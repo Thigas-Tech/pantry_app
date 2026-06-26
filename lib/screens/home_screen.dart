@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
-import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -76,30 +75,16 @@ class HomeScreen extends ConsumerWidget {
         ref.invalidate(inventoryWithProductProvider);
       }
     } on ProductNotFoundException {
-      // 2. Product not found – offer to add it to Open Food Facts
       if (context.mounted) {
-        final newProduct = await Navigator.of(context).push<Product>(
-          MaterialPageRoute(builder: (_) => AddProductScreen(barcode: barcode)),
-        );
-        if (newProduct != null && context.mounted) {
-          await repo.cacheProduct(newProduct);
-          if (!context.mounted) return; // <-- added
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ProductDetailScreen(product: newProduct),
-            ),
+        final offUrl = Uri.parse('https://world.openfoodfacts.org/');
+        final canLaunch = await canLaunchUrl(offUrl);
+        if (canLaunch && context.mounted) {
+          await launchUrl(offUrl, mode: LaunchMode.externalApplication);
+        } else if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open Open Food Facts.')),
           );
-          ref.invalidate(inventoryWithProductProvider);
         }
-      }
-    } on FetchFailedException {
-      // 3. Network error while fetching, no cached copy
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No connection and product not in pantry.'),
-          ),
-        );
       }
     }
   }
