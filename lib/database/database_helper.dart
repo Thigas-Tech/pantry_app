@@ -158,6 +158,27 @@ class DatabaseHelper {
     return db.delete('inventory', where: 'id = ?', whereArgs: [id]);
   }
 
+  /// Returns inventory items joined with the product name and image.
+  Future<List<Map<String, dynamic>>> getInventoryWithProduct() async {
+    final db = await database;
+    return db.rawQuery('''
+      SELECT
+        inventory.id,
+        inventory.barcode,
+        inventory.quantity,
+        inventory.unit,
+        inventory.expiry_date,
+        inventory.location,
+        inventory.notes,
+        inventory.date_added,
+        products.name AS product_name,
+        products.image_url AS product_image_url
+      FROM inventory
+      INNER JOIN products ON inventory.barcode = products.barcode
+      ORDER BY inventory.expiry_date ASC
+    ''');
+  }
+
   // ---------- Mapping helpers ----------
   Map<String, dynamic> _productToMap(Product p) => {
     'barcode': p.barcode,
