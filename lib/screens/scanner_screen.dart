@@ -7,7 +7,6 @@ class ScannerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Show the proper UI based on platform
     return isMobile ? const _MobileScannerView() : const _ManualEntryView();
   }
 }
@@ -29,7 +28,7 @@ class _MobileScannerViewState extends State<_MobileScannerView> {
       appBar: AppBar(title: const Text('Scan Barcode')),
       body: MobileScanner(
         onDetect: (capture) {
-          if (_hasScanned) return; // avoid duplicate pops
+          if (_hasScanned) return;
           final barcode = capture.barcodes.first;
           if (barcode.rawValue == null) return;
           _hasScanned = true;
@@ -90,7 +89,10 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _submit, child: const Text('Submit')),
+            ElevatedButton(
+              onPressed: _submit,
+              child: const Text('Submit'),
+            ),
           ],
         ),
       ),
