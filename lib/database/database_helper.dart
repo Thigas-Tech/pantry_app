@@ -1,8 +1,9 @@
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/utils/platform_utils.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DatabaseHelper {
   factory DatabaseHelper() => _instance;
@@ -18,6 +19,9 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
+    if (!isMobile) {
+      databaseFactory = databaseFactoryFfi;
+    }
     final documentsDir = await getApplicationDocumentsDirectory();
     final dbPath = join(documentsDir.path, 'pantry.db');
     return openDatabase(
