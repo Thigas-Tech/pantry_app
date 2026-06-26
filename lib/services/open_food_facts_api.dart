@@ -48,6 +48,56 @@ class OpenFoodFactsApi implements ProductApiService {
     if (value is String) return double.tryParse(value);
     return null;
   }
+
+  /// Submit a new product to Open Food Facts.
+  /// Returns true on success, false if something goes wrong.
+  Future<bool> submitProduct(Product product) async {
+    try {
+      final formData = <String, dynamic>{
+        'code': product.barcode,
+        'product_name': product.name,
+        'brands': product.brand ?? '',
+        'categories': product.category ?? '',
+        'ingredients_text': product.ingredients ?? '',
+        'serving_size': product.servingSize ?? '',
+      };
+
+      // Add nutrition fields only if they are not null
+      if (product.energyKcal != null) {
+        formData['nutriments.energy-kcal_100g'] = product.energyKcal.toString();
+      }
+      if (product.proteinG != null) {
+        formData['nutriments.proteins_100g'] = product.proteinG.toString();
+      }
+      if (product.carbsG != null) {
+        formData['nutriments.carbohydrates_100g'] = product.carbsG.toString();
+      }
+      if (product.fatG != null) {
+        formData['nutriments.fat_100g'] = product.fatG.toString();
+      }
+      if (product.fiberG != null) {
+        formData['nutriments.fiber_100g'] = product.fiberG.toString();
+      }
+      if (product.saltG != null) {
+        formData['nutriments.salt_100g'] = product.saltG.toString();
+      }
+
+      final response = await _dio.post(
+        'https://world.openfoodfacts.org/cgi/product_jqm2.pl',
+        data: FormData.fromMap(formData),
+        options: Options(
+          headers: {
+            'User-Agent':
+                'PantryApp/1.0 (your.email@example.com)', // ← use the same contact
+          },
+        ),
+      );
+
+      return response.statusCode == 200 || response.statusCode == 302;
+    } catch (_) {
+      return false;
+    }
+  }
 }
 
 class ProductNotFoundException implements Exception {

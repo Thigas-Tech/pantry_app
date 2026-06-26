@@ -1,10 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
@@ -62,32 +62,44 @@ class HomeScreen extends ConsumerWidget {
     ).push<String>(MaterialPageRoute(builder: (_) => const ScannerScreen()));
     if (barcode == null || !context.mounted) return;
 
+    final repo = ref.read(productRepositoryProvider);
+
     try {
-      final repo = ref.read(productRepositoryProvider);
+      // 1. Try to fetch from OFF or local cache
       final product = await repo.getProduct(barcode);
       if (context.mounted) {
-        unawaited(
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ProductDetailScreen(product: product),
-            ),
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
           ),
         );
-        ref.invalidate(
-          inventoryWithProductProvider,
-        ); // refresh list when we come back
+        ref.invalidate(inventoryWithProductProvider);
       }
     } on ProductNotFoundException {
+      // 2. Product not found – offer to add it to Open Food Facts
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Product not found')));
+        final newProduct = await Navigator.of(context).push<Product>(
+          MaterialPageRoute(builder: (_) => AddProductScreen(barcode: barcode)),
+        );
+        if (newProduct != null && context.mounted) {
+          await repo.cacheProduct(newProduct);
+          if (!context.mounted) return; // <-- added
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ProductDetailScreen(product: newProduct),
+            ),
+          );
+          ref.invalidate(inventoryWithProductProvider);
+        }
       }
-    } on FetchFailedException catch (e) {
+    } on FetchFailedException {
+      // 3. Network error while fetching, no cached copy
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No connection and product not in pantry.'),
+          ),
+        );
       }
     }
   }
@@ -156,7 +168,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
       if (i.expiryDate == null) return false;
       final date = DateTime.tryParse(i.expiryDate!);
       if (date == null) return false;
-      return date.isBefore(todayStart); // strictly before today
+      return date.isBefore(todayStart);
     }).toList();
   }
 
@@ -177,7 +189,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     final todayStart = DateTime(today.year, today.month, today.day);
     final threeDaysLater = todayStart.add(const Duration(days: 3));
     return _filtered.where((i) {
-      if (i.expiryDate == null) return true; // no expiry = good
+      if (i.expiryDate == null) return true;
       final date = DateTime.tryParse(i.expiryDate!);
       if (date == null) return true;
       return !date.isBefore(threeDaysLater);
@@ -188,7 +200,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Search bar
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: TextField(
@@ -208,7 +219,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             onChanged: (v) => setState(() => _searchQuery = v),
           ),
         ),
-        // Grouped list
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -283,21 +293,17 @@ class _InventoryCard extends StatelessWidget {
           size: 12,
         ),
         onTap: () async {
-          // Navigate to product detail via barcode (we can fetch product there)
           final repo = ProviderScope.containerOf(
             context,
           ).read(productRepositoryProvider);
           try {
             final product = await repo.getProduct(item.barcode);
-            if (context.mounted) {
-              unawaited(
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ProductDetailScreen(product: product),
-                  ),
-                ),
-              );
-            }
+            if (!context.mounted) return; // <-- added
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: product),
+              ),
+            );
           } catch (_) {
             // ignore
           }
