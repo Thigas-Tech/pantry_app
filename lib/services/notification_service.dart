@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:pantry_app/models/inventory_item.dart';
@@ -86,5 +88,14 @@ class NotificationService {
     final id = itemId.hashCode;
     await _plugin.cancel(id: id);
     await _plugin.cancel(id: id + 1);
+  }
+
+  static Future<void> requestPermission() async {
+    if (!isMobile || !Platform.isAndroid) return;
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    await androidPlugin?.requestNotificationsPermission();
   }
 }
