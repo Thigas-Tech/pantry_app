@@ -4,10 +4,10 @@ part 'inventory_item.freezed.dart';
 part 'inventory_item.g.dart';
 
 @freezed
-class InventoryItem with _$InventoryItem {
+abstract class InventoryItem with _$InventoryItem {
   const factory InventoryItem({
-    int? id, // auto-increment, nullable for new items
     required String barcode,
+    int? id, // auto-increment, nullable for new items
     @Default(1) double quantity,
     @Default('pcs') String unit,
     String? expiryDate, // ISO 8601 format

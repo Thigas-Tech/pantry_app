@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Product {
 
- String get barcode; String get name; String? get brand; String? get imageUrl; String? get category; String? get ingredients; String? get servingSize; double? get energyKcal; double? get proteinG; double? get carbsG; double? get fatG; double? get fiberG; double? get saltG; int? get lastSynced;
+ String get barcode; String get name; String? get brand; String? get imageUrl; String? get category; String? get ingredients;// comma-separated or future JSON list
+ String? get servingSize; double? get energyKcal; double? get proteinG; double? get carbsG; double? get fatG; double? get fiberG; double? get saltG; int? get lastSynced;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -231,6 +232,7 @@ class _Product implements Product {
 @override final  String? imageUrl;
 @override final  String? category;
 @override final  String? ingredients;
+// comma-separated or future JSON list
 @override final  String? servingSize;
 @override final  double? energyKcal;
 @override final  double? proteinG;

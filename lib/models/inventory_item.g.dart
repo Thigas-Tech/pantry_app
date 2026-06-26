@@ -8,8 +8,8 @@ part of 'inventory_item.dart';
 
 _InventoryItem _$InventoryItemFromJson(Map<String, dynamic> json) =>
     _InventoryItem(
-      id: (json['id'] as num?)?.toInt(),
       barcode: json['barcode'] as String,
+      id: (json['id'] as num?)?.toInt(),
       quantity: (json['quantity'] as num?)?.toDouble() ?? 1,
       unit: json['unit'] as String? ?? 'pcs',
       expiryDate: json['expiryDate'] as String?,
@@ -20,8 +20,8 @@ _InventoryItem _$InventoryItemFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$InventoryItemToJson(_InventoryItem instance) =>
     <String, dynamic>{
-      'id': instance.id,
       'barcode': instance.barcode,
+      'id': instance.id,
       'quantity': instance.quantity,
       'unit': instance.unit,
       'expiryDate': instance.expiryDate,
