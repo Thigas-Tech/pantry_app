@@ -1,4 +1,5 @@
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_api_service.dart';
@@ -31,4 +32,16 @@ class ProductRepository {
       );
     }
   }
+
+  // ---------- Inventory ----------
+  Future<List<InventoryItem>> getInventoryForBarcode(String barcode) =>
+      _db.getInventoryItemsByBarcode(barcode);
+
+  Future<int> addInventoryItem(InventoryItem item) =>
+      _db.insertInventoryItem(item);
+
+  Future<int> updateInventoryItem(InventoryItem item) =>
+      _db.updateInventoryItem(item);
+
+  Future<int> deleteInventoryItem(int id) => _db.deleteInventoryItem(id);
 }

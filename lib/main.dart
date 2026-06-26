@@ -6,9 +6,11 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/notification_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  NotificationService.initialize(); // no need to await; runs in background
   runApp(const ProviderScope(child: PantryApp()));
 }
 

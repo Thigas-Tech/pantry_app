@@ -131,6 +131,18 @@ class DatabaseHelper {
     return result.map(_inventoryFromMap).toList();
   }
 
+  // Get all inventory items for a specific barcode
+  Future<List<InventoryItem>> getInventoryItemsByBarcode(String barcode) async {
+    final db = await database;
+    final result = await db.query(
+      'inventory',
+      where: 'barcode = ?',
+      whereArgs: [barcode],
+      orderBy: 'expiry_date ASC',
+    );
+    return result.map(_inventoryFromMap).toList();
+  }
+
   Future<int> updateInventoryItem(InventoryItem item) async {
     final db = await database;
     return db.update(
