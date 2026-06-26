@@ -7,7 +7,9 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
+import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -21,13 +23,21 @@ class HomeScreen extends ConsumerWidget {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () {
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const StatsScreen()));
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(inventoryWithProductProvider),
           ),
         ],
       ),
       body: inventoryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _InventoryShimmer(),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (items) {
           if (items.isEmpty) {
@@ -139,30 +149,40 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).toList();
   }
 
-  // Group by expiry
-  List<InventoryWithProduct> get _expired => _filtered
-      .where(
-        (i) =>
-            i.expiryDate != null &&
-            DateTime.tryParse(i.expiryDate!)?.isBefore(DateTime.now()) == true,
-      )
-      .toList();
+  List<InventoryWithProduct> get _expired {
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    return _filtered.where((i) {
+      if (i.expiryDate == null) return false;
+      final date = DateTime.tryParse(i.expiryDate!);
+      if (date == null) return false;
+      return date.isBefore(todayStart); // strictly before today
+    }).toList();
+  }
 
-  List<InventoryWithProduct> get _expiringSoon => _filtered.where((i) {
-    if (i.expiryDate == null) return false;
-    final date = DateTime.tryParse(i.expiryDate!);
-    if (date == null) return false;
-    final diff = date.difference(DateTime.now()).inDays;
-    return diff >= 0 && diff <= 3;
-  }).toList();
+  List<InventoryWithProduct> get _expiringSoon {
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final threeDaysLater = todayStart.add(const Duration(days: 3));
+    return _filtered.where((i) {
+      if (i.expiryDate == null) return false;
+      final date = DateTime.tryParse(i.expiryDate!);
+      if (date == null) return false;
+      return !date.isBefore(todayStart) && date.isBefore(threeDaysLater);
+    }).toList();
+  }
 
-  List<InventoryWithProduct> get _good => _filtered.where((i) {
-    if (i.expiryDate == null) return true; // no expiry → good
-    final date = DateTime.tryParse(i.expiryDate!);
-    if (date == null) return true;
-    final diff = date.difference(DateTime.now()).inDays;
-    return diff > 3;
-  }).toList();
+  List<InventoryWithProduct> get _good {
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final threeDaysLater = todayStart.add(const Duration(days: 3));
+    return _filtered.where((i) {
+      if (i.expiryDate == null) return true; // no expiry = good
+      final date = DateTime.tryParse(i.expiryDate!);
+      if (date == null) return true;
+      return !date.isBefore(threeDaysLater);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +302,41 @@ class _InventoryCard extends StatelessWidget {
             // ignore
           }
         },
+      ),
+    );
+  }
+}
+
+class _InventoryShimmer extends StatelessWidget {
+  const _InventoryShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(12),
+        itemCount: 6,
+        itemBuilder: (_, _) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            children: [
+              const CircleAvatar(backgroundColor: Colors.white),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(height: 14, color: Colors.white),
+                    const SizedBox(height: 8),
+                    Container(height: 10, width: 150, color: Colors.white),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

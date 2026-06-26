@@ -3,6 +3,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/utils/platform_utils.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DatabaseHelper {
@@ -177,6 +178,22 @@ class DatabaseHelper {
       INNER JOIN products ON inventory.barcode = products.barcode
       ORDER BY inventory.expiry_date ASC
     ''');
+  }
+
+  Future<int> getProductCount() async {
+    final db = await database;
+    return Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM products'),
+        ) ??
+        0;
+  }
+
+  Future<int> getInventoryCount() async {
+    final db = await database;
+    return Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM inventory'),
+        ) ??
+        0;
   }
 
   // ---------- Mapping helpers ----------
