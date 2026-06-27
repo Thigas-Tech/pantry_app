@@ -100,6 +100,24 @@ class DatabaseHelper {
     return _productFromMap(result.first);
   }
 
+  /// Removes inventory items older than 60 days.
+  /// Then deletes products that are no longer referenced by any inventory item.
+  Future<void> cleanupOldEntries() async {
+    final db = await database;
+    final cutoff = DateTime.now()
+        .subtract(const Duration(days: 60))
+        .millisecondsSinceEpoch;
+
+    // Delete old inventory items
+    await db.delete('inventory', where: 'date_added < ?', whereArgs: [cutoff]);
+
+    // Remove orphaned products (not referenced in inventory)
+    await db.rawDelete('''
+      DELETE FROM products
+      WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
+    ''');
+  }
+
   // ---------- Inventory CRUD ----------
   Future<int> insertInventoryItem(InventoryItem item) async {
     final db = await database;
