@@ -1,6 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 
+/// A form screen for creating or editing an inventory item.
+///
+/// This screen is pushed from [ProductDetailScreen] after the user taps
+/// "Add to Inventory" or the edit button on an existing inventory tile.
+///
+/// ## Modes
+///
+/// - **Create mode**: [existingItem] is `null`. A blank form is shown with
+///   default values (quantity = 1, unit = 'pcs', location = 'pantry'). An
+///   optional [suggestedExpiry] may be pre‑filled based on the product
+///   category.
+/// - **Edit mode**: [existingItem] is provided. All fields are initialised
+///   with the current values, allowing the user to modify them.
+///
+/// ## Return value
+///
+/// When the user saves (or updates), the screen pops and returns an
+/// [InventoryItem] with the form data. If the user navigates back without
+/// saving, `null` is returned.
+///
+/// ## Validation
+///
+/// The quantity field must be a positive number. All other fields are
+/// optional.
 class AddToInventoryScreen extends StatefulWidget {
   const AddToInventoryScreen({
     required this.barcode,
@@ -8,10 +32,15 @@ class AddToInventoryScreen extends StatefulWidget {
     this.existingItem,
     this.suggestedExpiry,
   });
+
+  /// The product barcode this inventory item belongs to.
   final String barcode;
 
-  /// If provided, we're editing an existing item.
+  /// If provided, the form is in edit mode and pre‑filled with this item.
   final InventoryItem? existingItem;
+
+  /// A suggested expiry date in ISO 8601 format (`YYYY-MM-DD`), used as
+  /// the default for the date picker in create mode.
   final String? suggestedExpiry;
 
   @override
@@ -26,7 +55,10 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   late DateTime? _expiryDate;
   String _notes = '';
 
+  /// Available units for the dropdown.
   final List<String> _units = ['pcs', 'g', 'kg', 'ml', 'L'];
+
+  /// Available storage locations for the dropdown.
   final List<String> _locations = ['pantry', 'fridge', 'freezer'];
 
   @override
@@ -44,6 +76,8 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     _notes = existing?.notes ?? '';
   }
 
+  /// Validates the form and, if valid, pops the screen with the constructed
+  /// [InventoryItem].
   void _save() {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
@@ -54,6 +88,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
       quantity: _quantity,
       unit: _unit,
       location: _location,
+      // Store only the date part (YYYY-MM-DD), discarding time.
       expiryDate: _expiryDate?.toIso8601String().substring(0, 10),
       notes: _notes.isNotEmpty ? _notes : null,
       dateAdded:
@@ -77,6 +112,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              // Quantity input
               TextFormField(
                 initialValue: _quantity.toString(),
                 decoration: const InputDecoration(labelText: 'Quantity'),
@@ -88,6 +124,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 },
                 onSaved: (v) => _quantity = double.parse(v!),
               ),
+              // Unit dropdown
               DropdownButtonFormField<String>(
                 initialValue: _unit,
                 items: _units
@@ -96,6 +133,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 onChanged: (v) => setState(() => _unit = v!),
                 decoration: const InputDecoration(labelText: 'Unit'),
               ),
+              // Location dropdown
               DropdownButtonFormField<String>(
                 initialValue: _location,
                 items: _locations
@@ -105,6 +143,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 decoration: const InputDecoration(labelText: 'Location'),
               ),
               const SizedBox(height: 16),
+              // Expiry date picker
               Row(
                 children: [
                   Expanded(
@@ -139,12 +178,14 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 ],
               ),
               const SizedBox(height: 16),
+              // Notes field
               TextFormField(
                 initialValue: _notes,
                 decoration: const InputDecoration(labelText: 'Notes'),
                 onSaved: (v) => _notes = v ?? '',
               ),
               const SizedBox(height: 32),
+              // Submit button
               ElevatedButton(
                 onPressed: _save,
                 child: Text(isEditing ? 'Update' : 'Add to Pantry'),

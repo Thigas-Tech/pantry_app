@@ -4,7 +4,36 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_api_service.dart';
 
+/// Open Food Facts API client.
+///
+/// Implements [ProductApiService] to fetch product data by barcode from
+/// the Open Food Facts database (v3 API). It supports both the production
+/// server (`world.openfoodfacts.org`) and the staging server
+/// (`world.openfoodfacts.net`) for testing.
+///
+/// ## Authentication
+///
+/// The constructor requires a [userId] and [password] for product
+/// submissions. These are sent as query parameters to the legacy
+/// `/cgi/product_jqm2.pl` endpoint. For the v3 PATCH endpoint, a session
+/// cookie is needed instead.
+///
+/// ## User‑Agent
+///
+/// Open Food Facts requires a descriptive `User-Agent` header. This is
+/// generated automatically from [appName], [appVersion], and [contactEmail].
+///
+/// ## Parsing
+///
+/// Product JSON from the v3 API is parsed into a [Product] model inside
+/// `_parseProduct`. Nutrition values are extracted from the `nutriments`
+/// map and are always per 100 g / 100 ml.
 class OpenFoodFactsApi implements ProductApiService {
+  /// Creates an [OpenFoodFactsApi] client.
+  ///
+  /// The [dio] instance is injected via the provider system.
+  /// [userId] and [password] are **required** for product submission.
+  /// [useStaging] determines which server to target.
   OpenFoodFactsApi(
     this._dio, {
     required this.userId,
@@ -21,15 +50,23 @@ class OpenFoodFactsApi implements ProductApiService {
   final String appName;
   final String appVersion;
   final String contactEmail;
+
+  /// Whether to use the staging server (`true`) or production (`false`).
   final bool useStaging;
 
+  /// Returns the base URL based on [useStaging].
   String get _baseUrl => useStaging
       ? 'https://world.openfoodfacts.net'
       : 'https://world.openfoodfacts.org';
 
+  /// Constructs the `User-Agent` header as required by Open Food Facts.
   String get _userAgent => '$appName/$appVersion ($contactEmail)';
 
-  @override
+  /// Fetches product information for the given [barcode] from the v3 API.
+  ///
+  /// Throws [ProductNotFoundException] if the product does not exist
+  /// (HTTP 404 or status `"failure"`). For other network errors, the
+  /// underlying [DioException] is rethrown so the repository can handle it.
   @override
   Future<Product> getByBarcode(String barcode) async {
     final url = '$_baseUrl/api/v3/product/$barcode.json';
@@ -45,15 +82,18 @@ class OpenFoodFactsApi implements ProductApiService {
       final productJson = data['product'] as Map<String, dynamic>;
       return _parseProduct(productJson);
     } on DioException catch (e) {
-      // If the server returned a 404 Not Found, treat as product not found
       if (e.response?.statusCode == 404) {
         throw ProductNotFoundException('Product not found: $barcode');
       }
-      // Re-throw network errors etc. – repository will handle them
       rethrow;
     }
   }
 
+  /// Parses a raw v3 product JSON into a [Product] model.
+  ///
+  /// All nutrition values are extracted from the `nutriments` map.
+  /// Missing values are left as `null`. Numeric fields may arrive as
+  /// integers, doubles, or strings, so `_parseDouble` handles all cases.
   Product _parseProduct(Map<String, dynamic> json) {
     final nutriments = json['nutriments'] as Map<String, dynamic>? ?? {};
 
@@ -75,6 +115,8 @@ class OpenFoodFactsApi implements ProductApiService {
     );
   }
 
+  /// Converts a dynamic API value to a [double], handling integers and
+  /// strings.
   double? _parseDouble(dynamic value) {
     if (value == null) return null;
     if (value is double) return value;
@@ -83,11 +125,12 @@ class OpenFoodFactsApi implements ProductApiService {
     return null;
   }
 
-  /// Submit a new product to Open Food Facts using the legacy API.
-  /// Returns true on success, false if something goes wrong.
+  /// Submits a new product using the legacy Open Food Facts API.
+  ///
+  /// Returns `true` on success (HTTP 200 or 302). All fields use the
+  /// `add_` prefix to avoid overwriting existing data.
   Future<bool> submitProduct(Product product) async {
     try {
-      // Build query parameters with authentication
       final params = <String, dynamic>{
         'code': product.barcode,
         'user_id': userId,
@@ -95,11 +138,9 @@ class OpenFoodFactsApi implements ProductApiService {
         'comment':
             // ignore: lines_longer_than_80_chars
             'Edit by $appName $appVersion - ${DateTime.now().millisecondsSinceEpoch}',
-        // Use add_ prefix to avoid overwriting existing data
         'add_product_name': product.name,
       };
 
-      // Add optional fields with add_ prefix
       if (product.brand != null && product.brand!.isNotEmpty) {
         params['add_brands'] = product.brand;
       }
@@ -112,8 +153,6 @@ class OpenFoodFactsApi implements ProductApiService {
       if (product.servingSize != null && product.servingSize!.isNotEmpty) {
         params['add_serving_size'] = product.servingSize;
       }
-
-      // Nutrition fields
       if (product.energyKcal != null) {
         params['add_nutriments_energy-kcal_100g'] = product.energyKcal
             .toString();
@@ -134,7 +173,6 @@ class OpenFoodFactsApi implements ProductApiService {
         params['add_nutriments_salt_100g'] = product.saltG.toString();
       }
 
-      // Send as query parameters (the legacy API expects this)
       final url = '$_baseUrl/cgi/product_jqm2.pl';
       final response = await _dio.post(
         url,
@@ -147,22 +185,20 @@ class OpenFoodFactsApi implements ProductApiService {
         ),
       );
 
-      // Check for success (200 OK or 302 redirect)
       return response.statusCode == 200 || response.statusCode == 302;
     } catch (e) {
-      // Log the error for debugging
       debugPrint('Error submitting product: $e');
       return false;
     }
   }
 
-  /// Alternative: Use the new v3 PATCH API (recommended for new integrations).
-  /// Note: This requires a session cookie from a prior login.
+  /// Submits a product using the v3 PATCH API (requires a session cookie).
+  ///
+  /// This is the recommended method for new integrations but requires the
+  /// user to be logged in first.
   Future<bool> submitProductV3(Product product, String sessionCookie) async {
     try {
       final url = '$_baseUrl/api/v3/product/${product.barcode}';
-
-      // Build the structured product data
       final productData = <String, dynamic>{'product_name': product.name};
 
       if (product.brand != null && product.brand!.isNotEmpty) {
@@ -188,18 +224,10 @@ class OpenFoodFactsApi implements ProductApiService {
       if (product.carbsG != null) {
         nutriments['carbohydrates_100g'] = product.carbsG;
       }
-      if (product.fatG != null) {
-        nutriments['fat_100g'] = product.fatG;
-      }
-      if (product.fiberG != null) {
-        nutriments['fiber_100g'] = product.fiberG;
-      }
-      if (product.saltG != null) {
-        nutriments['salt_100g'] = product.saltG;
-      }
-      if (nutriments.isNotEmpty) {
-        productData['nutriments'] = nutriments;
-      }
+      if (product.fatG != null) nutriments['fat_100g'] = product.fatG;
+      if (product.fiberG != null) nutriments['fiber_100g'] = product.fiberG;
+      if (product.saltG != null) nutriments['salt_100g'] = product.saltG;
+      if (nutriments.isNotEmpty) productData['nutriments'] = nutriments;
 
       final response = await _dio.patch(
         url,
