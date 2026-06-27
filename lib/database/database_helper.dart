@@ -304,6 +304,34 @@ class DatabaseHelper {
         0;
   }
 
+  /// Returns all inventory rows joined with product names and nutrition,
+  /// ordered by expiry date. This is used for CSV export.
+  Future<List<Map<String, dynamic>>> getExportData() async {
+    final db = await database;
+    return db.rawQuery('''
+      SELECT
+        products.name AS product_name,
+        products.brand,
+        products.category,
+        inventory.barcode,
+        inventory.quantity,
+        inventory.unit,
+        inventory.expiry_date,
+        inventory.location,
+        inventory.notes,
+        inventory.date_added,
+        products.energy_kcal,
+        products.protein_g,
+        products.carbs_g,
+        products.fat_g,
+        products.fiber_g,
+        products.salt_g
+      FROM inventory
+      INNER JOIN products ON inventory.barcode = products.barcode
+      ORDER BY inventory.expiry_date ASC
+    ''');
+  }
+
   // --------------------- Mapping helpers ---------------------
 
   /// Converts a [Product] model into a row map for SQLite.
