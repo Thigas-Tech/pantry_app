@@ -6,8 +6,43 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 
+/// Displays full product details and the associated inventory entries.
+///
+/// This screen is reached after scanning a known barcode or tapping an
+/// inventory card on the home screen. It shows:
+/// - Product image (if available).
+/// - All nutritional information (per 100 g / 100 ml).
+/// - The ingredients list.
+/// - A list of existing inventory items for this product, each with edit and
+///   delete actions.
+/// - An "Add to Inventory" button that opens the [AddToInventoryScreen].
+///
+/// ## State
+///
+/// The screen is a [ConsumerStatefulWidget] because it needs to rebuild the
+/// inventory list after adding, editing, or deleting an item. A simple
+/// counter `_inventoryVersion` is incremented after every mutation; it is
+/// used as the [ValueKey] of the [FutureBuilder] so that the future is
+/// re‑evaluated and the list refreshes.
+///
+/// ## Expiry suggestions
+///
+/// When adding a new item, the screen looks at the product’s [Product.category]
+/// and suggests a default expiry date:
+/// - **Dairy** → today + 7 days.
+/// - **Bread** → today + 3 days.
+/// - Other categories → no suggestion (user picks manually).
+///
+/// ## Notifications
+///
+// ignore: lines_longer_than_80_chars
+/// After an item is created or updated, [NotificationService.scheduleExpiryReminders]
+/// is called. When an item is deleted,
+/// the corresponding reminders are cancelled.
 class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({required this.product, super.key});
+
+  /// The product to display details for.
   final Product product;
 
   @override
@@ -16,7 +51,8 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
-  // A counter that we increment after inventory changes to force a rebuild
+  /// Incremented after every inventory mutation to force the [FutureBuilder]
+  /// to re‑fetch the inventory list.
   int _inventoryVersion = 0;
 
   @override
@@ -30,7 +66,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // Product info
+            // Product image (from Open Food Facts CDN)
             if (widget.product.imageUrl != null)
               Image.network(widget.product.imageUrl!, height: 200),
             _infoRow('Barcode', widget.product.barcode),
@@ -51,14 +87,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               Text('Ingredients: ${widget.product.ingredients}'),
             const SizedBox(height: 24),
 
-            // Inventory section
+            // Inventory section header
             Text(
               'Your inventory',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
+
+            // Inventory list (rebuilds when _inventoryVersion changes)
             FutureBuilder<List<InventoryItem>>(
-              key: ValueKey(_inventoryVersion), // rebuild when version changes
+              key: ValueKey(_inventoryVersion),
               future: inventoryFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -82,6 +120,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               },
             ),
             const SizedBox(height: 16),
+
+            // Add to Inventory button
             ElevatedButton.icon(
               onPressed: () => _openAddEditScreen(),
               icon: const Icon(Icons.add),
@@ -93,6 +133,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
+  /// Builds a simple label‑value row used for product information.
   Widget _infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -106,7 +147,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
+  /// Opens the [AddToInventoryScreen] for creating or editing an item.
+  ///
+  /// If [existing] is provided, the screen is pre‑filled with the current
+  /// values for editing. Otherwise a new item form is shown.
+  ///
+  /// After the user saves, the inventory item is persisted via the repository
+  /// and expiry notifications are scheduled (or rescheduled for edits). The
+  /// screen then rebuilds the inventory list by incrementing
+  /// `_inventoryVersion`.
   Future<void> _openAddEditScreen({InventoryItem? existing}) async {
+    // Suggest an expiry date based on the product category.
     String? suggested;
     if (existing == null && widget.product.category != null) {
       final cat = widget.product.category!.toLowerCase();
@@ -136,16 +187,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (result != null && mounted) {
       final repo = ref.read(productRepositoryProvider);
       if (existing != null) {
+        // Edit mode: update existing item and reschedule notifications.
         await repo.updateInventoryItem(result);
         await NotificationService.cancelReminders(existing.id!);
       } else {
+        // Create mode: insert new item.
         await repo.addInventoryItem(result);
       }
       await NotificationService.scheduleExpiryReminders(result);
-      setState(() => _inventoryVersion++); // trigger refresh
+      setState(() => _inventoryVersion++);
     }
   }
 
+  /// Asks for confirmation and then deletes the given inventory [item].
+  ///
+  /// Cancels any scheduled notifications for the item before removing it
+  /// from the database. Triggers a refresh of the inventory list.
   Future<void> _deleteItem(InventoryItem item) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -173,14 +230,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 }
 
+/// A single row in the inventory list.
+///
+/// Displays an icon (coloured red if expired, orange otherwise), the
+/// quantity/unit/location, the expiry date, and edit / delete buttons.
 class _InventoryTile extends StatelessWidget {
   const _InventoryTile({
     required this.item,
     required this.onEdit,
     required this.onDelete,
   });
+
+  /// The inventory item to display.
   final InventoryItem item;
+
+  /// Called when the user taps the edit button.
   final VoidCallback onEdit;
+
+  /// Called when the user taps the delete button.
   final VoidCallback onDelete;
 
   @override

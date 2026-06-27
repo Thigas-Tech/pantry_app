@@ -2,6 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 
+/// A simple statistics screen showing aggregate pantry data.
+///
+/// [StatsScreen] displays:
+/// - The total number of unique products in the local cache (`products` table).
+/// - The total number of inventory items currently stored (`inventory` table).
+/// - A placeholder button for exporting pantry data as a CSV file.
+///
+/// ## Access
+///
+/// This screen is reached via the chart icon in the [HomeScreen] app bar. It
+/// is a read‑only informational view and performs no mutations.
+///
+/// ## Data sources
+///
+/// Both counts are fetched in parallel using [Future.wait] on two separate
+/// queries:
+/// - [DatabaseHelper.getProductCount] – `SELECT COUNT(*) FROM products`.
+/// - [DatabaseHelper.getInventoryCount] – `SELECT COUNT(*) FROM inventory`.
+///
+/// Running both queries at the same time halves the perceived loading time.
+///
+/// ## CSV export
+///
+/// The export button is currently a **placeholder**. When implemented, it
+/// should collect all inventory items (joined with product names) and write
+/// them to a CSV file, then open a share sheet so the user can email or
+/// save the file.
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
 
@@ -11,10 +38,8 @@ class StatsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Pantry Stats')),
       body: FutureBuilder(
-        future: Future.wait([
-          db.getProductCount(), // we'll add this helper
-          db.getInventoryCount(),
-        ]),
+        // Fetch both counts in parallel to reduce perceived loading time.
+        future: Future.wait([db.getProductCount(), db.getInventoryCount()]),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());

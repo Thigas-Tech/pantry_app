@@ -6,19 +6,71 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+/// Provides access to the local SQLite database.
+///
+/// [DatabaseHelper] is a **singleton** – only one instance exists during the
+/// lifetime of the app. The singleton pattern guarantees that all database
+/// operations use the same connection, avoiding locking issues and unnecessary
+/// overhead.
+///
+/// ## Platform support
+///
+/// On **Android & iOS** the regular `sqflite` plugin is used.
+/// On **desktop** (Linux, macOS, Windows) the `sqflite_common_ffi` backend is
+/// activated before opening the database. The platform check is performed in
+/// [isMobile] (defined in `platform_utils.dart`).
+///
+/// ## Schema overview
+///
+/// Two tables are created on first launch (version 1):
+///
+/// - `products` – stores immutable (or rarely‑changing) product data fetched
+///   from Open Food Facts. The barcode is the primary key. Nutrition values
+///   are denormalised into columns so that the UI can retrieve a complete
+///   product with a single row query.
+/// - `inventory` – stores instances of a product that the user has added to
+///   their pantry. Multiple rows can share the same barcode. The `date_added`
+///   column is used by [cleanupOldEntries] to remove items that haven’t been
+///   re‑added for 60 days.
+///
+/// ## Migrations
+///
+/// Future schema changes should be handled in [_onUpgrade]. The current
+/// version is 1. When a migration is needed, bump the version number passed
+/// to [openDatabase] and add conditional logic inside [_onUpgrade].
 class DatabaseHelper {
+  /// Returns the single [DatabaseHelper] instance.
   factory DatabaseHelper() => _instance;
+
+  /// Internal constructor for the singleton.
   DatabaseHelper._internal();
+
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
+  /// The lazily‑initialised database connection.
+  ///
+  /// The first access to [database] triggers [_initDatabase], which creates
+  /// or opens the SQLite file and runs any necessary migrations.
   static Database? _database;
 
+  /// The lazily‑opened database instance.
+  ///
+  /// This getter ensures that the database is opened exactly once. Subsequent
+  /// calls return the already‑opened connection immediately.
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
 
+  /// Opens the database file and applies the schema.
+  ///
+  /// On desktop platforms the `sqflite_common_ffi` database factory is set
+  /// before opening, because `sqflite` alone does not support Linux / Windows
+  /// / macOS. On mobile the default factory is used.
+  ///
+  /// The database file is stored in the application’s documents directory so
+  /// that it survives app restarts and is backed up by the OS (on iOS).
   Future<Database> _initDatabase() async {
     if (!isMobile) {
       databaseFactory = databaseFactoryFfi;
@@ -33,6 +85,11 @@ class DatabaseHelper {
     );
   }
 
+  /// Creates the `products` and `inventory` tables together with their
+  /// indexes.
+  ///
+  /// Called automatically by [openDatabase] when the database file does not
+  /// exist yet (version 1).
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE products (
@@ -74,12 +131,21 @@ class DatabaseHelper {
     );
   }
 
+  /// Placeholder for future database migrations.
+  ///
+  /// When the database version is increased, add conditional blocks here to
+  /// alter the schema without losing user data.
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Placeholder for future migrations
-    // Example: if (oldVersion < 2) { ... }
+    // Example: if (oldVersion < 2) { … }
   }
 
-  // ---------- Product CRUD ----------
+  // --------------------- Product CRUD ---------------------
+
+  /// Inserts a [product] into the local cache.
+  ///
+  /// If a product with the same barcode already exists it is **replaced**
+  /// (upsert). This is the intended behaviour because product data from Open
+  /// Food Facts may have been updated.
   Future<void> insertProduct(Product product) async {
     final db = await database;
     await db.insert(
@@ -89,6 +155,10 @@ class DatabaseHelper {
     );
   }
 
+  /// Looks up a single product by its barcode.
+  ///
+  /// Returns `null` if no product with the given barcode exists in the local
+  /// cache.
   Future<Product?> getProduct(String barcode) async {
     final db = await database;
     final result = await db.query(
@@ -100,31 +170,43 @@ class DatabaseHelper {
     return _productFromMap(result.first);
   }
 
-  /// Removes inventory items older than 60 days.
-  /// Then deletes products that are no longer referenced by any inventory item.
+  /// Removes inventory items that were added more than 60 days ago, and then
+  /// deletes any product records that are no longer referenced by the
+  /// remaining inventory items.
+  ///
+  /// The 60‑day cutoff is currently hard‑coded; it can be made configurable in
+  /// the future if user preferences demand it.
   Future<void> cleanupOldEntries() async {
     final db = await database;
     final cutoff = DateTime.now()
         .subtract(const Duration(days: 60))
         .millisecondsSinceEpoch;
 
-    // Delete old inventory items
     await db.delete('inventory', where: 'date_added < ?', whereArgs: [cutoff]);
 
-    // Remove orphaned products (not referenced in inventory)
+    // Remove orphaned products – a product whose last inventory entry was
+    // just deleted.
     await db.rawDelete('''
       DELETE FROM products
       WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
     ''');
   }
 
-  // ---------- Inventory CRUD ----------
+  // --------------------- Inventory CRUD ---------------------
+
+  /// Inserts a new inventory item.
+  ///
+  /// The returned [int] is the auto‑generated `id` of the new row. This ID
+  /// can be used later for updates or deletion.
   Future<int> insertInventoryItem(InventoryItem item) async {
     final db = await database;
-    // id is auto-generated, so omit if null
     return db.insert('inventory', _inventoryToMap(item));
   }
 
+  /// Retrieves all inventory items, optionally filtered by [location].
+  ///
+  /// The [expired] parameter is currently unused and reserved for a future
+  /// implementation using SQLite date functions.
   Future<List<InventoryItem>> getInventoryItems({
     String? location,
     bool? expired,
@@ -138,9 +220,6 @@ class DatabaseHelper {
       whereArgs = [location];
     }
 
-    // For expiry filtering you'd add a condition like
-    // "expiry_date < date('now')" – we'll handle that later via providers.
-
     final result = await db.query(
       'inventory',
       where: where,
@@ -150,7 +229,8 @@ class DatabaseHelper {
     return result.map(_inventoryFromMap).toList();
   }
 
-  // Get all inventory items for a specific barcode
+  /// Returns all inventory entries for a specific barcode, ordered by expiry
+  /// date (oldest first).
   Future<List<InventoryItem>> getInventoryItemsByBarcode(String barcode) async {
     final db = await database;
     final result = await db.query(
@@ -162,6 +242,10 @@ class DatabaseHelper {
     return result.map(_inventoryFromMap).toList();
   }
 
+  /// Updates an existing inventory item.
+  ///
+  /// The [item.id] field must be set to a value that exists in the database;
+  /// otherwise the update has no effect.
   Future<int> updateInventoryItem(InventoryItem item) async {
     final db = await database;
     return db.update(
@@ -172,12 +256,16 @@ class DatabaseHelper {
     );
   }
 
+  /// Deletes an inventory item by its auto‑generated [id].
   Future<int> deleteInventoryItem(int id) async {
     final db = await database;
     return db.delete('inventory', where: 'id = ?', whereArgs: [id]);
   }
 
-  /// Returns inventory items joined with the product name and image.
+  /// Retrieves all inventory rows joined with product metadata.
+  ///
+  /// This single query replaces multiple separate lookups and is used to build
+  /// the home‑screen inventory list.
   Future<List<Map<String, dynamic>>> getInventoryWithProduct() async {
     final db = await database;
     return db.rawQuery('''
@@ -198,6 +286,7 @@ class DatabaseHelper {
     ''');
   }
 
+  /// Returns the total number of cached product records.
   Future<int> getProductCount() async {
     final db = await database;
     return Sqflite.firstIntValue(
@@ -206,6 +295,7 @@ class DatabaseHelper {
         0;
   }
 
+  /// Returns the total number of rows in the inventory table.
   Future<int> getInventoryCount() async {
     final db = await database;
     return Sqflite.firstIntValue(
@@ -214,7 +304,9 @@ class DatabaseHelper {
         0;
   }
 
-  // ---------- Mapping helpers ----------
+  // --------------------- Mapping helpers ---------------------
+
+  /// Converts a [Product] model into a row map for SQLite.
   Map<String, dynamic> _productToMap(Product p) => {
     'barcode': p.barcode,
     'name': p.name,
@@ -232,6 +324,10 @@ class DatabaseHelper {
     'last_synced': p.lastSynced,
   };
 
+  /// Builds a [Product] from a raw database row.
+  ///
+  /// Numeric fields are read as [num] and converted to [double] because
+  /// SQLite may store them as integers when the decimal part is zero.
   Product _productFromMap(Map<String, dynamic> map) => Product(
     barcode: map['barcode'] as String,
     name: map['name'] as String,
@@ -249,6 +345,10 @@ class DatabaseHelper {
     lastSynced: map['last_synced'] as int?,
   );
 
+  /// Converts an [InventoryItem] into a row map.
+  ///
+  /// If [item.id] is `null` (new item) the map does not include the `id`
+  /// field, allowing SQLite to auto‑generate the primary key.
   Map<String, dynamic> _inventoryToMap(InventoryItem item) => {
     if (item.id != null) 'id': item.id,
     'barcode': item.barcode,
@@ -260,6 +360,11 @@ class DatabaseHelper {
     'date_added': item.dateAdded,
   };
 
+  /// Builds an [InventoryItem] from a raw database row.
+  ///
+  /// Defaults are applied to [quantity], [unit], and [location] in case the
+  /// database contains unexpected `NULL` values (should not happen with the
+  /// current schema, but provides robustness).
   InventoryItem _inventoryFromMap(Map<String, dynamic> map) => InventoryItem(
     id: map['id'] as int?,
     barcode: map['barcode'] as String,

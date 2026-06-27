@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
@@ -11,6 +12,34 @@ import 'package:pantry_app/services/exceptions.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// The main dashboard of the app.
+///
+/// [HomeScreen] shows the user’s pantry inventory grouped by expiry status
+/// (expired / expiring soon / good). It also contains the barcode scanner
+/// trigger (FAB) and navigation to the [StatsScreen].
+///
+/// ## Loading states
+///
+/// While the inventory is being fetched from the database,
+/// a [Shimmer] placeholder
+/// is displayed to give a sense of progress. On error, a simple error text is
+/// shown.
+///
+/// ## Empty state
+///
+/// When the inventory list is empty (no items added yet), the [_EmptyPantry]
+/// illustration is shown with a prompt to scan the first product.
+///
+/// ## Scanning flow
+///
+/// Tapping the FAB (or the empty‑state button) opens the [ScannerScreen].
+/// The returned barcode is then resolved via [ProductRepository]:
+/// - **Product found** (in cache or from Open Food Facts): navigates to the
+///   [ProductDetailScreen] where the user can add it to inventory.
+/// - **Product not found**: on Android / iOS the user is directed to the
+///   Open Food Facts app store page; on desktop to the OFF registration page.
+///   This encourages the user to contribute the missing product directly
+///   to the OFF project.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -56,6 +85,14 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  /// Initiates the barcode scanning flow and handles the result.
+  ///
+  /// Steps:
+  /// 1. Opens the [ScannerScreen] and waits for a barcode string.
+  /// 2. Uses [ProductRepository.getProduct] to resolve the barcode.
+  /// 3. On success – navigates to [ProductDetailScreen].
+  /// 4. On [ProductNotFoundException] – opens the appropriate Open Food Facts
+  ///    link for the current platform (Play Store, App Store, or website).
   Future<void> _scanBarcode(BuildContext context, WidgetRef ref) async {
     final barcode = await Navigator.of(
       context,
@@ -101,8 +138,15 @@ class HomeScreen extends ConsumerWidget {
 }
 
 // ---------- Empty state ----------
+
+/// Shown when the user has not added any items yet.
+///
+/// Displays a large kitchen icon, a title, a subtitle, and a button that
+/// triggers the same scanning flow as the FAB.
 class _EmptyPantry extends StatelessWidget {
   const _EmptyPantry({required this.onScan});
+
+  /// Callback invoked when the user presses the scan button.
   final VoidCallback onScan;
 
   @override
@@ -134,10 +178,26 @@ class _EmptyPantry extends StatelessWidget {
   }
 }
 
-// ---------- List with expiry grouping & search ----------
+// ---------- Inventory list with expiry grouping & search ----------
+
+/// Displays the full inventory list with search and expiry grouping.
+///
+/// The list is divided into three sections:
+/// - **Expired** (red) – items whose expiry date is strictly before today.
+/// - **Expiring soon** (orange) – items expiring between today (inclusive)
+///   and 3 days from now.
+/// - **Good** (green) – items expiring more than 3 days in the future, or
+///   items without an expiry date.
+///
+/// A search bar at the top filters items by product name or barcode.
+/// The filtering is case‑insensitive and updates as the user types.
 class _InventoryList extends ConsumerStatefulWidget {
   const _InventoryList({required this.items, required this.onScan});
+
+  /// The full, unfiltered list of inventory items with product metadata.
   final List<InventoryWithProduct> items;
+
+  /// Unused in this widget, but required for consistency with the parent.
   final VoidCallback onScan;
 
   @override
@@ -145,8 +205,10 @@ class _InventoryList extends ConsumerStatefulWidget {
 }
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
+  /// The current search string; an empty string means “show all”.
   String _searchQuery = '';
 
+  /// Returns [items] filtered by [searchQuery].
   List<InventoryWithProduct> get _filtered {
     if (_searchQuery.isEmpty) return widget.items;
     final q = _searchQuery.toLowerCase();
@@ -156,6 +218,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).toList();
   }
 
+  /// Items with an expiry date strictly before today (local time).
   List<InventoryWithProduct> get _expired {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
@@ -167,6 +230,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).toList();
   }
 
+  /// Items expiring between today (inclusive) and 3 days from now.
   List<InventoryWithProduct> get _expiringSoon {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
@@ -179,6 +243,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).toList();
   }
 
+  /// Items expiring more than 3 days in the future, or without an expiry date.
   List<InventoryWithProduct> get _good {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
@@ -195,6 +260,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Search bar
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: TextField(
@@ -214,6 +280,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             onChanged: (v) => setState(() => _searchQuery = v),
           ),
         ),
+        // Expiry‑grouped inventory list
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -242,6 +309,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     );
   }
 
+  /// Builds a section header for an expiry group.
   Widget _sectionHeader(String title, Color color) {
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 4),
@@ -257,8 +325,21 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   }
 }
 
+// ---------- Individual inventory card ----------
+
+/// A tappable card representing one inventory item.
+///
+/// Displays the product image (or a placeholder icon), the product name, and
+/// a subtitle with quantity, location, and expiry date. A small coloured dot
+/// on the right indicates whether the item is expired.
+///
+/// Tapping the card navigates to the [ProductDetailScreen] for that barcode,
+/// fetching the product from the repository (which checks the local cache
+/// first).
 class _InventoryCard extends StatelessWidget {
   const _InventoryCard({required this.item});
+
+  /// The inventory item to display.
   final InventoryWithProduct item;
 
   @override
@@ -288,19 +369,21 @@ class _InventoryCard extends StatelessWidget {
           size: 12,
         ),
         onTap: () async {
+          // Obtain the repository from the nearest ProviderScope.
           final repo = ProviderScope.containerOf(
             context,
           ).read(productRepositoryProvider);
           try {
             final product = await repo.getProduct(item.barcode);
-            if (!context.mounted) return; // <-- added
+            if (!context.mounted) return;
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => ProductDetailScreen(product: product),
               ),
             );
           } catch (_) {
-            // ignore
+            // Silently ignore errors – the product might have been removed
+            // or the network is unavailable.
           }
         },
       ),
@@ -308,6 +391,12 @@ class _InventoryCard extends StatelessWidget {
   }
 }
 
+// ---------- Shimmer loading placeholder ----------
+
+/// A shimmer effect shown while the inventory is loading.
+///
+/// Mimics the layout of a list of inventory cards, providing visual feedback
+/// that content is being loaded.
 class _InventoryShimmer extends StatelessWidget {
   const _InventoryShimmer();
 
