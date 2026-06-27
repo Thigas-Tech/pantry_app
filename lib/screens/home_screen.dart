@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
@@ -76,13 +77,22 @@ class HomeScreen extends ConsumerWidget {
       }
     } on ProductNotFoundException {
       if (context.mounted) {
-        final offUrl = Uri.parse('https://world.openfoodfacts.org/');
-        final canLaunch = await canLaunchUrl(offUrl);
+        final storeUrl = Platform.isAndroid
+            ? Uri.parse(
+                'https://play.google.com/store/apps/details?id=org.openfoodfacts.scanner&hl=en&pli=1',
+              )
+            : Platform.isIOS
+            ? Uri.parse(
+                'https://apps.apple.com/us/app/open-food-facts-product-scan/id588797948',
+              )
+            : Uri.parse('https://world.openfoodfacts.org/cgi/user.pl');
+
+        final canLaunch = await canLaunchUrl(storeUrl);
         if (canLaunch && context.mounted) {
-          await launchUrl(offUrl, mode: LaunchMode.externalApplication);
+          await launchUrl(storeUrl, mode: LaunchMode.externalApplication);
         } else if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open Open Food Facts.')),
+            const SnackBar(content: Text('Could not open the link.')),
           );
         }
       }
