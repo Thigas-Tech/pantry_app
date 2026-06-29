@@ -1,10 +1,8 @@
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/utils/platform_utils.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Provides access to the local SQLite database.
 ///
@@ -15,10 +13,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 ///
 /// ## Platform support
 ///
-/// On **Android & iOS** the regular `sqflite` plugin is used.
-/// On **desktop** (Linux, macOS, Windows) the `sqflite_common_ffi` backend is
-/// activated before opening the database. The platform check is performed in
-/// [isMobile] (defined in `platform_utils.dart`).
+/// This version targets **Android** (and will later support iOS). It uses the
+/// standard `sqflite` plugin. Desktop and web are not supported in this build.
 ///
 /// ## Schema overview
 ///
@@ -72,9 +68,6 @@ class DatabaseHelper {
   /// The database file is stored in the application’s documents directory so
   /// that it survives app restarts and is backed up by the OS (on iOS).
   Future<Database> _initDatabase() async {
-    if (!isMobile) {
-      databaseFactory = databaseFactoryFfi;
-    }
     final documentsDir = await getApplicationDocumentsDirectory();
     final dbPath = join(documentsDir.path, 'pantry.db');
     return openDatabase(

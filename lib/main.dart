@@ -6,17 +6,17 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 
-/// Entry point of the Pantry application.
+/// Entry point of the Pantry application (Android).
 ///
 /// This function performs all one‑time initialisation steps before the Flutter
 /// framework takes over:
 ///
 /// 1. **Flutter binding** – required to interact with the platform before
 ///    calling [runApp].
-/// 2. **Notifications** – initialises the local notifications plugin and
-///    requests the Android notification permission (if applicable). Both calls
-///    are fire‑and‑forget using [unawaited] because they are not critical for
-///    the first frame and must not delay the app startup.
+/// 2. **Notifications** – requests the Android notification permission
+///    (POST_NOTIFICATIONS on Android 13+). The call is fire‑and‑forget using
+///    [unawaited] because it is not critical for the first frame and must not
+///    delay the app startup.
 /// 3. **Database cleanup** – removes inventory entries that are older than 60
 ///    days and deletes any product records that are no longer referenced by
 ///    inventory items. This keeps the local SQLite database small and fast.
@@ -29,11 +29,6 @@ import 'package:pantry_app/services/notification_service.dart';
 void main() async {
   // Ensure that Flutter’s platform bindings are initialised.
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Fire‑and‑forget notification initialisation.
-  // No need to block the first frame for this – notifications will be
-  // available by the time the user adds an expiry reminder.
-  unawaited(NotificationService.initialize());
 
   // Request permission on Android 13+ (POST_NOTIFICATIONS).
   // If the user denies, notifications will simply not appear, which is

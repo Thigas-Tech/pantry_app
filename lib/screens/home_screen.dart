@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
@@ -12,7 +10,7 @@ import 'package:pantry_app/services/exceptions.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// The main dashboard of the app.
+/// The main dashboard of the app (Android).
 ///
 /// [HomeScreen] shows the user’s pantry inventory grouped by expiry status
 /// (expired / expiring soon / good). It also contains the barcode scanner
@@ -21,9 +19,8 @@ import 'package:url_launcher/url_launcher.dart';
 /// ## Loading states
 ///
 /// While the inventory is being fetched from the database,
-/// a [Shimmer] placeholder
-/// is displayed to give a sense of progress. On error, a simple error text is
-/// shown.
+/// a [Shimmer] placeholder is displayed to give a sense of progress.
+/// On error, a simple error text is shown.
 ///
 /// ## Empty state
 ///
@@ -36,10 +33,9 @@ import 'package:url_launcher/url_launcher.dart';
 /// The returned barcode is then resolved via [ProductRepository]:
 /// - **Product found** (in cache or from Open Food Facts): navigates to the
 ///   [ProductDetailScreen] where the user can add it to inventory.
-/// - **Product not found**: on Android / iOS the user is directed to the
-///   Open Food Facts app store page; on desktop to the OFF registration page.
-///   This encourages the user to contribute the missing product directly
-///   to the OFF project.
+/// - **Product not found**: the user is directed to the Open Food Facts
+///   Play Store page so they can install the OFF app and contribute the
+///   missing product.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -114,22 +110,15 @@ class HomeScreen extends ConsumerWidget {
       }
     } on ProductNotFoundException {
       if (context.mounted) {
-        final storeUrl = Platform.isAndroid
-            ? Uri.parse(
-                'https://play.google.com/store/apps/details?id=org.openfoodfacts.scanner&hl=en&pli=1',
-              )
-            : Platform.isIOS
-            ? Uri.parse(
-                'https://apps.apple.com/us/app/open-food-facts-product-scan/id588797948',
-              )
-            : Uri.parse('https://world.openfoodfacts.org/cgi/user.pl');
-
-        final canLaunch = await canLaunchUrl(storeUrl);
+        const storeUrl =
+            'https://play.google.com/store/apps/details?id=org.openfoodfacts.scanner&hl=en&pli=1';
+        final uri = Uri.parse(storeUrl);
+        final canLaunch = await canLaunchUrl(uri);
         if (canLaunch && context.mounted) {
-          await launchUrl(storeUrl, mode: LaunchMode.externalApplication);
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
         } else if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open the link.')),
+            const SnackBar(content: Text('Could not open the Play Store.')),
           );
         }
       }
