@@ -1,3 +1,10 @@
+/// Tests for [ProductRepository] – offline‑first product retrieval and
+/// inventory delegation.
+///
+/// Uses mocks for [DatabaseHelper] and [ProductApiService] to simulate
+/// cache hits, API successes, and failures.
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
@@ -34,18 +41,20 @@ void main() {
 
   group('getProduct', () {
     test('returns cached product when available', () async {
+      /// A cached product is returned immediately without calling the API.
       when(
         () => mockDb.getProduct(testBarcode),
       ).thenAnswer((_) async => testProduct);
 
       final product = await repository.getProduct(testBarcode);
-
       expect(product, testProduct);
       verify(() => mockDb.getProduct(testBarcode)).called(1);
       verifyNever(() => mockApi.getByBarcode(any()));
     });
 
     test('fetches from API and caches when not in DB', () async {
+      /// When there is no cache entry the API is called and the result
+      /// is saved.
       when(() => mockDb.getProduct(testBarcode)).thenAnswer((_) async => null);
       when(
         () => mockApi.getByBarcode(testBarcode),
@@ -55,7 +64,6 @@ void main() {
       ).thenAnswer((_) async => Future.value());
 
       final product = await repository.getProduct(testBarcode);
-
       expect(product, testProduct);
       verify(() => mockDb.insertProduct(testProduct)).called(1);
     });
@@ -63,6 +71,7 @@ void main() {
     test(
       'throws ProductNotFoundException when API returns not found',
       () async {
+        /// Without a fallback API a not‑found error is rethrown.
         final repoNoFallback = ProductRepository(mockDb, mockApi);
         when(
           () => mockDb.getProduct(testBarcode),
@@ -77,7 +86,10 @@ void main() {
         );
       },
     );
+
     test('throws FetchFailedException on generic API error', () async {
+      /// Network or other exceptions are wrapped in a
+      /// [FetchFailedException].
       when(() => mockDb.getProduct(testBarcode)).thenAnswer((_) async => null);
       when(
         () => mockApi.getByBarcode(testBarcode),
@@ -92,6 +104,8 @@ void main() {
     test(
       'uses fallback API when primary throws ProductNotFoundException',
       () async {
+        /// When the primary API cannot find the product, the fallback
+        /// API is tried before giving up.
         when(
           () => mockDb.getProduct(testBarcode),
         ).thenAnswer((_) async => null);
@@ -116,6 +130,8 @@ void main() {
     test(
       'throws ProductNotFoundException when both APIs fail with not found',
       () async {
+        /// If neither API finds the product, a [ProductNotFoundException]
+        /// is thrown.
         when(
           () => mockDb.getProduct(testBarcode),
         ).thenAnswer((_) async => null);
@@ -136,6 +152,7 @@ void main() {
 
   group('inventory methods', () {
     test('getInventoryForBarcode delegates to DB', () async {
+      /// The repository simply forwards the call to the database.
       final items = [const InventoryItem(barcode: testBarcode)];
       when(
         () => mockDb.getInventoryItemsByBarcode(testBarcode),
@@ -165,6 +182,7 @@ void main() {
     });
 
     test('cacheProduct inserts product into DB', () async {
+      /// `cacheProduct` saves the product without going through the API.
       when(() => mockDb.insertProduct(testProduct)).thenAnswer((_) async => {});
       await repository.cacheProduct(testProduct);
       verify(() => mockDb.insertProduct(testProduct)).called(1);
