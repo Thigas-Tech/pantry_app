@@ -12,10 +12,10 @@ _InventoryItem _$InventoryItemFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num?)?.toInt(),
       quantity: (json['quantity'] as num?)?.toDouble() ?? 1,
       unit: json['unit'] as String? ?? 'pcs',
-      expiryDate: json['expiryDate'] as String?,
+      expiryDate: json['expiry_date'] as String?,
       location: json['location'] as String? ?? 'pantry',
       notes: json['notes'] as String?,
-      dateAdded: (json['dateAdded'] as num?)?.toInt(),
+      dateAdded: (json['date_added'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$InventoryItemToJson(_InventoryItem instance) =>
@@ -24,8 +24,8 @@ Map<String, dynamic> _$InventoryItemToJson(_InventoryItem instance) =>
       'id': instance.id,
       'quantity': instance.quantity,
       'unit': instance.unit,
-      'expiryDate': instance.expiryDate,
+      'expiry_date': instance.expiryDate,
       'location': instance.location,
       'notes': instance.notes,
-      'dateAdded': instance.dateAdded,
+      'date_added': instance.dateAdded,
     };

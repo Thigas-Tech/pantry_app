@@ -6,10 +6,14 @@ import 'package:sqflite/sqflite.dart';
 
 /// Provides access to the local SQLite database.
 ///
-/// [DatabaseHelper] is a **singleton** – only one instance exists during the
-/// lifetime of the app. The singleton pattern guarantees that all database
-/// operations use the same connection, avoiding locking issues and unnecessary
-/// overhead.
+/// [DatabaseHelper] is normally a **singleton** – only one instance exists
+/// during the lifetime of the app. The singleton pattern guarantees that all
+/// database operations use the same connection, avoiding locking issues and
+/// unnecessary overhead.
+///
+/// For **testing** a separate instance can be created with
+/// [DatabaseHelper.withPath], which opens an in‑memory database or a
+/// temporary file. This avoids interfering with the singleton’s connection.
 ///
 /// ## Platform support
 ///
@@ -17,29 +21,22 @@ import 'package:sqflite/sqflite.dart';
 /// standard `sqflite` plugin. Desktop and web are not supported in this build.
 ///
 /// ## Schema overview
-///
-/// Two tables are created on first launch (version 1):
-///
-/// - `products` – stores immutable (or rarely‑changing) product data fetched
-///   from Open Food Facts. The barcode is the primary key. Nutrition values
-///   are denormalised into columns so that the UI can retrieve a complete
-///   product with a single row query.
-/// - `inventory` – stores instances of a product that the user has added to
-///   their pantry. Multiple rows can share the same barcode. The `date_added`
-///   column is used by [cleanupOldEntries] to remove items that haven’t been
-///   re‑added for 60 days.
-///
-/// ## Migrations
-///
-/// Future schema changes should be handled in [_onUpgrade]. The current
-/// version is 1. When a migration is needed, bump the version number passed
-/// to [openDatabase] and add conditional logic inside [_onUpgrade].
+/// … (unchanged)
 class DatabaseHelper {
+  /// Creates a [DatabaseHelper] that opens (or creates) a database at the
+  /// given [path] instead of the default location.
+  ///
+  /// This constructor is intended for **unit tests** that require an isolated
+  /// database. In production code the default singleton ([DatabaseHelper()])
+  /// should be used.
+  DatabaseHelper.withPath(String path) : _customPath = path;
+
   /// Returns the single [DatabaseHelper] instance.
   factory DatabaseHelper() => _instance;
 
   /// Internal constructor for the singleton.
-  DatabaseHelper._internal();
+  DatabaseHelper._internal() : _customPath = null;
+  final String? _customPath;
 
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
@@ -47,7 +44,7 @@ class DatabaseHelper {
   ///
   /// The first access to [database] triggers [_initDatabase], which creates
   /// or opens the SQLite file and runs any necessary migrations.
-  static Database? _database;
+  Database? _database;
 
   /// The lazily‑opened database instance.
   ///
@@ -61,21 +58,24 @@ class DatabaseHelper {
 
   /// Opens the database file and applies the schema.
   ///
-  /// On desktop platforms the `sqflite_common_ffi` database factory is set
-  /// before opening, because `sqflite` alone does not support Linux / Windows
-  /// / macOS. On mobile the default factory is used.
-  ///
-  /// The database file is stored in the application’s documents directory so
-  /// that it survives app restarts and is backed up by the OS (on iOS).
+  /// If a custom path was provided via [DatabaseHelper.withPath] it is used
+  /// directly; otherwise the file is stored in the application’s documents
+  /// directory so that it survives app restarts.
   Future<Database> _initDatabase() async {
-    final documentsDir = await getApplicationDocumentsDirectory();
-    final dbPath = join(documentsDir.path, 'pantry.db');
+    final dbPath = _customPath ?? (await _getDefaultPath());
     return openDatabase(
       dbPath,
       version: 1,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+  }
+
+  /// Returns the default path for the database file inside the app’s
+  /// documents directory.
+  Future<String> _getDefaultPath() async {
+    final documentsDir = await getApplicationDocumentsDirectory();
+    return join(documentsDir.path, 'pantry.db');
   }
 
   /// Creates the `products` and `inventory` tables together with their

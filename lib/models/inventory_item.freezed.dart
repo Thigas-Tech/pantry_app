@@ -15,9 +15,43 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$InventoryItem {
 
- String get barcode; int? get id;// auto-increment, nullable for new items
- double get quantity; String get unit; String? get expiryDate;// ISO 8601 format
- String get location; String? get notes; int? get dateAdded;
+/// The barcode of the product (e.g. EAN‑13, UPC).
+///
+/// This is a foreign key referencing [Product.barcode] and must match an
+/// existing product in the `products` table (or be added to it).
+ String get barcode;/// The auto‑generated primary key from the database.
+///
+/// Set to `null` for items that have not yet been inserted. After
+/// [DatabaseHelper.insertInventoryItem] returns, the generated ID is
+/// available in the returned integer (the caller should update this field
+/// if needed).
+ int? get id;/// The quantity of the item, expressed in the given [unit].
+///
+/// The value is stored as a [double] to support fractional quantities
+/// (e.g., `0.5` for half a pack). Defaults to `1`.
+ double get quantity;/// The unit of measurement for [quantity].
+///
+/// Common values: `'pcs'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
+/// Defaults to `'pcs'`.
+ String get unit;/// The expiry date in ISO 8601 format (`YYYY-MM-DD`).
+///
+/// May be `null` if the user has not set an expiry date. When present,
+/// the date is treated as the last day the item is safe to consume
+/// (inclusive).
+///
+/// The home screen uses this value to group items into expired /
+/// expiring soon / good categories.
+@JsonKey(name: 'expiry_date') String? get expiryDate;/// The storage location of the item.
+///
+/// Common values: `'pantry'`, `'fridge'`, `'freezer'`.
+/// Defaults to `'pantry'`.
+ String get location;/// Optional free‑form notes about this item.
+ String? get notes;/// Epoch timestamp (milliseconds since Unix epoch) of when the item
+/// was first added.
+///
+/// Set automatically when the user creates the item. Used by the
+/// database cleanup routine to purge old entries after 60 days.
+@JsonKey(name: 'date_added') int? get dateAdded;
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -50,7 +84,7 @@ abstract mixin class $InventoryItemCopyWith<$Res>  {
   factory $InventoryItemCopyWith(InventoryItem value, $Res Function(InventoryItem) _then) = _$InventoryItemCopyWithImpl;
 @useResult
 $Res call({
- String barcode, int? id, double quantity, String unit, String? expiryDate, String location, String? notes, int? dateAdded
+ String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded
 });
 
 
@@ -162,7 +196,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit,  String? expiryDate,  String location,  String? notes,  int? dateAdded)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _InventoryItem() when $default != null:
 return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded);case _:
@@ -183,7 +217,7 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit,  String? expiryDate,  String location,  String? notes,  int? dateAdded)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded)  $default,) {final _that = this;
 switch (_that) {
 case _InventoryItem():
 return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded);case _:
@@ -203,7 +237,7 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  int? id,  double quantity,  String unit,  String? expiryDate,  String location,  String? notes,  int? dateAdded)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded)?  $default,) {final _that = this;
 switch (_that) {
 case _InventoryItem() when $default != null:
 return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded);case _:
@@ -218,19 +252,53 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 @JsonSerializable()
 
 class _InventoryItem implements InventoryItem {
-  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pcs', this.expiryDate, this.location = 'pantry', this.notes, this.dateAdded});
+  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pcs', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded});
   factory _InventoryItem.fromJson(Map<String, dynamic> json) => _$InventoryItemFromJson(json);
 
+/// The barcode of the product (e.g. EAN‑13, UPC).
+///
+/// This is a foreign key referencing [Product.barcode] and must match an
+/// existing product in the `products` table (or be added to it).
 @override final  String barcode;
+/// The auto‑generated primary key from the database.
+///
+/// Set to `null` for items that have not yet been inserted. After
+/// [DatabaseHelper.insertInventoryItem] returns, the generated ID is
+/// available in the returned integer (the caller should update this field
+/// if needed).
 @override final  int? id;
-// auto-increment, nullable for new items
+/// The quantity of the item, expressed in the given [unit].
+///
+/// The value is stored as a [double] to support fractional quantities
+/// (e.g., `0.5` for half a pack). Defaults to `1`.
 @override@JsonKey() final  double quantity;
+/// The unit of measurement for [quantity].
+///
+/// Common values: `'pcs'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
+/// Defaults to `'pcs'`.
 @override@JsonKey() final  String unit;
-@override final  String? expiryDate;
-// ISO 8601 format
+/// The expiry date in ISO 8601 format (`YYYY-MM-DD`).
+///
+/// May be `null` if the user has not set an expiry date. When present,
+/// the date is treated as the last day the item is safe to consume
+/// (inclusive).
+///
+/// The home screen uses this value to group items into expired /
+/// expiring soon / good categories.
+@override@JsonKey(name: 'expiry_date') final  String? expiryDate;
+/// The storage location of the item.
+///
+/// Common values: `'pantry'`, `'fridge'`, `'freezer'`.
+/// Defaults to `'pantry'`.
 @override@JsonKey() final  String location;
+/// Optional free‑form notes about this item.
 @override final  String? notes;
-@override final  int? dateAdded;
+/// Epoch timestamp (milliseconds since Unix epoch) of when the item
+/// was first added.
+///
+/// Set automatically when the user creates the item. Used by the
+/// database cleanup routine to purge old entries after 60 days.
+@override@JsonKey(name: 'date_added') final  int? dateAdded;
 
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
@@ -265,7 +333,7 @@ abstract mixin class _$InventoryItemCopyWith<$Res> implements $InventoryItemCopy
   factory _$InventoryItemCopyWith(_InventoryItem value, $Res Function(_InventoryItem) _then) = __$InventoryItemCopyWithImpl;
 @override @useResult
 $Res call({
- String barcode, int? id, double quantity, String unit, String? expiryDate, String location, String? notes, int? dateAdded
+ String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded
 });
 
 

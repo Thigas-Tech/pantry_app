@@ -15,8 +15,45 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Product {
 
- String get barcode; String get name; String? get brand; String? get imageUrl; String? get category; String? get ingredients;// comma-separated or future JSON list
- String? get servingSize; double? get energyKcal; double? get proteinG; double? get carbsG; double? get fatG; double? get fiberG; double? get saltG; int? get lastSynced;
+/// The barcode (EAN‑13, UPC, etc.) that uniquely identifies the product.
+///
+/// This is the primary key in the local database and the lookup key for
+/// the Open Food Facts API.
+@JsonKey(name: '_id') String get barcode;/// The product name as returned by Open Food Facts.
+///
+/// In rare cases the API may return an empty string; the repository
+/// should handle that gracefully.
+@JsonKey(name: 'product_name') String get name;/// The brand name(s), often comma‑separated when multiple brands exist
+/// (e.g. `"Ferrero"`, `"Nestlé, Nespresso"`).
+@JsonKey(name: 'brands') String? get brand;/// A URL to the product’s front image on the Open Food Facts CDN.
+///
+/// May be `null` if no image has been uploaded for this product.
+@JsonKey(name: 'image_url') String? get imageUrl;/// The product category as assigned by the Open Food Facts community.
+///
+/// Often a comma‑separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
+/// Used in the add‑to‑inventory screen to suggest a default expiry date
+/// based on the category (e.g., dairy → +7 days).
+@JsonKey(name: 'category') String? get category;/// The full ingredients list as plain text.
+///
+/// Currently stored as a single string, exactly as returned by the API.
+/// In the future this could be migrated to a separate `ingredients` table
+/// to enable allergen filtering or per‑ingredient search.
+@JsonKey(name: 'ingredients_text') String? get ingredients;/// The suggested serving size, typically with a unit (e.g. `"15 g"`,
+/// `"1 cookie (28 g)"`).
+@JsonKey(name: 'serving_size') String? get servingSize;/// Energy content in **kilocalories per 100 g** (or 100 ml).
+///
+/// Sourced from `nutriments.energy-kcal_100g` in the API response.
+@JsonKey(name: 'energy_kcal') double? get energyKcal;/// Protein content in **grams per 100 g** (or 100 ml).
+@JsonKey(name: 'protein_g') double? get proteinG;/// Carbohydrate content in **grams per 100 g** (or 100 ml).
+@JsonKey(name: 'carbs_g') double? get carbsG;/// Fat content in **grams per 100 g** (or 100 ml).
+@JsonKey(name: 'fat_g') double? get fatG;/// Fiber content in **grams per 100 g** (or 100 ml).
+@JsonKey(name: 'fiber_g') double? get fiberG;/// Salt content in **grams per 100 g** (or 100 ml).
+@JsonKey(name: 'salt_g') double? get saltG;/// Epoch timestamp (milliseconds since Unix epoch) of when the product
+/// data was last fetched from the API or submitted by the user.
+///
+/// Set automatically in [OpenFoodFactsApi.getByBarcode] and
+/// [OpenFoodFactsApi.submitProduct].
+@JsonKey(name: 'last_synced') int? get lastSynced;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +86,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
- String barcode, String name, String? brand, String? imageUrl, String? category, String? ingredients, String? servingSize, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, int? lastSynced
+@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced
 });
 
 
@@ -167,7 +204,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced);case _:
@@ -188,7 +225,7 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.catego
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
 return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced);case _:
@@ -208,7 +245,7 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.catego
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced);case _:
@@ -223,24 +260,61 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.catego
 @JsonSerializable()
 
 class _Product implements Product {
-  const _Product({required this.barcode, required this.name, this.brand, this.imageUrl, this.category, this.ingredients, this.servingSize, this.energyKcal, this.proteinG, this.carbsG, this.fatG, this.fiberG, this.saltG, this.lastSynced});
+  const _Product({@JsonKey(name: '_id') required this.barcode, @JsonKey(name: 'product_name') required this.name, @JsonKey(name: 'brands') this.brand, @JsonKey(name: 'image_url') this.imageUrl, @JsonKey(name: 'category') this.category, @JsonKey(name: 'ingredients_text') this.ingredients, @JsonKey(name: 'serving_size') this.servingSize, @JsonKey(name: 'energy_kcal') this.energyKcal, @JsonKey(name: 'protein_g') this.proteinG, @JsonKey(name: 'carbs_g') this.carbsG, @JsonKey(name: 'fat_g') this.fatG, @JsonKey(name: 'fiber_g') this.fiberG, @JsonKey(name: 'salt_g') this.saltG, @JsonKey(name: 'last_synced') this.lastSynced});
   factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
 
-@override final  String barcode;
-@override final  String name;
-@override final  String? brand;
-@override final  String? imageUrl;
-@override final  String? category;
-@override final  String? ingredients;
-// comma-separated or future JSON list
-@override final  String? servingSize;
-@override final  double? energyKcal;
-@override final  double? proteinG;
-@override final  double? carbsG;
-@override final  double? fatG;
-@override final  double? fiberG;
-@override final  double? saltG;
-@override final  int? lastSynced;
+/// The barcode (EAN‑13, UPC, etc.) that uniquely identifies the product.
+///
+/// This is the primary key in the local database and the lookup key for
+/// the Open Food Facts API.
+@override@JsonKey(name: '_id') final  String barcode;
+/// The product name as returned by Open Food Facts.
+///
+/// In rare cases the API may return an empty string; the repository
+/// should handle that gracefully.
+@override@JsonKey(name: 'product_name') final  String name;
+/// The brand name(s), often comma‑separated when multiple brands exist
+/// (e.g. `"Ferrero"`, `"Nestlé, Nespresso"`).
+@override@JsonKey(name: 'brands') final  String? brand;
+/// A URL to the product’s front image on the Open Food Facts CDN.
+///
+/// May be `null` if no image has been uploaded for this product.
+@override@JsonKey(name: 'image_url') final  String? imageUrl;
+/// The product category as assigned by the Open Food Facts community.
+///
+/// Often a comma‑separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
+/// Used in the add‑to‑inventory screen to suggest a default expiry date
+/// based on the category (e.g., dairy → +7 days).
+@override@JsonKey(name: 'category') final  String? category;
+/// The full ingredients list as plain text.
+///
+/// Currently stored as a single string, exactly as returned by the API.
+/// In the future this could be migrated to a separate `ingredients` table
+/// to enable allergen filtering or per‑ingredient search.
+@override@JsonKey(name: 'ingredients_text') final  String? ingredients;
+/// The suggested serving size, typically with a unit (e.g. `"15 g"`,
+/// `"1 cookie (28 g)"`).
+@override@JsonKey(name: 'serving_size') final  String? servingSize;
+/// Energy content in **kilocalories per 100 g** (or 100 ml).
+///
+/// Sourced from `nutriments.energy-kcal_100g` in the API response.
+@override@JsonKey(name: 'energy_kcal') final  double? energyKcal;
+/// Protein content in **grams per 100 g** (or 100 ml).
+@override@JsonKey(name: 'protein_g') final  double? proteinG;
+/// Carbohydrate content in **grams per 100 g** (or 100 ml).
+@override@JsonKey(name: 'carbs_g') final  double? carbsG;
+/// Fat content in **grams per 100 g** (or 100 ml).
+@override@JsonKey(name: 'fat_g') final  double? fatG;
+/// Fiber content in **grams per 100 g** (or 100 ml).
+@override@JsonKey(name: 'fiber_g') final  double? fiberG;
+/// Salt content in **grams per 100 g** (or 100 ml).
+@override@JsonKey(name: 'salt_g') final  double? saltG;
+/// Epoch timestamp (milliseconds since Unix epoch) of when the product
+/// data was last fetched from the API or submitted by the user.
+///
+/// Set automatically in [OpenFoodFactsApi.getByBarcode] and
+/// [OpenFoodFactsApi.submitProduct].
+@override@JsonKey(name: 'last_synced') final  int? lastSynced;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
@@ -275,7 +349,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
- String barcode, String name, String? brand, String? imageUrl, String? category, String? ingredients, String? servingSize, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, int? lastSynced
+@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced
 });
 
 
