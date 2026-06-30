@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 
@@ -61,6 +62,12 @@ class InventoryCard extends StatelessWidget {
                 builder: (_) => ProductDetailScreen(product: product),
               ),
             );
+            // Invalidate so the home screen refreshes when we come back.
+            if (context.mounted) {
+              ProviderScope.containerOf(
+                context,
+              ).invalidate(inventoryWithProductProvider);
+            }
           } on Exception {
             // Silently ignore errors.
           }

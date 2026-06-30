@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
@@ -251,6 +252,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       }
       await NotificationService.scheduleExpiryReminders(result);
       setState(() => _inventoryVersion++);
+      ref.invalidate(inventoryWithProductProvider);
     }
   }
 
@@ -282,6 +284,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       await NotificationService.cancelReminders(item.id!);
       logInfo('Deleted inventory item ${item.id} (${widget.product.barcode})');
       setState(() => _inventoryVersion++);
+      ref.invalidate(inventoryWithProductProvider);
     }
   }
 }
