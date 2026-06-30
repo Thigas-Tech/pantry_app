@@ -38,7 +38,6 @@ class _ScannerScreenState extends State<ScannerScreen> {
           );
   }
 }
-
 // ---------- Camera scanner ----------
 
 /// The live camera scanner using Google ML Kit via [MobileScanner].

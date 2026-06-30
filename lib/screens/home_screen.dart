@@ -347,6 +347,10 @@ class _InventoryCard extends StatelessWidget {
         item.expiryDate != null &&
         DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
     return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
         leading: CircleAvatar(
@@ -367,7 +371,6 @@ class _InventoryCard extends StatelessWidget {
           size: 12,
         ),
         onTap: () async {
-          // Obtain the repository from the nearest ProviderScope.
           final repo = ProviderScope.containerOf(
             context,
           ).read(productRepositoryProvider);
