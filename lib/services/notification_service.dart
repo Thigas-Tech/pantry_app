@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -135,6 +136,17 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       );
     }
+    if (dayBeforeTZ.isAfter(now)) {
+      logInfo(
+        // ignore: lines_longer_than_80_chars
+        'Scheduling "expiring soon" for barcode ${item.barcode} on $dayBeforeTZ',
+      );
+    }
+    if (expiryTZ.isAfter(now)) {
+      logInfo(
+        'Scheduling "expiring today" for barcode ${item.barcode} on $expiryTZ',
+      );
+    }
   }
 
   /// Cancels both notifications associated with the given [itemId].
@@ -142,6 +154,7 @@ class NotificationService {
   /// Call this when an inventory item is deleted or its expiry date is
   /// changed. The method cancels the two IDs derived from `itemId.hashCode`.
   static Future<void> cancelReminders(int itemId) async {
+    logInfo('Cancelling reminders for item $itemId');
     final id = itemId.hashCode;
     await _plugin.cancel(id: id);
     await _plugin.cancel(id: id + 1);
@@ -159,5 +172,6 @@ class NotificationService {
           AndroidFlutterLocalNotificationsPlugin
         >();
     await androidPlugin?.requestNotificationsPermission();
+    logInfo('Notification permission requested');
   }
 }

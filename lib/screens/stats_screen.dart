@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/services/csv_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -79,6 +80,8 @@ class StatsScreen extends ConsumerWidget {
   }
 
   Future<void> _exportCsv(BuildContext context, DatabaseHelper db) async {
+    logInfo('Export button pressed');
+
     try {
       final csvService = CsvService(db);
       final csvString = await csvService.generateCsv();
@@ -111,6 +114,7 @@ class StatsScreen extends ConsumerWidget {
   }
 
   Future<void> _importCsv(BuildContext context, DatabaseHelper db) async {
+    logInfo('Import button pressed');
     try {
       final controller = TextEditingController();
       final String? filePath = await showDialog<String>(

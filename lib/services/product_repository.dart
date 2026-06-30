@@ -3,6 +3,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_api_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// The central data access point that implements the offline‑first pattern.
 ///
@@ -47,23 +48,30 @@ class ProductRepository {
   /// cache exists.
   Future<Product> getProduct(String barcode) async {
     // 1. Local cache
+    logInfo('Looking up $barcode');
     final cached = await _db.getProduct(barcode);
-    if (cached != null) return cached;
+    if (cached != null) {
+      logInfo('Cache hit for $barcode');
+      return cached;
+    }
 
     // 2. Try primary API
     try {
+      logInfo('Fetching $barcode from primary API');
       final remote = await _api.getByBarcode(barcode);
       await _db.insertProduct(remote);
       return remote;
     } on ProductNotFoundException {
       // Primary not found → try fallback if set
       if (_fallbackApi != null) {
+        logInfo('Trying fallback API for $barcode');
         try {
           final remote = await _fallbackApi.getByBarcode(barcode);
           await _db.insertProduct(remote);
           return remote;
         } on ProductNotFoundException {
           // Both failed, rethrow
+          logWarning('$barcode not found in primary API');
           rethrow;
         } catch (e) {
           // Network error on fallback → throw generic
@@ -76,6 +84,7 @@ class ProductRepository {
       }
     } catch (e) {
       // Network/other error on primary, but no cache
+      logError('Network error for $barcode: $e');
       throw FetchFailedException(
         'Failed to fetch product. Please check your connection.',
       );

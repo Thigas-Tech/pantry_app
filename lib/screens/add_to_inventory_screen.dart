@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// A form screen for creating or editing an inventory item.
 ///
@@ -95,7 +96,10 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
           widget.existingItem?.dateAdded ??
           DateTime.now().millisecondsSinceEpoch,
     );
-
+    logInfo(
+      // ignore: lines_longer_than_80_chars
+      'Inventory item ready: barcode=${item.barcode} qty=${item.quantity} ${item.unit} loc=${item.location} expiry=${item.expiryDate}',
+    );
     Navigator.of(context).pop(item);
   }
 

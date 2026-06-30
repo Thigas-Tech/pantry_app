@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// Entry point of the Pantry application (Android).
 ///
@@ -39,9 +40,11 @@ void main() async {
   // This prevents the database from growing indefinitely.
   final dbHelper = DatabaseHelper();
   await dbHelper.cleanupOldEntries();
+  logInfo('Database cleanup completed');
 
   // Start the app with Riverpod dependency injection.
   runApp(const ProviderScope(child: PantryApp()));
+  logInfo('App started');
 }
 
 /// The root widget of the Pantry application.

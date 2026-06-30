@@ -1,5 +1,6 @@
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -129,6 +130,7 @@ class DatabaseHelper {
   /// When the database version is increased, add conditional blocks here to
   /// alter the schema without losing user data.
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    logInfo('Database upgrade: $oldVersion → $newVersion');
     // Example: if (oldVersion < 2) { … }
   }
 
@@ -174,6 +176,10 @@ class DatabaseHelper {
     final cutoff = DateTime.now()
         .subtract(const Duration(days: 60))
         .millisecondsSinceEpoch;
+    logInfo(
+      // ignore: lines_longer_than_80_chars
+      'Cleaning up items added before ${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}',
+    );
 
     await db.delete('inventory', where: 'date_added < ?', whereArgs: [cutoff]);
 
@@ -183,6 +189,7 @@ class DatabaseHelper {
       DELETE FROM products
       WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
     ''');
+    logInfo('Cleanup finished');
   }
 
   // --------------------- Inventory CRUD ---------------------

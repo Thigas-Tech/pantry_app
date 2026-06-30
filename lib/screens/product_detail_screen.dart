@@ -5,6 +5,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// Displays full product details and the associated inventory entries.
 ///
@@ -187,11 +188,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (result != null && mounted) {
       final repo = ref.read(productRepositoryProvider);
       if (existing != null) {
+        logInfo(
+          // ignore: lines_longer_than_80_chars
+          'Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}',
+        );
         // Edit mode: update existing item and reschedule notifications.
         await repo.updateInventoryItem(result);
         await NotificationService.cancelReminders(existing.id!);
       } else {
         // Create mode: insert new item.
+        logInfo(
+          // ignore: lines_longer_than_80_chars
+          'Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}',
+        );
         await repo.addInventoryItem(result);
       }
       await NotificationService.scheduleExpiryReminders(result);
@@ -225,6 +234,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       final repo = ref.read(productRepositoryProvider);
       await repo.deleteInventoryItem(item.id!);
       await NotificationService.cancelReminders(item.id!);
+      logInfo('Deleted inventory item ${item.id} (${widget.product.barcode})');
       setState(() => _inventoryVersion++);
     }
   }

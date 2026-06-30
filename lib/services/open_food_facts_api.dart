@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_api_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// Open Food Facts API client.
 ///
@@ -70,12 +71,15 @@ class OpenFoodFactsApi implements ProductApiService {
   @override
   Future<Product> getByBarcode(String barcode) async {
     final url = '$_baseUrl/api/v3/product/$barcode.json';
+    logInfo('GET $url');
     try {
       final response = await _dio.get(
         url,
         options: Options(headers: {'User-Agent': _userAgent}),
       );
+      logInfo('Response status: ${response.statusCode}');
       final data = response.data as Map<String, dynamic>;
+      logInfo('OFF status: ${data['status']}');
       if (data['status'] != 'success' || data['product'] == null) {
         throw ProductNotFoundException('Product not found: $barcode');
       }
@@ -83,6 +87,7 @@ class OpenFoodFactsApi implements ProductApiService {
       return _parseProduct(productJson);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
+        logWarning('DioException for $barcode: ${e.response?.statusCode}');
         throw ProductNotFoundException('Product not found: $barcode');
       }
       rethrow;

@@ -7,6 +7,7 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -93,6 +94,7 @@ class HomeScreen extends ConsumerWidget {
     final barcode = await Navigator.of(
       context,
     ).push<String>(MaterialPageRoute(builder: (_) => const ScannerScreen()));
+    logInfo('Barcode scanned: $barcode');
     if (barcode == null || !context.mounted) return;
 
     final repo = ref.read(productRepositoryProvider);
@@ -100,6 +102,7 @@ class HomeScreen extends ConsumerWidget {
     try {
       // 1. Try to fetch from OFF or local cache
       final product = await repo.getProduct(barcode);
+      logInfo('Product found: ${product.name}');
       if (context.mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(
@@ -109,6 +112,7 @@ class HomeScreen extends ConsumerWidget {
         ref.invalidate(inventoryWithProductProvider);
       }
     } on ProductNotFoundException {
+      logWarning('Product not found for $barcode – redirecting to Play Store');
       if (context.mounted) {
         const storeUrl =
             'https://play.google.com/store/apps/details?id=org.openfoodfacts.scanner&hl=en&pli=1';

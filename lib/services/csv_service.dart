@@ -4,6 +4,7 @@ import 'package:csv/csv.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// Handles CSV export and import for the pantry database.
 ///
@@ -17,6 +18,7 @@ class CsvService {
   /// Generates a CSV string of all inventory items with product details.
   Future<String> generateCsv() async {
     final rows = await _db.getExportData();
+    logInfo('CSV export: ${rows.length} rows');
     if (rows.isEmpty) return '';
 
     final headers = [
@@ -72,6 +74,7 @@ class CsvService {
   ///
   /// Returns a map with `products` (count) and `items` (count) imported.
   Future<Map<String, int>> importCsv(String filePath) async {
+    logInfo('CSV import from $filePath');
     // Read the entire file as a string (v8 csv.decode works on a string).
     final csvString = await File(filePath).readAsString();
     if (csvString.trim().isEmpty) throw Exception('CSV file is empty.');
@@ -135,6 +138,9 @@ class CsvService {
       itemsImported++;
     }
 
+    logInfo(
+      'CSV import done: $productsImported products, $itemsImported items',
+    );
     return {'products': productsImported, 'items': itemsImported};
   }
 
