@@ -41,6 +41,14 @@ import 'package:url_launcher/url_launcher.dart';
 /// - **Product not found**: the user is directed to the Open Food Facts
 ///   Play Store page so they can install the OFF app and contribute the
 ///   missing product.
+///
+/// ## Automatic refresh
+///
+/// The inventory list is automatically refreshed every time it could have
+/// changed – after adding/editing/deleting an item in the detail screen,
+/// after importing/exporting data in the stats screen, or after a product
+/// scan that leads to a new inventory entry. A manual refresh button is
+/// therefore unnecessary and has been removed.
 class HomeScreen extends ConsumerWidget {
   /// Creates a [HomeScreen] widget.
   const HomeScreen({super.key});
@@ -55,17 +63,13 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
-            onPressed: () {
-              unawaited(
-                Navigator.of(context).push<void>(
-                  MaterialPageRoute(builder: (_) => const StatsScreen()),
-                ),
+            onPressed: () async {
+              // Navigate to stats and refresh the inventory when we return.
+              await Navigator.of(context).push<void>(
+                MaterialPageRoute(builder: (_) => const StatsScreen()),
               );
+              ref.invalidate(inventoryWithProductProvider);
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(inventoryWithProductProvider),
           ),
         ],
       ),
@@ -116,6 +120,8 @@ class HomeScreen extends ConsumerWidget {
             builder: (_) => ProductDetailScreen(product: product),
           ),
         );
+        // After returning from the detail screen (where items may have been
+        // added or removed), invalidate the provider so the list refreshes.
         ref.invalidate(inventoryWithProductProvider);
       }
     } on ProductNotFoundException {
