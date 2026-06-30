@@ -6,6 +6,8 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Displays full product details and the associated inventory entries.
 ///
@@ -14,10 +16,11 @@ import 'package:pantry_app/utils/logger.dart';
 /// - Product image (if available), animated with a [Hero] transition.
 /// - All nutritional information (per 100 g / 100 ml) presented in a styled
 ///   [Table] with alternating row colours.
-/// - The ingredients list.
+/// - The ingredients list, collapsed by default.
 /// - A list of existing inventory items for this product, each with edit and
 ///   delete actions.
 /// - An "Add to Inventory" button that opens the [AddToInventoryScreen].
+/// - A button in the app bar that opens the product’s page on Open Food Facts.
 ///
 /// ## State
 ///
@@ -63,7 +66,25 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final inventoryFuture = repo.getInventoryForBarcode(widget.product.barcode);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.product.name)),
+      appBar: AppBar(
+        title: Text(widget.product.name),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.open_in_browser),
+            tooltip: 'View on Open Food Facts',
+            onPressed: () async {
+              final url = Uri.parse(
+                'https://world.openfoodfacts.org/product/${widget.product.barcode}',
+              );
+              if (await canLaunchUrl(url) && context.mounted) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              } else if (mounted) {
+                SnackbarHelper.showError(context, 'Could not open the link.');
+              }
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
@@ -114,7 +135,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ),
                 ],
               ),
-
             const SizedBox(height: 24),
 
             // Inventory section header
