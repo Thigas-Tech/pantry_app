@@ -8,8 +8,8 @@ environment:
 
 dependencies:
   csv: ^8.0.0
-  cupertino_icons: ^1.0.8
   dio: ^5.9.2
+  filegate: ^1.7.0
   flutter:
     sdk: flutter
   flutter_local_notifications: ^22.0.1

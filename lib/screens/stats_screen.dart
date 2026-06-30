@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:filegate/filegate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
@@ -15,7 +16,9 @@ import 'package:share_plus/share_plus.dart';
 ///
 /// Shows aggregate pantry counts and allows the user to:
 /// - **Export** all inventory as a CSV file via the system share sheet.
-/// - **Import** a previously exported CSV file by entering its file path.
+/// - **Import** a previously exported CSV file by picking it with a native
+///   file picker powered by `filegate`. The chosen file is then processed
+///   and its data merged into the pantry.
 ///
 /// ## Export
 ///
@@ -25,11 +28,10 @@ import 'package:share_plus/share_plus.dart';
 ///
 /// ## Import
 ///
-/// Since Android does not have a straightforward native file picker in
-/// this build, the user is prompted to type or paste the full path of
-/// the CSV file (e.g., `/storage/emulated/0/Download/pantry_export.csv`).
-/// After import, a dialog shows the number of products updated and
-/// items added.
+/// The user taps “Import CSV” and is presented with the device’s file picker
+/// filtered to `.csv` files. After selecting a file, a loading indicator
+/// appears while the import runs, and a result dialog shows the number of
+/// products updated and items added.
 ///
 /// ## Import logic
 ///
@@ -117,36 +119,19 @@ class StatsScreen extends ConsumerWidget {
 
   Future<void> _importCsv(BuildContext context, DatabaseHelper db) async {
     logInfo('Import button pressed');
+
     try {
-      final controller = TextEditingController();
-      final filePath = await showDialog<String>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Import CSV'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: '/path/to/pantry_export.csv',
-              labelText: 'File path',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: const Text('Import'),
-            ),
-          ],
-        ),
+      // Open the native file picker via filegate.
+      const filegate = Filegate();
+      final files = await filegate.pickFiles(
+        allowedExtensions: ['csv'],
       );
 
-      if (filePath == null || filePath.isEmpty) return; // user cancelled
+      if (files == null || files.isEmpty) return; // user cancelled
 
-      // Show loading indicator while importing.
+      final filePath = files.first.path;
+
+      // Show a loading indicator while the import runs.
       if (context.mounted) {
         unawaited(
           showDialog(
@@ -160,10 +145,10 @@ class StatsScreen extends ConsumerWidget {
       final csvService = CsvService(db);
       final counts = await csvService.importCsv(filePath);
 
-      // Dismiss loading.
+      // Dismiss the loading indicator.
       if (context.mounted) Navigator.of(context).pop();
 
-      // Show import result.
+      // Show the import result.
       if (context.mounted) {
         unawaited(
           showDialog(
@@ -185,6 +170,7 @@ class StatsScreen extends ConsumerWidget {
         );
       }
     } on Exception catch (e) {
+      // Dismiss the loading indicator if it's still shown.
       if (context.mounted) Navigator.of(context).pop();
       if (context.mounted) {
         SnackbarHelper.showError(context, 'Import failed: $e');
