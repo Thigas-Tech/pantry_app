@@ -12,6 +12,7 @@ import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,7 +31,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// ## Empty state
 ///
-/// When the inventory list is empty (no items added yet), the [_EmptyPantry]
+/// When the inventory list is empty (no items added yet), the [EmptyPantry]
 /// illustration is shown with a prompt to scan the first product.
 ///
 /// ## Scanning flow
@@ -79,7 +80,7 @@ class HomeScreen extends ConsumerWidget {
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (items) {
           if (items.isEmpty) {
-            return _EmptyPantry(onScan: () => _scanBarcode(context, ref));
+            return EmptyPantry(onScan: () => _scanBarcode(context, ref));
           }
           return _InventoryList(
             items: items,
@@ -139,47 +140,6 @@ class HomeScreen extends ConsumerWidget {
         }
       }
     }
-  }
-}
-
-// ---------- Empty state ----------
-
-/// Shown when the user has not added any items yet.
-///
-/// Displays a large kitchen icon, a title, a subtitle, and a button that
-/// triggers the same scanning flow as the FAB.
-class _EmptyPantry extends StatelessWidget {
-  const _EmptyPantry({required this.onScan});
-
-  /// Callback invoked when the user presses the scan button.
-  final VoidCallback onScan;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.kitchen, size: 80, color: Colors.grey.shade400),
-            const SizedBox(height: 24),
-            Text(
-              'Your pantry is empty',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            const Text('Tap the button below to scan your first product'),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: onScan,
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Scan a barcode'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
