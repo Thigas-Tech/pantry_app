@@ -33,8 +33,9 @@ import 'package:timezone/timezone.dart' as tz;
 ///
 /// If the item has no `id` (e.g. a newly created item before insertion),
 /// the barcode’s hash code is used as a fallback. When an item is deleted,
-/// both IDs are cancelled via [cancelReminders].
+/// both IDs are cancelled via `cancelReminders`.
 class NotificationService {
+  NotificationService._(); // private constructor – adds an instance member
   /// The plugin instance. All operations go through this object.
   static final _plugin = FlutterLocalNotificationsPlugin();
 
@@ -58,7 +59,7 @@ class NotificationService {
     final localTimeZoneName = DateTime.now().timeZoneName;
     try {
       tz.setLocalLocation(tz.getLocation(localTimeZoneName));
-    } catch (_) {
+    } on Exception catch (_) {
       // Fall back to UTC – notifications will still fire, but at the wrong
       // local time on devices with unrecognised timezone names.
       tz.setLocalLocation(tz.UTC);
@@ -81,9 +82,9 @@ class NotificationService {
   /// - One day before the expiry date.
   /// - On the expiry date itself.
   ///
-  /// If [item.expiryDate] is `null` or cannot be parsed, this method does
-  /// nothing. Notifications whose scheduled date is already in the past are
-  /// silently skipped.
+  /// If [InventoryItem.expiryDate] is `null` or cannot be parsed, this method
+  /// does nothing. Notifications whose scheduled date is already
+  /// in the past are silently skipped.
   ///
   /// The notification body currently shows the barcode. A future improvement
   /// could include the product name by looking it up in the cache.
@@ -138,13 +139,12 @@ class NotificationService {
     }
     if (dayBeforeTZ.isAfter(now)) {
       logInfo(
-        // ignore: lines_longer_than_80_chars
-        'Scheduling "expiring soon" for barcode ${item.barcode} on $dayBeforeTZ',
+        '''Scheduling "expiring soon" for barcode ${item.barcode} on $dayBeforeTZ''',
       );
     }
     if (expiryTZ.isAfter(now)) {
       logInfo(
-        'Scheduling "expiring today" for barcode ${item.barcode} on $expiryTZ',
+        '''Scheduling "expiring today" for barcode ${item.barcode} on $expiryTZ''',
       );
     }
   }

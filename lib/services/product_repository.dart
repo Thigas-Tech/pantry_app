@@ -73,7 +73,7 @@ class ProductRepository {
           // Both failed, rethrow
           logWarning('$barcode not found in primary API');
           rethrow;
-        } catch (e) {
+        } on Exception {
           // Network error on fallback → throw generic
           throw FetchFailedException(
             'Failed to fetch product. Please check your connection.',
@@ -82,7 +82,7 @@ class ProductRepository {
       } else {
         rethrow;
       }
-    } catch (e) {
+    } on Exception catch (e) {
       // Network/other error on primary, but no cache
       logError('Network error for $barcode: $e');
       throw FetchFailedException(

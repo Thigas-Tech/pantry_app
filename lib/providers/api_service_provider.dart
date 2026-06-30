@@ -27,7 +27,7 @@ final apiServiceProvider = Provider<OpenFoodFactsApi>((ref) {
     dio,
     // TODO(ThiagoAssis): Remove credentials before distribution.
     userId: 'thiagoassis',
-    password: 'H%Mcfp#Y74p\$ucbBUEFP',
+    password: r'H%Mcfp#Y74p$ucbBUEFP',
     useStaging: false,
   );
 });

@@ -15,17 +15,16 @@ import 'package:pantry_app/services/csv_service.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-class FakeProduct extends Fake implements Product {}
-
-class FakeInventoryItem extends Fake implements InventoryItem {}
-
 void main() {
   late MockDatabaseHelper mockDb;
   late CsvService csvService;
 
   setUpAll(() {
-    registerFallbackValue(FakeProduct());
-    registerFallbackValue(FakeInventoryItem());
+    // Provide real minimal instances as fallback values.
+    // They are never actually used – only needed to satisfy the type parameter
+    // of `any()`.
+    registerFallbackValue(const Product(barcode: '', name: ''));
+    registerFallbackValue(const InventoryItem(barcode: ''));
   });
 
   setUp(() {
@@ -87,9 +86,8 @@ void main() {
       /// A correctly formatted CSV file is parsed and the database
       /// insert methods are called once per row.
       const csvContent =
-          'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,Location,Notes,Date Added,Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g)\n'
-          // ignore: lines_longer_than_80_chars
-          'Milk,Dairy,,123,2,L,2026-01-01,fridge,,2026-01-01T00:00:00.000,42,3.4,5.0,1.0,0.0,0.1\n';
+          '''Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,Location,Notes,Date Added,Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g)\n'''
+          '''Milk,Dairy,,123,2,L,2026-01-01,fridge,,2026-01-01T00:00:00.000,42,3.4,5.0,1.0,0.0,0.1\n''';
       final tempFile = File('${Directory.systemTemp.path}/test_import.csv');
       await tempFile.writeAsString(csvContent);
 

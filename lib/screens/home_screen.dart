@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
@@ -7,6 +9,7 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,6 +41,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///   Play Store page so they can install the OFF app and contribute the
 ///   missing product.
 class HomeScreen extends ConsumerWidget {
+  /// Creates a [HomeScreen] widget.
   const HomeScreen({super.key});
 
   @override
@@ -51,9 +55,11 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.bar_chart),
             onPressed: () {
-              Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const StatsScreen()));
+              unawaited(
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => const StatsScreen()),
+                ),
+              );
             },
           ),
           IconButton(
@@ -91,9 +97,9 @@ class HomeScreen extends ConsumerWidget {
   /// 4. On [ProductNotFoundException] – opens the appropriate Open Food Facts
   ///    link for the current platform (Play Store, App Store, or website).
   Future<void> _scanBarcode(BuildContext context, WidgetRef ref) async {
-    final barcode = await Navigator.of(
-      context,
-    ).push<String>(MaterialPageRoute(builder: (_) => const ScannerScreen()));
+    final barcode = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const ScannerScreen()),
+    );
     logInfo('Barcode scanned: $barcode');
     if (barcode == null || !context.mounted) return;
 
@@ -104,7 +110,7 @@ class HomeScreen extends ConsumerWidget {
       final product = await repo.getProduct(barcode);
       logInfo('Product found: ${product.name}');
       if (context.mounted) {
-        await Navigator.of(context).push(
+        await Navigator.of(context).push<void>(
           MaterialPageRoute(
             builder: (_) => ProductDetailScreen(product: product),
           ),
@@ -146,7 +152,7 @@ class _EmptyPantry extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -201,7 +207,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   /// The current search string; an empty string means “show all”.
   String _searchQuery = '';
 
-  /// Returns [items] filtered by [searchQuery].
+  /// Returns [_InventoryList] filtered by [_searchQuery].
   List<InventoryWithProduct> get _filtered {
     if (_searchQuery.isEmpty) return widget.items;
     final q = _searchQuery.toLowerCase();
@@ -255,7 +261,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
       children: [
         // Search bar
         Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(12),
           child: TextField(
             decoration: InputDecoration(
               hintText: 'Search by name or barcode',
@@ -353,8 +359,7 @@ class _InventoryCard extends StatelessWidget {
         ),
         title: Text(item.productName ?? item.barcode),
         subtitle: Text(
-          // ignore: lines_longer_than_80_chars
-          '${item.quantity} ${item.unit} · ${item.location}${item.expiryDate != null ? " · Exp: ${item.expiryDate}" : ""}',
+          '''${item.quantity} ${item.unit} · ${item.location}${item.expiryDate != null ? " · Exp: ${item.expiryDate}" : ""}''',
         ),
         trailing: Icon(
           Icons.circle,
@@ -369,12 +374,12 @@ class _InventoryCard extends StatelessWidget {
           try {
             final product = await repo.getProduct(item.barcode);
             if (!context.mounted) return;
-            await Navigator.of(context).push(
+            await Navigator.of(context).push<void>(
               MaterialPageRoute(
                 builder: (_) => ProductDetailScreen(product: product),
               ),
             );
-          } catch (_) {
+          } on Exception {
             // Silently ignore errors – the product might have been removed
             // or the network is unavailable.
           }

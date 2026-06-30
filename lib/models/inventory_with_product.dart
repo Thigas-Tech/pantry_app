@@ -1,3 +1,7 @@
+import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product.dart';
+
 /// A read‑only view that joins an [InventoryItem] with its corresponding
 /// [Product] metadata.
 ///

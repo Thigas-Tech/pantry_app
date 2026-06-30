@@ -27,8 +27,7 @@ void main() {
 
   setUp(() {
     adapter = MockHttpClientAdapter();
-    dio = Dio();
-    dio.httpClientAdapter = adapter;
+    dio = Dio()..httpClientAdapter = adapter; // cascade to avoid duplication
     api = OpenFoodFactsApi(
       dio,
       userId: 'test',
@@ -80,7 +79,7 @@ void main() {
       expect(product.lastSynced, isNotNull);
     });
 
-    test('throws ProductNotFoundException on status failure', () async {
+    test('throws ProductNotFoundException on status failure', () {
       /// When the API returns status 'failure', a
       /// [ProductNotFoundException] is thrown.
       final failureResponse = {'status': 'failure', 'product': null};
@@ -100,7 +99,7 @@ void main() {
       );
     });
 
-    test('throws ProductNotFoundException on 404', () async {
+    test('throws ProductNotFoundException on 404', () {
       /// An HTTP 404 response is converted to a
       /// [ProductNotFoundException].
       when(() => adapter.fetch(any(), any(), any())).thenAnswer(
@@ -113,7 +112,7 @@ void main() {
       );
     });
 
-    test('rethrows DioException on network error (non-404)', () async {
+    test('rethrows DioException on network error (non-404)', () {
       /// Network errors (other than 404) are re‑thrown as
       /// [DioException] so the repository can wrap them in
       /// [FetchFailedException].

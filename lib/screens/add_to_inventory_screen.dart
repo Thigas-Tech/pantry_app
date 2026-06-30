@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// A form screen for creating or editing an inventory item.
@@ -27,6 +28,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// The quantity field must be a positive number. All other fields are
 /// optional.
 class AddToInventoryScreen extends StatefulWidget {
+  /// Creates a [AddToInventoryScreen] widget.
   const AddToInventoryScreen({
     required this.barcode,
     super.key,
@@ -97,8 +99,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
           DateTime.now().millisecondsSinceEpoch,
     );
     logInfo(
-      // ignore: lines_longer_than_80_chars
-      'Inventory item ready: barcode=${item.barcode} qty=${item.quantity} ${item.unit} loc=${item.location} expiry=${item.expiryDate}',
+      '''Inventory item ready: barcode=${item.barcode} qty=${item.quantity} ${item.unit} loc=${item.location} expiry=${item.expiryDate}''',
     );
     Navigator.of(context).pop(item);
   }
@@ -111,7 +112,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
         title: Text(isEditing ? 'Update Item' : 'Add to Inventory'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -154,8 +155,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                     child: Text(
                       _expiryDate == null
                           ? 'Expiry date (optional)'
-                          // ignore: lines_longer_than_80_chars
-                          : 'Expiry: ${_expiryDate!.toIso8601String().substring(0, 10)}',
+                          : '''Expiry: ${_expiryDate!.toIso8601String().substring(0, 10)}''',
                     ),
                   ),
                   TextButton(

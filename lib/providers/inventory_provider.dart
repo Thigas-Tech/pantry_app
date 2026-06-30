@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/screens/home_screen.dart';
 
 /// Provides the joined list of inventory items with their product metadata.
 ///

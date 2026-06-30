@@ -13,6 +13,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 /// The screen always returns a [String] (the barcode) when popped, or
 /// `null` if the user navigates back without submitting.
 class ScannerScreen extends StatefulWidget {
+  /// Creates a [ScannerScreen] widget.
   const ScannerScreen({super.key});
 
   @override
@@ -120,7 +121,7 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

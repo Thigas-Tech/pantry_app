@@ -32,7 +32,7 @@ import 'package:pantry_app/utils/logger.dart';
 class OpenFoodFactsApi implements ProductApiService {
   /// Creates an [OpenFoodFactsApi] client.
   ///
-  /// The [dio] instance is injected via the provider system.
+  /// The [Dio] instance is injected via the provider system.
   /// [userId] and [password] are **required** for product submission.
   /// [useStaging] determines which server to target.
   OpenFoodFactsApi(
@@ -46,10 +46,20 @@ class OpenFoodFactsApi implements ProductApiService {
   });
 
   final Dio _dio;
+
+  /// The Open Food Facts user ID for API authentication.
   final String userId;
+
+  /// The Open Food Facts password for API authentication.
   final String password;
+
+  /// The application name used in the `User-Agent` header.
   final String appName;
+
+  /// The application version used in the `User-Agent` header.
   final String appVersion;
+
+  /// The contact email used in the `User-Agent` header.
   final String contactEmail;
 
   /// Whether to use the staging server (`true`) or production (`false`).
@@ -63,6 +73,11 @@ class OpenFoodFactsApi implements ProductApiService {
   /// Constructs the `User-Agent` header as required by Open Food Facts.
   String get _userAgent => '$appName/$appVersion ($contactEmail)';
 
+  @override
+  Future<void> close() async {
+    // No resources to release for this implementation.
+  }
+
   /// Fetches product information for the given [barcode] from the v3 API.
   ///
   /// Throws [ProductNotFoundException] if the product does not exist
@@ -73,12 +88,12 @@ class OpenFoodFactsApi implements ProductApiService {
     final url = '$_baseUrl/api/v3/product/$barcode.json';
     logInfo('GET $url');
     try {
-      final response = await _dio.get(
+      final response = await _dio.get<Map<String, dynamic>>(
         url,
         options: Options(headers: {'User-Agent': _userAgent}),
       );
       logInfo('Response status: ${response.statusCode}');
-      final data = response.data as Map<String, dynamic>;
+      final data = response.data!;
       logInfo('OFF status: ${data['status']}');
       if (data['status'] != 'success' || data['product'] == null) {
         throw ProductNotFoundException('Product not found: $barcode');
@@ -141,8 +156,7 @@ class OpenFoodFactsApi implements ProductApiService {
         'user_id': userId,
         'password': password,
         'comment':
-            // ignore: lines_longer_than_80_chars
-            'Edit by $appName $appVersion - ${DateTime.now().millisecondsSinceEpoch}',
+            '''Edit by $appName $appVersion - ${DateTime.now().millisecondsSinceEpoch}''',
         'add_product_name': product.name,
       };
 
@@ -179,7 +193,7 @@ class OpenFoodFactsApi implements ProductApiService {
       }
 
       final url = '$_baseUrl/cgi/product_jqm2.pl';
-      final response = await _dio.post(
+      final response = await _dio.post<Map<String, dynamic>>(
         url,
         queryParameters: params,
         options: Options(
@@ -191,7 +205,7 @@ class OpenFoodFactsApi implements ProductApiService {
       );
 
       return response.statusCode == 200 || response.statusCode == 302;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error submitting product: $e');
       return false;
     }
@@ -234,7 +248,7 @@ class OpenFoodFactsApi implements ProductApiService {
       if (product.saltG != null) nutriments['salt_100g'] = product.saltG;
       if (nutriments.isNotEmpty) productData['nutriments'] = nutriments;
 
-      final response = await _dio.patch(
+      final response = await _dio.patch<Map<String, dynamic>>(
         url,
         data: {'product': productData},
         options: Options(
@@ -247,7 +261,7 @@ class OpenFoodFactsApi implements ProductApiService {
       );
 
       return response.statusCode == 200;
-    } catch (e) {
+    } on Exception catch (e) {
       debugPrint('Error submitting product via v3: $e');
       return false;
     }

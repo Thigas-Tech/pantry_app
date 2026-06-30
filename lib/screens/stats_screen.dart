@@ -38,6 +38,7 @@ import 'package:share_plus/share_plus.dart';
 /// - Inventory items are always **added as new** entries.
 /// - The original inventory IDs are not preserved.
 class StatsScreen extends ConsumerWidget {
+  /// Creates a [StatsScreen] widget.
   const StatsScreen({super.key});
 
   @override
@@ -51,9 +52,13 @@ class StatsScreen extends ConsumerWidget {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final counts = snapshot.data as List<int>;
+          final data = snapshot.data;
+          if (data == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final counts = data;
           return Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -104,7 +109,7 @@ class StatsScreen extends ConsumerWidget {
           ShareParams(files: [XFile(filePath)], subject: 'Pantry Export'),
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -117,7 +122,7 @@ class StatsScreen extends ConsumerWidget {
     logInfo('Import button pressed');
     try {
       final controller = TextEditingController();
-      final String? filePath = await showDialog<String>(
+      final filePath = await showDialog<String>(
         context: context,
         builder: (_) => AlertDialog(
           title: const Text('Import CSV'),
@@ -182,7 +187,7 @@ class StatsScreen extends ConsumerWidget {
           ),
         );
       }
-    } catch (e) {
+    } on Exception catch (e) {
       if (context.mounted) Navigator.of(context).pop();
       if (context.mounted) {
         ScaffoldMessenger.of(

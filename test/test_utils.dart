@@ -4,6 +4,7 @@
 /// real [DatabaseHelper] without touching the file system.
 library;
 
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Initialises the FFI database factory for tests.

@@ -12,9 +12,10 @@ import 'package:sqflite/sqflite.dart';
 /// database operations use the same connection, avoiding locking issues and
 /// unnecessary overhead.
 ///
-/// For **testing** a separate instance can be created with
-/// [DatabaseHelper.withPath], which opens an in‑memory database or a
-/// temporary file. This avoids interfering with the singleton’s connection.
+/// For **testing** a separate instance can be created with the named
+/// constructor `DatabaseHelper.withPath`, which opens an in‑memory database
+/// or a temporary file. This avoids interfering with the singleton’s
+/// connection.
 ///
 /// ## Platform support
 ///
@@ -22,28 +23,47 @@ import 'package:sqflite/sqflite.dart';
 /// standard `sqflite` plugin. Desktop and web are not supported in this build.
 ///
 /// ## Schema overview
-/// … (unchanged)
+///
+/// Two tables are created on first launch (version 1):
+///
+/// - `products` – stores immutable (or rarely‑changing) product data fetched
+///   from Open Food Facts. The barcode is the primary key. Nutrition values
+///   are denormalised into columns so that the UI can retrieve a complete
+///   product with a single row query.
+/// - `inventory` – stores instances of a product that the user has added to
+///   their pantry. Multiple rows can share the same barcode. The `date_added`
+///   column is used by [cleanupOldEntries] to remove items that haven’t been
+///   re‑added for 60 days.
+///
+/// ## Migrations
+///
+/// Future schema changes should be handled in [_onUpgrade]. The current
+/// version is 1. When a migration is needed, bump the version number passed
+/// to [openDatabase] and add conditional logic inside [_onUpgrade].
 class DatabaseHelper {
-  /// Creates a [DatabaseHelper] that opens (or creates) a database at the
-  /// given [path] instead of the default location.
-  ///
-  /// This constructor is intended for **unit tests** that require an isolated
-  /// database. In production code the default singleton ([DatabaseHelper()])
-  /// should be used.
-  DatabaseHelper.withPath(String path) : _customPath = path;
-
   /// Returns the single [DatabaseHelper] instance.
   factory DatabaseHelper() => _instance;
 
   /// Internal constructor for the singleton.
   DatabaseHelper._internal() : _customPath = null;
+
+  /// Creates a [DatabaseHelper] that opens (or creates) a database at the
+  /// given [path] instead of the default location.
+  ///
+  /// This constructor is intended for **unit tests** that require an isolated
+  /// database. In production code the default singleton (`DatabaseHelper()`)
+  /// should be used.
+  DatabaseHelper.withPath(String path) : _customPath = path;
+
+  /// The custom database path used
+  /// when constructed via [DatabaseHelper.withPath].
   final String? _customPath;
 
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
   /// The lazily‑initialised database connection.
   ///
-  /// The first access to [database] triggers [_initDatabase], which creates
+  /// The first access to this getter triggers [_initDatabase], which creates
   /// or opens the SQLite file and runs any necessary migrations.
   Database? _database;
 
@@ -59,7 +79,7 @@ class DatabaseHelper {
 
   /// Opens the database file and applies the schema.
   ///
-  /// If a custom path was provided via [DatabaseHelper.withPath] it is used
+  /// If a custom path was provided via `DatabaseHelper.withPath` it is used
   /// directly; otherwise the file is stored in the application’s documents
   /// directory so that it survives app restarts.
   Future<Database> _initDatabase() async {
@@ -136,7 +156,7 @@ class DatabaseHelper {
 
   // --------------------- Product CRUD ---------------------
 
-  /// Inserts a [product] into the local cache.
+  /// Inserts a product into the local cache.
   ///
   /// If a product with the same barcode already exists it is **replaced**
   /// (upsert). This is the intended behaviour because product data from Open
@@ -177,8 +197,7 @@ class DatabaseHelper {
         .subtract(const Duration(days: 60))
         .millisecondsSinceEpoch;
     logInfo(
-      // ignore: lines_longer_than_80_chars
-      'Cleaning up items added before ${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}',
+      '''Cleaning up items added before ${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}''',
     );
 
     await db.delete('inventory', where: 'date_added < ?', whereArgs: [cutoff]);
@@ -196,16 +215,16 @@ class DatabaseHelper {
 
   /// Inserts a new inventory item.
   ///
-  /// The returned [int] is the auto‑generated `id` of the new row. This ID
+  /// The returned integer is the auto‑generated `id` of the new row. This ID
   /// can be used later for updates or deletion.
   Future<int> insertInventoryItem(InventoryItem item) async {
     final db = await database;
     return db.insert('inventory', _inventoryToMap(item));
   }
 
-  /// Retrieves all inventory items, optionally filtered by [location].
+  /// Retrieves all inventory items, optionally filtered by location.
   ///
-  /// The [expired] parameter is currently unused and reserved for a future
+  /// The `expired` parameter is currently unused and reserved for a future
   /// implementation using SQLite date functions.
   Future<List<InventoryItem>> getInventoryItems({
     String? location,
@@ -244,7 +263,7 @@ class DatabaseHelper {
 
   /// Updates an existing inventory item.
   ///
-  /// The [item.id] field must be set to a value that exists in the database;
+  /// The item’s `id` field must be set to a value that exists in the database;
   /// otherwise the update has no effect.
   Future<int> updateInventoryItem(InventoryItem item) async {
     final db = await database;
@@ -256,7 +275,7 @@ class DatabaseHelper {
     );
   }
 
-  /// Deletes an inventory item by its auto‑generated [id].
+  /// Deletes an inventory item by its auto‑generated id.
   Future<int> deleteInventoryItem(int id) async {
     final db = await database;
     return db.delete('inventory', where: 'id = ?', whereArgs: [id]);
@@ -334,7 +353,7 @@ class DatabaseHelper {
 
   // --------------------- Mapping helpers ---------------------
 
-  /// Converts a [Product] model into a row map for SQLite.
+  /// Converts a [Product] into a row map for SQLite.
   Map<String, dynamic> _productToMap(Product p) => {
     'barcode': p.barcode,
     'name': p.name,
@@ -354,8 +373,8 @@ class DatabaseHelper {
 
   /// Builds a [Product] from a raw database row.
   ///
-  /// Numeric fields are read as [num] and converted to [double] because
-  /// SQLite may store them as integers when the decimal part is zero.
+  /// Numeric fields are first read as `num` and then converted to `double`
+  /// because SQLite may store them as integers when the decimal part is zero.
   Product _productFromMap(Map<String, dynamic> map) => Product(
     barcode: map['barcode'] as String,
     name: map['name'] as String,
@@ -375,8 +394,8 @@ class DatabaseHelper {
 
   /// Converts an [InventoryItem] into a row map.
   ///
-  /// If [item.id] is `null` (new item) the map does not include the `id`
-  /// field, allowing SQLite to auto‑generate the primary key.
+  /// If the item’s `id` is `null` (new item) the map does not include the
+  /// `id` field, allowing SQLite to auto‑generate the primary key.
   Map<String, dynamic> _inventoryToMap(InventoryItem item) => {
     if (item.id != null) 'id': item.id,
     'barcode': item.barcode,
@@ -390,7 +409,7 @@ class DatabaseHelper {
 
   /// Builds an [InventoryItem] from a raw database row.
   ///
-  /// Defaults are applied to [quantity], [unit], and [location] in case the
+  /// Defaults are applied to `quantity`, `unit`, and `location` in case the
   /// database contains unexpected `NULL` values (should not happen with the
   /// current schema, but provides robustness).
   InventoryItem _inventoryFromMap(Map<String, dynamic> map) => InventoryItem(

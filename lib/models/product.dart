@@ -1,4 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/services/open_food_facts_api.dart';
 
 part 'product.freezed.dart';
 part 'product.g.dart';
@@ -37,8 +40,8 @@ part 'product.g.dart';
 ///
 /// The [@JsonKey] annotations map the Open Food Facts API field names
 /// (e.g. `product_name`, `brands`, `energy_kcal`) to the Dart property names.
-/// This allows [fromJson] to parse the v3 API response directly. When reading
-/// from the local database the mapping is done manually by
+/// This allows [Product.fromJson] to parse the v3 API response directly.
+/// When reading from the local database the mapping is done manually by
 /// [DatabaseHelper._productFromMap].
 ///
 /// ## Immutability

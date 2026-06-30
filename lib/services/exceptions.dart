@@ -1,3 +1,8 @@
+import 'package:dio/dio.dart';
+import 'package:pantry_app/screens/home_screen.dart';
+import 'package:pantry_app/services/open_food_facts_api.dart';
+import 'package:pantry_app/services/product_repository.dart';
+
 /// Thrown when a product barcode is not found in Open Food Facts.
 ///
 /// This exception is raised by [OpenFoodFactsApi.getByBarcode] when:

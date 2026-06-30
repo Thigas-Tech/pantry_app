@@ -36,11 +36,11 @@ import 'package:pantry_app/utils/logger.dart';
 ///
 /// ## Notifications
 ///
-// ignore: lines_longer_than_80_chars
-/// After an item is created or updated, [NotificationService.scheduleExpiryReminders]
-/// is called. When an item is deleted,
-/// the corresponding reminders are cancelled.
+/// After an item is created or updated,
+/// [NotificationService.scheduleExpiryReminders] is called. When an item is
+/// deleted, the corresponding reminders are cancelled.
 class ProductDetailScreen extends ConsumerStatefulWidget {
+  /// Creates a [ProductDetailScreen] for the given [product].
   const ProductDetailScreen({required this.product, super.key});
 
   /// The product to display details for.
@@ -64,7 +64,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.product.name)),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
             // Product image (from Open Food Facts CDN)
@@ -108,15 +108,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   return const Text('No items in pantry yet.');
                 }
                 return Column(
-                  children: items
-                      .map(
-                        (item) => _InventoryTile(
-                          item: item,
-                          onEdit: () => _openAddEditScreen(existing: item),
-                          onDelete: () => _deleteItem(item),
-                        ),
-                      )
-                      .toList(),
+                  children: items.map(_buildInventoryTile).toList(),
                 );
               },
             ),
@@ -124,7 +116,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
             // Add to Inventory button
             ElevatedButton.icon(
-              onPressed: () => _openAddEditScreen(),
+              onPressed: _openAddEditScreen,
               icon: const Icon(Icons.add),
               label: const Text('Add to Inventory'),
             ),
@@ -134,10 +126,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
+  /// Builds an [_InventoryTile] for the given [item].
+  _InventoryTile _buildInventoryTile(InventoryItem item) {
+    return _InventoryTile(
+      item: item,
+      onEdit: () => _openAddEditScreen(existing: item),
+      onDelete: () => _deleteItem(item),
+    );
+  }
+
   /// Builds a simple label‑value row used for product information.
   Widget _infoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -189,17 +190,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       final repo = ref.read(productRepositoryProvider);
       if (existing != null) {
         logInfo(
-          // ignore: lines_longer_than_80_chars
-          'Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}',
+          '''Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
         );
-        // Edit mode: update existing item and reschedule notifications.
         await repo.updateInventoryItem(result);
         await NotificationService.cancelReminders(existing.id!);
       } else {
-        // Create mode: insert new item.
         logInfo(
-          // ignore: lines_longer_than_80_chars
-          'Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}',
+          '''Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
         );
         await repo.addInventoryItem(result);
       }

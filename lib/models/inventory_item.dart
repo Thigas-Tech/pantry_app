@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/product.dart';
 
 part 'inventory_item.freezed.dart';
 part 'inventory_item.g.dart';

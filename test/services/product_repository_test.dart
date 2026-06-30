@@ -61,7 +61,7 @@ void main() {
       ).thenAnswer((_) async => testProduct);
       when(
         () => mockDb.insertProduct(testProduct),
-      ).thenAnswer((_) async => Future.value());
+      ).thenAnswer((_) => Future.value());
 
       final product = await repository.getProduct(testBarcode);
       expect(product, testProduct);
@@ -70,7 +70,7 @@ void main() {
 
     test(
       'throws ProductNotFoundException when API returns not found',
-      () async {
+      () {
         /// Without a fallback API a not‑found error is rethrown.
         final repoNoFallback = ProductRepository(mockDb, mockApi);
         when(
@@ -87,7 +87,7 @@ void main() {
       },
     );
 
-    test('throws FetchFailedException on generic API error', () async {
+    test('throws FetchFailedException on generic API error', () {
       /// Network or other exceptions are wrapped in a
       /// [FetchFailedException].
       when(() => mockDb.getProduct(testBarcode)).thenAnswer((_) async => null);
@@ -129,7 +129,7 @@ void main() {
 
     test(
       'throws ProductNotFoundException when both APIs fail with not found',
-      () async {
+      () {
         /// If neither API finds the product, a [ProductNotFoundException]
         /// is thrown.
         when(
