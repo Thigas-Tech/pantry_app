@@ -12,7 +12,8 @@ import 'package:pantry_app/utils/logger.dart';
 /// This screen is reached after scanning a known barcode or tapping an
 /// inventory card on the home screen. It shows:
 /// - Product image (if available), animated with a [Hero] transition.
-/// - All nutritional information (per 100 g / 100 ml).
+/// - All nutritional information (per 100 g / 100 ml) presented in a styled
+///   [Table] with alternating row colours.
 /// - The ingredients list.
 /// - A list of existing inventory items for this product, each with edit and
 ///   delete actions.
@@ -98,15 +99,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               _infoRow('Category', widget.product.category!),
             const Divider(),
             _infoRow('Serving size', widget.product.servingSize ?? 'N/A'),
-            _infoRow('Energy', '${widget.product.energyKcal ?? '-'} kcal/100g'),
-            _infoRow('Protein', '${widget.product.proteinG ?? '-'} g'),
-            _infoRow('Carbs', '${widget.product.carbsG ?? '-'} g'),
-            _infoRow('Fat', '${widget.product.fatG ?? '-'} g'),
-            _infoRow('Fiber', '${widget.product.fiberG ?? '-'} g'),
-            _infoRow('Salt', '${widget.product.saltG ?? '-'} g'),
+
+            // Nutrition table
+            _NutritionTable(product: widget.product),
+
             const Divider(),
             if (widget.product.ingredients != null)
-              Text('Ingredients: ${widget.product.ingredients}'),
+              ExpansionTile(
+                title: const Text('Ingredients'),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Text(widget.product.ingredients!),
+                  ),
+                ],
+              ),
+
             const SizedBox(height: 24),
 
             // Inventory section header
@@ -156,7 +164,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
-  /// Builds a simple label‑value row used for product information.
+  /// Builds a simple label‑value row used for non‑nutrition product information
   Widget _infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -260,8 +268,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
 /// A single row in the inventory list.
 ///
-/// Displays an icon (coloured red if expired, orange otherwise), the
-/// quantity/unit/location, the expiry date, and edit / delete buttons.
+/// Displays an icon that varies by storage location (coloured red if expired,
+/// orange otherwise), the quantity/unit/location, the expiry date, and edit /
+/// delete buttons.
 class _InventoryTile extends StatelessWidget {
   const _InventoryTile({
     required this.item,
@@ -285,7 +294,7 @@ class _InventoryTile extends StatelessWidget {
         DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
     return ListTile(
       leading: Icon(
-        Icons.kitchen,
+        _iconForLocation(item.location),
         color: isExpired ? Colors.red : Colors.orange,
       ),
       title: Text('${item.quantity} ${item.unit} in ${item.location}'),
@@ -299,4 +308,104 @@ class _InventoryTile extends StatelessWidget {
       ),
     );
   }
+
+  /// Returns an appropriate icon for the given storage [location].
+  ///
+  /// - `'pantry'` → [Icons.kitchen]
+  /// - `'fridge'` → [Icons.local_drink] (no perfect fridge icon in Material)
+  /// - `'freezer'` → [Icons.ac_unit]
+  /// - any other → [Icons.help_outline]
+  IconData _iconForLocation(String location) {
+    switch (location.toLowerCase()) {
+      case 'pantry':
+        return Icons.kitchen;
+      case 'fridge':
+        return Icons.local_drink; // closest available icon
+      case 'freezer':
+        return Icons.ac_unit;
+      default:
+        return Icons.help_outline;
+    }
+  }
+}
+
+/// A styled table that displays the nutritional values of a [Product].
+///
+/// Each row shows a nutrient name and its amount per 100 g / 100 ml.
+/// The header row uses the current theme’s primary colour, and data rows
+/// alternate between white and a light grey for readability.
+class _NutritionTable extends StatelessWidget {
+  const _NutritionTable({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <_NutrientRow>[
+      _NutrientRow('Energy', '${product.energyKcal ?? '-'} kcal'),
+      _NutrientRow('Protein', '${product.proteinG ?? '-'} g'),
+      _NutrientRow('Carbs', '${product.carbsG ?? '-'} g'),
+      _NutrientRow('Fat', '${product.fatG ?? '-'} g'),
+      _NutrientRow('Fiber', '${product.fiberG ?? '-'} g'),
+      _NutrientRow('Salt', '${product.saltG ?? '-'} g'),
+    ];
+
+    return Table(
+      border: TableBorder.all(color: Colors.grey.shade300, width: 0.5),
+      columnWidths: const {
+        0: FlexColumnWidth(2),
+        1: FlexColumnWidth(),
+      },
+      children: [
+        // Header row
+        TableRow(
+          decoration: BoxDecoration(
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withValues(alpha: 0.15),
+          ),
+          children: const [
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Nutrient',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Per 100 g',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        // Data rows with alternating colours
+        for (var i = 0; i < rows.length; i++)
+          TableRow(
+            decoration: BoxDecoration(
+              color: i.isEven ? Colors.white : Colors.grey.shade50,
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(rows[i].name),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(rows[i].value),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+/// A single row of nutritional data.
+class _NutrientRow {
+  const _NutrientRow(this.name, this.value);
+  final String name;
+  final String value;
 }
