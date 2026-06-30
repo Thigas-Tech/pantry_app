@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// A barcode input screen for Android.
@@ -71,6 +74,7 @@ class _MobileScannerViewState extends State<_MobileScannerView> {
           final barcode = capture.barcodes.first;
           if (barcode.rawValue == null) return;
           _hasScanned = true;
+          unawaited(HapticFeedback.mediumImpact());
           Navigator.of(context).pop(barcode.rawValue);
         },
       ),
@@ -97,6 +101,7 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
   void _submit() {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
+      unawaited(HapticFeedback.mediumImpact());
       Navigator.of(context).pop(text);
     }
   }
