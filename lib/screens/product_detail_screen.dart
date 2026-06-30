@@ -11,7 +11,7 @@ import 'package:pantry_app/utils/logger.dart';
 ///
 /// This screen is reached after scanning a known barcode or tapping an
 /// inventory card on the home screen. It shows:
-/// - Product image (if available).
+/// - Product image (if available), animated with a [Hero] transition.
 /// - All nutritional information (per 100 g / 100 ml).
 /// - The ingredients list.
 /// - A list of existing inventory items for this product, each with edit and
@@ -67,9 +67,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            // Product image (from Open Food Facts CDN)
+            // Product image wrapped in Hero so it animates from/to the
+            // home screen inventory card.
             if (widget.product.imageUrl != null)
-              Image.network(widget.product.imageUrl!, height: 200),
+              Hero(
+                tag: widget.product.barcode,
+                child: Image.network(widget.product.imageUrl!, height: 200),
+              ),
             _infoRow('Barcode', widget.product.barcode),
             if (widget.product.brand != null)
               _infoRow('Brand', widget.product.brand!),

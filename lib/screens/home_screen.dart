@@ -12,6 +12,7 @@ import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -291,15 +292,15 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             children: [
               if (_expired.isNotEmpty) ...[
                 _sectionHeader('Expired', Colors.red),
-                ..._expired.map((item) => _InventoryCard(item: item)),
+                ..._expired.map((item) => InventoryCard(item: item)),
               ],
               if (_expiringSoon.isNotEmpty) ...[
                 _sectionHeader('Expiring soon', Colors.orange),
-                ..._expiringSoon.map((item) => _InventoryCard(item: item)),
+                ..._expiringSoon.map((item) => InventoryCard(item: item)),
               ],
               if (_good.isNotEmpty) ...[
                 _sectionHeader('Good', Colors.green),
-                ..._good.map((item) => _InventoryCard(item: item)),
+                ..._good.map((item) => InventoryCard(item: item)),
               ],
               if (_filtered.isEmpty)
                 const Padding(
@@ -324,74 +325,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
           fontWeight: FontWeight.bold,
           fontSize: 16,
         ),
-      ),
-    );
-  }
-}
-
-// ---------- Individual inventory card ----------
-
-/// A tappable card representing one inventory item.
-///
-/// Displays the product image (or a placeholder icon), the product name, and
-/// a subtitle with quantity, location, and expiry date. A small coloured dot
-/// on the right indicates whether the item is expired.
-///
-/// Tapping the card navigates to the [ProductDetailScreen] for that barcode,
-/// fetching the product from the repository (which checks the local cache
-/// first).
-class _InventoryCard extends StatelessWidget {
-  const _InventoryCard({required this.item});
-
-  /// The inventory item to display.
-  final InventoryWithProduct item;
-
-  @override
-  Widget build(BuildContext context) {
-    final isExpired =
-        item.expiryDate != null &&
-        DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: item.productImageUrl != null
-              ? NetworkImage(item.productImageUrl!)
-              : null,
-          child: item.productImageUrl == null
-              ? const Icon(Icons.fastfood)
-              : null,
-        ),
-        title: Text(item.productName ?? item.barcode),
-        subtitle: Text(
-          '''${item.quantity} ${item.unit} · ${item.location}${item.expiryDate != null ? " · Exp: ${item.expiryDate}" : ""}''',
-        ),
-        trailing: Icon(
-          Icons.circle,
-          color: isExpired ? Colors.red : Colors.grey.shade300,
-          size: 12,
-        ),
-        onTap: () async {
-          final repo = ProviderScope.containerOf(
-            context,
-          ).read(productRepositoryProvider);
-          try {
-            final product = await repo.getProduct(item.barcode);
-            if (!context.mounted) return;
-            await Navigator.of(context).push<void>(
-              MaterialPageRoute(
-                builder: (_) => ProductDetailScreen(product: product),
-              ),
-            );
-          } on Exception {
-            // Silently ignore errors – the product might have been removed
-            // or the network is unavailable.
-          }
-        },
       ),
     );
   }
