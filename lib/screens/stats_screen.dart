@@ -7,6 +7,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/services/csv_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -93,9 +94,7 @@ class StatsScreen extends ConsumerWidget {
 
       if (csvString.isEmpty) {
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('No data to export.')));
+          SnackbarHelper.showInfo(context, 'No data to export.');
         }
         return;
       }
@@ -111,9 +110,7 @@ class StatsScreen extends ConsumerWidget {
       }
     } on Exception catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+        SnackbarHelper.showError(context, 'Export failed: $e');
       }
     }
   }
@@ -190,9 +187,7 @@ class StatsScreen extends ConsumerWidget {
     } on Exception catch (e) {
       if (context.mounted) Navigator.of(context).pop();
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+        SnackbarHelper.showError(context, 'Import failed: $e');
       }
     }
   }

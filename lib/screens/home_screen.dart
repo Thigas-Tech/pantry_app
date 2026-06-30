@@ -11,6 +11,7 @@ import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -127,9 +128,7 @@ class HomeScreen extends ConsumerWidget {
         if (canLaunch && context.mounted) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         } else if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open the Play Store.')),
-          );
+          SnackbarHelper.showError(context, 'Could not open the Play Store.');
         }
       }
     }
