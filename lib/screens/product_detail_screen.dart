@@ -72,7 +72,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             if (widget.product.imageUrl != null)
               Hero(
                 tag: widget.product.barcode,
-                child: Image.network(widget.product.imageUrl!, height: 200),
+                child: Image.network(
+                  widget.product.imageUrl!,
+                  height: 200,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.broken_image, size: 48),
+                ),
               ),
             _infoRow('Barcode', widget.product.barcode),
             if (widget.product.brand != null)
