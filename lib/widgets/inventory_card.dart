@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
@@ -28,6 +29,7 @@ class InventoryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final isExpired =
         item.expiryDate != null &&
         DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
@@ -44,7 +46,7 @@ class InventoryCard extends ConsumerWidget {
         ),
         title: Text(item.productName ?? item.barcode),
         subtitle: Text(
-          '''${item.quantity} ${item.unit} · ${item.location}${item.expiryDate != null ? " · Exp: ${item.expiryDate}" : ""}''',
+          '''${item.quantity} ${item.unit} · ${item.location}${item.expiryDate != null ? " · ${l10n.expiryPrefix}: ${item.expiryDate}" : ""}''',
         ),
         trailing: Icon(
           Icons.circle,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 
 /// An inviting empty‑state illustration shown when the pantry has no items.
 ///
@@ -15,6 +16,8 @@ class EmptyPantry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -24,16 +27,16 @@ class EmptyPantry extends StatelessWidget {
             Icon(Icons.kitchen, size: 80, color: Colors.grey.shade400),
             const SizedBox(height: 24),
             Text(
-              'Your pantry is empty',
+              l10n.emptyPantryTitle,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            const Text('Tap the button below to scan your first product'),
+            Text(l10n.emptyPantrySubtitle),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onScan,
               icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Scan a barcode'),
+              label: Text(l10n.scanFirstProduct),
             ),
           ],
         ),
