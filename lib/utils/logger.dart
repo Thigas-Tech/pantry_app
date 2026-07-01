@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// Warning and error logs are always printed in debug mode regardless of
 /// this flag.
-const _verbose = false;
+const _verbose = true;
 
 /// Logs an informational message.
 ///
