@@ -30,6 +30,7 @@ import 'package:pantry_app/screens/home_screen.dart';
 /// - **data** – the list of [InventoryWithProduct] items, possibly empty.
 final inventoryWithProductProvider = FutureProvider<List<InventoryWithProduct>>(
   (ref) async {
+    await Future<void>.delayed(Duration.zero);
     final db = ref.watch(databaseProvider);
     final rows = await db.getInventoryWithProduct();
     return rows.map(InventoryWithProduct.fromMap).toList();

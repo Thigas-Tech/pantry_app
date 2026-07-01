@@ -36,6 +36,7 @@ import 'package:timezone/timezone.dart' as tz;
 /// both IDs are cancelled via `cancelReminders`.
 class NotificationService {
   NotificationService._(); // private constructor – adds an instance member
+
   /// The plugin instance. All operations go through this object.
   static final _plugin = FlutterLocalNotificationsPlugin();
 
@@ -49,20 +50,22 @@ class NotificationService {
   /// configured here so that scheduled notifications fire at the correct
   /// local time.
   static Future<void> initialize() async {
+    logInfo('Initialising notification service');
+
     // Load the IANA timezone database bundled with the `timezone` package.
     tz_data.initializeTimeZones();
 
     // Attempt to detect the local timezone from the system clock.
-    // `DateTime.now().timeZoneName` returns an abbreviated name like "CET"
-    // or "America/New_York". The `timezone` package can resolve most of
-    // these, but some Android firmwares return non‑standard abbreviations.
     final localTimeZoneName = DateTime.now().timeZoneName;
+    logInfo('Detected device timezone name: $localTimeZoneName');
     try {
       tz.setLocalLocation(tz.getLocation(localTimeZoneName));
+      logInfo('Timezone set to $localTimeZoneName');
     } on Exception catch (_) {
       // Fall back to UTC – notifications will still fire, but at the wrong
       // local time on devices with unrecognised timezone names.
       tz.setLocalLocation(tz.UTC);
+      logWarning('Unknown timezone "$localTimeZoneName", falling back to UTC');
     }
 
     const androidSettings = AndroidInitializationSettings(
@@ -70,12 +73,17 @@ class NotificationService {
     );
     const iosSettings = DarwinInitializationSettings();
 
-    await _plugin.initialize(
-      settings: const InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      ),
-    );
+    try {
+      await _plugin.initialize(
+        settings: const InitializationSettings(
+          android: androidSettings,
+          iOS: iosSettings,
+        ),
+      );
+      logInfo('Notification plugin initialised successfully');
+    } on Exception catch (e) {
+      logError('Failed to initialise notification plugin: $e');
+    }
   }
 
   /// Schedules two local notifications for [item]:
@@ -83,14 +91,22 @@ class NotificationService {
   /// - On the expiry date itself.
   ///
   /// If [InventoryItem.expiryDate] is `null` or cannot be parsed, this method
-  /// does nothing. Notifications whose scheduled date is already
-  /// in the past are silently skipped.
+  /// does nothing. Notifications whose scheduled date is already in the past
+  /// are silently skipped.
   ///
   /// The notification body currently shows the barcode. A future improvement
   /// could include the product name by looking it up in the cache.
   static Future<void> scheduleExpiryReminders(InventoryItem item) async {
+    if (item.expiryDate == null) {
+      logInfo('No expiry date for item ${item.id}, skipping reminders');
+      return;
+    }
+
     final expiry = DateTime.tryParse(item.expiryDate!);
-    if (expiry == null) return;
+    if (expiry == null) {
+      logWarning('Could not parse expiry date "${item.expiryDate}"');
+      return;
+    }
 
     final dayBefore = expiry.subtract(const Duration(days: 1));
     final now = tz.TZDateTime.now(tz.local);
@@ -99,52 +115,64 @@ class NotificationService {
     // Reminder one day before
     final dayBeforeTZ = tz.TZDateTime.from(dayBefore, tz.local);
     if (dayBeforeTZ.isAfter(now)) {
-      await _plugin.zonedSchedule(
-        id: id,
-        title: 'Expiring soon',
-        body: '${item.barcode} expires tomorrow',
-        scheduledDate: dayBeforeTZ,
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'expiry_channel',
-            'Expiry reminders',
-            channelDescription: 'Warns about expiring food',
-            importance: Importance.high,
+      try {
+        await _plugin.zonedSchedule(
+          id: id,
+          title: 'Expiring soon',
+          body: '${item.barcode} expires tomorrow',
+          scheduledDate: dayBeforeTZ,
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'expiry_channel',
+              'Expiry reminders',
+              channelDescription: 'Warns about expiring food',
+              importance: Importance.high,
+            ),
+            iOS: DarwinNotificationDetails(),
           ),
-          iOS: DarwinNotificationDetails(),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+        logInfo(
+          '''Scheduled "expiring soon" for barcode ${item.barcode} on $dayBeforeTZ''',
+        );
+      } on Exception catch (e) {
+        logError('Failed to schedule "expiring soon" for ${item.barcode}: $e');
+      }
+    } else {
+      logInfo(
+        '''Skipping "expiring soon" for ${item.barcode} – date is in the past''',
       );
     }
 
     // Reminder on expiry day
     final expiryTZ = tz.TZDateTime.from(expiry, tz.local);
     if (expiryTZ.isAfter(now)) {
-      await _plugin.zonedSchedule(
-        id: id + 1,
-        title: 'Food expiring today',
-        body: '${item.barcode} expires today!',
-        scheduledDate: expiryTZ,
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'expiry_channel',
-            'Expiry reminders',
-            channelDescription: 'Warns about expiring food',
-            importance: Importance.high,
+      try {
+        await _plugin.zonedSchedule(
+          id: id + 1,
+          title: 'Food expiring today',
+          body: '${item.barcode} expires today!',
+          scheduledDate: expiryTZ,
+          notificationDetails: const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'expiry_channel',
+              'Expiry reminders',
+              channelDescription: 'Warns about expiring food',
+              importance: Importance.high,
+            ),
+            iOS: DarwinNotificationDetails(),
           ),
-          iOS: DarwinNotificationDetails(),
-        ),
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
-    }
-    if (dayBeforeTZ.isAfter(now)) {
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        );
+        logInfo(
+          '''Scheduled "expiring today" for barcode ${item.barcode} on $expiryTZ''',
+        );
+      } on Exception catch (e) {
+        logError('Failed to schedule "expiring today" for ${item.barcode}: $e');
+      }
+    } else {
       logInfo(
-        '''Scheduling "expiring soon" for barcode ${item.barcode} on $dayBeforeTZ''',
-      );
-    }
-    if (expiryTZ.isAfter(now)) {
-      logInfo(
-        '''Scheduling "expiring today" for barcode ${item.barcode} on $expiryTZ''',
+        '''Skipping "expiring today" for ${item.barcode} – date is in the past''',
       );
     }
   }
@@ -156,8 +184,13 @@ class NotificationService {
   static Future<void> cancelReminders(int itemId) async {
     logInfo('Cancelling reminders for item $itemId');
     final id = itemId.hashCode;
-    await _plugin.cancel(id: id);
-    await _plugin.cancel(id: id + 1);
+    try {
+      await _plugin.cancel(id: id);
+      await _plugin.cancel(id: id + 1);
+      logInfo('Reminders cancelled for item $itemId');
+    } on Exception catch (e) {
+      logError('Failed to cancel reminders for item $itemId: $e');
+    }
   }
 
   /// Requests the `POST_NOTIFICATIONS` permission on Android 13+.
@@ -167,11 +200,12 @@ class NotificationService {
   /// denies, notifications will simply not appear, which is acceptable for
   /// a pantry manager.
   static Future<void> requestPermission() async {
+    logInfo('Requesting notification permission');
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
     await androidPlugin?.requestNotificationsPermission();
-    logInfo('Notification permission requested');
+    logInfo('Notification permission request completed');
   }
 }

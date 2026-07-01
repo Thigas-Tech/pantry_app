@@ -13,26 +13,27 @@ import 'package:sqflite/sqflite.dart';
 /// unnecessary overhead.
 ///
 /// For **testing** a separate instance can be created with the named
-/// constructor `DatabaseHelper.withPath`, which opens an in‑memory database
+/// constructor [DatabaseHelper.withPath], which opens an in‑memory database
 /// or a temporary file. This avoids interfering with the singleton’s
 /// connection.
 ///
 /// ## Platform support
 ///
 /// This version targets **Android** (and will later support iOS). It uses the
-/// standard `sqflite` plugin. Desktop and web are not supported in this build.
+/// standard [Sqflite] plugin. Desktop and web are not supported in this build.
 ///
 /// ## Schema overview
 ///
 /// Two tables are created on first launch (version 1):
 ///
-/// - `products` – stores immutable (or rarely‑changing) product data fetched
+/// - [Product] – stores immutable (or rarely‑changing) product data fetched
 ///   from Open Food Facts. The barcode is the primary key. Nutrition values
 ///   are denormalised into columns so that the UI can retrieve a complete
 ///   product with a single row query.
-/// - `inventory` – stores instances of a product that the user has added to
-///   their pantry. Multiple rows can share the same barcode. The `date_added`
-///   column is used by [cleanupOldEntries] to remove items that haven’t been
+/// - [InventoryItem] – stores instances of a product that the user has added to
+///   their pantry. Multiple rows can share the same barcode.
+///   The [InventoryItem.dateAdded] column is used by [cleanupOldEntries]
+///   to remove items that haven’t been
 ///   re‑added for 60 days.
 ///
 /// ## Migrations
@@ -51,7 +52,7 @@ class DatabaseHelper {
   /// given [path] instead of the default location.
   ///
   /// This constructor is intended for **unit tests** that require an isolated
-  /// database. In production code the default singleton (`DatabaseHelper()`)
+  /// database. In production code the default singleton ([DatabaseHelper])
   /// should be used.
   DatabaseHelper.withPath(String path) : _customPath = path;
 
@@ -79,17 +80,25 @@ class DatabaseHelper {
 
   /// Opens the database file and applies the schema.
   ///
-  /// If a custom path was provided via `DatabaseHelper.withPath` it is used
+  /// If a custom path was provided via [DatabaseHelper.withPath] it is used
   /// directly; otherwise the file is stored in the application’s documents
   /// directory so that it survives app restarts.
   Future<Database> _initDatabase() async {
     final dbPath = _customPath ?? (await _getDefaultPath());
-    return openDatabase(
-      dbPath,
-      version: 1,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-    );
+    logInfo('Opening database at $dbPath');
+    try {
+      final db = await openDatabase(
+        dbPath,
+        version: 1,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
+      logInfo('Database opened successfully');
+      return db;
+    } on Exception catch (e) {
+      logError('Failed to open database: $e');
+      rethrow;
+    }
   }
 
   /// Returns the default path for the database file inside the app’s
@@ -105,6 +114,7 @@ class DatabaseHelper {
   /// Called automatically by [openDatabase] when the database file does not
   /// exist yet (version 1).
   Future<void> _onCreate(Database db, int version) async {
+    logInfo('Creating database schema (version $version)');
     await db.execute('''
       CREATE TABLE products (
         barcode TEXT PRIMARY KEY,
@@ -143,6 +153,7 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_inventory_barcode ON inventory(barcode)',
     );
+    logInfo('Database schema created successfully');
   }
 
   /// Placeholder for future database migrations.
@@ -162,12 +173,19 @@ class DatabaseHelper {
   /// (upsert). This is the intended behaviour because product data from Open
   /// Food Facts may have been updated.
   Future<void> insertProduct(Product product) async {
-    final db = await database;
-    await db.insert(
-      'products',
-      _productToMap(product),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    logInfo('Inserting product: ${product.barcode} — ${product.name}');
+    try {
+      final db = await database;
+      await db.insert(
+        'products',
+        _productToMap(product),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      logInfo('Product ${product.barcode} inserted/updated');
+    } on Exception catch (e) {
+      logError('Failed to insert product ${product.barcode}: $e');
+      rethrow;
+    }
   }
 
   /// Looks up a single product by its barcode.
@@ -175,14 +193,23 @@ class DatabaseHelper {
   /// Returns `null` if no product with the given barcode exists in the local
   /// cache.
   Future<Product?> getProduct(String barcode) async {
-    final db = await database;
-    final result = await db.query(
-      'products',
-      where: 'barcode = ?',
-      whereArgs: [barcode],
-    );
-    if (result.isEmpty) return null;
-    return _productFromMap(result.first);
+    try {
+      final db = await database;
+      final result = await db.query(
+        'products',
+        where: 'barcode = ?',
+        whereArgs: [barcode],
+      );
+      if (result.isEmpty) {
+        logInfo('Product $barcode not found in cache');
+        return null;
+      }
+      logInfo('Product $barcode found in cache');
+      return _productFromMap(result.first);
+    } on Exception catch (e) {
+      logError('Error looking up product $barcode: $e');
+      rethrow;
+    }
   }
 
   /// Removes inventory items that were added more than 60 days ago, and then
@@ -200,15 +227,24 @@ class DatabaseHelper {
       '''Cleaning up items added before ${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}''',
     );
 
-    await db.delete('inventory', where: 'date_added < ?', whereArgs: [cutoff]);
+    try {
+      final deletedItems = await db.delete(
+        'inventory',
+        where: 'date_added < ?',
+        whereArgs: [cutoff],
+      );
+      logInfo('Removed $deletedItems old inventory items');
 
-    // Remove orphaned products – a product whose last inventory entry was
-    // just deleted.
-    await db.rawDelete('''
-      DELETE FROM products
-      WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
-    ''');
-    logInfo('Cleanup finished');
+      final deletedProducts = await db.rawDelete('''
+        DELETE FROM products
+        WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
+      ''');
+      logInfo('Removed $deletedProducts orphaned products');
+      logInfo('Cleanup finished');
+    } on Exception catch (e) {
+      logError('Cleanup failed: $e');
+      rethrow;
+    }
   }
 
   // --------------------- Inventory CRUD ---------------------
@@ -218,8 +254,18 @@ class DatabaseHelper {
   /// The returned integer is the auto‑generated `id` of the new row. This ID
   /// can be used later for updates or deletion.
   Future<int> insertInventoryItem(InventoryItem item) async {
-    final db = await database;
-    return db.insert('inventory', _inventoryToMap(item));
+    logInfo(
+      '''Inserting inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location}''',
+    );
+    try {
+      final db = await database;
+      final id = await db.insert('inventory', _inventoryToMap(item));
+      logInfo('Inventory item inserted with id $id');
+      return id;
+    } on Exception catch (e) {
+      logError('Failed to insert inventory item for ${item.barcode}: $e');
+      rethrow;
+    }
   }
 
   /// Retrieves all inventory items, optionally filtered by location.
@@ -230,35 +276,47 @@ class DatabaseHelper {
     String? location,
     bool? expired,
   }) async {
-    final db = await database;
-    String? where;
-    List<dynamic>? whereArgs;
+    try {
+      final db = await database;
+      String? where;
+      List<dynamic>? whereArgs;
 
-    if (location != null) {
-      where = 'location = ?';
-      whereArgs = [location];
+      if (location != null) {
+        where = 'location = ?';
+        whereArgs = [location];
+      }
+
+      final result = await db.query(
+        'inventory',
+        where: where,
+        whereArgs: whereArgs,
+        orderBy: 'expiry_date ASC',
+      );
+      logInfo('Fetched ${result.length} inventory items');
+      return result.map(_inventoryFromMap).toList();
+    } on Exception catch (e) {
+      logError('Error fetching inventory items: $e');
+      rethrow;
     }
-
-    final result = await db.query(
-      'inventory',
-      where: where,
-      whereArgs: whereArgs,
-      orderBy: 'expiry_date ASC',
-    );
-    return result.map(_inventoryFromMap).toList();
   }
 
   /// Returns all inventory entries for a specific barcode, ordered by expiry
   /// date (oldest first).
   Future<List<InventoryItem>> getInventoryItemsByBarcode(String barcode) async {
-    final db = await database;
-    final result = await db.query(
-      'inventory',
-      where: 'barcode = ?',
-      whereArgs: [barcode],
-      orderBy: 'expiry_date ASC',
-    );
-    return result.map(_inventoryFromMap).toList();
+    try {
+      final db = await database;
+      final result = await db.query(
+        'inventory',
+        where: 'barcode = ?',
+        whereArgs: [barcode],
+        orderBy: 'expiry_date ASC',
+      );
+      logInfo('Fetched ${result.length} inventory items for barcode $barcode');
+      return result.map(_inventoryFromMap).toList();
+    } on Exception catch (e) {
+      logError('Error fetching inventory for $barcode: $e');
+      rethrow;
+    }
   }
 
   /// Updates an existing inventory item.
@@ -266,19 +324,41 @@ class DatabaseHelper {
   /// The item’s `id` field must be set to a value that exists in the database;
   /// otherwise the update has no effect.
   Future<int> updateInventoryItem(InventoryItem item) async {
-    final db = await database;
-    return db.update(
-      'inventory',
-      _inventoryToMap(item),
-      where: 'id = ?',
-      whereArgs: [item.id],
+    logInfo(
+      '''Updating inventory item ${item.id}: qty=${item.quantity} ${item.unit}, loc=${item.location}''',
     );
+    try {
+      final db = await database;
+      final rows = await db.update(
+        'inventory',
+        _inventoryToMap(item),
+        where: 'id = ?',
+        whereArgs: [item.id],
+      );
+      logInfo('Updated $rows row(s) for inventory item ${item.id}');
+      return rows;
+    } on Exception catch (e) {
+      logError('Failed to update inventory item ${item.id}: $e');
+      rethrow;
+    }
   }
 
   /// Deletes an inventory item by its auto‑generated id.
   Future<int> deleteInventoryItem(int id) async {
-    final db = await database;
-    return db.delete('inventory', where: 'id = ?', whereArgs: [id]);
+    logInfo('Deleting inventory item $id');
+    try {
+      final db = await database;
+      final rows = await db.delete(
+        'inventory',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      logInfo('Deleted $rows row(s) for inventory item $id');
+      return rows;
+    } on Exception catch (e) {
+      logError('Failed to delete inventory item $id: $e');
+      rethrow;
+    }
   }
 
   /// Retrieves all inventory rows joined with product metadata.
@@ -286,23 +366,30 @@ class DatabaseHelper {
   /// This single query replaces multiple separate lookups and is used to build
   /// the home‑screen inventory list.
   Future<List<Map<String, dynamic>>> getInventoryWithProduct() async {
-    final db = await database;
-    return db.rawQuery('''
-      SELECT
-        inventory.id,
-        inventory.barcode,
-        inventory.quantity,
-        inventory.unit,
-        inventory.expiry_date,
-        inventory.location,
-        inventory.notes,
-        inventory.date_added,
-        products.name AS product_name,
-        products.image_url AS product_image_url
-      FROM inventory
-      INNER JOIN products ON inventory.barcode = products.barcode
-      ORDER BY inventory.expiry_date ASC
-    ''');
+    try {
+      final db = await database;
+      final result = await db.rawQuery('''
+        SELECT
+          inventory.id,
+          inventory.barcode,
+          inventory.quantity,
+          inventory.unit,
+          inventory.expiry_date,
+          inventory.location,
+          inventory.notes,
+          inventory.date_added,
+          products.name AS product_name,
+          products.image_url AS product_image_url
+        FROM inventory
+        INNER JOIN products ON inventory.barcode = products.barcode
+        ORDER BY inventory.expiry_date ASC
+      ''');
+      logInfo('Fetched ${result.length} inventory-with-product rows');
+      return result;
+    } on Exception catch (e) {
+      logError('Error fetching inventory with product data: $e');
+      rethrow;
+    }
   }
 
   /// Returns the total number of cached product records.
@@ -326,29 +413,36 @@ class DatabaseHelper {
   /// Returns all inventory rows joined with product names and nutrition,
   /// ordered by expiry date. This is used for CSV export.
   Future<List<Map<String, dynamic>>> getExportData() async {
-    final db = await database;
-    return db.rawQuery('''
-      SELECT
-        products.name AS product_name,
-        products.brand,
-        products.category,
-        inventory.barcode,
-        inventory.quantity,
-        inventory.unit,
-        inventory.expiry_date,
-        inventory.location,
-        inventory.notes,
-        inventory.date_added,
-        products.energy_kcal,
-        products.protein_g,
-        products.carbs_g,
-        products.fat_g,
-        products.fiber_g,
-        products.salt_g
-      FROM inventory
-      INNER JOIN products ON inventory.barcode = products.barcode
-      ORDER BY inventory.expiry_date ASC
-    ''');
+    try {
+      final db = await database;
+      final result = await db.rawQuery('''
+        SELECT
+          products.name AS product_name,
+          products.brand,
+          products.category,
+          inventory.barcode,
+          inventory.quantity,
+          inventory.unit,
+          inventory.expiry_date,
+          inventory.location,
+          inventory.notes,
+          inventory.date_added,
+          products.energy_kcal,
+          products.protein_g,
+          products.carbs_g,
+          products.fat_g,
+          products.fiber_g,
+          products.salt_g
+        FROM inventory
+        INNER JOIN products ON inventory.barcode = products.barcode
+        ORDER BY inventory.expiry_date ASC
+      ''');
+      logInfo('Export data: ${result.length} rows');
+      return result;
+    } on Exception catch (e) {
+      logError('Error fetching export data: $e');
+      rethrow;
+    }
   }
 
   // --------------------- Mapping helpers ---------------------

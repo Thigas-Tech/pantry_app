@@ -28,11 +28,12 @@ import 'package:pantry_app/utils/logger.dart';
 ///
 /// ## Fallback API
 ///
-/// The constructor accepts an optional `_fallbackApi`. This is currently
-/// unused but could be re‑enabled in the future if a second API is desired.
+/// The constructor accepts an optional fallback [ProductApiService]. This is
+/// currently unused but could be re‑enabled in the future if a second API
+/// is desired.
 class ProductRepository {
   /// Creates a [ProductRepository] with the given [DatabaseHelper] and
-  /// primary [ProductApiService]. An optional [_fallbackApi] can be
+  /// primary [ProductApiService]. An optional fallback API can be
   /// provided for future use.
   ProductRepository(this._db, this._api, {this._fallbackApi});
 
@@ -47,8 +48,9 @@ class ProductRepository {
   /// sources. Throws [FetchFailedException] on network errors when no
   /// cache exists.
   Future<Product> getProduct(String barcode) async {
-    // 1. Local cache
     logInfo('Looking up $barcode');
+
+    // 1. Local cache
     final cached = await _db.getProduct(barcode);
     if (cached != null) {
       logInfo('Cache hit for $barcode');
@@ -60,21 +62,23 @@ class ProductRepository {
       logInfo('Fetching $barcode from primary API');
       final remote = await _api.getByBarcode(barcode);
       await _db.insertProduct(remote);
+      logInfo('Fetched and cached $barcode');
       return remote;
     } on ProductNotFoundException {
+      logWarning('Product $barcode not found in primary API');
       // Primary not found → try fallback if set
       if (_fallbackApi != null) {
         logInfo('Trying fallback API for $barcode');
         try {
           final remote = await _fallbackApi.getByBarcode(barcode);
           await _db.insertProduct(remote);
+          logInfo('Fetched $barcode from fallback API');
           return remote;
         } on ProductNotFoundException {
-          // Both failed, rethrow
-          logWarning('$barcode not found in primary API');
+          logWarning('Product $barcode not found in fallback API');
           rethrow;
-        } on Exception {
-          // Network error on fallback → throw generic
+        } on Exception catch (e) {
+          logError('Fallback API error for $barcode: $e');
           throw FetchFailedException(
             'Failed to fetch product. Please check your connection.',
           );
@@ -83,7 +87,6 @@ class ProductRepository {
         rethrow;
       }
     } on Exception catch (e) {
-      // Network/other error on primary, but no cache
       logError('Network error for $barcode: $e');
       throw FetchFailedException(
         'Failed to fetch product. Please check your connection.',
@@ -92,19 +95,32 @@ class ProductRepository {
   }
 
   /// Retrieves all inventory items for the given [barcode].
-  Future<List<InventoryItem>> getInventoryForBarcode(String barcode) =>
-      _db.getInventoryItemsByBarcode(barcode);
+  Future<List<InventoryItem>> getInventoryForBarcode(String barcode) {
+    logInfo('Fetching inventory for barcode $barcode');
+    return _db.getInventoryItemsByBarcode(barcode);
+  }
 
   /// Inserts a new inventory item and returns its auto‑generated ID.
-  Future<int> addInventoryItem(InventoryItem item) =>
-      _db.insertInventoryItem(item);
+  Future<int> addInventoryItem(InventoryItem item) {
+    logInfo(
+      '''Adding inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location}''',
+    );
+    return _db.insertInventoryItem(item);
+  }
 
   /// Updates an existing inventory item.
-  Future<int> updateInventoryItem(InventoryItem item) =>
-      _db.updateInventoryItem(item);
+  Future<int> updateInventoryItem(InventoryItem item) {
+    logInfo(
+      '''Updating inventory item ${item.id}: qty=${item.quantity} ${item.unit}, loc=${item.location}''',
+    );
+    return _db.updateInventoryItem(item);
+  }
 
   /// Deletes an inventory item by its [id].
-  Future<int> deleteInventoryItem(int id) => _db.deleteInventoryItem(id);
+  Future<int> deleteInventoryItem(int id) {
+    logInfo('Deleting inventory item $id');
+    return _db.deleteInventoryItem(id);
+  }
 
   /// Inserts a product directly into the local cache.
   ///
@@ -112,6 +128,7 @@ class ProductRepository {
   /// add‑product screen) or when the product is submitted to Open Food Facts
   /// and should be cached immediately.
   Future<void> cacheProduct(Product product) async {
+    logInfo('Caching product: ${product.barcode} — ${product.name}');
     await _db.insertProduct(product);
   }
 }

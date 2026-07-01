@@ -5,6 +5,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// A tappable card representing one inventory item on the home screen.
 ///
@@ -49,6 +50,7 @@ class InventoryCard extends StatelessWidget {
           size: 12,
         ),
         onTap: () async {
+          logInfo('Inventory card tapped: ${item.barcode}');
           final repo = ProviderScope.containerOf(
             context,
           ).read(productRepositoryProvider);
@@ -66,8 +68,8 @@ class InventoryCard extends StatelessWidget {
                 context,
               ).invalidate(inventoryWithProductProvider);
             }
-          } on Exception {
-            // Silently ignore errors.
+          } on Exception catch (e) {
+            logError('Failed to navigate to product detail: $e');
           }
         },
       ),

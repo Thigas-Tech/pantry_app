@@ -77,9 +77,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               final url = Uri.parse(
                 'https://world.openfoodfacts.org/product/${widget.product.barcode}',
               );
+              logInfo('Opening OFF page for ${widget.product.barcode}');
               if (await canLaunchUrl(url) && context.mounted) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
-              } else if (mounted) {
+                logInfo('OFF page opened successfully');
+              } else if (context.mounted) {
+                logWarning('Failed to launch OFF page');
                 SnackbarHelper.showError(context, 'Could not open the link.');
               }
             },
@@ -152,6 +155,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  logError(
+                    'Error fetching inventory: ${snapshot.error}',
+                  );
+                  return const Center(
+                    child: Text('Failed to load inventory items.'),
+                  );
                 }
                 final items = snapshot.data ?? [];
                 if (items.isEmpty) {
@@ -238,21 +249,37 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     if (result != null && mounted) {
       final repo = ref.read(productRepositoryProvider);
-      if (existing != null) {
-        logInfo(
-          '''Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
-        );
-        await repo.updateInventoryItem(result);
-        await NotificationService.cancelReminders(existing.id!);
-      } else {
-        logInfo(
-          '''Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
-        );
-        await repo.addInventoryItem(result);
+      try {
+        if (existing != null) {
+          logInfo(
+            '''Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
+          );
+          await repo.updateInventoryItem(result);
+          await NotificationService.cancelReminders(existing.id!);
+          if (mounted) {
+            SnackbarHelper.showInfo(context, 'Item updated.');
+          }
+        } else {
+          logInfo(
+            '''Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
+          );
+          await repo.addInventoryItem(result);
+          if (mounted) {
+            SnackbarHelper.showInfo(context, 'Item added to pantry.');
+          }
+        }
+        await NotificationService.scheduleExpiryReminders(result);
+        setState(() => _inventoryVersion++);
+        ref.invalidate(inventoryWithProductProvider);
+      } on Exception catch (e) {
+        logError('Inventory operation failed: $e');
+        if (mounted) {
+          SnackbarHelper.showError(
+            context,
+            'Failed to save inventory item.',
+          );
+        }
       }
-      await NotificationService.scheduleExpiryReminders(result);
-      setState(() => _inventoryVersion++);
-      ref.invalidate(inventoryWithProductProvider);
     }
   }
 
@@ -280,11 +307,23 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
     if (confirm == true && mounted) {
       final repo = ref.read(productRepositoryProvider);
-      await repo.deleteInventoryItem(item.id!);
-      await NotificationService.cancelReminders(item.id!);
-      logInfo('Deleted inventory item ${item.id} (${widget.product.barcode})');
-      setState(() => _inventoryVersion++);
-      ref.invalidate(inventoryWithProductProvider);
+      try {
+        await repo.deleteInventoryItem(item.id!);
+        await NotificationService.cancelReminders(item.id!);
+        logInfo(
+          'Deleted inventory item ${item.id} (${widget.product.barcode})',
+        );
+        if (mounted) {
+          SnackbarHelper.showInfo(context, 'Item removed from pantry.');
+        }
+        setState(() => _inventoryVersion++);
+        ref.invalidate(inventoryWithProductProvider);
+      } on Exception catch (e) {
+        logError('Failed to delete item: $e');
+        if (mounted) {
+          SnackbarHelper.showError(context, 'Failed to delete item.');
+        }
+      }
     }
   }
 }

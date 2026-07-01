@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// A barcode input screen for Android.
 ///
@@ -32,10 +33,16 @@ class _ScannerScreenState extends State<ScannerScreen> {
   Widget build(BuildContext context) {
     return _showManualEntry
         ? _ManualEntryView(
-            onSwitchToCamera: () => setState(() => _showManualEntry = false),
+            onSwitchToCamera: () {
+              logInfo('Switched to camera scanner');
+              setState(() => _showManualEntry = false);
+            },
           )
         : _MobileScannerView(
-            onSwitchToManual: () => setState(() => _showManualEntry = true),
+            onSwitchToManual: () {
+              logInfo('Switched to manual entry');
+              setState(() => _showManualEntry = true);
+            },
           );
   }
 }
@@ -98,6 +105,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
               final barcode = capture.barcodes.first;
               if (barcode.rawValue == null) return;
               _hasScanned = true;
+              logInfo('Barcode scanned via camera: ${barcode.rawValue}');
               unawaited(HapticFeedback.mediumImpact());
               Navigator.of(context).pop(barcode.rawValue);
             },
@@ -150,7 +158,7 @@ class _ScannerOverlayPainter extends CustomPainter {
     final backgroundPaint = Paint()..color = Colors.black54;
     canvas
       ..drawRect(rect, backgroundPaint)
-      // 2. …then “punch out” the rounded rectangle so the camera shows through.
+      // 2. …then "punch out" the rounded rectangle so the camera shows through.
       ..drawRRect(
         cutoutRRect,
         Paint()..blendMode = BlendMode.clear,
@@ -291,6 +299,7 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
   void _submit() {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
+      logInfo('Barcode entered manually: $text');
       unawaited(HapticFeedback.mediumImpact());
       Navigator.of(context).pop(text);
     }

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_api_service.dart';
@@ -102,9 +101,13 @@ class OpenFoodFactsApi implements ProductApiService {
       return _parseProduct(productJson);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        logWarning('DioException for $barcode: ${e.response?.statusCode}');
+        logWarning('404 for $barcode');
         throw ProductNotFoundException('Product not found: $barcode');
       }
+      logError('DioException for $barcode: ${e.message}');
+      rethrow;
+    } on Exception catch (e) {
+      logError('Unexpected error fetching $barcode: $e');
       rethrow;
     }
   }
@@ -150,6 +153,7 @@ class OpenFoodFactsApi implements ProductApiService {
   /// Returns `true` on success (HTTP 200 or 302). All fields use the
   /// `add_` prefix to avoid overwriting existing data.
   Future<bool> submitProduct(Product product) async {
+    logInfo('Submitting product ${product.barcode} via legacy API');
     try {
       final params = <String, dynamic>{
         'code': product.barcode,
@@ -204,9 +208,17 @@ class OpenFoodFactsApi implements ProductApiService {
         ),
       );
 
-      return response.statusCode == 200 || response.statusCode == 302;
+      final success = response.statusCode == 200 || response.statusCode == 302;
+      if (success) {
+        logInfo('Product ${product.barcode} submitted successfully');
+      } else {
+        logWarning(
+          '''Product ${product.barcode} submission returned status ${response.statusCode}''',
+        );
+      }
+      return success;
     } on Exception catch (e) {
-      debugPrint('Error submitting product: $e');
+      logError('Failed to submit product ${product.barcode}: $e');
       return false;
     }
   }
@@ -216,6 +228,7 @@ class OpenFoodFactsApi implements ProductApiService {
   /// This is the recommended method for new integrations but requires the
   /// user to be logged in first.
   Future<bool> submitProductV3(Product product, String sessionCookie) async {
+    logInfo('Submitting product ${product.barcode} via v3 API');
     try {
       final url = '$_baseUrl/api/v3/product/${product.barcode}';
       final productData = <String, dynamic>{'product_name': product.name};
@@ -260,9 +273,17 @@ class OpenFoodFactsApi implements ProductApiService {
         ),
       );
 
-      return response.statusCode == 200;
+      final success = response.statusCode == 200;
+      if (success) {
+        logInfo('Product ${product.barcode} submitted successfully via v3');
+      } else {
+        logWarning(
+          '''Product ${product.barcode} v3 submission returned status ${response.statusCode}''',
+        );
+      }
+      return success;
     } on Exception catch (e) {
-      debugPrint('Error submitting product via v3: $e');
+      logError('Failed to submit product ${product.barcode} via v3: $e');
       return false;
     }
   }

@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 ///
 /// Displays a large kitchen icon, a title, a subtitle, and a button that
 /// triggers the scanning flow. This widget can be replaced later with a
-// ignore: comment_references
-/// [Lottie] animation or a custom illustration without changing the home
+/// Lottie animation or a custom illustration without changing the home
 /// screen code.
 class EmptyPantry extends StatelessWidget {
   /// Creates an [EmptyPantry] widget.

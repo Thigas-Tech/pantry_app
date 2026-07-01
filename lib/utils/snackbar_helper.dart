@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// A thin wrapper around [ScaffoldMessenger] that shows styled snackbars.
 ///
@@ -24,6 +25,7 @@ class SnackbarHelper {
       backgroundColor: Colors.blue.shade700,
       foregroundColor: Colors.white,
     );
+    logInfo('Info from SnackBar: $message');
   }
 
   /// Shows a warning snackbar (amber).
@@ -35,6 +37,8 @@ class SnackbarHelper {
       backgroundColor: Colors.amber.shade800,
       foregroundColor: Colors.white,
     );
+
+    logWarning('Warning from SnackBar: $message');
   }
 
   /// Shows an error snackbar (red).
@@ -46,6 +50,7 @@ class SnackbarHelper {
       backgroundColor: Colors.red.shade700,
       foregroundColor: Colors.white,
     );
+    logError('Error from SnackBar: $message');
   }
 
   /// Internal helper that builds and shows the snackbar.

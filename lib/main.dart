@@ -18,16 +18,14 @@ import 'package:pantry_app/utils/logger.dart';
 ///    (POST_NOTIFICATIONS on Android 13+). The call is fire‑and‑forget using
 ///    [unawaited] because it is not critical for the first frame and must not
 ///    delay the app startup.
-/// 3. **Database cleanup** – removes inventory entries that are older than 60
-///    days and deletes any product records that are no longer referenced by
-///    inventory items. This keeps the local SQLite database small and fast.
-///    This step is awaited because we want to finish purging stale data before
-///    the UI tries to display the inventory list.
+/// 3. **Database cleanup** – scheduled after the first frame to remove
+///    inventory entries older than 60 days and orphaned products. It no
+///    longer blocks the initial render.
 /// 4. **Riverpod scope** – wraps the entire app in a [ProviderScope] so that
 ///    all Riverpod providers are available throughout the widget tree.
 ///
 /// After these steps, the [PantryApp] widget is launched.
-void main() async {
+void main() {
   // Ensure that Flutter’s platform bindings are initialised.
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -36,15 +34,24 @@ void main() async {
   // acceptable for a pantry manager.
   unawaited(NotificationService.requestPermission());
 
-  // Remove items that haven’t been re‑added in 60 days.
-  // This prevents the database from growing indefinitely.
-  final dbHelper = DatabaseHelper();
-  await dbHelper.cleanupOldEntries();
-  logInfo('Database cleanup completed');
-
-  // Start the app with Riverpod dependency injection.
+  // Start the app immediately – database cleanup runs after the first frame.
   runApp(const ProviderScope(child: PantryApp()));
   logInfo('App started');
+
+  // Run the cleanup in the background, now that the UI is visible.
+  unawaited(_runDatabaseCleanup());
+}
+
+/// Removes stale inventory items and orphaned products without blocking the
+/// UI thread.
+Future<void> _runDatabaseCleanup() async {
+  try {
+    final dbHelper = DatabaseHelper();
+    await dbHelper.cleanupOldEntries();
+    logInfo('Database cleanup completed');
+  } on Exception catch (e) {
+    logError('Database cleanup failed: $e');
+  }
 }
 
 /// The root widget of the Pantry application.

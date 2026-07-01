@@ -27,7 +27,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// While the inventory is being fetched from the database,
 /// a [Shimmer] placeholder is displayed to give a sense of progress.
-/// On error, a simple error text is shown.
+/// On error, a simple error text is shown and an error snackbar appears.
 ///
 /// ## Empty state
 ///
@@ -66,7 +66,6 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.bar_chart),
             onPressed: () async {
-              // Navigate to stats and refresh the inventory when we return.
               await Navigator.of(context).push<void>(
                 MaterialPageRoute(builder: (_) => const StatsScreen()),
               );
@@ -76,8 +75,15 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: inventoryAsync.when(
-        loading: () => const _InventoryShimmer(),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) {
+          logError('Failed to load inventory: $err');
+          // Show the error to the user as well.
+          if (context.mounted) {
+            SnackbarHelper.showError(context, 'Failed to load inventory.');
+          }
+          return Center(child: Text('Error: $err'));
+        },
         data: (items) {
           if (items.isEmpty) {
             return EmptyPantry(onScan: () => _scanBarcode(context, ref));
@@ -284,47 +290,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
           color: color,
           fontWeight: FontWeight.bold,
           fontSize: 16,
-        ),
-      ),
-    );
-  }
-}
-
-// ---------- Shimmer loading placeholder ----------
-
-/// A shimmer effect shown while the inventory is loading.
-///
-/// Mimics the layout of a list of inventory cards, providing visual feedback
-/// that content is being loaded.
-class _InventoryShimmer extends StatelessWidget {
-  const _InventoryShimmer();
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: 6,
-        itemBuilder: (_, _) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Row(
-            children: [
-              const CircleAvatar(backgroundColor: Colors.white),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(height: 14, color: Colors.white),
-                    const SizedBox(height: 8),
-                    Container(height: 10, width: 150, color: Colors.white),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

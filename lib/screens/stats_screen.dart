@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:filegate/filegate.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
@@ -12,13 +10,12 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// A statistics and data‑export/import screen for Android.
+/// A statistics and data‑export screen for Android.
 ///
 /// Shows aggregate pantry counts and allows the user to:
 /// - **Export** all inventory as a CSV file via the system share sheet.
-/// - **Import** a previously exported CSV file by picking it with a native
-///   file picker powered by `filegate`. The chosen file is then processed
-///   and its data merged into the pantry.
+/// - **Import** a previously exported CSV file (planned – currently shows
+///   a “coming soon” message).
 ///
 /// ## Export
 ///
@@ -26,20 +23,10 @@ import 'package:share_plus/share_plus.dart';
 /// `share_plus`. The system share sheet offers apps like email,
 /// messaging, or cloud storage.
 ///
-/// ## Import
+/// ## Import (planned)
 ///
-/// The user taps “Import CSV” and is presented with the device’s file picker
-/// filtered to `.csv` files. After selecting a file, a loading indicator
-/// appears while the import runs, and a result dialog shows the number of
-/// products updated and items added.
-///
-/// ## Import logic
-///
-/// - Every row is processed independently.
-/// - Products are **upserted** (existing barcodes are updated with the CSV
-///   data).
-/// - Inventory items are always **added as new** entries.
-/// - The original inventory IDs are not preserved.
+/// CSV import is not yet implemented. The button displays a snackbar
+/// informing the user that the feature is coming in a future update.
 class StatsScreen extends ConsumerWidget {
   /// Creates a [StatsScreen] widget.
   const StatsScreen({super.key});
@@ -75,7 +62,9 @@ class StatsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
-                  onPressed: () => _importCsv(context, db),
+                  onPressed: () {
+                    SnackbarHelper.showInfo(context, 'CSV import coming soon.');
+                  },
                   icon: const Icon(Icons.file_upload),
                   label: const Text('Import CSV'),
                 ),
@@ -113,67 +102,6 @@ class StatsScreen extends ConsumerWidget {
     } on Exception catch (e) {
       if (context.mounted) {
         SnackbarHelper.showError(context, 'Export failed: $e');
-      }
-    }
-  }
-
-  Future<void> _importCsv(BuildContext context, DatabaseHelper db) async {
-    logInfo('Import button pressed');
-
-    try {
-      // Open the native file picker via filegate.
-      const filegate = Filegate();
-      final files = await filegate.pickFiles(
-        allowedExtensions: ['csv'],
-      );
-
-      if (files == null || files.isEmpty) return; // user cancelled
-
-      final filePath = files.first.path;
-
-      // Show a loading indicator while the import runs.
-      if (context.mounted) {
-        unawaited(
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator()),
-          ),
-        );
-      }
-
-      final csvService = CsvService(db);
-      final counts = await csvService.importCsv(filePath);
-
-      // Dismiss the loading indicator.
-      if (context.mounted) Navigator.of(context).pop();
-
-      // Show the import result.
-      if (context.mounted) {
-        unawaited(
-          showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: const Text('Import complete'),
-              content: Text(
-                'Products updated: ${counts['products']}\n'
-                'Items added: ${counts['items']}',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-    } on Exception catch (e) {
-      // Dismiss the loading indicator if it's still shown.
-      if (context.mounted) Navigator.of(context).pop();
-      if (context.mounted) {
-        SnackbarHelper.showError(context, 'Import failed: $e');
       }
     }
   }
