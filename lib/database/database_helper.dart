@@ -212,19 +212,19 @@ class DatabaseHelper {
     }
   }
 
-  /// Removes inventory items that were added more than 60 days ago, and then
-  /// deletes any product records that are no longer referenced by the
-  /// remaining inventory items.
+  /// Removes inventory items that were added more than [retentionDays] ago,
+  /// and then deletes any product records that are no longer referenced by
+  /// the remaining inventory items.
   ///
-  /// The 60‑day cutoff is currently hard‑coded; it can be made configurable in
-  /// the future if user preferences demand it.
-  Future<void> cleanupOldEntries() async {
+  /// The default retention period is 60 days; this can be overridden by
+  /// passing a value from the user’s settings.
+  Future<void> cleanupOldEntries({int retentionDays = 60}) async {
     final db = await database;
     final cutoff = DateTime.now()
-        .subtract(const Duration(days: 60))
+        .subtract(Duration(days: retentionDays))
         .millisecondsSinceEpoch;
     logInfo(
-      '''Cleaning up items added before ${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}''',
+      '''Cleaning up items added before ${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()} (retention: $retentionDays days)''',
     );
 
     try {
@@ -246,7 +246,6 @@ class DatabaseHelper {
       rethrow;
     }
   }
-
   // --------------------- Inventory CRUD ---------------------
 
   /// Inserts a new inventory item.

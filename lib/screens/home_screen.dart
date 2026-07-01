@@ -7,26 +7,25 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
-import 'package:pantry_app/screens/stats_screen.dart';
+import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// The main dashboard of the app (Android).
 ///
-/// [HomeScreen] shows the user’s pantry inventory grouped by expiry status
+/// [HomeScreen] shows the user's pantry inventory grouped by expiry status
 /// (expired / expiring soon / good). It also contains the barcode scanner
-/// trigger (FAB) and navigation to the [StatsScreen].
+/// trigger (FAB) and navigation to the [SettingsScreen].
 ///
 /// ## Loading states
 ///
 /// While the inventory is being fetched from the database,
-/// a [Shimmer] placeholder is displayed to give a sense of progress.
+/// a [CircularProgressIndicator] is displayed to give a sense of progress.
 /// On error, a simple error text is shown and an error snackbar appears.
 ///
 /// ## Empty state
@@ -63,12 +62,18 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('My Pantry'),
         centerTitle: true,
         actions: [
+          /// Opens the [SettingsScreen] where the user can adjust theme,
+          /// notifications, and data retention.
           IconButton(
-            icon: const Icon(Icons.bar_chart),
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
             onPressed: () async {
+              logInfo('Settings button pressed');
               await Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const StatsScreen()),
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
+              // Refresh the inventory when returning from settings
+              // in case the retention period was changed.
               ref.invalidate(inventoryWithProductProvider);
             },
           ),
@@ -176,7 +181,7 @@ class _InventoryList extends ConsumerStatefulWidget {
 }
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
-  /// The current search string; an empty string means “show all”.
+  /// The current search string; an empty string means "show all".
   String _searchQuery = '';
 
   /// Returns [_InventoryList] filtered by [_searchQuery].

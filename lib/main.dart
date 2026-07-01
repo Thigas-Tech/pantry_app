@@ -4,38 +4,11 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/logger.dart';
-
-/// The available theme modes for the app.
-enum ThemeModeOption {
-  /// Follow the system setting.
-  system,
-
-  /// Always use the light theme.
-  light,
-
-  /// Always use the dark theme.
-  dark,
-}
-
-/// A [Notifier] that holds the current `ThemeModeOption`.
-///
-/// Used by [themeModeProvider] so that the settings screen (or any widget)
-/// can read and change the theme mode via the `state` property.
-class ThemeModeNotifier extends Notifier<ThemeModeOption> {
-  @override
-  ThemeModeOption build() => ThemeModeOption.system;
-}
-
-/// A [NotifierProvider] for [ThemeModeNotifier].
-///
-/// Changing the value triggers a rebuild of the [DynamicColorBuilder] and
-/// the widget tree, switching between light, dark, and system themes.
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeModeOption>(
-  ThemeModeNotifier.new,
-);
 
 /// Entry point of the Pantry application (Android).
 ///
@@ -49,14 +22,15 @@ final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeModeOption>(
 ///    [unawaited] because it is not critical for the first frame and must not
 ///    delay the app startup.
 /// 3. **Database cleanup** – scheduled after the first frame to remove
-///    inventory entries older than 60 days and orphaned products. It no
-///    longer blocks the initial render.
+///    inventory entries older than the user's configured retention period
+///    and orphaned products. The retention days are read from
+///    [settingsProvider]. The cleanup no longer blocks the initial render.
 /// 4. **Riverpod scope** – wraps the entire app in a [ProviderScope] so that
 ///    all Riverpod providers are available throughout the widget tree.
 ///
 /// After these steps, the [PantryApp] widget is launched.
 void main() {
-  // Ensure that Flutter’s platform bindings are initialised.
+  // Ensure that Flutter's platform bindings are initialised.
   WidgetsFlutterBinding.ensureInitialized();
 
   // Request permission on Android 13+ (POST_NOTIFICATIONS).
@@ -67,29 +41,38 @@ void main() {
   logInfo('App started');
 
   // Run the cleanup in the background, now that the UI is visible.
-  unawaited(_runDatabaseCleanup());
+  final container = ProviderContainer();
+  unawaited(_runDatabaseCleanup(container));
 }
 
 /// Removes stale inventory items and orphaned products without blocking the
 /// UI thread.
-Future<void> _runDatabaseCleanup() async {
+///
+/// The retention period is read from the user's settings via
+/// [settingsProvider]. If no custom period has been set, the default of
+/// 60 days is used. The [container] is disposed after the cleanup completes.
+Future<void> _runDatabaseCleanup(ProviderContainer container) async {
+  logInfo('Starting database cleanup');
   try {
+    final settings = container.read(settingsProvider);
     final dbHelper = DatabaseHelper();
-    await dbHelper.cleanupOldEntries();
+    await dbHelper.cleanupOldEntries(retentionDays: settings.retentionDays);
     logInfo('Database cleanup completed');
   } on Exception catch (e) {
     logError('Database cleanup failed: $e');
+  } finally {
+    container.dispose();
   }
 }
 
 /// The root widget of the Pantry application.
 ///
 /// [PantryApp] is a [MaterialApp] that:
-/// - Sets the app title to “Pantry” (used by the OS task switcher).
+/// - Sets the app title to "Pantry" (used by the OS task switcher).
 /// - Uses [DynamicColorBuilder] to seed the colour scheme from the device
 ///   wallpaper, falling back to a teal palette when dynamic colours are
 ///   unavailable.
-/// - Respects the user’s theme preference (light, dark, or system) via
+/// - Respects the user's theme preference (light, dark, or system) via
 ///   [themeModeProvider].
 /// - Directly shows the [HomeScreen] as the initial route.
 ///
