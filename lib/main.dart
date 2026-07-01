@@ -1,11 +1,41 @@
 import 'dart:async';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+
+/// The available theme modes for the app.
+enum ThemeModeOption {
+  /// Follow the system setting.
+  system,
+
+  /// Always use the light theme.
+  light,
+
+  /// Always use the dark theme.
+  dark,
+}
+
+/// A [Notifier] that holds the current `ThemeModeOption`.
+///
+/// Used by [themeModeProvider] so that the settings screen (or any widget)
+/// can read and change the theme mode via the `state` property.
+class ThemeModeNotifier extends Notifier<ThemeModeOption> {
+  @override
+  ThemeModeOption build() => ThemeModeOption.system;
+}
+
+/// A [NotifierProvider] for [ThemeModeNotifier].
+///
+/// Changing the value triggers a rebuild of the [DynamicColorBuilder] and
+/// the widget tree, switching between light, dark, and system themes.
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeModeOption>(
+  ThemeModeNotifier.new,
+);
 
 /// Entry point of the Pantry application (Android).
 ///
@@ -30,8 +60,6 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Request permission on Android 13+ (POST_NOTIFICATIONS).
-  // If the user denies, notifications will simply not appear, which is
-  // acceptable for a pantry manager.
   unawaited(NotificationService.requestPermission());
 
   // Start the app immediately – database cleanup runs after the first frame.
@@ -56,29 +84,50 @@ Future<void> _runDatabaseCleanup() async {
 
 /// The root widget of the Pantry application.
 ///
-/// [PantryApp] is a minimal [MaterialApp] that:
+/// [PantryApp] is a [MaterialApp] that:
 /// - Sets the app title to “Pantry” (used by the OS task switcher).
-/// - Configures a Material 3 theme with a teal colour scheme.
+/// - Uses [DynamicColorBuilder] to seed the colour scheme from the device
+///   wallpaper, falling back to a teal palette when dynamic colours are
+///   unavailable.
+/// - Respects the user’s theme preference (light, dark, or system) via
+///   [themeModeProvider].
 /// - Directly shows the [HomeScreen] as the initial route.
 ///
 /// No routing or authentication logic is needed at this stage – the app is
 /// intentionally single‑screen with modal navigation for scanning and detail
 /// views.
-class PantryApp extends StatelessWidget {
+class PantryApp extends ConsumerWidget {
   /// Creates a [PantryApp] widget.
-  ///
-  /// The [key] parameter is forwarded to the superclass and can be used by
-  /// tests or parent widgets to control this widget’s identity.
   const PantryApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pantry',
-      // Material 3 provides a fresh, modern look with automatic colour
-      // generation from the seed colour.
-      theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
-      home: const HomeScreen(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeModeOption = ref.watch(themeModeProvider);
+    final themeMode = switch (themeModeOption) {
+      ThemeModeOption.light => ThemeMode.light,
+      ThemeModeOption.dark => ThemeMode.dark,
+      ThemeModeOption.system => ThemeMode.system,
+    };
+
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        final lightScheme =
+            lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.teal);
+        final darkScheme =
+            darkDynamic ??
+            ColorScheme.fromSeed(
+              seedColor: Colors.teal,
+              brightness: Brightness.dark,
+            );
+
+        return MaterialApp(
+          title: 'Pantry',
+          theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
+          darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
+          themeMode: themeMode,
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }

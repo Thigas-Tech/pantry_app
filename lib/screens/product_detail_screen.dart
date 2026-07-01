@@ -394,8 +394,9 @@ class _InventoryTile extends StatelessWidget {
 /// A styled table that displays the nutritional values of a [Product].
 ///
 /// Each row shows a nutrient name and its amount per 100 g / 100 ml.
-/// The header row uses the current theme’s primary colour, and data rows
-/// alternate between white and a light grey for readability.
+/// The header uses the theme’s primary container colour, and data rows
+/// alternate between transparent and a very subtle primary overlay for
+/// readability in both light and dark themes.
 class _NutritionTable extends StatelessWidget {
   const _NutritionTable({required this.product});
 
@@ -403,6 +404,7 @@ class _NutritionTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final rows = <_NutrientRow>[
       _NutrientRow('Energy', '${product.energyKcal ?? '-'} kcal'),
       _NutrientRow('Protein', '${product.proteinG ?? '-'} g'),
@@ -413,7 +415,10 @@ class _NutritionTable extends StatelessWidget {
     ];
 
     return Table(
-      border: TableBorder.all(color: Colors.grey.shade300, width: 0.5),
+      border: TableBorder.all(
+        color: theme.colorScheme.outlineVariant,
+        width: 0.5,
+      ),
       columnWidths: const {
         0: FlexColumnWidth(2),
         1: FlexColumnWidth(),
@@ -422,32 +427,38 @@ class _NutritionTable extends StatelessWidget {
         // Header row
         TableRow(
           decoration: BoxDecoration(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withValues(alpha: 0.15),
+            color: theme.colorScheme.primaryContainer,
           ),
-          children: const [
+          children: [
             Padding(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Nutrient',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               child: Text(
                 'Per 100 g',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
               ),
             ),
           ],
         ),
-        // Data rows with alternating colours
+        // Data rows with alternating subtle backgrounds
         for (var i = 0; i < rows.length; i++)
           TableRow(
             decoration: BoxDecoration(
-              color: i.isEven ? Colors.white : Colors.grey.shade50,
+              color: i.isEven
+                  ? Colors.transparent
+                  : theme.colorScheme.primary.withValues(alpha: 0.05),
             ),
             children: [
               Padding(

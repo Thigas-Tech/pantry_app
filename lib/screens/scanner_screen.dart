@@ -130,6 +130,9 @@ class _MobileScannerViewState extends State<_MobileScannerView>
 
 /// Paints a semi‑transparent dark overlay with a rounded‑rectangle cutout
 /// and an animated horizontal scanning line inside the cutout.
+///
+/// The cutout is created using a path with [PathFillType.evenOdd] so that
+/// it works on all rendering backends (Impeller and Skia).
 class _ScannerOverlayPainter extends CustomPainter {
   const _ScannerOverlayPainter({required this.animationValue});
 
@@ -139,8 +142,6 @@ class _ScannerOverlayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-
     // Dimensions of the cutout (the scanning area)
     const cutoutWidth = 250.0;
     const cutoutHeight = 250.0;
@@ -154,15 +155,16 @@ class _ScannerOverlayPainter extends CustomPainter {
       const Radius.circular(16),
     );
 
-    // 1. Draw the semi‑transparent dark background everywhere…
-    final backgroundPaint = Paint()..color = Colors.black54;
-    canvas
-      ..drawRect(rect, backgroundPaint)
-      // 2. …then "punch out" the rounded rectangle so the camera shows through.
-      ..drawRRect(
-        cutoutRRect,
-        Paint()..blendMode = BlendMode.clear,
-      );
+    // 1. Build a path that covers the entire screen with a hole for the
+    //    cutout, using an even‑odd fill rule.
+    final overlayPath = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..addRRect(cutoutRRect)
+      ..fillType = PathFillType.evenOdd;
+
+    // 2. Fill the overlay with a semi‑transparent dark colour.
+    final overlayPaint = Paint()..color = Colors.black54;
+    canvas.drawPath(overlayPath, overlayPaint);
 
     // 3. Draw the white border around the cutout.
     final borderPaint = Paint()
