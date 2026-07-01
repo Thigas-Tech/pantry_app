@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
@@ -95,26 +98,50 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           children: [
             // Product image wrapped in Hero so it animates from/to the
             // home screen inventory card.
+            // Product image wrapped in Hero, loaded from cache when possible.
             if (widget.product.imageUrl != null)
               Hero(
                 tag: widget.product.barcode,
-                child: Image.network(
-                  widget.product.imageUrl!,
-                  height: 200,
-                  fit: BoxFit.contain,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                            : null,
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final imageCache = ref.watch(imageCacheProvider);
+                    return FutureBuilder<String?>(
+                      future: imageCache.cacheImage(
+                        widget.product.imageUrl,
+                        widget.product.barcode,
                       ),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return Image.file(
+                            File(snapshot.data!),
+                            height: 200,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.broken_image, size: 48),
+                          );
+                        }
+                        return Image.network(
+                          widget.product.imageUrl!,
+                          height: 200,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.broken_image, size: 48),
+                        );
+                      },
                     );
                   },
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image, size: 48),
                 ),
               ),
             _infoRow('Barcode', widget.product.barcode),

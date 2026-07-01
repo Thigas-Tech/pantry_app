@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
-import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -14,10 +16,10 @@ import 'package:pantry_app/utils/logger.dart';
 /// dot indicating whether the item is expired.
 ///
 /// The product image is wrapped in a [Hero] so that it smoothly animates
-/// into the product detail screen when the card is tapped. While the image
-/// loads, a grey placeholder circle is shown; on error a fallback icon is
-/// displayed.
-class InventoryCard extends StatelessWidget {
+/// into the product detail screen when the card is tapped. The image is
+/// loaded from a local cache (WebP format) when available; otherwise a
+/// placeholder is shown while the network image is fetched and cached.
+class InventoryCard extends ConsumerWidget {
   /// Creates an [InventoryCard] for the given [item].
   const InventoryCard({required this.item, super.key});
 
@@ -25,7 +27,7 @@ class InventoryCard extends StatelessWidget {
   final InventoryWithProduct item;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isExpired =
         item.expiryDate != null &&
         DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
@@ -38,7 +40,7 @@ class InventoryCard extends StatelessWidget {
       child: ListTile(
         leading: Hero(
           tag: item.barcode,
-          child: _buildLeadingImage(),
+          child: _buildLeadingImage(ref),
         ),
         title: Text(item.productName ?? item.barcode),
         subtitle: Text(
@@ -51,9 +53,7 @@ class InventoryCard extends StatelessWidget {
         ),
         onTap: () async {
           logInfo('Inventory card tapped: ${item.barcode}');
-          final repo = ProviderScope.containerOf(
-            context,
-          ).read(productRepositoryProvider);
+          final repo = ref.read(productRepositoryProvider);
           try {
             final product = await repo.getProduct(item.barcode);
             if (!context.mounted) return;
@@ -62,11 +62,8 @@ class InventoryCard extends StatelessWidget {
                 builder: (_) => ProductDetailScreen(product: product),
               ),
             );
-            // Refresh the home screen when we come back.
             if (context.mounted) {
-              ProviderScope.containerOf(
-                context,
-              ).invalidate(inventoryWithProductProvider);
+              ref.invalidate(inventoryWithProductProvider);
             }
           } on Exception catch (e) {
             logError('Failed to navigate to product detail: $e');
@@ -76,42 +73,49 @@ class InventoryCard extends StatelessWidget {
     );
   }
 
-  /// Builds the leading image widget.
-  ///
-  /// When [Product.imageUrl] is available, a [ClipOval] wraps an
-  /// [Image.network] that shows a grey container while loading and a
-  /// fallback icon on error. If no URL is present, a simple fallback
-  /// icon is displayed.
-  Widget _buildLeadingImage() {
-    if (item.productImageUrl == null) {
-      return const CircleAvatar(child: Icon(Icons.fastfood));
-    }
-
-    return ClipOval(
-      child: Image.network(
-        item.productImageUrl!,
-        width: 40,
-        height: 40,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          // Show a grey placeholder while the image loads.
-          return Container(
-            width: 40,
-            height: 40,
-            color: Colors.grey.shade300,
+  /// Builds the leading image widget, loading from cache or network.
+  Widget _buildLeadingImage(WidgetRef ref) {
+    final imageCache = ref.watch(imageCacheProvider);
+    return FutureBuilder<String?>(
+      future: imageCache.cacheImage(item.productImageUrl, item.barcode),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
+          return ClipOval(
+            child: Image.file(
+              File(snapshot.data!),
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => _fallbackIcon(),
+            ),
           );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          // If the image fails to load, show a fallback icon.
-          return Container(
-            width: 40,
-            height: 40,
-            color: Colors.grey.shade300,
-            child: const Icon(Icons.fastfood, size: 24),
+        }
+        // Still loading or failed; show placeholder.
+        if (item.productImageUrl != null) {
+          return ClipOval(
+            child: Image.network(
+              item.productImageUrl!,
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  width: 40,
+                  height: 40,
+                  color: Colors.grey.shade300,
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => _fallbackIcon(),
+            ),
           );
-        },
-      ),
+        }
+        return _fallbackIcon();
+      },
     );
+  }
+
+  Widget _fallbackIcon() {
+    return const CircleAvatar(child: Icon(Icons.fastfood));
   }
 }
