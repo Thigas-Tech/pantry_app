@@ -16,6 +16,7 @@ _InventoryItem _$InventoryItemFromJson(Map<String, dynamic> json) =>
       location: json['location'] as String? ?? 'pantry',
       notes: json['notes'] as String?,
       dateAdded: (json['date_added'] as num?)?.toInt(),
+      inventoryId: (json['inventory_id'] as num?)?.toInt() ?? 1,
     );
 
 Map<String, dynamic> _$InventoryItemToJson(_InventoryItem instance) =>
@@ -28,4 +29,5 @@ Map<String, dynamic> _$InventoryItemToJson(_InventoryItem instance) =>
       'location': instance.location,
       'notes': instance.notes,
       'date_added': instance.dateAdded,
+      'inventory_id': instance.inventoryId,
     };

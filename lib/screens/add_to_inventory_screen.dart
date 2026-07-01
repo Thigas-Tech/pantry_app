@@ -29,8 +29,13 @@ import 'package:pantry_app/utils/logger.dart';
 /// optional.
 class AddToInventoryScreen extends StatefulWidget {
   /// Creates a [AddToInventoryScreen] widget.
+  ///
+  /// [inventoryId] is the ID of the inventory (pantry) this item will belong
+  /// to. It is used only in create mode; in edit mode the existing item's
+  /// inventory is preserved.
   const AddToInventoryScreen({
     required this.barcode,
+    required this.inventoryId,
     super.key,
     this.existingItem,
     this.suggestedExpiry,
@@ -38,6 +43,9 @@ class AddToInventoryScreen extends StatefulWidget {
 
   /// The product barcode this inventory item belongs to.
   final String barcode;
+
+  /// The ID of the inventory to add the item to (create mode).
+  final int inventoryId;
 
   /// If provided, the form is in edit mode and pre‑filled with this item.
   final InventoryItem? existingItem;
@@ -58,10 +66,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   late DateTime? _expiryDate;
   String _notes = '';
 
-  /// Available units for the dropdown.
   final List<String> _units = ['pcs', 'g', 'kg', 'ml', 'L'];
-
-  /// Available storage locations for the dropdown.
   final List<String> _locations = ['pantry', 'fridge', 'freezer'];
 
   @override
@@ -79,8 +84,6 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     _notes = existing?.notes ?? '';
   }
 
-  /// Validates the form and, if valid, pops the screen with the constructed
-  /// [InventoryItem].
   void _save() {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
@@ -91,15 +94,15 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
       quantity: _quantity,
       unit: _unit,
       location: _location,
-      // Store only the date part (YYYY-MM-DD), discarding time.
       expiryDate: _expiryDate?.toIso8601String().substring(0, 10),
       notes: _notes.isNotEmpty ? _notes : null,
       dateAdded:
           widget.existingItem?.dateAdded ??
           DateTime.now().millisecondsSinceEpoch,
+      inventoryId: widget.existingItem?.inventoryId ?? widget.inventoryId,
     );
     logInfo(
-      '''Inventory item ready: barcode=${item.barcode} qty=${item.quantity} ${item.unit} loc=${item.location} expiry=${item.expiryDate}''',
+      '''Inventory item ready: barcode=${item.barcode} qty=${item.quantity} ${item.unit} loc=${item.location} expiry=${item.expiryDate} inventory=${item.inventoryId}''',
     );
     Navigator.of(context).pop(item);
   }
@@ -117,7 +120,6 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // Quantity input
               TextFormField(
                 initialValue: _quantity.toString(),
                 decoration: const InputDecoration(labelText: 'Quantity'),
@@ -129,7 +131,6 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 },
                 onSaved: (v) => _quantity = double.parse(v!),
               ),
-              // Unit dropdown
               DropdownButtonFormField<String>(
                 initialValue: _unit,
                 items: _units
@@ -138,7 +139,6 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 onChanged: (v) => setState(() => _unit = v!),
                 decoration: const InputDecoration(labelText: 'Unit'),
               ),
-              // Location dropdown
               DropdownButtonFormField<String>(
                 initialValue: _location,
                 items: _locations
@@ -148,7 +148,6 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 decoration: const InputDecoration(labelText: 'Location'),
               ),
               const SizedBox(height: 16),
-              // Expiry date picker
               Row(
                 children: [
                   Expanded(
@@ -182,14 +181,12 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              // Notes field
               TextFormField(
                 initialValue: _notes,
                 decoration: const InputDecoration(labelText: 'Notes'),
                 onSaved: (v) => _notes = v ?? '',
               ),
               const SizedBox(height: 32),
-              // Submit button
               ElevatedButton(
                 onPressed: _save,
                 child: Text(isEditing ? 'Update' : 'Add to Pantry'),

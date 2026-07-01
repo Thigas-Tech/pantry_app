@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -19,8 +20,9 @@ import 'package:url_launcher/url_launcher.dart';
 /// The main dashboard of the app (Android).
 ///
 /// [HomeScreen] shows the user's pantry inventory grouped by expiry status
-/// (expired / expiring soon / good). It also contains the barcode scanner
-/// trigger (FAB) and navigation to the [SettingsScreen].
+/// (expired / expiring soon / good) for the currently selected inventory.
+/// It also contains the barcode scanner trigger (FAB), an inventory switcher,
+/// and navigation to the [SettingsScreen].
 ///
 /// ## Loading states
 ///
@@ -57,11 +59,38 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
+    final inventoriesAsync = ref.watch(inventoryListProvider);
+
+    // Build the inventory switcher dropdown.
+    Widget? switcher;
+    inventoriesAsync.whenData((list) {
+      if (list.length > 1) {
+        switcher = PopupMenuButton<int>(
+          icon: const Icon(Icons.swap_horiz),
+          tooltip: 'Switch pantry',
+          onSelected: (id) {
+            logInfo('Switched to inventory $id');
+            ref.read(activeInventoryProvider.notifier).value = id;
+          },
+          itemBuilder: (_) => list
+              .map(
+                (inv) => PopupMenuItem<int>(
+                  value: inv['id'] as int,
+                  child: Text(inv['name'] as String),
+                ),
+              )
+              .toList(),
+        );
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Pantry'),
         centerTitle: true,
         actions: [
+          if (switcher != null) switcher!,
+
           /// Opens the [SettingsScreen] where the user can adjust theme,
           /// notifications, and data retention.
           IconButton(
@@ -72,8 +101,6 @@ class HomeScreen extends ConsumerWidget {
               await Navigator.of(context).push<void>(
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
-              // Refresh the inventory when returning from settings
-              // in case the retention period was changed.
               ref.invalidate(inventoryWithProductProvider);
             },
           ),
@@ -83,7 +110,6 @@ class HomeScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) {
           logError('Failed to load inventory: $err');
-          // Show the error to the user as well.
           if (context.mounted) {
             SnackbarHelper.showError(context, 'Failed to load inventory.');
           }
@@ -112,8 +138,7 @@ class HomeScreen extends ConsumerWidget {
   /// 1. Opens the [ScannerScreen] and waits for a barcode string.
   /// 2. Uses [ProductRepository.getProduct] to resolve the barcode.
   /// 3. On success – navigates to [ProductDetailScreen].
-  /// 4. On [ProductNotFoundException] – opens the appropriate Open Food Facts
-  ///    link for the current platform (Play Store, App Store, or website).
+  /// 4. On [ProductNotFoundException] – opens the Play Store link.
   Future<void> _scanBarcode(BuildContext context, WidgetRef ref) async {
     final barcode = await Navigator.of(context).push<String>(
       MaterialPageRoute(builder: (_) => const ScannerScreen()),
@@ -124,7 +149,6 @@ class HomeScreen extends ConsumerWidget {
     final repo = ref.read(productRepositoryProvider);
 
     try {
-      // 1. Try to fetch from OFF or local cache
       final product = await repo.getProduct(barcode);
       logInfo('Product found: ${product.name}');
       if (context.mounted) {
@@ -133,8 +157,6 @@ class HomeScreen extends ConsumerWidget {
             builder: (_) => ProductDetailScreen(product: product),
           ),
         );
-        // After returning from the detail screen (where items may have been
-        // added or removed), invalidate the provider so the list refreshes.
         ref.invalidate(inventoryWithProductProvider);
       }
     } on ProductNotFoundException {

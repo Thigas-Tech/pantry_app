@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -66,8 +67,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final activeId = ref.watch<int>(activeInventoryProvider);
     final repo = ref.watch(productRepositoryProvider);
-    final inventoryFuture = repo.getInventoryForBarcode(widget.product.barcode);
+    final inventoryFuture = repo.getInventoryForBarcode(
+      widget.product.barcode,
+      inventoryId: activeId,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -96,8 +101,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            // Product image wrapped in Hero so it animates from/to the
-            // home screen inventory card.
             // Product image wrapped in Hero, loaded from cache when possible.
             if (widget.product.imageUrl != null)
               Hero(
@@ -184,9 +187,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  logError(
-                    'Error fetching inventory: ${snapshot.error}',
-                  );
+                  logError('Error fetching inventory: ${snapshot.error}');
                   return const Center(
                     child: Text('Failed to load inventory items.'),
                   );
@@ -247,6 +248,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// screen then rebuilds the inventory list by incrementing
   /// `_inventoryVersion`.
   Future<void> _openAddEditScreen({InventoryItem? existing}) async {
+    final activeId = ref.read<int>(activeInventoryProvider);
+
     // Suggest an expiry date based on the product category.
     String? suggested;
     if (existing == null && widget.product.category != null) {
@@ -270,6 +273,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           barcode: widget.product.barcode,
           existingItem: existing,
           suggestedExpiry: suggested,
+          inventoryId: activeId,
         ),
       ),
     );
@@ -301,10 +305,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       } on Exception catch (e) {
         logError('Inventory operation failed: $e');
         if (mounted) {
-          SnackbarHelper.showError(
-            context,
-            'Failed to save inventory item.',
-          );
+          SnackbarHelper.showError(context, 'Failed to save inventory item.');
         }
       }
     }
@@ -409,7 +410,7 @@ class _InventoryTile extends StatelessWidget {
       case 'pantry':
         return Icons.kitchen;
       case 'fridge':
-        return Icons.local_drink; // closest available icon
+        return Icons.local_drink;
       case 'freezer':
         return Icons.ac_unit;
       default:

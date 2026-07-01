@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/services/csv_service.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -56,7 +57,7 @@ class StatsScreen extends ConsumerWidget {
                 Text('Inventory items: ${counts[1]}'),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: () => _exportCsv(context, db),
+                  onPressed: () => _exportCsv(context, ref, db),
                   icon: const Icon(Icons.file_download),
                   label: const Text('Export as CSV'),
                 ),
@@ -76,12 +77,17 @@ class StatsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _exportCsv(BuildContext context, DatabaseHelper db) async {
+  Future<void> _exportCsv(
+    BuildContext context,
+    WidgetRef ref,
+    DatabaseHelper db,
+  ) async {
     logInfo('Export button pressed');
 
     try {
       final csvService = CsvService(db);
-      final csvString = await csvService.generateCsv();
+      final activeId = ref.read<int>(activeInventoryProvider);
+      final csvString = await csvService.generateCsv(inventoryId: activeId);
 
       if (csvString.isEmpty) {
         if (context.mounted) {

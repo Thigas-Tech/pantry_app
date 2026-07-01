@@ -23,8 +23,9 @@ import 'package:pantry_app/utils/logger.dart';
 ///
 /// ## Inventory management
 ///
-/// The repository also exposes CRUD methods for inventory items, delegating
-/// directly to [DatabaseHelper].
+/// The repository exposes CRUD methods for inventory items and for the
+/// named inventories (pantries) themselves. All item operations are scoped
+/// to a specific inventory via its [InventoryItem.inventoryId].
 ///
 /// ## Fallback API
 ///
@@ -66,7 +67,6 @@ class ProductRepository {
       return remote;
     } on ProductNotFoundException {
       logWarning('Product $barcode not found in primary API');
-      // Primary not found → try fallback if set
       if (_fallbackApi != null) {
         logInfo('Trying fallback API for $barcode');
         try {
@@ -94,16 +94,36 @@ class ProductRepository {
     }
   }
 
-  /// Retrieves all inventory items for the given [barcode].
-  Future<List<InventoryItem>> getInventoryForBarcode(String barcode) {
-    logInfo('Fetching inventory for barcode $barcode');
-    return _db.getInventoryItemsByBarcode(barcode);
+  // ---------- Named inventories ----------
+
+  /// Creates a new inventory (pantry) with the given [name].
+  Future<int> createInventory(String name) => _db.createInventory(name);
+
+  /// Returns all inventories.
+  Future<List<Map<String, dynamic>>> getInventories() => _db.getInventories();
+
+  /// Deletes the inventory with the given [id] and all its items.
+  Future<void> deleteInventory(int id) => _db.deleteInventory(id);
+
+  /// Renames the inventory with the given [id].
+  Future<void> renameInventory(int id, String newName) =>
+      _db.renameInventory(id, newName);
+
+  // ---------- Inventory items (scoped) ----------
+
+  /// Returns all inventory items for the given [barcode] inside [inventoryId].
+  Future<List<InventoryItem>> getInventoryForBarcode(
+    String barcode, {
+    required int inventoryId,
+  }) {
+    logInfo('Fetching inventory for barcode $barcode (inventory $inventoryId)');
+    return _db.getInventoryItemsByBarcode(barcode, inventoryId: inventoryId);
   }
 
   /// Inserts a new inventory item and returns its auto‑generated ID.
   Future<int> addInventoryItem(InventoryItem item) {
     logInfo(
-      '''Adding inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location}''',
+      '''Adding inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location} (inventory ${item.inventoryId})''',
     );
     return _db.insertInventoryItem(item);
   }
@@ -120,6 +140,26 @@ class ProductRepository {
   Future<int> deleteInventoryItem(int id) {
     logInfo('Deleting inventory item $id');
     return _db.deleteInventoryItem(id);
+  }
+
+  /// Returns joined inventory-with-product rows for a given [inventoryId].
+  Future<List<Map<String, dynamic>>> getInventoryWithProduct({
+    required int inventoryId,
+  }) {
+    return _db.getInventoryWithProduct(inventoryId: inventoryId);
+  }
+
+  /// Returns the total number of inventory items for a given [inventoryId]
+  /// or globally if `null`.
+  Future<int> getInventoryCount({int? inventoryId}) {
+    return _db.getInventoryCount(inventoryId: inventoryId);
+  }
+
+  /// Returns export data (joined with product info) for a given [inventoryId].
+  Future<List<Map<String, dynamic>>> getExportData({
+    required int inventoryId,
+  }) {
+    return _db.getExportData(inventoryId: inventoryId);
   }
 
   /// Inserts a product directly into the local cache.

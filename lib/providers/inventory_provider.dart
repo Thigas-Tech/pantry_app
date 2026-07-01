@@ -1,38 +1,34 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/screens/home_screen.dart';
 
-/// Provides the joined list of inventory items with their product metadata.
+/// Provides the joined list of inventory items for the currently active
+/// inventory.
 ///
-/// This [FutureProvider] is watched by the [HomeScreen] to display the pantry
-/// contents grouped by expiry status. It reads the [DatabaseHelper] via the
-/// [databaseProvider] and calls [DatabaseHelper.getInventoryWithProduct],
-/// which performs a single `INNER JOIN` query between `inventory` and
-/// `products`.
+/// This [FutureProvider] is watched by the HomeScreen to display the pantry
+/// contents grouped by expiry status. It reads the active inventory ID from
+/// [activeInventoryProvider] and calls [DatabaseHelper.getInventoryWithProduct]
+/// with that ID.
 ///
 /// ## Reactivity
 ///
-/// The provider is **automatically invalidated** by the [HomeScreen] after a
-/// new product is scanned and added to inventory, or after an inventory item
-/// is created / updated / deleted. The manual refresh button in the app bar
-/// also calls `ref.invalidate(inventoryWithProductProvider)` to force a
-/// re‑fetch.
-///
-/// ## States
-///
-/// As a [FutureProvider], it exposes three states to the UI:
-/// - **loading** – while the database query is running. The home screen shows
-///   a shimmer placeholder during this time.
-/// - **error** – if the database query throws an exception. The home screen
-///   displays the error message.
-/// - **data** – the list of [InventoryWithProduct] items, possibly empty.
+/// The provider is **automatically invalidated** whenever the inventory data
+/// changes (item added/updated/deleted) or when the active inventory is
+/// switched. This ensures the home screen always shows the current data.
 final inventoryWithProductProvider = FutureProvider<List<InventoryWithProduct>>(
   (ref) async {
     await Future<void>.delayed(Duration.zero);
+    final activeId = ref.watch<int>(activeInventoryProvider);
     final db = ref.watch(databaseProvider);
-    final rows = await db.getInventoryWithProduct();
+    final rows = await db.getInventoryWithProduct(inventoryId: activeId);
     return rows.map(InventoryWithProduct.fromMap).toList();
   },
 );
+
+/// Provides the list of all inventories (id, name).
+final inventoryListProvider = FutureProvider<List<Map<String, dynamic>>>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.getInventories();
+});

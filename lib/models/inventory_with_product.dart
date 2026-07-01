@@ -3,19 +3,20 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 
 /// A read‑only view that joins an [InventoryItem] with its corresponding
-/// [Product] metadata.
+/// [Product] metadata and inventory details.
 ///
 /// This class is **not** persisted directly. Instead, it is built on the fly
 /// by [DatabaseHelper.getInventoryWithProduct] using a SQL `INNER JOIN`
-/// between the `inventory` and `products` tables. It provides all the data
-/// needed by the home screen to display a single inventory card, avoiding
-/// the need for multiple separate queries.
+/// between the `inventory`, `products`, and `inventories` tables. It provides
+/// all the data needed by the home screen to display a single inventory card,
+/// avoiding the need for multiple separate queries.
 ///
 /// ## Fields
 ///
-/// The first eight fields mirror those of [InventoryItem]. The last two
-/// ([productName] and [productImageUrl]) are pulled from the `products` table
-/// and provide human‑readable labels and images.
+/// The first nine fields mirror those of [InventoryItem]. The last three
+/// ([productName], [productImageUrl], and [inventoryName]) are pulled from
+/// the joined tables and provide human‑readable labels, images, and inventory
+/// names.
 ///
 /// ## Immutability
 ///
@@ -24,9 +25,9 @@ import 'package:pantry_app/models/product.dart';
 class InventoryWithProduct {
   /// Constructs an [InventoryWithProduct] instance.
   ///
-  /// Only [barcode], [quantity], [unit], and [location] are required. All
-  /// other fields are optional because they may be missing from the database
-  /// row (e.g., a product may not have an image URL).
+  /// Only [barcode], [quantity], [unit], [location], and [inventoryId] are
+  /// required. All other fields are optional because they may be missing from
+  /// the database row (e.g., a product may not have an image URL).
   const InventoryWithProduct({
     /// The product barcode (foreign key).
     required this.barcode,
@@ -39,6 +40,9 @@ class InventoryWithProduct {
 
     /// The storage location (e.g. `'pantry'`, `'fridge'`).
     required this.location,
+
+    /// The ID of the inventory this item belongs to.
+    required this.inventoryId,
 
     /// The auto‑generated primary key of the inventory row.
     this.id,
@@ -60,6 +64,9 @@ class InventoryWithProduct {
 
     /// A URL to the product’s front image from Open Food Facts.
     this.productImageUrl,
+
+    /// The name of the inventory this item belongs to.
+    this.inventoryName,
   });
 
   /// Constructs an [InventoryWithProduct] from a raw database row.
@@ -79,8 +86,10 @@ class InventoryWithProduct {
       location: map['location'] as String? ?? 'pantry',
       notes: map['notes'] as String?,
       dateAdded: map['date_added'] as int?,
+      inventoryId: map['inventory_id'] as int? ?? 1,
       productName: map['product_name'] as String?,
       productImageUrl: map['product_image_url'] as String?,
+      inventoryName: map['inventory_name'] as String?,
     );
   }
 
@@ -108,9 +117,15 @@ class InventoryWithProduct {
   /// Epoch timestamp of when this item was first added to inventory.
   final int? dateAdded;
 
+  /// The ID of the inventory (pantry) this item belongs to.
+  final int inventoryId;
+
   /// The product name from the `products` table, for display purposes.
   final String? productName;
 
   /// A URL to the product’s front image from Open Food Facts.
   final String? productImageUrl;
+
+  /// The display name of the inventory this item belongs to.
+  final String? inventoryName;
 }

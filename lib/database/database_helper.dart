@@ -24,23 +24,21 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Two tables are created on first launch (version 1):
+/// Three tables are created on first launch (version 2):
 ///
 /// - [Product] – stores immutable (or rarely‑changing) product data fetched
 ///   from Open Food Facts. The barcode is the primary key. Nutrition values
-///   are denormalised into columns so that the UI can retrieve a complete
-///   product with a single row query.
+///   are denormalised into columns.
 /// - [InventoryItem] – stores instances of a product that the user has added to
-///   their pantry. Multiple rows can share the same barcode.
-///   The [InventoryItem.dateAdded] column is used by [cleanupOldEntries]
-///   to remove items that haven’t been
-///   re‑added for 60 days.
+///   a specific inventory (pantry). The `inventory_id` column links to the
+///   `inventories` table.
+/// - **inventories** – stores named inventories (e.g. “Home”, “Work”).
+///   Each inventory has an auto‑generated `id` and a `name`.
 ///
 /// ## Migrations
 ///
-/// Future schema changes should be handled in [_onUpgrade]. The current
-/// version is 1. When a migration is needed, bump the version number passed
-/// to [openDatabase] and add conditional logic inside [_onUpgrade].
+/// - Version 1 → 2: adds the `inventories` table and `inventory_id` column to
+///   `inventory`. Existing items are assigned to a default “Home” inventory.
 class DatabaseHelper {
   /// Returns the single [DatabaseHelper] instance.
   factory DatabaseHelper() => _instance;
@@ -89,7 +87,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 1,
+        version: 2,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -108,13 +106,14 @@ class DatabaseHelper {
     return join(documentsDir.path, 'pantry.db');
   }
 
-  /// Creates the `products` and `inventory` tables together with their
-  /// indexes.
+  /// Creates the `products`, `inventory` (v2), and `inventories` tables
+  /// together with their indexes.
   ///
   /// Called automatically by [openDatabase] when the database file does not
-  /// exist yet (version 1).
+  /// exist yet (version 2).
   Future<void> _onCreate(Database db, int version) async {
     logInfo('Creating database schema (version $version)');
+
     await db.execute('''
       CREATE TABLE products (
         barcode TEXT PRIMARY KEY,
@@ -135,6 +134,14 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
+      CREATE TABLE inventories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        created_at INTEGER NOT NULL
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE inventory (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         barcode TEXT NOT NULL,
@@ -144,7 +151,9 @@ class DatabaseHelper {
         location TEXT DEFAULT 'pantry',
         notes TEXT,
         date_added INTEGER,
-        FOREIGN KEY(barcode) REFERENCES products(barcode)
+        inventory_id INTEGER NOT NULL,
+        FOREIGN KEY(barcode) REFERENCES products(barcode),
+        FOREIGN KEY(inventory_id) REFERENCES inventories(id)
       )
     ''');
 
@@ -153,16 +162,88 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_inventory_barcode ON inventory(barcode)',
     );
+    await db.execute(
+      'CREATE INDEX idx_inventory_id ON inventory(inventory_id)',
+    );
+
+    // Create a default "Home" inventory.
+    await db.insert('inventories', {
+      'name': 'Home',
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+    });
+
     logInfo('Database schema created successfully');
   }
 
-  /// Placeholder for future database migrations.
-  ///
-  /// When the database version is increased, add conditional blocks here to
-  /// alter the schema without losing user data.
+  /// Handles database upgrades from version 1 to version 2.
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     logInfo('Database upgrade: $oldVersion → $newVersion');
-    // Example: if (oldVersion < 2) { … }
+
+    if (oldVersion < 2) {
+      // Create the inventories table.
+      await db.execute('''
+        CREATE TABLE inventories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          created_at INTEGER NOT NULL
+        )
+      ''');
+
+      // Add inventory_id column to inventory (nullable during migration).
+      await db.execute('ALTER TABLE inventory ADD COLUMN inventory_id INTEGER');
+
+      // Create a default "Home" inventory.
+      final homeId = await db.insert('inventories', {
+        'name': 'Home',
+        'created_at': DateTime.now().millisecondsSinceEpoch,
+      });
+
+      // Assign all existing items to the Home inventory.
+      await db.update(
+        'inventory',
+        {'inventory_id': homeId},
+        where: 'inventory_id IS NULL',
+      );
+
+      logInfo('Migration to version 2 completed');
+    }
+  }
+
+  // --------------------- Inventories CRUD ---------------------
+
+  /// Creates a new inventory with the given [name].
+  Future<int> createInventory(String name) async {
+    final db = await database;
+    return db.insert('inventories', {
+      'name': name,
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
+  /// Returns all inventories, ordered by creation time.
+  Future<List<Map<String, dynamic>>> getInventories() async {
+    final db = await database;
+    return db.rawQuery(
+      'SELECT id, name, created_at FROM inventories ORDER BY created_at ASC',
+    );
+  }
+
+  /// Deletes the inventory with the given [id] and all its items.
+  Future<void> deleteInventory(int id) async {
+    final db = await database;
+    await db.delete('inventory', where: 'inventory_id = ?', whereArgs: [id]);
+    await db.delete('inventories', where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Renames the inventory with the given [id].
+  Future<void> renameInventory(int id, String newName) async {
+    final db = await database;
+    await db.update(
+      'inventories',
+      {'name': newName},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   // --------------------- Product CRUD ---------------------
@@ -246,12 +327,13 @@ class DatabaseHelper {
       rethrow;
     }
   }
+
   // --------------------- Inventory CRUD ---------------------
 
   /// Inserts a new inventory item.
   ///
-  /// The returned integer is the auto‑generated `id` of the new row. This ID
-  /// can be used later for updates or deletion.
+  /// The [InventoryItem.inventoryId] must be set to a valid inventory ID.
+  /// The returned integer is the auto‑generated `id` of the new row.
   Future<int> insertInventoryItem(InventoryItem item) async {
     logInfo(
       '''Inserting inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location}''',
@@ -267,22 +349,20 @@ class DatabaseHelper {
     }
   }
 
-  /// Retrieves all inventory items, optionally filtered by location.
-  ///
-  /// The `expired` parameter is currently unused and reserved for a future
-  /// implementation using SQLite date functions.
+  /// Retrieves all inventory items for a specific [inventoryId], optionally
+  /// filtered by location.
   Future<List<InventoryItem>> getInventoryItems({
+    required int inventoryId,
     String? location,
-    bool? expired,
   }) async {
     try {
       final db = await database;
-      String? where;
-      List<dynamic>? whereArgs;
+      var where = 'inventory_id = ?';
+      final whereArgs = <dynamic>[inventoryId];
 
       if (location != null) {
-        where = 'location = ?';
-        whereArgs = [location];
+        where += ' AND location = ?';
+        whereArgs.add(location);
       }
 
       final result = await db.query(
@@ -299,15 +379,18 @@ class DatabaseHelper {
     }
   }
 
-  /// Returns all inventory entries for a specific barcode, ordered by expiry
-  /// date (oldest first).
-  Future<List<InventoryItem>> getInventoryItemsByBarcode(String barcode) async {
+  /// Returns all inventory entries for a specific barcode and [inventoryId],
+  /// ordered by expiry date (oldest first).
+  Future<List<InventoryItem>> getInventoryItemsByBarcode(
+    String barcode, {
+    required int inventoryId,
+  }) async {
     try {
       final db = await database;
       final result = await db.query(
         'inventory',
-        where: 'barcode = ?',
-        whereArgs: [barcode],
+        where: 'barcode = ? AND inventory_id = ?',
+        whereArgs: [barcode, inventoryId],
         orderBy: 'expiry_date ASC',
       );
       logInfo('Fetched ${result.length} inventory items for barcode $barcode');
@@ -360,14 +443,18 @@ class DatabaseHelper {
     }
   }
 
-  /// Retrieves all inventory rows joined with product metadata.
+  /// Retrieves all inventory rows joined with product metadata for a specific
+  /// [inventoryId].
   ///
   /// This single query replaces multiple separate lookups and is used to build
   /// the home‑screen inventory list.
-  Future<List<Map<String, dynamic>>> getInventoryWithProduct() async {
+  Future<List<Map<String, dynamic>>> getInventoryWithProduct({
+    required int inventoryId,
+  }) async {
     try {
       final db = await database;
-      final result = await db.rawQuery('''
+      final result = await db.rawQuery(
+        '''
         SELECT
           inventory.id,
           inventory.barcode,
@@ -377,12 +464,18 @@ class DatabaseHelper {
           inventory.location,
           inventory.notes,
           inventory.date_added,
+          inventory.inventory_id,
           products.name AS product_name,
-          products.image_url AS product_image_url
+          products.image_url AS product_image_url,
+          inventories.name AS inventory_name
         FROM inventory
         INNER JOIN products ON inventory.barcode = products.barcode
+        INNER JOIN inventories ON inventory.inventory_id = inventories.id
+        WHERE inventory.inventory_id = ?
         ORDER BY inventory.expiry_date ASC
-      ''');
+      ''',
+        [inventoryId],
+      );
       logInfo('Fetched ${result.length} inventory-with-product rows');
       return result;
     } on Exception catch (e) {
@@ -400,21 +493,35 @@ class DatabaseHelper {
         0;
   }
 
-  /// Returns the total number of rows in the inventory table.
-  Future<int> getInventoryCount() async {
+  /// Returns the total number of rows in the inventory table for a specific
+  /// [inventoryId], or globally if `null`.
+  Future<int> getInventoryCount({int? inventoryId}) async {
     final db = await database;
+    if (inventoryId != null) {
+      return Sqflite.firstIntValue(
+            await db.rawQuery(
+              'SELECT COUNT(*) FROM inventory WHERE inventory_id = ?',
+              [inventoryId],
+            ),
+          ) ??
+          0;
+    }
     return Sqflite.firstIntValue(
           await db.rawQuery('SELECT COUNT(*) FROM inventory'),
         ) ??
         0;
   }
 
-  /// Returns all inventory rows joined with product names and nutrition,
-  /// ordered by expiry date. This is used for CSV export.
-  Future<List<Map<String, dynamic>>> getExportData() async {
+  /// Returns all inventory rows joined with product names and nutrition for a
+  /// specific [inventoryId], ordered by expiry date. This is used for CSV
+  /// export.
+  Future<List<Map<String, dynamic>>> getExportData({
+    required int inventoryId,
+  }) async {
     try {
       final db = await database;
-      final result = await db.rawQuery('''
+      final result = await db.rawQuery(
+        '''
         SELECT
           products.name AS product_name,
           products.brand,
@@ -431,11 +538,16 @@ class DatabaseHelper {
           products.carbs_g,
           products.fat_g,
           products.fiber_g,
-          products.salt_g
+          products.salt_g,
+          inventories.name AS inventory_name
         FROM inventory
         INNER JOIN products ON inventory.barcode = products.barcode
+        INNER JOIN inventories ON inventory.inventory_id = inventories.id
+        WHERE inventory.inventory_id = ?
         ORDER BY inventory.expiry_date ASC
-      ''');
+      ''',
+        [inventoryId],
+      );
       logInfo('Export data: ${result.length} rows');
       return result;
     } on Exception catch (e) {
@@ -446,7 +558,6 @@ class DatabaseHelper {
 
   // --------------------- Mapping helpers ---------------------
 
-  /// Converts a [Product] into a row map for SQLite.
   Map<String, dynamic> _productToMap(Product p) => {
     'barcode': p.barcode,
     'name': p.name,
@@ -464,10 +575,6 @@ class DatabaseHelper {
     'last_synced': p.lastSynced,
   };
 
-  /// Builds a [Product] from a raw database row.
-  ///
-  /// Numeric fields are first read as `num` and then converted to `double`
-  /// because SQLite may store them as integers when the decimal part is zero.
   Product _productFromMap(Map<String, dynamic> map) => Product(
     barcode: map['barcode'] as String,
     name: map['name'] as String,
@@ -485,10 +592,6 @@ class DatabaseHelper {
     lastSynced: map['last_synced'] as int?,
   );
 
-  /// Converts an [InventoryItem] into a row map.
-  ///
-  /// If the item’s `id` is `null` (new item) the map does not include the
-  /// `id` field, allowing SQLite to auto‑generate the primary key.
   Map<String, dynamic> _inventoryToMap(InventoryItem item) => {
     if (item.id != null) 'id': item.id,
     'barcode': item.barcode,
@@ -498,13 +601,9 @@ class DatabaseHelper {
     'location': item.location,
     'notes': item.notes,
     'date_added': item.dateAdded,
+    'inventory_id': item.inventoryId,
   };
 
-  /// Builds an [InventoryItem] from a raw database row.
-  ///
-  /// Defaults are applied to `quantity`, `unit`, and `location` in case the
-  /// database contains unexpected `NULL` values (should not happen with the
-  /// current schema, but provides robustness).
   InventoryItem _inventoryFromMap(Map<String, dynamic> map) => InventoryItem(
     id: map['id'] as int?,
     barcode: map['barcode'] as String,
@@ -514,5 +613,6 @@ class DatabaseHelper {
     location: map['location'] as String? ?? 'pantry',
     notes: map['notes'] as String?,
     dateAdded: map['date_added'] as int?,
+    inventoryId: map['inventory_id'] as int? ?? 1,
   );
 }

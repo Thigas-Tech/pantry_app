@@ -22,6 +22,7 @@ part 'inventory_item.g.dart';
 ///   the database. After insertion, [id] holds the row ID.
 /// - The [barcode] links this item to a [Product] in the `products` table via
 ///   a foreign key relationship.
+/// - The [inventoryId] links this item to a named inventory (pantry).
 ///
 /// ## Defaults
 ///
@@ -30,6 +31,7 @@ part 'inventory_item.g.dart';
 /// - [quantity] defaults to `1`.
 /// - [unit] defaults to `'pcs'` (pieces).
 /// - [location] defaults to `'pantry'`.
+/// - [inventoryId] defaults to `1` (the default "Home" inventory).
 ///
 /// ## Date fields
 ///
@@ -104,14 +106,20 @@ abstract class InventoryItem with _$InventoryItem {
     /// Set automatically when the user creates the item. Used by the
     /// database cleanup routine to purge old entries after 60 days.
     @JsonKey(name: 'date_added') int? dateAdded,
+
+    /// The ID of the inventory (pantry) this item belongs to.
+    ///
+    /// This is a foreign key referencing the `inventories` table.
+    /// Defaults to `1` (the default "Home" inventory).
+    @JsonKey(name: 'inventory_id') @Default(1) int inventoryId,
   }) = _InventoryItem;
 
   /// Creates an [InventoryItem] from a JSON map.
   ///
-  /// The map is expected to contain the keys `expiry_date` and `date_added`
-  /// (as configured by the [@JsonKey] annotations). This factory is used when
-  /// deserializing data from the database (via the raw row map) or from API
-  /// responses.
+  /// The map is expected to contain the keys `expiry_date`, `date_added`, and
+  /// `inventory_id` (as configured by the [@JsonKey] annotations). This
+  /// factory is used when deserializing data from the database (via the raw
+  /// row map) or from API responses.
   factory InventoryItem.fromJson(Map<String, dynamic> json) =>
       _$InventoryItemFromJson(json);
 }

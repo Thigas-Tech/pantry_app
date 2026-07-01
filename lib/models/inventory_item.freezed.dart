@@ -51,7 +51,11 @@ mixin _$InventoryItem {
 ///
 /// Set automatically when the user creates the item. Used by the
 /// database cleanup routine to purge old entries after 60 days.
-@JsonKey(name: 'date_added') int? get dateAdded;
+@JsonKey(name: 'date_added') int? get dateAdded;/// The ID of the inventory (pantry) this item belongs to.
+///
+/// This is a foreign key referencing the `inventories` table.
+/// Defaults to `1` (the default "Home" inventory).
+@JsonKey(name: 'inventory_id') int get inventoryId;
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -64,16 +68,16 @@ $InventoryItemCopyWith<InventoryItem> get copyWith => _$InventoryItemCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded);
+int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded,inventoryId);
 
 @override
 String toString() {
-  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded)';
+  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId)';
 }
 
 
@@ -84,7 +88,7 @@ abstract mixin class $InventoryItemCopyWith<$Res>  {
   factory $InventoryItemCopyWith(InventoryItem value, $Res Function(InventoryItem) _then) = _$InventoryItemCopyWithImpl;
 @useResult
 $Res call({
- String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded
+ String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded,@JsonKey(name: 'inventory_id') int inventoryId
 });
 
 
@@ -101,7 +105,7 @@ class _$InventoryItemCopyWithImpl<$Res>
 
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
   return _then(_self.copyWith(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
@@ -111,7 +115,8 @@ as String,expiryDate: freezed == expiryDate ? _self.expiryDate : expiryDate // i
 as String?,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as String,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -196,10 +201,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _InventoryItem() when $default != null:
-return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded);case _:
+return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId);case _:
   return orElse();
 
 }
@@ -217,10 +222,10 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId)  $default,) {final _that = this;
 switch (_that) {
 case _InventoryItem():
-return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded);case _:
+return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -237,10 +242,10 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId)?  $default,) {final _that = this;
 switch (_that) {
 case _InventoryItem() when $default != null:
-return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded);case _:
+return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId);case _:
   return null;
 
 }
@@ -252,7 +257,7 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 @JsonSerializable()
 
 class _InventoryItem implements InventoryItem {
-  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pcs', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded});
+  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pcs', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded, @JsonKey(name: 'inventory_id') this.inventoryId = 1});
   factory _InventoryItem.fromJson(Map<String, dynamic> json) => _$InventoryItemFromJson(json);
 
 /// The barcode of the product (e.g. EAN‑13, UPC).
@@ -299,6 +304,11 @@ class _InventoryItem implements InventoryItem {
 /// Set automatically when the user creates the item. Used by the
 /// database cleanup routine to purge old entries after 60 days.
 @override@JsonKey(name: 'date_added') final  int? dateAdded;
+/// The ID of the inventory (pantry) this item belongs to.
+///
+/// This is a foreign key referencing the `inventories` table.
+/// Defaults to `1` (the default "Home" inventory).
+@override@JsonKey(name: 'inventory_id') final  int inventoryId;
 
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
@@ -313,16 +323,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded);
+int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded,inventoryId);
 
 @override
 String toString() {
-  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded)';
+  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId)';
 }
 
 
@@ -333,7 +343,7 @@ abstract mixin class _$InventoryItemCopyWith<$Res> implements $InventoryItemCopy
   factory _$InventoryItemCopyWith(_InventoryItem value, $Res Function(_InventoryItem) _then) = __$InventoryItemCopyWithImpl;
 @override @useResult
 $Res call({
- String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded
+ String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded,@JsonKey(name: 'inventory_id') int inventoryId
 });
 
 
@@ -350,7 +360,7 @@ class __$InventoryItemCopyWithImpl<$Res>
 
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
   return _then(_InventoryItem(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
@@ -360,7 +370,8 @@ as String,expiryDate: freezed == expiryDate ? _self.expiryDate : expiryDate // i
 as String?,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as String,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

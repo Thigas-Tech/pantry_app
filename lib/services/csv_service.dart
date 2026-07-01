@@ -17,10 +17,11 @@ class CsvService {
 
   // ---------- Export ----------
 
-  /// Generates a CSV string of all inventory items with product details.
-  Future<String> generateCsv() async {
-    logInfo('Generating CSV export');
-    final rows = await _db.getExportData();
+  /// Generates a CSV string of all inventory items with product details for
+  /// the given [inventoryId].
+  Future<String> generateCsv({required int inventoryId}) async {
+    logInfo('Generating CSV export for inventory $inventoryId');
+    final rows = await _db.getExportData(inventoryId: inventoryId);
     logInfo('CSV export: ${rows.length} rows');
     if (rows.isEmpty) {
       logInfo('No data to export');
@@ -44,6 +45,7 @@ class CsvService {
       'Fat (g/100g)',
       'Fiber (g/100g)',
       'Salt (g/100g)',
+      'Inventory Name',
     ];
 
     final buffer = StringBuffer()..writeln(headers.join(','));
@@ -71,6 +73,7 @@ class CsvService {
         row['fat_g']?.toString() ?? '',
         row['fiber_g']?.toString() ?? '',
         row['salt_g']?.toString() ?? '',
+        _escapeCsvField(row['inventory_name']),
       ];
       buffer.writeln(values.join(','));
     }
@@ -92,9 +95,15 @@ class CsvService {
 
   /// Parses the CSV file at [filePath] and inserts/updates the database.
   ///
+  /// The [inventoryId] is assigned to every new inventory item created from
+  /// the CSV data.
+  ///
   /// Returns a map with `products` (count) and `items` (count) imported.
-  Future<Map<String, int>> importCsv(String filePath) async {
-    logInfo('CSV import from $filePath');
+  Future<Map<String, int>> importCsv(
+    String filePath, {
+    required int inventoryId,
+  }) async {
+    logInfo('CSV import from $filePath (inventory $inventoryId)');
 
     final file = File(filePath);
     if (!file.existsSync()) {
@@ -170,6 +179,7 @@ class CsvService {
           expiryDate: expiryStr?.isEmpty == true ? null : expiryStr,
           notes: map['Notes'].emptyAsNull,
           dateAdded: dateAdded,
+          inventoryId: inventoryId,
         );
 
         await _db.insertInventoryItem(item);
