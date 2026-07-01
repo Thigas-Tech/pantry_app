@@ -14,7 +14,8 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Displays full product details and the associated inventory entries.
+/// Displays full product details and the associated inventory entries
+/// for the currently active pantry.
 ///
 /// This screen is reached after scanning a known barcode or tapping an
 /// inventory card on the home screen. It shows:
@@ -22,9 +23,10 @@ import 'package:url_launcher/url_launcher.dart';
 /// - All nutritional information (per 100 g / 100 ml) presented in a styled
 ///   [Table] with alternating row colours.
 /// - The ingredients list, collapsed by default.
-/// - A list of existing inventory items for this product, each with edit and
-///   delete actions.
-/// - An "Add to Inventory" button that opens the [AddToInventoryScreen].
+/// - A list of existing inventory items for this product, scoped to the
+///   active pantry (managed via [activeInventoryProvider]).
+/// - An "Add to Inventory" button that opens the [AddToInventoryScreen]
+///   and creates the item inside the active pantry.
 /// - A button in the app bar that opens the product’s page on Open Food Facts.
 ///
 /// ## State

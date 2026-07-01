@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
+import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
@@ -10,6 +11,7 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 /// - **Theme**: choose between system, light, or dark mode.
 /// - **Notifications**: enable or disable expiry reminders.
 /// - **Data retention**: set how many days before old items are cleaned up.
+/// - **Manage Inventories**: create, rename, or delete pantries.
 class SettingsScreen extends ConsumerWidget {
   /// Creates a [SettingsScreen] widget.
   const SettingsScreen({super.key});
@@ -24,7 +26,6 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Theme selector
           ListTile(
             title: const Text('Theme'),
             subtitle: Text(themeMode.name),
@@ -32,8 +33,6 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _showThemeDialog(context, ref),
           ),
           const Divider(),
-
-          // Notification toggle
           SwitchListTile(
             title: const Text('Expiry notifications'),
             subtitle: const Text('Remind before food expires'),
@@ -53,13 +52,27 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           const Divider(),
-
-          // Retention days
           ListTile(
             title: const Text('Data retention'),
             subtitle: Text('${settings.retentionDays} days'),
             leading: const Icon(Icons.timer),
             onTap: () => _showRetentionDialog(context, ref),
+          ),
+          const Divider(),
+
+          /// Opens the [ManageInventoriesScreen] where the user can create,
+          /// rename, or delete pantries.
+          ListTile(
+            title: const Text('Manage Inventories'),
+            subtitle: const Text('Create, rename, or delete pantries'),
+            leading: const Icon(Icons.folder),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ManageInventoriesScreen(),
+                ),
+              );
+            },
           ),
         ],
       ),

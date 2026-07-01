@@ -7,8 +7,11 @@ import 'package:pantry_app/utils/logger.dart';
 
 /// Handles CSV export and import for the pantry database.
 ///
-/// All operations work with the local SQLite database and are
-/// platform‑independent within the Android app.
+/// All operations are scoped to a specific inventory via its
+/// [InventoryItem.inventoryId]. Export generates a CSV for the given inventory;
+/// import adds all parsed items to the given inventory.
+///
+/// The CSV parsing is platform‑independent within the Android app.
 class CsvService {
   /// Creates a [CsvService] that uses the given [DatabaseHelper].
   CsvService(this._db);

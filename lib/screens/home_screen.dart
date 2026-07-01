@@ -60,6 +60,18 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
     final inventoriesAsync = ref.watch(inventoryListProvider);
+    final activeId = ref.watch<int>(activeInventoryProvider);
+
+    // Find the active inventory name.
+    var appBarTitle = 'My Pantry';
+    inventoriesAsync.whenData((list) {
+      for (final inv in list) {
+        if (inv['id'] == activeId) {
+          appBarTitle = inv['name'] as String;
+          break;
+        }
+      }
+    });
 
     // Build the inventory switcher dropdown.
     Widget? switcher;
@@ -86,13 +98,10 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Pantry'),
+        title: Text(appBarTitle),
         centerTitle: true,
         actions: [
           if (switcher != null) switcher!,
-
-          /// Opens the [SettingsScreen] where the user can adjust theme,
-          /// notifications, and data retention.
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
@@ -106,6 +115,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+
       body: inventoryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) {

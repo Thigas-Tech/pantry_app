@@ -13,16 +13,19 @@ import 'package:share_plus/share_plus.dart';
 
 /// A statistics and data‑export screen for Android.
 ///
-/// Shows aggregate pantry counts and allows the user to:
-/// - **Export** all inventory as a CSV file via the system share sheet.
+/// Shows aggregate pantry counts (across all inventories) and allows the
+/// user to:
+/// - **Export** the currently active pantry's inventory as a CSV file via
+///   the system share sheet. The export is scoped to the pantry selected
+///   on the home screen.
 /// - **Import** a previously exported CSV file (planned – currently shows
 ///   a “coming soon” message).
 ///
 /// ## Export
 ///
 /// The CSV is written to a temporary directory and then shared using
-/// `share_plus`. The system share sheet offers apps like email,
-/// messaging, or cloud storage.
+/// `share_plus`. The exported data corresponds to the active inventory
+/// managed by [activeInventoryProvider].
 ///
 /// ## Import (planned)
 ///
