@@ -29,7 +29,7 @@ linter:
     - directives_ordering
     - flutter_style_todos
     - join_return_with_assignment
-    - lines_longer_than_80_chars          # optional; keep or remove
+    - lines_longer_than_80_chars
     - prefer_adjacent_string_concatenation
     - prefer_collection_literals
     - prefer_const_constructors
