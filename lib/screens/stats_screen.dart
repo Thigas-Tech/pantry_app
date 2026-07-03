@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/services/csv_service.dart';
@@ -37,9 +38,10 @@ class StatsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final db = ref.watch(databaseProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Pantry Stats')),
+      appBar: AppBar(title: Text(l10n.pantryStats)),
       body: FutureBuilder(
         future: Future.wait([db.getProductCount(), db.getInventoryCount()]),
         builder: (context, snapshot) {
@@ -56,21 +58,21 @@ class StatsScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Total products: ${counts[0]}'),
-                Text('Inventory items: ${counts[1]}'),
+                Text('${l10n.totalProducts}: ${counts[0]}'),
+                Text('${l10n.inventoryItems}: ${counts[1]}'),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () => _exportCsv(context, ref, db),
                   icon: const Icon(Icons.file_download),
-                  label: const Text('Export as CSV'),
+                  label: Text(l10n.exportCsv),
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
                   onPressed: () {
-                    SnackbarHelper.showInfo(context, 'CSV import coming soon.');
+                    SnackbarHelper.showInfo(context, l10n.csvImportComingSoon);
                   },
                   icon: const Icon(Icons.file_upload),
-                  label: const Text('Import CSV'),
+                  label: Text(l10n.importCsv),
                 ),
               ],
             ),
@@ -85,6 +87,7 @@ class StatsScreen extends ConsumerWidget {
     WidgetRef ref,
     DatabaseHelper db,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     logInfo('Export button pressed');
 
     try {
@@ -94,7 +97,7 @@ class StatsScreen extends ConsumerWidget {
 
       if (csvString.isEmpty) {
         if (context.mounted) {
-          SnackbarHelper.showInfo(context, 'No data to export.');
+          SnackbarHelper.showInfo(context, l10n.noDataToExport);
         }
         return;
       }
@@ -105,12 +108,12 @@ class StatsScreen extends ConsumerWidget {
 
       if (context.mounted) {
         await SharePlus.instance.share(
-          ShareParams(files: [XFile(filePath)], subject: 'Pantry Export'),
+          ShareParams(files: [XFile(filePath)], subject: l10n.pantryExport),
         );
       }
     } on Exception catch (e) {
       if (context.mounted) {
-        SnackbarHelper.showError(context, 'Export failed: $e');
+        SnackbarHelper.showError(context, '${l10n.exportFailed}: $e');
       }
     }
   }

@@ -210,4 +210,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get expiryPrefix => 'Exp';
+
+  @override
+  String get switchPantry => 'Switch pantry';
+
+  @override
+  String get couldNotOpenPlayStore => 'Could not open the Play Store.';
+
+  @override
+  String get viewOnOpenFoodFacts => 'View on Open Food Facts';
+
+  @override
+  String get couldNotOpenLink => 'Could not open the link.';
+
+  @override
+  String get nutrient => 'Nutrient';
+
+  @override
+  String get inLocation => 'in';
+
+  @override
+  String get noExpiry => 'No expiry';
+
+  @override
+  String get deleteItemTitle => 'Delete item?';
+
+  @override
+  String get deleteItemContent => 'This cannot be undone.';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get failedToLoadInventoryItems => 'Failed to load inventory items.';
+
+  @override
+  String get enterPositiveNumber => 'Enter a positive number';
+
+  @override
+  String get csvImportComingSoon => 'CSV import coming soon.';
+
+  @override
+  String get noDataToExport => 'No data to export.';
+
+  @override
+  String get pantryExport => 'Pantry Export';
+
+  @override
+  String get exportFailed => 'Export failed';
+
+  @override
+  String get notificationsEnabled => 'Notifications enabled.';
+
+  @override
+  String get notificationsDisabled => 'Notifications disabled.';
+
+  @override
+  String themeChanged(String theme) {
+    return 'Theme: $theme';
+  }
+
+  @override
+  String retentionDaysValue(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get dataRetentionDialogTitle => 'Data retention (days)';
+
+  @override
+  String get daysLabel => 'Days';
+
+  @override
+  String retentionPeriodSet(int days) {
+    return 'Retention period set to $days days.';
+  }
+
+  @override
+  String get noInventories => 'No inventories.';
+
+  @override
+  String itemsCount(int count) {
+    return 'Items: $count';
+  }
+
+  @override
+  String get nameLabel => 'Name';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get rename => 'Rename';
+
+  @override
+  String inventoryCreated(String name) {
+    return '\"$name\" created.';
+  }
+
+  @override
+  String inventoryRenamed(String name) {
+    return 'Renamed to \"$name\".';
+  }
+
+  @override
+  String inventoryDeleted(String name) {
+    return '\"$name\" deleted.';
+  }
+
+  @override
+  String get couldNotCreateInventory => 'Could not create inventory.';
+
+  @override
+  String get couldNotRenameInventory => 'Could not rename inventory.';
+
+  @override
+  String get couldNotDeleteInventory => 'Could not delete inventory.';
 }

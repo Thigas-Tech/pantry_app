@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
@@ -18,24 +19,25 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final themeMode = ref.watch(themeModeProvider);
     final settings = ref.watch(settingsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           ListTile(
-            title: const Text('Theme'),
+            title: Text(l10n.theme),
             subtitle: Text(themeMode.name),
             leading: const Icon(Icons.brightness_6),
             onTap: () => _showThemeDialog(context, ref),
           ),
           const Divider(),
           SwitchListTile(
-            title: const Text('Expiry notifications'),
-            subtitle: const Text('Remind before food expires'),
+            title: Text(l10n.expiryNotifications),
+            subtitle: Text(l10n.remindBeforeExpiry),
             secondary: const Icon(Icons.notifications_active),
             value: settings.notificationsEnabled,
             onChanged: (value) {
@@ -46,15 +48,17 @@ class SettingsScreen extends ConsumerWidget {
               if (context.mounted) {
                 SnackbarHelper.showInfo(
                   context,
-                  value ? 'Notifications enabled.' : 'Notifications disabled.',
+                  value
+                      ? l10n.notificationsEnabled
+                      : l10n.notificationsDisabled,
                 );
               }
             },
           ),
           const Divider(),
           ListTile(
-            title: const Text('Data retention'),
-            subtitle: Text('${settings.retentionDays} days'),
+            title: Text(l10n.dataRetention),
+            subtitle: Text(l10n.retentionDaysValue(settings.retentionDays)),
             leading: const Icon(Icons.timer),
             onTap: () => _showRetentionDialog(context, ref),
           ),
@@ -63,8 +67,8 @@ class SettingsScreen extends ConsumerWidget {
           /// Opens the [ManageInventoriesScreen] where the user can create,
           /// rename, or delete pantries.
           ListTile(
-            title: const Text('Manage Inventories'),
-            subtitle: const Text('Create, rename, or delete pantries'),
+            title: Text(l10n.manageInventories),
+            subtitle: Text(l10n.manageInventoriesSub),
             leading: const Icon(Icons.folder),
             onTap: () async {
               await Navigator.of(context).push(
@@ -80,15 +84,13 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   /// Shows a dialog with the three theme options.
-  ///
-  /// When the user picks a theme, [themeModeProvider] is updated and the
-  /// entire app rebuilds with the new theme.
   Future<void> _showThemeDialog(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final current = ref.read(themeModeProvider);
     final selected = await showDialog<ThemeModeOption>(
       context: context,
       builder: (ctx) => SimpleDialog(
-        title: const Text('Choose theme'),
+        title: Text(l10n.chooseTheme),
         children: [
           RadioGroup<ThemeModeOption>(
             groupValue: current,
@@ -110,35 +112,33 @@ class SettingsScreen extends ConsumerWidget {
       logInfo('Theme changed to ${selected.name}');
       ref.read(themeModeProvider.notifier).value = selected;
       if (context.mounted) {
-        SnackbarHelper.showInfo(context, 'Theme: ${selected.name}');
+        SnackbarHelper.showInfo(context, l10n.themeChanged(selected.name));
       }
     }
   }
 
   /// Shows a dialog that lets the user type a new retention period in days.
-  ///
-  /// The value must be a positive integer. If the user enters a valid value
-  /// and taps Save, [settingsProvider] is updated.
   Future<void> _showRetentionDialog(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(
       text: ref.read(settingsProvider).retentionDays.toString(),
     );
     final days = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Data retention (days)'),
+        title: Text(l10n.dataRetentionDialogTitle),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: '60',
-            labelText: 'Days',
+            labelText: l10n.daysLabel,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -147,7 +147,7 @@ class SettingsScreen extends ConsumerWidget {
                 Navigator.pop(ctx, value);
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -158,7 +158,7 @@ class SettingsScreen extends ConsumerWidget {
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
-          'Retention period set to $days days.',
+          l10n.retentionPeriodSet(days),
         );
       }
     }

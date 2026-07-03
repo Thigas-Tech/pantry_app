@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
-import 'app_localizations_pt.dart';
 
 // ignore_for_file: type=lint
 
@@ -91,8 +90,7 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('en'),
-    Locale('pt')
+    Locale('en')
   ];
 
   /// No description provided for @appTitle.
@@ -496,6 +494,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Exp'**
   String get expiryPrefix;
+
+  /// No description provided for @switchPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch pantry'**
+  String get switchPantry;
+
+  /// No description provided for @couldNotOpenPlayStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the Play Store.'**
+  String get couldNotOpenPlayStore;
+
+  /// No description provided for @viewOnOpenFoodFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'View on Open Food Facts'**
+  String get viewOnOpenFoodFacts;
+
+  /// No description provided for @couldNotOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link.'**
+  String get couldNotOpenLink;
+
+  /// No description provided for @nutrient.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrient'**
+  String get nutrient;
+
+  /// No description provided for @inLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'in'**
+  String get inLocation;
+
+  /// No description provided for @noExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'No expiry'**
+  String get noExpiry;
+
+  /// No description provided for @deleteItemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete item?'**
+  String get deleteItemTitle;
+
+  /// No description provided for @deleteItemContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This cannot be undone.'**
+  String get deleteItemContent;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @failedToLoadInventoryItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load inventory items.'**
+  String get failedToLoadInventoryItems;
+
+  /// No description provided for @enterPositiveNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive number'**
+  String get enterPositiveNumber;
+
+  /// No description provided for @csvImportComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV import coming soon.'**
+  String get csvImportComingSoon;
+
+  /// No description provided for @noDataToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'No data to export.'**
+  String get noDataToExport;
+
+  /// No description provided for @pantryExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry Export'**
+  String get pantryExport;
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get exportFailed;
+
+  /// No description provided for @notificationsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications enabled.'**
+  String get notificationsEnabled;
+
+  /// No description provided for @notificationsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications disabled.'**
+  String get notificationsDisabled;
+
+  /// No description provided for @themeChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme: {theme}'**
+  String themeChanged(String theme);
+
+  /// No description provided for @retentionDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String retentionDaysValue(int days);
+
+  /// No description provided for @dataRetentionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data retention (days)'**
+  String get dataRetentionDialogTitle;
+
+  /// No description provided for @daysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Days'**
+  String get daysLabel;
+
+  /// No description provided for @retentionPeriodSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Retention period set to {days} days.'**
+  String retentionPeriodSet(int days);
+
+  /// No description provided for @noInventories.
+  ///
+  /// In en, this message translates to:
+  /// **'No inventories.'**
+  String get noInventories;
+
+  /// No description provided for @itemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Items: {count}'**
+  String itemsCount(int count);
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get nameLabel;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get rename;
+
+  /// No description provided for @inventoryCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" created.'**
+  String inventoryCreated(String name);
+
+  /// No description provided for @inventoryRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Renamed to \"{name}\".'**
+  String inventoryRenamed(String name);
+
+  /// No description provided for @inventoryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" deleted.'**
+  String inventoryDeleted(String name);
+
+  /// No description provided for @couldNotCreateInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create inventory.'**
+  String get couldNotCreateInventory;
+
+  /// No description provided for @couldNotRenameInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not rename inventory.'**
+  String get couldNotRenameInventory;
+
+  /// No description provided for @couldNotDeleteInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete inventory.'**
+  String get couldNotDeleteInventory;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -507,7 +709,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'pt'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -519,7 +721,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'en': return AppLocalizationsEn();
-    case 'pt': return AppLocalizationsPt();
   }
 
   throw FlutterError(

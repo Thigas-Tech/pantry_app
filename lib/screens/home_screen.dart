@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
@@ -58,12 +59,13 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
     final inventoriesAsync = ref.watch(inventoryListProvider);
     final activeId = ref.watch<int>(activeInventoryProvider);
 
     // Find the active inventory name.
-    var appBarTitle = 'My Pantry';
+    var appBarTitle = l10n.myPantry;
     inventoriesAsync.whenData((list) {
       for (final inv in list) {
         if (inv['id'] == activeId) {
@@ -79,7 +81,7 @@ class HomeScreen extends ConsumerWidget {
       if (list.length > 1) {
         switcher = PopupMenuButton<int>(
           icon: const Icon(Icons.swap_horiz),
-          tooltip: 'Switch pantry',
+          tooltip: l10n.switchPantry,
           onSelected: (id) {
             logInfo('Switched to inventory $id');
             ref.read(activeInventoryProvider.notifier).value = id;
@@ -104,7 +106,7 @@ class HomeScreen extends ConsumerWidget {
           if (switcher != null) switcher!,
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: 'Settings',
+            tooltip: l10n.settings,
             onPressed: () async {
               logInfo('Settings button pressed');
               await Navigator.of(context).push<void>(
@@ -121,7 +123,7 @@ class HomeScreen extends ConsumerWidget {
         error: (err, _) {
           logError('Failed to load inventory: $err');
           if (context.mounted) {
-            SnackbarHelper.showError(context, 'Failed to load inventory.');
+            SnackbarHelper.showError(context, l10n.inventoryLoadFailed);
           }
           return Center(child: Text('Error: $err'));
         },
@@ -143,13 +145,8 @@ class HomeScreen extends ConsumerWidget {
   }
 
   /// Initiates the barcode scanning flow and handles the result.
-  ///
-  /// Steps:
-  /// 1. Opens the [ScannerScreen] and waits for a barcode string.
-  /// 2. Uses [ProductRepository.getProduct] to resolve the barcode.
-  /// 3. On success – navigates to [ProductDetailScreen].
-  /// 4. On [ProductNotFoundException] – opens the Play Store link.
   Future<void> _scanBarcode(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final barcode = await Navigator.of(context).push<String>(
       MaterialPageRoute(builder: (_) => const ScannerScreen()),
     );
@@ -179,7 +176,10 @@ class HomeScreen extends ConsumerWidget {
         if (canLaunch && context.mounted) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         } else if (context.mounted) {
-          SnackbarHelper.showError(context, 'Could not open the Play Store.');
+          SnackbarHelper.showError(
+            context,
+            l10n.couldNotOpenPlayStore,
+          );
         }
       }
     }
@@ -189,23 +189,10 @@ class HomeScreen extends ConsumerWidget {
 // ---------- Inventory list with expiry grouping & search ----------
 
 /// Displays the full inventory list with search and expiry grouping.
-///
-/// The list is divided into three sections:
-/// - **Expired** (red) – items whose expiry date is strictly before today.
-/// - **Expiring soon** (orange) – items expiring between today (inclusive)
-///   and 3 days from now.
-/// - **Good** (green) – items expiring more than 3 days in the future, or
-///   items without an expiry date.
-///
-/// A search bar at the top filters items by product name or barcode.
-/// The filtering is case‑insensitive and updates as the user types.
 class _InventoryList extends ConsumerStatefulWidget {
   const _InventoryList({required this.items, required this.onScan});
 
-  /// The full, unfiltered list of inventory items with product metadata.
   final List<InventoryWithProduct> items;
-
-  /// Unused in this widget, but required for consistency with the parent.
   final VoidCallback onScan;
 
   @override
@@ -213,10 +200,8 @@ class _InventoryList extends ConsumerStatefulWidget {
 }
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
-  /// The current search string; an empty string means "show all".
   String _searchQuery = '';
 
-  /// Returns [_InventoryList] filtered by [_searchQuery].
   List<InventoryWithProduct> get _filtered {
     if (_searchQuery.isEmpty) return widget.items;
     final q = _searchQuery.toLowerCase();
@@ -226,7 +211,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).toList();
   }
 
-  /// Items with an expiry date strictly before today (local time).
   List<InventoryWithProduct> get _expired {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
@@ -238,7 +222,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).toList();
   }
 
-  /// Items expiring between today (inclusive) and 3 days from now.
   List<InventoryWithProduct> get _expiringSoon {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
@@ -251,7 +234,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).toList();
   }
 
-  /// Items expiring more than 3 days in the future, or without an expiry date.
   List<InventoryWithProduct> get _good {
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
@@ -266,14 +248,14 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        // Search bar
         Padding(
           padding: const EdgeInsets.all(12),
           child: TextField(
             decoration: InputDecoration(
-              hintText: 'Search by name or barcode',
+              hintText: l10n.searchHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
@@ -288,27 +270,26 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             onChanged: (v) => setState(() => _searchQuery = v),
           ),
         ),
-        // Expiry‑grouped inventory list
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             children: [
               if (_expired.isNotEmpty) ...[
-                _sectionHeader('Expired', Colors.red),
+                _sectionHeader(l10n.expired, Colors.red),
                 ..._expired.map((item) => InventoryCard(item: item)),
               ],
               if (_expiringSoon.isNotEmpty) ...[
-                _sectionHeader('Expiring soon', Colors.orange),
+                _sectionHeader(l10n.expiringSoon, Colors.orange),
                 ..._expiringSoon.map((item) => InventoryCard(item: item)),
               ],
               if (_good.isNotEmpty) ...[
-                _sectionHeader('Good', Colors.green),
+                _sectionHeader(l10n.good, Colors.green),
                 ..._good.map((item) => InventoryCard(item: item)),
               ],
               if (_filtered.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Center(child: Text('No items match your search')),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(child: Text(l10n.noItemsMatch)),
                 ),
             ],
           ),
@@ -317,7 +298,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     );
   }
 
-  /// Builds a section header for an expiry group.
   Widget _sectionHeader(String title, Color color) {
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 4),

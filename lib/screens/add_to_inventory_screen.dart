@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -109,10 +110,11 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.existingItem != null;
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Update Item' : 'Add to Inventory'),
+        title: Text(isEditing ? l10n.updateItem : l10n.addToInventory),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -122,11 +124,13 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
             children: [
               TextFormField(
                 initialValue: _quantity.toString(),
-                decoration: const InputDecoration(labelText: 'Quantity'),
+                decoration: InputDecoration(labelText: l10n.quantityLabel),
                 keyboardType: TextInputType.number,
                 validator: (v) {
                   final n = double.tryParse(v ?? '');
-                  if (n == null || n <= 0) return 'Enter a positive number';
+                  if (n == null || n <= 0) {
+                    return l10n.enterPositiveNumber;
+                  }
                   return null;
                 },
                 onSaved: (v) => _quantity = double.parse(v!),
@@ -137,7 +141,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                     .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                     .toList(),
                 onChanged: (v) => setState(() => _unit = v!),
-                decoration: const InputDecoration(labelText: 'Unit'),
+                decoration: InputDecoration(labelText: l10n.unitLabel),
               ),
               DropdownButtonFormField<String>(
                 initialValue: _location,
@@ -145,7 +149,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                     .map((l) => DropdownMenuItem(value: l, child: Text(l)))
                     .toList(),
                 onChanged: (v) => setState(() => _location = v!),
-                decoration: const InputDecoration(labelText: 'Location'),
+                decoration: InputDecoration(labelText: l10n.locationLabel),
               ),
               const SizedBox(height: 16),
               Row(
@@ -153,8 +157,10 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                   Expanded(
                     child: Text(
                       _expiryDate == null
-                          ? 'Expiry date (optional)'
-                          : '''Expiry: ${_expiryDate!.toIso8601String().substring(0, 10)}''',
+                          ? l10n.expiryDateOptional
+                          // ignore this line because the formatter likes it
+                          // ignore: lines_longer_than_80_chars
+                          : '${l10n.expiryPrefix}: ${_expiryDate!.toIso8601String().substring(0, 10)}',
                     ),
                   ),
                   TextButton(
@@ -171,7 +177,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                       );
                       if (picked != null) setState(() => _expiryDate = picked);
                     },
-                    child: const Text('Pick date'),
+                    child: Text(l10n.pickDate),
                   ),
                   if (_expiryDate != null)
                     IconButton(
@@ -183,13 +189,13 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 initialValue: _notes,
-                decoration: const InputDecoration(labelText: 'Notes'),
+                decoration: InputDecoration(labelText: l10n.notesLabel),
                 onSaved: (v) => _notes = v ?? '',
               ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _save,
-                child: Text(isEditing ? 'Update' : 'Add to Pantry'),
+                child: Text(isEditing ? l10n.updateItem : l10n.addToPantry),
               ),
             ],
           ),

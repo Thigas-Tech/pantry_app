@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -17,17 +18,18 @@ class ManageInventoriesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final inventoriesAsync = ref.watch(inventoryListProvider);
     final activeId = ref.watch<int>(activeInventoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Manage Inventories')),
+      appBar: AppBar(title: Text(l10n.manageInventories)),
       body: inventoriesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (list) {
           if (list.isEmpty) {
-            return const Center(child: Text('No inventories.'));
+            return Center(child: Text(l10n.noInventories));
           }
 
           return ListView(
@@ -35,14 +37,15 @@ class ManageInventoriesScreen extends ConsumerWidget {
               for (final inv in list)
                 ListTile(
                   title: Text(inv['name'] as String),
-                  subtitle: Text('Items: ${inv['item_count'] ?? '…'}'),
+                  subtitle: Text(
+                    l10n.itemsCount((inv['item_count'] as int?) ?? 0),
+                  ),
                   trailing: (inv['id'] as int) == activeId
                       ? const Icon(Icons.check, color: Colors.teal)
                       : null,
                   onTap: () {
                     ref.read(activeInventoryProvider.notifier).value =
                         inv['id'] as int;
-                    // Go back immediately so the user sees the updated home.
                     Navigator.of(context).pop();
                   },
                   onLongPress: () => _showRenameDialog(
@@ -55,7 +58,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
               const Divider(),
               ListTile(
                 leading: const Icon(Icons.add),
-                title: const Text('Create new pantry'),
+                title: Text(l10n.createNewPantry),
                 onTap: () => _showCreateDialog(context, ref),
               ),
             ],
@@ -66,24 +69,25 @@ class ManageInventoriesScreen extends ConsumerWidget {
   }
 
   Future<void> _showCreateDialog(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('New pantry'),
+        title: Text(l10n.newPantry),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Name'),
+          decoration: InputDecoration(labelText: l10n.nameLabel),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Create'),
+            child: Text(l10n.create),
           ),
         ],
       ),
@@ -96,12 +100,12 @@ class ManageInventoriesScreen extends ConsumerWidget {
         logInfo('Created inventory "$name"');
         ref.invalidate(inventoryListProvider);
         if (context.mounted) {
-          SnackbarHelper.showInfo(context, '"$name" created.');
+          SnackbarHelper.showInfo(context, l10n.inventoryCreated(name));
         }
       } on Exception catch (e) {
         logError('Failed to create inventory: $e');
         if (context.mounted) {
-          SnackbarHelper.showError(context, 'Could not create inventory.');
+          SnackbarHelper.showError(context, l10n.couldNotCreateInventory);
         }
       }
     }
@@ -113,32 +117,32 @@ class ManageInventoriesScreen extends ConsumerWidget {
     int id,
     String currentName,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: currentName);
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rename pantry'),
+        title: Text(l10n.renamePantry),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Name'),
+          decoration: InputDecoration(labelText: l10n.nameLabel),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Rename'),
+            child: Text(l10n.rename),
           ),
           TextButton(
             onPressed: () async {
-              // Delete option
               Navigator.pop(ctx);
               await _confirmDelete(context, ref, id, currentName);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -151,12 +155,12 @@ class ManageInventoriesScreen extends ConsumerWidget {
         logInfo('Renamed inventory $id to "$newName"');
         ref.invalidate(inventoryListProvider);
         if (context.mounted) {
-          SnackbarHelper.showInfo(context, 'Renamed to "$newName".');
+          SnackbarHelper.showInfo(context, l10n.inventoryRenamed(newName));
         }
       } on Exception catch (e) {
         logError('Failed to rename inventory: $e');
         if (context.mounted) {
-          SnackbarHelper.showError(context, 'Could not rename inventory.');
+          SnackbarHelper.showError(context, l10n.couldNotRenameInventory);
         }
       }
     }
@@ -168,19 +172,20 @@ class ManageInventoriesScreen extends ConsumerWidget {
     int id,
     String name,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete pantry?'),
-        content: Text('All items in "$name" will be permanently deleted.'),
+        title: Text(l10n.deletePantry),
+        content: Text(l10n.deletePantryContent(name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -204,12 +209,12 @@ class ManageInventoriesScreen extends ConsumerWidget {
           }
         }
         if (context.mounted) {
-          SnackbarHelper.showInfo(context, '"$name" deleted.');
+          SnackbarHelper.showInfo(context, l10n.inventoryDeleted(name));
         }
       } on Exception catch (e) {
         logError('Failed to delete inventory: $e');
         if (context.mounted) {
-          SnackbarHelper.showError(context, 'Could not delete inventory.');
+          SnackbarHelper.showError(context, l10n.couldNotDeleteInventory);
         }
       }
     }

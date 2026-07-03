@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// A barcode input screen for Android.
@@ -85,13 +86,15 @@ class _MobileScannerViewState extends State<_MobileScannerView>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan Barcode'),
+        title: Text(l10n.scanBarcode),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            tooltip: 'Enter barcode manually',
+            tooltip: l10n.manualEntryTooltip,
             onPressed: widget.onSwitchToManual,
           ),
         ],
@@ -118,6 +121,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
                 size: MediaQuery.of(context).size,
                 painter: _ScannerOverlayPainter(
                   animationValue: _animationController.value,
+                  hintText: l10n.alignBarcode,
                 ),
               );
             },
@@ -134,11 +138,17 @@ class _MobileScannerViewState extends State<_MobileScannerView>
 /// The cutout is created using a path with [PathFillType.evenOdd] so that
 /// it works on all rendering backends (Impeller and Skia).
 class _ScannerOverlayPainter extends CustomPainter {
-  const _ScannerOverlayPainter({required this.animationValue});
+  const _ScannerOverlayPainter({
+    required this.animationValue,
+    required this.hintText,
+  });
 
   /// Value between 0.0 and 1.0 that controls the vertical position of the
   /// scanning line inside the cutout.
   final double animationValue;
+
+  /// The localised hint text shown below the cutout.
+  final String hintText;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -219,9 +229,9 @@ class _ScannerOverlayPainter extends CustomPainter {
 
     // 6. Draw a small hint text below the cutout.
     final textPainter = TextPainter(
-      text: const TextSpan(
-        text: 'Align the barcode inside the frame',
-        style: TextStyle(color: Colors.white, fontSize: 14),
+      text: TextSpan(
+        text: hintText,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
@@ -236,7 +246,8 @@ class _ScannerOverlayPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ScannerOverlayPainter oldDelegate) {
-    return animationValue != oldDelegate.animationValue;
+    return animationValue != oldDelegate.animationValue ||
+        hintText != oldDelegate.hintText;
   }
 }
 
@@ -315,13 +326,15 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Enter Barcode'),
+        title: Text(l10n.enterBarcode),
         actions: [
           IconButton(
             icon: const Icon(Icons.camera_alt),
-            tooltip: 'Scan with camera',
+            tooltip: l10n.cameraTooltip,
             onPressed: widget.onSwitchToCamera,
           ),
         ],
@@ -331,15 +344,15 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Type or paste a barcode', textAlign: TextAlign.center),
+            Text(l10n.typeOrPasteBarcode, textAlign: TextAlign.center),
             const SizedBox(height: 24),
             TextField(
               controller: _controller,
               autofocus: true,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Barcode',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.barcodeLabel,
+                border: const OutlineInputBorder(),
               ),
               onSubmitted: (_) => _submit(),
             ),
@@ -347,7 +360,7 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
             ElevatedButton.icon(
               onPressed: _submit,
               icon: const Icon(Icons.check),
-              label: const Text('Submit'),
+              label: Text(l10n.submit),
             ),
           ],
         ),

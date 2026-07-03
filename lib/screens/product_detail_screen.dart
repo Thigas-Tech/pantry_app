@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -69,6 +70,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final activeId = ref.watch<int>(activeInventoryProvider);
     final repo = ref.watch(productRepositoryProvider);
     final inventoryFuture = repo.getInventoryForBarcode(
@@ -82,7 +84,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.open_in_browser),
-            tooltip: 'View on Open Food Facts',
+            tooltip: l10n.viewOnOpenFoodFacts,
             onPressed: () async {
               final url = Uri.parse(
                 'https://world.openfoodfacts.org/product/${widget.product.barcode}',
@@ -93,7 +95,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 logInfo('OFF page opened successfully');
               } else if (context.mounted) {
                 logWarning('Failed to launch OFF page');
-                SnackbarHelper.showError(context, 'Could not open the link.');
+                SnackbarHelper.showError(context, l10n.couldNotOpenLink);
               }
             },
           ),
@@ -149,13 +151,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   },
                 ),
               ),
-            _infoRow('Barcode', widget.product.barcode),
+            _infoRow(l10n.barcodeLabel, widget.product.barcode),
             if (widget.product.brand != null)
-              _infoRow('Brand', widget.product.brand!),
+              _infoRow(l10n.brandLabel, widget.product.brand!),
             if (widget.product.category != null)
-              _infoRow('Category', widget.product.category!),
+              _infoRow(l10n.categoryLabel, widget.product.category!),
             const Divider(),
-            _infoRow('Serving size', widget.product.servingSize ?? 'N/A'),
+            _infoRow(l10n.servingSize, widget.product.servingSize ?? 'N/A'),
 
             // Nutrition table
             _NutritionTable(product: widget.product),
@@ -163,7 +165,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             const Divider(),
             if (widget.product.ingredients != null)
               ExpansionTile(
-                title: const Text('Ingredients'),
+                title: Text(l10n.ingredients),
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -175,7 +177,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
             // Inventory section header
             Text(
-              'Your inventory',
+              l10n.yourInventory,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -190,13 +192,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 }
                 if (snapshot.hasError) {
                   logError('Error fetching inventory: ${snapshot.error}');
-                  return const Center(
-                    child: Text('Failed to load inventory items.'),
+                  return Center(
+                    child: Text(l10n.failedToLoadInventoryItems),
                   );
                 }
                 final items = snapshot.data ?? [];
                 if (items.isEmpty) {
-                  return const Text('No items in pantry yet.');
+                  return Text(l10n.noItemsInPantry);
                 }
                 return Column(
                   children: items.map(_buildInventoryTile).toList(),
@@ -209,7 +211,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ElevatedButton.icon(
               onPressed: _openAddEditScreen,
               icon: const Icon(Icons.add),
-              label: const Text('Add to Inventory'),
+              label: Text(l10n.addToInventory),
             ),
           ],
         ),
@@ -241,14 +243,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   /// Opens the [AddToInventoryScreen] for creating or editing an item.
-  ///
-  /// If [existing] is provided, the screen is pre‑filled with the current
-  /// values for editing. Otherwise a new item form is shown.
-  ///
-  /// After the user saves, the inventory item is persisted via the repository
-  /// and expiry notifications are scheduled (or rescheduled for edits). The
-  /// screen then rebuilds the inventory list by incrementing
-  /// `_inventoryVersion`.
   Future<void> _openAddEditScreen({InventoryItem? existing}) async {
     final activeId = ref.read<int>(activeInventoryProvider);
 
@@ -281,6 +275,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
 
     if (result != null && mounted) {
+      final l10n = AppLocalizations.of(context)!;
       final repo = ref.read(productRepositoryProvider);
       try {
         if (existing != null) {
@@ -290,7 +285,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           await repo.updateInventoryItem(result);
           await NotificationService.cancelReminders(existing.id!);
           if (mounted) {
-            SnackbarHelper.showInfo(context, 'Item updated.');
+            SnackbarHelper.showInfo(context, l10n.itemUpdated);
           }
         } else {
           logInfo(
@@ -298,7 +293,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           );
           await repo.addInventoryItem(result);
           if (mounted) {
-            SnackbarHelper.showInfo(context, 'Item added to pantry.');
+            SnackbarHelper.showInfo(context, l10n.itemAdded);
           }
         }
         await NotificationService.scheduleExpiryReminders(result);
@@ -307,30 +302,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       } on Exception catch (e) {
         logError('Inventory operation failed: $e');
         if (mounted) {
-          SnackbarHelper.showError(context, 'Failed to save inventory item.');
+          SnackbarHelper.showError(context, l10n.saveFailed);
         }
       }
     }
   }
 
   /// Asks for confirmation and then deletes the given inventory [item].
-  ///
-  /// Cancels any scheduled notifications for the item before removing it
-  /// from the database. Triggers a refresh of the inventory list.
   Future<void> _deleteItem(InventoryItem item) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete item?'),
-        content: const Text('This cannot be undone.'),
+        title: Text(l10n.deleteItemTitle),
+        content: Text(l10n.deleteItemContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -344,14 +337,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           'Deleted inventory item ${item.id} (${widget.product.barcode})',
         );
         if (mounted) {
-          SnackbarHelper.showInfo(context, 'Item removed from pantry.');
+          SnackbarHelper.showInfo(context, l10n.itemRemoved);
         }
         setState(() => _inventoryVersion++);
         ref.invalidate(inventoryWithProductProvider);
       } on Exception catch (e) {
         logError('Failed to delete item: $e');
         if (mounted) {
-          SnackbarHelper.showError(context, 'Failed to delete item.');
+          SnackbarHelper.showError(context, l10n.deleteFailed);
         }
       }
     }
@@ -381,6 +374,7 @@ class _InventoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isExpired =
         item.expiryDate != null &&
         DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
@@ -389,8 +383,10 @@ class _InventoryTile extends StatelessWidget {
         _iconForLocation(item.location),
         color: isExpired ? Colors.red : Colors.orange,
       ),
-      title: Text('${item.quantity} ${item.unit} in ${item.location}'),
-      subtitle: Text(item.expiryDate ?? 'No expiry'),
+      title: Text(
+        '${item.quantity} ${item.unit} ${l10n.inLocation} ${item.location}',
+      ),
+      subtitle: Text(item.expiryDate ?? l10n.noExpiry),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -402,11 +398,6 @@ class _InventoryTile extends StatelessWidget {
   }
 
   /// Returns an appropriate icon for the given storage [location].
-  ///
-  /// - `'pantry'` → [Icons.kitchen]
-  /// - `'fridge'` → [Icons.local_drink] (no perfect fridge icon in Material)
-  /// - `'freezer'` → [Icons.ac_unit]
-  /// - any other → [Icons.help_outline]
   IconData _iconForLocation(String location) {
     switch (location.toLowerCase()) {
       case 'pantry':
@@ -434,14 +425,15 @@ class _NutritionTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final rows = <_NutrientRow>[
-      _NutrientRow('Energy', '${product.energyKcal ?? '-'} kcal'),
-      _NutrientRow('Protein', '${product.proteinG ?? '-'} g'),
-      _NutrientRow('Carbs', '${product.carbsG ?? '-'} g'),
-      _NutrientRow('Fat', '${product.fatG ?? '-'} g'),
-      _NutrientRow('Fiber', '${product.fiberG ?? '-'} g'),
-      _NutrientRow('Salt', '${product.saltG ?? '-'} g'),
+      _NutrientRow(l10n.energy, '${product.energyKcal ?? '-'} kcal'),
+      _NutrientRow(l10n.protein, '${product.proteinG ?? '-'} g'),
+      _NutrientRow(l10n.carbs, '${product.carbsG ?? '-'} g'),
+      _NutrientRow(l10n.fat, '${product.fatG ?? '-'} g'),
+      _NutrientRow(l10n.fiber, '${product.fiberG ?? '-'} g'),
+      _NutrientRow(l10n.salt, '${product.saltG ?? '-'} g'),
     ];
 
     return Table(
@@ -463,7 +455,7 @@ class _NutritionTable extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                'Nutrient',
+                l10n.nutrient,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: theme.colorScheme.onPrimaryContainer,
@@ -473,7 +465,7 @@ class _NutritionTable extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(8),
               child: Text(
-                'Per 100 g',
+                l10n.per100g,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: theme.colorScheme.onPrimaryContainer,

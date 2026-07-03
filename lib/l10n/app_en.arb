@@ -74,5 +74,96 @@
   "saveFailed": "Failed to save inventory item.",
   "deleteFailed": "Failed to delete item.",
   "inventoryLoadFailed": "Failed to load inventory.",
-  "expiryPrefix": "Exp"
+  "expiryPrefix": "Exp",
+  "switchPantry": "Switch pantry",
+  "couldNotOpenPlayStore": "Could not open the Play Store.",
+  "viewOnOpenFoodFacts": "View on Open Food Facts",
+  "couldNotOpenLink": "Could not open the link.",
+  "nutrient": "Nutrient",
+  "inLocation": "in",
+  "noExpiry": "No expiry",
+  "deleteItemTitle": "Delete item?",
+  "deleteItemContent": "This cannot be undone.",
+  "delete": "Delete",
+  "failedToLoadInventoryItems": "Failed to load inventory items.",
+  "enterPositiveNumber": "Enter a positive number",
+  "csvImportComingSoon": "CSV import coming soon.",
+  "noDataToExport": "No data to export.",
+  "pantryExport": "Pantry Export",
+  "exportFailed": "Export failed",
+  "notificationsEnabled": "Notifications enabled.",
+  "notificationsDisabled": "Notifications disabled.",
+  "themeChanged": "Theme: {theme}",
+  "@themeChanged": {
+    "placeholders": {
+      "theme": {
+        "type": "String",
+        "example": "system"
+      }
+    }
+  },
+  "retentionDaysValue": "{days} days",
+  "@retentionDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "60"
+      }
+    }
+  },
+  "dataRetentionDialogTitle": "Data retention (days)",
+  "daysLabel": "Days",
+  "retentionPeriodSet": "Retention period set to {days} days.",
+  "@retentionPeriodSet": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "60"
+      }
+    }
+  },
+  "noInventories": "No inventories.",
+  "itemsCount": "Items: {count}",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "nameLabel": "Name",
+  "create": "Create",
+  "rename": "Rename",
+  "delete": "Delete",
+  "inventoryCreated": "\"{name}\" created.",
+  "@inventoryCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Work"
+      }
+    }
+  },
+  "inventoryRenamed": "Renamed to \"{name}\".",
+  "@inventoryRenamed": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Office"
+      }
+    }
+  },
+  "inventoryDeleted": "\"{name}\" deleted.",
+  "@inventoryDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Old Pantry"
+      }
+    }
+  },
+  "couldNotCreateInventory": "Could not create inventory.",
+  "couldNotRenameInventory": "Could not rename inventory.",
+  "couldNotDeleteInventory": "Could not delete inventory."
 }
