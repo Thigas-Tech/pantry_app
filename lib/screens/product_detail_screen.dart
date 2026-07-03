@@ -8,6 +8,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
@@ -277,13 +278,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (result != null && mounted) {
       final l10n = AppLocalizations.of(context)!;
       final repo = ref.read(productRepositoryProvider);
+      final notificationService = ref.read(notificationServiceProvider);
       try {
         if (existing != null) {
           logInfo(
             '''Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
           await repo.updateInventoryItem(result);
-          await NotificationService.cancelReminders(existing.id!);
+          await notificationService.cancelReminders(existing.id!);
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.itemUpdated);
           }
@@ -296,7 +298,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             SnackbarHelper.showInfo(context, l10n.itemAdded);
           }
         }
-        await NotificationService.scheduleExpiryReminders(result);
+        await notificationService.scheduleExpiryReminders(result);
         setState(() => _inventoryVersion++);
         ref.invalidate(inventoryWithProductProvider);
       } on Exception catch (e) {
@@ -330,9 +332,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
     if (confirm == true && mounted) {
       final repo = ref.read(productRepositoryProvider);
+      final notificationService = ref.read(notificationServiceProvider);
       try {
         await repo.deleteInventoryItem(item.id!);
-        await NotificationService.cancelReminders(item.id!);
+        await notificationService.cancelReminders(item.id!);
         logInfo(
           'Deleted inventory item ${item.id} (${widget.product.barcode})',
         );

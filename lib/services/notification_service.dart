@@ -4,13 +4,7 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Manages local notifications for expiry reminders on Android.
-///
-/// All methods are **static** because the service is a stateless singleton
-/// that wraps the `flutter_local_notifications` plugin. There is no instance
-/// state – the plugin itself holds the native resources.
-///
-/// ## Platform support
+/// Manages local notifications for expiry reminders.
 ///
 /// Designed for **Android** (and ready for iOS when that platform is added).
 /// Desktop and web are not supported.
@@ -19,51 +13,37 @@ import 'package:timezone/timezone.dart' as tz;
 ///
 /// Scheduled notifications require a timezone‑aware `TZDateTime`. The service
 /// loads the IANA timezone database and then attempts to match the device’s
-/// local timezone name (obtained from `DateTime.now().timeZoneName`). If the
-/// name is unknown – which can happen on some Android devices – it falls back
-/// to UTC. This means notifications may fire at the wrong wall‑clock time on
-/// those rare devices. A future improvement could use `flutter_timezone` to
-/// obtain a reliable timezone ID.
+/// local timezone name. If the name is unknown it falls back to UTC.
 ///
 /// ## Notification IDs
 ///
 /// Each inventory item can have up to two scheduled notifications:
 /// - ID = `item.id.hashCode`        → “Expiring soon” (1 day before)
 /// - ID = `item.id.hashCode + 1`    → “Expiring today” (on the expiry day)
-///
-/// If the item has no `id` (e.g. a newly created item before insertion),
-/// the barcode’s hash code is used as a fallback. When an item is deleted,
-/// both IDs are cancelled via `cancelReminders`.
 class NotificationService {
-  NotificationService._(); // private constructor – adds an instance member
+  /// Creates a [NotificationService] that uses the given [plugin].
+  /// In production code the default [FlutterLocalNotificationsPlugin] is used;
+  /// in tests a mock can be injected.
+  NotificationService({FlutterLocalNotificationsPlugin? plugin})
+    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
-  /// The plugin instance. All operations go through this object.
-  static final _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin;
 
-  /// Initialises the notification plugin for Android.
+  /// Initialises the notification plugin.
   ///
   /// Must be called once at app startup, before any notification is
-  /// scheduled.
-  ///
-  /// The Android initialisation uses `@mipmap/ic_launcher` as the notification
-  /// icon (the default Flutter launcher icon). The local timezone is also
-  /// configured here so that scheduled notifications fire at the correct
-  /// local time.
-  static Future<void> initialize() async {
+  /// scheduled. The Android icon is `@mipmap/ic_launcher`.
+  Future<void> initialize() async {
     logInfo('Initialising notification service');
 
-    // Load the IANA timezone database bundled with the `timezone` package.
     tz_data.initializeTimeZones();
 
-    // Attempt to detect the local timezone from the system clock.
     final localTimeZoneName = DateTime.now().timeZoneName;
     logInfo('Detected device timezone name: $localTimeZoneName');
     try {
       tz.setLocalLocation(tz.getLocation(localTimeZoneName));
       logInfo('Timezone set to $localTimeZoneName');
     } on Exception catch (_) {
-      // Fall back to UTC – notifications will still fire, but at the wrong
-      // local time on devices with unrecognised timezone names.
       tz.setLocalLocation(tz.UTC);
       logWarning('Unknown timezone "$localTimeZoneName", falling back to UTC');
     }
@@ -86,17 +66,8 @@ class NotificationService {
     }
   }
 
-  /// Schedules two local notifications for [item]:
-  /// - One day before the expiry date.
-  /// - On the expiry date itself.
-  ///
-  /// If [InventoryItem.expiryDate] is `null` or cannot be parsed, this method
-  /// does nothing. Notifications whose scheduled date is already in the past
-  /// are silently skipped.
-  ///
-  /// The notification body currently shows the barcode. A future improvement
-  /// could include the product name by looking it up in the cache.
-  static Future<void> scheduleExpiryReminders(InventoryItem item) async {
+  /// Schedules two local notifications for [item].
+  Future<void> scheduleExpiryReminders(InventoryItem item) async {
     if (item.expiryDate == null) {
       logInfo('No expiry date for item ${item.id}, skipping reminders');
       return;
@@ -178,10 +149,7 @@ class NotificationService {
   }
 
   /// Cancels both notifications associated with the given [itemId].
-  ///
-  /// Call this when an inventory item is deleted or its expiry date is
-  /// changed. The method cancels the two IDs derived from `itemId.hashCode`.
-  static Future<void> cancelReminders(int itemId) async {
+  Future<void> cancelReminders(int itemId) async {
     logInfo('Cancelling reminders for item $itemId');
     final id = itemId.hashCode;
     try {
@@ -194,12 +162,7 @@ class NotificationService {
   }
 
   /// Requests the `POST_NOTIFICATIONS` permission on Android 13+.
-  ///
-  /// This is a no‑op on iOS and desktop. On older Android versions the
-  /// permission is not required. The call is fire‑and‑forget – if the user
-  /// denies, notifications will simply not appear, which is acceptable for
-  /// a pantry manager.
-  static Future<void> requestPermission() async {
+  Future<void> requestPermission() async {
     logInfo('Requesting notification permission');
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<

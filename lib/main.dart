@@ -6,10 +6,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
-import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// Entry point of the Pantry application (Android).
@@ -35,15 +35,13 @@ void main() {
   // Ensure that Flutter's platform bindings are initialised.
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Request permission on Android 13+ (POST_NOTIFICATIONS).
-  unawaited(NotificationService.requestPermission());
-
   // Start the app immediately – database cleanup runs after the first frame.
   runApp(const ProviderScope(child: PantryApp()));
   logInfo('App started');
 
   // Run the cleanup in the background, now that the UI is visible.
   final container = ProviderContainer();
+  unawaited(container.read(notificationServiceProvider).requestPermission());
   unawaited(_runDatabaseCleanup(container));
 }
 
