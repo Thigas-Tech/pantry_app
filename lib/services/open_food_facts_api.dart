@@ -205,6 +205,7 @@ class OpenFoodFactsApi implements ProductApiService {
             'User-Agent': _userAgent,
             'Content-Type': 'application/x-www-form-urlencoded',
           },
+          validateStatus: (status) => status == 200 || status == 302,
         ),
       );
 
