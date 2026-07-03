@@ -271,6 +271,7 @@ class OpenFoodFactsApi implements ProductApiService {
             'Cookie': sessionCookie,
             'Content-Type': 'application/json',
           },
+          validateStatus: (status) => status == 200 || status == 302,
         ),
       );
 
