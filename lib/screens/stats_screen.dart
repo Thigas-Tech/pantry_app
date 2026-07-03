@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/csv_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/services/csv_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,17 +20,6 @@ import 'package:share_plus/share_plus.dart';
 ///   on the home screen.
 /// - **Import** a previously exported CSV file (planned – currently shows
 ///   a “coming soon” message).
-///
-/// ## Export
-///
-/// The CSV is written to a temporary directory and then shared using
-/// `share_plus`. The exported data corresponds to the active inventory
-/// managed by [activeInventoryProvider].
-///
-/// ## Import (planned)
-///
-/// CSV import is not yet implemented. The button displays a snackbar
-/// informing the user that the feature is coming in a future update.
 class StatsScreen extends ConsumerWidget {
   /// Creates a [StatsScreen] widget.
   const StatsScreen({super.key});
@@ -62,7 +50,7 @@ class StatsScreen extends ConsumerWidget {
                 Text('${l10n.inventoryItems}: ${counts[1]}'),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: () => _exportCsv(context, ref, db),
+                  onPressed: () => _exportCsv(context, ref),
                   icon: const Icon(Icons.file_download),
                   label: Text(l10n.exportCsv),
                 ),
@@ -85,13 +73,12 @@ class StatsScreen extends ConsumerWidget {
   Future<void> _exportCsv(
     BuildContext context,
     WidgetRef ref,
-    DatabaseHelper db,
   ) async {
     final l10n = AppLocalizations.of(context)!;
     logInfo('Export button pressed');
 
     try {
-      final csvService = CsvService(db);
+      final csvService = ref.read(csvServiceProvider);
       final activeId = ref.read<int>(activeInventoryProvider);
       final csvString = await csvService.generateCsv(inventoryId: activeId);
 
