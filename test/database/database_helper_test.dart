@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
@@ -288,8 +290,9 @@ void main() {
   });
   group('Migration v1 → v2', () {
     test('upgrades a v1 database correctly', () async {
-      // 1. Manually create a v1 database with the old schema.
-      const v1Path = '${inMemoryDatabasePath}_v1';
+      // Create a temporary file for the v1 database.
+      final tempDir = Directory.systemTemp.createTempSync('pantry_v1_');
+      final v1Path = '${tempDir.path}/pantry.db';
       final v1Db = await openDatabase(
         v1Path,
         version: 1,
@@ -378,6 +381,8 @@ void main() {
       // Clean up.
       final migratedDb = await dbHelper.database;
       await migratedDb.close();
+      // Delete the temporary directory.
+      tempDir.deleteSync(recursive: true);
     });
   });
 }

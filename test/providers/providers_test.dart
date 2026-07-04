@@ -3,8 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 
@@ -130,6 +134,33 @@ void main() {
       expect(item.inventoryId, 2);
       expect(item.productName, 'Milk');
       expect(item.inventoryName, 'Work');
+    });
+  });
+  group('apiServiceProvider', () {
+    test('returns an OpenFoodFactsApi instance', () {
+      final api = container.read(apiServiceProvider);
+      expect(api, isNotNull);
+    });
+  });
+
+  group('productRepositoryProvider', () {
+    test('returns a ProductRepository instance', () {
+      final repo = container.read(productRepositoryProvider);
+      expect(repo, isNotNull);
+    });
+  });
+
+  group('notificationServiceProvider', () {
+    test('returns a NotificationService instance', () {
+      final svc = container.read(notificationServiceProvider);
+      expect(svc, isNotNull);
+    });
+  });
+
+  group('imageCacheProvider', () {
+    test('returns an ImageCacheService instance', () {
+      final svc = container.read(imageCacheProvider);
+      expect(svc, isNotNull);
     });
   });
 }

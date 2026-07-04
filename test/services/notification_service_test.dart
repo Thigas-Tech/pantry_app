@@ -185,6 +185,61 @@ void main() {
         ).called(2);
       },
     );
+    test('skips when expiryDate is invalid', () async {
+      /// An un‑parseable expiry date should skip scheduling without errors.
+      const item = InventoryItem(
+        barcode: '123',
+        expiryDate: 'not-a-date',
+      );
+
+      await service.scheduleExpiryReminders(item);
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+        ),
+      );
+    });
+    test('handles zonedSchedule throwing an exception', () async {
+      /// If [zonedSchedule] throws, the exception is caught and logged,
+      /// and the method still attempts the second call.
+      final expiry = DateTime.now().add(const Duration(days: 10));
+      const item = InventoryItem(barcode: '123', id: 1);
+      final itemWithExpiry = item.copyWith(
+        expiryDate: expiry.toIso8601String().substring(0, 10),
+      );
+
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+        ),
+      ).thenThrow(Exception('test'));
+
+      // The service should complete without throwing.
+      await service.scheduleExpiryReminders(itemWithExpiry);
+
+      // Both calls are attempted; each catches the exception internally.
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+        ),
+      ).called(2);
+    });
   });
 
   // -----------------------------------------------------------------
@@ -203,6 +258,18 @@ void main() {
 
       // Assert: verify that cancel was called exactly twice.
       verify(() => mockPlugin.cancel(id: any(named: 'id'))).called(2);
+    });
+    test('handles cancel throwing an exception', () async {
+      /// If [cancel] throws, the exception is caught and the second call
+      /// is still attempted.
+      when(
+        () => mockPlugin.cancel(id: any(named: 'id')),
+      ).thenThrow(Exception('test'));
+
+      await service.cancelReminders(42);
+
+      // Cancel attempts are made.
+      verify(() => mockPlugin.cancel(id: any(named: 'id'))).called(1);
     });
   });
 

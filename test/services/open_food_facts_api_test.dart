@@ -168,4 +168,73 @@ void main() {
       expect(result, isFalse);
     });
   });
+  group('submitProductV3', () {
+    const testProduct = Product(barcode: '456', name: 'Test', energyKcal: 42);
+    const sessionCookie = 'session=abc123';
+
+    test('returns true on 200 OK', () async {
+      /// A successful v3 PATCH returns true.
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString('', 200, headers: {}),
+      );
+
+      final result = await api.submitProductV3(testProduct, sessionCookie);
+      expect(result, isTrue);
+    });
+
+    test('returns false on network error', () async {
+      /// Network exceptions are caught and `false` is returned.
+      when(
+        () => adapter.fetch(any(), any(), any()),
+      ).thenThrow(DioException(requestOptions: RequestOptions()));
+
+      final result = await api.submitProductV3(testProduct, sessionCookie);
+      expect(result, isFalse);
+    });
+  });
+
+  group('_parseDouble (via _parseProduct)', () {
+    test('parses nutrition values that are strings', () async {
+      /// Nutrition values may arrive as strings from the OFF API;
+      /// _parseDouble converts them to double.
+      final stringNutritionResponse = {
+        'status': 'success',
+        'product': {
+          '_id': '789',
+          'product_name': 'String Nutrition',
+          'brands': null,
+          'image_url': null,
+          'categories': null,
+          'ingredients_text': null,
+          'serving_size': null,
+          'nutriments': {
+            'energy-kcal_100g': '200.5',
+            'proteins_100g': '10.3',
+            'carbohydrates_100g': '50',
+            'fat_100g': 1.0,
+            'fiber_100g': 0,
+            'salt_100g': '0.75',
+          },
+        },
+      };
+
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(stringNutritionResponse),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+
+      final product = await api.getByBarcode('789');
+      expect(product.energyKcal, 200.5);
+      expect(product.proteinG, 10.3);
+      expect(product.carbsG, 50.0);
+      expect(product.fatG, 1.0);
+      expect(product.fiberG, 0.0);
+      expect(product.saltG, 0.75);
+    });
+  });
 }
