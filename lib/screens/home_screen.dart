@@ -122,9 +122,12 @@ class HomeScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) {
           logError('Failed to load inventory: $err');
-          if (context.mounted) {
-            SnackbarHelper.showError(context, l10n.inventoryLoadFailed);
-          }
+          // Schedule the snackbar after the current frame
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              SnackbarHelper.showError(context, l10n.inventoryLoadFailed);
+            }
+          });
           return Center(child: Text('Error: $err'));
         },
         data: (items) {
