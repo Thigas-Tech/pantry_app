@@ -34,12 +34,10 @@ Future<void> pumpApp(
 }) async {
   final effectiveImageCache = imageCacheMock ?? MockImageCacheService();
 
-  // Stub cacheImage to return null (no cached image).
-  if (imageCacheMock != null) {
-    when(
-      () => imageCacheMock.cacheImage(any(), any()),
-    ).thenAnswer((_) async => null);
-  }
+  // Always stub cacheImage so any widget using the image cache doesn't crash.
+  when(
+    () => effectiveImageCache.cacheImage(any(), any()),
+  ).thenAnswer((_) async => null);
 
   await tester.pumpWidget(
     ProviderScope(
