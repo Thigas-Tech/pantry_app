@@ -175,5 +175,12 @@ void main() {
       expect(counts['products'], 1);
       expect(counts['items'], 1);
     });
+    test('throws exception when file does not exist', () {
+      final csvService = CsvService(mockDb);
+      expect(
+        () => csvService.importCsv('/non_existent_path.csv', inventoryId: 1),
+        throwsA(isA<Exception>()),
+      );
+    });
   });
 }

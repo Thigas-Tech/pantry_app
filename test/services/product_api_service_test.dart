@@ -18,7 +18,7 @@ void main() {
   group('ProductApiService', () {
     test('close() completes without error', () async {
       final service = FakeProductApiService();
-      await service.close(); // should not throw
+      await service.close(); // exercises the default implementation
     });
   });
 }

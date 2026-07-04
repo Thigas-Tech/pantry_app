@@ -5,6 +5,7 @@
 ///   - The product name and subtitle (quantity, unit, location) are displayed.
 ///   - An expiry prefix is shown when an expiry date is provided.
 ///   - A red dot appears for expired items.
+///   - Cached image display when the image cache returns a file path.
 ///
 /// All tests use the `pumpApp` helper. The `imageCacheProvider` is overridden
 /// with a stubbed mock (so `InventoryCard._buildLeadingImage` doesn't crash),
@@ -29,6 +30,7 @@ InventoryWithProduct createItem({
   String unit = 'pcs',
   String location = 'pantry',
   String? expiryDate,
+  String? imageUrl,
 }) {
   return InventoryWithProduct(
     id: 1,
@@ -39,6 +41,7 @@ InventoryWithProduct createItem({
     productName: name,
     expiryDate: expiryDate,
     inventoryId: 1,
+    productImageUrl: imageUrl,
   );
 }
 
@@ -47,14 +50,12 @@ void main() {
 
   setUp(() {
     mockImageCache = MockImageCacheService();
-    // Stub cacheImage to return null → widget falls back to fallback icon.
+    // Default stub: no cached image → fallback icon.
     when(
       () => mockImageCache.cacheImage(any(), any()),
     ).thenAnswer((_) async => null);
   });
 
-  /// Checks that the product name, quantity+unit substring, and location
-  /// appear. Note that [quantity] is a double, so `3` becomes `"3.0"`.
   testWidgets('displays product name and subtitle', (tester) async {
     final item = createItem(name: 'Milk', quantity: 3, unit: 'L');
 
@@ -72,8 +73,6 @@ void main() {
     expect(find.textContaining('pantry'), findsOneWidget);
   });
 
-  /// Verifies that the subtitle includes "Exp: 2026-12-31" when an expiry
-  /// date is present.
   testWidgets('shows expiry prefix when date is present', (tester) async {
     final item = createItem(name: 'Cheese', expiryDate: '2026-12-31');
 
@@ -89,8 +88,6 @@ void main() {
     expect(find.textContaining('Exp: 2026-12-31'), findsOneWidget);
   });
 
-  /// Checks that the trailing circle icon is red when the item is expired
-  /// (expiry date before today).
   testWidgets('shows red dot when expired', (tester) async {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
     final item = createItem(

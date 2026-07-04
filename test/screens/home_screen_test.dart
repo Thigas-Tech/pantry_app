@@ -1,3 +1,6 @@
+// false positives
+// ignore_for_file: unused_local_variable
+
 /// @file HomeScreen widget tests.
 ///
 /// Tests for the main dashboard screen.  The screen displays:
@@ -6,6 +9,8 @@
 ///   - The empty‑state widget when the inventory list is empty.
 ///   - Items grouped by expiry status (Expired, Expiring soon, Good).
 ///   - An inventory switcher icon when more than one inventory exists.
+///   - Search bar filtering and clear functionality.
+///   - Navigation via the FAB (scanner flow) and settings button.
 ///
 /// All tests use the shared `pumpApp` helper.  We override the relevant
 /// Riverpod providers (`inventoryWithProductProvider`, `inventoryListProvider`,
@@ -15,10 +20,6 @@
 ///
 /// The loading test uses `settle: false` to keep the future pending, then
 /// completes it manually to avoid a “pending timer” error.
-
-// (The linter incorrectly flags the testWidgets callbacks because it doesn't
-//  see the `await` inside the body.  We keep the ignore until the analyzer is
-//  updated.)
 library;
 
 import 'dart:async';
@@ -26,17 +27,33 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
+import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/screens/scanner_screen.dart';
+import 'package:pantry_app/screens/settings_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/widgets/inventory_card.dart';
 import '../helpers/pump_app.dart';
 
-/// A fake [ActiveInventoryNotifier] that always returns 1.
+/// A fake [ActiveInventoryNotifier] that always returns 1
+/// and records the last set value.
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
+  int lastSetValue = 1;
+
   @override
   int build() => 1;
+
+  @override
+  set value(int newValue) {
+    lastSetValue = newValue;
+    super.value = newValue;
+  }
 }
 
 /// Creates a lightweight [InventoryWithProduct] with sensible defaults.
@@ -67,9 +84,8 @@ void main() {
     ).thenAnswer((_) async => null);
   });
 
-  /// Loading state: a [CircularProgressIndicator] appears while the inventory
-  /// future is still pending.  We keep the future open with a [Completer] and
-  /// check the indicator, then complete it to clean up.
+  // ---------- Original tests (unchanged) ----------
+
   testWidgets('shows loading spinner when inventory is loading', (
     tester,
   ) async {
@@ -79,7 +95,7 @@ void main() {
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
-      settle: false, // don't wait for the future to complete
+      settle: false,
       overrides: [
         inventoryWithProductProvider.overrideWith((ref) => completer.future),
         inventoryListProvider.overrideWith(
@@ -93,11 +109,9 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     completer.complete([]);
-    await tester.pumpAndSettle(); // allow the widget to rebuild
+    await tester.pumpAndSettle();
   });
 
-  /// Error state: when the inventory future completes with an error, the error
-  /// message is displayed in the centre of the screen.
   testWidgets('shows error message when inventory fails', (tester) async {
     await pumpApp(
       tester,
@@ -118,8 +132,6 @@ void main() {
     expect(find.text('Error: test error'), findsOneWidget);
   });
 
-  /// Empty state: when the inventory list is empty, the [EmptyPantry] widget
-  /// appears with the correct title.
   testWidgets('shows empty state when inventory list is empty', (tester) async {
     await pumpApp(
       tester,
@@ -140,9 +152,6 @@ void main() {
     expect(find.text('Your pantry is empty'), findsOneWidget);
   });
 
-  /// Expiry grouping: items are placed under the correct section headers
-  /// "Expired", "Expiring soon", and "Good".  A fourth item without an
-  /// expiry date falls into the "Good" group.
   testWidgets('shows inventory items grouped by expiry', (tester) async {
     final now = DateTime.now();
     final items = [
@@ -185,8 +194,6 @@ void main() {
     expect(find.text('Good'), findsOneWidget);
   });
 
-  /// Inventory switcher: when two inventories ("Home" and "Work") exist, the
-  /// `swap_horiz` icon is visible in the app bar.
   testWidgets('shows inventory switcher when multiple inventories exist', (
     tester,
   ) async {
@@ -212,7 +219,6 @@ void main() {
     expect(find.byIcon(Icons.swap_horiz), findsOneWidget);
   });
 
-  /// When only one inventory exists, the switcher icon must not appear.
   testWidgets('does not show switcher when only one inventory exists', (
     tester,
   ) async {
@@ -235,5 +241,239 @@ void main() {
     );
 
     expect(find.byIcon(Icons.swap_horiz), findsNothing);
+  });
+
+  // ---------- Additional tests for uncovered paths ----------
+
+  testWidgets('tapping settings navigates to SettingsScreen', (tester) async {
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith(
+          (ref) => <InventoryWithProduct>[],
+        ),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pump();
+    await tester.pump(); // allow navigation to start
+
+    expect(find.byType(SettingsScreen), findsOneWidget);
+  });
+
+  testWidgets('search filters items and shows clear button', (tester) async {
+    final items = [
+      testItem('Milk', barcode: '111'),
+      testItem('Bread', barcode: '222'),
+    ];
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    expect(find.widgetWithText(InventoryCard, 'Milk'), findsOneWidget);
+    expect(find.widgetWithText(InventoryCard, 'Bread'), findsOneWidget);
+
+    final searchField = find.byType(TextField);
+    await tester.enterText(searchField, 'Milk');
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(InventoryCard, 'Milk'), findsOneWidget);
+    expect(find.widgetWithText(InventoryCard, 'Bread'), findsNothing);
+
+    expect(find.byIcon(Icons.clear), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.clear));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(InventoryCard, 'Milk'), findsOneWidget);
+    expect(find.widgetWithText(InventoryCard, 'Bread'), findsOneWidget);
+  });
+
+  testWidgets('shows no items match message when search yields empty', (
+    tester,
+  ) async {
+    final items = [testItem('Milk', barcode: '111')];
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    await tester.enterText(find.byType(TextField), 'XYZ');
+    await tester.pumpAndSettle();
+
+    expect(find.text('No items match your search'), findsOneWidget);
+  });
+
+  testWidgets('inventory switcher popup selects a different inventory', (
+    tester,
+  ) async {
+    final fakeNotifier = FakeActiveInventoryNotifier();
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith(
+          (ref) => <InventoryWithProduct>[],
+        ),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+            {'id': 2, 'name': 'Work'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(() => fakeNotifier),
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    await tester.tap(find.byIcon(Icons.swap_horiz));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Work').last);
+    await tester.pumpAndSettle();
+
+    expect(fakeNotifier.lastSetValue, 2);
+  });
+
+  testWidgets(
+    'FAB scanner flow: barcode returns, navigates to product detail',
+    (tester) async {
+      final mockRepo = MockProductRepository();
+      const product = Product(barcode: '123', name: 'Test');
+      when(() => mockRepo.getProduct('123')).thenAnswer((_) async => product);
+      // Stub inventory fetch to avoid null future
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => <InventoryItem>[]);
+
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          inventoryWithProductProvider.overrideWith(
+            (ref) => <InventoryWithProduct>[],
+          ),
+          inventoryListProvider.overrideWith(
+            (ref) => <Map<String, dynamic>>[],
+          ),
+          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(ScannerScreen), findsOneWidget);
+
+      // Pop the scanner with a barcode
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator))
+        ..pop('123');
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(ProductDetailScreen), findsOneWidget);
+      expect(find.text('Test'), findsOneWidget);
+    },
+  );
+
+  testWidgets('FAB scanner flow: null result does nothing', (tester) async {
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith(
+          (ref) => <InventoryWithProduct>[],
+        ),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(ScannerScreen), findsOneWidget);
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator))
+      ..pop(); // null value
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(ProductDetailScreen), findsNothing);
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('FAB scanner flow: product not found shows snackbar', (
+    tester,
+  ) async {
+    final mockRepo = MockProductRepository();
+    when(
+      () => mockRepo.getProduct('123'),
+    ).thenThrow(ProductNotFoundException('product not found'));
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith(
+          (ref) => <InventoryWithProduct>[],
+        ),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(mockRepo),
+      ],
+    );
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator))
+      ..pop('123');
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 }

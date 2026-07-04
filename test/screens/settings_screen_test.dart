@@ -182,4 +182,36 @@ void main() {
       expect(find.byType(ManageInventoriesScreen), findsOneWidget);
     },
   );
+  testWidgets('cancelling retention dialog does not change value', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+      ],
+    );
+
+    // Tap the data retention tile
+    await tester.tap(
+      find.ancestor(
+        of: find.byIcon(Icons.timer),
+        matching: find.byType(ListTile),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    // Tap Cancel
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    // Dialog closed, no snackbar
+    expect(find.byType(AlertDialog), findsNothing);
+    // No "Retention period set" message
+    expect(find.textContaining('Retention period set'), findsNothing);
+  });
 }
