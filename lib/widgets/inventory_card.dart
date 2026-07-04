@@ -9,18 +9,13 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/widgets/nutriscore_badge.dart';
 
 /// A tappable card representing one inventory item on the home screen.
 ///
-/// Shows the product image (or a placeholder icon), the product name, a
-/// subtitle with quantity, location, and expiry date, and a small coloured
-/// dot indicating whether the item is expired.
-///
-/// The product image is wrapped in a [Hero] so that it smoothly animates
-/// into the product detail screen when the card is tapped. The image is
-/// loaded from a local cache (WebP format) when available; otherwise a
-/// placeholder is shown while the network image is fetched and cached.
-class InventoryCard extends ConsumerWidget {
+/// Caches the image future in state to avoid recreating it on rebuilds.
+/// Includes semantic labels for accessibility.
+class InventoryCard extends ConsumerStatefulWidget {
   /// Creates an [InventoryCard] for the given [item].
   const InventoryCard({required this.item, super.key});
 
@@ -28,36 +23,90 @@ class InventoryCard extends ConsumerWidget {
   final InventoryWithProduct item;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InventoryCard> createState() => _InventoryCardState();
+}
+
+class _InventoryCardState extends ConsumerState<InventoryCard> {
+  Future<String?>? _cachedImageFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _cachedImageFuture = null;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_cachedImageFuture == null) {
+      final imageCache = ref.read(imageCacheProvider);
+      _cachedImageFuture = imageCache.cacheImage(
+        widget.item.productImageUrl,
+        widget.item.barcode,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isExpired =
-        item.expiryDate != null &&
-        DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
+    final isExpired = widget.item.expiryDate != null &&
+        DateTime.tryParse(widget.item.expiryDate!)
+                ?.isBefore(DateTime.now()) ==
+            true;
+    final expiryLabel = isExpired ? l10n.expired : l10n.good;
+
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        leading: Hero(
-          tag: item.barcode,
-          child: _buildLeadingImage(ref),
-        ),
-        title: Text(item.productName ?? item.barcode),
-        subtitle: Text(
-          '''${item.quantity} ${item.unit} · ${item.location}${item.expiryDate != null ? " · ${l10n.expiryPrefix}: ${item.expiryDate}" : ""}''',
-        ),
-        trailing: Icon(
-          Icons.circle,
-          color: isExpired ? Colors.red : Colors.grey.shade300,
-          size: 12,
+        leading: widget.item.productImageUrl != null
+            ? Hero(
+                tag: widget.item.barcode,
+                child: Semantics(
+                  label: widget.item.productName,
+                  child: _buildLeadingImage(),
+                ),
+              )
+            : Semantics(
+                label: widget.item.productName,
+                child: _buildLeadingImage(),
+              ),
+        title: Text(widget.item.productName ?? widget.item.barcode),
+          subtitle: _buildSubtitle(l10n),
+        trailing: Semantics(
+          label: expiryLabel,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              NutriScoreBadge(
+                grade: widget.item.nutriscoreGrade,
+                size: 24,
+              ),
+              if (widget.item.nutriscoreGrade != null)
+                const SizedBox(width: 6),
+              Text(
+                expiryLabel,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isExpired ? Colors.red : Colors.grey.shade500,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.circle,
+                color: isExpired ? Colors.red : Colors.grey.shade300,
+                size: 12,
+              ),
+            ],
+          ),
         ),
         onTap: () async {
-          logInfo('Inventory card tapped: ${item.barcode}');
+          logInfo('Inventory card tapped: ${widget.item.barcode}');
           final repo = ref.read(productRepositoryProvider);
           try {
-            final product = await repo.getProduct(item.barcode);
+            final product = await repo.getProduct(widget.item.barcode);
             if (!context.mounted) return;
             await Navigator.of(context).push<void>(
               MaterialPageRoute(
@@ -75,11 +124,19 @@ class InventoryCard extends ConsumerWidget {
     );
   }
 
-  /// Builds the leading image widget, loading from cache or network.
-  Widget _buildLeadingImage(WidgetRef ref) {
-    final imageCache = ref.watch(imageCacheProvider);
+  Widget _buildSubtitle(AppLocalizations l10n) {
+    final sb = StringBuffer()
+      ..write('${widget.item.quantity} ${widget.item.unit}')
+      ..write(' · ${widget.item.location}');
+    if (widget.item.expiryDate != null) {
+      sb.write(' · ${l10n.expiryPrefix}: ${widget.item.expiryDate}');
+    }
+    return Text(sb.toString());
+  }
+
+  Widget _buildLeadingImage() {
     return FutureBuilder<String?>(
-      future: imageCache.cacheImage(item.productImageUrl, item.barcode),
+      future: _cachedImageFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data != null) {
           return ClipOval(
@@ -92,11 +149,10 @@ class InventoryCard extends ConsumerWidget {
             ),
           );
         }
-        // Still loading or failed; show placeholder.
-        if (item.productImageUrl != null) {
+        if (widget.item.productImageUrl != null) {
           return ClipOval(
             child: Image.network(
-              item.productImageUrl!,
+              widget.item.productImageUrl!,
               width: 40,
               height: 40,
               fit: BoxFit.cover,

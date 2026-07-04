@@ -279,7 +279,7 @@ void main() {
       expect(rows.first['category'], 'Cat1');
       expect(rows.first['barcode'], 'p1');
       expect(rows.first['quantity'], 5);
-      expect(rows.first['unit'], 'pcs');
+      expect(rows.first['unit'], 'pieces');
       expect(rows.first['expiry_date'], '2026-06-01');
       expect(rows.first['location'], 'fridge');
       expect(rows.first['notes'], 'note');
@@ -320,7 +320,7 @@ void main() {
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               barcode TEXT NOT NULL,
               quantity REAL DEFAULT 1,
-              unit TEXT DEFAULT 'pcs',
+              unit TEXT DEFAULT 'pieces',
               expiry_date TEXT,
               location TEXT DEFAULT 'pantry',
               notes TEXT,
@@ -348,7 +348,7 @@ void main() {
           await db.insert('inventory', {
             'barcode': 'old',
             'quantity': 2,
-            'unit': 'pcs',
+            'unit': 'pieces',
             'expiry_date': '2025-12-31',
             'location': 'pantry',
             'notes': 'old item',
@@ -382,6 +382,76 @@ void main() {
       final migratedDb = await dbHelper.database;
       await migratedDb.close();
       // Delete the temporary directory.
+      tempDir.deleteSync(recursive: true);
+    });
+  });
+  group('Migration v2 → v3', () {
+    test('updates pcs units to pieces', () async {
+      final tempDir = Directory.systemTemp.createTempSync('pantry_v2_');
+      final v2Path = '${tempDir.path}/pantry.db';
+      final v2Db = await openDatabase(
+        v2Path,
+        version: 2,
+        onCreate: (db, _) async {
+          await db.execute('''
+            CREATE TABLE products (
+              barcode TEXT PRIMARY KEY,
+              name TEXT NOT NULL
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE inventories (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              created_at INTEGER NOT NULL
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE inventory (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT NOT NULL,
+              quantity REAL DEFAULT 1,
+              unit TEXT DEFAULT 'pcs',
+              expiry_date TEXT,
+              location TEXT DEFAULT 'pantry',
+              notes TEXT,
+              date_added INTEGER,
+              inventory_id INTEGER NOT NULL
+            )
+          ''');
+          await db.insert('inventories', {
+            'name': 'Home',
+            'created_at': DateTime.now().millisecondsSinceEpoch,
+          });
+        },
+      );
+
+      await v2Db.insert('products', {'barcode': 'a', 'name': 'A'});
+      await v2Db.insert('products', {'barcode': 'b', 'name': 'B'});
+      await v2Db.insert('inventory', {
+        'barcode': 'a',
+        'unit': 'pcs',
+        'location': 'pantry',
+        'inventory_id': 1,
+      });
+      await v2Db.insert('inventory', {
+        'barcode': 'b',
+        'unit': 'kg',
+        'location': 'fridge',
+        'inventory_id': 1,
+      });
+      await v2Db.close();
+
+      final dbHelper = DatabaseHelper.withPath(v2Path);
+      final items = await dbHelper.getInventoryItems(inventoryId: 1);
+
+      final unitA = items.firstWhere((i) => i.barcode == 'a').unit;
+      final unitB = items.firstWhere((i) => i.barcode == 'b').unit;
+      expect(unitA, 'pieces');
+      expect(unitB, 'kg');
+
+      final migratedDb = await dbHelper.database;
+      await migratedDb.close();
       tempDir.deleteSync(recursive: true);
     });
   });

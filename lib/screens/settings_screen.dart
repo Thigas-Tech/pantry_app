@@ -9,10 +9,8 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// A screen where the user can adjust application preferences.
 ///
-/// - **Theme**: choose between system, light, or dark mode.
-/// - **Notifications**: enable or disable expiry reminders.
-/// - **Data retention**: set how many days before old items are cleaned up.
-/// - **Manage Inventories**: create, rename, or delete pantries.
+/// Includes theme, notifications, data retention, and expiring‑soon
+/// threshold settings, as well as a link to manage inventories.
 class SettingsScreen extends ConsumerWidget {
   /// Creates a [SettingsScreen] widget.
   const SettingsScreen({super.key});
@@ -42,9 +40,9 @@ class SettingsScreen extends ConsumerWidget {
             value: settings.notificationsEnabled,
             onChanged: (value) {
               logInfo('Notifications toggled: $value');
-              ref.read(settingsProvider.notifier).value = Settings(
-                notificationsEnabled: value,
-              );
+              final current = ref.read(settingsProvider);
+              ref.read(settingsProvider.notifier).value =
+                  current.copyWith(notificationsEnabled: value);
               if (context.mounted) {
                 SnackbarHelper.showInfo(
                   context,
@@ -63,9 +61,15 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _showRetentionDialog(context, ref),
           ),
           const Divider(),
-
-          /// Opens the [ManageInventoriesScreen] where the user can create,
-          /// rename, or delete pantries.
+          ListTile(
+            title: Text(l10n.expiringSoonDays),
+            subtitle: Text(
+              l10n.expiringSoonDaysValue(settings.expiringSoonDays),
+            ),
+            leading: const Icon(Icons.calendar_today),
+            onTap: () => _showExpiringSoonDialog(context, ref),
+          ),
+          const Divider(),
           ListTile(
             title: Text(l10n.manageInventories),
             subtitle: Text(l10n.manageInventoriesSub),
@@ -83,7 +87,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  /// Shows a dialog with the three theme options.
   Future<void> _showThemeDialog(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
     final current = ref.read(themeModeProvider);
@@ -117,11 +120,11 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  /// Shows a dialog that lets the user type a new retention period in days.
   Future<void> _showRetentionDialog(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(settingsProvider);
     final controller = TextEditingController(
-      text: ref.read(settingsProvider).retentionDays.toString(),
+      text: current.retentionDays.toString(),
     );
     final days = await showDialog<int>(
       context: context,
@@ -130,10 +133,7 @@ class SettingsScreen extends ConsumerWidget {
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: '60',
-            labelText: l10n.daysLabel,
-          ),
+          decoration: InputDecoration(labelText: l10n.daysLabel),
         ),
         actions: [
           TextButton(
@@ -154,11 +154,57 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (days != null) {
       logInfo('Retention period changed to $days days');
-      ref.read(settingsProvider.notifier).value = Settings(retentionDays: days);
+      ref.read(settingsProvider.notifier).value =
+          current.copyWith(retentionDays: days);
+      if (context.mounted) {
+        SnackbarHelper.showInfo(context, l10n.retentionPeriodSet(days));
+      }
+    }
+  }
+
+  Future<void> _showExpiringSoonDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(settingsProvider);
+    final controller = TextEditingController(
+      text: current.expiringSoonDays.toString(),
+    );
+    final days = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.expiringSoonDaysDialogTitle),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(labelText: l10n.daysLabel),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = int.tryParse(controller.text.trim());
+              if (value != null && value > 0) {
+                Navigator.pop(ctx, value);
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    if (days != null) {
+      logInfo('Expiring soon threshold changed to $days days');
+      ref.read(settingsProvider.notifier).value =
+          current.copyWith(expiringSoonDays: days);
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
-          l10n.retentionPeriodSet(days),
+          l10n.expiringSoonDaysSet(days),
         );
       }
     }

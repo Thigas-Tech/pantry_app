@@ -1,18 +1,4 @@
-/// @file ScannerScreen widget tests.
-///
-/// Tests for the barcode input screen.  The screen offers two modes:
-/// - Camera scanner (MobileScanner)
-/// - Manual entry (text field)
-///
-/// Because MobileScanner is a native plugin, the onDetect callback is not
-/// triggered in a pure Dart test environment.  We therefore focus on:
-///   - Initial camera view with the correct app bar title and toggle button.
-///   - Switching to manual entry and back to camera.
-///   - Manual barcode entry and submission.
-///
-/// The scanner has a perpetual animation; we avoid `pumpAndSettle` and use
-/// `pump()` with explicit durations.
-library;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,14 +13,12 @@ void main() {
       await pumpApp(
         tester,
         const ScannerScreen(),
-        settle: false, // don't wait for perpetual animation
+        settle: false,
       );
-      await tester.pump(); // one frame
+      await tester.pump();
 
       expect(find.text('Scan Barcode'), findsOneWidget);
       expect(find.byIcon(Icons.edit), findsOneWidget);
-      // The overlay custom painter is present (may appear multiple times due to
-      // scaffold background, etc.)
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
@@ -48,12 +32,8 @@ void main() {
       );
       await tester.pump();
       await tester.tap(find.byIcon(Icons.edit));
-      await tester.pump(); // rebuild
-
-      // Now we are in manual entry mode; still no settle needed
-      await tester.pump(
-        const Duration(milliseconds: 500),
-      ); // let build complete
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.text('Enter Barcode'), findsOneWidget);
       expect(find.byIcon(Icons.camera_alt), findsOneWidget);
@@ -74,7 +54,6 @@ void main() {
 
       await tester.tap(find.widgetWithText(ElevatedButton, 'Submit'));
       await tester.pump();
-      // Still on the scanner screen
       expect(find.byType(ScannerScreen), findsOneWidget);
     });
 
@@ -97,8 +76,6 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      // The route should be popped;
-      // The scanner screen gone from navigation stack
       expect(find.byType(ScannerScreen), findsNothing);
     });
 
@@ -121,9 +98,75 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      // Now the camera view should be shown again
       expect(find.text('Scan Barcode'), findsOneWidget);
       expect(find.byIcon(Icons.edit), findsOneWidget);
+    });
+
+    testWidgets('back navigation shows confirmation dialog', (
+      tester,
+    ) async {
+      // Pump a parent route, then push ScannerScreen via the Navigator.
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  unawaited(
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ScannerScreen(),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Open Scanner'),
+              ),
+            ),
+          ),
+        ),
+        settle: false,
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Navigate to scanner
+      await tester.tap(find.text('Open Scanner'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Scanner should be visible
+      expect(find.byType(ScannerScreen), findsOneWidget);
+
+      // Trigger a back-pop attempt
+      final nav = tester.state<NavigatorState>(find.byType(Navigator));
+      unawaited(nav.maybePop());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Confirmation dialog should appear
+      expect(find.text('Stop scanning?'), findsOneWidget);
+      expect(find.text('The current scan will be discarded.'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Stay'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Leave'), findsOneWidget);
+
+      // Tapping Stay should keep the scanner visible
+      await tester.tap(find.widgetWithText(TextButton, 'Stay'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byType(ScannerScreen), findsOneWidget);
+
+      // Tapping Leave should pop the scanner
+      // Trigger back-pop attempt (pop result is ignored)
+      unawaited(nav.maybePop());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.widgetWithText(TextButton, 'Leave'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(ScannerScreen), findsNothing);
     });
   });
 }

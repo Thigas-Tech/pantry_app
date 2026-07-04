@@ -31,8 +31,8 @@ mixin _$InventoryItem {
 /// (e.g., `0.5` for half a pack). Defaults to `1`.
  double get quantity;/// The unit of measurement for [quantity].
 ///
-/// Common values: `'pcs'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
-/// Defaults to `'pcs'`.
+/// Common values: `'pieces'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
+/// Defaults to `'pieces'`.
  String get unit;/// The expiry date in ISO 8601 format (`YYYY-MM-DD`).
 ///
 /// May be `null` if the user has not set an expiry date. When present,
@@ -257,7 +257,7 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 @JsonSerializable()
 
 class _InventoryItem implements InventoryItem {
-  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pcs', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded, @JsonKey(name: 'inventory_id') this.inventoryId = 1});
+  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pieces', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded, @JsonKey(name: 'inventory_id') this.inventoryId = 1});
   factory _InventoryItem.fromJson(Map<String, dynamic> json) => _$InventoryItemFromJson(json);
 
 /// The barcode of the product (e.g. EAN‑13, UPC).
@@ -279,8 +279,8 @@ class _InventoryItem implements InventoryItem {
 @override@JsonKey() final  double quantity;
 /// The unit of measurement for [quantity].
 ///
-/// Common values: `'pcs'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
-/// Defaults to `'pcs'`.
+/// Common values: `'pieces'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
+/// Defaults to `'pieces'`.
 @override@JsonKey() final  String unit;
 /// The expiry date in ISO 8601 format (`YYYY-MM-DD`).
 ///

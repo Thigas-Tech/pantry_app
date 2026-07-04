@@ -6,20 +6,17 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/csv_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/filegate_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// A statistics and data‑export screen for Android.
+/// A statistics and data‑export screen.
 ///
-/// Shows aggregate pantry counts (across all inventories) and allows the
-/// user to:
-/// - **Export** the currently active pantry's inventory as a CSV file via
-///   the system share sheet. The export is scoped to the pantry selected
-///   on the home screen.
-/// - **Import** a previously exported CSV file (planned – currently shows
-///   a “coming soon” message).
+/// Shows aggregate pantry counts and allows the user to export and import
+/// CSV files for the currently active pantry. Export uses the system share
+/// sheet; import opens the platform file picker via `Filegate`.
 class StatsScreen extends ConsumerWidget {
   /// Creates a [StatsScreen] widget.
   const StatsScreen({super.key});
@@ -56,9 +53,7 @@ class StatsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    SnackbarHelper.showInfo(context, l10n.csvImportComingSoon);
-                  },
+                  onPressed: () => _importCsv(context, ref),
                   icon: const Icon(Icons.file_upload),
                   label: Text(l10n.importCsv),
                 ),
@@ -70,10 +65,8 @@ class StatsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _exportCsv(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  /// Exports the current pantry as a CSV file via the system share sheet.
+  Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
     logInfo('Export button pressed');
 
@@ -99,8 +92,42 @@ class StatsScreen extends ConsumerWidget {
         );
       }
     } on Exception catch (e) {
+      logError('Export failed: $e');
       if (context.mounted) {
-        SnackbarHelper.showError(context, '${l10n.exportFailed}: $e');
+        SnackbarHelper.showError(context, l10n.exportFailed);
+      }
+    }
+  }
+
+  /// Opens the platform file picker and imports a CSV into the active pantry.
+  Future<void> _importCsv(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    logInfo('Import button pressed');
+
+    try {
+      final filegate = ref.read(filegateProvider);
+      final picked = await filegate.pickFiles(
+        allowedExtensions: ['csv'],
+      );
+      if (picked == null || picked.isEmpty) return;
+
+      final csvService = ref.read(csvServiceProvider);
+      final activeId = ref.read<int>(activeInventoryProvider);
+      final result = await csvService.importCsv(
+        picked.first.path,
+        inventoryId: activeId,
+      );
+
+      if (context.mounted) {
+        SnackbarHelper.showInfo(
+          context,
+          l10n.importCsvSuccess(result['products']!, result['items']!),
+        );
+      }
+    } on Exception catch (e) {
+      logError('CSV import failed: $e');
+      if (context.mounted) {
+        SnackbarHelper.showError(context, l10n.importCsvFailed(e.toString()));
       }
     }
   }

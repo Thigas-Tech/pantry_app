@@ -12,16 +12,23 @@ import 'package:timezone/timezone.dart' as tz;
 /// ## Timezone handling
 ///
 /// Scheduled notifications require a timezone‑aware `TZDateTime`. The service
-/// loads the IANA timezone database and then attempts to match the device’s
+/// loads the IANA timezone database and then attempts to match the device's
 /// local timezone name. If the name is unknown it falls back to UTC.
 ///
 /// ## Notification IDs
 ///
 /// Each inventory item can have up to two scheduled notifications:
-/// - ID = `item.id.hashCode`        → “Expiring soon” (1 day before)
-/// - ID = `item.id.hashCode + 1`    → “Expiring today” (on the expiry day)
+/// - ID = `item.id.hashCode`        -> "Expiring soon" (1 day before)
+/// - ID = `item.id.hashCode + 1`    -> "Expiring today" (on the expiry day)
+///
+/// ## Localization
+///
+/// Notification title and body strings are passed in by callers so they can
+/// be localized via `AppLocalizations`. If no strings are provided, English
+/// fallback values are used.
 class NotificationService {
   /// Creates a [NotificationService] that uses the given [plugin].
+  ///
   /// In production code the default [FlutterLocalNotificationsPlugin] is used;
   /// in tests a mock can be injected.
   NotificationService({FlutterLocalNotificationsPlugin? plugin})
@@ -40,17 +47,18 @@ class NotificationService {
 
     final localTimeZoneName = DateTime.now().timeZoneName;
     logInfo('Detected device timezone name: $localTimeZoneName');
+
+    tz.Location location;
     try {
-      tz.setLocalLocation(tz.getLocation(localTimeZoneName));
-      logInfo('Timezone set to $localTimeZoneName');
-    } on Exception catch (_) {
-      tz.setLocalLocation(tz.UTC);
-      logWarning('Unknown timezone "$localTimeZoneName", falling back to UTC');
+      location = tz.getLocation(localTimeZoneName);
+    } on Exception {
+      location = _resolveFromOffset(localTimeZoneName);
     }
 
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
+    tz.setLocalLocation(location);
+    logInfo('Timezone set to ${location.name}');
+
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
 
     try {
@@ -67,7 +75,20 @@ class NotificationService {
   }
 
   /// Schedules two local notifications for [item].
-  Future<void> scheduleExpiryReminders(InventoryItem item) async {
+  ///
+  /// [expiringSoonTitle], [expiringSoonBody], [expiringTodayTitle],
+  /// [expiringTodayBody], [channelName], and [channelDescription] can be
+  /// passed to localize the notifications. If omitted, English defaults
+  /// are used.
+  Future<void> scheduleExpiryReminders(
+    InventoryItem item, {
+    String expiringSoonTitle = 'Expiring soon',
+    String expiringSoonBody = '',
+    String expiringTodayTitle = 'Food expiring today',
+    String expiringTodayBody = '',
+    String channelName = 'Expiry reminders',
+    String channelDescription = 'Warns about expiring food',
+  }) async {
     if (item.expiryDate == null) {
       logInfo('No expiry date for item ${item.id}, skipping reminders');
       return;
@@ -87,19 +108,22 @@ class NotificationService {
     final dayBeforeTZ = tz.TZDateTime.from(dayBefore, tz.local);
     if (dayBeforeTZ.isAfter(now)) {
       try {
+        final body = expiringSoonBody.isNotEmpty
+            ? expiringSoonBody
+            : '${item.barcode} expires tomorrow';
         await _plugin.zonedSchedule(
           id: id,
-          title: 'Expiring soon',
-          body: '${item.barcode} expires tomorrow',
+          title: expiringSoonTitle,
+          body: body,
           scheduledDate: dayBeforeTZ,
-          notificationDetails: const NotificationDetails(
+          notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
               'expiry_channel',
-              'Expiry reminders',
-              channelDescription: 'Warns about expiring food',
+              channelName,
+              channelDescription: channelDescription,
               importance: Importance.high,
             ),
-            iOS: DarwinNotificationDetails(),
+            iOS: const DarwinNotificationDetails(),
           ),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         );
@@ -119,19 +143,22 @@ class NotificationService {
     final expiryTZ = tz.TZDateTime.from(expiry, tz.local);
     if (expiryTZ.isAfter(now)) {
       try {
+        final body = expiringTodayBody.isNotEmpty
+            ? expiringTodayBody
+            : '${item.barcode} expires today!';
         await _plugin.zonedSchedule(
           id: id + 1,
-          title: 'Food expiring today',
-          body: '${item.barcode} expires today!',
+          title: expiringTodayTitle,
+          body: body,
           scheduledDate: expiryTZ,
-          notificationDetails: const NotificationDetails(
+          notificationDetails: NotificationDetails(
             android: AndroidNotificationDetails(
               'expiry_channel',
-              'Expiry reminders',
-              channelDescription: 'Warns about expiring food',
+              channelName,
+              channelDescription: channelDescription,
               importance: Importance.high,
             ),
-            iOS: DarwinNotificationDetails(),
+            iOS: const DarwinNotificationDetails(),
           ),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         );
@@ -170,5 +197,21 @@ class NotificationService {
         >();
     await androidPlugin?.requestNotificationsPermission();
     logInfo('Notification permission request completed');
+  }
+
+  /// Handles raw UTC offset strings (e.g. `-03` on Linux desktop) by
+  /// returning [tz.UTC].  On Android/iOS the system provides a proper
+  /// IANA zone name, so this fallback is rarely hit in production.
+  static tz.Location _resolveFromOffset(String name) {
+    final match = RegExp(r'^[+-]\d{1,2}$').hasMatch(name);
+    if (match) {
+      logWarning(
+        'Raw UTC offset "$name" detected (common on Linux desktop).'
+        ' Falling back to UTC for timezone calculations.',
+      );
+    } else {
+      logWarning('Unknown timezone "$name", falling back to UTC');
+    }
+    return tz.UTC;
   }
 }

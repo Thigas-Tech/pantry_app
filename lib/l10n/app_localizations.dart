@@ -698,6 +698,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete inventory.'**
   String get couldNotDeleteInventory;
+
+  /// No description provided for @networkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your connection.'**
+  String get networkError;
+
+  /// No description provided for @productNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Product not found'**
+  String get productNotFound;
+
+  /// No description provided for @productNotFoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.'**
+  String get productNotFoundHint;
+
+  /// No description provided for @addManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Add manually'**
+  String get addManually;
+
+  /// No description provided for @contributeToOpenFoodFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribute to Open Food Facts'**
+  String get contributeToOpenFoodFacts;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @expiringSoonDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon threshold'**
+  String get expiringSoonDays;
+
+  /// No description provided for @expiringSoonDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String expiringSoonDaysValue(int days);
+
+  /// No description provided for @expiringSoonDaysDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon threshold (days)'**
+  String get expiringSoonDaysDialogTitle;
+
+  /// No description provided for @expiringSoonDaysSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon threshold set to {days} days.'**
+  String expiringSoonDaysSet(int days);
+
+  /// No description provided for @expiringToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Food expiring today'**
+  String get expiringToday;
+
+  /// No description provided for @expiresTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{barcode} expires tomorrow'**
+  String expiresTomorrow(String barcode);
+
+  /// No description provided for @expiresToday.
+  ///
+  /// In en, this message translates to:
+  /// **'{barcode} expires today!'**
+  String expiresToday(String barcode);
+
+  /// No description provided for @expiryChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry reminders'**
+  String get expiryChannelName;
+
+  /// No description provided for @expiryChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Warns about expiring food'**
+  String get expiryChannelDescription;
+
+  /// No description provided for @itemRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Item restored.'**
+  String get itemRestored;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @scanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Align the barcode inside the frame'**
+  String get scanHint;
+
+  /// No description provided for @confirmExitScanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop scanning?'**
+  String get confirmExitScanner;
+
+  /// No description provided for @confirmExitScannerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The current scan will be discarded.'**
+  String get confirmExitScannerHint;
+
+  /// No description provided for @stay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get stay;
+
+  /// No description provided for @leave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get leave;
+
+  /// No description provided for @importCsvSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Import complete — {products} products, {items} items.'**
+  String importCsvSuccess(int products, int items);
+
+  /// No description provided for @importCsvFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV import failed: {error}'**
+  String importCsvFailed(String error);
+
+  /// No description provided for @customUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom...'**
+  String get customUnit;
+
+  /// No description provided for @customLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom...'**
+  String get customLocation;
+
+  /// No description provided for @enterCustomUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter custom unit'**
+  String get enterCustomUnit;
+
+  /// No description provided for @enterCustomLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter custom location'**
+  String get enterCustomLocation;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @exportedToShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Export ready — share to save.'**
+  String get exportedToShare;
+
+  /// No description provided for @errorLoadingInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load inventory.'**
+  String get errorLoadingInventory;
+
+  /// No description provided for @items.
+  ///
+  /// In en, this message translates to:
+  /// **'items'**
+  String get items;
+
+  /// No description provided for @enterProductDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter product details'**
+  String get enterProductDetails;
+
+  /// No description provided for @productNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Product name'**
+  String get productNameLabel;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get requiredField;
+
+  /// No description provided for @servingSizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 100 g, 1 cookie (28 g)'**
+  String get servingSizeHint;
+
+  /// No description provided for @nutritionInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition (per 100 g / 100 ml)'**
+  String get nutritionInfo;
+
+  /// No description provided for @captureImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get captureImages;
+
+  /// No description provided for @nutritionTableImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition table photo'**
+  String get nutritionTableImage;
+
+  /// No description provided for @ingredientsImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients list photo'**
+  String get ingredientsImage;
+
+  /// No description provided for @productImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Product photo'**
+  String get productImage;
+
+  /// No description provided for @saveProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Save product'**
+  String get saveProduct;
+
+  /// No description provided for @submittingToOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Will be submitted to Open Food Facts when online'**
+  String get submittingToOff;
+
+  /// No description provided for @nutriscoreExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.'**
+  String get nutriscoreExplanation;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

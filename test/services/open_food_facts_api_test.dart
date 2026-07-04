@@ -32,7 +32,8 @@ void main() {
       dio,
       userId: 'test-user',
       password: 'test-pass',
-      useStaging: false, // production server
+      contactEmail: 'test@example.com',
+      useStaging: false,
     );
   });
 

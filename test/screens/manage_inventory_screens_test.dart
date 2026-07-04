@@ -121,7 +121,7 @@ void main() {
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
       ],
     );
-    expect(find.text('Error: fetch error'), findsOneWidget);
+    expect(find.text('Failed to load inventory.'), findsOneWidget);
   });
 
   testWidgets('shows empty state when no inventories', (tester) async {

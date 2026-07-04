@@ -3,6 +3,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/widgets/nutriscore_badge.dart';
 
 /// Provides the joined list of inventory items for the currently active
 /// inventory.
@@ -31,4 +32,30 @@ final inventoryWithProductProvider = FutureProvider<List<InventoryWithProduct>>(
 final inventoryListProvider = FutureProvider<List<Map<String, dynamic>>>((ref) {
   final db = ref.watch(databaseProvider);
   return db.getInventories();
+});
+
+/// Provides the average Nutri-Score letter for the active inventory.
+///
+/// Returns a grade (`'a'`–`'e'`) or `null` if none of the products in the
+/// current pantry have Nutri-Score data.
+final averageNutriscoreProvider = FutureProvider<String?>((ref) async {
+  final items = await ref.watch(inventoryWithProductProvider.future);
+  final scores = <int>[];
+  for (final item in items) {
+    if (item.nutriscoreGrade != null) {
+      final numeric = NutriScoreBadge.toNumeric(item.nutriscoreGrade);
+      if (numeric != null) scores.add(numeric);
+    }
+  }
+  if (scores.isEmpty) return null;
+  final avg = scores.reduce((a, b) => a + b) / scores.length;
+  final rounded = avg.round();
+  return switch (rounded) {
+    5 => 'a',
+    4 => 'b',
+    3 => 'c',
+    2 => 'd',
+    1 => 'e',
+    _ => null,
+  };
 });

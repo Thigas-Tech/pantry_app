@@ -157,7 +157,15 @@ void main() {
     mockRepo = MockProductRepository();
     mockNotif = MockNotificationService();
     when(
-      () => mockNotif.scheduleExpiryReminders(any()),
+      () => mockNotif.scheduleExpiryReminders(
+        any(),
+        expiringSoonTitle: any(named: 'expiringSoonTitle'),
+        expiringSoonBody: any(named: 'expiringSoonBody'),
+        expiringTodayTitle: any(named: 'expiringTodayTitle'),
+        expiringTodayBody: any(named: 'expiringTodayBody'),
+        channelName: any(named: 'channelName'),
+        channelDescription: any(named: 'channelDescription'),
+      ),
     ).thenAnswer((_) => Future<void>.value());
     when(
       () => mockNotif.cancelReminders(any()),
@@ -396,7 +404,17 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => mockRepo.addInventoryItem(newItem)).called(1);
-    verify(() => mockNotif.scheduleExpiryReminders(newItem)).called(1);
+    verify(
+      () => mockNotif.scheduleExpiryReminders(
+        newItem,
+        expiringSoonTitle: any(named: 'expiringSoonTitle'),
+        expiringSoonBody: any(named: 'expiringSoonBody'),
+        expiringTodayTitle: any(named: 'expiringTodayTitle'),
+        expiringTodayBody: any(named: 'expiringTodayBody'),
+        channelName: any(named: 'channelName'),
+        channelDescription: any(named: 'channelDescription'),
+      ),
+    ).called(1);
     // The snackbar says "Item added to pantry."
     expect(find.textContaining('Item added'), findsOneWidget);
   });
@@ -435,7 +453,17 @@ void main() {
 
     verify(() => mockRepo.updateInventoryItem(updatedItem)).called(1);
     verify(() => mockNotif.cancelReminders(existingItem.id!)).called(1);
-    verify(() => mockNotif.scheduleExpiryReminders(updatedItem)).called(1);
+    verify(
+      () => mockNotif.scheduleExpiryReminders(
+        updatedItem,
+        expiringSoonTitle: any(named: 'expiringSoonTitle'),
+        expiringSoonBody: any(named: 'expiringSoonBody'),
+        expiringTodayTitle: any(named: 'expiringTodayTitle'),
+        expiringTodayBody: any(named: 'expiringTodayBody'),
+        channelName: any(named: 'channelName'),
+        channelDescription: any(named: 'channelDescription'),
+      ),
+    ).called(1);
     // The snackbar says "Item updated."
     expect(find.textContaining('Item updated'), findsOneWidget);
   });

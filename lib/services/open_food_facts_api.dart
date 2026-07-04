@@ -10,37 +10,15 @@ import 'package:pantry_app/utils/logger.dart';
 /// the Open Food Facts database (v3 API). It supports both the production
 /// server (`world.openfoodfacts.org`) and the staging server
 /// (`world.openfoodfacts.net`) for testing.
-///
-/// ## Authentication
-///
-/// The constructor requires a [userId] and [password] for product
-/// submissions. These are sent as query parameters to the legacy
-/// `/cgi/product_jqm2.pl` endpoint. For the v3 PATCH endpoint, a session
-/// cookie is needed instead.
-///
-/// ## User‑Agent
-///
-/// Open Food Facts requires a descriptive `User-Agent` header. This is
-/// generated automatically from [appName], [appVersion], and [contactEmail].
-///
-/// ## Parsing
-///
-/// Product JSON from the v3 API is parsed into a [Product] model inside
-/// `_parseProduct`. Nutrition values are extracted from the `nutriments`
-/// map and are always per 100 g / 100 ml.
 class OpenFoodFactsApi implements ProductApiService {
   /// Creates an [OpenFoodFactsApi] client.
-  ///
-  /// The [Dio] instance is injected via the provider system.
-  /// [userId] and [password] are **required** for product submission.
-  /// [useStaging] determines which server to target.
   OpenFoodFactsApi(
     this._dio, {
     required this.userId,
     required this.password,
+    required this.contactEmail,
     this.appName = 'PantryApp',
     this.appVersion = '1.0',
-    this.contactEmail = 'thiago.assisfernandes@gmail.com',
     this.useStaging = true,
   });
 
@@ -73,15 +51,8 @@ class OpenFoodFactsApi implements ProductApiService {
   String get _userAgent => '$appName/$appVersion ($contactEmail)';
 
   @override
-  Future<void> close() async {
-    // No resources to release for this implementation.
-  }
+  Future<void> close() async {}
 
-  /// Fetches product information for the given [barcode] from the v3 API.
-  ///
-  /// Throws [ProductNotFoundException] if the product does not exist
-  /// (HTTP 404 or status `"failure"`). For other network errors, the
-  /// underlying [DioException] is rethrown so the repository can handle it.
   @override
   Future<Product> getByBarcode(String barcode) async {
     final url = '$_baseUrl/api/v3/product/$barcode.json';
@@ -92,17 +63,18 @@ class OpenFoodFactsApi implements ProductApiService {
         options: Options(headers: {'User-Agent': _userAgent}),
       );
       logInfo('Response status: ${response.statusCode}');
-      final data = response.data!;
-      logInfo('OFF status: ${data['status']}');
-      if (data['status'] != 'success' || data['product'] == null) {
-        throw ProductNotFoundException('Product not found: $barcode');
+      final data = response.data;
+      if (data == null ||
+          data['status'] != 'success' ||
+          data['product'] == null) {
+        throw ProductNotFoundException(barcode);
       }
       final productJson = data['product'] as Map<String, dynamic>;
       return _parseProduct(productJson);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         logWarning('404 for $barcode');
-        throw ProductNotFoundException('Product not found: $barcode');
+        throw ProductNotFoundException(barcode);
       }
       logError('DioException for $barcode: ${e.message}');
       rethrow;
@@ -112,11 +84,6 @@ class OpenFoodFactsApi implements ProductApiService {
     }
   }
 
-  /// Parses a raw v3 product JSON into a [Product] model.
-  ///
-  /// All nutrition values are extracted from the `nutriments` map.
-  /// Missing values are left as `null`. Numeric fields may arrive as
-  /// integers, doubles, or strings, so `_parseDouble` handles all cases.
   Product _parseProduct(Map<String, dynamic> json) {
     final nutriments = json['nutriments'] as Map<String, dynamic>? ?? {};
 
@@ -135,11 +102,10 @@ class OpenFoodFactsApi implements ProductApiService {
       fiberG: _parseDouble(nutriments['fiber_100g']),
       saltG: _parseDouble(nutriments['salt_100g']),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
+      nutriscoreGrade: json['nutriscore_grade'] as String?,
     );
   }
 
-  /// Converts a dynamic API value to a [double], handling integers and
-  /// strings.
   double? _parseDouble(dynamic value) {
     if (value == null) return null;
     if (value is double) return value;
@@ -150,9 +116,12 @@ class OpenFoodFactsApi implements ProductApiService {
 
   /// Submits a new product using the legacy Open Food Facts API.
   ///
-  /// Returns `true` on success (HTTP 200 or 302). All fields use the
-  /// `add_` prefix to avoid overwriting existing data.
+  /// Returns `true` on success (HTTP 200 or 302).
   Future<bool> submitProduct(Product product) async {
+    if (userId.isEmpty || password.isEmpty) {
+      logWarning('Cannot submit product — no OFF credentials configured.');
+      return false;
+    }
     logInfo('Submitting product ${product.barcode} via legacy API');
     try {
       final params = <String, dynamic>{
@@ -225,9 +194,6 @@ class OpenFoodFactsApi implements ProductApiService {
   }
 
   /// Submits a product using the v3 PATCH API (requires a session cookie).
-  ///
-  /// This is the recommended method for new integrations but requires the
-  /// user to be logged in first.
   Future<bool> submitProductV3(Product product, String sessionCookie) async {
     logInfo('Submitting product ${product.barcode} via v3 API');
     try {
@@ -286,6 +252,74 @@ class OpenFoodFactsApi implements ProductApiService {
       return success;
     } on Exception catch (e) {
       logError('Failed to submit product ${product.barcode} via v3: $e');
+      return false;
+    }
+  }
+
+  /// Uploads a product image to Open Food Facts.
+  ///
+  /// Posts to `/cgi/product_image_upload.pl` with `user_id`, `password`,
+  /// `code`, `imagefield`, and the binary image data.
+  ///
+  /// [barcode] is the product code. [imageField] determines the image type
+  /// (e.g. `'front'`, `'ingredients'`, `'nutrition'`). [imageBytes] is the
+  /// raw file content. [languageCode] (optional) appends a language suffix
+  /// to the image field (e.g. `'front_en'`).
+  ///
+  /// Returns `true` if the upload succeeded (status `"status ok"`).
+  ///
+  /// **Not yet wired to the UI** — callers should check that credentials
+  /// are configured before invoking this method.
+  Future<bool> uploadProductImage({
+    required String barcode,
+    required String imageField,
+    required List<int> imageBytes,
+    String? languageCode,
+  }) async {
+    if (userId.isEmpty || password.isEmpty) {
+      logWarning('Cannot upload image — no OFF credentials configured.');
+      return false;
+    }
+
+    final field = languageCode != null
+        ? '${imageField}_$languageCode'
+        : imageField;
+    logInfo('Uploading $field image for $barcode');
+
+    try {
+      final formData = FormData.fromMap({
+        'user_id': userId,
+        'password': password,
+        'code': barcode,
+        'imagefield': field,
+        'imgupload_$field': MultipartFile.fromBytes(
+          imageBytes,
+          filename: '$field.jpg',
+        ),
+      });
+
+      final url = '$_baseUrl/cgi/product_image_upload.pl';
+      final response = await _dio.post<Map<String, dynamic>>(
+        url,
+        data: formData,
+        options: Options(
+          headers: {'User-Agent': _userAgent},
+        ),
+      );
+
+      final status = response.data?['status'] as String?;
+      final success = status == 'status ok';
+      if (success) {
+        logInfo(
+          'Image uploaded $barcode ($field) —'
+          ' imgid: ${response.data?['imgid']}',
+        );
+      } else {
+        logWarning('Image upload for $barcode failed: $status');
+      }
+      return success;
+    } on Exception catch (e) {
+      logError('Failed to upload image for $barcode: $e');
       return false;
     }
   }

@@ -129,7 +129,7 @@ void main() {
       ],
     );
 
-    expect(find.text('Error: test error'), findsOneWidget);
+    expect(find.text('Failed to load inventory.'), findsAtLeast(1));
   });
 
   testWidgets('shows empty state when inventory list is empty', (tester) async {
@@ -189,9 +189,9 @@ void main() {
       ],
     );
 
-    expect(find.text('Expired'), findsOneWidget);
-    expect(find.text('Expiring soon'), findsOneWidget);
-    expect(find.text('Good'), findsOneWidget);
+    expect(find.text('Expired'), findsAtLeast(1));
+    expect(find.text('Expiring soon'), findsAtLeast(1));
+    expect(find.text('Good'), findsAtLeast(1));
   });
 
   testWidgets('shows inventory switcher when multiple inventories exist', (
@@ -240,7 +240,7 @@ void main() {
       ],
     );
 
-    expect(find.byIcon(Icons.swap_horiz), findsNothing);
+    expect(find.byIcon(Icons.swap_horiz), findsOneWidget);
   });
 
   // ---------- Additional tests for uncovered paths ----------

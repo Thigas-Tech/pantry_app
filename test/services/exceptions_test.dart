@@ -1,13 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/services/exceptions.dart';
 
-/// Unit tests for the custom exception classes.
 void main() {
   group('ProductNotFoundException', () {
-    test('stores and displays the message', () {
-      final ex = ProductNotFoundException('Barcode 123 not found');
-      expect(ex.message, 'Barcode 123 not found');
-      expect(ex.toString(), contains('Barcode 123 not found'));
+    test('stores the barcode and provides a string representation', () {
+      final ex = ProductNotFoundException('5012345678900');
+      expect(ex.barcode, '5012345678900');
+      expect(ex.toString(), contains('5012345678900'));
     });
   });
 

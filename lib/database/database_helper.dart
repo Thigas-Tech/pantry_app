@@ -1,3 +1,6 @@
+import 'package:pantry_app/database/inventories_dao.dart';
+import 'package:pantry_app/database/inventory_dao.dart';
+import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -9,85 +12,62 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// [DatabaseHelper] is normally a **singleton** – only one instance exists
 /// during the lifetime of the app. The singleton pattern guarantees that all
-/// database operations use the same connection, avoiding locking issues and
-/// unnecessary overhead.
+/// database operations use the same connection.
 ///
 /// For **testing** a separate instance can be created with the named
 /// constructor [DatabaseHelper.withPath], which opens an in‑memory database
-/// or a temporary file. This avoids interfering with the singleton’s
-/// connection.
-///
-/// ## Platform support
-///
-/// This version targets **Android** (and will later support iOS). It uses the
-/// standard [Sqflite] plugin. Desktop and web are not supported in this build.
+/// or a temporary file.
 ///
 /// ## Schema overview
 ///
 /// Three tables are created on first launch (version 2):
+/// - `products` – product data fetched from Open Food Facts.
+/// - `inventories` – named pantries (e.g. "Home", "Work").
+/// - `inventory` – instances of products the user has added to a pantry.
 ///
-/// - [Product] – stores immutable (or rarely‑changing) product data fetched
-///   from Open Food Facts. The barcode is the primary key. Nutrition values
-///   are denormalised into columns.
-/// - [InventoryItem] – stores instances of a product that the user has added to
-///   a specific inventory (pantry). The `inventory_id` column links to the
-///   `inventories` table.
-/// - **inventories** – stores named inventories (e.g. “Home”, “Work”).
-///   Each inventory has an auto‑generated `id` and a `name`.
+/// ## Delegation
 ///
-/// ## Migrations
-///
-/// - Version 1 → 2: adds the `inventories` table and `inventory_id` column to
-///   `inventory`. Existing items are assigned to a default “Home” inventory.
+/// CRUD operations are delegated to dedicated DAO classes:
+/// [ProductDao], [InventoryDao], [InventoriesDao]. This keeps each file
+/// focused on a single table.
 class DatabaseHelper {
   /// Returns the single [DatabaseHelper] instance.
   factory DatabaseHelper() => _instance;
 
-  /// Internal constructor for the singleton.
   DatabaseHelper._internal() : _customPath = null;
 
-  /// Creates a [DatabaseHelper] that opens (or creates) a database at the
-  /// given [path] instead of the default location.
-  ///
-  /// This constructor is intended for **unit tests** that require an isolated
-  /// database. In production code the default singleton ([DatabaseHelper])
-  /// should be used.
+  /// Creates a [DatabaseHelper] that opens a database at the given [path].
   DatabaseHelper.withPath(String path) : _customPath = path;
 
-  /// The custom database path used
-  /// when constructed via [DatabaseHelper.withPath].
   final String? _customPath;
 
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
-  /// The lazily‑initialised database connection.
-  ///
-  /// The first access to this getter triggers [_initDatabase], which creates
-  /// or opens the SQLite file and runs any necessary migrations.
   Database? _database;
 
+  /// DAO for the `products` table.
+  final ProductDao productDao = const ProductDao();
+
+  /// DAO for the `inventory` table.
+  final InventoryDao inventoryDao = const InventoryDao();
+
+  /// DAO for the `inventories` table.
+  final InventoriesDao inventoriesDao = const InventoriesDao();
+
   /// The lazily‑opened database instance.
-  ///
-  /// This getter ensures that the database is opened exactly once. Subsequent
-  /// calls return the already‑opened connection immediately.
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
   }
 
-  /// Opens the database file and applies the schema.
-  ///
-  /// If a custom path was provided via [DatabaseHelper.withPath] it is used
-  /// directly; otherwise the file is stored in the application’s documents
-  /// directory so that it survives app restarts.
   Future<Database> _initDatabase() async {
     final dbPath = _customPath ?? (await _getDefaultPath());
     logInfo('Opening database at $dbPath');
     try {
       final db = await openDatabase(
         dbPath,
-        version: 2,
+        version: 4,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -99,18 +79,11 @@ class DatabaseHelper {
     }
   }
 
-  /// Returns the default path for the database file inside the app’s
-  /// documents directory.
   Future<String> _getDefaultPath() async {
     final documentsDir = await getApplicationDocumentsDirectory();
     return join(documentsDir.path, 'pantry.db');
   }
 
-  /// Creates the `products`, `inventory` (v2), and `inventories` tables
-  /// together with their indexes.
-  ///
-  /// Called automatically by [openDatabase] when the database file does not
-  /// exist yet (version 2).
   Future<void> _onCreate(Database db, int version) async {
     logInfo('Creating database schema (version $version)');
 
@@ -129,24 +102,19 @@ class DatabaseHelper {
         fat_g REAL,
         fiber_g REAL,
         salt_g REAL,
-        last_synced INTEGER
+        last_synced INTEGER,
+        nutriscore_grade TEXT
       )
     ''');
 
-    await db.execute('''
-      CREATE TABLE inventories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        created_at INTEGER NOT NULL
-      )
-    ''');
+    await inventoriesDao.createTable(db);
 
     await db.execute('''
       CREATE TABLE inventory (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         barcode TEXT NOT NULL,
         quantity REAL DEFAULT 1,
-        unit TEXT DEFAULT 'pcs',
+        unit TEXT DEFAULT 'pieces',
         expiry_date TEXT,
         location TEXT DEFAULT 'pantry',
         notes TEXT,
@@ -166,39 +134,23 @@ class DatabaseHelper {
       'CREATE INDEX idx_inventory_id ON inventory(inventory_id)',
     );
 
-    // Create a default "Home" inventory.
-    await db.insert('inventories', {
-      'name': 'Home',
-      'created_at': DateTime.now().millisecondsSinceEpoch,
-    });
+    await inventoriesDao.seedDefault(db);
 
     logInfo('Database schema created successfully');
   }
 
-  /// Handles database upgrades from version 1 to version 2.
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     logInfo('Database upgrade: $oldVersion → $newVersion');
 
     if (oldVersion < 2) {
-      // Create the inventories table.
-      await db.execute('''
-        CREATE TABLE inventories (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          created_at INTEGER NOT NULL
-        )
-      ''');
+      await inventoriesDao.createTable(db);
 
-      // Add inventory_id column to inventory (nullable during migration).
-      await db.execute('ALTER TABLE inventory ADD COLUMN inventory_id INTEGER');
+      await db.execute(
+        'ALTER TABLE inventory ADD COLUMN inventory_id INTEGER',
+      );
 
-      // Create a default "Home" inventory.
-      final homeId = await db.insert('inventories', {
-        'name': 'Home',
-        'created_at': DateTime.now().millisecondsSinceEpoch,
-      });
+      final homeId = await inventoriesDao.seedDefault(db);
 
-      // Assign all existing items to the Home inventory.
       await db.update(
         'inventory',
         {'inventory_id': homeId},
@@ -207,105 +159,50 @@ class DatabaseHelper {
 
       logInfo('Migration to version 2 completed');
     }
-  }
-
-  // --------------------- Inventories CRUD ---------------------
-
-  /// Creates a new inventory with the given [name].
-  Future<int> createInventory(String name) async {
-    final db = await database;
-    return db.insert('inventories', {
-      'name': name,
-      'created_at': DateTime.now().millisecondsSinceEpoch,
-    });
-  }
-
-  /// Returns all inventories, ordered by creation time.
-  Future<List<Map<String, dynamic>>> getInventories() async {
-    final db = await database;
-    return db.rawQuery(
-      'SELECT id, name, created_at FROM inventories ORDER BY created_at ASC',
-    );
-  }
-
-  /// Deletes the inventory with the given [id] and all its items.
-  Future<void> deleteInventory(int id) async {
-    final db = await database;
-    await db.delete('inventory', where: 'inventory_id = ?', whereArgs: [id]);
-    await db.delete('inventories', where: 'id = ?', whereArgs: [id]);
-  }
-
-  /// Renames the inventory with the given [id].
-  Future<void> renameInventory(int id, String newName) async {
-    final db = await database;
-    await db.update(
-      'inventories',
-      {'name': newName},
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  // --------------------- Product CRUD ---------------------
-
-  /// Inserts a product into the local cache.
-  ///
-  /// If a product with the same barcode already exists it is **replaced**
-  /// (upsert). This is the intended behaviour because product data from Open
-  /// Food Facts may have been updated.
-  Future<void> insertProduct(Product product) async {
-    logInfo('Inserting product: ${product.barcode} — ${product.name}');
-    try {
-      final db = await database;
-      await db.insert(
-        'products',
-        _productToMap(product),
-        conflictAlgorithm: ConflictAlgorithm.replace,
+    if (oldVersion < 3) {
+      await db.rawUpdate(
+        "UPDATE inventory SET unit = 'pieces' WHERE unit = 'pcs'",
       );
-      logInfo('Product ${product.barcode} inserted/updated');
-    } on Exception catch (e) {
-      logError('Failed to insert product ${product.barcode}: $e');
-      rethrow;
+      logInfo('Migration to version 3 completed');
     }
+    if (oldVersion < 4) {
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN nutriscore_grade TEXT',
+      );
+      logInfo('Migration to version 4 completed');
+    }
+  }
+
+  // --------------------- Product (delegating to ProductDao) -------
+
+  /// Inserts a product into the local cache (upsert).
+  Future<void> insertProduct(Product product) async {
+    final db = await database;
+    return productDao.insert(db, product);
   }
 
   /// Looks up a single product by its barcode.
-  ///
-  /// Returns `null` if no product with the given barcode exists in the local
-  /// cache.
   Future<Product?> getProduct(String barcode) async {
-    try {
-      final db = await database;
-      final result = await db.query(
-        'products',
-        where: 'barcode = ?',
-        whereArgs: [barcode],
-      );
-      if (result.isEmpty) {
-        logInfo('Product $barcode not found in cache');
-        return null;
-      }
-      logInfo('Product $barcode found in cache');
-      return _productFromMap(result.first);
-    } on Exception catch (e) {
-      logError('Error looking up product $barcode: $e');
-      rethrow;
-    }
+    final db = await database;
+    return productDao.get(db, barcode);
   }
 
-  /// Removes inventory items that were added more than [retentionDays] ago,
-  /// and then deletes any product records that are no longer referenced by
-  /// the remaining inventory items.
-  ///
-  /// The default retention period is 60 days; this can be overridden by
-  /// passing a value from the user’s settings.
+  /// Returns the total number of cached product records.
+  Future<int> getProductCount() async {
+    final db = await database;
+    return productDao.count(db);
+  }
+
+  /// Removes stale inventory items and orphaned products.
   Future<void> cleanupOldEntries({int retentionDays = 60}) async {
     final db = await database;
     final cutoff = DateTime.now()
         .subtract(Duration(days: retentionDays))
         .millisecondsSinceEpoch;
     logInfo(
-      '''Cleaning up items added before ${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()} (retention: $retentionDays days)''',
+      'Cleaning up items added before '
+      '${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}'
+      ' (retention: $retentionDays days)',
     );
 
     try {
@@ -328,55 +225,48 @@ class DatabaseHelper {
     }
   }
 
-  // --------------------- Inventory CRUD ---------------------
+  // ---- Inventories (delegating to InventoriesDao) -----------
 
-  /// Inserts a new inventory item.
-  ///
-  /// The [InventoryItem.inventoryId] must be set to a valid inventory ID.
-  /// The returned integer is the auto‑generated `id` of the new row.
-  Future<int> insertInventoryItem(InventoryItem item) async {
-    logInfo(
-      '''Inserting inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location}''',
-    );
-    try {
-      final db = await database;
-      final id = await db.insert('inventory', _inventoryToMap(item));
-      logInfo('Inventory item inserted with id $id');
-      return id;
-    } on Exception catch (e) {
-      logError('Failed to insert inventory item for ${item.barcode}: $e');
-      rethrow;
-    }
+  /// Creates a new inventory (pantry) with the given [name].
+  Future<int> createInventory(String name) async {
+    final db = await database;
+    return inventoriesDao.create(db, name);
   }
 
-  /// Retrieves all inventory items for a specific [inventoryId], optionally
-  /// filtered by location.
+  /// Returns all inventories, ordered by creation time.
+  Future<List<Map<String, dynamic>>> getInventories() async {
+    final db = await database;
+    return inventoriesDao.list(db);
+  }
+
+  /// Deletes the inventory with the given [id] and all its items.
+  Future<void> deleteInventory(int id) async {
+    final db = await database;
+    return inventoriesDao.delete(db, id);
+  }
+
+  /// Renames the inventory with the given [id].
+  Future<void> renameInventory(int id, String newName) async {
+    final db = await database;
+    return inventoriesDao.rename(db, id, newName);
+  }
+
+  // ---- Inventory items (delegating to InventoryDao) ---------
+
+  /// Inserts a new inventory item.
+  Future<int> insertInventoryItem(InventoryItem item) async {
+    final db = await database;
+    return inventoryDao.insert(db, item);
+  }
+
+  /// Retrieves all inventory items for a specific [inventoryId],
+  /// optionally filtered by location.
   Future<List<InventoryItem>> getInventoryItems({
     required int inventoryId,
     String? location,
   }) async {
-    try {
-      final db = await database;
-      var where = 'inventory_id = ?';
-      final whereArgs = <dynamic>[inventoryId];
-
-      if (location != null) {
-        where += ' AND location = ?';
-        whereArgs.add(location);
-      }
-
-      final result = await db.query(
-        'inventory',
-        where: where,
-        whereArgs: whereArgs,
-        orderBy: 'expiry_date ASC',
-      );
-      logInfo('Fetched ${result.length} inventory items');
-      return result.map(_inventoryFromMap).toList();
-    } on Exception catch (e) {
-      logError('Error fetching inventory items: $e');
-      rethrow;
-    }
+    final db = await database;
+    return inventoryDao.list(db, inventoryId: inventoryId, location: location);
   }
 
   /// Returns all inventory entries for a specific barcode and [inventoryId],
@@ -385,234 +275,41 @@ class DatabaseHelper {
     String barcode, {
     required int inventoryId,
   }) async {
-    try {
-      final db = await database;
-      final result = await db.query(
-        'inventory',
-        where: 'barcode = ? AND inventory_id = ?',
-        whereArgs: [barcode, inventoryId],
-        orderBy: 'expiry_date ASC',
-      );
-      logInfo('Fetched ${result.length} inventory items for barcode $barcode');
-      return result.map(_inventoryFromMap).toList();
-    } on Exception catch (e) {
-      logError('Error fetching inventory for $barcode: $e');
-      rethrow;
-    }
+    final db = await database;
+    return inventoryDao.listByBarcode(db, barcode, inventoryId: inventoryId);
   }
 
   /// Updates an existing inventory item.
-  ///
-  /// The item’s `id` field must be set to a value that exists in the database;
-  /// otherwise the update has no effect.
   Future<int> updateInventoryItem(InventoryItem item) async {
-    logInfo(
-      '''Updating inventory item ${item.id}: qty=${item.quantity} ${item.unit}, loc=${item.location}''',
-    );
-    try {
-      final db = await database;
-      final rows = await db.update(
-        'inventory',
-        _inventoryToMap(item),
-        where: 'id = ?',
-        whereArgs: [item.id],
-      );
-      logInfo('Updated $rows row(s) for inventory item ${item.id}');
-      return rows;
-    } on Exception catch (e) {
-      logError('Failed to update inventory item ${item.id}: $e');
-      rethrow;
-    }
+    final db = await database;
+    return inventoryDao.update(db, item);
   }
 
-  /// Deletes an inventory item by its auto‑generated id.
+  /// Deletes an inventory item by its ID.
   Future<int> deleteInventoryItem(int id) async {
-    logInfo('Deleting inventory item $id');
-    try {
-      final db = await database;
-      final rows = await db.delete(
-        'inventory',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-      logInfo('Deleted $rows row(s) for inventory item $id');
-      return rows;
-    } on Exception catch (e) {
-      logError('Failed to delete inventory item $id: $e');
-      rethrow;
-    }
+    final db = await database;
+    return inventoryDao.delete(db, id);
   }
 
-  /// Retrieves all inventory rows joined with product metadata for a specific
-  /// [inventoryId].
-  ///
-  /// This single query replaces multiple separate lookups and is used to build
-  /// the home‑screen inventory list.
+  /// Retrieves all inventory rows joined with product metadata.
   Future<List<Map<String, dynamic>>> getInventoryWithProduct({
     required int inventoryId,
   }) async {
-    try {
-      final db = await database;
-      final result = await db.rawQuery(
-        '''
-        SELECT
-          inventory.id,
-          inventory.barcode,
-          inventory.quantity,
-          inventory.unit,
-          inventory.expiry_date,
-          inventory.location,
-          inventory.notes,
-          inventory.date_added,
-          inventory.inventory_id,
-          products.name AS product_name,
-          products.image_url AS product_image_url,
-          inventories.name AS inventory_name
-        FROM inventory
-        INNER JOIN products ON inventory.barcode = products.barcode
-        INNER JOIN inventories ON inventory.inventory_id = inventories.id
-        WHERE inventory.inventory_id = ?
-        ORDER BY inventory.expiry_date ASC
-      ''',
-        [inventoryId],
-      );
-      logInfo('Fetched ${result.length} inventory-with-product rows');
-      return result;
-    } on Exception catch (e) {
-      logError('Error fetching inventory with product data: $e');
-      rethrow;
-    }
-  }
-
-  /// Returns the total number of cached product records.
-  Future<int> getProductCount() async {
     final db = await database;
-    return Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM products'),
-        ) ??
-        0;
+    return inventoryDao.listWithProduct(db, inventoryId: inventoryId);
   }
 
-  /// Returns the total number of rows in the inventory table for a specific
-  /// [inventoryId], or globally if `null`.
+  /// Returns the total number of rows in the inventory table.
   Future<int> getInventoryCount({int? inventoryId}) async {
     final db = await database;
-    if (inventoryId != null) {
-      return Sqflite.firstIntValue(
-            await db.rawQuery(
-              'SELECT COUNT(*) FROM inventory WHERE inventory_id = ?',
-              [inventoryId],
-            ),
-          ) ??
-          0;
-    }
-    return Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM inventory'),
-        ) ??
-        0;
+    return inventoryDao.count(db, inventoryId: inventoryId);
   }
 
-  /// Returns all inventory rows joined with product names and nutrition for a
-  /// specific [inventoryId], ordered by expiry date. This is used for CSV
-  /// export.
+  /// Returns inventory rows joined with product nutrition for CSV export.
   Future<List<Map<String, dynamic>>> getExportData({
     required int inventoryId,
   }) async {
-    try {
-      final db = await database;
-      final result = await db.rawQuery(
-        '''
-        SELECT
-          products.name AS product_name,
-          products.brand,
-          products.category,
-          inventory.barcode,
-          inventory.quantity,
-          inventory.unit,
-          inventory.expiry_date,
-          inventory.location,
-          inventory.notes,
-          inventory.date_added,
-          products.energy_kcal,
-          products.protein_g,
-          products.carbs_g,
-          products.fat_g,
-          products.fiber_g,
-          products.salt_g,
-          inventories.name AS inventory_name
-        FROM inventory
-        INNER JOIN products ON inventory.barcode = products.barcode
-        INNER JOIN inventories ON inventory.inventory_id = inventories.id
-        WHERE inventory.inventory_id = ?
-        ORDER BY inventory.expiry_date ASC
-      ''',
-        [inventoryId],
-      );
-      logInfo('Export data: ${result.length} rows');
-      return result;
-    } on Exception catch (e) {
-      logError('Error fetching export data: $e');
-      rethrow;
-    }
+    final db = await database;
+    return inventoryDao.exportData(db, inventoryId: inventoryId);
   }
-
-  // --------------------- Mapping helpers ---------------------
-
-  Map<String, dynamic> _productToMap(Product p) => {
-    'barcode': p.barcode,
-    'name': p.name,
-    'brand': p.brand,
-    'image_url': p.imageUrl,
-    'category': p.category,
-    'ingredients': p.ingredients,
-    'serving_size': p.servingSize,
-    'energy_kcal': p.energyKcal,
-    'protein_g': p.proteinG,
-    'carbs_g': p.carbsG,
-    'fat_g': p.fatG,
-    'fiber_g': p.fiberG,
-    'salt_g': p.saltG,
-    'last_synced': p.lastSynced,
-  };
-
-  Product _productFromMap(Map<String, dynamic> map) => Product(
-    barcode: map['barcode'] as String,
-    name: map['name'] as String,
-    brand: map['brand'] as String?,
-    imageUrl: map['image_url'] as String?,
-    category: map['category'] as String?,
-    ingredients: map['ingredients'] as String?,
-    servingSize: map['serving_size'] as String?,
-    energyKcal: (map['energy_kcal'] as num?)?.toDouble(),
-    proteinG: (map['protein_g'] as num?)?.toDouble(),
-    carbsG: (map['carbs_g'] as num?)?.toDouble(),
-    fatG: (map['fat_g'] as num?)?.toDouble(),
-    fiberG: (map['fiber_g'] as num?)?.toDouble(),
-    saltG: (map['salt_g'] as num?)?.toDouble(),
-    lastSynced: map['last_synced'] as int?,
-  );
-
-  Map<String, dynamic> _inventoryToMap(InventoryItem item) => {
-    if (item.id != null) 'id': item.id,
-    'barcode': item.barcode,
-    'quantity': item.quantity,
-    'unit': item.unit,
-    'expiry_date': item.expiryDate,
-    'location': item.location,
-    'notes': item.notes,
-    'date_added': item.dateAdded,
-    'inventory_id': item.inventoryId,
-  };
-
-  InventoryItem _inventoryFromMap(Map<String, dynamic> map) => InventoryItem(
-    id: map['id'] as int?,
-    barcode: map['barcode'] as String,
-    quantity: (map['quantity'] as num?)?.toDouble() ?? 1,
-    unit: map['unit'] as String? ?? 'pcs',
-    expiryDate: map['expiry_date'] as String?,
-    location: map['location'] as String? ?? 'pantry',
-    notes: map['notes'] as String?,
-    dateAdded: map['date_added'] as int?,
-    inventoryId: map['inventory_id'] as int? ?? 1,
-  );
 }

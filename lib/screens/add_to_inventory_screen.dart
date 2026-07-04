@@ -1,39 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
-import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// A form screen for creating or editing an inventory item.
 ///
-/// This screen is pushed from [ProductDetailScreen] after the user taps
-/// "Add to Inventory" or the edit button on an existing inventory tile.
-///
-/// ## Modes
-///
-/// - **Create mode**: [existingItem] is `null`. A blank form is shown with
-///   default values (quantity = 1, unit = 'pcs', location = 'pantry'). An
-///   optional [suggestedExpiry] may be pre‑filled based on the product
-///   category.
-/// - **Edit mode**: [existingItem] is provided. All fields are initialised
-///   with the current values, allowing the user to modify them.
-///
-/// ## Return value
-///
-/// When the user saves (or updates), the screen pops and returns an
-/// [InventoryItem] with the form data. If the user navigates back without
-/// saving, `null` is returned.
-///
-/// ## Validation
-///
-/// The quantity field must be a positive number. All other fields are
-/// optional.
+/// Supports custom units and locations via a dialog prompt.
 class AddToInventoryScreen extends StatefulWidget {
-  /// Creates a [AddToInventoryScreen] widget.
-  ///
-  /// [inventoryId] is the ID of the inventory (pantry) this item will belong
-  /// to. It is used only in create mode; in edit mode the existing item's
-  /// inventory is preserved.
+  /// Creates an [AddToInventoryScreen].
   const AddToInventoryScreen({
     required this.barcode,
     required this.inventoryId,
@@ -48,11 +24,10 @@ class AddToInventoryScreen extends StatefulWidget {
   /// The ID of the inventory to add the item to (create mode).
   final int inventoryId;
 
-  /// If provided, the form is in edit mode and pre‑filled with this item.
+  /// If provided, the form is in edit mode and pre-filled with this item.
   final InventoryItem? existingItem;
 
-  /// A suggested expiry date in ISO 8601 format (`YYYY-MM-DD`), used as
-  /// the default for the date picker in create mode.
+  /// A suggested expiry date in ISO 8601 format (`YYYY-MM-DD`).
   final String? suggestedExpiry;
 
   @override
@@ -67,15 +42,18 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   late DateTime? _expiryDate;
   String _notes = '';
 
-  final List<String> _units = ['pcs', 'g', 'kg', 'ml', 'L'];
-  final List<String> _locations = ['pantry', 'fridge', 'freezer'];
+  static const _presetUnits = ['pieces', 'g', 'kg', 'ml', 'L'];
+  static const _presetLocations = ['pantry', 'fridge', 'freezer'];
+
+  List<String> _units = List.of(_presetUnits);
+  List<String> _locations = List.of(_presetLocations);
 
   @override
   void initState() {
     super.initState();
     final existing = widget.existingItem;
     _quantity = existing?.quantity ?? 1;
-    _unit = existing?.unit ?? 'pcs';
+    _unit = existing?.unit ?? 'pieces';
     _location = existing?.location ?? 'pantry';
     _expiryDate = existing?.expiryDate != null
         ? DateTime.tryParse(existing!.expiryDate!)
@@ -83,6 +61,80 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
               ? DateTime.tryParse(widget.suggestedExpiry!)
               : null);
     _notes = existing?.notes ?? '';
+    _syncCustomOptions();
+  }
+
+  void _syncCustomOptions() {
+    if (!_presetUnits.contains(_unit) && !_units.contains(_unit)) {
+      _units = [..._presetUnits, _unit];
+    }
+    if (!_presetLocations.contains(_location) &&
+        !_locations.contains(_location)) {
+      _locations = [..._presetLocations, _location];
+    }
+  }
+
+  Future<void> _pickCustomUnit() async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+    final value = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.enterCustomUnit),
+        content: TextField(controller: controller, autofocus: true),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    if (value != null && value.isNotEmpty) {
+      setState(() {
+        _unit = value;
+        _syncCustomOptions();
+      });
+    }
+  }
+
+  Future<void> _pickCustomLocation() async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController();
+    final value = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.enterCustomLocation),
+        content: TextField(controller: controller, autofocus: true),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    if (value != null && value.isNotEmpty) {
+      setState(() {
+        _location = value;
+        _syncCustomOptions();
+      });
+    }
+  }
+
+  String get _expiryDisplayText {
+    final l10n = AppLocalizations.of(context)!;
+    if (_expiryDate == null) return l10n.expiryDateOptional;
+    final dateStr = _expiryDate!.toIso8601String().substring(0, 10);
+    return '${l10n.expiryPrefix}: $dateStr';
   }
 
   void _save() {
@@ -112,6 +164,17 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.existingItem != null;
+    final unitItems = <DropdownMenuItem<String>>[
+      for (final u in _units.where((u) => _presetUnits.contains(u)))
+        DropdownMenuItem(value: u, child: Text(u)),
+      const DropdownMenuItem(value: '__custom__', child: Text('...')),
+    ];
+    final locationItems = <DropdownMenuItem<String>>[
+      for (final l in _locations.where((l) => _presetLocations.contains(l)))
+        DropdownMenuItem(value: l, child: Text(l)),
+      const DropdownMenuItem(value: '__custom__', child: Text('...')),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? l10n.updateItem : l10n.addToInventory),
@@ -136,32 +199,38 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 onSaved: (v) => _quantity = double.parse(v!),
               ),
               DropdownButtonFormField<String>(
-                initialValue: _unit,
-                items: _units
-                    .map((u) => DropdownMenuItem(value: u, child: Text(u)))
-                    .toList(),
-                onChanged: (v) => setState(() => _unit = v!),
+                initialValue:
+                    _presetUnits.contains(_unit) ? _unit : '__custom__',
+                items: unitItems,
+                onChanged: (v) {
+                  if (v == '__custom__') {
+                    unawaited(_pickCustomUnit());
+                  } else {
+                    setState(() => _unit = v!);
+                  }
+                },
                 decoration: InputDecoration(labelText: l10n.unitLabel),
               ),
               DropdownButtonFormField<String>(
-                initialValue: _location,
-                items: _locations
-                    .map((l) => DropdownMenuItem(value: l, child: Text(l)))
-                    .toList(),
-                onChanged: (v) => setState(() => _location = v!),
+                initialValue: _presetLocations
+                        .contains(_location)
+                    ? _location
+                    : '__custom__',
+                items: locationItems,
+                onChanged: (v) {
+                  if (v == '__custom__') {
+                    unawaited(_pickCustomLocation());
+                  } else {
+                    setState(() => _location = v!);
+                  }
+                },
                 decoration: InputDecoration(labelText: l10n.locationLabel),
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      _expiryDate == null
-                          ? l10n.expiryDateOptional
-                          // ignore this line because the formatter likes it
-                          // ignore: lines_longer_than_80_chars
-                          : '${l10n.expiryPrefix}: ${_expiryDate!.toIso8601String().substring(0, 10)}',
-                    ),
+                    child: Text(_expiryDisplayText),
                   ),
                   TextButton(
                     onPressed: () async {

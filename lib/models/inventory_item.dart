@@ -40,8 +40,8 @@ part 'inventory_item.g.dart';
 ///   expiry date.
 /// - [dateAdded] is an epoch timestamp (milliseconds since Unix epoch) set
 ///   automatically when the item is first created. It is used by
-///   [DatabaseHelper.cleanupOldEntries] to remove items that haven't been
-///   re‑added for 60 days.
+/// [DatabaseHelper.cleanupOldEntries] to remove items that haven't been
+/// re‑added for the configured retention period (see `Settings.retentionDays`).
 ///
 /// ## Immutability
 ///
@@ -77,9 +77,9 @@ abstract class InventoryItem with _$InventoryItem {
 
     /// The unit of measurement for [quantity].
     ///
-    /// Common values: `'pcs'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
-    /// Defaults to `'pcs'`.
-    @Default('pcs') String unit,
+    /// Common values: `'pieces'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
+    /// Defaults to `'pieces'`.
+    @Default('pieces') String unit,
 
     /// The expiry date in ISO 8601 format (`YYYY-MM-DD`).
     ///

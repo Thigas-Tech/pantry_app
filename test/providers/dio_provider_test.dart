@@ -1,12 +1,16 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pantry_app/config.dart';
 import 'package:pantry_app/providers/dio_provider.dart';
 
-/// Tests for [dioProvider].
 void main() {
+  setUp(() {
+    dotenv.testLoad(mergeWith: {});
+  });
+
   test('provides a Dio instance with correct configuration', () {
-    /// The provider returns a Dio with timeouts and a User-Agent header.
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
@@ -16,7 +20,7 @@ void main() {
     expect(dio.options.receiveTimeout, const Duration(seconds: 10));
     expect(
       dio.options.headers['User-Agent'],
-      'PantryApp/1.0 (thiago.assisfernandes@gmail.com)',
+      'PantryApp/1.0 (${AppConfig.contactEmail})',
     );
   });
 }

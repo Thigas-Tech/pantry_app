@@ -31,7 +31,7 @@ void main() {
 
       final quantityField = find.widgetWithText(TextFormField, '1.0');
       expect(quantityField, findsOneWidget);
-      expect(find.text('pcs'), findsOneWidget);
+      expect(find.text('pieces'), findsOneWidget);
       expect(find.text('pantry'), findsOneWidget);
       expect(find.text('Expiry date (optional)'), findsOneWidget);
       expect(

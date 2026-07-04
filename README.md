@@ -1,4 +1,176 @@
 # Pantry App
 
-An offline first application that manages your pantry and the expiration dates
+An offline-first Flutter application to manage your pantry inventory and track
+expiration dates. Scan barcodes, look up products via Open Food Facts, and
+never waste food again.
 
+## Features
+
+- **Barcode scanning** — camera-based via Google ML Kit (`mobile_scanner`) or manual text entry
+- **Product lookup** — fetches name, brand, nutrition, ingredients from Open Food Facts
+- **Offline-first** — products are cached locally in SQLite; works without internet for known items
+- **Multiple pantries** — create, rename, and delete named inventories (e.g. Home, Work)
+- **Expiry tracking** — items grouped into Expired / Expiring Soon / Good on the home screen
+- **Local notifications** — two reminders per item: one day before expiry and on expiry day
+- **Custom units & locations** — pcs / g / kg / ml / L + pantry / fridge / freezer, with custom options
+- **CSV import/export** — backup your pantry or restore from a CSV file
+- **Nutrition table** — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml
+- **Material You** — dynamic colours from your device wallpaper, light/dark/system theme
+- **Undo delete** — restore an accidentally deleted inventory item with a snackbar action
+
+## Screenshots
+
+| Home | Scanner | Product Detail | Settings |
+|------|---------|---------------|----------|
+| Grouped by expiry, pull-to-refresh, search, inventory switcher | Animated overlay, manual entry, exit confirmation | Hero image, nutrition, ingredients, add to inventory | Theme, notifications, retention, expiring-soon threshold |
+
+## Getting started
+
+### Prerequisites
+
+- Flutter SDK (stable channel)
+- Android SDK / Xcode (for iOS)
+- A device or emulator with a camera for barcode scanning
+
+### Setup
+
+```bash
+git clone https://github.com/your-org/pantry_app.git
+cd pantry_app
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter gen-l10n
+```
+
+### Configure Open Food Facts credentials
+
+Copy the environment template and fill in your credentials:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env`:
+
+```env
+OFF_USER_ID=your_off_user_id_here
+OFF_PASSWORD=your_off_password_here
+CONTACT_EMAIL=you@example.com
+USE_OFF_STAGING=false
+```
+
+Leave `OFF_USER_ID` and `OFF_PASSWORD` empty if you don't plan to submit products.
+The `.env` file is **never** committed to git — it is listed in `.gitignore`.
+
+### Run
+
+```bash
+flutter run
+```
+
+### Build
+
+```bash
+# Debug APK
+flutter build apk --debug
+
+# Release APK
+flutter build apk
+
+# Release App Bundle (Play Store)
+flutter build appbundle
+```
+
+## Project structure
+
+```
+lib/
+  config.dart          # API credentials and flags
+  main.dart            # Entry point
+  database/
+    database_helper.dart   # Singleton, schema, migrations
+    product_dao.dart       # Product table CRUD
+    inventory_dao.dart     # Inventory items CRUD + joins
+    inventories_dao.dart   # Named pantries CRUD
+  l10n/                # App translations (English ARB)
+  models/              # Freezed data models
+  providers/           # Riverpod state & dependency injection
+  screens/             # UI pages
+  services/            # Business logic
+  utils/               # Logger, snackbar helpers
+  widgets/             # Reusable components
+test/                  # Unit and widget tests
+```
+
+For a deep dive into the architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Contributing
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture overview.
+
+### Quick rules
+
+1. **Doc comments** — every public class, constructor, field, and method must have `///` docs
+2. **Tests** — add tests for ALL new code using `mocktail`
+3. **Localization** — all user-visible strings go in `lib/l10n/app_en.arb`
+4. **Code generation** — after changing models or ARB files, run `build_runner` and `flutter gen-l10n`
+5. **Zero lint issues** — `flutter analyze` must report zero issues before committing
+6. **All tests pass** — `flutter test --concurrency=8` must pass before committing
+
+### Running checks
+
+```bash
+flutter analyze                      # Lint + static analysis
+flutter test --concurrency=8         # All tests
+flutter test --concurrency=8 --coverage  # With coverage
+```
+
+## Tech stack
+
+| Category           | Technology                       |
+|--------------------|----------------------------------|
+| Framework          | Flutter (stable)                 |
+| Language           | Dart 3.12+                      |
+| State management   | Riverpod 3.x                    |
+| Local database     | SQLite (sqflite)                |
+| HTTP client        | Dio                              |
+| Code generation    | freezed, json_serializable      |
+| Barcode scanning   | mobile_scanner (Google ML Kit)  |
+| Notifications      | flutter_local_notifications     |
+| Testing            | flutter_test + mocktail         |
+| Linting            | very_good_analysis, lint/strict |
+| Theming            | dynamic_color (Material You)    |
+
+## License
+
+MIT
+
+## API documentation
+
+`dart doc` generates HTML API reference from Dart source code using `///`
+doc comments. It ships with the Dart SDK — no extra install required.
+
+### Generating
+
+```bash
+dart doc .                     # output → doc/api
+dart doc --dry-run .            # check for issues without writing files
+```
+
+### Viewing locally
+
+The HTML uses JavaScript for search; serve it through an HTTP server:
+
+```bash
+dart pub global activate dhttpd
+dart pub global run dhttpd --path doc/api
+# Open http://localhost:8080
+```
+
+Opening the files directly in a browser will break search and the sidebar.
+
+### Troubleshooting
+
+- **Search / sidebar broken** — not served via HTTP, or `index.json` missing.
+- **Missing API docs** — `dart doc` only generates for **public** libraries and members.
+- **Icons as text** — browser failed to load Material Symbols font; proxy or use a local copy.

@@ -67,6 +67,9 @@ class InventoryWithProduct {
 
     /// The name of the inventory this item belongs to.
     this.inventoryName,
+
+    /// The Nutri-Score grade from the `products` table (e.g. `'a'`–`'e'`).
+    this.nutriscoreGrade,
   });
 
   /// Constructs an [InventoryWithProduct] from a raw database row.
@@ -90,6 +93,7 @@ class InventoryWithProduct {
       productName: map['product_name'] as String?,
       productImageUrl: map['product_image_url'] as String?,
       inventoryName: map['inventory_name'] as String?,
+      nutriscoreGrade: map['nutriscore_grade'] as String?,
     );
   }
 
@@ -128,4 +132,8 @@ class InventoryWithProduct {
 
   /// The display name of the inventory this item belongs to.
   final String? inventoryName;
+
+  /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
+  /// if unavailable.
+  final String? nutriscoreGrade;
 }

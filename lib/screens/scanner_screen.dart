@@ -5,19 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/widgets/scanner_overlay_painter.dart';
 
-/// A barcode input screen for Android.
+/// A barcode input screen.
 ///
-/// Offers two modes:
-/// - **Camera scanner** – uses [MobileScanner] to detect a barcode in real
-///   time. On the first detection it pops and returns the barcode string.
-///   Includes a semi‑transparent overlay with a scanning‑line animation.
-/// - **Manual entry** – a text field where the user can type or paste a
-///   barcode. Useful for damaged labels or low‑resolution cameras.
+/// Offers two modes: camera scanner via [MobileScanner] and manual text entry.
 ///
-/// The user switches between modes with the icon button in the app bar.
-/// The screen always returns a [String] (the barcode) when popped, or
-/// `null` if the user navigates back without submitting.
+/// The user is prompted for confirmation before navigating away with no result.
 class ScannerScreen extends StatefulWidget {
   /// Creates a [ScannerScreen] widget.
   const ScannerScreen({super.key});
@@ -27,34 +21,58 @@ class ScannerScreen extends StatefulWidget {
 }
 
 class _ScannerScreenState extends State<ScannerScreen> {
-  /// Whether the manual entry view is currently shown.
   bool _showManualEntry = false;
 
   @override
   Widget build(BuildContext context) {
-    return _showManualEntry
-        ? _ManualEntryView(
-            onSwitchToCamera: () {
-              logInfo('Switched to camera scanner');
-              setState(() => _showManualEntry = false);
-            },
-          )
-        : _MobileScannerView(
-            onSwitchToManual: () {
-              logInfo('Switched to manual entry');
-              setState(() => _showManualEntry = true);
-            },
-          );
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final l10n = AppLocalizations.of(context)!;
+        final stay = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n.confirmExitScanner),
+            content: Text(l10n.confirmExitScannerHint),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.stay),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.leave),
+              ),
+            ],
+          ),
+        );
+        if (stay == true && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: _showManualEntry
+          ? _ManualEntryView(
+              onSwitchToCamera: () {
+                logInfo('Switched to camera scanner');
+                setState(() => _showManualEntry = false);
+              },
+            )
+          : _MobileScannerView(
+              onSwitchToManual: () {
+                logInfo('Switched to manual entry');
+                setState(() => _showManualEntry = true);
+              },
+            ),
+    );
   }
 }
 
 // ---------- Camera scanner ----------
 
-/// The live camera scanner using Google ML Kit via [MobileScanner].
 class _MobileScannerView extends StatefulWidget {
   const _MobileScannerView({required this.onSwitchToManual});
 
-  /// Called when the user taps the manual entry button.
   final VoidCallback onSwitchToManual;
 
   @override
@@ -65,7 +83,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     with SingleTickerProviderStateMixin {
   bool _hasScanned = false;
 
-  /// Controls the scanning‑line animation.
   late final AnimationController _animationController;
 
   @override
@@ -101,7 +118,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
       ),
       body: Stack(
         children: [
-          // Camera view
           MobileScanner(
             onDetect: (capture) {
               if (_hasScanned) return;
@@ -113,15 +129,14 @@ class _MobileScannerViewState extends State<_MobileScannerView>
               Navigator.of(context).pop(barcode.rawValue);
             },
           ),
-          // Overlay with cutout and animated line
           AnimatedBuilder(
             animation: _animationController,
             builder: (context, _) {
               return CustomPaint(
                 size: MediaQuery.of(context).size,
-                painter: _ScannerOverlayPainter(
+                painter: ScannerOverlayPainter(
                   animationValue: _animationController.value,
-                  hintText: l10n.alignBarcode,
+                  hintText: l10n.scanHint,
                 ),
               );
             },
@@ -132,174 +147,11 @@ class _MobileScannerViewState extends State<_MobileScannerView>
   }
 }
 
-/// Paints a semi‑transparent dark overlay with a rounded‑rectangle cutout
-/// and an animated horizontal scanning line inside the cutout.
-///
-/// The cutout is created using a path with [PathFillType.evenOdd] so that
-/// it works on all rendering backends (Impeller and Skia).
-class _ScannerOverlayPainter extends CustomPainter {
-  const _ScannerOverlayPainter({
-    required this.animationValue,
-    required this.hintText,
-  });
-
-  /// Value between 0.0 and 1.0 that controls the vertical position of the
-  /// scanning line inside the cutout.
-  final double animationValue;
-
-  /// The localised hint text shown below the cutout.
-  final String hintText;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Dimensions of the cutout (the scanning area)
-    const cutoutWidth = 250.0;
-    const cutoutHeight = 250.0;
-    final cutoutRect = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2 - 40),
-      width: cutoutWidth,
-      height: cutoutHeight,
-    );
-    final cutoutRRect = RRect.fromRectAndRadius(
-      cutoutRect,
-      const Radius.circular(16),
-    );
-
-    // 1. Build a path that covers the entire screen with a hole for the
-    //    cutout, using an even‑odd fill rule.
-    final overlayPath = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..addRRect(cutoutRRect)
-      ..fillType = PathFillType.evenOdd;
-
-    // 2. Fill the overlay with a semi‑transparent dark colour.
-    final overlayPaint = Paint()..color = Colors.black54;
-    canvas.drawPath(overlayPath, overlayPaint);
-
-    // 3. Draw the white border around the cutout.
-    final borderPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
-    canvas.drawRRect(cutoutRRect, borderPaint);
-
-    // 4. Draw the corner accents (four small L‑shaped lines).
-    const cornerLength = 20.0;
-    final cornerPaint = Paint()
-      ..color = Colors.tealAccent
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
-    _drawCorner(
-      canvas,
-      cutoutRect.topLeft,
-      cornerPaint,
-      cornerLength,
-      Corner.topLeft,
-    );
-    _drawCorner(
-      canvas,
-      cutoutRect.topRight,
-      cornerPaint,
-      cornerLength,
-      Corner.topRight,
-    );
-    _drawCorner(
-      canvas,
-      cutoutRect.bottomLeft,
-      cornerPaint,
-      cornerLength,
-      Corner.bottomLeft,
-    );
-    _drawCorner(
-      canvas,
-      cutoutRect.bottomRight,
-      cornerPaint,
-      cornerLength,
-      Corner.bottomRight,
-    );
-
-    // 5. Draw the animated scanning line.
-    final lineY = cutoutRect.top + (cutoutRect.height * animationValue);
-    final linePaint = Paint()
-      ..color = Colors.tealAccent
-      ..strokeWidth = 2;
-    final lineStart = Offset(cutoutRect.left + 10, lineY);
-    final lineEnd = Offset(cutoutRect.right - 10, lineY);
-    canvas.drawLine(lineStart, lineEnd, linePaint);
-
-    // 6. Draw a small hint text below the cutout.
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: hintText,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        (size.width - textPainter.width) / 2,
-        cutoutRect.bottom + 16,
-      ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _ScannerOverlayPainter oldDelegate) {
-    return animationValue != oldDelegate.animationValue ||
-        hintText != oldDelegate.hintText;
-  }
-}
-
-/// The position of a corner accent line.
-enum Corner {
-  /// The top‑left corner.
-  topLeft,
-
-  /// The top‑right corner.
-  topRight,
-
-  /// The bottom‑left corner.
-  bottomLeft,
-
-  /// The bottom‑right corner.
-  bottomRight,
-}
-
-void _drawCorner(
-  Canvas canvas,
-  Offset corner,
-  Paint paint,
-  double length,
-  Corner type,
-) {
-  switch (type) {
-    case Corner.topLeft:
-      canvas
-        ..drawLine(corner, Offset(corner.dx + length, corner.dy), paint)
-        ..drawLine(corner, Offset(corner.dx, corner.dy + length), paint);
-    case Corner.topRight:
-      canvas
-        ..drawLine(corner, Offset(corner.dx - length, corner.dy), paint)
-        ..drawLine(corner, Offset(corner.dx, corner.dy + length), paint);
-    case Corner.bottomLeft:
-      canvas
-        ..drawLine(corner, Offset(corner.dx + length, corner.dy), paint)
-        ..drawLine(corner, Offset(corner.dx, corner.dy - length), paint);
-    case Corner.bottomRight:
-      canvas
-        ..drawLine(corner, Offset(corner.dx - length, corner.dy), paint)
-        ..drawLine(corner, Offset(corner.dx, corner.dy - length), paint);
-  }
-}
-
 // ---------- Manual entry ----------
 
-/// A simple form that lets the user type or paste a barcode.
 class _ManualEntryView extends StatefulWidget {
   const _ManualEntryView({required this.onSwitchToCamera});
 
-  /// Called when the user wants to return to the camera.
   final VoidCallback onSwitchToCamera;
 
   @override

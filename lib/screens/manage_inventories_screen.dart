@@ -6,6 +6,7 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/error_view.dart';
 
 /// A screen that lists all inventories and allows the user to create,
 /// rename, or delete them.
@@ -26,7 +27,10 @@ class ManageInventoriesScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.manageInventories)),
       body: inventoriesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => ErrorView(
+          message: l10n.inventoryLoadFailed,
+          onRetry: () => ref.invalidate(inventoryListProvider),
+        ),
         data: (list) {
           if (list.isEmpty) {
             return Center(child: Text(l10n.noInventories));

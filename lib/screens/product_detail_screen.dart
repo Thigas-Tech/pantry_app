@@ -14,6 +14,8 @@ import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:pantry_app/widgets/nutrition_table.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Displays full product details and the associated inventory entries
@@ -153,6 +155,31 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 ),
               ),
             _infoRow(l10n.barcodeLabel, widget.product.barcode),
+            if (widget.product.nutriscoreGrade != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    const SizedBox(width: 100),
+                    NutriScoreBadge(
+                      grade: widget.product.nutriscoreGrade,
+                      size: 32,
+                    ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: l10n.nutriscoreExplanation,
+                      child: Icon(
+                        Icons.help_outline,
+                        size: 16,
+                        color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             if (widget.product.brand != null)
               _infoRow(l10n.brandLabel, widget.product.brand!),
             if (widget.product.category != null)
@@ -161,7 +188,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             _infoRow(l10n.servingSize, widget.product.servingSize ?? 'N/A'),
 
             // Nutrition table
-            _NutritionTable(product: widget.product),
+            NutritionTable(product: widget.product),
 
             const Divider(),
             if (widget.product.ingredients != null)
@@ -285,7 +312,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             '''Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
           await repo.updateInventoryItem(result);
-          await notificationService.cancelReminders(existing.id!);
+          if (existing.id != null) {
+            await notificationService.cancelReminders(existing.id!);
+          }
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.itemUpdated);
           }
@@ -298,9 +327,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             SnackbarHelper.showInfo(context, l10n.itemAdded);
           }
         }
-        await notificationService.scheduleExpiryReminders(result);
+        await notificationService.scheduleExpiryReminders(
+          result,
+          expiringSoonTitle: l10n.expiringSoon,
+          expiringSoonBody: l10n.expiresTomorrow(result.barcode),
+          expiringTodayTitle: l10n.expiringToday,
+          expiringTodayBody: l10n.expiresToday(result.barcode),
+          channelName: l10n.expiryChannelName,
+          channelDescription: l10n.expiryChannelDescription,
+        );
         setState(() => _inventoryVersion++);
-        ref.invalidate(inventoryWithProductProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryWithProductProvider);
+        });
       } on Exception catch (e) {
         logError('Inventory operation failed: $e');
         if (mounted) {
@@ -334,16 +373,56 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       final repo = ref.read(productRepositoryProvider);
       final notificationService = ref.read(notificationServiceProvider);
       try {
-        await repo.deleteInventoryItem(item.id!);
-        await notificationService.cancelReminders(item.id!);
+        if (item.id != null) {
+          await repo.deleteInventoryItem(item.id!);
+          await notificationService.cancelReminders(item.id!);
+        }
         logInfo(
           'Deleted inventory item ${item.id} (${widget.product.barcode})',
         );
         if (mounted) {
-          SnackbarHelper.showInfo(context, l10n.itemRemoved);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.itemRemoved),
+              action: SnackBarAction(
+                label: l10n.undo,
+                onPressed: () async {
+                  try {
+                    final restoredId = await repo.addInventoryItem(item);
+                    logInfo('Undo delete: restored item $restoredId');
+                    final restoredItem = item.copyWith(id: restoredId);
+                    await notificationService.scheduleExpiryReminders(
+                      restoredItem,
+                      expiringSoonTitle: l10n.expiringSoon,
+                      expiringSoonBody:
+                          l10n.expiresTomorrow(restoredItem.barcode),
+                      expiringTodayTitle: l10n.expiringToday,
+                      expiringTodayBody:
+                          l10n.expiresToday(restoredItem.barcode),
+                      channelName: l10n.expiryChannelName,
+                      channelDescription: l10n.expiryChannelDescription,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.itemRestored)),
+                      );
+                      setState(() => _inventoryVersion++);
+                      ref.invalidate(inventoryWithProductProvider);
+                    }
+                  } on Exception catch (e) {
+                    logError('Failed to undo delete: $e');
+                  }
+                },
+              ),
+            ),
+          );
         }
         setState(() => _inventoryVersion++);
-        ref.invalidate(inventoryWithProductProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryWithProductProvider);
+        });
       } on Exception catch (e) {
         logError('Failed to delete item: $e');
         if (mounted) {
@@ -413,97 +492,4 @@ class _InventoryTile extends StatelessWidget {
         return Icons.help_outline;
     }
   }
-}
-
-/// A styled table that displays the nutritional values of a [Product].
-///
-/// Each row shows a nutrient name and its amount per 100 g / 100 ml.
-/// The header uses the theme’s primary container colour, and data rows
-/// alternate between transparent and a very subtle primary overlay for
-/// readability in both light and dark themes.
-class _NutritionTable extends StatelessWidget {
-  const _NutritionTable({required this.product});
-
-  final Product product;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final rows = <_NutrientRow>[
-      _NutrientRow(l10n.energy, '${product.energyKcal ?? '-'} kcal'),
-      _NutrientRow(l10n.protein, '${product.proteinG ?? '-'} g'),
-      _NutrientRow(l10n.carbs, '${product.carbsG ?? '-'} g'),
-      _NutrientRow(l10n.fat, '${product.fatG ?? '-'} g'),
-      _NutrientRow(l10n.fiber, '${product.fiberG ?? '-'} g'),
-      _NutrientRow(l10n.salt, '${product.saltG ?? '-'} g'),
-    ];
-
-    return Table(
-      border: TableBorder.all(
-        color: theme.colorScheme.outlineVariant,
-        width: 0.5,
-      ),
-      columnWidths: const {
-        0: FlexColumnWidth(2),
-        1: FlexColumnWidth(),
-      },
-      children: [
-        // Header row
-        TableRow(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer,
-          ),
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                l10n.nutrient,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                l10n.per100g,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ),
-          ],
-        ),
-        // Data rows with alternating subtle backgrounds
-        for (var i = 0; i < rows.length; i++)
-          TableRow(
-            decoration: BoxDecoration(
-              color: i.isEven
-                  ? Colors.transparent
-                  : theme.colorScheme.primary.withValues(alpha: 0.05),
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(rows[i].name),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(rows[i].value),
-              ),
-            ],
-          ),
-      ],
-    );
-  }
-}
-
-/// A single row of nutritional data.
-class _NutrientRow {
-  const _NutrientRow(this.name, this.value);
-  final String name;
-  final String value;
 }

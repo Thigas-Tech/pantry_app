@@ -43,7 +43,7 @@ void main() {
       final item = InventoryItem.fromJson(minimal);
       expect(item.id, isNull);
       expect(item.quantity, 1);
-      expect(item.unit, 'pcs');
+      expect(item.unit, 'pieces');
       expect(item.expiryDate, isNull);
       expect(item.location, 'pantry');
       expect(item.notes, isNull);

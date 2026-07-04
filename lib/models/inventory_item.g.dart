@@ -11,7 +11,7 @@ _InventoryItem _$InventoryItemFromJson(Map<String, dynamic> json) =>
       barcode: json['barcode'] as String,
       id: (json['id'] as num?)?.toInt(),
       quantity: (json['quantity'] as num?)?.toDouble() ?? 1,
-      unit: json['unit'] as String? ?? 'pcs',
+      unit: json['unit'] as String? ?? 'pieces',
       expiryDate: json['expiry_date'] as String?,
       location: json['location'] as String? ?? 'pantry',
       notes: json['notes'] as String?,

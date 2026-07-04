@@ -165,5 +165,102 @@
   },
   "couldNotCreateInventory": "Could not create inventory.",
   "couldNotRenameInventory": "Could not rename inventory.",
-  "couldNotDeleteInventory": "Could not delete inventory."
+  "couldNotDeleteInventory": "Could not delete inventory.",
+  "networkError": "Network error. Please check your connection.",
+  "productNotFound": "Product not found",
+  "productNotFoundHint": "This product isn't in the Open Food Facts database yet. You can add it manually or contribute it to the community.",
+  "addManually": "Add manually",
+  "contributeToOpenFoodFacts": "Contribute to Open Food Facts",
+  "retry": "Retry",
+  "expiringSoonDays": "Expiring soon threshold",
+  "expiringSoonDaysValue": "{days} days",
+  "@expiringSoonDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "expiringSoonDaysDialogTitle": "Expiring soon threshold (days)",
+  "expiringSoonDaysSet": "Expiring soon threshold set to {days} days.",
+  "@expiringSoonDaysSet": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "expiringSoon": "Expiring soon",
+  "expiringToday": "Food expiring today",
+  "expiresTomorrow": "{barcode} expires tomorrow",
+  "@expiresTomorrow": {
+    "placeholders": {
+      "barcode": {
+        "type": "String",
+        "example": "5901234123457"
+      }
+    }
+  },
+  "expiresToday": "{barcode} expires today!",
+  "@expiresToday": {
+    "placeholders": {
+      "barcode": {
+        "type": "String",
+        "example": "5901234123457"
+      }
+    }
+  },
+  "expiryChannelName": "Expiry reminders",
+  "expiryChannelDescription": "Warns about expiring food",
+  "itemRestored": "Item restored.",
+  "undo": "Undo",
+  "scanHint": "Align the barcode inside the frame",
+  "confirmExitScanner": "Stop scanning?",
+  "confirmExitScannerHint": "The current scan will be discarded.",
+  "stay": "Stay",
+  "leave": "Leave",
+  "importCsvSuccess": "Import complete — {products} products, {items} items.",
+  "@importCsvSuccess": {
+    "placeholders": {
+      "products": {
+        "type": "int",
+        "example": "5"
+      },
+      "items": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
+  "importCsvFailed": "CSV import failed: {error}",
+  "@importCsvFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Invalid format"
+      }
+    }
+  },
+  "customUnit": "Custom...",
+  "customLocation": "Custom...",
+  "enterCustomUnit": "Enter custom unit",
+  "enterCustomLocation": "Enter custom location",
+  "close": "Close",
+  "exportedToShare": "Export ready — share to save.",
+  "errorLoadingInventory": "Failed to load inventory.",
+  "items": "items",
+  "enterProductDetails": "Enter product details",
+  "productNameLabel": "Product name",
+  "requiredField": "This field is required",
+  "servingSizeHint": "e.g. 100 g, 1 cookie (28 g)",
+  "nutritionInfo": "Nutrition (per 100 g / 100 ml)",
+  "captureImages": "Photos",
+  "nutritionTableImage": "Nutrition table photo",
+  "ingredientsImage": "Ingredients list photo",
+  "productImage": "Product photo",
+  "saveProduct": "Save product",
+  "submittingToOff": "Will be submitted to Open Food Facts when online",
+  "nutriscoreExplanation": "Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance."
 }

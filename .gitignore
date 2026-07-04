@@ -1,4 +1,7 @@
-# Miscellaneous
+# Environment variables (contains credentials — DO NOT commit)
+.env
+.env.*
+!.env.example
 *.class
 *.log
 *.pyc

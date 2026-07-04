@@ -21,6 +21,7 @@ _Product _$ProductFromJson(Map<String, dynamic> json) => _Product(
   fiberG: (json['fiber_g'] as num?)?.toDouble(),
   saltG: (json['salt_g'] as num?)?.toDouble(),
   lastSynced: (json['last_synced'] as num?)?.toInt(),
+  nutriscoreGrade: json['nutriscore_grade'] as String?,
 );
 
 Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
@@ -38,4 +39,5 @@ Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
   'fiber_g': instance.fiberG,
   'salt_g': instance.saltG,
   'last_synced': instance.lastSynced,
+  'nutriscore_grade': instance.nutriscoreGrade,
 };

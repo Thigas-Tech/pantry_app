@@ -1,6 +1,5 @@
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
 
 /// Abstract interface for fetching product data by barcode.
 ///
@@ -10,9 +9,10 @@ import 'package:pantry_app/services/open_food_facts_api.dart';
 ///
 /// ## Implementations
 ///
-/// - [OpenFoodFactsApi] — the primary implementation used in production.
-/// - (Removed) `UpcItemDbApi` — previously used as a fallback; removed to
-///   simplify the app and focus on contributing to Open Food Facts.
+/// - `OpenFoodFactsApi` — the primary implementation used in production.
+///   Implementations must throw `ProductNotFoundException` when a barcode
+///   is unknown and allow other exceptions to propagate for the caller
+///   to handle (e.g., network errors).
 abstract class ProductApiService {
   /// Retrieves product information for the given [barcode].
   ///

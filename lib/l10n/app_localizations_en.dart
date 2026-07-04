@@ -326,4 +326,148 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get couldNotDeleteInventory => 'Could not delete inventory.';
+
+  @override
+  String get networkError => 'Network error. Please check your connection.';
+
+  @override
+  String get productNotFound => 'Product not found';
+
+  @override
+  String get productNotFoundHint => 'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
+
+  @override
+  String get addManually => 'Add manually';
+
+  @override
+  String get contributeToOpenFoodFacts => 'Contribute to Open Food Facts';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get expiringSoonDays => 'Expiring soon threshold';
+
+  @override
+  String expiringSoonDaysValue(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get expiringSoonDaysDialogTitle => 'Expiring soon threshold (days)';
+
+  @override
+  String expiringSoonDaysSet(int days) {
+    return 'Expiring soon threshold set to $days days.';
+  }
+
+  @override
+  String get expiringToday => 'Food expiring today';
+
+  @override
+  String expiresTomorrow(String barcode) {
+    return '$barcode expires tomorrow';
+  }
+
+  @override
+  String expiresToday(String barcode) {
+    return '$barcode expires today!';
+  }
+
+  @override
+  String get expiryChannelName => 'Expiry reminders';
+
+  @override
+  String get expiryChannelDescription => 'Warns about expiring food';
+
+  @override
+  String get itemRestored => 'Item restored.';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get scanHint => 'Align the barcode inside the frame';
+
+  @override
+  String get confirmExitScanner => 'Stop scanning?';
+
+  @override
+  String get confirmExitScannerHint => 'The current scan will be discarded.';
+
+  @override
+  String get stay => 'Stay';
+
+  @override
+  String get leave => 'Leave';
+
+  @override
+  String importCsvSuccess(int products, int items) {
+    return 'Import complete — $products products, $items items.';
+  }
+
+  @override
+  String importCsvFailed(String error) {
+    return 'CSV import failed: $error';
+  }
+
+  @override
+  String get customUnit => 'Custom...';
+
+  @override
+  String get customLocation => 'Custom...';
+
+  @override
+  String get enterCustomUnit => 'Enter custom unit';
+
+  @override
+  String get enterCustomLocation => 'Enter custom location';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get exportedToShare => 'Export ready — share to save.';
+
+  @override
+  String get errorLoadingInventory => 'Failed to load inventory.';
+
+  @override
+  String get items => 'items';
+
+  @override
+  String get enterProductDetails => 'Enter product details';
+
+  @override
+  String get productNameLabel => 'Product name';
+
+  @override
+  String get requiredField => 'This field is required';
+
+  @override
+  String get servingSizeHint => 'e.g. 100 g, 1 cookie (28 g)';
+
+  @override
+  String get nutritionInfo => 'Nutrition (per 100 g / 100 ml)';
+
+  @override
+  String get captureImages => 'Photos';
+
+  @override
+  String get nutritionTableImage => 'Nutrition table photo';
+
+  @override
+  String get ingredientsImage => 'Ingredients list photo';
+
+  @override
+  String get productImage => 'Product photo';
+
+  @override
+  String get saveProduct => 'Save product';
+
+  @override
+  String get submittingToOff => 'Will be submitted to Open Food Facts when online';
+
+  @override
+  String get nutriscoreExplanation => 'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.';
 }
