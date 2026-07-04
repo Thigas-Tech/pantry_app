@@ -19,7 +19,6 @@
 // (The linter incorrectly flags the testWidgets callbacks because it doesn't
 //  see the `await` inside the body.  We keep the ignore until the analyzer is
 //  updated.)
-// ignore_for_file: unnecessary_async
 library;
 
 import 'dart:async';
@@ -84,7 +83,7 @@ void main() {
       overrides: [
         inventoryWithProductProvider.overrideWith((ref) => completer.future),
         inventoryListProvider.overrideWith(
-          (ref) async => <Map<String, dynamic>>[],
+          (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         productRepositoryProvider.overrideWithValue(MockProductRepository()),
@@ -109,7 +108,7 @@ void main() {
           (ref) => Future.error('test error'),
         ),
         inventoryListProvider.overrideWith(
-          (ref) async => <Map<String, dynamic>>[],
+          (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         productRepositoryProvider.overrideWithValue(MockProductRepository()),
@@ -128,10 +127,10 @@ void main() {
       imageCacheMock: mockImageCache,
       overrides: [
         inventoryWithProductProvider.overrideWith(
-          (ref) async => <InventoryWithProduct>[],
+          (ref) => <InventoryWithProduct>[],
         ),
         inventoryListProvider.overrideWith(
-          (ref) async => <Map<String, dynamic>>[],
+          (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         productRepositoryProvider.overrideWithValue(MockProductRepository()),
@@ -170,9 +169,9 @@ void main() {
       const HomeScreen(),
       imageCacheMock: mockImageCache,
       overrides: [
-        inventoryWithProductProvider.overrideWith((ref) async => items),
+        inventoryWithProductProvider.overrideWith((ref) => items),
         inventoryListProvider.overrideWith(
-          (ref) async => <Map<String, dynamic>>[
+          (ref) => <Map<String, dynamic>>[
             {'id': 1, 'name': 'Home'},
           ],
         ),
@@ -197,10 +196,10 @@ void main() {
       imageCacheMock: mockImageCache,
       overrides: [
         inventoryWithProductProvider.overrideWith(
-          (ref) async => <InventoryWithProduct>[],
+          (ref) => <InventoryWithProduct>[],
         ),
         inventoryListProvider.overrideWith(
-          (ref) async => <Map<String, dynamic>>[
+          (ref) => <Map<String, dynamic>>[
             {'id': 1, 'name': 'Home'},
             {'id': 2, 'name': 'Work'},
           ],
@@ -223,10 +222,10 @@ void main() {
       imageCacheMock: mockImageCache,
       overrides: [
         inventoryWithProductProvider.overrideWith(
-          (ref) async => <InventoryWithProduct>[],
+          (ref) => <InventoryWithProduct>[],
         ),
         inventoryListProvider.overrideWith(
-          (ref) async => <Map<String, dynamic>>[
+          (ref) => <Map<String, dynamic>>[
             {'id': 1, 'name': 'Home'},
           ],
         ),
