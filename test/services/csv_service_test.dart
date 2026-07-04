@@ -10,7 +10,7 @@ import 'package:pantry_app/services/csv_service.dart';
 /// A mock of [DatabaseHelper] for isolating [CsvService] tests.
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-/// Unit tests for [CsvService] — CSV generation and import.
+/// Unit tests for [CsvService] – CSV generation and import.
 ///
 /// Uses a mock [DatabaseHelper] to avoid touching the real file system or
 /// database.
@@ -22,18 +22,12 @@ void main() {
     mockDb = MockDatabaseHelper();
     csvService = CsvService(mockDb);
 
-    // Register a fallback for `any` usage with freezed models.
-    registerFallbackValue(
-      const Product(barcode: '', name: ''),
-    );
-    registerFallbackValue(
-      const InventoryItem(barcode: ''),
-    );
+    registerFallbackValue(const Product(barcode: '', name: ''));
+    registerFallbackValue(const InventoryItem(barcode: ''));
   });
 
   group('generateCsv', () {
     test('returns empty string when no data', () async {
-      /// An empty export data set produces an empty CSV string.
       when(
         () => mockDb.getExportData(inventoryId: 1),
       ).thenAnswer((_) async => []);
@@ -42,8 +36,6 @@ void main() {
     });
 
     test('generates valid CSV with headers and data', () async {
-      /// A single export row produces a CSV with the header line and one
-      /// data line.
       final rows = [
         {
           'product_name': 'Milk',
@@ -77,16 +69,14 @@ void main() {
       expect(csv, contains('2'));
       expect(csv, contains('fridge'));
       expect(csv, contains('Home'));
-      // Unix timestamp converted to ISO 8601
       expect(csv, contains('1970-01-02T'));
     });
 
     test('escapes fields containing commas', () async {
-      /// Fields that contain commas are wrapped in double quotes.
       final rows = [
         {
           'product_name': 'Milk',
-          'brand': 'Dairy, Inc.', // comma inside
+          'brand': 'Dairy, Inc.',
           'category': 'Dairy',
           'barcode': '123',
           'quantity': 1,
@@ -114,8 +104,6 @@ void main() {
   });
 
   group('importCsv', () {
-    /// Writes [csvContent] to a temporary file, runs the import, and
-    /// cleans up afterwards.
     Future<Map<String, int>> runImport(
       String csvContent, {
       int inventoryId = 1,
@@ -133,16 +121,18 @@ void main() {
     }
 
     test('imports valid CSV and returns counts', () async {
-      /// A correctly formatted CSV file results in one product and one
-      /// inventory item being inserted.
       when(
         () => mockDb.insertProduct(any()),
-      ).thenAnswer((_) async => Future.value());
+      ).thenAnswer((_) => Future.value());
       when(() => mockDb.insertInventoryItem(any())).thenAnswer((_) async => 1);
 
       const csvContent =
-          'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,Location,Notes,Date Added,Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g),Inventory Name\n'
-          'Milk,Dairy,,123,2,L,2026-01-01,fridge,,2026-01-01T00:00:00.000,42,3.4,5.0,1.0,0.0,0.1,Home\n';
+          'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date, '
+          'Location,Notes,Date Added,Energy (kcal/100g),Protein (g/100g), '
+          'Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g), '
+          'Inventory Name\n'
+          'Milk,Dairy,,123,2,L,2026-01-01,fridge,,'
+          '2026-01-01T00:00:00.000,42,3.4,5.0,1.0,0.0,0.1,Home\n';
 
       final counts = await runImport(csvContent, inventoryId: 2);
       expect(counts['products'], 1);
@@ -151,9 +141,7 @@ void main() {
       verify(() => mockDb.insertInventoryItem(any())).called(1);
     });
 
-    test('throws if required columns are missing', () async {
-      /// Importing a CSV without 'Barcode' or 'Product Name' throws an
-      /// exception.
+    test('throws if required columns are missing', () {
       const csvContent = 'Bad,Headers\nvalue1,value2\n';
       expect(
         () => runImport(csvContent),
@@ -161,8 +149,7 @@ void main() {
       );
     });
 
-    test('throws if file is empty', () async {
-      /// An empty CSV file throws an exception.
+    test('throws if file is empty', () {
       const csvContent = '';
       expect(
         () => runImport(csvContent),
@@ -171,16 +158,18 @@ void main() {
     });
 
     test('handles quoted fields with commas', () async {
-      /// Fields inside double quotes are parsed as a single value, even
-      /// if they contain commas.
       when(
         () => mockDb.insertProduct(any()),
-      ).thenAnswer((_) async => Future.value());
+      ).thenAnswer((_) => Future.value());
       when(() => mockDb.insertInventoryItem(any())).thenAnswer((_) async => 1);
 
       const csvContent =
-          'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,Location,Notes,Date Added,Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g),Inventory Name\n'
-          '"Milk, Whole",Dairy,,123,1,L,2026-01-01,fridge,,,42,3.4,5.0,1.0,0.0,0.1,Home\n';
+          'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date, '
+          'Location,Notes,Date Added,Energy (kcal/100g),Protein (g/100g), '
+          'Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g), '
+          'Inventory Name\n'
+          '"Milk, Whole",Dairy,,123,1,L,2026-01-01,fridge,,, '
+          '42,3.4,5.0,1.0,0.0,0.1,Home\n';
 
       final counts = await runImport(csvContent);
       expect(counts['products'], 1);

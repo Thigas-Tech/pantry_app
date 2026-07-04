@@ -286,4 +286,98 @@ void main() {
       expect(rows.first['inventory_name'], 'Work');
     });
   });
+  group('Migration v1 → v2', () {
+    test('upgrades a v1 database correctly', () async {
+      // 1. Manually create a v1 database with the old schema.
+      const v1Path = '${inMemoryDatabasePath}_v1';
+      final v1Db = await openDatabase(
+        v1Path,
+        version: 1,
+        onCreate: (db, _) async {
+          await db.execute('''
+            CREATE TABLE products (
+              barcode TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              brand TEXT,
+              image_url TEXT,
+              category TEXT,
+              ingredients TEXT,
+              serving_size TEXT,
+              energy_kcal REAL,
+              protein_g REAL,
+              carbs_g REAL,
+              fat_g REAL,
+              fiber_g REAL,
+              salt_g REAL,
+              last_synced INTEGER
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE inventory (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT NOT NULL,
+              quantity REAL DEFAULT 1,
+              unit TEXT DEFAULT 'pcs',
+              expiry_date TEXT,
+              location TEXT DEFAULT 'pantry',
+              notes TEXT,
+              date_added INTEGER,
+              FOREIGN KEY(barcode) REFERENCES products(barcode)
+            )
+          ''');
+          // Insert a product and an old inventory item.
+          await db.insert('products', {
+            'barcode': 'old',
+            'name': 'Old Product',
+            'brand': null,
+            'image_url': null,
+            'category': null,
+            'ingredients': null,
+            'serving_size': null,
+            'energy_kcal': null,
+            'protein_g': null,
+            'carbs_g': null,
+            'fat_g': null,
+            'fiber_g': null,
+            'salt_g': null,
+            'last_synced': null,
+          });
+          await db.insert('inventory', {
+            'barcode': 'old',
+            'quantity': 2,
+            'unit': 'pcs',
+            'expiry_date': '2025-12-31',
+            'location': 'pantry',
+            'notes': 'old item',
+            'date_added': 12345,
+          });
+        },
+      );
+      await v1Db.close();
+
+      // 2. Open with the current DatabaseHelper – the upgrade from v1 to v2
+      //    will run automatically.
+      final dbHelper = DatabaseHelper.withPath(v1Path);
+      await dbHelper.database;
+
+      // 3. Verify the migration outcome.
+      final inventories = await dbHelper.getInventories();
+      expect(inventories.length, 1);
+      expect(inventories.first['name'], 'Home');
+
+      final items = await dbHelper.getInventoryItems(inventoryId: 1);
+      expect(items.length, 1);
+      expect(items.first.barcode, 'old');
+      expect(items.first.dateAdded, 12345);
+      expect(items.first.inventoryId, 1);
+
+      final product = await dbHelper.getProduct('old');
+      expect(product, isNotNull);
+      expect(product!.name, 'Old Product');
+
+      // Clean up.
+      final migratedDb = await dbHelper.database;
+      await migratedDb.close();
+    });
+  });
 }
