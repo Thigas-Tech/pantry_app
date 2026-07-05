@@ -151,7 +151,8 @@ Version history:
 | `activeInventoryProvider`       | `NotifierProvider`| Current pantry ID (default 1)      |
 | `inventoryWithProductProvider`  | `FutureProvider`  | Joined inventory list for home     |
 | `inventoryListProvider`         | `FutureProvider`  | All pantries (id, name)            |
-| `connectivityProvider`          | `StreamProvider`   | Internet connectivity status     |
+| `averageNutriscoreProvider`     | `FutureProvider`  | Average Nutri-Score for inventory  |
+| `connectivityProvider`          | `StreamProvider`  | Internet connectivity status       |
 | `settingsProvider`              | `NotifierProvider`| Notifications, retention, threshold|
 
 ---
@@ -168,16 +169,23 @@ HomeScreen
     ├── RefreshIndicator (pull-to-refresh)
     └── ListView
         ├── SectionHeader (expired / expiring soon / good)
-        └── InventoryCard (tappable, image, expiry dot + label)
+        └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot + label)
 
 ProductDetailScreen
 ├── AppBar (name, OFF link)
 ├── Hero → CachedImage (FutureBuilder → cached WebP or network)
+├── NutriScoreBadge + tooltip (A–E grade)
 ├── InfoRows (barcode, brand, category, serving size)
 ├── NutritionTable (energy, protein, carbs, fat, fiber, salt)
 ├── Ingredients (ExpansionTile)
 ├── InventoryTiles (location icon, qty, expiry, edit/delete)
 └── "Add to Inventory" button
+
+AddProductScreen (manual entry when offline or barcode not found)
+├── Product name, brand, category, serving size
+├── Nutrition table (6 fields, per 100g/ml)
+├── Ingredients (multi-line)
+└── Image capture (nutrition table, ingredients, product photos)
 
 ScannerScreen
 ├── PopScope (confirmation dialog on back)

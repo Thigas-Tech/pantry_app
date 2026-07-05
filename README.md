@@ -8,17 +8,19 @@ never waste food again.
 
 - **Barcode scanning** — camera-based via Google ML Kit (`mobile_scanner`) or manual text entry
 - **Product lookup** — fetches name, brand, nutrition, ingredients from Open Food Facts
-- **Offline-first** — products are cached locally in SQLite; works without internet for known items
+- **Local database** — products are cached locally in SQLite; works without internet for known items
 - **Multiple pantries** — create, rename, and delete named inventories (e.g. Home, Work)
 - **Expiry tracking** — items grouped into Expired / Expiring Soon / Good on the home screen
 - **Local notifications** — two reminders per item: one day before expiry and on expiry day
-- **Custom units & locations** — pcs / g / kg / ml / L + pantry / fridge / freezer, with custom options
+- **Custom units & locations** — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options
 - **CSV import/export** — backup your pantry or restore from a CSV file
 - **Nutrition table** — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml
 - **Material You** — dynamic colours from your device wallpaper, light/dark/system theme
 - **Undo delete** — restore an accidentally deleted inventory item with a snackbar action
 - **Offline-first** — connectivity detection skips API when offline, warns the user, and uses cached data
 - **Pull-to-refresh** — updates cached product data from Open Food Facts when online
+- **Nutri-Score** — A–E badges on the home screen and product detail, with average per pantry
+- **Manual product entry** — full form with nutrition table and camera capture when a barcode is unknown or you're offline
 
 ## Screenshots
 
@@ -138,6 +140,7 @@ flutter test --concurrency=8 --coverage  # With coverage
 | HTTP client        | Dio                              |
 | Code generation    | freezed, json_serializable      |
 | Barcode scanning   | mobile_scanner (Google ML Kit)  |
+| Image capture      | image_picker                    |
 | Notifications      | flutter_local_notifications     |
 | Connectivity       | internet_connection_checker     |
 | Testing            | flutter_test + mocktail         |
