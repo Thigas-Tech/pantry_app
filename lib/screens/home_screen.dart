@@ -1,11 +1,16 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:pantry_app/config.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -16,6 +21,7 @@ import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
@@ -243,6 +249,33 @@ class HomeScreen extends ConsumerWidget {
     logInfo('Barcode scanned: $barcode');
     if (barcode == null || !context.mounted) return;
 
+    // If offline, skip API and go directly to manual entry.
+    final isOnline = ref.read(connectivityProvider).value;
+    if (isOnline == false) {
+      logWarning('Offline — skipping API lookup for $barcode');
+      if (context.mounted) {
+        SnackbarHelper.showWarning(context, l10n.offlineWarning);
+        final result = await Navigator.of(context).push<Product>(
+          MaterialPageRoute(
+            builder: (_) => AddProductScreen(barcode: barcode),
+          ),
+        );
+        if (result != null && context.mounted) {
+          final repo = ref.read(productRepositoryProvider);
+          await repo.cacheProduct(result);
+          if (context.mounted) {
+            await Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: result),
+              ),
+            );
+          }
+          ref.invalidate(inventoryWithProductProvider);
+        }
+      }
+      return;
+    }
+
     final repo = ref.read(productRepositoryProvider);
 
     try {
@@ -279,66 +312,71 @@ class HomeScreen extends ConsumerWidget {
       showModalBottomSheet<void>(
         context: context,
         builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(l10n.productNotFound,
-                style: Theme.of(ctx).textTheme.titleMedium),
-            const SizedBox(height: 16),
-            Text(l10n.productNotFoundHint, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                if (context.mounted) {
-                  final result = await Navigator.of(context).push<Product>(
-                    MaterialPageRoute(
-                      builder: (_) => AddProductScreen(barcode: barcode),
-                    ),
-                  );
-                  if (result != null && context.mounted) {
-                    final repo = ref.read(productRepositoryProvider);
-                    await repo.cacheProduct(result);
-                    if (context.mounted) {
-                      await Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              ProductDetailScreen(product: result),
-                        ),
-                      );
-                      ref.invalidate(inventoryWithProductProvider);
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.productNotFound,
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              Text(l10n.productNotFoundHint, textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  if (context.mounted) {
+                    final result = await Navigator.of(context).push<Product>(
+                      MaterialPageRoute(
+                        builder: (_) => AddProductScreen(barcode: barcode),
+                      ),
+                    );
+                    if (result != null && context.mounted) {
+                      final repo = ref.read(productRepositoryProvider);
+                      await repo.cacheProduct(result);
+                      if (context.mounted) {
+                        await Navigator.of(context).push<void>(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ProductDetailScreen(product: result),
+                          ),
+                        );
+                        ref.invalidate(inventoryWithProductProvider);
+                      }
                     }
                   }
-                }
-              },
-              icon: const Icon(Icons.add),
-              label: Text(l10n.addManually),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                if (context.mounted) {
-                  const storeUrl =
-                      'https://play.google.com/store/apps/details?id=org.openfoodfacts.scanner&hl=en&pli=1';
-                  final uri = Uri.parse(storeUrl);
-                  final canLaunch = await canLaunchUrl(uri);
-                  if (canLaunch && context.mounted) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  } else if (context.mounted) {
-                    SnackbarHelper.showError(
-                      context,
-                      l10n.couldNotOpenPlayStore,
-                    );
+                },
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addManually),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  if (context.mounted) {
+                    const storeUrl =
+                        'https://play.google.com/store/apps/details?id=org.openfoodfacts.scanner&hl=en&pli=1';
+                    final uri = Uri.parse(storeUrl);
+                    final canLaunch = await canLaunchUrl(uri);
+                    if (canLaunch && context.mounted) {
+                      await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } else if (context.mounted) {
+                      SnackbarHelper.showError(
+                        context,
+                        l10n.couldNotOpenPlayStore,
+                      );
+                    }
                   }
-                }
-              },
-              child: Text(l10n.contributeToOpenFoodFacts),
-            ),
-          ],
+                },
+                child: Text(l10n.contributeToOpenFoodFacts),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -485,6 +523,31 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
           child: RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(inventoryWithProductProvider);
+              // Also refresh cached products if online.
+              final online =
+                  await InternetConnectionChecker.instance.hasConnection;
+              if (online && context.mounted) {
+                try {
+                  final dbHelper = DatabaseHelper();
+                  final products = await dbHelper.getAllProducts();
+                  final api = OpenFoodFactsApi(
+                    Dio(),
+                    userId: AppConfig.offUserId,
+                    password: AppConfig.offPassword,
+                    contactEmail: AppConfig.contactEmail,
+                  );
+                  for (final product in products) {
+                    try {
+                      final updated = await api.getByBarcode(product.barcode);
+                      await dbHelper.insertProduct(updated);
+                    } on Exception {
+                      // Skip individual failures.
+                    }
+                  }
+                } on Exception {
+                  // Silently skip — pull-to-refresh is best-effort.
+                }
+              }
             },
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12),

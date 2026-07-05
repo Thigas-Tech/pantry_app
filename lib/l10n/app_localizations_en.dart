@@ -469,5 +469,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submittingToOff => 'Will be submitted to Open Food Facts when online';
 
   @override
+  String get offlineWarning => 'You are offline — adding product manually';
+
+  @override
   String get nutriscoreExplanation => 'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.';
 }

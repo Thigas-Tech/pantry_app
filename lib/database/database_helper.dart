@@ -193,6 +193,12 @@ class DatabaseHelper {
     return productDao.count(db);
   }
 
+  /// Returns all cached products.
+  Future<List<Product>> getAllProducts() async {
+    final db = await database;
+    return productDao.all(db);
+  }
+
   /// Removes stale inventory items and orphaned products.
   Future<void> cleanupOldEntries({int retentionDays = 60}) async {
     final db = await database;

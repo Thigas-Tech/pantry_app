@@ -957,6 +957,12 @@ abstract class AppLocalizations {
   /// **'Will be submitted to Open Food Facts when online'**
   String get submittingToOff;
 
+  /// No description provided for @offlineWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline — adding product manually'**
+  String get offlineWarning;
+
   /// No description provided for @nutriscoreExplanation.
   ///
   /// In en, this message translates to:

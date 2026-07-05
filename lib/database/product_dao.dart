@@ -93,4 +93,10 @@ class ProductDao {
         ) ??
         0;
   }
+
+  /// Returns all cached products.
+  Future<List<Product>> all(Database db) async {
+    final result = await db.query('products');
+    return result.map(fromMap).toList();
+  }
 }

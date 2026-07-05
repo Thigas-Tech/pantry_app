@@ -262,5 +262,6 @@
   "productImage": "Product photo",
   "saveProduct": "Save product",
   "submittingToOff": "Will be submitted to Open Food Facts when online",
+  "offlineWarning": "You are offline — adding product manually",
   "nutriscoreExplanation": "Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance."
 }

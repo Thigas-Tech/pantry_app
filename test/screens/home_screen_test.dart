@@ -31,6 +31,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
@@ -391,6 +392,7 @@ void main() {
             (ref) => <Map<String, dynamic>>[],
           ),
           activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+          connectivityProvider.overrideWith((ref) => Stream.value(true)),
           productRepositoryProvider.overrideWithValue(mockRepo),
         ],
       );
@@ -424,6 +426,7 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        connectivityProvider.overrideWith((ref) => Stream.value(true)),
         productRepositoryProvider.overrideWithValue(MockProductRepository()),
       ],
     );
@@ -462,6 +465,7 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        connectivityProvider.overrideWith((ref) => Stream.value(true)),
         productRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
