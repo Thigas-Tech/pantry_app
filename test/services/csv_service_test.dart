@@ -141,9 +141,7 @@ void main() {
       ).thenAnswer((_) => Future.value());
       when(() => mockDb.insertInventoryItem(any())).thenAnswer((_) async => 1);
 
-      const csv =
-          'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,Location,Notes,Date Added,Serving Size,Nutri-Score,Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g),Inventory Name'
-          '\nMilk,Dairy,,123,2,L,2026-01-01,fridge,,,,,42,3.4,5,1,,0.1,Home\n';
+      const csv = 'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,Location,Notes,Date Added,Serving Size,Nutri-Score,Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g),Inventory Name\nMilk,Dairy,,123,2,L,2026-01-01,fridge,,,,,42,3.4,5,1,,0.1,Home\n';
 
       final counts = await csvService.importCsv(csv, inventoryId: 2);
       expect(counts['products'], 1);
@@ -173,13 +171,7 @@ void main() {
       ).thenAnswer((_) => Future.value());
       when(() => mockDb.insertInventoryItem(any())).thenAnswer((_) async => 1);
 
-      const csv =
-          'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,'
-          'Location,Notes,Date Added,Serving Size,Nutri-Score,'
-          'Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),'
-          'Fat (g/100g),Fiber (g/100g),Salt (g/100g),Inventory Name'
-          '\n"Milk, Whole",Dairy,,123,1,L,2026-01-01,fridge,,,,'
-          '42,3.4,5,1,,0.1,Home\n';
+      const csv = 'Product Name,Brand,Category,Barcode,Quantity,Unit,Expiry Date,Location,Notes,Date Added,Serving Size,Nutri-Score,Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),Fat (g/100g),Fiber (g/100g),Salt (g/100g),Inventory Name\n"Milk, Whole",Dairy,,123,1,L,2026-01-01,fridge,,,,42,3.4,5,1,,0.1,Home\n';
 
       final counts = await csvService.importCsv(csv, inventoryId: 1);
       expect(counts['products'], 1);
