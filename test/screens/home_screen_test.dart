@@ -38,6 +38,7 @@ import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
+import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import '../helpers/pump_app.dart';
@@ -479,5 +480,30 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(HomeScreen), findsOneWidget);
+  });
+
+  testWidgets('stats icon navigates to StatsScreen', (tester) async {
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith(
+          (ref) => <InventoryWithProduct>[],
+        ),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        connectivityProvider.overrideWith((ref) => Stream.value(true)),
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    await tester.tap(find.byTooltip('Pantry Stats'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(StatsScreen), findsOneWidget);
   });
 }
