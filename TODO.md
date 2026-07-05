@@ -41,8 +41,31 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 
 - [ ] **Multi‑language support** — ARB infrastructure exists; add translations (pt, fr, es, de). Contribute via community PRs.
 - [ ] **Recipe suggestions** — call a recipe API with items expiring this week; suggest meals that use them.
-- [ ] **Integration tests** — `integration_test/` directory; end-to-end flows: scan→add→verify→delete.
 - [ ] **Widget test → golden coverage** — product detail, settings, stats screens.
+- [ ] **Patrol E2E tests** — real‑device integration tests via [Patrol](https://patrol.leancode.co). Uses `patrol_cli` and `patrol` dev-dependency. Replace the generic `integration_test/` with `patrol_test/` directory.
+
+### Patrol E2E test scenarios
+
+- [ ] **Setup** — install `patrol_cli`, add `patrol` to `dev_dependencies`, configure `pubspec.yaml` (`pacakge_name`, `bundle_id`), create `patrol_test/`, gitignore `test_bundle.dart`.
+- [ ] **Scan → add to inventory** — tap FAB, simulate barcode scan, verify product detail appears, add item, verify home screen shows it.
+- [ ] **Offline scan → manual entry** — simulate offline, scan barcode, verify manual entry screen opens, fill form, save, verify product cached.
+- [ ] **Quantity adjustment flow** — open product detail, tap + 3×, verify quantity, tap − to 0, confirm delete, verify item gone.
+- [ ] **Notification flow** — add item with expiry tomorrow, background the app, advance time, verify notification appears.
+- [ ] **Inventory switch** — tap dropdown, select different pantry, verify items change.
+- [ ] **CSV export → import round‑trip** — export inventory, import the same CSV, verify item count.
+
+## CI/CD & DevOps
+
+- [ ] **GitHub Actions — CI pipeline** — on every PR and push to `main`:
+  - `flutter analyze` (lint check)
+  - `dart format --set-exit-if-changed .` (formatting check, not force‑format)
+  - `flutter test --concurrency=8 --coverage` (tests + coverage report)
+  - Upload coverage artifact, fail if tests fail.
+- [ ] **GitHub Actions — Play Store deployment** — on new tag (`v*`):
+  - `flutter build appbundle` + `flutter build apk` (release)
+  - Upload both to Google Play Console via `r0adkll/upload-google-play`
+  - Requires Play Store service account JSON stored as a GitHub secret.
+- [ ] **GitHub Actions — Patrol E2E on schedule** — weekly run of the Patrol test suite on a real Android emulator (GitHub‑hosted runner).
 
 ## Documentation (quick wins)
 
@@ -60,12 +83,12 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 High importance  │ Batch delete            │ Shopping list
                  │ Quick quantity adjust   │ Offline submission queue
                  │ Expiry date guard       │ Cloud backup
-                 │ Expiry parsing extract  │
+                 │ Expiry parsing extract  │ GitHub CI pipeline
                  │─────────────────────────│──────────────────────────
                  │ Golden tests            │ Multi-language
                  │ Accessibility audit     │ Recipe suggestions
-                 │ Stock count badge       │ Integration tests
+                 │ Stock count badge       │ Patrol E2E tests
+                 │ Screenshots             │ Play Store CI deploy
 Low importance   │ Empty-pantry onboarding │ Barcode history
                  │ Category filter         │
-                 │ Screenshots             │
 ```
