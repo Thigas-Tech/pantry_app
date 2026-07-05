@@ -25,20 +25,23 @@ class NutriScoreBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _colorForGrade(grade);
     if (color == null) return const SizedBox.shrink();
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Center(
-        child: Text(
-          grade!.toUpperCase(),
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: size * 0.55,
+    return Semantics(
+      label: 'Nutri-Score ${grade!.toUpperCase()}',
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Center(
+          child: Text(
+            grade!.toUpperCase(),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: size * 0.55,
+            ),
           ),
         ),
       ),

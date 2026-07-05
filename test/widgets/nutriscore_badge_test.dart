@@ -49,4 +49,46 @@ void main() {
       expect(NutriScoreBadge.toNumeric('x'), null);
     });
   });
+
+  group('NutriScoreBadge semantics', () {
+    testWidgets('has semantics label for grade a', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: NutriScoreBadge(grade: 'a')),
+      );
+      final node = tester.getSemantics(find.byType(NutriScoreBadge));
+      expect(node.label, contains('Nutri-Score A'));
+    });
+
+    testWidgets('has semantics label for grade e', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: NutriScoreBadge(grade: 'e')),
+      );
+      final node = tester.getSemantics(find.byType(NutriScoreBadge));
+      expect(node.label, contains('Nutri-Score E'));
+    });
+
+    testWidgets('label is uppercase for lowercase grade input', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: NutriScoreBadge(grade: 'c')),
+      );
+      final node = tester.getSemantics(find.byType(NutriScoreBadge));
+      expect(node.label, contains('Nutri-Score C'));
+    });
+
+    testWidgets('no semantics label for null grade', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: NutriScoreBadge(grade: null)),
+      );
+      final node = tester.getSemantics(find.byType(NutriScoreBadge));
+      expect(node.label, '');
+    });
+
+    testWidgets('no semantics label for invalid grade', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: NutriScoreBadge(grade: 'x')),
+      );
+      final node = tester.getSemantics(find.byType(NutriScoreBadge));
+      expect(node.label, '');
+    });
+  });
 }
