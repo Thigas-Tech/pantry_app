@@ -13,5 +13,10 @@ void main() {
       await pumpApp(tester, const AddProductScreen(barcode: '123'));
       expect(find.text('Product name'), findsOneWidget);
     });
+
+    testWidgets('shows nutrition section', (tester) async {
+      await pumpApp(tester, const AddProductScreen(barcode: '123'));
+      expect(find.text('Nutrition (per 100 g / 100 ml)'), findsOneWidget);
+    });
   });
 }

@@ -238,4 +238,97 @@ void main() {
       expect(product.saltG, 0.75);
     });
   });
+
+  // -----------------------------------------------------------------
+  // Group: submitProductV3 and uploadProductImage
+  // -----------------------------------------------------------------
+
+  group('submitProductV3', () {
+    test('returns true on HTTP 200', () async {
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          '{"status":"ok"}',
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+
+      final apiV3 = OpenFoodFactsApi(
+        dio,
+        userId: 'u',
+        password: 'p',
+        contactEmail: 't@t.com',
+        useStaging: false,
+      );
+      final result = await apiV3.submitProductV3(
+        const Product(barcode: '123', name: 'Test'),
+        'session_cookie',
+      );
+      expect(result, isTrue);
+    });
+
+    test('returns false on non-200', () async {
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString('{}', 500),
+      );
+
+      final apiV3 = OpenFoodFactsApi(
+        dio,
+        userId: 'u',
+        password: 'p',
+        contactEmail: 't@t.com',
+        useStaging: false,
+      );
+      final result = await apiV3.submitProductV3(
+        const Product(barcode: '123', name: 'Test'),
+        'session_cookie',
+      );
+      expect(result, isFalse);
+    });
+  });
+
+  group('uploadProductImage', () {
+    test('returns true on success', () async {
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          '{"status":"status ok","imgid":42}',
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+
+      final apiImg = OpenFoodFactsApi(
+        dio,
+        userId: 'u',
+        password: 'p',
+        contactEmail: 't@t.com',
+        useStaging: false,
+      );
+      final result = await apiImg.uploadProductImage(
+        barcode: '123',
+        imageField: 'front',
+        imageBytes: [1, 2, 3],
+      );
+      expect(result, isTrue);
+    });
+
+    test('returns false when credentials empty', () async {
+      final apiNoAuth = OpenFoodFactsApi(
+        dio,
+        userId: '',
+        password: '',
+        contactEmail: 't@t.com',
+      );
+      final result = await apiNoAuth.uploadProductImage(
+        barcode: '123',
+        imageField: 'front',
+        imageBytes: [1, 2, 3],
+      );
+      expect(result, isFalse);
+    });
+  });
 }

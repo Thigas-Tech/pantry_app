@@ -76,8 +76,25 @@ point** for database access in production code.
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 → v2).
+- `_onUpgrade` handles version bumps (currently v1 → v4).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
+
+Version history:
+| Version | Change |
+|---------|--------|
+| v1 → v2 | Added `inventories` table, `inventory_id` column |
+| v2 → v3 | Default unit `pcs` → `pieces`, migration of existing data |
+| v3 → v4 | Added `nutriscore_grade TEXT` column to `products` |
+
+### 2.4 Connectivity layer
+
+`InternetConnectionChecker` monitors device connectivity via a
+`StreamProvider<bool>` (`connectivityProvider`). The app uses this to:
+
+- Refresh cached product data on startup and pull-to-refresh (online only).
+- Skip the Open Food Facts API lookup when offline — going directly to
+  manual product entry with a warning snackbar.
+- Guard any network-dependent operation with a connectivity check.
 
 ---
 
@@ -134,7 +151,7 @@ point** for database access in production code.
 | `activeInventoryProvider`       | `NotifierProvider`| Current pantry ID (default 1)      |
 | `inventoryWithProductProvider`  | `FutureProvider`  | Joined inventory list for home     |
 | `inventoryListProvider`         | `FutureProvider`  | All pantries (id, name)            |
-| `themeModeProvider`             | `NotifierProvider`| System / light / dark              |
+| `connectivityProvider`          | `StreamProvider`   | Internet connectivity status     |
 | `settingsProvider`              | `NotifierProvider`| Notifications, retention, threshold|
 
 ---

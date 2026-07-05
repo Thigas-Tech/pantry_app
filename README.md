@@ -17,6 +17,8 @@ never waste food again.
 - **Nutrition table** — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml
 - **Material You** — dynamic colours from your device wallpaper, light/dark/system theme
 - **Undo delete** — restore an accidentally deleted inventory item with a snackbar action
+- **Offline-first** — connectivity detection skips API when offline, warns the user, and uses cached data
+- **Pull-to-refresh** — updates cached product data from Open Food Facts when online
 
 ## Screenshots
 
@@ -137,6 +139,7 @@ flutter test --concurrency=8 --coverage  # With coverage
 | Code generation    | freezed, json_serializable      |
 | Barcode scanning   | mobile_scanner (Google ML Kit)  |
 | Notifications      | flutter_local_notifications     |
+| Connectivity       | internet_connection_checker     |
 | Testing            | flutter_test + mocktail         |
 | Linting            | very_good_analysis, lint/strict |
 | Theming            | dynamic_color (Material You)    |
