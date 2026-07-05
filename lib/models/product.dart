@@ -120,10 +120,23 @@ abstract class Product with _$Product {
     @JsonKey(name: 'last_synced') int? lastSynced,
 
     /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
-    /// if the data is unavailable.
+    /// if the data is unavailable. May also be `'not-applicable'` when the
+    /// Nutri-Score system does not apply to this product category (e.g. food
+    /// additives).
     ///
     /// Sourced from `nutriscore_grade` in the Open Food Facts v3 API.
     @JsonKey(name: 'nutriscore_grade') String? nutriscoreGrade,
+
+    /// The product category that makes Nutri-Score not applicable, if any.
+    ///
+    /// This is present only when [nutriscoreGrade] is `'not-applicable'` and
+    /// explains why (e.g. `'en:food-additives'`).
+    ///
+    /// Sourced from `nutriscore_data.nutriscore_not_applicable_for_category`
+    /// in the API response. This field is not included in the JSON generated
+    /// by `json_serializable` because the value comes from a nested object.
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    String? nutriscoreNotApplicableCategory,
   }) = _Product;
 
   /// Creates a [Product] from a JSON map in the Open Food Facts v3 format.

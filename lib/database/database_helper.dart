@@ -67,7 +67,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 4,
+        version: 5,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -103,7 +103,8 @@ class DatabaseHelper {
         fiber_g REAL,
         salt_g REAL,
         last_synced INTEGER,
-        nutriscore_grade TEXT
+        nutriscore_grade TEXT,
+        nutriscore_not_applicable_category TEXT
       )
     ''');
 
@@ -170,6 +171,13 @@ class DatabaseHelper {
         'ALTER TABLE products ADD COLUMN nutriscore_grade TEXT',
       );
       logInfo('Migration to version 4 completed');
+    }
+    if (oldVersion < 5) {
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN nutriscore_not_applicable_category '
+        'TEXT',
+      );
+      logInfo('Migration to version 5 completed');
     }
   }
 

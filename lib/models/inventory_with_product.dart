@@ -69,7 +69,12 @@ class InventoryWithProduct {
     this.inventoryName,
 
     /// The Nutri-Score grade from the `products` table (e.g. `'a'`–`'e'`).
+    /// May be `'not-applicable'` when the Nutri-Score system does not apply.
     this.nutriscoreGrade,
+
+    /// The category that makes Nutri-Score not applicable, if any
+    /// (e.g. `'en:food-additives'`).
+    this.nutriscoreNotApplicableCategory,
   });
 
   /// Constructs an [InventoryWithProduct] from a raw database row.
@@ -94,6 +99,8 @@ class InventoryWithProduct {
       productImageUrl: map['product_image_url'] as String?,
       inventoryName: map['inventory_name'] as String?,
       nutriscoreGrade: map['nutriscore_grade'] as String?,
+      nutriscoreNotApplicableCategory:
+          map['nutriscore_not_applicable_category'] as String?,
     );
   }
 
@@ -136,4 +143,8 @@ class InventoryWithProduct {
   /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
   /// if unavailable.
   final String? nutriscoreGrade;
+
+  /// The product category that makes Nutri-Score not applicable, if any
+  /// (e.g. `'en:food-additives'`).
+  final String? nutriscoreNotApplicableCategory;
 }

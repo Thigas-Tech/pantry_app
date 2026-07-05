@@ -27,6 +27,7 @@ class ProductDao {
     'salt_g': p.saltG,
     'last_synced': p.lastSynced,
     'nutriscore_grade': p.nutriscoreGrade,
+    'nutriscore_not_applicable_category': p.nutriscoreNotApplicableCategory,
   };
 
   /// Converts a database row map into a [Product].
@@ -46,6 +47,8 @@ class ProductDao {
     saltG: (map['salt_g'] as num?)?.toDouble(),
     lastSynced: map['last_synced'] as int?,
     nutriscoreGrade: map['nutriscore_grade'] as String?,
+    nutriscoreNotApplicableCategory:
+        map['nutriscore_not_applicable_category'] as String?,
   );
 
   /// Inserts a product into the local cache (upsert).

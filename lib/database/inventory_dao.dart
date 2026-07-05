@@ -164,6 +164,8 @@ class InventoryDao {
           products.name AS product_name,
           products.image_url AS product_image_url,
           products.nutriscore_grade AS nutriscore_grade,
+          products.nutriscore_not_applicable_category
+            AS nutriscore_not_applicable_category,
           inventories.name AS inventory_name
         FROM inventory
         INNER JOIN products ON inventory.barcode = products.barcode
@@ -202,6 +204,7 @@ class InventoryDao {
           inventory.date_added,
           products.serving_size,
           products.nutriscore_grade,
+          products.nutriscore_not_applicable_category,
           products.energy_kcal,
           products.protein_g,
           products.carbs_g,

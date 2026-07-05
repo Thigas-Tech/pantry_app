@@ -41,6 +41,7 @@ import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
+import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import '../helpers/pump_app.dart';
 
 // ---------- Test data -------------------------------------------------------
@@ -66,6 +67,21 @@ const testProduct = Product(
 const minimalProduct = Product(
   barcode: '1111111111111',
   name: 'Bare Bones',
+);
+
+/// A product where Nutri-Score is not applicable (e.g. food additives).
+const notApplicableProduct = Product(
+  barcode: '9999999999999',
+  name: 'Sweetener',
+  nutriscoreGrade: 'not-applicable',
+  nutriscoreNotApplicableCategory: 'en:food-additives',
+);
+
+/// A product with a valid Nutri-Score grade.
+const gradeAProduct = Product(
+  barcode: '8888888888888',
+  name: 'Healthy Snack',
+  nutriscoreGrade: 'a',
 );
 
 /// A sample inventory item.
@@ -226,6 +242,44 @@ void main() {
     expect(find.textContaining('Test Brand'), findsOneWidget);
     expect(find.textContaining('Dairy'), findsOneWidget);
     expect(find.textContaining('250ml'), findsOneWidget);
+  });
+
+  // --------------------------------------------------------------------------
+  // Nutri-Score badge
+  // --------------------------------------------------------------------------
+
+  testWidgets('shows grey dashed badge when nutriscore is not applicable', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: notApplicableProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+    expect(find.text('—'), findsOneWidget);
+  });
+
+  testWidgets('hides nutriscore row when nutriscoreGrade is null', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: minimalProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+    expect(find.byType(NutriScoreBadge), findsNothing);
+  });
+
+  testWidgets('shows valid nutriscore badge for grade a', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: gradeAProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+    expect(find.text('A'), findsOneWidget);
   });
 
   // --------------------------------------------------------------------------

@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 /// The grade should be one of `'a'`, `'b'`, `'c'`, `'d'`, or `'e'`.
 /// If the grade is `null` or invalid, nothing is rendered.
 ///
+/// When the grade is `'not-applicable'` a grey dashed badge is shown,
+/// indicating that the Nutri-Score system does not apply to this product
+/// category (e.g. food additives).
+///
 /// Colours follow the official Nutri-Score palette:
 /// - A: dark green (#038141)
 /// - B: light green (#85BB2F)
@@ -15,7 +19,7 @@ class NutriScoreBadge extends StatelessWidget {
   /// Creates a [NutriScoreBadge] for the given [grade].
   const NutriScoreBadge({required this.grade, this.size = 28, super.key});
 
-  /// The Nutri-Score grade (`'a'`–`'e'`).
+  /// The Nutri-Score grade (`'a'`–`'e'` or `'not-applicable'`).
   final String? grade;
 
   /// The width and height of the badge.
@@ -23,6 +27,30 @@ class NutriScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_isNotApplicable(grade)) {
+      return Semantics(
+        label: 'Nutri-Score, not applicable',
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade500,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text(
+              '—',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: size * 0.55,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final color = _colorForGrade(grade);
     if (color == null) return const SizedBox.shrink();
     return Semantics(
@@ -48,6 +76,11 @@ class NutriScoreBadge extends StatelessWidget {
     );
   }
 
+  /// Returns `true` if the [grade] is `'not-applicable'`.
+  static bool isNotApplicable(String? grade) {
+    return _isNotApplicable(grade);
+  }
+
   /// Returns the Nutri-Score colour for [grade], or `null` if invalid.
   static Color? _colorForGrade(String? grade) {
     final g = grade?.toLowerCase().trim();
@@ -62,10 +95,17 @@ class NutriScoreBadge extends StatelessWidget {
     };
   }
 
+  /// Returns `true` if [grade] is `'not-applicable'` (case‑insensitive).
+  static bool _isNotApplicable(String? grade) {
+    return grade?.toLowerCase().trim() == 'not-applicable';
+  }
+
   /// Converts a Nutri-Score grade to a numeric value for averaging.
   ///
-  /// `'a'` = 5, `'b'` = 4, …, `'e'` = 1. Returns `null` for invalid grades.
+  /// `'a'` = 5, `'b'` = 4, …, `'e'` = 1. Returns `null` for invalid or
+  /// not‑applicable grades.
   static int? toNumeric(String? grade) {
+    if (_isNotApplicable(grade)) return null;
     return switch (grade?.toLowerCase()) {
       'a' => 5,
       'b' => 4,

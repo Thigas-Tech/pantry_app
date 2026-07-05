@@ -169,7 +169,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ),
                     const SizedBox(width: 8),
                     Tooltip(
-                      message: l10n.nutriscoreExplanation,
+                      message:
+                          NutriScoreBadge.isNotApplicable(
+                            widget.product.nutriscoreGrade,
+                          )
+                          ? () {
+                              final category = _formatCategory(
+                                widget.product.nutriscoreNotApplicableCategory,
+                              );
+                              return category.isNotEmpty
+                                  ? l10n.nutriscoreNotApplicable(category)
+                                  : l10n.nutriscoreNotApplicableGeneric;
+                            }()
+                          : l10n.nutriscoreExplanation,
                       child: Icon(
                         Icons.help_outline,
                         size: 16,
@@ -256,6 +268,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       onDelete: () => _deleteItem(item),
       onQuantityChanged: (newQty) => _updateQuantity(item, newQty),
     );
+  }
+
+  /// Formats an API-style category tag for human display.
+  ///
+  /// Strips the language prefix (e.g. `en:`) and replaces hyphens with
+  /// spaces so that `'en:food-additives'` becomes `'food additives'`.
+  static String _formatCategory(String? tag) {
+    if (tag == null || tag.isEmpty) return '';
+    final withoutPrefix = tag.contains(':') ? tag.split(':').last : tag;
+    return withoutPrefix.replaceAll('-', ' ');
   }
 
   /// Builds a simple label‑value row used for non‑nutrition product information

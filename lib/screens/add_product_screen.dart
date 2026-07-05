@@ -26,7 +26,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
   late final ImagePicker _imagePicker;
 
-
   late String _name;
   String _brand = '';
   String _category = '';
@@ -98,9 +97,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               TextFormField(
                 decoration: InputDecoration(labelText: l10n.productNameLabel),
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty)
-                        ? l10n.requiredField
-                        : null,
+                    (v == null || v.trim().isEmpty) ? l10n.requiredField : null,
                 onSaved: (v) => _name = v!.trim(),
               ),
               TextFormField(
@@ -119,8 +116,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 onSaved: (v) => _servingSize = v ?? '',
               ),
               const SizedBox(height: 16),
-              Text(l10n.nutritionInfo,
-                  style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                l10n.nutritionInfo,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               _nutritionField(l10n.energy, (v) => _energyKcal = v, 'kcal'),
               _nutritionField(l10n.protein, (v) => _proteinG = v, 'g'),
               _nutritionField(l10n.carbs, (v) => _carbsG = v, 'g'),

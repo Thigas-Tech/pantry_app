@@ -47,7 +47,7 @@ This document describes the architecture, patterns, and design decisions.
 
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 2)
+### 2.1 Schema (version 5)
 
 Three tables:
 
@@ -288,3 +288,4 @@ A manual flush button is also available in the settings screen.
 8. **Environment‑based config** — credentials loaded via `flutter_dotenv` from `.env` (never committed). `.env.example` is the documented template. `AppConfig` class provides typed accessors.
 9. **Batch delete with undo** — selection mode replaces the app bar actions and FAB with a delete button and close button. Checkboxes replace card images. Undo restores all deleted items via `SnackbarHelper.showUndo`.
 10. **Quick quantity adjustment** — `+/−` buttons on inventory tiles call `_updateQuantity`, which persists the change and re-schedules notifications. Tap the quantity to type a number directly. Decrementing to 0 triggers delete.
+11. **Nutri-Score fallback** — when the API returns `nutriscore_grade: "not-applicable"` (e.g. for food additives), the badge renders a grey dash. A tooltip explains the reason using the category from `nutriscore_data.nutriscore_not_applicable_for_category` (e.g. `en:food-additives` → "food additives"). This is stored as `nutriscore_not_applicable_category` on the product and surfaced through the `InventoryWithProduct` join.

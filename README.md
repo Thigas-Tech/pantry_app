@@ -19,7 +19,7 @@ never waste food again.
 - **Undo delete** — restore an accidentally deleted inventory item with a snackbar action
 - **Offline-first** — connectivity detection skips API when offline, warns the user, and uses cached data
 - **Pull-to-refresh** — updates cached product data from Open Food Facts when online
-- **Nutri-Score** — A–E badges on the home screen and product detail, with average per pantry
+- **Nutri-Score** — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products
 - **Manual product entry** — full form with nutrition table and camera capture when a barcode is unknown or you're offline
 
 ## Screenshots

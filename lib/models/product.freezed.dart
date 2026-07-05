@@ -54,10 +54,20 @@ mixin _$Product {
 /// Set automatically in `OpenFoodFactsApi.getByBarcode` and
 /// `OpenFoodFactsApi.submitProduct`.
 @JsonKey(name: 'last_synced') int? get lastSynced;/// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
-/// if the data is unavailable.
+/// if the data is unavailable. May also be `'not-applicable'` when the
+/// Nutri-Score system does not apply to this product category (e.g. food
+/// additives).
 ///
 /// Sourced from `nutriscore_grade` in the Open Food Facts v3 API.
-@JsonKey(name: 'nutriscore_grade') String? get nutriscoreGrade;
+@JsonKey(name: 'nutriscore_grade') String? get nutriscoreGrade;/// The product category that makes Nutri-Score not applicable, if any.
+///
+/// This is present only when [nutriscoreGrade] is `'not-applicable'` and
+/// explains why (e.g. `'en:food-additives'`).
+///
+/// Sourced from `nutriscore_data.nutriscore_not_applicable_for_category`
+/// in the API response. This field is not included in the JSON generated
+/// by `json_serializable` because the value comes from a nested object.
+@JsonKey(includeFromJson: false, includeToJson: false) String? get nutriscoreNotApplicableCategory;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -70,16 +80,16 @@ $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,barcode,name,brand,imageUrl,category,ingredients,servingSize,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade);
+int get hashCode => Object.hash(runtimeType,barcode,name,brand,imageUrl,category,ingredients,servingSize,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory);
 
 @override
 String toString() {
-  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, category: $category, ingredients: $ingredients, servingSize: $servingSize, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade)';
+  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, category: $category, ingredients: $ingredients, servingSize: $servingSize, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade, nutriscoreNotApplicableCategory: $nutriscoreNotApplicableCategory)';
 }
 
 
@@ -90,7 +100,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced,@JsonKey(name: 'nutriscore_grade') String? nutriscoreGrade
+@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced,@JsonKey(name: 'nutriscore_grade') String? nutriscoreGrade,@JsonKey(includeFromJson: false, includeToJson: false) String? nutriscoreNotApplicableCategory
 });
 
 
@@ -107,7 +117,7 @@ class _$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,Object? nutriscoreNotApplicableCategory = freezed,}) {
   return _then(_self.copyWith(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -124,6 +134,7 @@ as double?,fiberG: freezed == fiberG ? _self.fiberG : fiberG // ignore: cast_nul
 as double?,saltG: freezed == saltG ? _self.saltG : saltG // ignore: cast_nullable_to_non_nullable
 as double?,lastSynced: freezed == lastSynced ? _self.lastSynced : lastSynced // ignore: cast_nullable_to_non_nullable
 as int?,nutriscoreGrade: freezed == nutriscoreGrade ? _self.nutriscoreGrade : nutriscoreGrade // ignore: cast_nullable_to_non_nullable
+as String?,nutriscoreNotApplicableCategory: freezed == nutriscoreNotApplicableCategory ? _self.nutriscoreNotApplicableCategory : nutriscoreNotApplicableCategory // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -209,10 +220,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutriscoreNotApplicableCategory)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade);case _:
+return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory);case _:
   return orElse();
 
 }
@@ -230,10 +241,10 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.catego
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutriscoreNotApplicableCategory)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
-return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade);case _:
+return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -250,10 +261,10 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.catego
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutriscoreNotApplicableCategory)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade);case _:
+return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory);case _:
   return null;
 
 }
@@ -265,7 +276,7 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.catego
 @JsonSerializable()
 
 class _Product implements Product {
-  const _Product({@JsonKey(name: '_id') required this.barcode, @JsonKey(name: 'product_name') required this.name, @JsonKey(name: 'brands') this.brand, @JsonKey(name: 'image_url') this.imageUrl, @JsonKey(name: 'category') this.category, @JsonKey(name: 'ingredients_text') this.ingredients, @JsonKey(name: 'serving_size') this.servingSize, @JsonKey(name: 'energy_kcal') this.energyKcal, @JsonKey(name: 'protein_g') this.proteinG, @JsonKey(name: 'carbs_g') this.carbsG, @JsonKey(name: 'fat_g') this.fatG, @JsonKey(name: 'fiber_g') this.fiberG, @JsonKey(name: 'salt_g') this.saltG, @JsonKey(name: 'last_synced') this.lastSynced, @JsonKey(name: 'nutriscore_grade') this.nutriscoreGrade});
+  const _Product({@JsonKey(name: '_id') required this.barcode, @JsonKey(name: 'product_name') required this.name, @JsonKey(name: 'brands') this.brand, @JsonKey(name: 'image_url') this.imageUrl, @JsonKey(name: 'category') this.category, @JsonKey(name: 'ingredients_text') this.ingredients, @JsonKey(name: 'serving_size') this.servingSize, @JsonKey(name: 'energy_kcal') this.energyKcal, @JsonKey(name: 'protein_g') this.proteinG, @JsonKey(name: 'carbs_g') this.carbsG, @JsonKey(name: 'fat_g') this.fatG, @JsonKey(name: 'fiber_g') this.fiberG, @JsonKey(name: 'salt_g') this.saltG, @JsonKey(name: 'last_synced') this.lastSynced, @JsonKey(name: 'nutriscore_grade') this.nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false) this.nutriscoreNotApplicableCategory});
   factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
 
 /// The barcode (EAN‑13, UPC, etc.) that uniquely identifies the product.
@@ -321,10 +332,21 @@ class _Product implements Product {
 /// `OpenFoodFactsApi.submitProduct`.
 @override@JsonKey(name: 'last_synced') final  int? lastSynced;
 /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
-/// if the data is unavailable.
+/// if the data is unavailable. May also be `'not-applicable'` when the
+/// Nutri-Score system does not apply to this product category (e.g. food
+/// additives).
 ///
 /// Sourced from `nutriscore_grade` in the Open Food Facts v3 API.
 @override@JsonKey(name: 'nutriscore_grade') final  String? nutriscoreGrade;
+/// The product category that makes Nutri-Score not applicable, if any.
+///
+/// This is present only when [nutriscoreGrade] is `'not-applicable'` and
+/// explains why (e.g. `'en:food-additives'`).
+///
+/// Sourced from `nutriscore_data.nutriscore_not_applicable_for_category`
+/// in the API response. This field is not included in the JSON generated
+/// by `json_serializable` because the value comes from a nested object.
+@override@JsonKey(includeFromJson: false, includeToJson: false) final  String? nutriscoreNotApplicableCategory;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
@@ -339,16 +361,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,barcode,name,brand,imageUrl,category,ingredients,servingSize,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade);
+int get hashCode => Object.hash(runtimeType,barcode,name,brand,imageUrl,category,ingredients,servingSize,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory);
 
 @override
 String toString() {
-  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, category: $category, ingredients: $ingredients, servingSize: $servingSize, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade)';
+  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, category: $category, ingredients: $ingredients, servingSize: $servingSize, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade, nutriscoreNotApplicableCategory: $nutriscoreNotApplicableCategory)';
 }
 
 
@@ -359,7 +381,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced,@JsonKey(name: 'nutriscore_grade') String? nutriscoreGrade
+@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced,@JsonKey(name: 'nutriscore_grade') String? nutriscoreGrade,@JsonKey(includeFromJson: false, includeToJson: false) String? nutriscoreNotApplicableCategory
 });
 
 
@@ -376,7 +398,7 @@ class __$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,Object? nutriscoreNotApplicableCategory = freezed,}) {
   return _then(_Product(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -393,6 +415,7 @@ as double?,fiberG: freezed == fiberG ? _self.fiberG : fiberG // ignore: cast_nul
 as double?,saltG: freezed == saltG ? _self.saltG : saltG // ignore: cast_nullable_to_non_nullable
 as double?,lastSynced: freezed == lastSynced ? _self.lastSynced : lastSynced // ignore: cast_nullable_to_non_nullable
 as int?,nutriscoreGrade: freezed == nutriscoreGrade ? _self.nutriscoreGrade : nutriscoreGrade // ignore: cast_nullable_to_non_nullable
+as String?,nutriscoreNotApplicableCategory: freezed == nutriscoreNotApplicableCategory ? _self.nutriscoreNotApplicableCategory : nutriscoreNotApplicableCategory // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

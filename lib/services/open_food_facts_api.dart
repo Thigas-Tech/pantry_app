@@ -83,6 +83,7 @@ class OpenFoodFactsApi {
 
   Product _parseProduct(Map<String, dynamic> json) {
     final nutriments = json['nutriments'] as Map<String, dynamic>? ?? {};
+    final nutriscoreData = json['nutriscore_data'] as Map<String, dynamic>?;
 
     return Product(
       barcode: json['_id'] as String? ?? '',
@@ -100,6 +101,8 @@ class OpenFoodFactsApi {
       saltG: _parseDouble(nutriments['salt_100g']),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
       nutriscoreGrade: json['nutriscore_grade'] as String?,
+      nutriscoreNotApplicableCategory:
+          nutriscoreData?['nutriscore_not_applicable_for_category'] as String?,
     );
   }
 

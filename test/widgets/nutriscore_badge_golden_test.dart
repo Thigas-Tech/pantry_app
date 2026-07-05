@@ -39,5 +39,24 @@ void main() {
         matchesGoldenFile('goldens/nutriscore_null.png'),
       );
     });
+
+    testWidgets('not-applicable grade renders dashed grey badge', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: NutriScoreBadge(grade: 'not-applicable'),
+            ),
+          ),
+        ),
+      );
+      await expectLater(
+        find.byType(NutriScoreBadge),
+        matchesGoldenFile('goldens/nutriscore_not_applicable.png'),
+      );
+    });
   });
 }

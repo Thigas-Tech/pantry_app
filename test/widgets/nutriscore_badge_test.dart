@@ -32,6 +32,26 @@ void main() {
       expect(find.byType(Container), findsNothing);
     });
 
+    testWidgets('renders dashed badge for not-applicable', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: NutriScoreBadge(grade: 'not-applicable'),
+        ),
+      );
+      expect(find.text('—'), findsOneWidget);
+    });
+
+    testWidgets('renders dashed badge for NOT-APPLICABLE casing', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: NutriScoreBadge(grade: 'NOT-APPLICABLE'),
+        ),
+      );
+      expect(find.text('—'), findsOneWidget);
+    });
+
     testWidgets('renders badge for uppercase grade', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: NutriScoreBadge(grade: 'C')),
@@ -47,6 +67,15 @@ void main() {
       expect(NutriScoreBadge.toNumeric('e'), 1);
       expect(NutriScoreBadge.toNumeric(null), null);
       expect(NutriScoreBadge.toNumeric('x'), null);
+      expect(NutriScoreBadge.toNumeric('not-applicable'), null);
+    });
+
+    test('isNotApplicable returns correct values', () {
+      expect(NutriScoreBadge.isNotApplicable('not-applicable'), true);
+      expect(NutriScoreBadge.isNotApplicable('NOT-APPLICABLE'), true);
+      expect(NutriScoreBadge.isNotApplicable('a'), false);
+      expect(NutriScoreBadge.isNotApplicable(null), false);
+      expect(NutriScoreBadge.isNotApplicable(''), false);
     });
   });
 
@@ -89,6 +118,18 @@ void main() {
       );
       final node = tester.getSemantics(find.byType(NutriScoreBadge));
       expect(node.label, '');
+    });
+
+    testWidgets('has semantics label for not-applicable grade', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: NutriScoreBadge(grade: 'not-applicable'),
+        ),
+      );
+      final node = tester.getSemantics(find.byType(NutriScoreBadge));
+      expect(node.label, contains('not applicable'));
     });
   });
 }
