@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -253,6 +254,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       item: item,
       onEdit: () => _openAddEditScreen(existing: item),
       onDelete: () => _deleteItem(item),
+      onQuantityChanged: (newQty) => _updateQuantity(item, newQty),
     );
   }
 
@@ -345,6 +347,38 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         if (mounted) {
           SnackbarHelper.showError(context, l10n.saveFailed);
         }
+      }
+    }
+  }
+
+  /// Updates the quantity of [item] to [newQuantity], stores it, and
+  /// re-schedules expiry reminders.
+  Future<void> _updateQuantity(
+    InventoryItem item,
+    double newQuantity,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final repo = ref.read(productRepositoryProvider);
+    final notificationService = ref.read(notificationServiceProvider);
+    final updated = item.copyWith(quantity: newQuantity);
+    try {
+      await repo.updateInventoryItem(updated);
+      await notificationService.scheduleExpiryReminders(
+        updated,
+        expiringSoonTitle: l10n.expiringSoon,
+        expiringSoonBody: l10n.expiresTomorrow(updated.barcode),
+        expiringTodayTitle: l10n.expiringToday,
+        expiringTodayBody: l10n.expiresToday(updated.barcode),
+        channelName: l10n.expiryChannelName,
+        channelDescription: l10n.expiryChannelDescription,
+      );
+      logInfo('Quantity updated: ${item.barcode} — $newQuantity');
+      setState(() => _inventoryVersion++);
+      ref.invalidate(inventoryWithProductProvider);
+    } on Exception catch (e) {
+      logError('Failed to update quantity: $e');
+      if (mounted) {
+        SnackbarHelper.showError(context, l10n.saveFailed);
       }
     }
   }
@@ -445,6 +479,7 @@ class _InventoryTile extends StatelessWidget {
     required this.item,
     required this.onEdit,
     required this.onDelete,
+    required this.onQuantityChanged,
   });
 
   /// The inventory item to display.
@@ -456,6 +491,9 @@ class _InventoryTile extends StatelessWidget {
   /// Called when the user taps the delete button.
   final VoidCallback onDelete;
 
+  /// Called when the user adjusts the quantity.
+  final ValueChanged<double> onQuantityChanged;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -465,10 +503,39 @@ class _InventoryTile extends StatelessWidget {
         _iconForLocation(item.location),
         color: itemIsExpired ? Colors.red : Colors.orange,
       ),
-      title: Text(
-        '${item.quantity} ${item.unit} ${l10n.inLocation} ${item.location}',
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline, size: 20),
+            onPressed: () {
+              final newQty = item.quantity - 1;
+              if (newQty <= 0) {
+                onDelete();
+              } else {
+                onQuantityChanged(newQty);
+              }
+            },
+          ),
+          GestureDetector(
+            onTap: () => _showQuantityDialog(context),
+            child: Text(
+              '${item.quantity} ${item.unit}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline, size: 20),
+            onPressed: () => onQuantityChanged(item.quantity + 1),
+          ),
+        ],
       ),
-      subtitle: Text(item.expiryDate ?? l10n.noExpiry),
+      subtitle: (() {
+        final expirySuffix = item.expiryDate != null
+            ? '  ·  $l10n.expiryPrefix: ${item.expiryDate}'
+            : '';
+        return Text('${item.location}$expirySuffix');
+      })(),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -476,6 +543,50 @@ class _InventoryTile extends StatelessWidget {
           IconButton(icon: const Icon(Icons.delete), onPressed: onDelete),
         ],
       ),
+    );
+  }
+
+  void _showQuantityDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(
+      text: item.quantity.toString(),
+    );
+    final future = showDialog<double>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.quantityLabel),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = double.tryParse(controller.text.trim());
+              if (value != null) {
+                Navigator.pop(ctx, value);
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+    unawaited(
+      future.then((value) {
+        if (value != null) {
+          if (value <= 0) {
+            onDelete();
+          } else {
+            onQuantityChanged(value);
+          }
+        }
+      }),
     );
   }
 
