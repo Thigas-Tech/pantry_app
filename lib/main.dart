@@ -1,14 +1,11 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -16,7 +13,6 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,10 +22,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// 1. Flutter binding.
 /// 2. Environment variables loaded via `flutter_dotenv`.
 /// 3. App version check — clears stale caches when the app was updated.
-/// 4. Connectivity check; if online, refresh cached product data.
-/// 5. Notification permission request and initialization.
-/// 6. Database cleanup (after first frame).
-/// 7. App launched inside `ProviderScope`.
+/// 4. Notification permission request and initialization.
+/// 5. Database cleanup (after first frame).
+/// 6. App launched inside `ProviderScope`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -37,14 +32,6 @@ Future<void> main() async {
   logInfo('Environment loaded');
 
   await _handleAppUpdate();
-
-  final isOnline = await InternetConnectionChecker.instance.hasConnection;
-  if (isOnline) {
-    logInfo('Connected — refreshing cached products');
-    unawaited(_refreshCachedProducts());
-  } else {
-    logInfo('Offline — skipping cached product refresh');
-  }
 
   runApp(const ProviderScope(child: PantryApp()));
   logInfo('App started');
@@ -85,36 +72,6 @@ Future<void> _handleAppUpdate() async {
     logInfo('Caches flushed for app update');
   } on Exception catch (e) {
     logError('App update handling failed: $e');
-  }
-}
-
-Future<void> _refreshCachedProducts() async {
-  logInfo('Starting cached product refresh');
-  try {
-    final dbHelper = DatabaseHelper();
-    final products = await dbHelper.getCachedProducts();
-    if (products.isEmpty) {
-      logInfo('No cached products to refresh');
-      return;
-    }
-    logInfo('Refreshing ${products.length} cached products');
-    final api = OpenFoodFactsApi(
-      Dio(),
-      userId: AppConfig.offUserId,
-      password: AppConfig.offPassword,
-      contactEmail: AppConfig.contactEmail,
-    );
-    for (final product in products) {
-      try {
-        final updated = await api.getByBarcode(product.barcode);
-        await dbHelper.insertProduct(updated);
-      } on Exception {
-        // Skip individual failures; continue with next product.
-      }
-    }
-    logInfo('Cached product refresh completed');
-  } on Exception catch (e) {
-    logError('Cached product refresh failed: $e');
   }
 }
 

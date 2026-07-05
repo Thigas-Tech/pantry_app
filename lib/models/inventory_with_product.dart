@@ -6,10 +6,12 @@ import 'package:pantry_app/models/product.dart';
 /// [Product] metadata and inventory details.
 ///
 /// This class is **not** persisted directly. Instead, it is built on the fly
-/// by [DatabaseHelper.getInventoryWithProduct] using a SQL `INNER JOIN`
-/// between the `inventory`, `products`, and `inventories` tables. It provides
-/// all the data needed by the home screen to display a single inventory card,
-/// avoiding the need for multiple separate queries.
+/// by [DatabaseHelper.getInventoryWithProduct] using a `LEFT JOIN` on
+/// `products` and an `INNER JOIN` on `inventories`. The `LEFT JOIN` ensures
+/// inventory items remain visible even after a cache flush deletes their
+/// product records. It provides all the data needed by the home screen to
+/// display a single inventory card, avoiding the need for multiple separate
+/// queries.
 ///
 /// ## Fields
 ///
@@ -58,8 +60,9 @@ class InventoryWithProduct {
 
     /// The product name from the `products` table.
     ///
-    /// May be `null` if the join somehow fails – though with an `INNER JOIN`
-    /// this should not happen in practice.
+    /// May be `null` if the product record was deleted (e.g. after a cache
+    /// flush) — the `LEFT JOIN` in the query still returns the inventory row
+    /// with `NULL` product columns.
     this.productName,
 
     /// A URL to the product’s front image from Open Food Facts.
