@@ -46,7 +46,8 @@ flutter build appbundle            # release AAB
 3. **Update generated code** — after changing models (freezed) or ARB files (l10n), run `dart run build_runner build --delete-conflicting-outputs` AND `flutter gen-l10n`.
 4. **Localize** — all user-visible strings go in `lib/l10n/app_en.arb`. Never hardcode English strings in widgets or services (except in doc comments).
 5. **Run the full suite** — before committing: `flutter analyze && flutter test --concurrency=8`. Zero issues, all tests passing.
-6. **Update documentation** — after making changes, update `README.md`, `ARCHITECTURE.md`, and/or `AGENTS.md` to reflect new features, structure changes, or updated commands. Always generate fresh API docs with `dart doc .`.
+6. **Update documentation** — after making changes, update `CHANGELOG.md`, `README.md`, `ARCHITECTURE.md`, and/or `AGENTS.md` to reflect new features, structure changes, or updated commands. Always generate fresh API docs with `dart doc .`.
+7. **Update CHANGELOG.md** — after every feature addition, bugfix, or significant change, add an entry under `[Unreleased]` grouped by category. Keep entries concise and user-facing. This is the canonical record of what ships in each release.
 
 ### Code style
 - 80-character line limit (enforced by lint)
