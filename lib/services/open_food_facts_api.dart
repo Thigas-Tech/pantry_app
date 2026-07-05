@@ -1,16 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/product_api_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// Open Food Facts API client.
 ///
-/// Implements [ProductApiService] to fetch product data by barcode from
-/// the Open Food Facts database (v3 API). It supports both the production
-/// server (`world.openfoodfacts.org`) and the staging server
-/// (`world.openfoodfacts.net`) for testing.
-class OpenFoodFactsApi implements ProductApiService {
+/// Fetches product data by barcode from the Open Food Facts database (v3
+/// API). It supports both the production server (`world.openfoodfacts.org`)
+/// and the staging server (`world.openfoodfacts.net`) for testing.
+class OpenFoodFactsApi {
   /// Creates an [OpenFoodFactsApi] client.
   OpenFoodFactsApi(
     this._dio, {
@@ -50,10 +48,9 @@ class OpenFoodFactsApi implements ProductApiService {
   /// Constructs the `User-Agent` header as required by Open Food Facts.
   String get _userAgent => '$appName/$appVersion ($contactEmail)';
 
-  @override
-  Future<void> close() async {}
-
-  @override
+  /// Fetches a product from Open Food Facts by its [barcode].
+  ///
+  /// Throws [ProductNotFoundException] if the barcode is unknown.
   Future<Product> getByBarcode(String barcode) async {
     final url = '$_baseUrl/api/v3/product/$barcode.json';
     logInfo('GET $url');

@@ -12,6 +12,7 @@ import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
+import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
@@ -171,10 +172,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       child: Icon(
                         Icons.help_outline,
                         size: 16,
-                        color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -395,11 +395,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     await notificationService.scheduleExpiryReminders(
                       restoredItem,
                       expiringSoonTitle: l10n.expiringSoon,
-                      expiringSoonBody:
-                          l10n.expiresTomorrow(restoredItem.barcode),
+                      expiringSoonBody: l10n.expiresTomorrow(
+                        restoredItem.barcode,
+                      ),
                       expiringTodayTitle: l10n.expiringToday,
-                      expiringTodayBody:
-                          l10n.expiresToday(restoredItem.barcode),
+                      expiringTodayBody: l10n.expiresToday(
+                        restoredItem.barcode,
+                      ),
                       channelName: l10n.expiryChannelName,
                       channelDescription: l10n.expiryChannelDescription,
                     );
@@ -457,13 +459,11 @@ class _InventoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isExpired =
-        item.expiryDate != null &&
-        DateTime.tryParse(item.expiryDate!)?.isBefore(DateTime.now()) == true;
+    final itemIsExpired = isExpired(item.expiryDate);
     return ListTile(
       leading: Icon(
         _iconForLocation(item.location),
-        color: isExpired ? Colors.red : Colors.orange,
+        color: itemIsExpired ? Colors.red : Colors.orange,
       ),
       title: Text(
         '${item.quantity} ${item.unit} ${l10n.inLocation} ${item.location}',

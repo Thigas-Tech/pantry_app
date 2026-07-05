@@ -22,6 +22,7 @@ import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/open_food_facts_api.dart';
+import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
@@ -445,14 +446,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
 
   List<InventoryWithProduct> get _expired {
     if (_cacheValid && _cachedExpired != null) return _cachedExpired!;
-    final today = DateTime.now();
-    final todayStart = DateTime(today.year, today.month, today.day);
-    _cachedExpired = _filtered.where((i) {
-      if (i.expiryDate == null) return false;
-      final date = DateTime.tryParse(i.expiryDate!);
-      if (date == null) return false;
-      return date.isBefore(todayStart);
-    }).toList();
+    _cachedExpired = _filtered.where((i) => isExpired(i.expiryDate)).toList();
     return _cachedExpired!;
   }
 
@@ -460,27 +454,21 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     if (_cacheValid && _cachedExpiringSoon != null) {
       return _cachedExpiringSoon!;
     }
-    final today = DateTime.now();
-    final todayStart = DateTime(today.year, today.month, today.day);
-    final threshold = todayStart.add(Duration(days: widget.expiringSoonDays));
-    _cachedExpiringSoon = _filtered.where((i) {
-      if (i.expiryDate == null) return false;
-      final date = DateTime.tryParse(i.expiryDate!);
-      if (date == null) return false;
-      return !date.isBefore(todayStart) && date.isBefore(threshold);
-    }).toList();
+    _cachedExpiringSoon = _filtered
+        .where((i) => isExpiringSoon(i.expiryDate, widget.expiringSoonDays))
+        .toList();
     return _cachedExpiringSoon!;
   }
 
   List<InventoryWithProduct> get _good {
     if (_cacheValid && _cachedGood != null) return _cachedGood!;
-    final today = DateTime.now();
-    final todayStart = DateTime(today.year, today.month, today.day);
-    final threshold = todayStart.add(Duration(days: widget.expiringSoonDays));
     _cachedGood = _filtered.where((i) {
       if (i.expiryDate == null) return true;
-      final date = DateTime.tryParse(i.expiryDate!);
+      final date = parseExpiryDate(i.expiryDate);
       if (date == null) return true;
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final threshold = todayStart.add(Duration(days: widget.expiringSoonDays));
       return !date.isBefore(threshold);
     }).toList();
     return _cachedGood!;

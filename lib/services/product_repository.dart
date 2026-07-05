@@ -2,13 +2,13 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/product_api_service.dart';
+import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// The central data access point that implements the offline‑first pattern.
 ///
 /// [ProductRepository] coordinates between the local SQLite cache
-/// ([DatabaseHelper]) and the remote API ([ProductApiService]).
+/// ([DatabaseHelper]) and the remote API (`OpenFoodFactsApi`).
 ///
 /// ## Offline‑first strategy
 ///
@@ -29,18 +29,17 @@ import 'package:pantry_app/utils/logger.dart';
 ///
 /// ## Fallback API
 ///
-/// The constructor accepts an optional fallback [ProductApiService]. This is
+/// The constructor accepts an optional fallback `OpenFoodFactsApi`. This is
 /// currently unused but could be re‑enabled in the future if a second API
 /// is desired.
 class ProductRepository {
   /// Creates a [ProductRepository] with the given [DatabaseHelper] and
-  /// primary [ProductApiService]. An optional fallback API can be
-  /// provided for future use.
+  /// primary API. An optional fallback API can be provided for future use.
   ProductRepository(this._db, this._api, {this._fallbackApi});
 
   final DatabaseHelper _db;
-  final ProductApiService _api;
-  final ProductApiService? _fallbackApi;
+  final OpenFoodFactsApi _api;
+  final OpenFoodFactsApi? _fallbackApi;
 
   /// Returns a [Product] for the given [barcode], either from cache or from
   /// the remote API.

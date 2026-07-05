@@ -18,11 +18,11 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 
 ## Code Health (low/medium effort)
 
-- [ ] **Extract expiry-date parsing** — duplicated in `home_screen.dart`, `product_detail_screen.dart`, `inventory_card.dart`. Extract to a shared utility `DateTime? parseExpiry(String?)`.
+- [x] **Extract expiry-date parsing** — duplicated in `home_screen.dart`, `product_detail_screen.dart`, `inventory_card.dart`. Extracted to `utils/date_helpers.dart`: `parseExpiryDate()`, `isExpired()`, `isExpiringSoon()`.
 - [ ] **Deduplicate custom picker dialogs** — `_pickCustomUnit` and `_pickCustomLocation` in `add_to_inventory_screen.dart` are structurally identical; parameterise.
 - [ ] **Deduplicate settings dialogs** — `_showRetentionDialog` and `_showExpiringSoonDialog` share structure; extract a builder.
-- [ ] **Screenshots section** — add actual PNGs to `README.md` or remove the placeholder table.
-- [ ] **Remove unused `product_api_service.dart`** or add a stub test for `close()`.
+- [x] **Screenshots section** — removed placeholder table; added single‑line placeholder.
+- [x] **Remove unused `product_api_service.dart`** — removed; `ProductRepository` now uses `OpenFoodFactsApi` directly. `close()` method removed from `OpenFoodFactsApi`.
 - [ ] **Golden tests for `NutriScoreBadge`** — verify A–E colours render correctly via `matchesGoldenFile`.
 - [ ] **Accessibility audit** — add Semantics traversal tests for inventory cards, badges, dialogs.
 

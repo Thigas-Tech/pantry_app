@@ -1,32 +1,26 @@
-// tests tend to get to long
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/product_api_service.dart';
+import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/services/product_repository.dart';
 
-/// Mocks for [DatabaseHelper] and [ProductApiService].
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-class MockProductApiService extends Mock implements ProductApiService {}
+class MockOpenFoodFactsApi extends Mock implements OpenFoodFactsApi {}
 
-/// Tests for [ProductRepository] – offline‑first product retrieval,
-/// inventory item delegation, and inventory (pantry) management.
 void main() {
   late ProductRepository repository;
   late MockDatabaseHelper mockDb;
-  late MockProductApiService mockApi;
-  late MockProductApiService fallbackApi;
+  late MockOpenFoodFactsApi mockApi;
+  late MockOpenFoodFactsApi fallbackApi;
 
   setUp(() {
     mockDb = MockDatabaseHelper();
-    mockApi = MockProductApiService();
-    fallbackApi = MockProductApiService();
+    mockApi = MockOpenFoodFactsApi();
+    fallbackApi = MockOpenFoodFactsApi();
     repository = ProductRepository(mockDb, mockApi, fallbackApi: fallbackApi);
   });
 
@@ -65,7 +59,8 @@ void main() {
     });
 
     test(
-      'throws ProductNotFoundException when API returns not found (no fallback)',
+      'throws ProductNotFoundException when API returns not found '
+      '(no fallback)',
       () {
         /// Without a fallback API, a not‑found error is rethrown directly.
         final repoNoFallback = ProductRepository(mockDb, mockApi);

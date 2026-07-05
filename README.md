@@ -24,9 +24,7 @@ never waste food again.
 
 ## Screenshots
 
-| Home | Scanner | Product Detail | Settings |
-|------|---------|---------------|----------|
-| Grouped by expiry, pull-to-refresh, search, inventory switcher | Animated overlay, manual entry, exit confirmation | Hero image, nutrition, ingredients, add to inventory | Theme, notifications, retention, expiring-soon threshold |
+Add screenshots here: Home, Scanner, Product Detail, Settings.
 
 ## Getting started
 

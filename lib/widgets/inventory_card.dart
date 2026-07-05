@@ -8,6 +8,7 @@ import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 
@@ -50,11 +51,8 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isExpired = widget.item.expiryDate != null &&
-        DateTime.tryParse(widget.item.expiryDate!)
-                ?.isBefore(DateTime.now()) ==
-            true;
-    final expiryLabel = isExpired ? l10n.expired : l10n.good;
+    final itemIsExpired = isExpired(widget.item.expiryDate);
+    final expiryLabel = itemIsExpired ? l10n.expired : l10n.good;
 
     return Card(
       elevation: 2,
@@ -74,7 +72,7 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                 child: _buildLeadingImage(),
               ),
         title: Text(widget.item.productName ?? widget.item.barcode),
-          subtitle: _buildSubtitle(l10n),
+        subtitle: _buildSubtitle(l10n),
         trailing: Semantics(
           label: expiryLabel,
           child: Row(
@@ -84,19 +82,18 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                 grade: widget.item.nutriscoreGrade,
                 size: 24,
               ),
-              if (widget.item.nutriscoreGrade != null)
-                const SizedBox(width: 6),
+              if (widget.item.nutriscoreGrade != null) const SizedBox(width: 6),
               Text(
                 expiryLabel,
                 style: TextStyle(
                   fontSize: 11,
-                  color: isExpired ? Colors.red : Colors.grey.shade500,
+                  color: itemIsExpired ? Colors.red : Colors.grey.shade500,
                 ),
               ),
               const SizedBox(width: 4),
               Icon(
                 Icons.circle,
-                color: isExpired ? Colors.red : Colors.grey.shade300,
+                color: itemIsExpired ? Colors.red : Colors.grey.shade300,
                 size: 12,
               ),
             ],
