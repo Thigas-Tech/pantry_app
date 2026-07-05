@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Documentation
+- `ARCHITECTURE.md` section 11: Carbon footprint design decisions (dark mode energy savings, image caching, offline-first, RepaintBoundary strategy, thread strategy, AAB/deferred components, eco-mode pattern, performance measurement).
+- `AGENTS.md` performance & footprint optimization section (build-time/runtime optimizations, expensive raster ops, measuring performance with DevTools/Flashlight/Perfetto, eco-mode pattern, rules of thumb).
+- `TODO.md` footprint optimization roadmap: 20+ new items across Quick Wins, Code Health, Features, Larger Projects, CI/CD, and Documentation sections. Updated Effort x Importance matrix.
+
 ### Enhancements
 - **Long-press to select**: Inventory cards now respond to long-press by entering multi-select mode with haptic feedback (`HapticFeedback.mediumImpact()`). Long-press is suppressed when checkboxes are already visible.
 - **Batch move items between pantries**: New `moveItemsToInventory` method moves selected items to a different pantry via dialog picker. Undo snackbar restores original assignment. "Move" button appears in selection mode app bar when 2+ inventories exist.

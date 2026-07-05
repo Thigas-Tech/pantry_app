@@ -297,3 +297,94 @@ A manual flush button is also available in the settings screen.
 10. **Quick quantity adjustment** — `+/−` buttons on inventory tiles call `_updateQuantity`, which persists the change and re-schedules notifications. Tap the quantity to type a number directly. Decrementing to 0 triggers delete.
 11. **Nutri-Score fallback** — when the API returns `nutriscore_grade: "not-applicable"` (e.g. for food additives), the badge renders a grey dash. A tooltip explains the reason using the category from `nutriscore_data.nutriscore_not_applicable_for_category` (e.g. `en:food-additives` → "food additives"). This is stored as `nutriscore_not_applicable_category` on the product and surfaced through the `InventoryWithProduct` join.
 12. **Source column protects manual products** — every row in the `products` table carries a `source` column (`'api'` for OFF‑fetched data, `'manual'` for user‑entered or CSV‑imported data). Cache flush (`clearCachedProducts`) deletes only API‑sourced products; manual products and all inventory items survive across app updates. The image cache is inherently separated (stores only downloaded OFF CDN images) and safe to clear.
+
+---
+
+## 11. Carbon footprint design decisions
+
+### 11.1 Dark mode (OLED/AMOLED energy savings)
+
+The app supports `ThemeMode.system` (default), `ThemeMode.light`, and
+`ThemeMode.dark` via `ThemeModeNotifier`. On AMOLED displays, dark mode
+consumes up to 60% less power because black pixels are physically turned
+off. A future enhancement will detect AMOLED devices at launch and nudge
+the user toward dark mode with a one-time prompt.
+
+### 11.2 Image caching (WebP)
+
+`ImageCacheService` downloads product images in WebP format from the Open
+Food Facts CDN and stores them in the app's local documents directory. WebP
+is ~30% smaller than JPEG at equivalent quality, reducing network transfer
+and storage footprint. Cached images are served instantly — no network calls
+on subsequent views.
+
+Future enhancement: request images at display resolution (width ×
+`devicePixelRatio`) instead of full-size, reducing memory usage and decode
+time on the UI thread.
+
+### 11.3 Offline-first architecture
+
+`ProductRepository` implements offline-first: always return cached data
+first, fetch from API only on cache miss. This dramatically reduces API
+calls — a product viewed twice generates one network call, not two. The
+background cache refresh is throttled (5+ days overdue, connectivity
+required), and only API‑sourced products are refreshed — user‑entered
+products are never re‑fetched.
+
+### 11.4 RepaintBoundary placement
+
+`RepaintBoundary` should be applied to widget subtrees that:
+- Scroll independently (e.g., items inside `ListView.builder`)
+- Animate repeatedly (e.g., badge transitions, progress indicators)
+- Are embedded in a scrolling parent but have static content
+
+This prevents the entire screen from being repainted when only a small part
+changes, reducing GPU work on the raster thread.
+
+### 11.5 Thread strategy
+
+sqflite already executes SQL on a background isolate internally. The
+following operations are candidates for `Isolate` / `compute()` offloading:
+- Open Food Facts API response parsing (`json.decode` of large payloads)
+- CSV import/export (row-by-row processing, string manipulation)
+- Image encoding (camera capture → WebP conversion in `ImageCacheService`)
+
+`compute()` from `package:flutter/foundation.dart` is preferred over raw
+`Isolate` for fire-and-forget tasks. Use `SendPort` messaging for
+long-running workers.
+
+### 11.6 AAB and deferred components (Android)
+
+The app builds as an Android App Bundle (AAB) for Play Store distribution.
+A future optimization will split into dynamic feature modules so users only
+download the features they actually use:
+- `scanner` — MobileScanner camera integration
+- `search` — Open Food Facts API + Dio
+- `import_export` — CSV parsing, file picker
+
+This reduces the initial install size and download bandwidth, especially
+for users on metered connections.
+
+### 11.7 Eco-mode pattern
+
+A planned `EcoModeNotifier` (mirrors `ThemeModeNotifier`) will let users
+opt into reduced energy consumption. When enabled:
+- Animations are simplified or disabled
+- Network refresh intervals are doubled
+- Non-essential haptic feedback is disabled
+
+Designed to complement Android Battery Saver and iOS Low Power Mode.
+
+### 11.8 Performance measurement
+
+Future CI pipeline additions will integrate:
+- **Flashlight** — automated battery, CPU, GPU profiling on physical devices.
+  Compares before/after reports to catch regressions.
+- **Perfetto** — startup and frame timing traces. Open in `ui.perfetto.dev`
+  or parse with `perfetto` CLI for jank metrics.
+- **Dart DevTools** — manual profiling during development: Performance page
+  (widget rebuilds, oversized images) and CPU Profiler (Flame Chart for
+  UI-thread blocking).
+
+Reference: Flutter Heroes 2025 performance talk by Alexandre Moureaux (BAM)
+— [github.com/bamlab/flashlight](https://github.com/bamlab/flashlight).
