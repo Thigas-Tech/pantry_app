@@ -6,15 +6,15 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 
 ## Quick Wins (low effort, high impact)
 
-- [ ] **Batch delete** — multi-select items via checkboxes, delete all selected. Reuses existing `deleteInventoryItem` + undo snackbar.
+- [x] **Batch delete** — multi-select items via checkboxes, delete all selected. Reuses existing `deleteInventoryItem` + undo snackbar.
 - [x] **Expiry date guard** — date picker already uses `firstDate: DateTime.now()`. Verified correct.
-- [ ] **Quick quantity adjustment** — `+/−` buttons on each inventory tile in `ProductDetailScreen`. Tap quantity to type a number directly (e.g. used 3 of 12 eggs at breakfast). Decrementing to 0 deletes the item with confirmation + undo. Re-schedules notifications on restore.
+- [x] **Quick quantity adjustment** — `+/−` buttons on each inventory tile in `ProductDetailScreen`. Tap quantity to type a number directly. Decrementing to 0 deletes the item with confirmation + undo. Re-schedules notifications on restore.
 - [x] **Coverage: `stats_screen.dart`** (83.6%) — test export + import button flows.
-- [ ] **Coverage: `home_screen.dart`** (64.8%) — test create-pantry dialog, pull-to-refresh.
+- [x] **Coverage: `home_screen.dart`** (72.2%) — test create-pantry dialog, batch delete.
 - [x] **Coverage: `add_product_screen.dart`** (85.3%) — test form validation + save-and-pop.
-- [ ] **Coverage: `add_to_inventory_screen.dart`** (65.8%) — test custom unit/location dialogs.
-- [ ] **Coverage: `inventory_card.dart`** (65.5%) — test tap navigation, image cache miss.
-- [ ] **Coverage: `connectivity_provider.dart`** (33.3%) — stream emission test.
+- [x] **Coverage: `add_to_inventory_screen.dart`** (94.0%) — test custom unit/location dialogs.
+- [x] **Coverage: `inventory_card.dart`** (87.7%) — test tap navigation, image cache miss.
+- [x] **Coverage: `connectivity_provider.dart`** (33.3%) — stream emission test.
 
 ## Code Health (low/medium effort)
 

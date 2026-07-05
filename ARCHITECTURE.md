@@ -255,11 +255,28 @@ for JSON deserialization from the Open Food Facts API.
 | Providers| `ProviderContainer`                  | Test provider wiring and defaults         |
 | Screens  | `pumpApp()` helper + mocks           | Widget tests with Riverpod scope + l10n   |
 | Widgets  | `pumpApp()` helper                   | Visual assertions on cards, error states  |
-| Utils    | Pure Dart                            | Logger output capture, snackbar styling   |
+  | Utils    | Pure Dart                            | Logger output capture, snackbar styling   |
+| Golden  | `matchesGoldenFile`                  | Visual regression for badges, screens     |
 
 ---
 
-## 9. Key design decisions
+## 9. Cache flush on app update
+
+When the app version changes (detected via `package_info_plus` and
+`shared_preferences`), the following caches are cleared:
+
+1. **Image cache** — `ImageCacheService.clearCache()` deletes the
+   entire `image_cache/` directory, forcing re-download of product images.
+2. **Product database** — `DatabaseHelper.clearProducts()` deletes all
+   rows from the `products` table. On next startup, the background refresh
+   in `main()` re-fetches every product from Open Food Facts with current
+   data (including fields added in newer versions, e.g. `nutriscore_grade`).
+
+A manual flush button is also available in the settings screen.
+
+---
+
+## 10. Key design decisions
 
 1. **Singleton DatabaseHelper** — avoids multiple connections and locking issues.
 2. **DAO pattern** — separates schema/migrations from CRUD, making the codebase testable and maintainable.
@@ -269,3 +286,5 @@ for JSON deserialization from the Open Food Facts API.
 6. **No `ignore:` comments** — all lint rules are followed; deprecations are addressed rather than suppressed.
 7. **ANSI-coloured logging** — `logInfo` (blue), `logWarning` (yellow), `logError` (red) for terminal visibility.
 8. **Environment‑based config** — credentials loaded via `flutter_dotenv` from `.env` (never committed). `.env.example` is the documented template. `AppConfig` class provides typed accessors.
+9. **Batch delete with undo** — selection mode replaces the app bar actions and FAB with a delete button and close button. Checkboxes replace card images. Undo restores all deleted items via `SnackbarHelper.showUndo`.
+10. **Quick quantity adjustment** — `+/−` buttons on inventory tiles call `_updateQuantity`, which persists the change and re-schedules notifications. Tap the quantity to type a number directly. Decrementing to 0 triggers delete.
