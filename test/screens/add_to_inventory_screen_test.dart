@@ -125,6 +125,68 @@ void main() {
 
       expect(find.byType(AddToInventoryScreen), findsNothing);
     });
+
+    testWidgets('custom unit dialog opens and allows save', (tester) async {
+      await pumpApp(
+        tester,
+        const AddToInventoryScreen(barcode: '123', inventoryId: 1),
+      );
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('...'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enter custom unit'), findsOneWidget);
+
+      final dialogField = find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      );
+      await tester.enterText(dialogField, 'boxes');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // Dialog closed, custom value stored internally.  Saving should work.
+      await tester.tap(
+        find.widgetWithText(ElevatedButton, 'Add to Pantry'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddToInventoryScreen), findsNothing);
+    });
+
+    testWidgets('custom location dialog opens and allows save', (tester) async {
+      await pumpApp(
+        tester,
+        const AddToInventoryScreen(barcode: '123', inventoryId: 1),
+      );
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>).last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('...'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enter custom location'), findsOneWidget);
+
+      final dialogField = find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(TextField),
+      );
+      await tester.enterText(dialogField, 'garage');
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // Dialog closed, custom value stored internally.  Saving should work.
+      await tester.tap(
+        find.widgetWithText(ElevatedButton, 'Add to Pantry'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddToInventoryScreen), findsNothing);
+    });
   });
 
   group('AddToInventoryScreen edit mode', () {
