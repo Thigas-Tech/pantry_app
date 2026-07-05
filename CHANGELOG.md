@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Bugfixes
+- **SearchScreen `setState` after dispose**: Added `mounted` checks and request‑ID stale-guard before every `setState` in `_search()`. The `_requestId` counter ensures stale results from a previous query are silently discarded when the user types faster than the 300 ms debounce.
+- **SearchScreen API spam**: OFF API calls are now skipped for 1‑character queries (minimum 2 chars). Inflight requests are not cancelled at the HTTP level but their results are ignored when superseded by a newer query.
+- **Short barcode crash**: `product.barcode.substring(0, 3)` in the search result `CircleAvatar` now guards against barcodes shorter than 3 characters (pads with `'0'`).
+- **OFF taxonomy codes in category filter**: `_displayCategory()` strips the `en:` prefix from OFF taxonomy codes and formats the remainder as human‑readable text (e.g. `en:spreads` → `Spreads`).
+- **Double background refresh on startup**: `_scheduleCacheRefresh` in `main.dart` now calls `setLastRefreshTime()` *before* firing background refreshes, so `HomeScreen._refreshIfOverdue` finds a non‑overdue cache and skips.
+- **Search field keyboard type**: Added `textInputAction: TextInputAction.search` to the `SearchScreen` TextField.
 - **Critical**: Cache flush no longer deletes manually-entered products. Added `source` column to `products` table (`'api'` vs `'manual'`) so `clearCachedProducts()` only removes API-fetched data. Inventory items and user-entered products are preserved across app updates and manual flushes.
 - Image cache verified isolated — only stores downloaded OFF CDN images, never local/manual photos.
 
@@ -99,10 +105,37 @@
 - **5‑day automatic refresh**: On app start, if cached products haven't been refreshed in 5+ days, a background refresh is automatically scheduled for every inventory. The last‑refresh timestamp is persisted via `SharedPreferences`.
 - **Empty‑string guards in mergeFromApi**: API responses with `""` for optional string fields (e.g. `nutriscore_grade`) are now treated like `null`, preventing incomplete responses from destroying cached data.
 
+### NavigationBar
+- Replaced hardcoded stats/settings buttons with a proper `NavigationBar` (Home, Search, Stats, Settings) via `PantryShell`
+- Uses `IndexedStack` to preserve screen state across tab switches
+- `main.dart` updated to render `PantryShell` instead of `HomeScreen` directly
+
+### Product name search
+- New `SearchScreen` tab with debounced `TextField` (300ms)
+- Queries local DB first (LIKE on name + barcode), then Open Food Facts API
+- Results deduplicated by barcode; API results tagged with `cloud_outlined` icon
+- Tapping a result navigates to `ProductDetailScreen`
+- States: idle (search icon + hint), loading (spinner), empty (search_off icon), results list
+- API errors silently logged (best-effort, never shown to user)
+
+### Stock count badges
+- Horizontal badge row on `HomeScreen` above the search field: total items, expiring soon, added this week
+- Colour-coded icons (primary, orange, tertiary) for quick visual scanning
+
+### Category filter chips
+- `FilterChip` row shown when 2+ unique product categories exist in the current inventory
+- "All" chip resets the filter; individual category chips filter items in all sections
+- Category data sourced from `InventoryWithProduct.productCategory` (aliased `products.category` in the LEFT JOIN)
+
+### Localization
+- 9 new ARB strings: nav labels (Home, Search, Stats, Settings), search screen text, stock count formatting, filter labels (`navHome`, `navSearch`, `navStats`, `navSettings`, `searchTitle`, `searchProductsHint`, `noSearchResults`, `totalItemsCount`, `expiringSoonCount`, `addedThisWeek`, `filterAll`)
+
 ### Testing
 - Added `mergeFromApi` unit tests in `product_test.dart` (5 test cases: non-null overwrites, null preserves, name sentinel, local-field safety, full-nutrition update)
 - Added flush cache integration test suite in `flush_cache_test.dart` (LEFT JOIN regression guard, manual product preservation, export data survive flush, re-fetch restoration)
-- 277 tests total, 0 analyze issues
+- Added `SearchScreen` widget tests (9 tests: idle, loading, results local/API/dedup, navigation, empty, clear, debounce)
+- Added `HomeScreen` stock count badge and category filter tests (6 tests: badge counts, badge icons, filter chips visibility, category selection, "All" reset)
+- 309 tests total, 0 analyze issues
 
 ---
 

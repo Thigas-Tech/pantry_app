@@ -1089,6 +1089,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to submit product. Tap to retry.'**
   String get submissionError;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get navSearch;
+
+  /// No description provided for @navStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Stats'**
+  String get navStats;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Products'**
+  String get searchTitle;
+
+  /// No description provided for @searchProductsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for products by name or barcode'**
+  String get searchProductsHint;
+
+  /// No description provided for @noSearchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No products found matching your search'**
+  String get noSearchResults;
+
+  /// No description provided for @totalItemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total items: {count}'**
+  String totalItemsCount(Object count);
+
+  /// No description provided for @expiringSoonCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon: {count}'**
+  String expiringSoonCount(Object count);
+
+  /// No description provided for @addedThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Added this week: {count}'**
+  String addedThisWeek(Object count);
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @filterByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get filterByCategory;
 }
 
 class _AppLocalizationsDelegate

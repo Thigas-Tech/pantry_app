@@ -237,6 +237,14 @@ class DatabaseHelper {
     return productDao.all(db);
   }
 
+  /// Searches the products table by name or barcode.
+  ///
+  /// Delegates to [ProductDao.search] with a case‑insensitive LIKE query.
+  Future<List<Product>> searchProducts(String query) async {
+    final db = await database;
+    return productDao.search(db, query);
+  }
+
   /// Returns only products fetched from the Open Food Facts API.
   ///
   /// These are safe to flush and re‑fetch. Products entered manually

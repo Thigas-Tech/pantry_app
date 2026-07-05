@@ -13,7 +13,7 @@ import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
-import 'package:pantry_app/screens/home_screen.dart';
+import 'package:pantry_app/screens/pantry_shell.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,12 +93,15 @@ Future<void> _scheduleCacheRefresh() async {
       return;
     }
     logInfo('Cache is overdue — scheduling background refresh');
+    // Set the timestamp *before* firing refreshes so that
+    // [HomeScreen._refreshIfOverdue] sees a non‑overdue cache and
+    // does not duplicate the work.
+    await repo.setLastRefreshTime();
     final db = container.read(databaseProvider);
     final inventories = await db.getInventories();
     for (final inv in inventories) {
       repo.refreshInventoryProductsBackground(inv['id'] as int);
     }
-    await repo.setLastRefreshTime();
     logInfo(
       'Background refresh scheduled for ${inventories.length} inventories',
     );
@@ -160,7 +163,7 @@ class PantryApp extends ConsumerWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const HomeScreen(),
+          home: const PantryShell(),
         );
       },
     );

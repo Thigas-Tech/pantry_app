@@ -15,10 +15,10 @@ import 'package:pantry_app/models/product.dart';
 ///
 /// ## Fields
 ///
-/// The first nine fields mirror those of [InventoryItem]. The last three
-/// ([productName], [productImageUrl], and [inventoryName]) are pulled from
-/// the joined tables and provide human‑readable labels, images, and inventory
-/// names.
+/// The first nine fields mirror those of [InventoryItem]. The last four
+/// ([productName], [productImageUrl], [productCategory], and [inventoryName])
+/// are pulled from the joined tables and provide human‑readable labels,
+/// images, categories, and inventory names.
 ///
 /// ## Immutability
 ///
@@ -78,6 +78,12 @@ class InventoryWithProduct {
     /// The category that makes Nutri-Score not applicable, if any
     /// (e.g. `'en:food-additives'`).
     this.nutriscoreNotApplicableCategory,
+
+    /// The product category from the `products` table (e.g. `'Spreads'`).
+    ///
+    /// May be `null` if the product record was deleted or the category
+    /// was not set. Used for category filter chips on the home screen.
+    this.productCategory,
   });
 
   /// Constructs an [InventoryWithProduct] from a raw database row.
@@ -104,6 +110,7 @@ class InventoryWithProduct {
       nutriscoreGrade: map['nutriscore_grade'] as String?,
       nutriscoreNotApplicableCategory:
           map['nutriscore_not_applicable_category'] as String?,
+      productCategory: map['product_category'] as String?,
     );
   }
 
@@ -150,4 +157,10 @@ class InventoryWithProduct {
   /// The product category that makes Nutri-Score not applicable, if any
   /// (e.g. `'en:food-additives'`).
   final String? nutriscoreNotApplicableCategory;
+
+  /// The product category from the `products` table (e.g. `'Spreads'`).
+  ///
+  /// May be `null` if the product record was deleted or the category
+  /// was not set. Used for category filter chips on the home screen.
+  final String? productCategory;
 }

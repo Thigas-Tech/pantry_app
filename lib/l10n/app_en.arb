@@ -298,5 +298,32 @@
   "submitToOff": "Submit to Open Food Facts",
   "submittingToOffTitle": "Submitting…",
   "submissionSuccess": "Product submitted to Open Food Facts.",
-  "submissionError": "Failed to submit product. Tap to retry."
+  "submissionError": "Failed to submit product. Tap to retry.",
+  "navHome": "Home",
+  "navSearch": "Search",
+  "navStats": "Stats",
+  "navSettings": "Settings",
+  "searchTitle": "Search Products",
+  "searchProductsHint": "Search for products by name or barcode",
+  "noSearchResults": "No products found matching your search",
+  "totalItemsCount": "Total items: {count}",
+  "@totalItemsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "expiringSoonCount": "Expiring soon: {count}",
+  "@expiringSoonCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "addedThisWeek": "Added this week: {count}",
+  "@addedThisWeek": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "filterAll": "All",
+  "filterByCategory": "Category"
 }

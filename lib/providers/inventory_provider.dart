@@ -34,6 +34,12 @@ final inventoryListProvider = FutureProvider<List<Map<String, dynamic>>>((ref) {
   return db.getInventories();
 });
 
+/// Provides the count of inventory items in the active inventory.
+final inventoryCountProvider = FutureProvider<int>((ref) async {
+  final items = await ref.watch(inventoryWithProductProvider.future);
+  return items.length;
+});
+
 /// Provides the average Nutri-Score letter for the active inventory.
 ///
 /// Returns a grade (`'a'`–`'e'`) or `null` if none of the products in the

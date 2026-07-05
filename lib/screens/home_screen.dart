@@ -16,8 +16,6 @@ import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
-import 'package:pantry_app/screens/settings_screen.dart';
-import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -278,28 +276,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   tooltip: l10n.selectItems,
                   onPressed: _toggleSelectionMode,
                 ),
-                IconButton(
-                  icon: const Icon(Icons.bar_chart),
-                  tooltip: l10n.pantryStats,
-                  onPressed: () async {
-                    await Navigator.of(context).push<void>(
-                      MaterialPageRoute(builder: (_) => const StatsScreen()),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  tooltip: l10n.settings,
-                  onPressed: () async {
-                    logInfo('Settings button pressed');
-                    await Navigator.of(context).push<void>(
-                      MaterialPageRoute(
-                        builder: (_) => const SettingsScreen(),
-                      ),
-                    );
-                    ref.invalidate(inventoryWithProductProvider);
-                  },
-                ),
               ],
       ),
       body: inventoryAsync.when(
@@ -554,12 +530,14 @@ class _InventoryList extends ConsumerStatefulWidget {
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
   String _searchQuery = '';
+  String? _selectedCategory;
   List<InventoryWithProduct>? _cachedFiltered;
   List<InventoryWithProduct>? _cachedExpired;
   List<InventoryWithProduct>? _cachedExpiringSoon;
   List<InventoryWithProduct>? _cachedGood;
   int? _cachedItemHash;
   String? _cachedSearchQuery;
+  String? _cachedSelectedCategory;
   int? _cachedThreshold;
 
   void _invalidateCache() {
@@ -569,6 +547,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     _cachedGood = null;
     _cachedItemHash = null;
     _cachedSearchQuery = null;
+    _cachedSelectedCategory = null;
     _cachedThreshold = null;
   }
 
@@ -576,21 +555,44 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
       _cachedItemHash != null &&
       _cachedItemHash == widget.items.hashCode &&
       _cachedSearchQuery == _searchQuery &&
+      _cachedSelectedCategory == _selectedCategory &&
       _cachedThreshold == widget.expiringSoonDays;
+
+  Set<String> get _uniqueCategories {
+    final cats = <String>{};
+    for (final item in widget.items) {
+      if (item.productCategory != null && item.productCategory!.isNotEmpty) {
+        cats.add(item.productCategory!);
+      }
+    }
+    return cats;
+  }
 
   List<InventoryWithProduct> get _filtered {
     if (_cacheValid && _cachedFiltered != null) return _cachedFiltered!;
-    if (_searchQuery.isEmpty) {
-      _cachedFiltered = widget.items;
-    } else {
+
+    var items = widget.items;
+
+    // Apply search filter.
+    if (_searchQuery.isNotEmpty) {
       final q = _searchQuery.toLowerCase();
-      _cachedFiltered = widget.items.where((item) {
+      items = items.where((item) {
         return (item.productName?.toLowerCase().contains(q) ?? false) ||
             item.barcode.toLowerCase().contains(q);
       }).toList();
     }
+
+    // Apply category filter.
+    if (_selectedCategory != null) {
+      items = items.where((item) {
+        return item.productCategory == _selectedCategory;
+      }).toList();
+    }
+
+    _cachedFiltered = items;
     _cachedItemHash = widget.items.hashCode;
     _cachedSearchQuery = _searchQuery;
+    _cachedSelectedCategory = _selectedCategory;
     _cachedThreshold = widget.expiringSoonDays;
     _cachedExpired = null;
     _cachedExpiringSoon = null;
@@ -628,6 +630,30 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     return _cachedGood!;
   }
 
+  /// Converts an OFF taxonomy code (e.g. `'en:spreads'`) into a
+  /// human‑readable display name (e.g. `'Spreads'`).
+  String _displayCategory(String category) {
+    final parts = category.split(':');
+    final name = parts.length > 1 ? parts.sublist(1).join(':') : parts[0];
+    return name
+        .replaceAll(RegExp('[_-]'), ' ')
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .map((w) => '${w[0].toUpperCase()}${w.substring(1)}')
+        .join(' ');
+  }
+
+  int get _addedThisWeekCount {
+    final now = DateTime.now();
+    final weekAgo = now
+        .subtract(const Duration(days: 7))
+        .millisecondsSinceEpoch;
+    return widget.items.where((i) {
+      if (i.dateAdded == null) return false;
+      return i.dateAdded! >= weekAgo;
+    }).length;
+  }
+
   @override
   void didUpdateWidget(covariant _InventoryList oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -640,10 +666,43 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final categories = _uniqueCategories;
+
     return Column(
       children: [
+        // Stock count badge row.
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          child: SizedBox(
+            height: 32,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                _countChip(
+                  label: l10n.totalItemsCount(widget.items.length),
+                  icon: Icons.inventory_2_outlined,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                _countChip(
+                  label: l10n.expiringSoonCount(_expiringSoon.length),
+                  icon: Icons.warning_amber_outlined,
+                  color: Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                _countChip(
+                  label: l10n.addedThisWeek(_addedThisWeekCount),
+                  icon: Icons.add_circle_outline,
+                  color: theme.colorScheme.tertiary,
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Search field.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
           child: TextField(
             decoration: InputDecoration(
               hintText: l10n.searchHint,
@@ -657,18 +716,51 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
             ),
             onChanged: (v) => setState(() => _searchQuery = v),
           ),
         ),
+        // Category filter chips.
+        if (categories.length >= 2)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+            child: SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  FilterChip(
+                    label: Text(l10n.filterAll),
+                    selected: _selectedCategory == null,
+                    onSelected: (_) => setState(() => _selectedCategory = null),
+                  ),
+                  const SizedBox(width: 6),
+                  for (final cat in categories)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: FilterChip(
+                        label: Text(_displayCategory(cat)),
+                        selected: _selectedCategory == cat,
+                        onSelected: (selected) => setState(
+                          () => _selectedCategory = selected ? cat : null,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
               final repo = ref.read(productRepositoryProvider);
               final lastRefresh = await repo.getLastRefreshTime();
 
-              // Cooldown: if refreshed less than 1 minute ago, just
-              // re-read the DB without hitting the API.
               final cooldownExpired =
                   lastRefresh == null ||
                   DateTime.now().difference(lastRefresh).inMinutes >= 1;
@@ -685,7 +777,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                 repo.refreshInventoryProductsBackground(activeId);
                 await repo.setLastRefreshTime();
               }
-              // Invalidate *after* so the UI loads fresh data from the DB.
               ref.invalidate(inventoryWithProductProvider);
             },
             child: ListView(
@@ -742,13 +833,47 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                 if (_filtered.isEmpty)
                   Padding(
                     padding: const EdgeInsets.all(24),
-                    child: Center(child: Text(l10n.noItemsMatch)),
+                    child: Center(
+                      child: Text(
+                        _selectedCategory != null
+                            ? '${l10n.noItemsMatch} '
+                                  '(${l10n.filterByCategory}: '
+                                  '${_displayCategory(_selectedCategory!)})'
+                            : l10n.noItemsMatch,
+                      ),
+                    ),
                   ),
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _countChip({
+    required String label,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withAlpha(25),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withAlpha(76)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: color),
+          ),
+        ],
+      ),
     );
   }
 

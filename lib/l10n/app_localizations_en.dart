@@ -546,4 +546,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submissionError => 'Failed to submit product. Tap to retry.';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navSearch => 'Search';
+
+  @override
+  String get navStats => 'Stats';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get searchTitle => 'Search Products';
+
+  @override
+  String get searchProductsHint => 'Search for products by name or barcode';
+
+  @override
+  String get noSearchResults => 'No products found matching your search';
+
+  @override
+  String totalItemsCount(Object count) {
+    return 'Total items: $count';
+  }
+
+  @override
+  String expiringSoonCount(Object count) {
+    return 'Expiring soon: $count';
+  }
+
+  @override
+  String addedThisWeek(Object count) {
+    return 'Added this week: $count';
+  }
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterByCategory => 'Category';
 }

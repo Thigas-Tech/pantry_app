@@ -114,6 +114,27 @@ class ProductDao {
     return result.map(fromMap).toList();
   }
 
+  /// Searches the products table by name or barcode using a LIKE query.
+  ///
+  /// The [query] is matched case‑insensitively against both `name` and
+  /// `barcode` columns. Results are ordered by name ascending.
+  Future<List<Product>> search(Database db, String query) async {
+    try {
+      final pattern = '%$query%';
+      final result = await db.query(
+        'products',
+        where: 'name LIKE ? OR barcode LIKE ?',
+        whereArgs: [pattern, pattern],
+        orderBy: 'name ASC',
+      );
+      logInfo('Search for "$query" returned ${result.length} results');
+      return result.map(fromMap).toList();
+    } on Exception catch (e) {
+      logError('Error searching products for "$query": $e');
+      rethrow;
+    }
+  }
+
   /// Deletes all cached products from the table.
   Future<void> clear(Database db) async {
     await db.delete('products');

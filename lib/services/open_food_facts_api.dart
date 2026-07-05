@@ -124,6 +124,50 @@ class OpenFoodFactsApi {
     return false;
   }
 
+  /// Searches Open Food Facts by product name or barcode prefix.
+  ///
+  /// Uses the legacy search API at `$_baseUrl/cgi/search.pl`.
+  /// Returns at most [pageSize] results (default 20).
+  ///
+  /// Returns an empty list on network errors (failures are silently logged).
+  Future<List<Product>> searchProducts(
+    String query, {
+    int pageSize = 20,
+  }) async {
+    try {
+      final url = '$_baseUrl/cgi/search.pl';
+      logInfo('Searching OFF for "$query" (pageSize=$pageSize)');
+      final response = await _dio.get<Map<String, dynamic>>(
+        url,
+        queryParameters: {
+          'search_terms': query,
+          'page_size': pageSize,
+          'json': 1,
+        },
+        options: Options(headers: {'User-Agent': _userAgent}),
+      );
+      final data = response.data;
+      if (data == null || data['products'] == null) {
+        logInfo('OFF search returned no results for "$query"');
+        return [];
+      }
+      final productsJson = data['products'] as List<dynamic>;
+      final products = productsJson
+          .cast<Map<String, dynamic>>()
+          .map(_parseProduct)
+          .where((p) => p.barcode.isNotEmpty)
+          .toList();
+      logInfo('OFF search returned ${products.length} products for "$query"');
+      return products;
+    } on DioException catch (e) {
+      logWarning('OFF search failed for "$query": ${e.message}');
+      return [];
+    } on Exception catch (e) {
+      logWarning('OFF search unexpected error for "$query": $e');
+      return [];
+    }
+  }
+
   /// Returns a short human‑readable label for a [DioException] reason.
   String _describeError(DioException e) {
     if (e.response?.statusCode == 429) return '429';

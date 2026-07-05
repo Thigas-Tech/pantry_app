@@ -25,13 +25,21 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [x] **Remove unused `product_api_service.dart`** — removed; `ProductRepository` now uses `OpenFoodFactsApi` directly. `close()` method removed from `OpenFoodFactsApi`.
 - [x] **Golden tests for `NutriScoreBadge`** — verify A–E colours render correctly via `matchesGoldenFile`.
 - [x] **Accessibility audit** — added Semantics label to NutriScoreBadge; 5 semantics tests verify labels for grades a–e, null, and invalid.
+- [x] **Flutter widget catalog review** — audited Material 3 widgets. New candidates added below.
+- [ ] **SearchBar/SearchAnchor upgrade** — replace manual `TextField` in SearchScreen and HomeScreen with M3 `SearchBar`/`SearchAnchor` for native autocomplete and animation. Effort: medium.
+- [ ] **SegmentedButton** — replace `FilterChip` row on home screen with `SegmentedButton` for multi-category selection. More compact on small screens. Effort: low.
+- [ ] **Autocomplete** — add autocomplete suggestions to the home screen search bar based on cached product names. Effort: low.
+- [ ] **NavigationRail** — adaptive sidebar layout for tablets/desktop alongside `NavigationBar`. Effort: medium.
+- [ ] **InteractiveViewer** — enable pinch-to-zoom on product nutrition/ingredient photos. Effort: low.
+- [ ] **ExpansionTile in settings** — group related settings (notifications, data retention) under `ExpansionTile` for a cleaner settings screen. Effort: low.
+- [ ] **DropdownMenu** — replace `PopupMenuButton` for inventory switcher with M3 `DropdownMenu`. Effort: low.
 
 ## Features (medium effort)
 
 - [ ] **Shopping list** — tab or separate screen; mark items as "to buy" with a toggle. Items appear in a dedicated list until purchased (then move to inventory).
 - [ ] **Barcode history** — show the last N scanned barcodes with quick-add button. Persist to SQLite.
-- [ ] **Category filter** — dropdown/filter chip on home screen to filter items by product category.
-- [ ] **Stock count badge** — show "N items" and "added this week" on the home screen app bar or stats page.
+- [x] **Category filter** — `FilterChip` row on home screen to filter items by product category. Replaces previous scope dropdown approach.
+- [x] **Stock count badge** — horizontal badge row (total items, expiring soon, added this week) on the home screen above the search field.
 - [ ] **Empty-pantry onboarding** — when inventory is empty, show a guided "scan your first item" flow instead of just the empty state widget.
 - [ ] **Offline-first product submission queue** — queue `submitProduct` calls when offline; flush when `connectivityProvider` emits `true`.
 - [ ] **Cloud backup** — upload DB to Firebase Storage / S3. Restore on a new device.
@@ -39,6 +47,8 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [x] **Ingredient list & nutrition table photos in manual entry** — added image‑picker fields to `AddProductScreen` for capturing/selecting photos. Local file paths stored on model; preview thumbnails in form (Phase 2).
 - [ ] **Cosmetics & toiletries support** — extend the OFF API integration to query Open Beauty Facts (`openbeautyfacts.org`), add `productType` to the `Product` model (`'food'` / `'beauty'` / `'petfood'`), add cosmetic‑specific fields (periodAfterOpening, beauty category), hide nutrition/Nutri‑Score for non‑food items, and add filter chips on the home screen.
 - [ ] **WHO-based food quality recommendations** — research complete: ADI-based additive safety warnings, non‑sugar sweetener health guidance, free‑sugar threshold alerts (5 g per 100 g), sodium level awareness labels (low/medium/high per WHO thresholds), balanced diet prompts, and Five Keys to Safer Food tips.
+- [x] **Bottom NavigationBar** — `NavigationBar` with Home, Search, Stats, Settings tabs using `IndexedStack` + nested Scaffolds.
+- [x] **Product name search** — `SearchScreen` tab with debounced `TextField` (300ms) querying local DB + OFF API, deduplicated results, `ProductDetailScreen` navigation.
 
 ## Larger Projects (high effort)
 
@@ -93,8 +103,8 @@ High importance  │ Batch delete            │ Shopping list
                  │─────────────────────────│──────────────────────────
                  │ Golden tests            │ Multi-language
                  │ Accessibility audit     │ Recipe suggestions
-                 │ Stock count badge       │ Patrol E2E tests
-                 │ Screenshots             │ Play Store CI deploy
-Low importance   │ Empty-pantry onboarding │ Barcode history
-                 │ Category filter         │
+                  │ SearchBar upgrade        │ Patrol E2E tests
+                  │ Screenshots             │ Play Store CI deploy
+ Low importance   │ Empty-pantry onboarding │ Barcode history
+                  │ NavigationRail          │
 ```

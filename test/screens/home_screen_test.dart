@@ -35,10 +35,10 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
+import 'package:pantry_app/screens/pantry_shell.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
-import 'package:pantry_app/screens/settings_screen.dart';
-import 'package:pantry_app/screens/stats_screen.dart';
+import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import '../helpers/pump_app.dart';
@@ -259,10 +259,10 @@ void main() {
 
   // ---------- Additional tests for uncovered paths ----------
 
-  testWidgets('tapping settings navigates to SettingsScreen', (tester) async {
+  testWidgets('NavigationBar tabs switch content', (tester) async {
     await pumpApp(
       tester,
-      const HomeScreen(),
+      const PantryShell(),
       imageCacheMock: mockImageCache,
       overrides: [
         inventoryWithProductProvider.overrideWith(
@@ -271,18 +271,26 @@ void main() {
         inventoryListProvider.overrideWith(
           (ref) => <Map<String, dynamic>>[],
         ),
+        inventoryCountProvider.overrideWith(
+          (ref) => Future<int>.value(0),
+        ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         productRepositoryProvider.overrideWithValue(
           createMockProductRepository(),
         ),
       ],
+      settle: false,
     );
-
-    await tester.tap(find.byIcon(Icons.settings));
     await tester.pump();
-    await tester.pump(); // allow navigation to start
 
-    expect(find.byType(SettingsScreen), findsOneWidget);
+    // Default tab is Home.
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+
+    // Tap Search tab.
+    await tester.tap(find.text('Search'));
+    await tester.pump();
+    expect(find.byType(SearchScreen), findsOneWidget);
   });
 
   testWidgets('search filters items and shows clear button', (tester) async {
@@ -504,10 +512,10 @@ void main() {
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 
-  testWidgets('stats icon navigates to StatsScreen', (tester) async {
+  testWidgets('NavigationBar displays all tab labels', (tester) async {
     await pumpApp(
       tester,
-      const HomeScreen(),
+      const PantryShell(),
       imageCacheMock: mockImageCache,
       overrides: [
         inventoryWithProductProvider.overrideWith(
@@ -516,19 +524,24 @@ void main() {
         inventoryListProvider.overrideWith(
           (ref) => <Map<String, dynamic>>[],
         ),
+        inventoryCountProvider.overrideWith(
+          (ref) => Future<int>.value(0),
+        ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         connectivityProvider.overrideWith((ref) => Stream.value(true)),
         productRepositoryProvider.overrideWithValue(
           createMockProductRepository(),
         ),
       ],
+      settle: false,
     );
-
-    await tester.tap(find.byTooltip('Pantry Stats'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
 
-    expect(find.byType(StatsScreen), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Stats'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
   });
 
   testWidgets('create pantry dialog creates an inventory', (tester) async {
@@ -568,6 +581,445 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => mockRepo.createInventory('Camping')).called(1);
+  });
+
+  // ---------- Stock count badge tests ----------
+
+  testWidgets('shows stock count badges with item counts', (tester) async {
+    final now = DateTime.now();
+    final items = [
+      testItem(
+        'Item 1',
+        barcode: '1',
+        expiryDate: now.add(const Duration(days: 10)), // good
+      ),
+      testItem(
+        'Item 2',
+        barcode: '2',
+        expiryDate: now.add(const Duration(days: 1)), // expiring soon
+      ),
+      testItem(
+        'Item 3',
+        barcode: '3',
+        expiryDate: now.subtract(const Duration(days: 1)), // expired
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    expect(find.textContaining('Total items: 3'), findsOneWidget);
+    expect(find.textContaining('Expiring soon: 1'), findsOneWidget);
+    expect(find.textContaining('Added this week: 0'), findsOneWidget);
+  });
+
+  testWidgets('stock count badges use correct icons', (tester) async {
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith(
+          (ref) => [
+            testItem('Item', barcode: '1'),
+          ],
+        ),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    expect(find.byIcon(Icons.inventory_2_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.warning_amber_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.add_circle_outline), findsOneWidget);
+  });
+
+  // ---------- Category filter tests ----------
+
+  testWidgets('shows category filter chips when 2+ categories exist', (
+    tester,
+  ) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+        productCategory: 'Dairy',
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Bread',
+        productCategory: 'Grains',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Dairy'), findsOneWidget);
+    expect(find.text('Grains'), findsOneWidget);
+  });
+
+  testWidgets('hides category filter chips when <2 categories', (tester) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+        productCategory: 'Dairy',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    expect(find.byType(FilterChip), findsNothing);
+  });
+
+  testWidgets('selecting category filter hides other items', (tester) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+        productCategory: 'Dairy',
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Bread',
+        productCategory: 'Grains',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // Both items visible initially.
+    expect(find.text('Milk'), findsOneWidget);
+    expect(find.text('Bread'), findsOneWidget);
+
+    // Tap the "Dairy" chip.
+    await tester.tap(find.text('Dairy'));
+    await tester.pumpAndSettle();
+
+    // Only Dairy item visible.
+    expect(find.text('Milk'), findsOneWidget);
+    expect(find.text('Bread'), findsNothing);
+  });
+
+  testWidgets('selecting "All" resets category filter', (tester) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+        productCategory: 'Dairy',
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Bread',
+        productCategory: 'Grains',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // Filter by Dairy.
+    await tester.tap(find.text('Dairy'));
+    await tester.pumpAndSettle();
+    expect(find.text('Bread'), findsNothing);
+
+    // Reset with "All".
+    await tester.tap(find.text('All'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Milk'), findsOneWidget);
+    expect(find.text('Bread'), findsOneWidget);
+  });
+
+  testWidgets('category filter displays OFF taxonomy code as human-readable', (
+    tester,
+  ) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Spreads',
+        productCategory: 'en:spreads',
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Beverage',
+        productCategory: 'en:beverages',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // Should show human-readable names, not taxonomy codes.
+    // "Spreads" appears both as product name (card) and category (chip).
+    expect(find.text('All'), findsOneWidget);
+    expect(find.text('Spreads'), findsAtLeast(1));
+    expect(find.text('Beverages'), findsAtLeast(1));
+    // Taxonomy codes should not appear.
+    expect(find.text('en:spreads'), findsNothing);
+    expect(find.text('en:beverages'), findsNothing);
+  });
+
+  testWidgets('empty message includes active category when filtered', (
+    tester,
+  ) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+        productCategory: 'Dairy',
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Bread',
+        productCategory: 'Grains',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // Search for something that doesn't match any item name.
+    await tester.enterText(find.byType(TextField), 'XYZ');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('No items match'), findsOneWidget);
+
+    // Now also filter by a category — message should include the category.
+    await tester.tap(find.text('Dairy'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('Category: Dairy'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('No items match'), findsOneWidget);
+  });
+
+  testWidgets('category filter + search query AND correctly', (tester) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+        productCategory: 'Dairy',
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Milk Chocolate',
+        productCategory: 'Sweets',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // Search for "Milk" — both items match.
+    await tester.enterText(find.byType(TextField), 'Milk');
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InventoryCard), findsNWidgets(2));
+
+    // Now also filter by "Dairy" — only "Milk" should remain.
+    await tester.tap(find.text('Dairy'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InventoryCard), findsOneWidget);
   });
 
   testWidgets('batch delete selects and deletes items', (tester) async {
