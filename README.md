@@ -83,6 +83,9 @@ flutter build apk
 
 # Release App Bundle (Play Store)
 flutter build appbundle
+
+# Debug App Bundle
+flutter build appbundle --debug
 ```
 
 ## Project structure
