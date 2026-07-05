@@ -968,6 +968,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.'**
   String get nutriscoreExplanation;
+
+  /// No description provided for @flushCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Flush cache'**
+  String get flushCache;
+
+  /// No description provided for @flushCacheSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete cached products and images'**
+  String get flushCacheSub;
+
+  /// No description provided for @flushCacheConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete all cached product data and images. Products will be re-fetched from Open Food Facts the next time you view them.'**
+  String get flushCacheConfirm;
+
+  /// No description provided for @flushCacheSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache flushed. Products will refresh automatically.'**
+  String get flushCacheSuccess;
+
+  /// No description provided for @flushCacheFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to flush cache. Please try again.'**
+  String get flushCacheFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

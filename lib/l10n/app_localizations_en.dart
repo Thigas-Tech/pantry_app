@@ -473,4 +473,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutriscoreExplanation => 'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.';
+
+  @override
+  String get flushCache => 'Flush cache';
+
+  @override
+  String get flushCacheSub => 'Delete cached products and images';
+
+  @override
+  String get flushCacheConfirm => 'This will delete all cached product data and images. Products will be re-fetched from Open Food Facts the next time you view them.';
+
+  @override
+  String get flushCacheSuccess => 'Cache flushed. Products will refresh automatically.';
+
+  @override
+  String get flushCacheFailed => 'Failed to flush cache. Please try again.';
 }

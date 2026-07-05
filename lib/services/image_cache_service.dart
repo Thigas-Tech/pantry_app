@@ -75,4 +75,21 @@ class ImageCacheService {
     }
     return dir;
   }
+
+  /// Deletes all cached image files.
+  ///
+  /// Removes the entire image cache directory and recreates it empty.
+  /// Called after an app update to force re-download of product images.
+  Future<void> clearCache() async {
+    try {
+      final cacheDir = await _imageCacheDirectory();
+      if (await cacheDir.exists()) {
+        await cacheDir.delete(recursive: true);
+        await cacheDir.create(recursive: true);
+        logInfo('Image cache cleared');
+      }
+    } on Exception catch (e) {
+      logError('Failed to clear image cache: $e');
+    }
+  }
 }

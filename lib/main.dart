@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
@@ -14,23 +15,28 @@ import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
+import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Entry point of the Pantry application.
 ///
 /// Startup sequence:
 /// 1. Flutter binding.
 /// 2. Environment variables loaded via `flutter_dotenv`.
-/// 3. Connectivity check; if online, refresh cached product data.
-/// 4. Notification permission request and initialization.
-/// 5. Database cleanup (after first frame).
-/// 6. App launched inside `ProviderScope`.
+/// 3. App version check — clears stale caches when the app was updated.
+/// 4. Connectivity check; if online, refresh cached product data.
+/// 5. Notification permission request and initialization.
+/// 6. Database cleanup (after first frame).
+/// 7. App launched inside `ProviderScope`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load();
   logInfo('Environment loaded');
+
+  await _handleAppUpdate();
 
   final isOnline = await InternetConnectionChecker.instance.hasConnection;
   if (isOnline) {
@@ -47,6 +53,38 @@ Future<void> main() async {
   unawaited(container.read(notificationServiceProvider).requestPermission());
   await container.read(notificationServiceProvider).initialize();
   unawaited(_runDatabaseCleanup(container));
+}
+
+/// Clears the product database and image cache when the app version changes.
+///
+/// This ensures products cached before the Nutri-Score badge feature (or any
+/// other schema change) get re-fetched from Open Food Facts with fresh data.
+Future<void> _handleAppUpdate() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final info = await PackageInfo.fromPlatform();
+    final currentVersion = '${info.version}+${info.buildNumber}';
+    final lastVersion = prefs.getString('app_version');
+
+    if (lastVersion == currentVersion) return;
+
+    logInfo(
+      'App updated from ${lastVersion ?? 'first install'} to $currentVersion',
+    );
+
+    // Clear image cache so stale images don't persist across updates.
+    await ImageCacheService().clearCache();
+
+    // Clear product table so all products get re-fetched with full OFF data
+    // (including fields added in newer versions, e.g. nutriscore_grade).
+    final db = DatabaseHelper();
+    await db.clearProducts();
+
+    await prefs.setString('app_version', currentVersion);
+    logInfo('Caches flushed for app update');
+  } on Exception catch (e) {
+    logError('App update handling failed: $e');
+  }
 }
 
 Future<void> _refreshCachedProducts() async {

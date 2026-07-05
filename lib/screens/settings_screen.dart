@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
+import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
@@ -82,6 +85,13 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               );
             },
+          ),
+          const Divider(),
+          ListTile(
+            title: Text(l10n.flushCache),
+            subtitle: Text(l10n.flushCacheSub),
+            leading: const Icon(Icons.cleaning_services),
+            onTap: () => _flushCache(context),
           ),
         ],
       ),
@@ -195,5 +205,49 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _flushCache(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.flushCache),
+        content: Text(l10n.flushCacheConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.flushCache),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      logInfo('Flushing cache manually');
+      await ImageCacheService().clearCache();
+      await DatabaseHelper().clearProducts();
+
+      if (context.mounted) {
+        SnackbarHelper.showInfo(context, l10n.flushCacheSuccess);
+      }
+
+      final isOnline = await InternetConnectionChecker.instance.hasConnection;
+      if (isOnline) {
+        logInfo('Online — products will be re-fetched on next view');
+      }
+    } on Exception catch (e) {
+      logError('Cache flush failed: $e');
+      if (context.mounted) {
+        SnackbarHelper.showError(context, l10n.flushCacheFailed);
+      }
+    }
   }
 }

@@ -99,4 +99,10 @@ class ProductDao {
     final result = await db.query('products');
     return result.map(fromMap).toList();
   }
+
+  /// Deletes all cached products from the table.
+  Future<void> clear(Database db) async {
+    await db.delete('products');
+    logInfo('All cached products deleted');
+  }
 }

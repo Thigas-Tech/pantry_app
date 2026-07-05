@@ -199,6 +199,15 @@ class DatabaseHelper {
     return productDao.all(db);
   }
 
+  /// Deletes all cached products from the database.
+  ///
+  /// Used during app update to force a full re-fetch from Open Food Facts,
+  /// ensuring new fields (e.g. `nutriscore_grade`) are populated.
+  Future<void> clearProducts() async {
+    final db = await database;
+    return productDao.clear(db);
+  }
+
   /// Removes stale inventory items and orphaned products.
   Future<void> cleanupOldEntries({int retentionDays = 60}) async {
     final db = await database;
