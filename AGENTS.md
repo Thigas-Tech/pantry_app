@@ -49,6 +49,7 @@ flutter build appbundle            # release AAB
 6. **Update documentation** — after making changes, update `CHANGELOG.md`, `README.md`, `ARCHITECTURE.md`, and/or `AGENTS.md` to reflect new features, structure changes, or updated commands. Always generate fresh API docs with `dart doc .`.
 7. **Update CHANGELOG.md** — after every feature addition, bugfix, or significant change, add an entry under `[Unreleased]` grouped by category. Keep entries concise and user-facing. This is the canonical record of what ships in each release.
 8. **Set Product.source** — every `Product()` constructor call MUST pass `source`. Use `'api'` for OFF‑fetched data and `'manual'` for user‑entered or CSV‑imported data. The default is `'api'`. Never omit this field — it protects manual products from being deleted by `clearCachedProducts()` during cache flushes.
+9. **No emoji** — never use emoji characters anywhere in the codebase, including documentation, comments, commit messages, ARB strings, and TODOs. Use plain text alternatives (e.g., `Yes`/`No` instead of check/cross marks, `**Pitfalls**` instead of warning signs). Emojis render inconsistently across terminals, editors, and git tools, and this project's documentation must remain plain-text clean.
 
 ### Code style
 - 80-character line limit (enforced by lint)

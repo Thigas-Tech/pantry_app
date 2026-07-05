@@ -45,7 +45,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   4. New ARB strings: `whatsNew`, `dismiss`.
   5. Tests: verify dialog appears on version change, doesn't on same version, doesn't on first install.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **Missing file**: `rootBundle.loadString('CHANGELOG.md')` throws `FlutterError`. Use `await File('CHANGELOG.md').exists()` first, or bundle a fallback JSON file instead of parsing markdown.
   - **`flutter_markdown` discontinued**: Official package last updated at 0.7.x; community forks exist (`flutter_markdown_plus`, `flutter_markdown_community`). Consider using a simple line‑based parser for version extraction instead of a full markdown renderer.
   - **Markdown parser crashes**: Known assertion failures in `flutter_markdown` with malformed inline elements (`'_inlines.isEmpty': is not true.`). Always wrap in `FlutterError` boundary.
@@ -67,7 +67,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   7. DB migration: add `products.lang` column (bundle with version 9).
   8. Tests: mock API responses with `lc=fr`, verify French name returned; verify brand names preserved.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **Silent fallback**: If no translation exists for the requested `lc`, OFF silently returns the product's default `lang`. You cannot distinguish "translation missing" from "product's default matches the requested locale". Always display the returned value — it may be in a different language.
   - **`Platform.localeName` is unreliable**: Returns `null` on iOS first launch; returns `"en_US"` in test env; never updates on Android at runtime. Use `Localizations.localeOf(context).languageCode` or `PlatformDispatcher.instance.locale.languageCode` instead.
   - **Locale string mismatch**: Dart `Locale.languageCode` returns ISO 639-1 (`"en"`). This is correct for OFF. But if someone uses `locale.toString()` you get `"en_US"` (OFF doesn't understand). Always use `.languageCode`.
@@ -101,7 +101,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   5. Queue offline price submissions; flush when connectivity returns.
   6. Tests: model, DAO, service, widget tests.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **Open Prices has NO documented rate limits**: The OFF rate limits page says "we currently don't have any rate limit policy" (GitHub issue #8818). Real risk of IP bans for aggressive requests. Assume ~15 req/min. Always set `User-Agent` header in the format `AppName/Version (contact@example.com)`.
   - **Photo proof is MANDATORY**: Every Open Prices submission requires a photo of the price tag/receipt. No way to submit a price without one. This adds camera permission handling, storage, and network overhead. Design the UI to support photo capture gracefully.
   - **Environment‑specific tokens**: Auth tokens differ between `prices.openfoodfacts.org` (prod) and `prices.openfoodfacts.net` (pre‑prod). Use `--dart-define` flavors to keep them separate. No documented token refresh — handle expiry with re‑authentication.
@@ -133,7 +133,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   - Flutter sends QR URL → backend returns JSON.
   - Backend handles multi‑state HTML variations.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **25+ Brazilian states, each with unique HTML structure**: SEFAZ pages differ by state (SP, PR, RS, etc.). A parser that works for São Paulo may fail for Paraná. Build a state‑detection layer (from URL domain + QR code params) and route to state‑specific parsers. Start with the most common states.
   - **SEFAZ can change HTML structure at any time**: Scraping is inherently fragile. The pages are government systems that update unpredictably. Implement a `version` field in the parser; when a parse fails, log the raw HTML for debugging. The future backend service with a parser‑per‑state architecture mitigates this.
   - **`package:html` O(n²) tokenizer on large invoices**: Confirmed open issue (`dart-lang/html#18`) where string interpolation creates O(n²) behavior on long strings. Invoices with 50+ items may be slow. Use `parseFragment()` instead of `parse()` to avoid full document wrapper overhead. Consider chunk‑based processing for very large documents.
@@ -163,7 +163,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   8. New ARB strings: `showOriginal`, `showTranslated`, `ingredientsInLanguage`.
   9. Tests: model, DAO, widget tests for language toggle and allergen highlighting.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **Allergen mistranslation is a safety hazard**: If the user reads ingredients in a translated language where allergens are misidentified or formatting is lost, they could consume a harmful product. Display a disclaimer: "Ingredients list is user‑contributed. Always check the product packaging for allergens." Never remove allergen information from display.
   - **`ingredients_text_with_allergens_XX` is not always available**: Many products only have `ingredients_text`. The allergen‑highlighted version is contributed by OFF community editors. When unavailable, fall back to `ingredients_text` with no highlighting. Do not attempt to parse allergens yourself — that's a complex NLP problem.
   - **Ingredients formatting varies by language**: Commas vs. bullets vs. numbered lists differ across locales. The `ingredients_text` field is raw text with locale‑specific formatting. A German ingredients list may look structurally different from an English one. The "show original" toggle must switch the entire text block, not attempt per‑segment comparison.
@@ -183,7 +183,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   - Migration must handle: existing rows get `NULL` for new columns (safe defaults in app code), `prices` table created fresh.
   - Rollback: keep old column defaults so downgrade doesn't crash (code should handle `NULL`).
 
-  ⚠ **Pitfall**: Schema changes for products table must not disrupt existing data. All new columns are nullable — no `NOT NULL` or `DEFAULT` on existing rows. `_onUpgrade` runs in a transaction; test on a copy of a real database.
+   **Pitfall**: Schema changes for products table must not disrupt existing data. All new columns are nullable — no `NOT NULL` or `DEFAULT` on existing rows. `_onUpgrade` runs in a transaction; test on a copy of a real database.
 
 ## Features (medium effort — from previous roadmap, still pending)
 
@@ -213,7 +213,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   2. Add a "Today's Nutrition" summary card on `StatsScreen` or `HomeScreen` that reads the day's aggregated nutrition from Health Connect.
   3. Background sync: when connectivity permits, sync any pending nutrition records queued while offline.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **Flutter plugin maturity**: The `health_connect` package on pub.dev may have incomplete `NutritionRecord` support or bugs. Audit the package source before committing. Be prepared to write a custom platform channel in Kotlin if the plugin lacks write support for `NutritionRecord` — Health Connect's Kotlin API is well-documented but the Flutter bridge may lag.
   - **Health Connect must be installed separately**: It is NOT built into Android. `HealthConnectClient.getSdkStatus()` returns `SdkStatus.AVAILABLE` only when "Health Connect by Google" is installed from Play Store. If unavailable, show a setup prompt with Play Store deep link. Do not crash.
   - **System permission sheet UX**: Health Connect uses a system-level permission sheet, NOT standard Android runtime permissions. The user grants per-data-type access (e.g., "Allow Nutrition read" + "Allow Nutrition write"). This sheet cannot be styled or customized. If the user denies a specific type, writes to that type fail silently — always check `getGrantedPermissions()` before writing and show a clear error if a required type was denied.
@@ -237,7 +237,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   5. Align with Health Connect abstraction: write to both platforms via the same `HealthNutritionData` model.
   6. New ARB strings: `samsungHealthPermission`, `samsungHealthConnected`.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **Deprecated SDK cut-off**: The old "Samsung Health SDK for Android" was deprecated as of 31 July 2025. Using it will fail for new users. Verify your integration uses the **Samsung Health Data SDK** (new). The migration guide is at [developer.samsung.com/health/data/migration-guide/overview.html](https://developer.samsung.com/health/data/migration-guide/overview.html). Check `build.gradle` dependencies — the old SDK has group `com.samsung.android.sdk:health`, the new one has group `com.samsung.android.sdk.healthdata`.
   - **Samsung Health app must be installed AND at v6.30.2+**: The SDK connects via the Samsung Health app. If the app is missing or outdated, `HealthDataStore.connectService()` fails with a connection error. Detect this in the connection listener callback and show a Play Store deep link to install/update Samsung Health. Example deep link: `market://details?id=com.samsung.android.app.health`
   - **SI units only — no imperial**: The SDK enforces SI units. `CALORIE` is in kcal (not cal), `WEIGHT` in kg (not lb), `HEIGHT` in cm (not ft/in). If your app allows imperial unit display, you must convert before writing. Failure to convert results in silently incorrect data (no error from the SDK).
@@ -262,7 +262,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   4. Write planned meals' nutrition data to Samsung Health via the SDK from the previous item.
   5. New ARB strings: `mealPlan`, `weeklyPlanner`, `groceryList`, `addToPlan`.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **API access may require partnership**: Samsung Food's integration API may require a business partnership or specific credentials. The public documentation is limited. The FoodNote sample shows one-way nutrition write via Health Data SDK, but read/plan operations may use a different (possibly private) API. Research access requirements before scoping implementation time.
   - **Regional availability**: Samsung Food is not available in all countries. Check [samsungfood.com](https://samsungfood.com/) for regional restrictions. If unavailable in the user's country, hide the meal planning UI and show a "Not available in your region" message instead of crashing.
   - **Recipe suggestions overlap**: The existing "Recipe suggestions" TODO item (below) proposes calling a generic recipe API for expiring items. Samsung Food has its own recipe database and meal planner. Decide: use Samsung Food as the recipe source (requires their API) or keep a generic recipe API for wider coverage. If you use a generic API + Samsung Food, you get two recipe sources — merge them or let the user choose.
@@ -283,7 +283,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
   4. Write nutrition records using the same `HealthNutritionData` model from the Health Connect abstraction layer.
   5. New ARB strings: `appleHealthPermission`, `healthKitSynced`.
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **iOS-only, gated behind platform check**: HealthKit classes exist only on Apple platforms. Use `defaultTargetPlatform == TargetPlatform.iOS` to gate all HealthKit code. Accessing `HKHealthStore` on Android/macOS crashes.
   - **Entitlement provisioning in Xcode**: You must enable the HealthKit capability in Xcode under Signing & Capabilities. This requires an Apple Developer account (paid). The entitlement is checked at runtime — if missing, `HKHealthStore.isHealthDataAvailable()` returns `false`.
   - **Per-type permission granularity — no bulk requests**: HealthKit requires you to request read/write permission for EACH data type individually (`HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)`, `.dietaryFatTotal`, `.dietaryProtein`, `.dietaryCarbohydrates`, `.dietaryFiber`). You cannot request "all nutrition types". Missing one type means writes to that type fail silently. Maintain a list of requested types and verify each is granted before writing.
@@ -317,7 +317,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
         Health platform's native SDK
   ```
 
-  **⚠ Pitfalls & edge cases**:
+  **Pitfalls & edge cases**:
   - **Platform channel complexity multiplies**: Each health SDK requires its own Android/iOS platform channel code. Health Connect needs Kotlin (Android), Samsung Health Data SDK needs Kotlin (Android), HealthKit needs Swift (iOS). One buggy platform channel can crash the entire app. Use a separate `MethodChannel` per service with clear error handling. Do NOT share a single channel for all health operations.
   - **Testing across platforms is hard**: Unit tests can mock the `HealthService` interface, but integration tests require real devices with Health Connect / Samsung Health / HealthKit installed. CI pipelines generally don't support this. Keep integration tests in a separate `health_integration_test/` directory that is run manually, not in CI.
   - **Cross-platform data deduplication**: If Health Connect and Samsung Health are both active AND Samsung Health syncs to Health Connect (it does on supported devices), writing the same nutrition data through both services creates duplicate records in Health Connect. Detect cross-sync by querying Health Connect for records matching this app's `clientId` before writing to Samsung Health. Write to only one platform if cross-sync is detected.
@@ -336,15 +336,15 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 ```
 | Platform | Write | Nutrition | Meal Plan | Docs |
 |----------|-------|-----------|-----------|------|
-| Health Connect (Android) | ✅ | ✅ NutritionRecord | ❌ | [developer.android.com/health-and-fitness/health-connect](https://developer.android.com/health-and-fitness/health-connect) |
-| Samsung Health Data SDK | ✅ | ✅ Food/Nutrition | ✅ via Samsung Food | [developer.samsung.com/health](https://developer.samsung.com/health) |
-| Samsung Food | N/A (via SDK) | ✅ | ✅ meal planner | [samsungfood.com](https://samsungfood.com/) |
-| Apple HealthKit | ✅ (future) | ✅ dietary energy | ❌ | [developer.apple.com/documentation/healthkit](https://developer.apple.com/documentation/healthkit) |
-| Huawei Health Kit | ✅ | ✅ limited | ❌ | [developer.huawei.com/consumer/en/hms/huawei-healthkit](https://developer.huawei.com/consumer/en/hms/huawei-healthkit) |
-| Xiaomi Health Cloud | ✅ | limited | ❌ | [dev.mi.com](http://developer.mi.com) |
-| OPPO Health | ✅ | limited | ❌ | [open.oppomobile.com](https://open.oppomobile.com/) |
-| vivo Health Kit | ✅ | limited | ❌ | [developers.vivo.com](https://developers.vivo.com/) |
-| Honor Health Kit | ✅ | limited | ❌ | [developer.honor.com](https://developer.honor.com/) |
+| Health Connect (Android) | Yes | Yes NutritionRecord | No | [developer.android.com/health-and-fitness/health-connect](https://developer.android.com/health-and-fitness/health-connect) |
+| Samsung Health Data SDK | Yes | Yes Food/Nutrition | Yes via Samsung Food | [developer.samsung.com/health](https://developer.samsung.com/health) |
+| Samsung Food | N/A (via SDK) | Yes | Yes meal planner | [samsungfood.com](https://samsungfood.com/) |
+| Apple HealthKit | Yes (future) | Yes dietary energy | No | [developer.apple.com/documentation/healthkit](https://developer.apple.com/documentation/healthkit) |
+| Huawei Health Kit | Yes | Yes limited | No | [developer.huawei.com/consumer/en/hms/huawei-healthkit](https://developer.huawei.com/consumer/en/hms/huawei-healthkit) |
+| Xiaomi Health Cloud | Yes | limited | No | [dev.mi.com](http://developer.mi.com) |
+| OPPO Health | Yes | limited | No | [open.oppomobile.com](https://open.oppomobile.com/) |
+| vivo Health Kit | Yes | limited | No | [developers.vivo.com](https://developers.vivo.com/) |
+| Honor Health Kit | Yes | limited | No | [developer.honor.com](https://developer.honor.com/) |
 ```
 
 ## Larger Projects (high effort — from previous roadmap, still pending)
@@ -421,7 +421,7 @@ High importance  │ Batch delete            │ Shopping list
 
 ## Summary of new pitfalls documentation
 
-Every new feature item now includes a dedicated **⚠ Pitfalls & edge cases** section covering:
+Every new feature item now includes a dedicated **Pitfalls & edge cases** section covering:
 
 | Category | Common examples |
 |---|---|
