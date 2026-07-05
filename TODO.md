@@ -7,7 +7,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 ## Quick Wins (low effort, high impact)
 
 - [ ] **Batch delete** — multi-select items via checkboxes, delete all selected. Reuses existing `deleteInventoryItem` + undo snackbar.
-- [ ] **Expiry date guard** — date picker min-date = today; validate before saving.
+- [x] **Expiry date guard** — date picker already uses `firstDate: DateTime.now()`. Verified correct.
 - [ ] **Quick quantity adjustment** — `+/−` buttons on each inventory tile in `ProductDetailScreen`. Tap quantity to type a number directly (e.g. used 3 of 12 eggs at breakfast). Decrementing to 0 deletes the item with confirmation + undo. Re-schedules notifications on restore.
 - [ ] **Coverage: `stats_screen.dart`** (32.8%) — test export + import button flows.
 - [ ] **Coverage: `home_screen.dart`** (65.1%) — test create-pantry dialog, pull-to-refresh.
@@ -19,8 +19,8 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 ## Code Health (low/medium effort)
 
 - [x] **Extract expiry-date parsing** — duplicated in `home_screen.dart`, `product_detail_screen.dart`, `inventory_card.dart`. Extracted to `utils/date_helpers.dart`: `parseExpiryDate()`, `isExpired()`, `isExpiringSoon()`.
-- [ ] **Deduplicate custom picker dialogs** — `_pickCustomUnit` and `_pickCustomLocation` in `add_to_inventory_screen.dart` are structurally identical; parameterise.
-- [ ] **Deduplicate settings dialogs** — `_showRetentionDialog` and `_showExpiringSoonDialog` share structure; extract a builder.
+- [x] **Deduplicate custom picker dialogs** — extracted `_showCustomInput(title, onPicked)` shared by both.
+- [x] **Deduplicate settings dialogs** — extracted `_showDaysDialog(title, initialValue)` shared by both.
 - [x] **Screenshots section** — removed placeholder table; added single‑line placeholder.
 - [x] **Remove unused `product_api_service.dart`** — removed; `ProductRepository` now uses `OpenFoodFactsApi` directly. `close()` method removed from `OpenFoodFactsApi`.
 - [ ] **Golden tests for `NutriScoreBadge`** — verify A–E colours render correctly via `matchesGoldenFile`.

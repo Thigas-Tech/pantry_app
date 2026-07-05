@@ -41,8 +41,9 @@ class SettingsScreen extends ConsumerWidget {
             onChanged: (value) {
               logInfo('Notifications toggled: $value');
               final current = ref.read(settingsProvider);
-              ref.read(settingsProvider.notifier).value =
-                  current.copyWith(notificationsEnabled: value);
+              ref.read(settingsProvider.notifier).value = current.copyWith(
+                notificationsEnabled: value,
+              );
               if (context.mounted) {
                 SnackbarHelper.showInfo(
                   context,
@@ -123,39 +124,16 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _showRetentionDialog(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
     final current = ref.read(settingsProvider);
-    final controller = TextEditingController(
-      text: current.retentionDays.toString(),
-    );
-    final days = await showDialog<int>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.dataRetentionDialogTitle),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(labelText: l10n.daysLabel),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              final value = int.tryParse(controller.text.trim());
-              if (value != null && value > 0) {
-                Navigator.pop(ctx, value);
-              }
-            },
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
+    final days = await _showDaysDialog(
+      context,
+      title: l10n.dataRetentionDialogTitle,
+      initialValue: current.retentionDays,
     );
     if (days != null) {
       logInfo('Retention period changed to $days days');
-      ref.read(settingsProvider.notifier).value =
-          current.copyWith(retentionDays: days);
+      ref.read(settingsProvider.notifier).value = current.copyWith(
+        retentionDays: days,
+      );
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.retentionPeriodSet(days));
       }
@@ -168,13 +146,33 @@ class SettingsScreen extends ConsumerWidget {
   ) async {
     final l10n = AppLocalizations.of(context)!;
     final current = ref.read(settingsProvider);
-    final controller = TextEditingController(
-      text: current.expiringSoonDays.toString(),
+    final days = await _showDaysDialog(
+      context,
+      title: l10n.expiringSoonDaysDialogTitle,
+      initialValue: current.expiringSoonDays,
     );
-    final days = await showDialog<int>(
+    if (days != null) {
+      logInfo('Expiring soon threshold changed to $days days');
+      ref.read(settingsProvider.notifier).value = current.copyWith(
+        expiringSoonDays: days,
+      );
+      if (context.mounted) {
+        SnackbarHelper.showInfo(context, l10n.expiringSoonDaysSet(days));
+      }
+    }
+  }
+
+  Future<int?> _showDaysDialog(
+    BuildContext context, {
+    required String title,
+    required int initialValue,
+  }) {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = TextEditingController(text: initialValue.toString());
+    return showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.expiringSoonDaysDialogTitle),
+        title: Text(title),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
@@ -197,16 +195,5 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (days != null) {
-      logInfo('Expiring soon threshold changed to $days days');
-      ref.read(settingsProvider.notifier).value =
-          current.copyWith(expiringSoonDays: days);
-      if (context.mounted) {
-        SnackbarHelper.showInfo(
-          context,
-          l10n.expiringSoonDaysSet(days),
-        );
-      }
-    }
   }
 }

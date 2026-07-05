@@ -74,41 +74,26 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     }
   }
 
-  Future<void> _pickCustomUnit() async {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    final value = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.enterCustomUnit),
-        content: TextField(controller: controller, autofocus: true),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
-    );
-    if (value != null && value.isNotEmpty) {
-      setState(() {
-        _unit = value;
-        _syncCustomOptions();
-      });
-    }
-  }
+  Future<void> _pickCustomUnit() => _showCustomInput(
+    AppLocalizations.of(context)!.enterCustomUnit,
+    (v) => _unit = v,
+  );
 
-  Future<void> _pickCustomLocation() async {
+  Future<void> _pickCustomLocation() => _showCustomInput(
+    AppLocalizations.of(context)!.enterCustomLocation,
+    (v) => _location = v,
+  );
+
+  Future<void> _showCustomInput(
+    String title,
+    ValueSetter<String> onPicked,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
     final value = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.enterCustomLocation),
+        title: Text(title),
         content: TextField(controller: controller, autofocus: true),
         actions: [
           TextButton(
@@ -124,7 +109,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     );
     if (value != null && value.isNotEmpty) {
       setState(() {
-        _location = value;
+        onPicked(value);
         _syncCustomOptions();
       });
     }
@@ -199,8 +184,9 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 onSaved: (v) => _quantity = double.parse(v!),
               ),
               DropdownButtonFormField<String>(
-                initialValue:
-                    _presetUnits.contains(_unit) ? _unit : '__custom__',
+                initialValue: _presetUnits.contains(_unit)
+                    ? _unit
+                    : '__custom__',
                 items: unitItems,
                 onChanged: (v) {
                   if (v == '__custom__') {
@@ -212,8 +198,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 decoration: InputDecoration(labelText: l10n.unitLabel),
               ),
               DropdownButtonFormField<String>(
-                initialValue: _presetLocations
-                        .contains(_location)
+                initialValue: _presetLocations.contains(_location)
                     ? _location
                     : '__custom__',
                 items: locationItems,
