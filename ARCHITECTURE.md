@@ -104,9 +104,31 @@ Version history:
 
 `ProductRepository` implements the offline-first strategy:
 
+```
+User scans barcode
+           │
+      ┌────▼────┐  no     ┌─────────────────┐
+      │ Online? ├────────►│ Manual entry     │
+      └────┬────┘         │ (AddProductScreen)│
+           │ yes          └────────┬─────────┘
+      ┌────▼────┐                 │
+      │ OFF API │                 │
+      └────┬────┘                 │
+           │                      │
+      ┌────▼──────────┐          │
+      │ Cache in DB   │◄─────────┘
+      │ (upsertProduct)│
+      └────┬──────────┘
+           │
+      ┌────▼────┐
+      │ Return  │
+      │ Product │
+      └─────────┘
+```
+
 1. **Check local cache** — if the product exists in SQLite, return it immediately.
 2. **Call primary API** — if not cached, fetch from Open Food Facts and store locally.
-3. **Fallback API** — an optional secondary API (wired but currently unused).
+3. **Fallback (offline)** — if no connectivity, skip API and go directly to manual entry form.
 
 **Exception hierarchy:**
 
@@ -246,3 +268,4 @@ for JSON deserialization from the Open Food Facts API.
 5. **Freezed models** — immutable, with generated `copyWith`, `==`, `hashCode`, and JSON serialization.
 6. **No `ignore:` comments** — all lint rules are followed; deprecations are addressed rather than suppressed.
 7. **ANSI-coloured logging** — `logInfo` (blue), `logWarning` (yellow), `logError` (red) for terminal visibility.
+8. **Environment‑based config** — credentials loaded via `flutter_dotenv` from `.env` (never committed). `.env.example` is the documented template. `AppConfig` class provides typed accessors.

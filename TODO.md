@@ -69,8 +69,8 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 
 ## Documentation (quick wins)
 
-- [ ] `ARCHITECTURE.md` — add security section (dotenv env-var handling, no-committed-secrets rule).
-- [ ] `ARCHITECTURE.md` — add offline-first pattern diagram or ASCII flow.
+- [x] `ARCHITECTURE.md` — add security section (dotenv env-var handling, no-committed-secrets rule).
+- [x] `ARCHITECTURE.md` — add offline-first pattern diagram or ASCII flow.
 - [ ] `AGENTS.md` — add "always check TODO.md before starting new work" instruction.
 
 ---
