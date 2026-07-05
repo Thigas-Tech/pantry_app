@@ -142,6 +142,36 @@ class InventoryDao {
     }
   }
 
+  /// Moves multiple inventory items to a different inventory (pantry).
+  ///
+  /// Uses a batch `UPDATE` to atomically reassign all [itemIds] to the
+  /// [targetInventoryId]. Logs the number of affected rows on success.
+  Future<void> moveItemsToInventory(
+    Database db,
+    List<int> itemIds,
+    int targetInventoryId,
+  ) async {
+    logInfo(
+      'Moving ${itemIds.length} item(s) to inventory $targetInventoryId',
+    );
+    try {
+      final batch = db.batch();
+      for (final id in itemIds) {
+        batch.update(
+          'inventory',
+          {'inventory_id': targetInventoryId},
+          where: 'id = ?',
+          whereArgs: [id],
+        );
+      }
+      final results = await batch.commit(noResult: true);
+      logInfo('Moved ${results.length} item(s) successfully');
+    } on Exception catch (e) {
+      logError('Failed to move items to inventory $targetInventoryId: $e');
+      rethrow;
+    }
+  }
+
   /// Retrieves all inventory rows joined with product metadata for a
   /// specific [inventoryId].
   ///

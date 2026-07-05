@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -17,18 +18,31 @@ import 'package:share_plus/share_plus.dart';
 /// Shows aggregate pantry counts and allows the user to export and import
 /// CSV files for the currently active pantry. Export uses the system share
 /// sheet; import opens the platform file picker via `Filegate`.
-class StatsScreen extends ConsumerWidget {
+///
+/// Pull‑to‑refresh re‑loads the product and inventory counts.
+class StatsScreen extends ConsumerStatefulWidget {
   /// Creates a [StatsScreen] widget.
   const StatsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends ConsumerState<StatsScreen> {
+  int _refreshKey = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final db = ref.watch(databaseProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.pantryStats)),
       body: FutureBuilder(
-        future: Future.wait([db.getProductCount(), db.getInventoryCount()]),
+        key: ValueKey(_refreshKey),
+        future: Future.wait([
+          db.getProductCount(),
+          db.getInventoryCount(),
+        ]),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -38,24 +52,32 @@ class StatsScreen extends ConsumerWidget {
             return const Center(child: CircularProgressIndicator());
           }
           final counts = data;
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          return RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                Text('${l10n.totalProducts}: ${counts[0]}'),
-                Text('${l10n.inventoryItems}: ${counts[1]}'),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () => _exportCsv(context, ref),
-                  icon: const Icon(Icons.file_download),
-                  label: Text(l10n.exportCsv),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  onPressed: () => _importCsv(context, ref),
-                  icon: const Icon(Icons.file_upload),
-                  label: Text(l10n.importCsv),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${l10n.totalProducts}: ${counts[0]}'),
+                      Text('${l10n.inventoryItems}: ${counts[1]}'),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => _exportCsv(context, ref),
+                        icon: const Icon(Icons.file_download),
+                        label: Text(l10n.exportCsv),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () => _importCsv(context, ref),
+                        icon: const Icon(Icons.file_upload),
+                        label: Text(l10n.importCsv),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -63,6 +85,10 @@ class StatsScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  Future<void> _onRefresh() async {
+    setState(() => _refreshKey++);
   }
 
   /// Exports the current pantry as a CSV file via the system share sheet.

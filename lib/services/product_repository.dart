@@ -159,6 +159,17 @@ class ProductRepository {
     return _db.deleteInventoryItem(id);
   }
 
+  /// Moves multiple inventory items to a different inventory (pantry).
+  Future<void> moveItemsToInventory(
+    List<int> itemIds,
+    int targetInventoryId,
+  ) {
+    logInfo(
+      'Moving ${itemIds.length} item(s) to inventory $targetInventoryId',
+    );
+    return _db.moveItemsToInventory(itemIds, targetInventoryId);
+  }
+
   /// Returns joined inventory-with-product rows for a given [inventoryId].
   Future<List<Map<String, dynamic>>> getInventoryWithProduct({
     required int inventoryId,

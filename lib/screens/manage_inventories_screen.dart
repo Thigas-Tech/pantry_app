@@ -39,24 +39,40 @@ class ManageInventoriesScreen extends ConsumerWidget {
           return ListView(
             children: [
               for (final inv in list)
-                ListTile(
-                  title: Text(inv['name'] as String),
-                  subtitle: Text(
-                    l10n.itemsCount((inv['item_count'] as int?) ?? 0),
+                Dismissible(
+                  key: ValueKey('manage-inv-${inv['id'] as int}'),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    color: Colors.red,
+                    child: const Icon(Icons.delete, color: Colors.white),
                   ),
-                  trailing: (inv['id'] as int) == activeId
-                      ? const Icon(Icons.check, color: Colors.teal)
-                      : null,
-                  onTap: () {
-                    ref.read(activeInventoryProvider.notifier).value =
-                        inv['id'] as int;
-                    Navigator.of(context).pop();
-                  },
-                  onLongPress: () => _showRenameDialog(
+                  confirmDismiss: (_) => _confirmDelete(
                     context,
                     ref,
                     inv['id'] as int,
                     inv['name'] as String,
+                  ),
+                  child: ListTile(
+                    title: Text(inv['name'] as String),
+                    subtitle: Text(
+                      l10n.itemsCount((inv['item_count'] as int?) ?? 0),
+                    ),
+                    trailing: (inv['id'] as int) == activeId
+                        ? const Icon(Icons.check, color: Colors.teal)
+                        : null,
+                    onTap: () {
+                      ref.read(activeInventoryProvider.notifier).value =
+                          inv['id'] as int;
+                      Navigator.of(context).pop();
+                    },
+                    onLongPress: () => _showRenameDialog(
+                      context,
+                      ref,
+                      inv['id'] as int,
+                      inv['name'] as String,
+                    ),
                   ),
                 ),
               const Divider(),
@@ -170,7 +186,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _confirmDelete(
+  Future<bool> _confirmDelete(
     BuildContext context,
     WidgetRef ref,
     int id,
@@ -215,12 +231,15 @@ class ManageInventoriesScreen extends ConsumerWidget {
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.inventoryDeleted(name));
         }
+        return true;
       } on Exception catch (e) {
         logError('Failed to delete inventory: $e');
         if (context.mounted) {
           SnackbarHelper.showError(context, l10n.couldNotDeleteInventory);
         }
+        return false;
       }
     }
+    return false;
   }
 }

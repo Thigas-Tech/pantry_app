@@ -289,7 +289,7 @@ void main() {
 
     // Tap Search tab.
     await tester.tap(find.text('Search'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(SearchScreen), findsOneWidget);
   });
 
@@ -1319,5 +1319,115 @@ void main() {
 
     expect(find.byType(InventoryCard), findsOneWidget);
     expect(find.text('111111'), findsNothing);
+  });
+
+  // ---------- Long-press selection tests ----------
+
+  testWidgets('long-press enters selection mode and selects item', (
+    tester,
+  ) async {
+    final mockRepo = createMockProductRepository();
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        productName: 'Item A',
+        notes: 'test',
+        dateAdded: 0,
+        inventoryId: 1,
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 2,
+        unit: 'L',
+        location: 'fridge',
+        id: 2,
+        productName: 'Item B',
+        notes: 'test',
+        dateAdded: 0,
+        inventoryId: 1,
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(mockRepo),
+      ],
+    );
+
+    // Long-press the first card.
+    await tester.longPress(find.byType(InventoryCard).first);
+    await tester.pumpAndSettle();
+
+    // Selection mode should be active: checkboxes visible.
+    expect(find.byType(Checkbox), findsNWidgets(2));
+
+    // The first checkbox should be checked.
+    final firstCheckbox = tester.widget<Checkbox>(
+      find.byType(Checkbox).first,
+    );
+    expect(firstCheckbox.value, isTrue);
+  });
+
+  testWidgets('tap still navigates when not in selection mode', (
+    tester,
+  ) async {
+    final mockRepo = createMockProductRepository();
+    const product = Product(barcode: '1', name: 'Item A');
+    when(() => mockRepo.getProduct('1')).thenAnswer((_) async => product);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => <InventoryItem>[]);
+
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        productName: 'Item A',
+        notes: 'test',
+        dateAdded: 0,
+        inventoryId: 1,
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(mockRepo),
+      ],
+    );
+
+    await tester.tap(find.byType(InventoryCard));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ProductDetailScreen), findsOneWidget);
   });
 }

@@ -158,6 +158,36 @@ void main() {
       final items = await db.getInventoryItems(inventoryId: 1);
       expect(items, isEmpty);
     });
+
+    test('moveItemsToInventory reassigns items to target inventory', () async {
+      // Create two inventories.
+      await db.createInventory('Pantry A');
+      await db.createInventory('Pantry B');
+
+      // Insert a product.
+      await db.insertProduct(
+        const Product(barcode: '001', name: 'Test'),
+      );
+
+      // Insert two items in Pantry A.
+      final id1 = await db.insertInventoryItem(
+        const InventoryItem(barcode: '001', quantity: 1, inventoryId: 1),
+      );
+      final id2 = await db.insertInventoryItem(
+        const InventoryItem(barcode: '001', quantity: 2, inventoryId: 1),
+      );
+
+      // Move both items to Pantry B.
+      await db.moveItemsToInventory([id1, id2], 2);
+
+      // Verify they now belong to Pantry B.
+      final itemsInB = await db.getInventoryItems(inventoryId: 2);
+      expect(itemsInB.length, 2);
+
+      // Verify they no longer belong to Pantry A.
+      final itemsInA = await db.getInventoryItems(inventoryId: 1);
+      expect(itemsInA.length, 0);
+    });
   });
 
   group('cleanupOldEntries', () {

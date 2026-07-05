@@ -36,26 +36,170 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 
 ## Features (medium effort)
 
+- [ ] **Changelog at startup** — detect app update via existing `_handleAppUpdate()` scaffolding (`package_info_plus` + `SharedPreferences` `app_version` key). On first launch after update, show a `WhatsNewDialog` or bottom sheet with new entries from `CHANGELOG.md`.
+
+  **Implementation**:
+  1. Create `lib/widgets/whats_new_dialog.dart` — reads CHANGELOG.md, parses entries by version, filters to unseen versions.
+  2. Modify `main.dart` to set `changelog_last_seen` SharedPreferences key separate from `app_version`.
+  3. In `PantryShell` init, check flag and show dialog once.
+  4. New ARB strings: `whatsNew`, `dismiss`.
+  5. Tests: verify dialog appears on version change, doesn't on same version, doesn't on first install.
+
+  **⚠ Pitfalls & edge cases**:
+  - **Missing file**: `rootBundle.loadString('CHANGELOG.md')` throws `FlutterError`. Use `await File('CHANGELOG.md').exists()` first, or bundle a fallback JSON file instead of parsing markdown.
+  - **`flutter_markdown` discontinued**: Official package last updated at 0.7.x; community forks exist (`flutter_markdown_plus`, `flutter_markdown_community`). Consider using a simple line‑based parser for version extraction instead of a full markdown renderer.
+  - **Markdown parser crashes**: Known assertion failures in `flutter_markdown` with malformed inline elements (`'_inlines.isEmpty': is not true.`). Always wrap in `FlutterError` boundary.
+  - **Memory on large CHANGELOG**: Full markdown builds a complete AST in memory. Keep displayed content short (last 2–3 versions max). Truncate the input string before parsing.
+  - **First install**: Don't show changelog on first install (no `app_version` in prefs). Only show on detected version change.
+  - **Accumulated versions**: User may skip multiple releases. Show all entries from `last_seen` → `current`, not just the latest.
+  - **Inline HTML**: `flutter_markdown` does **not** support inline HTML (`<br/>`, `<div>`). Strip or escape before rendering.
+  - **No `CHANGELOG.md` in release bundle**: Ensure `pubspec.yaml` includes `assets: [CHANGELOG.md]` or switch to a bundled JSON release‑notes file.
+
+- [ ] **Product name translations** — pass `lc=<app_locale>` to OFF API v3. `product_name` and `ingredients_text` return in the user's locale. Brands are **never translated** (proper nouns/trademarks). Add `brand_name_overrides` alias map for edge cases like `"Hungry Jack's"` → `"Burger King"` in Australia.
+
+  **Implementation**:
+  1. Add `lc` and `tags_lc` query parameters to `OpenFoodFactsApi.getByBarcode()` and `searchProducts()`.
+  2. Extract locale from `Localizations.localeOf(context).languageCode` (or `PlatformDispatcher.instance.locale.languageCode` for non‑widget code).
+  3. Add `lang` field to `Product` model (persisted in DB).
+  4. Add `brand_name_overrides` JSON map to `Product` model + seed data in `ProductDao`.
+  5. Add display helper `resolveBrandName()` in `Product` extension.
+  6. Update `ProductMerge.mergeFromApi` to preserve `lang`.
+  7. DB migration: add `products.lang` column (bundle with version 9).
+  8. Tests: mock API responses with `lc=fr`, verify French name returned; verify brand names preserved.
+
+  **⚠ Pitfalls & edge cases**:
+  - **Silent fallback**: If no translation exists for the requested `lc`, OFF silently returns the product's default `lang`. You cannot distinguish "translation missing" from "product's default matches the requested locale". Always display the returned value — it may be in a different language.
+  - **`Platform.localeName` is unreliable**: Returns `null` on iOS first launch; returns `"en_US"` in test env; never updates on Android at runtime. Use `Localizations.localeOf(context).languageCode` or `PlatformDispatcher.instance.locale.languageCode` instead.
+  - **Locale string mismatch**: Dart `Locale.languageCode` returns ISO 639-1 (`"en"`). This is correct for OFF. But if someone uses `locale.toString()` you get `"en_US"` (OFF doesn't understand). Always use `.languageCode`.
+  - **`und` locale**: `PlatformDispatcher.locale` returns `Locale.fromSubtags(languageCode: "und")` when the device locale list is empty. Validate: `if (code.isEmpty || code == 'und') code = 'en'`.
+  - **`lc` without `tags_lc`**: product name may be German but category/label taxonomy names remain in the product's default language. Always pass both: `{'lc': lang, 'tags_lc': lang}`.
+  - **Empty product name**: Some products have `product_name: ""` in a language. Handle `null`/empty in `_parseProduct`; fall back to product's `_id` (barcode).
+  - **Search API (`cgi/search.pl`)**: The legacy search endpoint may not support `lc` identically to v3. Test before deploying. If it doesn't work, accept that search results may be in mixed languages.
+  - **Brand alias map maintenance**: Brand overrides are a curated list. Add a mechanism to update it without app updates (remote config, or seed file in assets). Start with known cases (Hungry Jack's → Burger King, Quick → Burger King in Belgium).
+  - **CORS on Flutter Web**: Open bug #1089 — OFF API lacks CORS headers. Blocked on web irrespective of `lc`. Not actionable here but good to know.
+  - **iOS unsupported locale**: `PlatformDispatcher.locale` on iOS returns the OS language even when not in `supportedLocales`. If user has system language set to `th` (Thai) and app only supports `en`/`pt`/`fr`, `lc=th` will return English fallback silently.
+
+## Larger Projects (high effort)
+
+- [ ] **Product prices + inventory total value** — new `prices` SQLite table, `PriceDao`, `Price` freezed model. Dual-source: local user‑entered prices and Open Prices API (`prices.openfoodfacts.org`). Price badge on `InventoryCard` (unit price), `InventoryTile` (price + store), total value in `StatsScreen`. Price editing via bottom sheet. Open Prices submissions upload proof photo.
+
+  **Implementation (Phase 1 — local‑first)**:
+  1. Create `Price` model (`lib/models/price.dart`).
+  2. Create `prices` table schema: `id INTEGER PK`, `barcode TEXT FK products`, `price REAL`, `store TEXT`, `date INTEGER`, `currency TEXT`, `proof_image_path TEXT`, `source TEXT` (`'local'` / `'open_prices'`).
+  3. Create `PriceDao` with CRUD.
+  4. Add unit‑price badge to `InventoryCard` (similar to NutriScoreBadge).
+  5. Add price + store display on `ProductDetailScreen._InventoryTile`.
+  6. Add total inventory value to `StatsScreen`.
+  7. Price editing bottom sheet (long‑press on inventory tile, enter price/store).
+  8. DB migration version 9 (bundled with other schema changes).
+
+  **Implementation (Phase 2 — Open Prices API)**:
+  1. Create `lib/services/open_prices_api.dart` — HTTP client for `prices.openfoodfacts.org/api/`.
+  2. Fetch prices by barcode: `GET /api/v1/prices?barcode={barcode}`.
+  3. Submit prices: `POST /api/v1/prices` with proof photo and Bearer token.
+  4. Create `PriceService` combining local DB + API (local wins on conflict, API as fallback).
+  5. Queue offline price submissions; flush when connectivity returns.
+  6. Tests: model, DAO, service, widget tests.
+
+  **⚠ Pitfalls & edge cases**:
+  - **Open Prices has NO documented rate limits**: The OFF rate limits page says "we currently don't have any rate limit policy" (GitHub issue #8818). Real risk of IP bans for aggressive requests. Assume ~15 req/min. Always set `User-Agent` header in the format `AppName/Version (contact@example.com)`.
+  - **Photo proof is MANDATORY**: Every Open Prices submission requires a photo of the price tag/receipt. No way to submit a price without one. This adds camera permission handling, storage, and network overhead. Design the UI to support photo capture gracefully.
+  - **Environment‑specific tokens**: Auth tokens differ between `prices.openfoodfacts.org` (prod) and `prices.openfoodfacts.net` (pre‑prod). Use `--dart-define` flavors to keep them separate. No documented token refresh — handle expiry with re‑authentication.
+  - **License obligations**: Open Prices data is OdBL-licensed. You must attribute Open Food Facts as source. Any prices your users contribute must be contributed back under OdBL. You cannot mix with proprietary price databases.
+  - **Data quality**: "No guarantees for accuracy, completeness, or reliability." Display a disclaimer: prices are community‑contributed and may be stale/incorrect.
+  - **Currency handling**: Decide on default currency (`BRL` for Brazilian users, `USD` otherwise). Allow user override. No currency conversion — display in original currency.
+  - **Multiple prices for same product**: Different stores, different dates. Show the most recent local price; if none, show the most recent from Open Prices. Let user choose which to display.
+  - **Decimal precision**: Prices have varying decimal places (`R$ 1,99` vs `$ 1.999`). Store as `double` but format with locale‑aware `NumberFormat.currency()`.
+  - **Offline submission queue**: Proof photos can be large (multiple MB). Queue submissions with `connectivityProvider`. Show pending count in UI. Handle submission failures with retry.
+  - **Privacy**: User may not want to share their prices or receipts. Make Open Prices opt‑in with explicit consent dialog. Local‑only prices work offline and never leave the device.
+  - **Proof photo storage**: Photos should be stored in app‑local directory and deleted after successful upload. Implement periodic cleanup for failed uploads.
+  - **HTTP 503 from infra**: "503 Service Unavailable" is returned indiscriminately when global limits are exceeded. Implement exponential backoff with jitter (1s, 2s, 4s, max 60s). Distinguish from actual service downtime via `status.openfoodfacts.org`.
+  - **User‑entered vs API conflict resolution**: If user enters a price manually and Open Prices has a different one, local wins. Show both in detail view: "Your price: $4.99 | Store average: $5.20."
+
+- [ ] **NFC‑e importing from QR code** — detect NFC‑e QR URLs on the scanner screen (pattern `fazenda.*/nfce/qrcode`). Fetch SEFAZ page via HTTP GET. Parse product items from DANFE HTML using `package:html`. Map items to `Product` (create if new) + `InventoryItem` (add to active inventory). Show review screen with checkboxes and quantity edits before importing. Future: dedicated backend service (nfce-scraper Docker).
+
+  **Implementation (Phase 1 — in‑app scraping)**:
+  1. Add `html` package to `pubspec.yaml`.
+  2. Create `lib/services/nfce_service.dart` — validate NFC‑e URL, HTTP GET SEFAZ page, parse DANFE HTML table rows.
+  3. Create `NfceItem` model (description, quantity, unit, unit_price, total).
+  4. Detect NFC‑e QR code on `ScannerScreen` or add "Import NFC‑e" button on home screen.
+  5. Show review screen: list of parsed items with checkboxes + quantity/price edits.
+  6. On confirm: `upsertProduct` + `addInventoryItem` for each checked item.
+  7. New ARB strings: `importNfce`, `nfceItemCount`, `nfceImportSuccess`, `nfceImportFailed`, `nfceParseError`.
+  8. Create `lib/docs/nfce_reference.md` — full NFC‑e technical reference from project documentation.
+
+  **Implementation (Phase 2 — backend service)**:
+  - Separate TODO item: deploy `nfce-scraper` (Python FastAPI) as Docker service.
+  - Flutter sends QR URL → backend returns JSON.
+  - Backend handles multi‑state HTML variations.
+
+  **⚠ Pitfalls & edge cases**:
+  - **25+ Brazilian states, each with unique HTML structure**: SEFAZ pages differ by state (SP, PR, RS, etc.). A parser that works for São Paulo may fail for Paraná. Build a state‑detection layer (from URL domain + QR code params) and route to state‑specific parsers. Start with the most common states.
+  - **SEFAZ can change HTML structure at any time**: Scraping is inherently fragile. The pages are government systems that update unpredictably. Implement a `version` field in the parser; when a parse fails, log the raw HTML for debugging. The future backend service with a parser‑per‑state architecture mitigates this.
+  - **`package:html` O(n²) tokenizer on large invoices**: Confirmed open issue (`dart-lang/html#18`) where string interpolation creates O(n²) behavior on long strings. Invoices with 50+ items may be slow. Use `parseFragment()` instead of `parse()` to avoid full document wrapper overhead. Consider chunk‑based processing for very large documents.
+  - **QR code v2 vs v3 format**: v2 includes CSC hash fields; v3 (mandatory from Sep 2025) removes CSC. Parse the URL parameters to determine version. The extraction flow (HTTP GET → HTML parse) is identical for both — only the URL structure differs.
+  - **Offline contingency QR codes** (`tpEmis=9`): Extra fields in the QR code URL (`day`, `total`). The SEFAZ page may have different content/layout for contingency invoices. Handle gracefully — if parse fails, show raw error and suggest manual entry.
+  - **No barcode on NFC‑e items**: Many items lack EAN barcodes. Map to `Product` with `source: 'manual'` and a generated ID. The item description becomes the product name. Cache by description hash to avoid duplicates in the same import batch.
+  - **Duplicate detection**: Item already exists in active inventory. Show a warning in the review screen. Let user choose: skip, add as new (duplicate), or increment quantity.
+  - **Network errors fetching SEFAZ page**: SEFAZ servers can be slow/unavailable. Show loading with timeout (10s default). On failure, retry once, then show error with "Try again" button.
+  - **Encoding**: Brazilian Portuguese uses ISO‑8859-1 / Latin-1 encoding in some SEFAZ pages. Detect charset from HTML `<meta>` tag or Content-Type header. Convert to UTF‑8 before parsing. `package:html` expects UTF‑8 input.
+  - **Privacy**: NFC‑e URLs may encode the consumer's CPF (tax ID) in some states. Warn the user before fetching: "The QR code may contain personal information. The page will be fetched but not stored." Never cache the raw HTML.
+  - **Large invoices (50+ items)**: Memory concern. The review screen builds a widget per item. Use `ListView.builder` with lazy loading. Show a progress indicator during parsing with item count.
+  - **HTML5 "error recovery"**: `package:html` follows HTML5 spec and silently "fixes" malformed HTML (auto‑closes tags, injects `<tbody>`, etc.). The DOM you query may differ from the raw HTML structure. Test against real SEFAZ pages during development — include fixture files in tests.
+  - **Partial import**: User unchecks some items. Only process checked items. If none checked, show "No items selected" snackbar.
+  - **State‑specific error pages**: SEFAZ sometimes returns an HTML error page instead of the invoice (expired key, not found). Detect by checking for error keywords (`"não encontrada"`, `"inválida"`) in the response. Show descriptive error in user's language.
+  - **Rate limiting by SEFAZ**: Government servers may throttle repeated requests from the same IP. Add a 1‑second delay between fetch and retry. The in‑app approach fetches from the user's device (one IP per user), which is less risky than a backend service.
+
+- [ ] **Ingredients translations + allergen localization** — same `lc` parameter from product name translations renders `ingredients_text` in the user's locale. Show allergen highlighting via `ingredients_text_with_allergens_XX` when available. Add "show original" toggle to compare with the product's default language. Store `ingredients_text_languages` JSON on `Product` model for offline access in multiple languages.
+
+  **Implementation**:
+  1. Extend `OpenFoodFactsApi._parseProduct()` to extract `ingredients_text_with_allergens_XX` and `ingredients_text_languages` (requires `fields=ingredients_text_languages` in API call).
+  2. Add `ingredientsTextLanguages` field to `Product` model (`Map<String, String>?`).
+  3. Add `ingredientsTextWithAllergensLanguages` field (optional).
+  4. DB migration: add `products.ingredients_text_languages` JSON column (version 9, bundled).
+  5. Update `ProductMerge.mergeFromApi` to merge multilingual ingredient data.
+  6. On `ProductDetailScreen`, display ingredients in app's locale. Add toggle button "show original" → switch to `lang` version.
+  7. When `ingredients_text_with_allergens_XX` is available, render allergens in bold/coloured using a custom `IngredientText` widget.
+  8. New ARB strings: `showOriginal`, `showTranslated`, `ingredientsInLanguage`.
+  9. Tests: model, DAO, widget tests for language toggle and allergen highlighting.
+
+  **⚠ Pitfalls & edge cases**:
+  - **Allergen mistranslation is a safety hazard**: If the user reads ingredients in a translated language where allergens are misidentified or formatting is lost, they could consume a harmful product. Display a disclaimer: "Ingredients list is user‑contributed. Always check the product packaging for allergens." Never remove allergen information from display.
+  - **`ingredients_text_with_allergens_XX` is not always available**: Many products only have `ingredients_text`. The allergen‑highlighted version is contributed by OFF community editors. When unavailable, fall back to `ingredients_text` with no highlighting. Do not attempt to parse allergens yourself — that's a complex NLP problem.
+  - **Ingredients formatting varies by language**: Commas vs. bullets vs. numbered lists differ across locales. The `ingredients_text` field is raw text with locale‑specific formatting. A German ingredients list may look structurally different from an English one. The "show original" toggle must switch the entire text block, not attempt per‑segment comparison.
+  - **`ingredients_text_languages` field may be large**: Some products have 10+ language translations. Storing these as a JSON map in SQLite is fine for typical sizes (<5 KB), but very large texts (>100 KB across all languages) could impact DB performance. Consider a separate `product_translations` table if this becomes a problem. Initial estimate: store JSON inline.
+  - **"Show original" needs the product's `lang`**: The `lang` field from the API tells you which language the product's default data is in. The toggle should switch to that language. If `lang` is `null` or empty, fall back to the first non‑empty language in `ingredients_text_languages`, then to English, then display the raw text.
+  - **Healthcare/religious implications**: A translated ingredient list could mislead users with dietary restrictions (halal, kosher, vegan). The toggle and disclaimer help mitigate this, but the app should never claim the translation is authoritative.
+  - **`fields=ingredients_text_languages` adds API payload size**: Requesting the full languages map adds to the response size. For products with many translations, this could be significant. Only request this field when the product detail screen is opened (lazy fetch), not during search/list views.
+  - **Allergen formatting in translated text**: The allergen‑highlighted version uses HTML-like markup or bold formatting depending on the language. `Package:html` can parse this, but displaying it in Flutter requires `flutter_html` or custom rendering. Simpler approach: display `ingredients_text_with_allergens_XX` (if available) with basic bold/color markup using a lightweight parser (regex for `**text**` or `<b>text</b>`).
+  - **Fallback chain ambiguity**: The app's locale → product's `lang` → English → raw text. But "English" may not exist either. The final fallback should be the first non‑empty `ingredients_text_XX` found in the API response, regardless of language. Display a subtle indicator: "Ingredients shown in [language]."
+  - **Search results can't show translated ingredients**: Search list results (`SearchScreen`, autocomplete) fetch minimal data. Only request `ingredients_text_languages` on the full product detail. This means search summaries are always in the product's default language — which is acceptable.
+
+## Database migrations
+
+- [ ] **DB version 9: prices table + lang and multilingual fields** — bundle into a single migration:
+  - New table: `prices`
+  - New columns on `products`: `lang TEXT`, `product_name_languages TEXT` (JSON), `ingredients_text_languages TEXT` (JSON)
+  - Migration must handle: existing rows get `NULL` for new columns (safe defaults in app code), `prices` table created fresh.
+  - Rollback: keep old column defaults so downgrade doesn't crash (code should handle `NULL`).
+
+  ⚠ **Pitfall**: Schema changes for products table must not disrupt existing data. All new columns are nullable — no `NOT NULL` or `DEFAULT` on existing rows. `_onUpgrade` runs in a transaction; test on a copy of a real database.
+
+## Features (medium effort — from previous roadmap, still pending)
+
 - [ ] **Shopping list** — tab or separate screen; mark items as "to buy" with a toggle. Items appear in a dedicated list until purchased (then move to inventory).
 - [ ] **Barcode history** — show the last N scanned barcodes with quick-add button. Persist to SQLite.
-- [x] **Category filter** — `FilterChip` row on home screen to filter items by product category. Replaces previous scope dropdown approach.
-- [x] **Stock count badge** — horizontal badge row (total items, expiring soon, added this week) on the home screen above the search field.
 - [ ] **Empty-pantry onboarding** — when inventory is empty, show a guided "scan your first item" flow instead of just the empty state widget.
 - [ ] **Offline-first product submission queue** — queue `submitProduct` calls when offline; flush when `connectivityProvider` emits `true`.
 - [ ] **Cloud backup** — upload DB to Firebase Storage / S3. Restore on a new device.
-- [x] **Serving‑size & Nutri‑Score in manual entry** — `add_product_screen.dart` already has the fields; verified wired and tested (Phase 1).
-- [x] **Ingredient list & nutrition table photos in manual entry** — added image‑picker fields to `AddProductScreen` for capturing/selecting photos. Local file paths stored on model; preview thumbnails in form (Phase 2).
 - [ ] **Cosmetics & toiletries support** — extend the OFF API integration to query Open Beauty Facts (`openbeautyfacts.org`), add `productType` to the `Product` model (`'food'` / `'beauty'` / `'petfood'`), add cosmetic‑specific fields (periodAfterOpening, beauty category), hide nutrition/Nutri‑Score for non‑food items, and add filter chips on the home screen.
 - [ ] **WHO-based food quality recommendations** — research complete: ADI-based additive safety warnings, non‑sugar sweetener health guidance, free‑sugar threshold alerts (5 g per 100 g), sodium level awareness labels (low/medium/high per WHO thresholds), balanced diet prompts, and Five Keys to Safer Food tips.
-- [x] **Bottom NavigationBar** — `NavigationBar` with Home, Search, Stats, Settings tabs using `IndexedStack` + nested Scaffolds.
-- [x] **Product name search** — `SearchScreen` tab with debounced `TextField` (300ms) querying local DB + OFF API, deduplicated results, `ProductDetailScreen` navigation.
 
-## Larger Projects (high effort)
+## Larger Projects (high effort — from previous roadmap, still pending)
 
 - [ ] **Multi‑language support** — ARB infrastructure exists; add translations (pt, fr, es, de). Contribute via community PRs.
 - [ ] **Recipe suggestions** — call a recipe API with items expiring this week; suggest meals that use them.
 - [ ] **Widget test → golden coverage** — product detail, settings, stats screens.
-- [x] **Upload manual products to Open Food Facts** — submit user‑entered products (including photos of ingredients list and nutrition table) to the OFF API via the legacy product submission endpoint + image upload. Submission status shown in UI with retry for failures. Supersedes the offline‑first submission queue item (Phase 3).
 - [ ] **Remake notification feature from scratch** — rewrite `NotificationService` for reliability: precise expiry‑day‑at‑morning and expiry‑soon (N days before) scheduling, multi‑item grouping, per‑inventory notification channels, proper timezone handling, and resilient rescheduling on app boot.
 - [ ] **Remake import/export from scratch** — rewrite `CsvService` to support: export only cached (API-fetched) products, export a specific inventory, export products from a specific inventory, and import via `filegate` (platform file picker). Replace the stats-screen picker with a streamlined FileGate-based flow.
 - [ ] **Patrol E2E tests** — real‑device integration tests via [Patrol](https://patrol.leancode.co). Uses `patrol_cli` and `patrol` dev-dependency. Replace the generic `integration_test/` with `patrol_test/` directory.
@@ -88,6 +232,8 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [x] `ARCHITECTURE.md` — add security section (dotenv env-var handling, no-committed-secrets rule).
 - [x] `ARCHITECTURE.md` — add offline-first pattern diagram or ASCII flow.
 - [x] `AGENTS.md` — add "always check TODO.md before starting new work" instruction.
+- [ ] **NFC‑e reference doc** — create `lib/docs/nfce_reference.md` with complete technical reference (QR code URL formats, state‑specific variations, v2 vs v3, parsing approach, open‑source tools).
+- [ ] **Price tracking doc** — add section to `ARCHITECTURE.md` documenting local + Open Prices API data flow, conflict resolution, and proof‑photo requirement.
 
 ---
 
@@ -100,11 +246,32 @@ High importance  │ Batch delete            │ Shopping list
                  │ Quick quantity adjust   │ Offline submission queue
                  │ Expiry date guard       │ Cloud backup
                  │ Expiry parsing extract  │ GitHub CI pipeline
+                 │ Changelog at startup    │ Product prices (+ Open Prices)
+                 │ Product name trans.     │ NFC-e importing
                  │─────────────────────────│──────────────────────────
                  │ Golden tests            │ Multi-language
                  │ Accessibility audit     │ Recipe suggestions
-                  │ SearchBar upgrade        │ Patrol E2E tests
-                  │ Screenshots             │ Play Store CI deploy
- Low importance   │ Empty-pantry onboarding │ Barcode history
-                  │ NavigationRail          │
+                 │ SearchBar upgrade       │ Patrol E2E tests
+                 │ Screenshots             │ Play Store CI deploy
+                 │ Empty-pantry onboarding │ Barcode history
+ Low importance  │ NavigationRail          │ Ingredients translations
+                 │                         │ Cosmetics/toiletries
+                 │                         │ WHO food recommendations
 ```
+
+---
+
+## Summary of new pitfalls documentation
+
+Every new feature item now includes a dedicated **⚠ Pitfalls & edge cases** section covering:
+
+| Category | Common examples |
+|---|---|
+| **API limitations** | Rate limits, silent fallbacks, undocumented behaviour, CORS |
+| **Platform quirks** | iOS locale differences, Android background isolates, Windows locale bugs |
+| **Data quality** | Missing translations, no accuracy guarantees, stale prices, different HTML structures |
+| **Security/privacy** | NFC-e URLs with CPF, proof photos as PII, offline submission queuing |
+| **Performance** | HTML parser O(n²), large markdown ASTs, DB size for multilingual fields |
+| **UX edge cases** | First install vs update, accumulated version skips, partial imports, mixed-language results |
+| **Dependency risk** | Discontinued packages (`flutter_markdown`), fragile scraping (SEFAZ), license obligations (OdBL) |
+| **Safety** | Allergen mistranslation, dietary restriction implications, no authoritative translation claims |

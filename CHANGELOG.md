@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Enhancements
+- **Long-press to select**: Inventory cards now respond to long-press by entering multi-select mode with haptic feedback (`HapticFeedback.mediumImpact()`). Long-press is suppressed when checkboxes are already visible.
+- **Batch move items between pantries**: New `moveItemsToInventory` method moves selected items to a different pantry via dialog picker. Undo snackbar restores original assignment. "Move" button appears in selection mode app bar when 2+ inventories exist.
+- **Swipe between bottom nav tabs**: `PantryShell` replaced `IndexedStack` with `PageView` + `PageController`. Tabs maintain their state (`AutomaticKeepAliveClientMixin`) — preserving search results, scroll position, and form state.
+- **Search: swipe-right-to-add**: Search results are now `Dismissible` — swipe right (leading) adds the product to the active pantry. Undo snackbar removes the item.
+- **Search: long-press context menu**: `showModalBottomSheet` with "Add to inventory" and "Copy barcode" options.
+- **Product detail: swipe-to-delete inventory items**: `_InventoryTile` wrapped in `Dismissible` (trailing) with delete confirmation via existing `_deleteItem` method.
+- **Manage inventories: swipe-to-delete**: `Dismissible` with `confirmDismiss` reuses existing `_confirmDelete` dialog. Returns `bool` for proper dismiss control.
+- **Stats: pull-to-refresh**: Converted to `ConsumerStatefulWidget` with `_refreshKey`. `RefreshIndicator` wraps `ListView` with `AlwaysScrollableScrollPhysics`. Pulling down re-fetches product and inventory counts.
+- **New localised strings**: `copyBarcode`, `barcodeCopied`, `removedFromPantry`.
+
 ### Bugfixes
 - **`removeDiacritics` producing decimal strings instead of characters**: `StringBuffer.write(int)` was outputting ASCII code-point decimal values (e.g. `77` instead of `M`). Replaced with `writeCharCode` so the function actually strips diacritics as documented.
 - **`ProductDao.search()` accent‑insensitive DB queries**: Both the query AND stored product names are now normalised via in‑memory `removeDiacritics` filtering (previously only the query was normalised, leaving accented DB content unmatched).

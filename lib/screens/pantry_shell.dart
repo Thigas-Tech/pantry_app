@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
@@ -15,8 +17,8 @@ import 'package:pantry_app/screens/stats_screen.dart';
 /// - **Stats** — inventory statistics and CSV export/import.
 /// - **Settings** — application preferences.
 ///
-/// Uses an [IndexedStack] so that each tab preserves its state when
-/// the user switches between them.
+/// Uses a [PageView] so that users can swipe horizontally between tabs.
+/// Each tab uses `AutomaticKeepAliveClientMixin` to preserve its state.
 class PantryShell extends ConsumerStatefulWidget {
   /// Creates a [PantryShell] widget.
   const PantryShell({super.key});
@@ -27,14 +29,28 @@ class PantryShell extends ConsumerStatefulWidget {
 
 class _PantryShellState extends ConsumerState<PantryShell> {
   int _selectedIndex = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) => setState(() => _selectedIndex = index),
         children: const [
           HomeScreen(),
           SearchScreen(),
@@ -44,8 +60,16 @@ class _PantryShellState extends ConsumerState<PantryShell> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) =>
-            setState(() => _selectedIndex = index),
+        onDestinationSelected: (index) {
+          setState(() => _selectedIndex = index);
+          unawaited(
+            _pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            ),
+          );
+        },
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.kitchen_outlined),

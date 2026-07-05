@@ -262,6 +262,24 @@ abstract class AppLocalizations {
   /// **'Add to Inventory'**
   String get addToInventory;
 
+  /// No description provided for @copyBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy barcode'**
+  String get copyBarcode;
+
+  /// No description provided for @barcodeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode copied!'**
+  String get barcodeCopied;
+
+  /// No description provided for @removedFromPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from pantry.'**
+  String get removedFromPantry;
+
   /// No description provided for @updateItem.
   ///
   /// In en, this message translates to:
@@ -513,6 +531,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to delete item.'**
   String get deleteFailed;
+
+  /// No description provided for @moveToPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to pantry'**
+  String get moveToPantry;
+
+  /// No description provided for @moveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to move items.'**
+  String get moveFailed;
 
   /// No description provided for @inventoryLoadFailed.
   ///

@@ -38,10 +38,14 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   bool _selectionMode = false;
   final Set<int> _selectedIds = {};
   bool _hasCheckedOverdue = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -73,6 +77,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _selectionMode = !_selectionMode;
       if (!_selectionMode) _selectedIds.clear();
     });
+  }
+
+  void _onLongPressItem(int id) {
+    if (!_selectionMode) {
+      setState(() {
+        _selectionMode = true;
+        _selectedIds.add(id);
+      });
+    }
   }
 
   Future<void> _deleteSelected(List<InventoryWithProduct> allItems) async {
@@ -150,8 +163,89 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  Future<void> _moveSelected(
+    List<InventoryWithProduct> allItems,
+    List<Map<String, dynamic>> inventories,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final count = _selectedIds.length;
+    if (count == 0) return;
+
+    final ids = Set<int>.from(_selectedIds);
+    final itemsToMove = allItems
+        .where((item) => ids.contains(item.id))
+        .toList();
+
+    final activeId = ref.read(activeInventoryProvider);
+    final targetInventories = inventories
+        .where((inv) => (inv['id'] as int) != activeId)
+        .toList();
+
+    if (targetInventories.isEmpty) return;
+
+    final targetInv = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l10n.moveToPantry),
+        children: [
+          for (final inv in targetInventories)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, inv),
+              child: ListTile(
+                leading: const Icon(Icons.kitchen),
+                title: Text(inv['name'] as String),
+                subtitle: Text(
+                  '${inv['item_count'] ?? 0} '
+                  '${l10n.inventoryItems.toLowerCase()}',
+                ),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+        ],
+      ),
+    );
+
+    if (targetInv == null || !mounted) return;
+
+    final targetId = targetInv['id'] as int;
+    final targetName = targetInv['name'] as String;
+    final repo = ref.read(productRepositoryProvider);
+
+    try {
+      await repo.moveItemsToInventory(ids.toList(), targetId);
+    } on Exception catch (e) {
+      logError('Batch move failed: $e');
+      if (mounted) {
+        SnackbarHelper.showError(context, l10n.moveFailed);
+      }
+      return;
+    }
+
+    setState(() {
+      _selectedIds.clear();
+      _selectionMode = false;
+    });
+    ref.invalidate(inventoryWithProductProvider);
+
+    if (mounted) {
+      SnackbarHelper.showUndo(
+        context,
+        '${itemsToMove.length} moved to $targetName',
+        () async {
+          await repo.moveItemsToInventory(ids.toList(), activeId);
+          ref.invalidate(inventoryWithProductProvider);
+          if (mounted) {
+            SnackbarHelper.showInfo(context, l10n.itemsRestored);
+          }
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context)!;
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
     final inventoriesAsync = ref.watch(inventoryListProvider);
@@ -264,6 +358,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
+                if (inventoriesAsync.value != null &&
+                    inventoriesAsync.value!.length > 1)
+                  IconButton(
+                    icon: const Icon(Icons.move_up),
+                    tooltip: l10n.moveToPantry,
+                    onPressed: () => unawaited(
+                      _moveSelected(
+                        inventoryAsync.value ?? [],
+                        inventoriesAsync.value!,
+                      ),
+                    ),
+                  ),
                 IconButton(
                   icon: const Icon(Icons.close),
                   tooltip: l10n.cancel,
@@ -310,6 +416,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _selectedIds.add(id);
               }
             }),
+            onLongPressItem: _onLongPressItem,
           );
         },
       ),
@@ -516,6 +623,7 @@ class _InventoryList extends ConsumerStatefulWidget {
     this.selectionMode = false,
     this.selectedIds = const {},
     this.onToggleSelection,
+    this.onLongPressItem,
   });
 
   final List<InventoryWithProduct> items;
@@ -524,6 +632,7 @@ class _InventoryList extends ConsumerStatefulWidget {
   final bool selectionMode;
   final Set<int> selectedIds;
   final void Function(int itemId)? onToggleSelection;
+  final void Function(int itemId)? onLongPressItem;
 
   @override
   ConsumerState<_InventoryList> createState() => _InventoryListState();
@@ -889,6 +998,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                       isSelected: widget.selectedIds.contains(item.id),
                       onToggleSelection: () =>
                           widget.onToggleSelection?.call(item.id!),
+                      onLongPress: () => widget.onLongPressItem?.call(item.id!),
                     ),
                   ),
                 ],
@@ -905,6 +1015,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                       isSelected: widget.selectedIds.contains(item.id),
                       onToggleSelection: () =>
                           widget.onToggleSelection?.call(item.id!),
+                      onLongPress: () => widget.onLongPressItem?.call(item.id!),
                     ),
                   ),
                 ],
@@ -921,6 +1032,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                       isSelected: widget.selectedIds.contains(item.id),
                       onToggleSelection: () =>
                           widget.onToggleSelection?.call(item.id!),
+                      onLongPress: () => widget.onLongPressItem?.call(item.id!),
                     ),
                   ),
                 ],

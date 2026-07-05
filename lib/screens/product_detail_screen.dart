@@ -280,12 +280,23 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   /// Builds an [_InventoryTile] for the given [item].
-  _InventoryTile _buildInventoryTile(InventoryItem item) {
-    return _InventoryTile(
-      item: item,
-      onEdit: () => _openAddEditScreen(existing: item),
-      onDelete: () => _deleteItem(item),
-      onQuantityChanged: (newQty) => _updateQuantity(item, newQty),
+  Widget _buildInventoryTile(InventoryItem item) {
+    return Dismissible(
+      key: ValueKey('prod-detail-inv-${item.id ?? item.hashCode}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.red,
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      onDismissed: (_) => _deleteItem(item),
+      child: _InventoryTile(
+        item: item,
+        onEdit: () => _openAddEditScreen(existing: item),
+        onDelete: () => _deleteItem(item),
+        onQuantityChanged: (newQty) => _updateQuantity(item, newQty),
+      ),
     );
   }
 

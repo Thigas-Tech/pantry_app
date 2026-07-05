@@ -94,6 +94,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToInventory => 'Add to Inventory';
 
   @override
+  String get copyBarcode => 'Copy barcode';
+
+  @override
+  String get barcodeCopied => 'Barcode copied!';
+
+  @override
+  String get removedFromPantry => 'Removed from pantry.';
+
+  @override
   String get updateItem => 'Update Item';
 
   @override
@@ -224,6 +233,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteFailed => 'Failed to delete item.';
+
+  @override
+  String get moveToPantry => 'Move to pantry';
+
+  @override
+  String get moveFailed => 'Failed to move items.';
 
   @override
   String get inventoryLoadFailed => 'Failed to load inventory.';

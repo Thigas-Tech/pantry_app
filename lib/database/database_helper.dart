@@ -370,6 +370,15 @@ class DatabaseHelper {
     return inventoryDao.delete(db, id);
   }
 
+  /// Moves multiple inventory items to a different inventory (pantry).
+  Future<void> moveItemsToInventory(
+    List<int> itemIds,
+    int targetInventoryId,
+  ) async {
+    final db = await database;
+    return inventoryDao.moveItemsToInventory(db, itemIds, targetInventoryId);
+  }
+
   /// Retrieves all inventory rows joined with product metadata.
   Future<List<Map<String, dynamic>>> getInventoryWithProduct({
     required int inventoryId,

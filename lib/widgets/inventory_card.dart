@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
@@ -21,6 +23,9 @@ import 'package:pantry_app/widgets/nutriscore_badge.dart';
 ///
 /// When [showCheckbox] is true, a checkbox replaces the leading image and
 /// the card's tap navigation is disabled in favour of selection.
+///
+/// Long-pressing a card triggers [onLongPress], which enters selection mode
+/// and selects this item.
 class InventoryCard extends ConsumerStatefulWidget {
   /// Creates an [InventoryCard] for the given [item].
   const InventoryCard({
@@ -28,6 +33,7 @@ class InventoryCard extends ConsumerStatefulWidget {
     this.showCheckbox = false,
     this.isSelected = false,
     this.onToggleSelection,
+    this.onLongPress,
     super.key,
   });
 
@@ -42,6 +48,10 @@ class InventoryCard extends ConsumerStatefulWidget {
 
   /// Called when the selection checkbox is toggled.
   final VoidCallback? onToggleSelection;
+
+  /// Called when the user long-presses the card (only when not in selection
+  /// mode). Enters selection mode and selects this item.
+  final VoidCallback? onLongPress;
 
   @override
   ConsumerState<InventoryCard> createState() => _InventoryCardState();
@@ -78,82 +88,92 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.symmetric(vertical: 4),
-      child: ListTile(
-        leading: widget.showCheckbox
-            ? Checkbox(
-                value: widget.isSelected,
-                onChanged: (_) => widget.onToggleSelection?.call(),
-              )
-            : widget.item.productImageUrl != null
-            ? Hero(
-                tag: widget.item.barcode,
-                child: Semantics(
+      child: GestureDetector(
+        onLongPress: widget.showCheckbox
+            ? null
+            : () {
+                unawaited(HapticFeedback.mediumImpact());
+                widget.onLongPress?.call();
+              },
+        child: ListTile(
+          leading: widget.showCheckbox
+              ? Checkbox(
+                  value: widget.isSelected,
+                  onChanged: (_) => widget.onToggleSelection?.call(),
+                )
+              : widget.item.productImageUrl != null
+              ? Hero(
+                  tag: widget.item.barcode,
+                  child: Semantics(
+                    label: widget.item.productName,
+                    child: _buildLeadingImage(),
+                  ),
+                )
+              : Semantics(
                   label: widget.item.productName,
                   child: _buildLeadingImage(),
                 ),
-              )
-            : Semantics(
-                label: widget.item.productName,
-                child: _buildLeadingImage(),
-              ),
-        title: Text(widget.item.productName ?? widget.item.barcode),
-        subtitle: _buildSubtitle(l10n),
-        trailing: Semantics(
-          label: expiryLabel,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              NutriScoreBadge(
-                grade: widget.item.nutriscoreGrade,
-                size: 24,
-              ),
-              if (widget.item.nutriscoreGrade != null) const SizedBox(width: 6),
-              Text(
-                expiryLabel,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: itemIsExpired ? Colors.red : Colors.grey.shade500,
+          title: Text(widget.item.productName ?? widget.item.barcode),
+          subtitle: _buildSubtitle(l10n),
+          trailing: Semantics(
+            label: expiryLabel,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                NutriScoreBadge(
+                  grade: widget.item.nutriscoreGrade,
+                  size: 24,
                 ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.circle,
-                color: itemIsExpired ? Colors.red : Colors.grey.shade300,
-                size: 12,
-              ),
-            ],
+                if (widget.item.nutriscoreGrade != null)
+                  const SizedBox(width: 6),
+                Text(
+                  expiryLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: itemIsExpired ? Colors.red : Colors.grey.shade500,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.circle,
+                  color: itemIsExpired ? Colors.red : Colors.grey.shade300,
+                  size: 12,
+                ),
+              ],
+            ),
           ),
-        ),
-        onTap: widget.showCheckbox
-            ? null
-            : () async {
-                logInfo('Inventory card tapped: ${widget.item.barcode}');
-                final repo = ref.read(productRepositoryProvider);
-                try {
-                  final product = await repo.getProduct(widget.item.barcode);
-                  if (!context.mounted) return;
-                  await Navigator.of(context).push<void>(
-                    MaterialPageRoute(
-                      builder: (_) => ProductDetailScreen(product: product),
-                    ),
-                  );
-                  if (context.mounted) {
-                    ref.invalidate(inventoryWithProductProvider);
-                  }
-                } on FetchFailedException {
-                  logError(
-                    'Product ${widget.item.barcode} unavailable (offline)',
-                  );
-                  if (context.mounted) {
-                    SnackbarHelper.showInfo(
-                      context,
-                      'Product data unavailable — pull to refresh when online',
+          onTap: widget.showCheckbox
+              ? null
+              : () async {
+                  logInfo('Inventory card tapped: ${widget.item.barcode}');
+                  final repo = ref.read(productRepositoryProvider);
+                  try {
+                    final product = await repo.getProduct(widget.item.barcode);
+                    if (!context.mounted) return;
+                    await Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailScreen(product: product),
+                      ),
                     );
+                    if (context.mounted) {
+                      ref.invalidate(inventoryWithProductProvider);
+                    }
+                  } on FetchFailedException {
+                    logError(
+                      'Product ${widget.item.barcode} unavailable (offline)',
+                    );
+                    if (context.mounted) {
+                      SnackbarHelper.showInfo(
+                        context,
+                        'Product data unavailable'
+                        ' — pull to refresh when online',
+                      );
+                    }
+                  } on Exception catch (e) {
+                    logError('Failed to navigate to product detail: $e');
                   }
-                } on Exception catch (e) {
-                  logError('Failed to navigate to product detail: $e');
-                }
-              },
+                },
+        ),
       ),
     );
   }

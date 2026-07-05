@@ -149,4 +149,51 @@ void main() {
     expect(find.byType(ProductDetailScreen), findsOneWidget);
     expect(find.text('Toast'), findsOneWidget);
   });
+
+  testWidgets('long-press triggers onLongPress callback', (tester) async {
+    final item = createItem(name: 'LongPressItem');
+    bool longPressed = false;
+
+    await pumpApp(
+      tester,
+      InventoryCard(
+        item: item,
+        onLongPress: () => longPressed = true,
+      ),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    await tester.longPress(find.byType(InventoryCard));
+    await tester.pump();
+
+    expect(longPressed, isTrue);
+  });
+
+  testWidgets('long-press suppressed when showCheckbox is true', (
+    tester,
+  ) async {
+    final item = createItem(name: 'SelectItem');
+    bool longPressed = false;
+
+    await pumpApp(
+      tester,
+      InventoryCard(
+        item: item,
+        showCheckbox: true,
+        onLongPress: () => longPressed = true,
+      ),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    await tester.longPress(find.byType(InventoryCard));
+    await tester.pump();
+
+    expect(longPressed, isFalse);
+  });
 }

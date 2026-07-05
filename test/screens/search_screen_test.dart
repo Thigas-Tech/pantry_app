@@ -300,10 +300,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 350));
       await tester.pump();
 
-      final listTile = tester.widget<ListTile>(find.byType(ListTile).first);
-      expect(listTile.key, isA<ValueKey<String>>());
+      final dismissible = tester.widget<Dismissible>(
+        find.byType(Dismissible).first,
+      );
+      expect(dismissible.key, isA<ValueKey<String>>());
       expect(
-        (listTile.key! as ValueKey<String>).value,
+        (dismissible.key! as ValueKey<String>).value,
         'search-result-001',
       );
     });
