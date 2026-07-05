@@ -66,7 +66,7 @@
 - Per-pantry inventory views and stats
 
 ### Documentation
-- Added roadmap items to TODO.md: cosmetics/toiletries OFF API support, ingredient/nutrition photos in manual entry, upload manual products to OFF API
+- Added roadmap items to TODO.md: cosmetics/toiletries OFF API support, ingredient/nutrition photos in manual entry, upload manual products to OFF API, remake notifications from scratch, remake import/export from scratch
 
 ### Performance
 - Image caching in local filesystem (`ImageCacheService`)

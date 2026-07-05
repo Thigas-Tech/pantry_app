@@ -45,6 +45,8 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [ ] **Recipe suggestions** — call a recipe API with items expiring this week; suggest meals that use them.
 - [ ] **Widget test → golden coverage** — product detail, settings, stats screens.
 - [ ] **Upload manual products to Open Food Facts** — submit user‑entered products (including photos of ingredients list and nutrition table) to the OFF API via the v3 product submission endpoint. Handle authentication, field mapping, image upload, and show submission status in the UI. Supersedes the offline‑first submission queue item.
+- [ ] **Remake notification feature from scratch** — rewrite `NotificationService` for reliability: precise expiry‑day‑at‑morning and expiry‑soon (N days before) scheduling, multi‑item grouping, per‑inventory notification channels, proper timezone handling, and resilient rescheduling on app boot.
+- [ ] **Remake import/export from scratch** — rewrite `CsvService` to support: export only cached (API-fetched) products, export a specific inventory, export products from a specific inventory, and import via `filegate` (platform file picker). Replace the stats-screen picker with a streamlined FileGate-based flow.
 - [ ] **Patrol E2E tests** — real‑device integration tests via [Patrol](https://patrol.leancode.co). Uses `patrol_cli` and `patrol` dev-dependency. Replace the generic `integration_test/` with `patrol_test/` directory.
 
 ### Patrol E2E test scenarios
