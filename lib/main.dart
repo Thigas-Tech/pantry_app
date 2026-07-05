@@ -63,6 +63,17 @@ Future<void> _handleAppUpdate() async {
       'App updated from ${lastVersion ?? 'first install'} to $currentVersion',
     );
 
+    // If this is NOT a first install, flag the changelog for display so
+    // the user sees what changed since their last version.
+    final lastSeenChangelog = prefs.getString('changelog_last_seen');
+    if (lastSeenChangelog != null && lastSeenChangelog != currentVersion) {
+      unawaited(prefs.setString('changelog_show_pending', 'true'));
+    }
+
+    // Always store the current version so future updates are detected and
+    // the parser knows where to start filtering (handles first install too).
+    await prefs.setString('changelog_last_seen', currentVersion);
+
     // Clear image cache so stale images don't persist across updates.
     await ImageCacheService().clearCache();
 

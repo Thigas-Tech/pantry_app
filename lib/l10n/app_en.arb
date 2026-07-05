@@ -333,5 +333,16 @@
   "filterByCategory": "Category",
   "settingsAppearance": "Appearance",
   "settingsDataManagement": "Data Management",
-  "settingsMaintenance": "Maintenance"
+  "settingsMaintenance": "Maintenance",
+  "whatsNewTitle": "What's new",
+  "whatsNewVersion": "Version {version}",
+  "@whatsNewVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "1.0.0"
+      }
+    }
+  },
+  "whatsNewDismiss": "Got it"
 }

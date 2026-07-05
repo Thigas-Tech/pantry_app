@@ -1,12 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
+import 'package:pantry_app/services/changelog_parser.dart';
+import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/widgets/whats_new_sheet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// The root shell that holds the [NavigationBar] and switches between
 /// the main app screens.
@@ -35,12 +41,61 @@ class _PantryShellState extends ConsumerState<PantryShell> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _selectedIndex);
+    unawaited(_showChangelogIfPending());
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _showChangelogIfPending() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final showPending = prefs.getString('changelog_show_pending') == 'true';
+      if (!showPending) return;
+
+      final lastSeen = prefs.getString('changelog_last_seen');
+      final info = await PackageInfo.fromPlatform();
+      final currentVersion = info.version;
+
+      final raw = await rootBundle.loadString('CHANGELOG.md');
+      final parser = ChangelogParser();
+      final allEntries = parser.parse(raw);
+
+      if (allEntries.isEmpty) {
+        logError('Changelog parsed but produced no entries');
+        return;
+      }
+
+      final entries = parser.filterUnseen(
+        allEntries,
+        lastSeen ?? '0.0.0',
+        currentVersion,
+      );
+
+      if (entries.isEmpty) return;
+
+      // Wait for the first frame so the sheet overlay has a valid context.
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await showWhatsNewSheet(context, entries);
+        // Mark as seen regardless of how the sheet was dismissed.
+        await prefs.setString('changelog_show_pending', 'false');
+        await prefs.setString('changelog_last_seen', currentVersion);
+      });
+    } on Exception catch (e) {
+      logError('Failed to show changelog: $e');
+      // Reset the flag so it doesn't block the next launch.
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('changelog_show_pending', 'false');
+      } on Exception {
+        // Best-effort cleanup.
+      }
+    }
   }
 
   @override

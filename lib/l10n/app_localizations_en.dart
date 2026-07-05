@@ -612,4 +612,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsMaintenance => 'Maintenance';
+
+  @override
+  String get whatsNewTitle => 'What\'s new';
+
+  @override
+  String whatsNewVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get whatsNewDismiss => 'Got it';
 }

@@ -1209,6 +1209,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maintenance'**
   String get settingsMaintenance;
+
+  /// No description provided for @whatsNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get whatsNewTitle;
+
+  /// No description provided for @whatsNewVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String whatsNewVersion(String version);
+
+  /// No description provided for @whatsNewDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get whatsNewDismiss;
 }
 
 class _AppLocalizationsDelegate

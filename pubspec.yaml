@@ -54,6 +54,7 @@ flutter:
   generate: true
   assets:
     - .env
+    - CHANGELOG.md
 
 flutter_launcher_icons:
   android: true
