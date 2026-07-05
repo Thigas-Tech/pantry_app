@@ -1,28 +1,14 @@
-/// @file InventoryCard widget tests.
-///
-/// Tests the card that represents one inventory item on the home screen.
-/// We validate:
-///   - The product name and subtitle (quantity, unit, location) are displayed.
-///   - An expiry prefix is shown when an expiry date is provided.
-///   - A red dot appears for expired items.
-///   - Cached image display when the image cache returns a file path.
-///
-/// All tests use the `pumpApp` helper. The `imageCacheProvider` is overridden
-/// with a stubbed mock (so `InventoryCard._buildLeadingImage` doesn't crash),
-/// and the `productRepositoryProvider` is overridden with a fresh mock in
-/// every test to avoid “double override” errors.
-library;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import '../helpers/pump_app.dart';
 
-/// Creates a fully‑populated [InventoryWithProduct] with the given values.
-/// Defaults produce a typical non‑expired item in the pantry.
 InventoryWithProduct createItem({
   String name = 'Test Item',
   String barcode = '123',
@@ -31,6 +17,7 @@ InventoryWithProduct createItem({
   String location = 'pantry',
   String? expiryDate,
   String? imageUrl,
+  String? nutriscoreGrade,
 }) {
   return InventoryWithProduct(
     id: 1,
@@ -42,6 +29,7 @@ InventoryWithProduct createItem({
     expiryDate: expiryDate,
     inventoryId: 1,
     productImageUrl: imageUrl,
+    nutriscoreGrade: nutriscoreGrade,
   );
 }
 
@@ -50,7 +38,6 @@ void main() {
 
   setUp(() {
     mockImageCache = MockImageCacheService();
-    // Default stub: no cached image → fallback icon.
     when(
       () => mockImageCache.cacheImage(any(), any()),
     ).thenAnswer((_) async => null);
@@ -104,7 +91,6 @@ void main() {
       ],
     );
 
-    // The last Icon inside InventoryCard should be the trailing dot.
     final icon = tester.widget<Icon>(
       find.descendant(
         of: find.byType(InventoryCard),
@@ -112,5 +98,55 @@ void main() {
       ),
     );
     expect(icon.color, Colors.red);
+  });
+
+  testWidgets('shows fallback icon when image cache returns null', (
+    tester,
+  ) async {
+    final item = createItem(
+      name: 'NoImage',
+      imageUrl: 'https://example.com/img.jpg',
+    );
+
+    await pumpApp(
+      tester,
+      InventoryCard(item: item),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+      ],
+    );
+
+    // Fallback icon is always present because cacheImage returns null.
+    expect(find.byIcon(Icons.fastfood), findsOneWidget);
+  });
+
+  testWidgets('tapping card navigates to ProductDetailScreen', (tester) async {
+    final item = createItem(barcode: '456');
+    final mockRepo = MockProductRepository();
+    const product = Product(barcode: '456', name: 'Toast');
+    when(() => mockRepo.getProduct('456')).thenAnswer((_) async => product);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => <InventoryItem>[]);
+
+    await pumpApp(
+      tester,
+      InventoryCard(item: item),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        productRepositoryProvider.overrideWithValue(mockRepo),
+      ],
+    );
+
+    await tester.tap(find.byType(InventoryCard));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(ProductDetailScreen), findsOneWidget);
+    expect(find.text('Toast'), findsOneWidget);
   });
 }
