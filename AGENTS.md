@@ -40,6 +40,7 @@ flutter build appbundle            # release AAB
 ## Rules for contributions
 
 ### Always
+0. **Check TODO.md** — before starting new work, consult `TODO.md` for the current roadmap and pick an item at the appropriate effort/importance level.
 1. **Doc comments** — every public class, constructor, field, and method must have a `///` doc comment. Run `flutter analyze` to verify (zero issues required).
 2. **Tests** — add tests for ALL new code. Use `mocktail` for mocks. Place tests in the corresponding `test/` subdirectory. New screens/services need new test files.
 3. **Update generated code** — after changing models (freezed) or ARB files (l10n), run `dart run build_runner build --delete-conflicting-outputs` AND `flutter gen-l10n`.
