@@ -588,4 +588,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filterByCategory => 'Category';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsDataManagement => 'Data Management';
+
+  @override
+  String get settingsMaintenance => 'Maintenance';
 }

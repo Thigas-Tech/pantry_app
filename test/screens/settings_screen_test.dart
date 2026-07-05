@@ -127,13 +127,12 @@ void main() {
       ],
     );
 
-    // Tap the data retention tile (identified by its leading icon).
-    await tester.tap(
-      find.ancestor(
-        of: find.byIcon(Icons.timer),
-        matching: find.byType(ListTile),
-      ),
-    );
+    // Expand the "Data Management" section.
+    await tester.tap(find.byIcon(Icons.timer));
+    await tester.pumpAndSettle();
+
+    // Tap the data retention tile.
+    await tester.tap(find.text('Data retention'));
     await tester.pumpAndSettle();
 
     // An AlertDialog appears.
@@ -166,13 +165,12 @@ void main() {
         ],
       );
 
-      // Tap the manage inventories tile (identified by its leading icon).
-      await tester.tap(
-        find.ancestor(
-          of: find.byIcon(Icons.folder),
-          matching: find.byType(ListTile),
-        ),
-      );
+      // Expand the "Data Management" section.
+      await tester.tap(find.byIcon(Icons.timer));
+      await tester.pumpAndSettle();
+
+      // Tap the manage inventories tile.
+      await tester.tap(find.text('Manage Inventories'));
       // Give the navigation a moment to start – we don't use pumpAndSettle
       // because ManageInventoriesScreen may run forever‑pending async work.
       await tester.pump();
@@ -194,13 +192,12 @@ void main() {
       ],
     );
 
-    // Tap the data retention tile
-    await tester.tap(
-      find.ancestor(
-        of: find.byIcon(Icons.timer),
-        matching: find.byType(ListTile),
-      ),
-    );
+    // Expand the "Data Management" section.
+    await tester.tap(find.byIcon(Icons.timer));
+    await tester.pumpAndSettle();
+
+    // Tap the data retention tile.
+    await tester.tap(find.text('Data retention'));
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);

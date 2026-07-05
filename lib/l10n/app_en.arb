@@ -325,5 +325,8 @@
     }
   },
   "filterAll": "All",
-  "filterByCategory": "Category"
+  "filterByCategory": "Category",
+  "settingsAppearance": "Appearance",
+  "settingsDataManagement": "Data Management",
+  "settingsMaintenance": "Maintenance"
 }

@@ -1161,6 +1161,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Category'**
   String get filterByCategory;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearance;
+
+  /// No description provided for @settingsDataManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Management'**
+  String get settingsDataManagement;
+
+  /// No description provided for @settingsMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get settingsMaintenance;
 }
 
 class _AppLocalizationsDelegate

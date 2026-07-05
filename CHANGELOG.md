@@ -9,8 +9,10 @@
 - **OFF taxonomy codes in category filter**: `_displayCategory()` strips the `en:` prefix from OFF taxonomy codes and formats the remainder as human‑readable text (e.g. `en:spreads` → `Spreads`).
 - **Double background refresh on startup**: `_scheduleCacheRefresh` in `main.dart` now calls `setLastRefreshTime()` *before* firing background refreshes, so `HomeScreen._refreshIfOverdue` finds a non‑overdue cache and skips.
 - **Search field keyboard type**: Added `textInputAction: TextInputAction.search` to the `SearchScreen` TextField.
-- **Critical**: Cache flush no longer deletes manually-entered products. Added `source` column to `products` table (`'api'` vs `'manual'`) so `clearCachedProducts()` only removes API-fetched data. Inventory items and user-entered products are preserved across app updates and manual flushes.
-- Image cache verified isolated — only stores downloaded OFF CDN images, never local/manual photos.
+
+### Enhancements
+- **Pinch-to-zoom on product photos**: Product detail screen images wrapped in `InteractiveViewer` (0.5×–3× zoom) for both cached and network images.
+- **Settings screen grouped by sections**: Flat `ListView` replaced with `ExpansionTile` groups (Appearance, Notifications, Data Management, Maintenance).
 
 ### Nutri-Score
 - Grey dash badge for non-applicable products (food additives, sweeteners, etc.)
@@ -136,6 +138,10 @@
 - Added `SearchScreen` widget tests (9 tests: idle, loading, results local/API/dedup, navigation, empty, clear, debounce)
 - Added `HomeScreen` stock count badge and category filter tests (6 tests: badge counts, badge icons, filter chips visibility, category selection, "All" reset)
 - 309 tests total, 0 analyze issues
+
+### Code health
+- Wrapped product detail photos with `InteractiveViewer` (pinch-to-zoom)
+- Grouped settings screen into `ExpansionTile` sections with 3 new ARB strings
 
 ---
 

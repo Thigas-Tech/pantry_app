@@ -32,69 +32,85 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          ListTile(
-            title: Text(l10n.theme),
-            subtitle: Text(themeMode.name),
+          ExpansionTile(
             leading: const Icon(Icons.brightness_6),
-            onTap: () => _showThemeDialog(context, ref),
+            title: Text(l10n.settingsAppearance),
+            initiallyExpanded: true,
+            children: [
+              ListTile(
+                title: Text(l10n.theme),
+                subtitle: Text(themeMode.name),
+                onTap: () => _showThemeDialog(context, ref),
+              ),
+            ],
           ),
-          const Divider(),
-          SwitchListTile(
+          ExpansionTile(
+            leading: const Icon(Icons.notifications_active),
             title: Text(l10n.expiryNotifications),
-            subtitle: Text(l10n.remindBeforeExpiry),
-            secondary: const Icon(Icons.notifications_active),
-            value: settings.notificationsEnabled,
-            onChanged: (value) {
-              logInfo('Notifications toggled: $value');
-              final current = ref.read(settingsProvider);
-              ref.read(settingsProvider.notifier).value = current.copyWith(
-                notificationsEnabled: value,
-              );
-              if (context.mounted) {
-                SnackbarHelper.showInfo(
-                  context,
-                  value
-                      ? l10n.notificationsEnabled
-                      : l10n.notificationsDisabled,
-                );
-              }
-            },
+            initiallyExpanded: true,
+            children: [
+              SwitchListTile(
+                title: Text(l10n.remindBeforeExpiry),
+                value: settings.notificationsEnabled,
+                onChanged: (value) {
+                  logInfo('Notifications toggled: $value');
+                  final current = ref.read(settingsProvider);
+                  ref.read(settingsProvider.notifier).value = current.copyWith(
+                    notificationsEnabled: value,
+                  );
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      value
+                          ? l10n.notificationsEnabled
+                          : l10n.notificationsDisabled,
+                    );
+                  }
+                },
+              ),
+            ],
           ),
-          const Divider(),
-          ListTile(
-            title: Text(l10n.dataRetention),
-            subtitle: Text(l10n.retentionDaysValue(settings.retentionDays)),
+          ExpansionTile(
             leading: const Icon(Icons.timer),
-            onTap: () => _showRetentionDialog(context, ref),
-          ),
-          const Divider(),
-          ListTile(
-            title: Text(l10n.expiringSoonDays),
-            subtitle: Text(
-              l10n.expiringSoonDaysValue(settings.expiringSoonDays),
-            ),
-            leading: const Icon(Icons.calendar_today),
-            onTap: () => _showExpiringSoonDialog(context, ref),
-          ),
-          const Divider(),
-          ListTile(
-            title: Text(l10n.manageInventories),
-            subtitle: Text(l10n.manageInventoriesSub),
-            leading: const Icon(Icons.folder),
-            onTap: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const ManageInventoriesScreen(),
+            title: Text(l10n.settingsDataManagement),
+            children: [
+              ListTile(
+                title: Text(l10n.dataRetention),
+                subtitle: Text(
+                  l10n.retentionDaysValue(settings.retentionDays),
                 ),
-              );
-            },
+                onTap: () => _showRetentionDialog(context, ref),
+              ),
+              ListTile(
+                title: Text(l10n.expiringSoonDays),
+                subtitle: Text(
+                  l10n.expiringSoonDaysValue(settings.expiringSoonDays),
+                ),
+                onTap: () => _showExpiringSoonDialog(context, ref),
+              ),
+              ListTile(
+                title: Text(l10n.manageInventories),
+                subtitle: Text(l10n.manageInventoriesSub),
+                onTap: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const ManageInventoriesScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          const Divider(),
-          ListTile(
-            title: Text(l10n.flushCache),
-            subtitle: Text(l10n.flushCacheSub),
+          ExpansionTile(
             leading: const Icon(Icons.cleaning_services),
-            onTap: () => _flushCache(context, ref),
+            title: Text(l10n.settingsMaintenance),
+            children: [
+              ListTile(
+                title: Text(l10n.flushCache),
+                subtitle: Text(l10n.flushCacheSub),
+                onTap: () => _flushCache(context, ref),
+              ),
+            ],
           ),
         ],
       ),

@@ -125,32 +125,49 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       ),
                       builder: (context, snapshot) {
                         if (snapshot.hasData && snapshot.data != null) {
-                          return Image.file(
-                            File(snapshot.data!),
-                            height: 200,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.broken_image, size: 48),
+                          return ClipRect(
+                            child: InteractiveViewer(
+                              minScale: 0.5,
+                              maxScale: 3,
+                              child: Image.file(
+                                File(snapshot.data!),
+                                height: 200,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.broken_image, size: 48),
+                              ),
+                            ),
                           );
                         }
-                        return Image.network(
-                          widget.product.imageUrl!,
-                          height: 200,
-                          fit: BoxFit.contain,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value:
-                                    loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                    : null,
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(Icons.broken_image, size: 48),
+                        return ClipRect(
+                          child: InteractiveViewer(
+                            minScale: 0.5,
+                            maxScale: 3,
+                            child: Image.network(
+                              widget.product.imageUrl!,
+                              height: 200,
+                              fit: BoxFit.contain,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value:
+                                            loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.broken_image, size: 48),
+                            ),
+                          ),
                         );
                       },
                     );
