@@ -154,6 +154,30 @@ abstract class Product with _$Product {
     @JsonKey(includeFromJson: false, includeToJson: false)
     @Default('api')
     String source,
+
+    /// Local file path to a photo of the nutrition facts table.
+    ///
+    /// Populated when the user captures a photo on the manual‑entry screen.
+    /// Stored as a stable path inside `<app-documents>/product_images/`.
+    /// Not serialised to/from JSON because it is only used locally.
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    String? nutritionImagePath,
+
+    /// Local file path to a photo of the ingredients list.
+    ///
+    /// Populated when the user captures a photo on the manual‑entry screen.
+    /// Stored as a stable path inside `<app-documents>/product_images/`.
+    /// Not serialised to/from JSON because it is only used locally.
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    String? ingredientsImagePath,
+
+    /// Local file path to a photo of the product packaging / front.
+    ///
+    /// Populated when the user captures a photo on the manual‑entry screen.
+    /// Stored as a stable path inside `<app-documents>/product_images/`.
+    /// Not serialised to/from JSON because it is only used locally.
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    String? productImagePath,
   }) = _Product;
 
   /// Creates a [Product] from a JSON map in the Open Food Facts v3 format.

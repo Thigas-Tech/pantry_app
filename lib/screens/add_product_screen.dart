@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// A form screen for manually entering product details.
 ///
@@ -60,9 +61,41 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
   }
 
-  void _save() {
+  Future<String?> _saveImageToStorage(
+    File? image,
+    String barcode,
+    String suffix,
+  ) async {
+    if (image == null) return null;
+    final appDir = await getApplicationDocumentsDirectory();
+    final dir = Directory('${appDir.path}/product_images');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    final targetPath = '${dir.path}/${barcode}_$suffix.jpg';
+    await image.copy(targetPath);
+    return targetPath;
+  }
+
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
+
+    final nutritionPath = await _saveImageToStorage(
+      _nutritionImage,
+      widget.barcode,
+      'nutrition',
+    );
+    final ingredientsPath = await _saveImageToStorage(
+      _ingredientsImage,
+      widget.barcode,
+      'ingredients',
+    );
+    final productPath = await _saveImageToStorage(
+      _productImage,
+      widget.barcode,
+      'product',
+    );
 
     final product = Product(
       barcode: widget.barcode,
@@ -79,8 +112,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
       saltG: double.tryParse(_saltG),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
       source: 'manual',
+      nutritionImagePath: nutritionPath,
+      ingredientsImagePath: ingredientsPath,
+      productImagePath: productPath,
     );
     logInfo('Manual product entry saved: ${product.name}');
+    if (!mounted) return;
     Navigator.of(context).pop(product);
   }
 

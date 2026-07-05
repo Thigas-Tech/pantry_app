@@ -67,7 +67,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 6,
+        version: 7,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -105,7 +105,10 @@ class DatabaseHelper {
         last_synced INTEGER,
         nutriscore_grade TEXT,
         nutriscore_not_applicable_category TEXT,
-        source TEXT NOT NULL DEFAULT 'api'
+        source TEXT NOT NULL DEFAULT 'api',
+        nutrition_image_path TEXT,
+        ingredients_image_path TEXT,
+        product_image_path TEXT
       )
     ''');
 
@@ -185,6 +188,18 @@ class DatabaseHelper {
         "ALTER TABLE products ADD COLUMN source TEXT NOT NULL DEFAULT 'api'",
       );
       logInfo('Migration to version 6 completed');
+    }
+    if (oldVersion < 7) {
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN nutrition_image_path TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN ingredients_image_path TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN product_image_path TEXT',
+      );
+      logInfo('Migration to version 7 completed');
     }
   }
 

@@ -29,6 +29,9 @@ class ProductDao {
     'nutriscore_grade': p.nutriscoreGrade,
     'nutriscore_not_applicable_category': p.nutriscoreNotApplicableCategory,
     'source': p.source,
+    'nutrition_image_path': p.nutritionImagePath,
+    'ingredients_image_path': p.ingredientsImagePath,
+    'product_image_path': p.productImagePath,
   };
 
   /// Converts a database row map into a [Product].
@@ -51,6 +54,9 @@ class ProductDao {
     nutriscoreNotApplicableCategory:
         map['nutriscore_not_applicable_category'] as String?,
     source: map['source'] as String? ?? 'api',
+    nutritionImagePath: map['nutrition_image_path'] as String?,
+    ingredientsImagePath: map['ingredients_image_path'] as String?,
+    productImagePath: map['product_image_path'] as String?,
   );
 
   /// Inserts a product into the local cache (upsert).
