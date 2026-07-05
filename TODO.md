@@ -8,6 +8,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 
 - [ ] **Batch delete** — multi-select items via checkboxes, delete all selected. Reuses existing `deleteInventoryItem` + undo snackbar.
 - [ ] **Expiry date guard** — date picker min-date = today; validate before saving.
+- [ ] **Quick quantity adjustment** — `+/−` buttons on each inventory tile in `ProductDetailScreen`. Tap quantity to type a number directly (e.g. used 3 of 12 eggs at breakfast). Decrementing to 0 deletes the item with confirmation + undo. Re-schedules notifications on restore.
 - [ ] **Coverage: `stats_screen.dart`** (32.8%) — test export + import button flows.
 - [ ] **Coverage: `home_screen.dart`** (65.1%) — test create-pantry dialog, pull-to-refresh.
 - [ ] **Coverage: `add_product_screen.dart`** (58.8%) — test form validation + save-and-pop.
@@ -57,8 +58,8 @@ Items are organised by effort (low → high) and importance (critical → nice-t
                      Low effort ─────────── High effort
                      ─────────────────────────────────────
 High importance  │ Batch delete            │ Shopping list
-                 │ Expiry date guard       │ Offline submission queue
-                 │ Coverage gaps (6 files) │ Cloud backup
+                 │ Quick quantity adjust   │ Offline submission queue
+                 │ Expiry date guard       │ Cloud backup
                  │ Expiry parsing extract  │
                  │─────────────────────────│──────────────────────────
                  │ Golden tests            │ Multi-language
