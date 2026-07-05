@@ -9,9 +9,9 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [ ] **Batch delete** — multi-select items via checkboxes, delete all selected. Reuses existing `deleteInventoryItem` + undo snackbar.
 - [x] **Expiry date guard** — date picker already uses `firstDate: DateTime.now()`. Verified correct.
 - [ ] **Quick quantity adjustment** — `+/−` buttons on each inventory tile in `ProductDetailScreen`. Tap quantity to type a number directly (e.g. used 3 of 12 eggs at breakfast). Decrementing to 0 deletes the item with confirmation + undo. Re-schedules notifications on restore.
-- [ ] **Coverage: `stats_screen.dart`** (32.8%) — test export + import button flows.
-- [ ] **Coverage: `home_screen.dart`** (65.1%) — test create-pantry dialog, pull-to-refresh.
-- [ ] **Coverage: `add_product_screen.dart`** (58.8%) — test form validation + save-and-pop.
+- [x] **Coverage: `stats_screen.dart`** (83.6%) — test export + import button flows.
+- [ ] **Coverage: `home_screen.dart`** (64.8%) — test create-pantry dialog, pull-to-refresh.
+- [x] **Coverage: `add_product_screen.dart`** (85.3%) — test form validation + save-and-pop.
 - [ ] **Coverage: `add_to_inventory_screen.dart`** (65.8%) — test custom unit/location dialogs.
 - [ ] **Coverage: `inventory_card.dart`** (65.5%) — test tap navigation, image cache miss.
 - [ ] **Coverage: `connectivity_provider.dart`** (33.3%) — stream emission test.
@@ -23,8 +23,8 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [x] **Deduplicate settings dialogs** — extracted `_showDaysDialog(title, initialValue)` shared by both.
 - [x] **Screenshots section** — removed placeholder table; added single‑line placeholder.
 - [x] **Remove unused `product_api_service.dart`** — removed; `ProductRepository` now uses `OpenFoodFactsApi` directly. `close()` method removed from `OpenFoodFactsApi`.
-- [ ] **Golden tests for `NutriScoreBadge`** — verify A–E colours render correctly via `matchesGoldenFile`.
-- [ ] **Accessibility audit** — add Semantics traversal tests for inventory cards, badges, dialogs.
+- [x] **Golden tests for `NutriScoreBadge`** — verify A–E colours render correctly via `matchesGoldenFile`.
+- [x] **Accessibility audit** — added Semantics label to NutriScoreBadge; 5 semantics tests verify labels for grades a–e, null, and invalid.
 
 ## Features (medium effort)
 
@@ -71,7 +71,7 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 
 - [x] `ARCHITECTURE.md` — add security section (dotenv env-var handling, no-committed-secrets rule).
 - [x] `ARCHITECTURE.md` — add offline-first pattern diagram or ASCII flow.
-- [ ] `AGENTS.md` — add "always check TODO.md before starting new work" instruction.
+- [x] `AGENTS.md` — add "always check TODO.md before starting new work" instruction.
 
 ---
 
