@@ -331,4 +331,259 @@ void main() {
       expect(result, isFalse);
     });
   });
+
+  group('Real product fixtures', () {
+    test('Nutella — grade E, 539 kcal', () async {
+      final json = {
+        'status': 'success',
+        'product': {
+          '_id': '3017620422003',
+          'product_name': 'Nutella',
+          'brands': 'Nutella, Ferrero',
+          'nutriscore_grade': 'e',
+          'image_url':
+              'https://images.openfoodfacts.org/images/products/'
+              '301/762/042/2003/front_en.879.400.jpg',
+          'nutriments': {
+            'energy-kcal_100g': 539,
+            'proteins_100g': 6.3,
+            'carbohydrates_100g': 57.5,
+            'fat_100g': 30.9,
+            'salt_100g': 0.107,
+          },
+        },
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('3017620422003');
+      expect(p.name, 'Nutella');
+      expect(p.brand, 'Nutella, Ferrero');
+      expect(p.nutriscoreGrade, 'e');
+      expect(p.energyKcal, 539);
+      expect(p.proteinG, 6.3);
+      expect(p.carbsG, 57.5);
+      expect(p.fatG, 30.9);
+      expect(p.saltG, closeTo(0.107, 0.001));
+    });
+
+    test('Cristaline — grade A, null nutrition', () async {
+      final json = {
+        'status': 'success',
+        'product': {
+          '_id': '3274080005003',
+          'product_name': 'isabelle',
+          'brands': 'Cristaline',
+          'nutriscore_grade': 'a',
+          'nutriments': {
+            'energy-kcal_100g': null,
+            'proteins_100g': null,
+            'carbohydrates_100g': null,
+            'fat_100g': null,
+            'fiber_100g': null,
+            'salt_100g': 0.00275,
+          },
+        },
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('3274080005003');
+      expect(p.name, 'isabelle');
+      expect(p.nutriscoreGrade, 'a');
+      expect(p.energyKcal, null);
+      expect(p.proteinG, null);
+      expect(p.saltG, closeTo(0.00275, 0.00001));
+    });
+
+    test('Gazpacho Alvalle — grade B, serving size', () async {
+      final json = {
+        'status': 'success',
+        'product': {
+          '_id': '3168930163480',
+          'product_name': "Alvalle Gazpacho l'original",
+          'brands': 'Alvalle',
+          'nutriscore_grade': 'b',
+          'serving_size': '200 ml',
+          'nutriments': {
+            'energy-kcal_100g': 40,
+            'proteins_100g': 0.9,
+            'carbohydrates_100g': 3.5,
+            'fat_100g': 2.2,
+            'fiber_100g': 1.2,
+            'salt_100g': 0.61,
+          },
+        },
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('3168930163480');
+      expect(p.nutriscoreGrade, 'b');
+      expect(p.energyKcal, 40);
+      expect(p.fiberG, 1.2);
+      expect(p.servingSize, '200 ml');
+    });
+
+    test('La Boulangère bread — grade C, fibre', () async {
+      final json = {
+        'status': 'success',
+        'product': {
+          '_id': '3760049794298',
+          'product_name': 'Pain de mie Bio grandes tranches',
+          'brands': 'La Boulangère Bio',
+          'nutriscore_grade': 'c',
+          'serving_size': '35.7 g',
+          'nutriments': {
+            'energy-kcal_100g': 303,
+            'proteins_100g': 8.6,
+            'carbohydrates_100g': 46,
+            'fat_100g': 8.3,
+            'fiber_100g': 5.1,
+            'salt_100g': 1.1,
+          },
+        },
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('3760049794298');
+      expect(p.nutriscoreGrade, 'c');
+      expect(p.energyKcal, 303);
+      expect(p.fiberG, 5.1);
+      expect(p.servingSize, '35.7 g');
+    });
+
+    test('Goldium crémeux — grade D', () async {
+      final json = {
+        'status': 'success',
+        'product': {
+          '_id': '6111259092495',
+          'product_name': 'Goldium crémeux',
+          'nutriscore_grade': 'd',
+          'nutriments': {
+            'energy-kcal_100g': 225,
+            'proteins_100g': 5,
+            'carbohydrates_100g': 3,
+            'fat_100g': 24,
+            'fiber_100g': 0.1,
+            'salt_100g': 0.32,
+          },
+        },
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('6111259092495');
+      expect(p.nutriscoreGrade, 'd');
+      expect(p.fatG, 24);
+    });
+
+    test('Lindt 85% — grade E, high protein', () async {
+      final json = {
+        'status': 'success',
+        'product': {
+          '_id': '3046920022606',
+          'product_name': 'Excellence 85% cacao',
+          'brands': 'Lindt',
+          'nutriscore_grade': 'e',
+          'nutriments': {
+            'energy-kcal_100g': 584,
+            'proteins_100g': 12.5,
+            'carbohydrates_100g': 22,
+            'fat_100g': 46,
+            'fiber_100g': 0,
+            'salt_100g': 0.02,
+          },
+        },
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('3046920022606');
+      expect(p.nutriscoreGrade, 'e');
+      expect(p.proteinG, 12.5);
+      expect(p.saltG, 0.02);
+    });
+
+    test('Wine — grade not-applicable preserved', () async {
+      final json = {
+        'status': 'success',
+        'product': {
+          '_id': '5601012011500',
+          'product_name': 'Mateus Rosé Original',
+          'nutriscore_grade': 'not-applicable',
+          'nutriments': <String, dynamic>{},
+        },
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('5601012011500');
+      expect(p.nutriscoreGrade, 'not-applicable');
+      expect(p.name, 'Mateus Rosé Original');
+    });
+
+    test('missing product keys handled gracefully', () async {
+      final json = {
+        'status': 'success',
+        'product': {'_id': '9999999999999'},
+      };
+      when(() => adapter.fetch(any(), any(), any())).thenAnswer(
+        (_) async => ResponseBody.fromString(
+          jsonEncode(json),
+          200,
+          headers: {
+            'content-type': ['application/json'],
+          },
+        ),
+      );
+      final p = await api.getByBarcode('9999999999999');
+      expect(p.name, 'Unknown');
+      expect(p.brand, null);
+      expect(p.nutriscoreGrade, null);
+    });
+  });
 }
