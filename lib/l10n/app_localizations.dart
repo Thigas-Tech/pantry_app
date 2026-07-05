@@ -477,6 +477,36 @@ abstract class AppLocalizations {
   /// **'Failed to save inventory item.'**
   String get saveFailed;
 
+  /// No description provided for @deleteInventoryItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete items?'**
+  String get deleteInventoryItem;
+
+  /// No description provided for @deleteCountSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} selected items?'**
+  String deleteCountSub(Object count);
+
+  /// No description provided for @itemsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} deleted.'**
+  String itemsDeleted(Object count);
+
+  /// No description provided for @itemsRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Items restored.'**
+  String get itemsRestored;
+
+  /// No description provided for @selectItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Select items'**
+  String get selectItems;
+
   /// No description provided for @deleteFailed.
   ///
   /// In en, this message translates to:

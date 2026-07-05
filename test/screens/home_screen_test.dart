@@ -545,4 +545,74 @@ void main() {
 
     verify(() => mockRepo.createInventory('Camping')).called(1);
   });
+
+  testWidgets('batch delete selects and deletes items', (tester) async {
+    final mockRepo = MockProductRepository();
+    when(
+      () => mockRepo.deleteInventoryItem(any()),
+    ).thenAnswer((_) async => 1);
+
+    final items = [
+      const InventoryWithProduct(
+        barcode: '1',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        productName: 'Item A',
+        notes: 'test',
+        dateAdded: 0,
+        inventoryId: 1,
+      ),
+      const InventoryWithProduct(
+        barcode: '2',
+        quantity: 2,
+        unit: 'L',
+        location: 'fridge',
+        id: 2,
+        productName: 'Item B',
+        notes: 'test',
+        dateAdded: 0,
+        inventoryId: 1,
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(mockRepo),
+      ],
+    );
+
+    // Tap the checklist icon to enter selection mode
+    await tester.tap(find.byIcon(Icons.checklist));
+    await tester.pumpAndSettle();
+
+    // Checkboxes should be visible
+    expect(find.byType(Checkbox), findsNWidgets(2));
+
+    // Select the first item
+    await tester.tap(find.byType(Checkbox).first);
+    await tester.pumpAndSettle();
+
+    // Tap delete (should show confirmation)
+    await tester.tap(find.byIcon(Icons.delete));
+    await tester.pumpAndSettle();
+
+    // Confirm deletion
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockRepo.deleteInventoryItem(1)).called(1);
+    verifyNever(() => mockRepo.deleteInventoryItem(2));
+  });
 }

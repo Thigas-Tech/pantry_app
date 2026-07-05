@@ -53,6 +53,38 @@ class SnackbarHelper {
     logError('Error from SnackBar: $message');
   }
 
+  /// Shows an info snackbar with an undo action.
+  static void showUndo(
+    BuildContext context,
+    String message,
+    VoidCallback onUndo,
+  ) {
+    final snackBar = SnackBar(
+      content: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.white),
+          const SizedBox(width: 12),
+          Expanded(child: Text(message)),
+        ],
+      ),
+      action: SnackBarAction(
+        label: 'Undo',
+        onPressed: onUndo,
+      ),
+      backgroundColor: Colors.blue.shade700,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      duration: const Duration(seconds: 5),
+    );
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
+    logInfo('Info from SnackBar (undo): $message');
+  }
+
   /// Internal helper that builds and shows the snackbar.
   static void _show(
     BuildContext context, {

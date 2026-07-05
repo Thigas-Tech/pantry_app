@@ -7,6 +7,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -34,12 +35,102 @@ import 'package:url_launcher/url_launcher.dart';
 /// The main dashboard of the app.
 ///
 /// Shows inventory grouped by expiry status and provides barcode scanning.
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   /// Creates a [HomeScreen] widget.
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _selectionMode = false;
+  final Set<int> _selectedIds = {};
+
+  void _toggleSelectionMode() {
+    setState(() {
+      _selectionMode = !_selectionMode;
+      if (!_selectionMode) _selectedIds.clear();
+    });
+  }
+
+  Future<void> _deleteSelected(List<InventoryWithProduct> allItems) async {
+    final l10n = AppLocalizations.of(context)!;
+    final count = _selectedIds.length;
+    if (count == 0) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteInventoryItem),
+        content: Text(l10n.deleteCountSub(count)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final ids = Set<int>.from(_selectedIds);
+    final repo = ref.read(productRepositoryProvider);
+    final deletedItems = allItems
+        .where((item) => ids.contains(item.id))
+        .toList();
+    try {
+      for (final id in ids) {
+        await repo.deleteInventoryItem(id);
+      }
+    } on Exception catch (e) {
+      logError('Batch delete failed: $e');
+      if (mounted) {
+        SnackbarHelper.showError(context, l10n.deleteFailed);
+      }
+      return;
+    }
+
+    setState(() {
+      _selectedIds.clear();
+      _selectionMode = false;
+    });
+    ref.invalidate(inventoryWithProductProvider);
+
+    if (mounted) {
+      SnackbarHelper.showUndo(
+        context,
+        l10n.itemsDeleted(deletedItems.length),
+        () async {
+          for (final item in deletedItems) {
+            final inventoryItem = InventoryItem(
+              barcode: item.barcode,
+              quantity: item.quantity,
+              unit: item.unit,
+              location: item.location,
+              expiryDate: item.expiryDate,
+              notes: item.notes,
+              dateAdded: item.dateAdded,
+              inventoryId: item.inventoryId,
+            );
+            await repo.addInventoryItem(inventoryItem);
+          }
+          ref.invalidate(inventoryWithProductProvider);
+          if (mounted) {
+            SnackbarHelper.showInfo(context, l10n.itemsRestored);
+          }
+        },
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
     final inventoriesAsync = ref.watch(inventoryListProvider);
@@ -141,29 +232,53 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         centerTitle: true,
-        actions: [
-          switcher,
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: l10n.pantryStats,
-            onPressed: () async {
-              await Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const StatsScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: l10n.settings,
-            onPressed: () async {
-              logInfo('Settings button pressed');
-              await Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-              ref.invalidate(inventoryWithProductProvider);
-            },
-          ),
-        ],
+        actions: _selectionMode
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: l10n.delete,
+                  onPressed: () => unawaited(
+                    _deleteSelected(
+                      inventoryAsync.value ?? [],
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: l10n.cancel,
+                  onPressed: _toggleSelectionMode,
+                ),
+              ]
+            : [
+                switcher,
+                IconButton(
+                  icon: const Icon(Icons.checklist),
+                  tooltip: l10n.selectItems,
+                  onPressed: _toggleSelectionMode,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.bar_chart),
+                  tooltip: l10n.pantryStats,
+                  onPressed: () async {
+                    await Navigator.of(context).push<void>(
+                      MaterialPageRoute(builder: (_) => const StatsScreen()),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  tooltip: l10n.settings,
+                  onPressed: () async {
+                    logInfo('Settings button pressed');
+                    await Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsScreen(),
+                      ),
+                    );
+                    ref.invalidate(inventoryWithProductProvider);
+                  },
+                ),
+              ],
       ),
       body: inventoryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -187,13 +302,24 @@ class HomeScreen extends ConsumerWidget {
             items: items,
             onScan: () => _scanBarcode(context, ref),
             expiringSoonDays: settings.expiringSoonDays,
+            selectionMode: _selectionMode,
+            selectedIds: _selectedIds,
+            onToggleSelection: (id) => setState(() {
+              if (_selectedIds.contains(id)) {
+                _selectedIds.remove(id);
+              } else {
+                _selectedIds.add(id);
+              }
+            }),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _scanBarcode(context, ref),
-        child: const Icon(Icons.qr_code_scanner),
-      ),
+      floatingActionButton: _selectionMode
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _scanBarcode(context, ref),
+              child: const Icon(Icons.qr_code_scanner),
+            ),
     );
   }
 
@@ -388,11 +514,17 @@ class _InventoryList extends ConsumerStatefulWidget {
     required this.items,
     required this.onScan,
     required this.expiringSoonDays,
+    this.selectionMode = false,
+    this.selectedIds = const {},
+    this.onToggleSelection,
   });
 
   final List<InventoryWithProduct> items;
   final VoidCallback onScan;
   final int expiringSoonDays;
+  final bool selectionMode;
+  final Set<int> selectedIds;
+  final void Function(int itemId)? onToggleSelection;
 
   @override
   ConsumerState<_InventoryList> createState() => _InventoryListState();
@@ -546,7 +678,15 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                     Colors.red,
                     Icons.error_outline,
                   ),
-                  ..._expired.map((item) => InventoryCard(item: item)),
+                  ..._expired.map(
+                    (item) => InventoryCard(
+                      item: item,
+                      showCheckbox: widget.selectionMode,
+                      isSelected: widget.selectedIds.contains(item.id),
+                      onToggleSelection: () =>
+                          widget.onToggleSelection?.call(item.id!),
+                    ),
+                  ),
                 ],
                 if (_expiringSoon.isNotEmpty) ...[
                   _sectionHeader(
@@ -554,7 +694,15 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                     Colors.orange,
                     Icons.warning_amber,
                   ),
-                  ..._expiringSoon.map((item) => InventoryCard(item: item)),
+                  ..._expiringSoon.map(
+                    (item) => InventoryCard(
+                      item: item,
+                      showCheckbox: widget.selectionMode,
+                      isSelected: widget.selectedIds.contains(item.id),
+                      onToggleSelection: () =>
+                          widget.onToggleSelection?.call(item.id!),
+                    ),
+                  ),
                 ],
                 if (_good.isNotEmpty) ...[
                   _sectionHeader(
@@ -562,7 +710,15 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                     Colors.green,
                     Icons.check_circle_outline,
                   ),
-                  ..._good.map((item) => InventoryCard(item: item)),
+                  ..._good.map(
+                    (item) => InventoryCard(
+                      item: item,
+                      showCheckbox: widget.selectionMode,
+                      isSelected: widget.selectedIds.contains(item.id),
+                      onToggleSelection: () =>
+                          widget.onToggleSelection?.call(item.id!),
+                    ),
+                  ),
                 ],
                 if (_filtered.isEmpty)
                   Padding(

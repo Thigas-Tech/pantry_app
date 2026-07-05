@@ -203,6 +203,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveFailed => 'Failed to save inventory item.';
 
   @override
+  String get deleteInventoryItem => 'Delete items?';
+
+  @override
+  String deleteCountSub(Object count) {
+    return 'Delete $count selected items?';
+  }
+
+  @override
+  String itemsDeleted(Object count) {
+    return '$count deleted.';
+  }
+
+  @override
+  String get itemsRestored => 'Items restored.';
+
+  @override
+  String get selectItems => 'Select items';
+
+  @override
   String get deleteFailed => 'Failed to delete item.';
 
   @override

@@ -72,6 +72,21 @@
   "itemAdded": "Item added to pantry.",
   "itemRemoved": "Item removed from pantry.",
   "saveFailed": "Failed to save inventory item.",
+  "deleteInventoryItem": "Delete items?",
+  "deleteCountSub": "Delete {count} selected items?",
+  "@deleteCountSub": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemsDeleted": "{count} deleted.",
+  "@itemsDeleted": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemsRestored": "Items restored.",
+  "selectItems": "Select items",
   "deleteFailed": "Failed to delete item.",
   "inventoryLoadFailed": "Failed to load inventory.",
   "expiryPrefix": "Exp",

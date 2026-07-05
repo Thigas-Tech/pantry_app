@@ -16,12 +16,30 @@ import 'package:pantry_app/widgets/nutriscore_badge.dart';
 ///
 /// Caches the image future in state to avoid recreating it on rebuilds.
 /// Includes semantic labels for accessibility.
+///
+/// When [showCheckbox] is true, a checkbox replaces the leading image and
+/// the card's tap navigation is disabled in favour of selection.
 class InventoryCard extends ConsumerStatefulWidget {
   /// Creates an [InventoryCard] for the given [item].
-  const InventoryCard({required this.item, super.key});
+  const InventoryCard({
+    required this.item,
+    this.showCheckbox = false,
+    this.isSelected = false,
+    this.onToggleSelection,
+    super.key,
+  });
 
   /// The inventory item to display.
   final InventoryWithProduct item;
+
+  /// Whether to show a selection checkbox instead of the product image.
+  final bool showCheckbox;
+
+  /// Whether this item is currently selected.
+  final bool isSelected;
+
+  /// Called when the selection checkbox is toggled.
+  final VoidCallback? onToggleSelection;
 
   @override
   ConsumerState<InventoryCard> createState() => _InventoryCardState();
@@ -59,7 +77,12 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        leading: widget.item.productImageUrl != null
+        leading: widget.showCheckbox
+            ? Checkbox(
+                value: widget.isSelected,
+                onChanged: (_) => widget.onToggleSelection?.call(),
+              )
+            : widget.item.productImageUrl != null
             ? Hero(
                 tag: widget.item.barcode,
                 child: Semantics(
@@ -99,24 +122,26 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
             ],
           ),
         ),
-        onTap: () async {
-          logInfo('Inventory card tapped: ${widget.item.barcode}');
-          final repo = ref.read(productRepositoryProvider);
-          try {
-            final product = await repo.getProduct(widget.item.barcode);
-            if (!context.mounted) return;
-            await Navigator.of(context).push<void>(
-              MaterialPageRoute(
-                builder: (_) => ProductDetailScreen(product: product),
-              ),
-            );
-            if (context.mounted) {
-              ref.invalidate(inventoryWithProductProvider);
-            }
-          } on Exception catch (e) {
-            logError('Failed to navigate to product detail: $e');
-          }
-        },
+        onTap: widget.showCheckbox
+            ? null
+            : () async {
+                logInfo('Inventory card tapped: ${widget.item.barcode}');
+                final repo = ref.read(productRepositoryProvider);
+                try {
+                  final product = await repo.getProduct(widget.item.barcode);
+                  if (!context.mounted) return;
+                  await Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => ProductDetailScreen(product: product),
+                    ),
+                  );
+                  if (context.mounted) {
+                    ref.invalidate(inventoryWithProductProvider);
+                  }
+                } on Exception catch (e) {
+                  logError('Failed to navigate to product detail: $e');
+                }
+              },
       ),
     );
   }
