@@ -50,35 +50,91 @@ class OpenFoodFactsApi {
 
   /// Fetches a product from Open Food Facts by its [barcode].
   ///
-  /// Throws [ProductNotFoundException] if the barcode is unknown.
+  /// Retries up to 3 times with exponential backoff (1s, 2s, 4s) when:
+  /// - HTTP 429 (rate limited)
+  /// - HTTP 5xx (server error)
+  /// - Connection timeout, receive timeout, or connection refused
+  ///
+  /// HTTP 404 is **not** retried — it always throws
+  /// [ProductNotFoundException] immediately.
+  ///
+  /// Throws [ProductNotFoundException] if the barcode is unknown or if all
+  /// retries are exhausted on a retryable error.
   Future<Product> getByBarcode(String barcode) async {
+    const maxRetries = 3;
+    const baseDelay = Duration(seconds: 1);
     final url = '$_baseUrl/api/v3/product/$barcode.json';
-    logInfo('GET $url');
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        url,
-        options: Options(headers: {'User-Agent': _userAgent}),
-      );
-      logInfo('Response status: ${response.statusCode}');
-      final data = response.data;
-      if (data == null ||
-          data['status'] != 'success' ||
-          data['product'] == null) {
-        throw ProductNotFoundException(barcode);
+
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      logInfo('GET $url (attempt ${attempt + 1})');
+      try {
+        final response = await _dio.get<Map<String, dynamic>>(
+          url,
+          options: Options(headers: {'User-Agent': _userAgent}),
+        );
+        logInfo('Response status: ${response.statusCode}');
+        final data = response.data;
+        if (data == null ||
+            data['status'] != 'success' ||
+            data['product'] == null) {
+          throw ProductNotFoundException(barcode);
+        }
+        final productJson = data['product'] as Map<String, dynamic>;
+        return _parseProduct(productJson);
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 404) {
+          logWarning('404 for $barcode');
+          throw ProductNotFoundException(barcode);
+        }
+        if (attempt < maxRetries && _isRetryable(e)) {
+          final delay = baseDelay * (1 << attempt); // 1s, 2s, 4s
+          logWarning(
+            'Retryable error for $barcode (${_describeError(e)})'
+            ' — retrying in ${delay.inSeconds}s',
+          );
+          await Future<void>.delayed(delay);
+          continue;
+        }
+        logError('DioException for $barcode: ${e.message}');
+        rethrow;
+      } on Exception catch (e) {
+        logError('Unexpected error fetching $barcode: $e');
+        rethrow;
       }
-      final productJson = data['product'] as Map<String, dynamic>;
-      return _parseProduct(productJson);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        logWarning('404 for $barcode');
-        throw ProductNotFoundException(barcode);
-      }
-      logError('DioException for $barcode: ${e.message}');
-      rethrow;
-    } on Exception catch (e) {
-      logError('Unexpected error fetching $barcode: $e');
-      rethrow;
     }
+    // Unreachable — either the request succeeds or an exception is thrown.
+    throw ProductNotFoundException(barcode);
+  }
+
+  /// Returns `true` when a [DioException] should be retried.
+  bool _isRetryable(DioException e) {
+    // Rate limited
+    if (e.response?.statusCode == 429) return true;
+    // Server error
+    if (e.response?.statusCode != null && e.response!.statusCode! >= 500) {
+      return true;
+    }
+    // Timeout / connection errors (no response)
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.connectionError) {
+      return true;
+    }
+    return false;
+  }
+
+  /// Returns a short human‑readable label for a [DioException] reason.
+  String _describeError(DioException e) {
+    if (e.response?.statusCode == 429) return '429';
+    if (e.response?.statusCode != null) return '${e.response!.statusCode}';
+    return switch (e.type) {
+      DioExceptionType.connectionTimeout => 'connection timeout',
+      DioExceptionType.receiveTimeout => 'receive timeout',
+      DioExceptionType.sendTimeout => 'send timeout',
+      DioExceptionType.connectionError => 'connection error',
+      _ => e.message ?? 'unknown',
+    };
   }
 
   Product _parseProduct(Map<String, dynamic> json) {

@@ -108,6 +108,25 @@ void main() {
         expect(merged.lastSynced, 1000);
       });
 
+      test('API empty string does not overwrite cached string value', () {
+        const cached = Product(
+          barcode: '1',
+          name: 'Real Name',
+          brand: 'Real Brand',
+          nutriscoreGrade: 'a',
+        );
+        // API returns empty strings for optional fields.
+        const api = Product(
+          barcode: '1',
+          name: 'Real Name',
+          brand: '',
+          nutriscoreGrade: '',
+        );
+        final merged = cached.mergeFromApi(api);
+        expect(merged.brand, 'Real Brand');
+        expect(merged.nutriscoreGrade, 'a');
+      });
+
       test('API name sentinel Unknown does not overwrite cached name', () {
         const cached = Product(barcode: '1', name: 'Real Name');
         const api = Product(barcode: '1', name: 'Unknown');

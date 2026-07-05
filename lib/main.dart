@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
@@ -35,6 +37,8 @@ Future<void> main() async {
 
   runApp(const ProviderScope(child: PantryApp()));
   logInfo('App started');
+
+  unawaited(_scheduleCacheRefresh());
 
   final container = ProviderContainer();
   unawaited(container.read(notificationServiceProvider).requestPermission());
@@ -72,6 +76,35 @@ Future<void> _handleAppUpdate() async {
     logInfo('Caches flushed for app update');
   } on Exception catch (e) {
     logError('App update handling failed: $e');
+  }
+}
+
+/// Checks whether the cached product data needs refreshing and, if so, fires
+/// a background refresh for every inventory.
+///
+/// Runs after the app starts. This is a best‑effort operation — failures are
+/// silently logged but never propagated.
+Future<void> _scheduleCacheRefresh() async {
+  try {
+    final container = ProviderContainer();
+    final repo = container.read(productRepositoryProvider);
+    if (!await repo.isCacheOverdue()) {
+      container.dispose();
+      return;
+    }
+    logInfo('Cache is overdue — scheduling background refresh');
+    final db = container.read(databaseProvider);
+    final inventories = await db.getInventories();
+    for (final inv in inventories) {
+      repo.refreshInventoryProductsBackground(inv['id'] as int);
+    }
+    await repo.setLastRefreshTime();
+    logInfo(
+      'Background refresh scheduled for ${inventories.length} inventories',
+    );
+    container.dispose();
+  } on Exception catch (e) {
+    logError('Scheduled cache refresh failed: $e');
   }
 }
 

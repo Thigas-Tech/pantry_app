@@ -6,6 +6,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/services/product_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
@@ -22,6 +23,7 @@ void main() {
     mockApi = MockOpenFoodFactsApi();
     fallbackApi = MockOpenFoodFactsApi();
     repository = ProductRepository(mockDb, mockApi, fallbackApi: fallbackApi);
+    registerFallbackValue(const Product(barcode: '', name: ''));
   });
 
   const testBarcode = '123456789';
@@ -260,6 +262,121 @@ void main() {
       ).thenAnswer((_) async => rows);
       final result = await repository.getExportData(inventoryId: 1);
       expect(result, rows);
+    });
+  });
+
+  group('refreshInventoryProducts', () {
+    setUp(() {
+      // Static mock values so the lonely InventoryItem gets a non-null id.
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('returns 0 when inventory has no items', () async {
+      when(
+        () => mockDb.getInventoryItems(inventoryId: 1),
+      ).thenAnswer((_) async => []);
+
+      final count = await repository.refreshInventoryProducts(1);
+      expect(count, 0);
+    });
+
+    test('refreshes successfully and returns correct count', () async {
+      const barcode1 = '111';
+      const barcode2 = '222';
+      const product1 = Product(barcode: barcode1, name: 'P1');
+      const product2 = Product(barcode: barcode2, name: 'P2');
+
+      when(
+        () => mockDb.getInventoryItems(inventoryId: 1),
+      ).thenAnswer(
+        (_) async => [
+          const InventoryItem(barcode: barcode1),
+          const InventoryItem(barcode: barcode2),
+        ],
+      );
+      when(
+        () => mockApi.getByBarcode(barcode1),
+      ).thenAnswer((_) async => product1);
+      when(
+        () => mockApi.getByBarcode(barcode2),
+      ).thenAnswer((_) async => product2);
+      when(() => mockDb.getProduct(barcode1)).thenAnswer((_) async => null);
+      when(() => mockDb.getProduct(barcode2)).thenAnswer((_) async => null);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
+
+      final count = await repository.refreshInventoryProducts(1);
+      expect(count, 2);
+    });
+
+    test('retries failed barcodes on second pass', () async {
+      const goodBarcode = 'good';
+      const badBarcode = 'bad';
+      const goodProduct = Product(barcode: goodBarcode, name: 'Good');
+
+      when(
+        () => mockDb.getInventoryItems(inventoryId: 1),
+      ).thenAnswer(
+        (_) async => [
+          const InventoryItem(barcode: goodBarcode),
+          const InventoryItem(barcode: badBarcode),
+        ],
+      );
+      // First pass: good succeeds, bad throws
+      when(
+        () => mockApi.getByBarcode(goodBarcode),
+      ).thenAnswer((_) async => goodProduct);
+      when(() => mockApi.getByBarcode(badBarcode)).thenThrow(Exception('fail'));
+      when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
+
+      final count = await repository.refreshInventoryProducts(1);
+      // First pass: 1 success (good). Bad fails on first pass, retry on
+      // second pass also fails (the stub still throws).
+      expect(count, 1);
+    });
+  });
+
+  group('refreshInventoryProductsBackground', () {
+    test('returns void (does not throw)', () {
+      when(
+        () => mockDb.getInventoryItems(inventoryId: 1),
+      ).thenAnswer((_) async => []);
+
+      // Should not throw — the fire-and-forget wrapper is void.
+      repository.refreshInventoryProductsBackground(1);
+    });
+  });
+
+  group('refresh time tracking', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('getLastRefreshTime returns null when never set', () async {
+      final time = await repository.getLastRefreshTime();
+      expect(time, isNull);
+    });
+
+    test('getLastRefreshTime / setLastRefreshTime round-trips', () async {
+      await repository.setLastRefreshTime();
+      final time = await repository.getLastRefreshTime();
+      expect(time, isNotNull);
+      // Should be within the last 5 seconds.
+      expect(
+        DateTime.now().difference(time!).inSeconds,
+        lessThan(5),
+      );
+    });
+
+    test('isCacheOverdue returns true when never refreshed', () async {
+      final overdue = await repository.isCacheOverdue();
+      expect(overdue, isTrue);
+    });
+
+    test('isCacheOverdue returns false when just refreshed', () async {
+      await repository.setLastRefreshTime();
+      final overdue = await repository.isCacheOverdue();
+      expect(overdue, isFalse);
     });
   });
 }

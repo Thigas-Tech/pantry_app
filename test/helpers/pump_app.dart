@@ -14,6 +14,21 @@ class MockProductRepository extends Mock implements ProductRepository {}
 
 class MockImageCacheService extends Mock implements ImageCacheService {}
 
+/// Creates a [MockProductRepository] with common stubs already configured.
+///
+/// Stubs included:
+/// - `isCacheOverdue()` → `false` (prevents background refresh on init)
+/// - `getLastRefreshTime()` → `null` (cooldown check returns no prior refresh)
+///
+/// Tests can override any stub by calling `when(() => ...).thenAnswer(...)`
+/// after receiving the instance.
+MockProductRepository createMockProductRepository() {
+  final repo = MockProductRepository();
+  when(repo.isCacheOverdue).thenAnswer((_) async => false);
+  when(repo.getLastRefreshTime).thenAnswer((_) async => null);
+  return repo;
+}
+
 /// Pumps [child] into a test‑friendly app shell.
 ///
 /// - ProviderScope with a default stub for [ImageCacheService] (avoids

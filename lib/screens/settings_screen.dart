@@ -250,6 +250,7 @@ class SettingsScreen extends ConsumerWidget {
           totalRefreshed += await repo.refreshInventoryProducts(id);
         }
         logInfo('Re-fetched $totalRefreshed products after cache flush');
+        await repo.setLastRefreshTime();
         ref.invalidate(inventoryWithProductProvider);
       } else {
         logInfo('Offline — products will appear with barcode as name');

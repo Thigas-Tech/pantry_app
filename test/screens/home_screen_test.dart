@@ -104,7 +104,9 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -127,7 +129,9 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -147,7 +151,9 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -187,7 +193,9 @@ void main() {
           ],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -214,7 +222,9 @@ void main() {
           ],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -238,7 +248,9 @@ void main() {
           ],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -260,7 +272,9 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -288,7 +302,9 @@ void main() {
           ],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -325,7 +341,9 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -354,7 +372,9 @@ void main() {
           ],
         ),
         activeInventoryProvider.overrideWith(() => fakeNotifier),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -370,7 +390,7 @@ void main() {
   testWidgets(
     'FAB scanner flow: barcode returns, navigates to product detail',
     (tester) async {
-      final mockRepo = MockProductRepository();
+      final mockRepo = createMockProductRepository();
       const product = Product(barcode: '123', name: 'Test');
       when(() => mockRepo.getProduct('123')).thenAnswer((_) async => product);
       // Stub inventory fetch to avoid null future
@@ -428,7 +448,9 @@ void main() {
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         connectivityProvider.overrideWith((ref) => Stream.value(true)),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -449,7 +471,7 @@ void main() {
   testWidgets('FAB scanner flow: product not found shows snackbar', (
     tester,
   ) async {
-    final mockRepo = MockProductRepository();
+    final mockRepo = createMockProductRepository();
     when(
       () => mockRepo.getProduct('123'),
     ).thenThrow(ProductNotFoundException('product not found'));
@@ -496,7 +518,9 @@ void main() {
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         connectivityProvider.overrideWith((ref) => Stream.value(true)),
-        productRepositoryProvider.overrideWithValue(MockProductRepository()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
       ],
     );
 
@@ -508,7 +532,7 @@ void main() {
   });
 
   testWidgets('create pantry dialog creates an inventory', (tester) async {
-    final mockRepo = MockProductRepository();
+    final mockRepo = createMockProductRepository();
     when(
       () => mockRepo.createInventory(any()),
     ).thenAnswer((_) async => 3);
@@ -547,7 +571,7 @@ void main() {
   });
 
   testWidgets('batch delete selects and deletes items', (tester) async {
-    final mockRepo = MockProductRepository();
+    final mockRepo = createMockProductRepository();
     when(
       () => mockRepo.deleteInventoryItem(any()),
     ).thenAnswer((_) async => 1);

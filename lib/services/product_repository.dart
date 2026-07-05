@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// The central data access point that implements the offline‑first pattern.
 ///
@@ -35,11 +38,26 @@ import 'package:pantry_app/utils/logger.dart';
 class ProductRepository {
   /// Creates a [ProductRepository] with the given [DatabaseHelper] and
   /// primary API. An optional fallback API can be provided for future use.
-  ProductRepository(this._db, this._api, {this._fallbackApi});
+  ///
+  /// If `_prefs` is provided it is used for refresh‑time tracking; otherwise
+  /// `SharedPreferences` is lazily obtained from the singleton instance.
+  ProductRepository(
+    this._db,
+    this._api, {
+    this._fallbackApi,
+    this._prefs,
+  });
 
   final DatabaseHelper _db;
   final OpenFoodFactsApi _api;
   final OpenFoodFactsApi? _fallbackApi;
+  final SharedPreferences? _prefs;
+
+  Future<SharedPreferences> get _sharedPrefs async =>
+      _prefs ?? await SharedPreferences.getInstance();
+
+  static const _lastRefreshKey = 'last_product_refresh';
+  static const _cacheOverdueDays = 5;
 
   /// Returns a [Product] for the given [barcode], either from cache or from
   /// the remote API.
@@ -173,16 +191,27 @@ class ProductRepository {
 
   /// Re‑fetches all products referenced by inventory items in [inventoryId].
   ///
-  /// For each unique barcode found in the inventory table, the remote API is
-  /// called. The freshly fetched data is **merged** with any cached product
-  /// via `Product.mergeFromApi`, ensuring that fields the API doesn't return
+  /// The method runs **two passes**. The first pass iterates every barcode
+  /// sequentially with a **500 ms delay** between calls. A second pass retries
+  /// only the barcodes that failed on the first pass (timeout, 5xx, 429, or
+  /// any other `Exception`), again with 500 ms spacing. This two‑pass strategy
+  /// absorbs transient rate‑limiting or server hiccups without blocking the
+  /// UI for longer than necessary.
+  ///
+  /// Each individual API call is retried internally by
+  /// [OpenFoodFactsApi.getByBarcode] with exponential backoff (1s, 2s, 4s)
+  /// for 429, 5xx, and timeout errors before the repository even sees the
+  /// failure.
+  ///
+  /// Freshly fetched data is **merged** with any cached product via
+  /// `Product.mergeFromApi`, ensuring that fields the API doesn't return
   /// (e.g. Nutri-Score on staging) are preserved from the cache.
   ///
   /// ## Returns
   ///
-  /// The number of successfully refreshed products. Failures are silently
-  /// skipped — this is a best‑effort operation suitable for pull‑to‑refresh
-  /// and post‑flush recovery.
+  /// The number of successfully refreshed products. Individual failures are
+  /// silently skipped — this is a best‑effort operation suitable for
+  /// pull‑to‑refresh and post‑flush recovery.
   Future<int> refreshInventoryProducts(int inventoryId) async {
     final items = await _db.getInventoryItems(inventoryId: inventoryId);
     final barcodes = items.map((e) => e.barcode).toSet();
@@ -191,8 +220,48 @@ class ProductRepository {
     logInfo(
       'Refreshing ${barcodes.length} products for inventory $inventoryId',
     );
+
     var refreshed = 0;
+
+    // ---- Pass 1: attempt every barcode ----
+    var result = await _refreshBatch(barcodes);
+    refreshed += result.refreshed;
+
+    // ---- Pass 2: retry only failures ----
+    if (result.failed.isNotEmpty) {
+      logInfo('Retrying ${result.failed.length} failed products');
+      await Future<void>.delayed(const Duration(seconds: 2));
+      result = await _refreshBatch(Set<String>.of(result.failed));
+      refreshed += result.refreshed;
+    }
+
+    logInfo('Refreshed $refreshed / ${barcodes.length} products');
+    return refreshed;
+  }
+
+  /// Fires‑off [refreshInventoryProducts] without awaiting the result.
+  ///
+  /// Use this for background refreshes where the caller does not need to
+  /// know when the operation completes (e.g., on‑startup cache refresh).
+  void refreshInventoryProductsBackground(int inventoryId) {
+    unawaited(refreshInventoryProducts(inventoryId));
+  }
+
+  /// Iterates [barcodes] sequentially, fetching and merging each one.
+  ///
+  /// Returns a record with the number of successfully refreshed products and
+  /// a list of barcodes that failed. A 500 ms delay separates consecutive
+  /// requests to reduce the risk of rate limiting.
+  Future<({int refreshed, List<String> failed})> _refreshBatch(
+    Set<String> barcodes,
+  ) async {
+    var refreshed = 0;
+    final failed = <String>[];
+    var index = 0;
     for (final barcode in barcodes) {
+      if (index > 0) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
       try {
         final fetched = await _api.getByBarcode(barcode);
         final cached = await _db.getProduct(barcode);
@@ -200,10 +269,48 @@ class ProductRepository {
         await _db.insertProduct(merged);
         refreshed++;
       } on Exception {
-        // Skip individual failures — best-effort.
+        failed.add(barcode);
+        logWarning('Refresh failed for $barcode — will retry');
       }
+      index++;
     }
-    logInfo('Refreshed $refreshed / ${barcodes.length} products');
-    return refreshed;
+    return (refreshed: refreshed, failed: failed);
+  }
+
+  /// Records the current time as the last successful product refresh.
+  ///
+  /// Used together with [isCacheOverdue] to trigger automatic background
+  /// refreshes after [cacheOverdueDays] of inactivity.
+  Future<void> setLastRefreshTime() async {
+    final prefs = await _sharedPrefs;
+    await prefs.setString(
+      _lastRefreshKey,
+      DateTime.now().toIso8601String(),
+    );
+    logInfo('Last refresh time updated');
+  }
+
+  /// Returns the stored last‑refresh timestamp, or `null` if no refresh has
+  /// ever been recorded.
+  Future<DateTime?> getLastRefreshTime() async {
+    final prefs = await _sharedPrefs;
+    final raw = prefs.getString(_lastRefreshKey);
+    if (raw == null) return null;
+    return DateTime.tryParse(raw);
+  }
+
+  /// The number of days after which the cached product data is considered
+  /// stale and a background refresh should be scheduled.
+  int get cacheOverdueDays => _cacheOverdueDays;
+
+  /// Returns `true` when the last refresh timestamp is missing or older than
+  /// [cacheOverdueDays] days.
+  ///
+  /// Used at app startup and on the home screen to decide whether to fire a
+  /// background refresh.
+  Future<bool> isCacheOverdue() async {
+    final lastRefresh = await getLastRefreshTime();
+    if (lastRefresh == null) return true;
+    return DateTime.now().difference(lastRefresh).inDays >= _cacheOverdueDays;
   }
 }

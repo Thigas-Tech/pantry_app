@@ -42,6 +42,32 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _selectionMode = false;
   final Set<int> _selectedIds = {};
+  bool _hasCheckedOverdue = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshIfOverdue());
+  }
+
+  /// Fires a background refresh when the cached product data is older than
+  /// `cacheOverdueDays` (5 days). Runs at most once per widget lifecycle.
+  Future<void> _refreshIfOverdue() async {
+    if (_hasCheckedOverdue || !mounted) return;
+    _hasCheckedOverdue = true;
+    try {
+      final repo = ref.read(productRepositoryProvider);
+      final online = await InternetConnectionChecker.instance.hasConnection;
+      if (!online) return;
+      if (!await repo.isCacheOverdue()) return;
+      logInfo('Cache overdue — scheduling background refresh');
+      final activeId = ref.read(activeInventoryProvider);
+      repo.refreshInventoryProductsBackground(activeId);
+      await repo.setLastRefreshTime();
+    } on Exception catch (e) {
+      logWarning('Overdue cache check failed: $e');
+    }
+  }
 
   void _toggleSelectionMode() {
     setState(() {
@@ -638,15 +664,29 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async {
-              ref.invalidate(inventoryWithProductProvider);
-              // Also refresh cached products if online.
+              final repo = ref.read(productRepositoryProvider);
+              final lastRefresh = await repo.getLastRefreshTime();
+
+              // Cooldown: if refreshed less than 1 minute ago, just
+              // re-read the DB without hitting the API.
+              final cooldownExpired =
+                  lastRefresh == null ||
+                  DateTime.now().difference(lastRefresh).inMinutes >= 1;
+              if (!cooldownExpired) {
+                logInfo('Refresh skipped — cooldown active');
+                ref.invalidate(inventoryWithProductProvider);
+                return;
+              }
+
               final online =
                   await InternetConnectionChecker.instance.hasConnection;
               if (online && context.mounted) {
-                final repo = ref.read(productRepositoryProvider);
                 final activeId = ref.read(activeInventoryProvider);
-                await repo.refreshInventoryProducts(activeId);
+                repo.refreshInventoryProductsBackground(activeId);
+                await repo.setLastRefreshTime();
               }
+              // Invalidate *after* so the UI loads fresh data from the DB.
+              ref.invalidate(inventoryWithProductProvider);
             },
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 12),

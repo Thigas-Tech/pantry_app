@@ -241,23 +241,29 @@ abstract class Product with _$Product {
 extension ProductMerge on Product {
   /// Merges data from an API-fetched [api] product into this product,
   /// preserving local-only fields that the API does not return.
+  ///
+  /// Empty strings (`""`) from the API are treated the same as `null` to
+  /// prevent incomplete API responses from overwriting cached data.
   Product mergeFromApi(Product api) {
+    T? nonEmpty<T extends String>(T? value) =>
+        (value != null && value.isNotEmpty) ? value : null;
+
     return copyWith(
       name: api.name != 'Unknown' ? api.name : name,
-      brand: api.brand ?? brand,
-      category: api.category ?? category,
-      ingredients: api.ingredients ?? ingredients,
-      servingSize: api.servingSize ?? servingSize,
+      brand: nonEmpty(api.brand) ?? brand,
+      category: nonEmpty(api.category) ?? category,
+      ingredients: nonEmpty(api.ingredients) ?? ingredients,
+      servingSize: nonEmpty(api.servingSize) ?? servingSize,
       energyKcal: api.energyKcal ?? energyKcal,
       proteinG: api.proteinG ?? proteinG,
       carbsG: api.carbsG ?? carbsG,
       fatG: api.fatG ?? fatG,
       fiberG: api.fiberG ?? fiberG,
       saltG: api.saltG ?? saltG,
-      imageUrl: api.imageUrl ?? imageUrl,
-      nutriscoreGrade: api.nutriscoreGrade ?? nutriscoreGrade,
+      imageUrl: nonEmpty(api.imageUrl) ?? imageUrl,
+      nutriscoreGrade: nonEmpty(api.nutriscoreGrade) ?? nutriscoreGrade,
       nutriscoreNotApplicableCategory:
-          api.nutriscoreNotApplicableCategory ??
+          nonEmpty(api.nutriscoreNotApplicableCategory) ??
           nutriscoreNotApplicableCategory,
       lastSynced: api.lastSynced ?? lastSynced,
     );
