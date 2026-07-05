@@ -48,6 +48,7 @@ flutter build appbundle            # release AAB
 5. **Run the full suite** — before committing: `flutter analyze && flutter test --concurrency=8`. Zero issues, all tests passing.
 6. **Update documentation** — after making changes, update `CHANGELOG.md`, `README.md`, `ARCHITECTURE.md`, and/or `AGENTS.md` to reflect new features, structure changes, or updated commands. Always generate fresh API docs with `dart doc .`.
 7. **Update CHANGELOG.md** — after every feature addition, bugfix, or significant change, add an entry under `[Unreleased]` grouped by category. Keep entries concise and user-facing. This is the canonical record of what ships in each release.
+8. **Set Product.source** — every `Product()` constructor call MUST pass `source`. Use `'api'` for OFF‑fetched data and `'manual'` for user‑entered or CSV‑imported data. The default is `'api'`. Never omit this field — it protects manual products from being deleted by `clearCachedProducts()` during cache flushes.
 
 ### Code style
 - 80-character line limit (enforced by lint)

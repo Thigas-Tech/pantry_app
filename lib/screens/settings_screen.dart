@@ -233,7 +233,7 @@ class SettingsScreen extends ConsumerWidget {
     try {
       logInfo('Flushing cache manually');
       await ImageCacheService().clearCache();
-      await DatabaseHelper().clearProducts();
+      await DatabaseHelper().clearCachedProducts();
 
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.flushCacheSuccess);

@@ -42,8 +42,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyPantryTitle => 'Your pantry is empty';
 
   @override
-  String get emptyPantrySubtitle =>
-      'Tap the button below to scan your first product';
+  String get emptyPantrySubtitle => 'Tap the button below to scan your first product';
 
   @override
   String get scanFirstProduct => 'Scan a barcode';
@@ -354,8 +353,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNotFound => 'Product not found';
 
   @override
-  String get productNotFoundHint =>
-      'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
+  String get productNotFoundHint => 'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
 
   @override
   String get addManually => 'Add manually';
@@ -487,15 +485,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveProduct => 'Save product';
 
   @override
-  String get submittingToOff =>
-      'Will be submitted to Open Food Facts when online';
+  String get submittingToOff => 'Will be submitted to Open Food Facts when online';
 
   @override
   String get offlineWarning => 'You are offline — adding product manually';
 
   @override
-  String get nutriscoreExplanation =>
-      'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.';
+  String get nutriscoreExplanation => 'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.';
 
   @override
   String nutriscoreNotApplicable(Object category) {
@@ -503,22 +499,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nutriscoreNotApplicableGeneric =>
-      'Nutri-Score is not applicable to this product category.';
+  String get nutriscoreNotApplicableGeneric => 'Nutri-Score is not applicable to this product category.';
 
   @override
   String get flushCache => 'Flush cache';
 
   @override
-  String get flushCacheSub => 'Delete cached products and images';
+  String get flushCacheSub => 'Delete cached product data and images';
 
   @override
-  String get flushCacheConfirm =>
-      'This will delete all cached product data and images. Products will be re-fetched from Open Food Facts the next time you view them.';
+  String get flushCacheConfirm => 'This will delete all cached product data and images fetched from Open Food Facts. Manually entered products and your inventory items will be preserved. Cached products will be re-fetched the next time you view them.';
 
   @override
-  String get flushCacheSuccess =>
-      'Cache flushed. Products will refresh automatically.';
+  String get flushCacheSuccess => 'Cached products flushed. They will refresh automatically.';
 
   @override
   String get flushCacheFailed => 'Failed to flush cache. Please try again.';

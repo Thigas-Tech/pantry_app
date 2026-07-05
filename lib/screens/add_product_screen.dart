@@ -78,6 +78,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       fiberG: double.tryParse(_fiberG),
       saltG: double.tryParse(_saltG),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
+      source: 'manual',
     );
     logInfo('Manual product entry saved: ${product.name}');
     Navigator.of(context).pop(product);

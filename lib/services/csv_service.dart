@@ -48,6 +48,7 @@ class CsvService {
     'Serving Size',
     'Nutri-Score',
     'Nutri-Score Reason',
+    'Source',
     'Energy (kcal/100g)',
     'Protein (g/100g)',
     'Carbs (g/100g)',
@@ -93,6 +94,7 @@ class CsvService {
         _escapeField(row['serving_size']),
         _escapeField(row['nutriscore_grade']),
         _escapeField(row['nutriscore_not_applicable_category']),
+        _escapeField(row['source']),
         row['energy_kcal']?.toString() ?? '',
         row['protein_g']?.toString() ?? '',
         row['carbs_g']?.toString() ?? '',
@@ -215,6 +217,9 @@ class CsvService {
           nutriscoreGrade: map['Nutri-Score'].emptyAsNull,
           nutriscoreNotApplicableCategory:
               map['Nutri-Score Reason'].emptyAsNull,
+          source: (map['Source'] ?? '').trim().isNotEmpty
+              ? map['Source']!.trim()
+              : 'manual',
           energyKcal: double.tryParse(map['Energy (kcal/100g)'] ?? ''),
           proteinG: double.tryParse(map['Protein (g/100g)'] ?? ''),
           carbsG: double.tryParse(map['Carbs (g/100g)'] ?? ''),

@@ -8,6 +8,11 @@ linter:
     # ----- Disabled (not applicable to Flutter apps) -----
     avoid_slow_async_io: false
 
+    # ----- Disabled (conflicts with multi-line string building) -----
+    prefer_adjacent_string_concatenation: false
+    no_adjacent_strings_in_list: false
+    missing_whitespace_between_adjacent_strings: false
+
     # ----- Error prevention -----
     always_declare_return_types: true
     avoid_dynamic_calls: true
@@ -32,7 +37,6 @@ linter:
     flutter_style_todos: true
     join_return_with_assignment: true
     lines_longer_than_80_chars: true
-    prefer_adjacent_string_concatenation: true
     prefer_collection_literals: true
     prefer_const_constructors: true
     prefer_const_constructors_in_immutables: true

@@ -47,13 +47,13 @@ This document describes the architecture, patterns, and design decisions.
 
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 5)
+### 2.1 Schema (version 6)
 
 Three tables:
 
 | Table         | Purpose                                                  |
 |---------------|----------------------------------------------------------|
-| `products`    | Cached product data from Open Food Facts. PK = barcode   |
+| `products`    | Cached product data from Open Food Facts. PK = barcode.  Includes `source` column: `'api'` (OFF‑fetched, flushable) or `'manual'` (user‑entered, protected). |
 | `inventories` | Named pantries (e.g. "Home", "Work"). PK = id            |
 | `inventory`   | Instances of products in a pantry. FK → products, inventories |
 
@@ -63,7 +63,7 @@ Each table has a dedicated Data Access Object:
 
 | DAO                    | Responsibility                            |
 |------------------------|-------------------------------------------|
-| `ProductDao`           | Upsert / lookup products, count           |
+| `ProductDao`           | Upsert / lookup products, count, source‑aware queries |
 | `InventoryDao`         | CRUD items, joined queries, export data   |
 | `InventoriesDao`       | CRUD named pantries, migrations           |
 
@@ -76,7 +76,7 @@ point** for database access in production code.
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 → v4).
+- `_onUpgrade` handles version bumps (currently v1 → v6).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -85,6 +85,8 @@ Version history:
 | v1 → v2 | Added `inventories` table, `inventory_id` column |
 | v2 → v3 | Default unit `pcs` → `pieces`, migration of existing data |
 | v3 → v4 | Added `nutriscore_grade TEXT` column to `products` |
+| v4 → v5 | Added `nutriscore_not_applicable_category TEXT` column |
+| v5 → v6 | Added `source TEXT NOT NULL DEFAULT 'api'` column |
 
 ### 2.4 Connectivity layer
 
@@ -267,10 +269,15 @@ When the app version changes (detected via `package_info_plus` and
 
 1. **Image cache** — `ImageCacheService.clearCache()` deletes the
    entire `image_cache/` directory, forcing re-download of product images.
-2. **Product database** — `DatabaseHelper.clearProducts()` deletes all
-   rows from the `products` table. On next startup, the background refresh
-   in `main()` re-fetches every product from Open Food Facts with current
-   data (including fields added in newer versions, e.g. `nutriscore_grade`).
+   The image cache only stores images downloaded from OFF CDN URLs —
+   manually captured photos and other user data are never kept here.
+
+2. **Product cache** — `DatabaseHelper.clearCachedProducts()` deletes
+   only rows where `source = 'api'` from the `products` table. Products
+   the user entered manually (`source = 'manual'`) and all inventory
+   items are preserved. On next startup, the background refresh in
+   `main()` re-fetches the remaining cached products from OFF with
+   current data (including fields added in newer versions).
 
 A manual flush button is also available in the settings screen.
 
@@ -289,3 +296,4 @@ A manual flush button is also available in the settings screen.
 9. **Batch delete with undo** — selection mode replaces the app bar actions and FAB with a delete button and close button. Checkboxes replace card images. Undo restores all deleted items via `SnackbarHelper.showUndo`.
 10. **Quick quantity adjustment** — `+/−` buttons on inventory tiles call `_updateQuantity`, which persists the change and re-schedules notifications. Tap the quantity to type a number directly. Decrementing to 0 triggers delete.
 11. **Nutri-Score fallback** — when the API returns `nutriscore_grade: "not-applicable"` (e.g. for food additives), the badge renders a grey dash. A tooltip explains the reason using the category from `nutriscore_data.nutriscore_not_applicable_for_category` (e.g. `en:food-additives` → "food additives"). This is stored as `nutriscore_not_applicable_category` on the product and surfaced through the `InventoryWithProduct` join.
+12. **Source column protects manual products** — every row in the `products` table carries a `source` column (`'api'` for OFF‑fetched data, `'manual'` for user‑entered or CSV‑imported data). Cache flush (`clearCachedProducts`) deletes only API‑sourced products; manual products and all inventory items survive across app updates. The image cache is inherently separated (stores only downloaded OFF CDN images) and safe to clear.

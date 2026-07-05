@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Bugfixes
+- **Critical**: Cache flush no longer deletes manually-entered products. Added `source` column to `products` table (`'api'` vs `'manual'`) so `clearCachedProducts()` only removes API-fetched data. Inventory items and user-entered products are preserved across app updates and manual flushes.
+- Image cache verified isolated — only stores downloaded OFF CDN images, never local/manual photos.
+
 ### Nutri-Score
 - Grey dash badge for non-applicable products (food additives, sweeteners, etc.)
 - Tooltip on product detail screen explains why with the OFF category name
@@ -35,13 +39,14 @@
 - Connectivity provider stream emission tests
 - InventoryCard tap navigation + image cache fallback tests
 - HomeScreen: stats navigation, create-pantry dialog, batch delete tests
-- 259 tests total, 0 analyze issues
+- 266 tests total, 0 analyze issues
 
 ### Code health
 - Extracted `parseExpiryDate`, `isExpired`, `isExpiringSoon` into `lib/utils/date_helpers.dart`
 - Removed dead `product_api_service.dart`
 - Deduplicated custom-input and days-dialog builders in `AddToInventoryScreen`
 - Singleton `DatabaseHelper` delegates to `const` DAOs
+- Resolved lint rule conflict: disabled `prefer_adjacent_string_concatenation`, `no_adjacent_strings_in_list`, and `missing_whitespace_between_adjacent_strings` to eliminate false positives on multi-line string building
 
 ### Localization
 - All user-visible strings externalised via ARB (`flutter gen-l10n`)
@@ -59,6 +64,9 @@
 ### Multi-inventory
 - Named pantries (Home, Work, Camping, …)
 - Per-pantry inventory views and stats
+
+### Documentation
+- Added roadmap items to TODO.md: cosmetics/toiletries OFF API support, ingredient/nutrition photos in manual entry, upload manual products to OFF API
 
 ### Performance
 - Image caching in local filesystem (`ImageCacheService`)

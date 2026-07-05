@@ -137,6 +137,23 @@ abstract class Product with _$Product {
     /// by `json_serializable` because the value comes from a nested object.
     @JsonKey(includeFromJson: false, includeToJson: false)
     String? nutriscoreNotApplicableCategory,
+
+    /// The origin of this product record.
+    ///
+    /// - `'api'` — fetched from Open Food Facts (can be safely flushed and
+    ///   re‑fetched).
+    /// - `'manual'` — entered by the user via the add‑product screen or
+    ///   imported from CSV (must never be deleted by a cache flush).
+    ///
+    /// Defaults to `'api'` because most products come from the OFF
+    /// integration. The add‑product screen and CSV import override it to
+    /// `'manual'`.
+    ///
+    /// Not serialised from JSON because the OFF API does not include this
+    /// field; it is only stored in the local database.
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    @Default('api')
+    String source,
   }) = _Product;
 
   /// Creates a [Product] from a JSON map in the Open Food Facts v3 format.

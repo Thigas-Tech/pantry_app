@@ -28,6 +28,7 @@ class ProductDao {
     'last_synced': p.lastSynced,
     'nutriscore_grade': p.nutriscoreGrade,
     'nutriscore_not_applicable_category': p.nutriscoreNotApplicableCategory,
+    'source': p.source,
   };
 
   /// Converts a database row map into a [Product].
@@ -49,6 +50,7 @@ class ProductDao {
     nutriscoreGrade: map['nutriscore_grade'] as String?,
     nutriscoreNotApplicableCategory:
         map['nutriscore_not_applicable_category'] as String?,
+    source: map['source'] as String? ?? 'api',
   );
 
   /// Inserts a product into the local cache (upsert).
@@ -107,5 +109,30 @@ class ProductDao {
   Future<void> clear(Database db) async {
     await db.delete('products');
     logInfo('All cached products deleted');
+  }
+
+  /// Returns products with the given [source] value.
+  ///
+  /// Used to retrieve only API‑fetched products for cache refresh.
+  Future<List<Product>> getBySource(Database db, String source) async {
+    final result = await db.query(
+      'products',
+      where: 'source = ?',
+      whereArgs: [source],
+    );
+    return result.map(fromMap).toList();
+  }
+
+  /// Deletes products with the given [source] value.
+  ///
+  /// Called by `DatabaseHelper.clearCachedProducts` to remove only
+  /// API‑fetched products while preserving user‑entered records.
+  Future<void> deleteBySource(Database db, String source) async {
+    final count = await db.delete(
+      'products',
+      where: 'source = ?',
+      whereArgs: [source],
+    );
+    logInfo('Deleted $count products with source "$source"');
   }
 }

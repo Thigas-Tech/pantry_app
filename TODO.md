@@ -36,12 +36,15 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [ ] **Offline-first product submission queue** — queue `submitProduct` calls when offline; flush when `connectivityProvider` emits `true`.
 - [ ] **Cloud backup** — upload DB to Firebase Storage / S3. Restore on a new device.
 - [ ] **Serving‑size & Nutri‑Score in manual entry** — `add_product_screen.dart` already has the fields; verify they are wired and tested.
+- [ ] **Cosmetics & toiletries support** — extend the OFF API integration to query cosmetics endpoints (`/cosmetics/`), add cosmetic‑specific fields to the `Product` model (brand, product type, non‑food category), and filter/sort accordingly in the UI.
+- [ ] **Ingredient list & nutrition table photos in manual entry** — add image‑picker fields to `AddProductScreen` for capturing/selecting photos of the ingredients list and nutrition table. Store local file paths on the model; preview thumbnails in the form.
 
 ## Larger Projects (high effort)
 
 - [ ] **Multi‑language support** — ARB infrastructure exists; add translations (pt, fr, es, de). Contribute via community PRs.
 - [ ] **Recipe suggestions** — call a recipe API with items expiring this week; suggest meals that use them.
 - [ ] **Widget test → golden coverage** — product detail, settings, stats screens.
+- [ ] **Upload manual products to Open Food Facts** — submit user‑entered products (including photos of ingredients list and nutrition table) to the OFF API via the v3 product submission endpoint. Handle authentication, field mapping, image upload, and show submission status in the UI. Supersedes the offline‑first submission queue item.
 - [ ] **Patrol E2E tests** — real‑device integration tests via [Patrol](https://patrol.leancode.co). Uses `patrol_cli` and `patrol` dev-dependency. Replace the generic `integration_test/` with `patrol_test/` directory.
 
 ### Patrol E2E test scenarios

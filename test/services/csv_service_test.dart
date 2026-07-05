@@ -344,6 +344,58 @@ void main() {
       expect(byBarcode['4304493261570']!.nutriscoreGrade, 'not-applicable');
     });
 
+    test('CSV round-trip preserves Source column', () async {
+      final products = <Product>[];
+      when(
+        () => mockDb.insertProduct(captureAny(that: isA<Product>())),
+      ).thenAnswer((invocation) {
+        products.add(invocation.positionalArguments.first as Product);
+        return Future.value();
+      });
+      when(() => mockDb.insertInventoryItem(any())).thenAnswer((_) async => 1);
+
+      final rows = _buildProductFixtureRows();
+      when(
+        () => mockDb.getExportData(inventoryId: 1),
+      ).thenAnswer((_) async => rows);
+
+      final exported = await csvService.generateCsv(inventoryId: 1);
+      // Verify CSV header includes Source.
+      expect(exported, contains('Source'));
+
+      // Import and verify all products have source 'api'.
+      await csvService.importCsv(exported, inventoryId: 1);
+      expect(products, isNotEmpty);
+      expect(products.every((p) => p.source == 'api'), isTrue);
+    });
+
+    test('CSV import defaults source to manual when missing', () async {
+      final products = <Product>[];
+      when(
+        () => mockDb.insertProduct(captureAny(that: isA<Product>())),
+      ).thenAnswer((invocation) {
+        products.add(invocation.positionalArguments.first as Product);
+        return Future.value();
+      });
+      when(() => mockDb.insertInventoryItem(any())).thenAnswer((_) async => 1);
+
+      // Build CSV without Source column.
+      const header =
+          'Product Name,Brand,Category,Barcode,'
+          'Quantity,Unit,Expiry Date,Location,Notes,Date Added,'
+          'Serving Size,Nutri-Score,Nutri-Score Reason,'
+          'Energy (kcal/100g),Protein (g/100g),Carbs (g/100g),'
+          'Fat (g/100g),Fiber (g/100g),Salt (g/100g),Inventory Name';
+      const row =
+          'Test,TestBrand,,123456789,1,pieces,,pantry,,,,,,20,'
+          ',,,,,Home';
+      final csv = [header, row].join('\n');
+
+      await csvService.importCsv(csv, inventoryId: 1);
+      expect(products, hasLength(1));
+      expect(products.first.source, 'manual');
+    });
+
     test('imported products have correct nutrition values', () async {
       final products = <Product>[];
       when(
@@ -443,6 +495,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '3017620422003',
       'serving_size': null,
       'nutriscore_grade': 'e',
+      'source': 'api',
       'energy_kcal': 539,
       'protein_g': 6.3,
       'carbs_g': 57.5,
@@ -457,6 +510,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '3274080005003',
       'serving_size': '1l',
       'nutriscore_grade': 'a',
+      'source': 'api',
       'energy_kcal': null,
       'protein_g': null,
       'carbs_g': null,
@@ -471,6 +525,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '3168930163480',
       'serving_size': '200 ml',
       'nutriscore_grade': 'b',
+      'source': 'api',
       'energy_kcal': 40,
       'protein_g': 0.9,
       'carbs_g': 3.5,
@@ -485,6 +540,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '3760049794298',
       'serving_size': '35.7 g',
       'nutriscore_grade': 'c',
+      'source': 'api',
       'energy_kcal': 303,
       'protein_g': 8.6,
       'carbs_g': 46,
@@ -499,6 +555,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '6111259092495',
       'serving_size': null,
       'nutriscore_grade': 'd',
+      'source': 'api',
       'energy_kcal': 225,
       'protein_g': 5,
       'carbs_g': 3,
@@ -513,6 +570,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '3046920022606',
       'serving_size': '100 g',
       'nutriscore_grade': 'e',
+      'source': 'api',
       'energy_kcal': 584,
       'protein_g': 12.5,
       'carbs_g': 22,
@@ -527,6 +585,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '6111242106949',
       'serving_size': '160g',
       'nutriscore_grade': 'd',
+      'source': 'api',
       'energy_kcal': 235,
       'protein_g': 8,
       'carbs_g': 3.5,
@@ -541,6 +600,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '6111246721261',
       'serving_size': '100 g',
       'nutriscore_grade': 'c',
+      'source': 'api',
       'energy_kcal': 159,
       'protein_g': 5,
       'carbs_g': 10,
@@ -555,6 +615,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '5601012011500',
       'serving_size': null,
       'nutriscore_grade': 'not-applicable',
+      'source': 'api',
       'energy_kcal': null,
       'protein_g': null,
       'carbs_g': null,
@@ -569,6 +630,7 @@ List<Map<String, dynamic>> _buildProductFixtureRows() {
       'barcode': '4304493261570',
       'serving_size': null,
       'nutriscore_grade': 'not-applicable',
+      'source': 'api',
       'energy_kcal': null,
       'protein_g': null,
       'carbs_g': null,

@@ -455,4 +455,143 @@ void main() {
       tempDir.deleteSync(recursive: true);
     });
   });
+  group('Migration v5 → v6', () {
+    test('adds source column with default api', () async {
+      final tempDir = Directory.systemTemp.createTempSync('pantry_v5_');
+      final v5Path = '${tempDir.path}/pantry.db';
+      final v5Db = await openDatabase(
+        v5Path,
+        version: 5,
+        onCreate: (db, _) async {
+          await db.execute('''
+            CREATE TABLE products (
+              barcode TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              brand TEXT,
+              image_url TEXT,
+              category TEXT,
+              ingredients TEXT,
+              serving_size TEXT,
+              energy_kcal REAL,
+              protein_g REAL,
+              carbs_g REAL,
+              fat_g REAL,
+              fiber_g REAL,
+              salt_g REAL,
+              last_synced INTEGER,
+              nutriscore_grade TEXT,
+              nutriscore_not_applicable_category TEXT
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE inventories (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              created_at INTEGER NOT NULL
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE inventory (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT NOT NULL,
+              quantity REAL DEFAULT 1,
+              unit TEXT DEFAULT 'pieces',
+              expiry_date TEXT,
+              location TEXT DEFAULT 'pantry',
+              notes TEXT,
+              date_added INTEGER,
+              inventory_id INTEGER NOT NULL
+            )
+          ''');
+          await db.insert('inventories', {
+            'name': 'Home',
+            'created_at': DateTime.now().millisecondsSinceEpoch,
+          });
+        },
+      );
+
+      await v5Db.insert('products', {'barcode': 'a', 'name': 'A'});
+      await v5Db.insert('products', {'barcode': 'b', 'name': 'B'});
+      await v5Db.close();
+
+      final dbHelper = DatabaseHelper.withPath(v5Path);
+      final products = await dbHelper.getAllProducts();
+
+      expect(products, hasLength(2));
+      // Existing products get the default source.
+      expect(products.every((p) => p.source == 'api'), isTrue);
+
+      final apiProducts = await dbHelper.getCachedProducts();
+      expect(apiProducts, hasLength(2));
+
+      // clearCachedProducts removes only api-sourced products.
+      await dbHelper.clearCachedProducts();
+      final remaining = await dbHelper.getAllProducts();
+      expect(remaining, isEmpty);
+
+      final migratedDb = await dbHelper.database;
+      await migratedDb.close();
+      tempDir.deleteSync(recursive: true);
+    });
+  });
+
+  group('clearCachedProducts', () {
+    test('deletes api products but preserves manual products', () async {
+      await db.insertProduct(
+        const Product(barcode: 'api1', name: 'API1'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'manual1', name: 'Manual1', source: 'manual'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'manual2', name: 'Manual2', source: 'manual'),
+      );
+
+      expect(await db.getProductCount(), 3);
+
+      await db.clearCachedProducts();
+
+      // API product deleted.
+      expect(await db.getProduct('api1'), isNull);
+      // Manual products preserved.
+      expect((await db.getProduct('manual1'))!.name, 'Manual1');
+      expect((await db.getProduct('manual2'))!.name, 'Manual2');
+      expect(await db.getProductCount(), 2);
+    });
+
+    test('no-op when there are no api products', () async {
+      await db.insertProduct(
+        const Product(barcode: 'm1', name: 'M1', source: 'manual'),
+      );
+      expect(await db.getProductCount(), 1);
+      await db.clearCachedProducts();
+      expect(await db.getProductCount(), 1);
+    });
+
+    test('getCachedProducts excludes manual products', () async {
+      await db.insertProduct(
+        const Product(barcode: 'a1', name: 'A1'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'm1', name: 'M1', source: 'manual'),
+      );
+      final cached = await db.getCachedProducts();
+      expect(cached, hasLength(1));
+      expect(cached.first.barcode, 'a1');
+    });
+  });
+
+  group('clearAllProducts', () {
+    test('deletes all products regardless of source', () async {
+      await db.insertProduct(
+        const Product(barcode: 'a1', name: 'A1'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'm1', name: 'M1', source: 'manual'),
+      );
+      expect(await db.getProductCount(), 2);
+      await db.clearAllProducts();
+      expect(await db.getProductCount(), 0);
+    });
+  });
 }

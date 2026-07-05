@@ -205,6 +205,7 @@ class InventoryDao {
           products.serving_size,
           products.nutriscore_grade,
           products.nutriscore_not_applicable_category,
+          products.source,
           products.energy_kcal,
           products.protein_g,
           products.carbs_g,

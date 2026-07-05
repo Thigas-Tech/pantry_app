@@ -75,10 +75,11 @@ Future<void> _handleAppUpdate() async {
     // Clear image cache so stale images don't persist across updates.
     await ImageCacheService().clearCache();
 
-    // Clear product table so all products get re-fetched with full OFF data
-    // (including fields added in newer versions, e.g. nutriscore_grade).
+    // Clear only API‑fetched product records so they get re‑fetched with
+    // fresh OFF data (including fields added in newer versions).
+    // Manual products entered by the user are preserved.
     final db = DatabaseHelper();
-    await db.clearProducts();
+    await db.clearCachedProducts();
 
     await prefs.setString('app_version', currentVersion);
     logInfo('Caches flushed for app update');
@@ -91,7 +92,7 @@ Future<void> _refreshCachedProducts() async {
   logInfo('Starting cached product refresh');
   try {
     final dbHelper = DatabaseHelper();
-    final products = await dbHelper.getAllProducts();
+    final products = await dbHelper.getCachedProducts();
     if (products.isEmpty) {
       logInfo('No cached products to refresh');
       return;

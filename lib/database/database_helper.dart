@@ -67,7 +67,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 5,
+        version: 6,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -104,7 +104,8 @@ class DatabaseHelper {
         salt_g REAL,
         last_synced INTEGER,
         nutriscore_grade TEXT,
-        nutriscore_not_applicable_category TEXT
+        nutriscore_not_applicable_category TEXT,
+        source TEXT NOT NULL DEFAULT 'api'
       )
     ''');
 
@@ -179,6 +180,12 @@ class DatabaseHelper {
       );
       logInfo('Migration to version 5 completed');
     }
+    if (oldVersion < 6) {
+      await db.execute(
+        "ALTER TABLE products ADD COLUMN source TEXT NOT NULL DEFAULT 'api'",
+      );
+      logInfo('Migration to version 6 completed');
+    }
   }
 
   // --------------------- Product (delegating to ProductDao) -------
@@ -207,11 +214,29 @@ class DatabaseHelper {
     return productDao.all(db);
   }
 
-  /// Deletes all cached products from the database.
+  /// Returns only products fetched from the Open Food Facts API.
   ///
-  /// Used during app update to force a full re-fetch from Open Food Facts,
-  /// ensuring new fields (e.g. `nutriscore_grade`) are populated.
-  Future<void> clearProducts() async {
+  /// These are safe to flush and re‑fetch. Products entered manually
+  /// (`source = 'manual'`) are excluded.
+  Future<List<Product>> getCachedProducts() async {
+    final db = await database;
+    return productDao.getBySource(db, 'api');
+  }
+
+  /// Deletes all API‑fetched products from the local cache.
+  ///
+  /// Products with [Product.source] `'manual'` are kept. Used during app
+  /// update and manual cache flush so that user‑entered data is never lost.
+  Future<void> clearCachedProducts() async {
+    final db = await database;
+    return productDao.deleteBySource(db, 'api');
+  }
+
+  /// Deletes every product from the `products` table.
+  ///
+  /// Intended for teardown in integration tests only. Production code
+  /// should call [clearCachedProducts] instead.
+  Future<void> clearAllProducts() async {
     final db = await database;
     return productDao.clear(db);
   }

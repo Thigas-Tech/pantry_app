@@ -287,8 +287,8 @@
   },
   "nutriscoreNotApplicableGeneric": "Nutri-Score is not applicable to this product category.",
   "flushCache": "Flush cache",
-  "flushCacheSub": "Delete cached products and images",
-  "flushCacheConfirm": "This will delete all cached product data and images. Products will be re-fetched from Open Food Facts the next time you view them.",
-  "flushCacheSuccess": "Cache flushed. Products will refresh automatically.",
+  "flushCacheSub": "Delete cached product data and images",
+  "flushCacheConfirm": "This will delete all cached product data and images fetched from Open Food Facts. Manually entered products and your inventory items will be preserved. Cached products will be re-fetched the next time you view them.",
+  "flushCacheSuccess": "Cached products flushed. They will refresh automatically.",
   "flushCacheFailed": "Failed to flush cache. Please try again."
 }
