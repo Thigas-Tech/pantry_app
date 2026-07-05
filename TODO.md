@@ -195,10 +195,162 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [ ] **Cosmetics & toiletries support** — extend the OFF API integration to query Open Beauty Facts (`openbeautyfacts.org`), add `productType` to the `Product` model (`'food'` / `'beauty'` / `'petfood'`), add cosmetic‑specific fields (periodAfterOpening, beauty category), hide nutrition/Nutri‑Score for non‑food items, and add filter chips on the home screen.
 - [ ] **WHO-based food quality recommendations** — research complete: ADI-based additive safety warnings, non‑sugar sweetener health guidance, free‑sugar threshold alerts (5 g per 100 g), sodium level awareness labels (low/medium/high per WHO thresholds), balanced diet prompts, and Five Keys to Safer Food tips.
 
+## Health & Meal Tracking (high effort)
+
+- [ ] **Health Connect (Android) — nutrition read/write** — integrate Android Health Connect Jetpack (`v1.1.0+`) via `androidx.health.connect:connect-client`. Read/write `NutritionRecord` (calories, macros) from the pantry app to the user's central health hub. Universal Android coverage (API 28+).
+
+  **Implementation (Phase 1 — foundation)**:
+  1. Add `health-connect-client` Flutter plugin or write platform channel in `android/app/src/main/kotlin/...`. Audit pub.dev packages first — prefer one with `NutritionRecord` write support.
+  2. Create `lib/services/health_connect_service.dart` — wraps `HealthConnectClient` init, permission requests (`HealthPermission.getReadPermission(NutritionRecord)`, `HealthPermission.getWritePermission(NutritionRecord)`), CRUD operations.
+  3. Define `HealthNutritionData` model (calories_kcal, protein_g, carbs_g, fat_g, fiber_g, timestamp, meal_type — breakfast/lunch/dinner/snack).
+  4. Add `NutritionRecord` write — triggered when user logs a meal or adds an item to inventory with known nutrition data.
+  5. Add `NutritionRecord` read — fetch today's totals from Health Connect to display in a nutrition dashboard.
+  6. Request permissions on first write attempt (lazy permission model).
+  7. New ARB strings: `healthConnectPermission`, `nutritionSynced`, `nutritionSyncFailed`, `todayCalories`.
+
+  **Implementation (Phase 2 — meal logging)**:
+  1. Add a "Log Meal" button on `ProductDetailScreen` — writes the product's nutrition data (+ quantity) to Health Connect as a `NutritionRecord`.
+  2. Add a "Today's Nutrition" summary card on `StatsScreen` or `HomeScreen` that reads the day's aggregated nutrition from Health Connect.
+  3. Background sync: when connectivity permits, sync any pending nutrition records queued while offline.
+
+  **⚠ Pitfalls & edge cases**:
+  - **Flutter plugin maturity**: The `health_connect` package on pub.dev may have incomplete `NutritionRecord` support or bugs. Audit the package source before committing. Be prepared to write a custom platform channel in Kotlin if the plugin lacks write support for `NutritionRecord` — Health Connect's Kotlin API is well-documented but the Flutter bridge may lag.
+  - **Health Connect must be installed separately**: It is NOT built into Android. `HealthConnectClient.getSdkStatus()` returns `SdkStatus.AVAILABLE` only when "Health Connect by Google" is installed from Play Store. If unavailable, show a setup prompt with Play Store deep link. Do not crash.
+  - **System permission sheet UX**: Health Connect uses a system-level permission sheet, NOT standard Android runtime permissions. The user grants per-data-type access (e.g., "Allow Nutrition read" + "Allow Nutrition write"). This sheet cannot be styled or customized. If the user denies a specific type, writes to that type fail silently — always check `getGrantedPermissions()` before writing and show a clear error if a required type was denied.
+  - **No aggregation — raw records**: Health Connect stores individual records, not aggregates. Writing `NutritionRecord` for breakfast at 8 AM and lunch at 1 PM produces two separate records. If the user logs the same meal twice (e.g., via both product detail "Log Meal" and a future batch logger), you get duplicate records. Implement idempotency: generate a deterministic `uid` from `product_barcode + timestamp + meal_type` and check for existing records before inserting.
+  - **Uninstall = permanent data loss**: If the user uninstalls Health Connect, ALL stored data across all apps is deleted. There is no cloud backup or restore. Detect Health Connect uninstall between app launches and warn the user. Keep your own sync log in SQLite to know what was written.
+  - **Android backup excludes Health Connect**: Health Connect data is explicitly excluded from Android Auto-Backup. After a device restore or new device, Health Connect starts empty. Your app should detect a "first launch after restore" scenario (e.g., Health Connect is available but has zero prior records from this app) and offer to re-sync.
+  - **API 28 minimum**: Health Connect requires Android 9+. On API 27 and below (Android 8.1), hide all Health Connect UI and assume no integration. The SDK methods will throw `UnsupportedOperationException` if called.
+  - **Permission revocation at any time**: The user can go to Settings → Health Connect → App permissions and revoke any data type at any time. Your app will not be notified — the next write silently fails. Before every write, re-check `getGrantedPermissions()`. Handle revocation gracefully: show a snackbar "Nutrition write permission was revoked. Logging will not sync." with a "Fix" button that opens the permission settings.
+  - **Background sync restrictions**: Android 14+ limits background work. `WorkManager` with a `PeriodicWorkRequest` (minimum 15-minute interval) is the recommended approach for background sync. Test on Android 14+ to ensure your sync worker actually fires.
+  - **Testing without a physical device**: You need an Android device or emulator with Health Connect installed. The emulator must include Play Services. CI emulators (GitHub Actions) generally don't have Health Connect — you will need to mock `HealthConnectClient` in unit tests via `mocktail`.
+  - **NutritionRecord data model mismatch**: Health Connect uses `Energy` (kcal), `Mass` (g) for macros, and `MealType` enum. Ensure your `HealthNutritionData` model maps cleanly. `MealType` supports: `MEAL_SNACK`, `MEAL_BREAKFAST`, `MEAL_LUNCH`, `MEAL_DINNER`. Also supports `MEAL_UNKNOWN` — use this as a fallback when the product has no category.
+  - **User identity confusion**: If multiple profiles/users share the same Android device (work profile, multiple users), Health Connect data is per-Android-user. A nutrition record written under User A is NOT visible under User B. Your app runs in one user's context — this is fine, but be aware if you ever add multi-profile support.
+
+- [ ] **Samsung Health Data SDK — nutrition sync** — integrate Samsung's active Health Data SDK (NOT the deprecated SDK). Write `HealthConstants.Food` (calories) and `HealthConstants.Nutrition` (macros) to Samsung Health. Works on all Android phones with Samsung Health app 6.30.2+.
+
+  **Implementation**:
+  1. Create Android platform channel or use community Flutter plugin for Samsung Health Data SDK (check pub.dev for availability; may require custom channel).
+  2. Implement `HealthDataStore` connection lifecycle — `connectService()`, `disconnectService()`, listener for connection status.
+  3. Request permissions via `HealthPermissionManager` per data type (CALORIE, FAT_TOTAL, PROTEIN, CARBOHYDRATE, FIBER).
+  4. Build `InsertRequest` with `HealthDataResolver` to write food intake.
+  5. Align with Health Connect abstraction: write to both platforms via the same `HealthNutritionData` model.
+  6. New ARB strings: `samsungHealthPermission`, `samsungHealthConnected`.
+
+  **⚠ Pitfalls & edge cases**:
+  - **Deprecated SDK cut-off**: The old "Samsung Health SDK for Android" was deprecated as of 31 July 2025. Using it will fail for new users. Verify your integration uses the **Samsung Health Data SDK** (new). The migration guide is at [developer.samsung.com/health/data/migration-guide/overview.html](https://developer.samsung.com/health/data/migration-guide/overview.html). Check `build.gradle` dependencies — the old SDK has group `com.samsung.android.sdk:health`, the new one has group `com.samsung.android.sdk.healthdata`.
+  - **Samsung Health app must be installed AND at v6.30.2+**: The SDK connects via the Samsung Health app. If the app is missing or outdated, `HealthDataStore.connectService()` fails with a connection error. Detect this in the connection listener callback and show a Play Store deep link to install/update Samsung Health. Example deep link: `market://details?id=com.samsung.android.app.health`
+  - **SI units only — no imperial**: The SDK enforces SI units. `CALORIE` is in kcal (not cal), `WEIGHT` in kg (not lb), `HEIGHT` in cm (not ft/in). If your app allows imperial unit display, you must convert before writing. Failure to convert results in silently incorrect data (no error from the SDK).
+  - **Partner registration for write access**: Some data types require a [Partner Request](https://developer.samsung.com/SHealth/business-partner/m48wvqi1mt9w2w4c) for write permissions. The `Food` and `Nutrition` data types may be restricted. Register early in development — Samsung's approval process can take weeks. Without it, writes fail with a permission error at runtime.
+  - **Connection lifecycle is fragile**: `HealthDataStore` must be connected before any operation. The connection is asynchronous and may disconnect without warning (e.g., Samsung Health app crashes or gets killed by the OS). Register a strong `HealthDataStore.ConnectionListener` that reconnects automatically. Test by force-stopping Samsung Health from Settings while your app is running.
+  - **Non-Samsung devices work too**: The SDK works on any Android phone (Marshmallow+) with Samsung Health installed — not just Galaxy devices. Do not gate the feature behind `Build.MANUFACTURER == "samsung"`. Test on a Pixel or Motorola device with Samsung Health installed.
+  - **Disconnection on app background**: The SDK auto-disconnects when your app goes to background on some Android versions. Reconnect in `onResume()` or `onForeground()`. Do not assume the connection persists between activities.
+  - **Threading**: All SDK callbacks run on a binder thread, NOT the main/UI thread. You must post results to the main thread before updating UI or notifying Flutter via platform channel. Failure to do so causes `CalledFromWrongThreadException`.
+  - **Data deduplication across platforms**: If the user has both Health Connect and Samsung Health, writing the same meal to both will create duplicate entries if Samsung Health syncs to Health Connect (it does, on supported devices). Check Samsung Health's "Sync with Health Connect" setting before writing — write to only one platform if cross-sync is enabled, or accept deduplication in the consuming app.
+  - **Official docs links**:
+    - [Health Data Store Guide](https://developer.samsung.com/health/android/data/guide/health-data-store.html)
+    - [API Reference 1.5.1](https://developer.samsung.com/health/android/data/api-reference/overview-summary.html)
+    - [Programming Guide](https://developer.samsung.com/health/android/data/guide/intro.html)
+    - [FoodNote Sample](https://developer.samsung.com/health/data/sample/foodnote.html)
+
+- [ ] **Samsung Food (formerly Whisk) — meal planning UX** — integrate with Samsung Food's meal planning pattern (recipe saving, drag-and-drop weekly planner, auto-generated grocery lists). Uses Samsung Health Data SDK underneath for nutrition sync.
+
+  **Implementation**:
+  1. Research the Samsung Food public API / integration points. Samsung Food exposes `HealthConstants.Nutrition` read/write through the Health Data SDK (see FoodNote sample).
+  2. Implement meal suggestion from expiring items (coordinate with the existing "Recipe suggestions" item below — merge efforts if both move forward).
+  3. Add a weekly meal plan UI: drag-and-drop items into day slots, auto-generate grocery list from planned meals.
+  4. Write planned meals' nutrition data to Samsung Health via the SDK from the previous item.
+  5. New ARB strings: `mealPlan`, `weeklyPlanner`, `groceryList`, `addToPlan`.
+
+  **⚠ Pitfalls & edge cases**:
+  - **API access may require partnership**: Samsung Food's integration API may require a business partnership or specific credentials. The public documentation is limited. The FoodNote sample shows one-way nutrition write via Health Data SDK, but read/plan operations may use a different (possibly private) API. Research access requirements before scoping implementation time.
+  - **Regional availability**: Samsung Food is not available in all countries. Check [samsungfood.com](https://samsungfood.com/) for regional restrictions. If unavailable in the user's country, hide the meal planning UI and show a "Not available in your region" message instead of crashing.
+  - **Recipe suggestions overlap**: The existing "Recipe suggestions" TODO item (below) proposes calling a generic recipe API for expiring items. Samsung Food has its own recipe database and meal planner. Decide: use Samsung Food as the recipe source (requires their API) or keep a generic recipe API for wider coverage. If you use a generic API + Samsung Food, you get two recipe sources — merge them or let the user choose.
+  - **Data portability lock-in**: If a user builds their weekly meal plan in Samsung Food, they cannot export it. Consider providing an export-to-SQLite option if your app acts as a layer on top. This avoids vendor lock-in.
+  - **Whisk acquisition changes**: Samsung acquired Whisk (now Samsung Food) in 2019. The API and features have changed multiple times since. Expect ongoing changes. The FoodNote sample is the most stable integration point.
+  - **Meal plan → grocery list → inventory conflict**: Samsung Food auto-generates grocery lists from meal plans. If the user buys those items and also adds them manually to your pantry app, you get duplicates. Implement a "mark as purchased" flow that cross-references with existing inventory items by barcode or name similarity.
+  - **Official docs links**:
+    - [Samsung Food](https://samsungfood.com/)
+    - [FoodNote Sample](https://developer.samsung.com/health/data/sample/foodnote.html)
+    - [Health Data Type – Food](https://developer.samsung.com/health/android/data/guide/health-data-type.html)
+
+- [ ] **Apple HealthKit (future iOS version)** — integrate HealthKit via `HKHealthStore` for reading/writing `HKQuantitySample` with `HKQuantityTypeIdentifier.dietaryEnergyConsumed` and related nutrition types. Minimum iOS 8.0+.
+
+  **Implementation**:
+  1. Add HealthKit capability in Xcode when building the iOS version of the app.
+  2. Use the `health` Flutter package or platform channel for `HKHealthStore`.
+  3. Request per-type permissions (`HKObjectType.quantityType(forIdentifier:)`).
+  4. Write nutrition records using the same `HealthNutritionData` model from the Health Connect abstraction layer.
+  5. New ARB strings: `appleHealthPermission`, `healthKitSynced`.
+
+  **⚠ Pitfalls & edge cases**:
+  - **iOS-only, gated behind platform check**: HealthKit classes exist only on Apple platforms. Use `defaultTargetPlatform == TargetPlatform.iOS` to gate all HealthKit code. Accessing `HKHealthStore` on Android/macOS crashes.
+  - **Entitlement provisioning in Xcode**: You must enable the HealthKit capability in Xcode under Signing & Capabilities. This requires an Apple Developer account (paid). The entitlement is checked at runtime — if missing, `HKHealthStore.isHealthDataAvailable()` returns `false`.
+  - **Per-type permission granularity — no bulk requests**: HealthKit requires you to request read/write permission for EACH data type individually (`HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)`, `.dietaryFatTotal`, `.dietaryProtein`, `.dietaryCarbohydrates`, `.dietaryFiber`). You cannot request "all nutrition types". Missing one type means writes to that type fail silently. Maintain a list of requested types and verify each is granted before writing.
+  - **No cross-device sync without iCloud**: HealthKit data is stored locally on each device. It only syncs across devices if the user has iCloud enabled with Health sync turned on. A user who logs meals on iPad will not see them on iPhone unless iCloud sync is active. Detect iCloud Health sync status and surface it in the UI: "Meal logs are stored on this device only."
+  - **Private medical data — no server transmission**: HealthKit data is encrypted at rest and Apple's guidelines prohibit transmitting it to third-party servers without explicit user consent. Never send HealthKit nutrition data to your own backend unless you show a clear, separate consent dialog and document exactly what data is sent and why.
+  - **Simulator limitations**: HealthKit works on iOS simulator, but with restrictions — no iCloud sync, no real Health data from other apps. You can write and read records for testing, but end-to-end testing with real data requires a physical device.
+  - **Background delivery**: HealthKit supports background delivery via `HKObserverQuery`, but iOS may delay delivery for power management. Do not rely on real-time updates. Use foreground queries for the nutrition dashboard and background delivery only for badge/notification updates.
+  - **User can delete records from Health app**: The user can open the Health app and delete any record, including those your app wrote. Your local cache will be stale. Implement periodic reconciliation: compare your SQLite log against HealthKit's records for the same period and flag discrepancies.
+  - **WatchOS independence**: On Apple Watch, HealthKit runs independently. If the user logs a meal on Watch (e.g., via a future Watch companion app), the record appears in HealthKit but may not trigger your app's observer query until the Watch syncs to iPhone over Bluetooth. This can take minutes.
+  - **HealthKit data deletion on app uninstall**: When your app is uninstalled, all HealthKit records written by your app are deleted (per Apple's privacy model). Re-installing the app won't recover them. Warn the user if they trigger an account deletion flow.
+  - **Official docs links**:
+    - [HealthKit Framework](https://developer.apple.com/documentation/healthkit)
+    - [HealthKit Updates (WWDC25)](https://developer.apple.com/documentation/healthkit)
+
+### Health platform abstraction layer
+
+- [ ] **Health platform abstraction layer** — create a unified Dart interface `HealthService` with methods `writeNutrition(HealthNutritionData)`, `readNutrition(TimeRange) → List<HealthNutritionData>`, `requestPermissions()`, `isAvailable()`. Implement for each platform: `HealthConnectService`, `SamsungHealthService`, `AppleHealthService`. This keeps the app code platform-agnostic and makes adding OEM platforms (Huawei Health Kit, Xiaomi Health Cloud, OPPO Health, vivo Health Kit, Honor Health Kit) a matter of writing a new implementation class.
+
+  **Reference architecture**:
+  ```
+  Your Pantry App
+        │
+        ▼
+  HealthService (abstract interface)
+        │
+        ├── HealthConnectService (Android — universal)
+        ├── SamsungHealthService (Android — Samsung Health app)
+        └── AppleHealthService (iOS — future)
+              │
+              ▼
+        Health platform's native SDK
+  ```
+
+  **⚠ Pitfalls & edge cases**:
+  - **Platform channel complexity multiplies**: Each health SDK requires its own Android/iOS platform channel code. Health Connect needs Kotlin (Android), Samsung Health Data SDK needs Kotlin (Android), HealthKit needs Swift (iOS). One buggy platform channel can crash the entire app. Use a separate `MethodChannel` per service with clear error handling. Do NOT share a single channel for all health operations.
+  - **Testing across platforms is hard**: Unit tests can mock the `HealthService` interface, but integration tests require real devices with Health Connect / Samsung Health / HealthKit installed. CI pipelines generally don't support this. Keep integration tests in a separate `health_integration_test/` directory that is run manually, not in CI.
+  - **Cross-platform data deduplication**: If Health Connect and Samsung Health are both active AND Samsung Health syncs to Health Connect (it does on supported devices), writing the same nutrition data through both services creates duplicate records in Health Connect. Detect cross-sync by querying Health Connect for records matching this app's `clientId` before writing to Samsung Health. Write to only one platform if cross-sync is detected.
+  - **User consent fatigue**: Requesting permissions for multiple health platforms one after another creates a terrible UX (up to 3 permission sheets on first use: Health Connect + Samsung Health + camera/gallery for proof photos). Stagger permission requests: ask for Health Connect on first nutrition write, Samsung Health only when the user explicitly opens Samsung Health settings, HealthKit when the user visits the iOS nutrition dashboard.
+  - **Privacy regulations (LGPD/GDPR)**: Health data is considered sensitive personal data under LGPD (Brazil) and GDPR (Europe). You must:
+    - Document exactly what health data is collected and why
+    - Get explicit consent before writing to any health platform
+    - Provide a way for users to delete all health data (your local logs + trigger deletion on all connected platforms if possible)
+    - Include health data processing in your privacy policy
+  - **App store scrutiny**: Apps that read/write health data face additional review requirements on both Google Play and Apple App Store. Apple requires a clear explanation of why you need each HealthKit data type. Google Play requires the Health Connect permission declaration form. Prepare these documents before release — don't wait until submission.
+  - **Error aggregation**: With multiple backends, error handling gets complex. A `ServiceUnavailableException` on Health Connect might be transient, but the same error on Samsung Health means Samsung Health is not installed. Create typed error classes per platform with clear user-facing messages. Never show raw SDK errors in the UI.
+  - **Feature flagging**: Each health platform integration should be behind a feature flag (e.g., `HealthConnectFeature`, `SamsungHealthFeature`) that can be disabled remotely or via a debug menu. This allows you to ship an integration that isn't fully ready yet without blocking the release.
+
+### Quick-reference table
+
+```
+| Platform | Write | Nutrition | Meal Plan | Docs |
+|----------|-------|-----------|-----------|------|
+| Health Connect (Android) | ✅ | ✅ NutritionRecord | ❌ | [developer.android.com/health-and-fitness/health-connect](https://developer.android.com/health-and-fitness/health-connect) |
+| Samsung Health Data SDK | ✅ | ✅ Food/Nutrition | ✅ via Samsung Food | [developer.samsung.com/health](https://developer.samsung.com/health) |
+| Samsung Food | N/A (via SDK) | ✅ | ✅ meal planner | [samsungfood.com](https://samsungfood.com/) |
+| Apple HealthKit | ✅ (future) | ✅ dietary energy | ❌ | [developer.apple.com/documentation/healthkit](https://developer.apple.com/documentation/healthkit) |
+| Huawei Health Kit | ✅ | ✅ limited | ❌ | [developer.huawei.com/consumer/en/hms/huawei-healthkit](https://developer.huawei.com/consumer/en/hms/huawei-healthkit) |
+| Xiaomi Health Cloud | ✅ | limited | ❌ | [dev.mi.com](http://developer.mi.com) |
+| OPPO Health | ✅ | limited | ❌ | [open.oppomobile.com](https://open.oppomobile.com/) |
+| vivo Health Kit | ✅ | limited | ❌ | [developers.vivo.com](https://developers.vivo.com/) |
+| Honor Health Kit | ✅ | limited | ❌ | [developer.honor.com](https://developer.honor.com/) |
+```
+
 ## Larger Projects (high effort — from previous roadmap, still pending)
 
 - [ ] **Multi‑language support** — ARB infrastructure exists; add translations (pt, fr, es, de). Contribute via community PRs.
-- [ ] **Recipe suggestions** — call a recipe API with items expiring this week; suggest meals that use them.
+- [ ] **Recipe suggestions** — call a recipe API with items expiring this week; suggest meals that use them. Coordinate with the Samsung Food meal planning integration above — if both are implemented, Samsung Food can serve as the meal planning UI layer and recipe source, while the generic recipe API provides wider coverage in regions where Samsung Food is unavailable.
 - [ ] **Widget test → golden coverage** — product detail, settings, stats screens.
 - [ ] **Remake notification feature from scratch** — rewrite `NotificationService` for reliability: precise expiry‑day‑at‑morning and expiry‑soon (N days before) scheduling, multi‑item grouping, per‑inventory notification channels, proper timezone handling, and resilient rescheduling on app boot.
 - [ ] **Remake import/export from scratch** — rewrite `CsvService` to support: export only cached (API-fetched) products, export a specific inventory, export products from a specific inventory, and import via `filegate` (platform file picker). Replace the stats-screen picker with a streamlined FileGate-based flow.
@@ -248,15 +400,21 @@ High importance  │ Batch delete            │ Shopping list
                  │ Expiry parsing extract  │ GitHub CI pipeline
                  │ Changelog at startup    │ Product prices (+ Open Prices)
                  │ Product name trans.     │ NFC-e importing
+                 │                         │ Health Connect nutrition sync
+                 │                         │ Samsung Health Data SDK
+                 │                         │ Samsung Food meal planning
+                 │                         │ Health abstraction layer
                  │─────────────────────────│──────────────────────────
                  │ Golden tests            │ Multi-language
-                 │ Accessibility audit     │ Recipe suggestions
+                 │ Accessibility audit     │ Recipe suggestions (+ Samsung Food)
                  │ SearchBar upgrade       │ Patrol E2E tests
                  │ Screenshots             │ Play Store CI deploy
                  │ Empty-pantry onboarding │ Barcode history
  Low importance  │ NavigationRail          │ Ingredients translations
                  │                         │ Cosmetics/toiletries
                  │                         │ WHO food recommendations
+                 │                         │ Apple HealthKit (future)
+                 │                         │ OEM platforms (Xiaomi, Huawei, etc.)
 ```
 
 ---
