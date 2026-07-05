@@ -1,11 +1,8 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:pantry_app/config.dart';
-import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
@@ -22,7 +19,6 @@ import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -647,26 +643,9 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
               final online =
                   await InternetConnectionChecker.instance.hasConnection;
               if (online && context.mounted) {
-                try {
-                  final dbHelper = DatabaseHelper();
-                  final products = await dbHelper.getAllProducts();
-                  final api = OpenFoodFactsApi(
-                    Dio(),
-                    userId: AppConfig.offUserId,
-                    password: AppConfig.offPassword,
-                    contactEmail: AppConfig.contactEmail,
-                  );
-                  for (final product in products) {
-                    try {
-                      final updated = await api.getByBarcode(product.barcode);
-                      await dbHelper.insertProduct(updated);
-                    } on Exception {
-                      // Skip individual failures.
-                    }
-                  }
-                } on Exception {
-                  // Silently skip — pull-to-refresh is best-effort.
-                }
+                final repo = ref.read(productRepositoryProvider);
+                final activeId = ref.read(activeInventoryProvider);
+                await repo.refreshInventoryProducts(activeId);
               }
             },
             child: ListView(

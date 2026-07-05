@@ -214,3 +214,52 @@ abstract class Product with _$Product {
   factory Product.fromJson(Map<String, dynamic> json) =>
       _$ProductFromJson(json);
 }
+
+/// Extension that provides safe API merge semantics on [Product].
+///
+/// `mergeFromApi` is defined as an extension rather than a method on the
+/// abstract class because freezed generates a concrete implementation
+/// (`_Product`) that `implements` (not `extends`) the abstract class.
+///
+/// ## Merge rules
+///
+/// - **API non‑null wins** — if the API returned a value, it overwrites
+///   the cached value.
+/// - **API null preserves cached** — if the API didn't return a field
+///   (e.g. the staging server lacks Nutri-Score data), the cached value
+///   is kept. This prevents pull-to-refresh from silently wiping data.
+/// - **Local-only fields are never touched** — [source],
+///   [submissionStatus], [nutritionImagePath], [ingredientsImagePath], and
+///   [productImagePath] are preserved exactly as-is because the API doesn't
+///   know about them.
+/// - **Name sentinel** — if the API returns `'Unknown'` (the default when
+///   the real name is missing), the cached name is kept.
+///
+/// This is the **safe‑update** primitive for pull-to-refresh and post‑flush
+/// re‑fetch operations. It guarantees that an incomplete API response can
+/// never degrade the cached data.
+extension ProductMerge on Product {
+  /// Merges data from an API-fetched [api] product into this product,
+  /// preserving local-only fields that the API does not return.
+  Product mergeFromApi(Product api) {
+    return copyWith(
+      name: api.name != 'Unknown' ? api.name : name,
+      brand: api.brand ?? brand,
+      category: api.category ?? category,
+      ingredients: api.ingredients ?? ingredients,
+      servingSize: api.servingSize ?? servingSize,
+      energyKcal: api.energyKcal ?? energyKcal,
+      proteinG: api.proteinG ?? proteinG,
+      carbsG: api.carbsG ?? carbsG,
+      fatG: api.fatG ?? fatG,
+      fiberG: api.fiberG ?? fiberG,
+      saltG: api.saltG ?? saltG,
+      imageUrl: api.imageUrl ?? imageUrl,
+      nutriscoreGrade: api.nutriscoreGrade ?? nutriscoreGrade,
+      nutriscoreNotApplicableCategory:
+          api.nutriscoreNotApplicableCategory ??
+          nutriscoreNotApplicableCategory,
+      lastSynced: api.lastSynced ?? lastSynced,
+    );
+  }
+}

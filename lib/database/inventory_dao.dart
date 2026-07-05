@@ -144,6 +144,12 @@ class InventoryDao {
 
   /// Retrieves all inventory rows joined with product metadata for a
   /// specific [inventoryId].
+  ///
+  /// Uses a `LEFT JOIN` on `products` so that inventory items remain visible
+  /// even when their product record has been deleted (e.g. after a cache
+  /// flush). When the product is missing, product fields such as
+  /// `product_name` will be `NULL` and should be handled by the UI (e.g.
+  /// falling back to the barcode).
   Future<List<Map<String, dynamic>>> listWithProduct(
     Database db, {
     required int inventoryId,
@@ -168,7 +174,7 @@ class InventoryDao {
             AS nutriscore_not_applicable_category,
           inventories.name AS inventory_name
         FROM inventory
-        INNER JOIN products ON inventory.barcode = products.barcode
+        LEFT JOIN products ON inventory.barcode = products.barcode
         INNER JOIN inventories ON inventory.inventory_id = inventories.id
         WHERE inventory.inventory_id = ?
         ORDER BY inventory.expiry_date ASC
@@ -184,6 +190,9 @@ class InventoryDao {
   }
 
   /// Returns all inventory rows joined with product nutrition for CSV export.
+  ///
+  /// Uses a `LEFT JOIN` on `products` so export works even after a cache
+  /// flush. Product columns will be `NULL` for orphaned inventory items.
   Future<List<Map<String, dynamic>>> exportData(
     Database db, {
     required int inventoryId,
@@ -218,7 +227,7 @@ class InventoryDao {
           products.salt_g,
           inventories.name AS inventory_name
         FROM inventory
-        INNER JOIN products ON inventory.barcode = products.barcode
+        LEFT JOIN products ON inventory.barcode = products.barcode
         INNER JOIN inventories ON inventory.inventory_id = inventories.id
         WHERE inventory.inventory_id = ?
         ORDER BY inventory.expiry_date ASC

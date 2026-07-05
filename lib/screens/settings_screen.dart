@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
@@ -91,7 +94,7 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.flushCache),
             subtitle: Text(l10n.flushCacheSub),
             leading: const Icon(Icons.cleaning_services),
-            onTap: () => _flushCache(context),
+            onTap: () => _flushCache(context, ref),
           ),
         ],
       ),
@@ -207,7 +210,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _flushCache(BuildContext context) async {
+  Future<void> _flushCache(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
 
     final confirmed = await showDialog<bool>(
@@ -235,13 +238,26 @@ class SettingsScreen extends ConsumerWidget {
       await ImageCacheService().clearCache();
       await DatabaseHelper().clearCachedProducts();
 
-      if (context.mounted) {
-        SnackbarHelper.showInfo(context, l10n.flushCacheSuccess);
-      }
-
       final isOnline = await InternetConnectionChecker.instance.hasConnection;
       if (isOnline) {
-        logInfo('Online — products will be re-fetched on next view');
+        logInfo('Online — re-fetching products for all inventories');
+        final repo = ref.read(productRepositoryProvider);
+        final db = ref.read(databaseProvider);
+        final inventories = await db.getInventories();
+        var totalRefreshed = 0;
+        for (final inv in inventories) {
+          final id = inv['id'] as int;
+          totalRefreshed += await repo.refreshInventoryProducts(id);
+        }
+        logInfo('Re-fetched $totalRefreshed products after cache flush');
+        ref.invalidate(inventoryWithProductProvider);
+      } else {
+        logInfo('Offline — products will appear with barcode as name');
+        ref.invalidate(inventoryWithProductProvider);
+      }
+
+      if (context.mounted) {
+        SnackbarHelper.showInfo(context, l10n.flushCacheSuccess);
       }
     } on Exception catch (e) {
       logError('Cache flush failed: $e');

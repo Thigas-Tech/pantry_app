@@ -8,8 +8,10 @@ import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 
 /// A tappable card representing one inventory item on the home screen.
@@ -137,6 +139,16 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                   );
                   if (context.mounted) {
                     ref.invalidate(inventoryWithProductProvider);
+                  }
+                } on FetchFailedException {
+                  logError(
+                    'Product ${widget.item.barcode} unavailable (offline)',
+                  );
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      'Product data unavailable — pull to refresh when online',
+                    );
                   }
                 } on Exception catch (e) {
                   logError('Failed to navigate to product detail: $e');

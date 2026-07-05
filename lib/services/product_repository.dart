@@ -170,4 +170,40 @@ class ProductRepository {
     logInfo('Caching product: ${product.barcode} — ${product.name}');
     await _db.insertProduct(product);
   }
+
+  /// Re‑fetches all products referenced by inventory items in [inventoryId].
+  ///
+  /// For each unique barcode found in the inventory table, the remote API is
+  /// called. The freshly fetched data is **merged** with any cached product
+  /// via `Product.mergeFromApi`, ensuring that fields the API doesn't return
+  /// (e.g. Nutri-Score on staging) are preserved from the cache.
+  ///
+  /// ## Returns
+  ///
+  /// The number of successfully refreshed products. Failures are silently
+  /// skipped — this is a best‑effort operation suitable for pull‑to‑refresh
+  /// and post‑flush recovery.
+  Future<int> refreshInventoryProducts(int inventoryId) async {
+    final items = await _db.getInventoryItems(inventoryId: inventoryId);
+    final barcodes = items.map((e) => e.barcode).toSet();
+    if (barcodes.isEmpty) return 0;
+
+    logInfo(
+      'Refreshing ${barcodes.length} products for inventory $inventoryId',
+    );
+    var refreshed = 0;
+    for (final barcode in barcodes) {
+      try {
+        final fetched = await _api.getByBarcode(barcode);
+        final cached = await _db.getProduct(barcode);
+        final merged = cached != null ? cached.mergeFromApi(fetched) : fetched;
+        await _db.insertProduct(merged);
+        refreshed++;
+      } on Exception {
+        // Skip individual failures — best-effort.
+      }
+    }
+    logInfo('Refreshed $refreshed / ${barcodes.length} products');
+    return refreshed;
+  }
 }

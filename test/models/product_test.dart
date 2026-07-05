@@ -7,7 +7,8 @@ import 'package:pantry_app/models/product.dart';
 /// Tests for the [Product] model.
 ///
 /// Covers JSON deserialization from the Open Food Facts v3 API format,
-/// handling of missing optional fields, and immutability via `copyWith`.
+/// handling of missing optional fields, immutability via `copyWith`, and
+/// safe API merge semantics via `Product.mergeFromApi`.
 void main() {
   group('Product', () {
     /// A complete JSON response as returned by the OFF v3 API.
@@ -74,6 +75,89 @@ void main() {
       expect(updated.name, 'Updated');
       expect(updated.brand, 'Brand');
       expect(updated.barcode, '789'); // unchanged
+    });
+
+    group('mergeFromApi', () {
+      test('API non-null overwrites cached value', () {
+        const cached = Product(barcode: '1', name: 'Old Name', brand: 'Old');
+        const api = Product(barcode: '1', name: 'New Name', brand: 'New');
+        final merged = cached.mergeFromApi(api);
+        expect(merged.name, 'New Name');
+        expect(merged.brand, 'New');
+      });
+
+      test('API null preserves cached value', () {
+        const cached = Product(
+          barcode: '1',
+          name: 'Old Name',
+          brand: 'Old Brand',
+          category: 'Old Cat',
+          nutriscoreGrade: 'a',
+          energyKcal: 100,
+          lastSynced: 1000,
+        );
+        // API returns only barcode + name; everything else is null/default.
+        const api = Product(barcode: '1', name: 'New Name');
+        final merged = cached.mergeFromApi(api);
+        // Name updated, everything else preserved.
+        expect(merged.name, 'New Name');
+        expect(merged.brand, 'Old Brand');
+        expect(merged.category, 'Old Cat');
+        expect(merged.nutriscoreGrade, 'a');
+        expect(merged.energyKcal, 100);
+        expect(merged.lastSynced, 1000);
+      });
+
+      test('API name sentinel Unknown does not overwrite cached name', () {
+        const cached = Product(barcode: '1', name: 'Real Name');
+        const api = Product(barcode: '1', name: 'Unknown');
+        final merged = cached.mergeFromApi(api);
+        expect(merged.name, 'Real Name');
+      });
+
+      test('local-only fields are never overwritten by API', () {
+        const cached = Product(
+          barcode: '1',
+          name: 'P',
+          source: 'manual',
+          submissionStatus: productSubmissionSubmitted,
+          nutritionImagePath: '/a.jpg',
+        );
+        final api = Product.fromJson({
+          '_id': '1',
+          'product_name': 'P',
+        });
+        // API product has default source='api' and submissionStatus='not_submitted'.
+        final merged = cached.mergeFromApi(api);
+        expect(merged.source, 'manual');
+        expect(merged.submissionStatus, productSubmissionSubmitted);
+        expect(merged.nutritionImagePath, '/a.jpg');
+      });
+
+      test('full API response updates all nutrition fields', () {
+        const cached = Product(barcode: '1', name: 'Old');
+        const api = Product(
+          barcode: '1',
+          name: 'New',
+          energyKcal: 200,
+          proteinG: 10,
+          carbsG: 30,
+          fatG: 5,
+          fiberG: 3,
+          saltG: 1.5,
+          nutriscoreGrade: 'b',
+          servingSize: '50 g',
+        );
+        final merged = cached.mergeFromApi(api);
+        expect(merged.energyKcal, 200);
+        expect(merged.proteinG, 10);
+        expect(merged.carbsG, 30);
+        expect(merged.fatG, 5);
+        expect(merged.fiberG, 3);
+        expect(merged.saltG, 1.5);
+        expect(merged.nutriscoreGrade, 'b');
+        expect(merged.servingSize, '50 g');
+      });
     });
   });
 }
