@@ -113,10 +113,14 @@ class StatsScreen extends ConsumerWidget {
 
       final csvService = ref.read(csvServiceProvider);
       final activeId = ref.read<int>(activeInventoryProvider);
-      final result = await csvService.importCsv(
-        picked.first.path,
-        inventoryId: activeId,
-      );
+      final path = picked.first.path;
+      final result = path.isNotEmpty
+          ? await csvService.importCsvFromFile(
+              path,
+              inventoryId: activeId,
+              filegate: filegate,
+            )
+          : throw Exception('No file selected');
 
       if (context.mounted) {
         SnackbarHelper.showInfo(

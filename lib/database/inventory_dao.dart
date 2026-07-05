@@ -200,6 +200,8 @@ class InventoryDao {
           inventory.location,
           inventory.notes,
           inventory.date_added,
+          products.serving_size,
+          products.nutriscore_grade,
           products.energy_kcal,
           products.protein_g,
           products.carbs_g,
