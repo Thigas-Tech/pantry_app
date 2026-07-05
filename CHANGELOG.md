@@ -31,6 +31,14 @@
 - `Semantics` labels on NutriScoreBadge: "Nutri-Score A" through "Nutri-Score E", "Nutri-Score, not applicable"
 - All badge golden tests also verify semantics labels
 
+### OFF product submission
+- Added `submissionStatus` to Product model (`not_submitted` / `pending` / `submitted` / `failed`)
+- DB migration v7→v8 adds `submission_status` column; CSV export includes the new column
+- New `ProductSubmissionService` coordinates metadata submission + image upload to OFF
+- `AddProductScreen._save()` fires and forgets local caching and OFF submission
+- `ProductDetailScreen` shows a status chip for manual products (with retry for failures)
+- L10n: 7 additional strings for submission states and retry
+
 ### Testing and coverage
 - Golden tests: NutriScoreBadge (A–E, null, not-applicable), StatsScreen, SettingsScreen
 - StatsScreen: 32.8% → 83.6%
@@ -71,6 +79,11 @@
 ### Performance
 - Image caching in local filesystem (`ImageCacheService`)
 - Hero animations on product images when navigating between screens
+
+### Roadmap
+- Updated TODO.md: marked Phases 1–3 as completed (serving-size tests, photo paths, OFF upload service)
+- Added WHO-based food quality recommendations feature item (ADI additive warnings, free-sugar thresholds, sodium awareness, Five Keys to Safer Food)
+- Refined cosmetics/toiletries support item with accurate Open Beauty Facts integration details
 
 ---
 

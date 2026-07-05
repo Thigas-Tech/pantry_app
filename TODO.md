@@ -35,16 +35,17 @@ Items are organised by effort (low → high) and importance (critical → nice-t
 - [ ] **Empty-pantry onboarding** — when inventory is empty, show a guided "scan your first item" flow instead of just the empty state widget.
 - [ ] **Offline-first product submission queue** — queue `submitProduct` calls when offline; flush when `connectivityProvider` emits `true`.
 - [ ] **Cloud backup** — upload DB to Firebase Storage / S3. Restore on a new device.
-- [ ] **Serving‑size & Nutri‑Score in manual entry** — `add_product_screen.dart` already has the fields; verify they are wired and tested.
-- [ ] **Cosmetics & toiletries support** — extend the OFF API integration to query cosmetics endpoints (`/cosmetics/`), add cosmetic‑specific fields to the `Product` model (brand, product type, non‑food category), and filter/sort accordingly in the UI.
-- [ ] **Ingredient list & nutrition table photos in manual entry** — add image‑picker fields to `AddProductScreen` for capturing/selecting photos of the ingredients list and nutrition table. Store local file paths on the model; preview thumbnails in the form.
+- [x] **Serving‑size & Nutri‑Score in manual entry** — `add_product_screen.dart` already has the fields; verified wired and tested (Phase 1).
+- [x] **Ingredient list & nutrition table photos in manual entry** — added image‑picker fields to `AddProductScreen` for capturing/selecting photos. Local file paths stored on model; preview thumbnails in form (Phase 2).
+- [ ] **Cosmetics & toiletries support** — extend the OFF API integration to query Open Beauty Facts (`openbeautyfacts.org`), add `productType` to the `Product` model (`'food'` / `'beauty'` / `'petfood'`), add cosmetic‑specific fields (periodAfterOpening, beauty category), hide nutrition/Nutri‑Score for non‑food items, and add filter chips on the home screen.
+- [ ] **WHO-based food quality recommendations** — research complete: ADI-based additive safety warnings, non‑sugar sweetener health guidance, free‑sugar threshold alerts (5 g per 100 g), sodium level awareness labels (low/medium/high per WHO thresholds), balanced diet prompts, and Five Keys to Safer Food tips.
 
 ## Larger Projects (high effort)
 
 - [ ] **Multi‑language support** — ARB infrastructure exists; add translations (pt, fr, es, de). Contribute via community PRs.
 - [ ] **Recipe suggestions** — call a recipe API with items expiring this week; suggest meals that use them.
 - [ ] **Widget test → golden coverage** — product detail, settings, stats screens.
-- [ ] **Upload manual products to Open Food Facts** — submit user‑entered products (including photos of ingredients list and nutrition table) to the OFF API via the v3 product submission endpoint. Handle authentication, field mapping, image upload, and show submission status in the UI. Supersedes the offline‑first submission queue item.
+- [x] **Upload manual products to Open Food Facts** — submit user‑entered products (including photos of ingredients list and nutrition table) to the OFF API via the legacy product submission endpoint + image upload. Submission status shown in UI with retry for failures. Supersedes the offline‑first submission queue item (Phase 3).
 - [ ] **Remake notification feature from scratch** — rewrite `NotificationService` for reliability: precise expiry‑day‑at‑morning and expiry‑soon (N days before) scheduling, multi‑item grouping, per‑inventory notification channels, proper timezone handling, and resilient rescheduling on app boot.
 - [ ] **Remake import/export from scratch** — rewrite `CsvService` to support: export only cached (API-fetched) products, export a specific inventory, export products from a specific inventory, and import via `filegate` (platform file picker). Replace the stats-screen picker with a streamlined FileGate-based flow.
 - [ ] **Patrol E2E tests** — real‑device integration tests via [Patrol](https://patrol.leancode.co). Uses `patrol_cli` and `patrol` dev-dependency. Replace the generic `integration_test/` with `patrol_test/` directory.

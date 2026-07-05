@@ -67,7 +67,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 7,
+        version: 8,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -108,7 +108,8 @@ class DatabaseHelper {
         source TEXT NOT NULL DEFAULT 'api',
         nutrition_image_path TEXT,
         ingredients_image_path TEXT,
-        product_image_path TEXT
+        product_image_path TEXT,
+        submission_status TEXT NOT NULL DEFAULT 'not_submitted'
       )
     ''');
 
@@ -200,6 +201,13 @@ class DatabaseHelper {
         'ALTER TABLE products ADD COLUMN product_image_path TEXT',
       );
       logInfo('Migration to version 7 completed');
+    }
+    if (oldVersion < 8) {
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN submission_status '
+        "TEXT NOT NULL DEFAULT 'not_submitted'",
+      );
+      logInfo('Migration to version 8 completed');
     }
   }
 

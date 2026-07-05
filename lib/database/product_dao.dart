@@ -32,6 +32,7 @@ class ProductDao {
     'nutrition_image_path': p.nutritionImagePath,
     'ingredients_image_path': p.ingredientsImagePath,
     'product_image_path': p.productImagePath,
+    'submission_status': p.submissionStatus,
   };
 
   /// Converts a database row map into a [Product].
@@ -57,6 +58,8 @@ class ProductDao {
     nutritionImagePath: map['nutrition_image_path'] as String?,
     ingredientsImagePath: map['ingredients_image_path'] as String?,
     productImagePath: map['product_image_path'] as String?,
+    submissionStatus:
+        map['submission_status'] as String? ?? productSubmissionNotSubmitted,
   );
 
   /// Inserts a product into the local cache (upsert).

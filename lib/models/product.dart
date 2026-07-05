@@ -3,6 +3,18 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'product.freezed.dart';
 part 'product.g.dart';
 
+/// Submission status: product has never been submitted.
+const String productSubmissionNotSubmitted = 'not_submitted';
+
+/// Submission status: queued for submission.
+const String productSubmissionPending = 'pending';
+
+/// Submission status: successfully submitted to Open Food Facts.
+const String productSubmissionSubmitted = 'submitted';
+
+/// Submission status: submission failed, retry possible.
+const String productSubmissionFailed = 'failed';
+
 /// Represents a cached product from Open Food Facts.
 ///
 /// Each `Product` corresponds to a row in the `products` table. Unlike
@@ -178,6 +190,19 @@ abstract class Product with _$Product {
     /// Not serialised to/from JSON because it is only used locally.
     @JsonKey(includeFromJson: false, includeToJson: false)
     String? productImagePath,
+
+    /// The submission status of this product to Open Food Facts.
+    ///
+    /// - [productSubmissionNotSubmitted] – not yet submitted (default).
+    /// - [productSubmissionPending] – queued for submission.
+    /// - [productSubmissionSubmitted] – successfully submitted.
+    /// - [productSubmissionFailed] – submission failed; retry possible.
+    ///
+    /// Not serialised from JSON because the OFF API does not include this
+    /// field; it is only stored in the local database.
+    @JsonKey(includeFromJson: false, includeToJson: false)
+    @Default(productSubmissionNotSubmitted)
+    String submissionStatus,
   }) = _Product;
 
   /// Creates a [Product] from a JSON map in the Open Food Facts v3 format.

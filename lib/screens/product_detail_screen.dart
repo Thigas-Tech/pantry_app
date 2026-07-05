@@ -11,6 +11,7 @@ import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
@@ -197,6 +198,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               _infoRow(l10n.brandLabel, widget.product.brand!),
             if (widget.product.category != null)
               _infoRow(l10n.categoryLabel, widget.product.category!),
+            if (widget.product.source == 'manual') _buildSubmissionStatus(l10n),
             const Divider(),
             _infoRow(l10n.servingSize, widget.product.servingSize ?? 'N/A'),
 
@@ -278,6 +280,58 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (tag == null || tag.isEmpty) return '';
     final withoutPrefix = tag.contains(':') ? tag.split(':').last : tag;
     return withoutPrefix.replaceAll('-', ' ');
+  }
+
+  /// Builds a chip showing the OFF submission status for manual products.
+  Widget _buildSubmissionStatus(AppLocalizations l10n) {
+    final status = widget.product.submissionStatus;
+    final chip = switch (status) {
+      productSubmissionSubmitted => Chip(
+        avatar: const Icon(Icons.check_circle, size: 18, color: Colors.green),
+        label: Text(l10n.submissionSubmitted),
+      ),
+      productSubmissionFailed => Chip(
+        avatar: const Icon(Icons.error, size: 18, color: Colors.red),
+        label: Text(l10n.submissionFailed),
+        deleteIcon: const Icon(Icons.refresh, size: 18),
+        onDeleted: _retrySubmission,
+      ),
+      productSubmissionPending => Chip(
+        avatar: const SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        label: Text(l10n.submissionPending),
+      ),
+      _ => Chip(
+        avatar: const Icon(Icons.cloud_upload, size: 18, color: Colors.grey),
+        label: Text(l10n.submissionNotSubmitted),
+        deleteIcon: const Icon(Icons.refresh, size: 18),
+        onDeleted: _retrySubmission,
+      ),
+    };
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: chip,
+    );
+  }
+
+  Future<void> _retrySubmission() async {
+    final l10n = AppLocalizations.of(context)!;
+    final service = ref.read(productSubmissionServiceProvider);
+    final result = await service.submitProduct(widget.product);
+    if (mounted) {
+      if (result.submissionStatus == productSubmissionSubmitted) {
+        SnackbarHelper.showInfo(context, l10n.submissionSuccess);
+      } else {
+        SnackbarHelper.showError(context, l10n.submissionError);
+      }
+      setState(() {
+        // Trigger rebuild with new status (widget.product is final, but
+        // the caller should invalidate the upstream provider).
+      });
+    }
   }
 
   /// Builds a simple label‑value row used for non‑nutrition product information

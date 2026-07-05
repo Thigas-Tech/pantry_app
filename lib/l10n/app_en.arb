@@ -290,5 +290,13 @@
   "flushCacheSub": "Delete cached product data and images",
   "flushCacheConfirm": "This will delete all cached product data and images fetched from Open Food Facts. Manually entered products and your inventory items will be preserved. Cached products will be re-fetched the next time you view them.",
   "flushCacheSuccess": "Cached products flushed. They will refresh automatically.",
-  "flushCacheFailed": "Failed to flush cache. Please try again."
+  "flushCacheFailed": "Failed to flush cache. Please try again.",
+  "submissionPending": "Pending submission to Open Food Facts",
+  "submissionSubmitted": "Submitted to Open Food Facts",
+  "submissionFailed": "Submission to Open Food Facts failed",
+  "submissionNotSubmitted": "Not submitted to Open Food Facts",
+  "submitToOff": "Submit to Open Food Facts",
+  "submittingToOffTitle": "Submitting…",
+  "submissionSuccess": "Product submitted to Open Food Facts.",
+  "submissionError": "Failed to submit product. Tap to retry."
 }

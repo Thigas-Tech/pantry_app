@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -12,7 +16,7 @@ import 'package:path_provider/path_provider.dart';
 /// Used when a barcode is not found in Open Food Facts, allowing the user
 /// to enter name, brand, category, nutrition, ingredients, and capture
 /// photos of the nutrition table, ingredients list, and product packaging.
-class AddProductScreen extends StatefulWidget {
+class AddProductScreen extends ConsumerStatefulWidget {
   /// Creates an [AddProductScreen] for the given [barcode].
   const AddProductScreen({required this.barcode, super.key});
 
@@ -20,10 +24,10 @@ class AddProductScreen extends StatefulWidget {
   final String barcode;
 
   @override
-  State<AddProductScreen> createState() => _AddProductScreenState();
+  ConsumerState<AddProductScreen> createState() => _AddProductScreenState();
 }
 
-class _AddProductScreenState extends State<AddProductScreen> {
+class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
   late final ImagePicker _imagePicker;
 
@@ -117,8 +121,28 @@ class _AddProductScreenState extends State<AddProductScreen> {
       productImagePath: productPath,
     );
     logInfo('Manual product entry saved: ${product.name}');
+
+    // Fire-and-forget the local cache + OFF submission.
+    // Errors are logged but never block the pop.
+    unawaited(_cacheAndSubmit(product));
+
     if (!mounted) return;
     Navigator.of(context).pop(product);
+  }
+
+  Future<void> _cacheAndSubmit(Product product) async {
+    try {
+      final repo = ref.read(productRepositoryProvider);
+      await repo.cacheProduct(product);
+    } on Exception catch (e) {
+      logError('Failed to cache product locally: $e');
+    }
+    try {
+      final service = ref.read(productSubmissionServiceProvider);
+      await service.submitProduct(product);
+    } on Exception catch (e) {
+      logError('Failed to submit product to OFF: $e');
+    }
   }
 
   @override
