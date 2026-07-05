@@ -20,6 +20,7 @@ import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/utils/string_helpers.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
@@ -539,6 +540,18 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   String? _cachedSearchQuery;
   String? _cachedSelectedCategory;
   int? _cachedThreshold;
+  Map<String, List<InventoryWithProduct>> _normalizedNameMap = {};
+
+  void _rebuildNameMap() {
+    final map = <String, List<InventoryWithProduct>>{};
+    for (final item in widget.items) {
+      if (item.productName != null && item.productName!.isNotEmpty) {
+        final key = removeDiacritics(item.productName!);
+        map.putIfAbsent(key, () => []).add(item);
+      }
+    }
+    _normalizedNameMap = map;
+  }
 
   void _invalidateCache() {
     _cachedFiltered = null;
@@ -573,12 +586,13 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
 
     var items = widget.items;
 
-    // Apply search filter.
+    // Apply search filter (case- and accent-insensitive).
     if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
+      final q = removeDiacritics(_searchQuery);
       items = items.where((item) {
-        return (item.productName?.toLowerCase().contains(q) ?? false) ||
-            item.barcode.toLowerCase().contains(q);
+        return (item.productName != null &&
+                removeDiacritics(item.productName!).contains(q)) ||
+            removeDiacritics(item.barcode).contains(q);
       }).toList();
     }
 
@@ -659,8 +673,15 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.items != widget.items ||
         oldWidget.expiringSoonDays != widget.expiringSoonDays) {
+      _rebuildNameMap();
       _invalidateCache();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _rebuildNameMap();
   }
 
   @override
@@ -700,28 +721,101 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             ),
           ),
         ),
-        // Search field.
+        // Search field (with autocomplete suggestions).
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: l10n.searchHint,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () => setState(() => _searchQuery = ''),
-                    )
-                  : null,
-              border: OutlineInputBorder(
+          child: Autocomplete<InventoryWithProduct>(
+            displayStringForOption: (item) => item.productName ?? item.barcode,
+            optionsBuilder: (textEditingValue) {
+              if (textEditingValue.text.isEmpty) return [];
+
+              // Lazily populate the name map if it wasn't built in initState
+              // (e.g. when items were not yet available).
+              if (_normalizedNameMap.isEmpty && widget.items.isNotEmpty) {
+                _rebuildNameMap();
+              }
+
+              final q = removeDiacritics(textEditingValue.text);
+
+              // Match by normalized product name.
+              final matched = <InventoryWithProduct>{};
+              for (final entry in _normalizedNameMap.entries) {
+                if (entry.key.contains(q)) {
+                  matched.addAll(entry.value);
+                }
+              }
+
+              // Match by barcode (full item list iteration is cheap for
+              // typical pantry sizes; barcodes are ASCII-only).
+              for (final item in widget.items) {
+                if (removeDiacritics(item.barcode).contains(q)) {
+                  matched.add(item);
+                }
+              }
+
+              // Scope to the active category filter if one is set.
+              if (_selectedCategory != null) {
+                matched.removeWhere(
+                  (item) => item.productCategory != _selectedCategory,
+                );
+              }
+
+              return matched.take(20);
+            },
+            onSelected: (selection) {
+              setState(() {
+                _searchQuery = selection.productName ?? selection.barcode;
+              });
+            },
+            fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+              return TextField(
+                controller: controller,
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  hintText: l10n.searchHint,
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            controller.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                ),
+                onChanged: (v) => setState(() => _searchQuery = v),
+                onSubmitted: (_) => onSubmitted(),
+              );
+            },
+            optionsViewBuilder: (context, onSelected, options) {
+              final items = options.toList();
+              return Material(
+                elevation: 4,
                 borderRadius: BorderRadius.circular(12),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-            ),
-            onChanged: (v) => setState(() => _searchQuery = v),
+                clipBehavior: Clip.antiAlias,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 280),
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: [
+                      for (final item in items)
+                        _suggestionTile(
+                          item: item,
+                          onTap: () => onSelected(item),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ),
         // Category filter chips.
@@ -893,6 +987,49 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _suggestionTile({
+    required InventoryWithProduct item,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: item.productImageUrl != null
+          ? ClipOval(
+              child: Image.network(
+                item.productImageUrl!,
+                width: 32,
+                height: 32,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const SizedBox(width: 32, height: 32);
+                },
+                errorBuilder: (context, error, stackTrace) =>
+                    _barcodeAvatar(item.barcode),
+              ),
+            )
+          : _barcodeAvatar(item.barcode),
+      title: Text(item.productName ?? item.barcode),
+      subtitle: Text(item.barcode),
+      onTap: onTap,
+    );
+  }
+
+  Widget _barcodeAvatar(String barcode) {
+    return CircleAvatar(
+      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+      radius: 16,
+      child: Text(
+        barcode.length >= 3
+            ? barcode.substring(0, 3)
+            : barcode.padRight(3, '0'),
+        style: TextStyle(
+          fontSize: 10,
+          color: Theme.of(context).colorScheme.onSecondaryContainer,
+        ),
       ),
     );
   }

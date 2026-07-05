@@ -1,5 +1,6 @@
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/string_helpers.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Data-access layer for the `products` table.
@@ -114,21 +115,30 @@ class ProductDao {
     return result.map(fromMap).toList();
   }
 
-  /// Searches the products table by name or barcode using a LIKE query.
+  /// Searches the products table by name or barcode.
   ///
-  /// The [query] is matched case‑insensitively against both `name` and
-  /// `barcode` columns. Results are ordered by name ascending.
+  /// The [query] is matched accent‑ and case‑insensitively against both `name`
+  /// and `barcode` columns. Results are ordered by name ascending.
+  ///
+  /// Filtering is performed in Dart so that the normalisation from
+  /// [removeDiacritics] is applied to both the query and the stored values.
   Future<List<Product>> search(Database db, String query) async {
     try {
-      final pattern = '%$query%';
+      final normalizedQuery = removeDiacritics(query);
       final result = await db.query(
         'products',
-        where: 'name LIKE ? OR barcode LIKE ?',
-        whereArgs: [pattern, pattern],
         orderBy: 'name ASC',
       );
-      logInfo('Search for "$query" returned ${result.length} results');
-      return result.map(fromMap).toList();
+      final products = result
+          .map(fromMap)
+          .where(
+            (p) =>
+                removeDiacritics(p.name).contains(normalizedQuery) ||
+                removeDiacritics(p.barcode).contains(normalizedQuery),
+          )
+          .toList();
+      logInfo('Search for "$query" returned ${products.length} results');
+      return products;
     } on Exception catch (e) {
       logError('Error searching products for "$query": $e');
       rethrow;

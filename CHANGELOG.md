@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Bugfixes
+- **`removeDiacritics` producing decimal strings instead of characters**: `StringBuffer.write(int)` was outputting ASCII code-point decimal values (e.g. `77` instead of `M`). Replaced with `writeCharCode` so the function actually strips diacritics as documented.
+- **`ProductDao.search()` accent‑insensitive DB queries**: Both the query AND stored product names are now normalised via in‑memory `removeDiacritics` filtering (previously only the query was normalised, leaving accented DB content unmatched).
 - **SearchScreen `setState` after dispose**: Added `mounted` checks and request‑ID stale-guard before every `setState` in `_search()`. The `_requestId` counter ensures stale results from a previous query are silently discarded when the user types faster than the 300 ms debounce.
 - **SearchScreen API spam**: OFF API calls are now skipped for 1‑character queries (minimum 2 chars). Inflight requests are not cancelled at the HTTP level but their results are ignored when superseded by a newer query.
 - **Short barcode crash**: `product.barcode.substring(0, 3)` in the search result `CircleAvatar` now guards against barcodes shorter than 3 characters (pads with `'0'`).
@@ -11,6 +13,8 @@
 - **Search field keyboard type**: Added `textInputAction: TextInputAction.search` to the `SearchScreen` TextField.
 
 ### Enhancements
+- **Autocomplete search with product thumbnails**: Home screen `TextField` replaced with `Autocomplete<InventoryWithProduct>`. Suggestions show a 32×32 `ClipOval` product thumbnail (or barcode `CircleAvatar` fallback), capped at 20 results.
+- **Accent-insensitive search**: `removeDiacritics()` normalises Latin diacritics (à→a, é→e, ü→u, ñ→n, ç→c, ß→s, etc.) for both in-memory filtering and SQL queries.
 - **Pinch-to-zoom on product photos**: Product detail screen images wrapped in `InteractiveViewer` (0.5×–3× zoom) for both cached and network images.
 - **Settings screen grouped by sections**: Flat `ListView` replaced with `ExpansionTile` groups (Appearance, Notifications, Data Management, Maintenance).
 
@@ -34,6 +38,9 @@
 - Version detection via `package_info_plus` and `shared_preferences`
 - Clears image cache and product DB on first launch after upgrade
 - Manual "Flush cache" button in settings screen
+
+### Tests
+- **`string_helpers_test.dart`**: 23 unit tests covering `removeDiacritics` (empty, ASCII, mixed diacritics, Latin Extended-A, non‑Latin pass‑through) and `equalsIgnoreCaseAndDiacritics` (case, accent, mismatch scenarios).
 
 ### Accessibility
 - `Semantics` labels on NutriScoreBadge: "Nutri-Score A" through "Nutri-Score E", "Nutri-Score, not applicable"

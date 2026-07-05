@@ -956,8 +956,15 @@ void main() {
 
     expect(find.textContaining('No items match'), findsOneWidget);
 
-    // Now also filter by a category — message should include the category.
+    // Clear the search to dismiss the autocomplete overlay, then filter.
+    await tester.tap(find.byIcon(Icons.clear));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Dairy'));
+    await tester.pumpAndSettle();
+
+    // Re-enter the search (no matching options, so no dropdown appears).
+    await tester.enterText(find.byType(TextField), 'XYZ');
     await tester.pumpAndSettle();
 
     expect(
@@ -1015,8 +1022,15 @@ void main() {
 
     expect(find.byType(InventoryCard), findsNWidgets(2));
 
-    // Now also filter by "Dairy" — only "Milk" should remain.
+    // Clear search to dismiss overlay, then filter by Dairy.
+    await tester.tap(find.byIcon(Icons.clear));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Dairy'));
+    await tester.pumpAndSettle();
+
+    // Re-enter "Milk" — Dairy filter + search = only 1 item.
+    await tester.enterText(find.byType(TextField), 'Milk');
     await tester.pumpAndSettle();
 
     expect(find.byType(InventoryCard), findsOneWidget);
@@ -1090,5 +1104,220 @@ void main() {
 
     verify(() => mockRepo.deleteInventoryItem(1)).called(1);
     verifyNever(() => mockRepo.deleteInventoryItem(2));
+  });
+
+  // ---------- Autocomplete tests ----------
+
+  testWidgets('autocomplete shows matching suggestions', (tester) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '111111',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+      ),
+      const InventoryWithProduct(
+        barcode: '222222',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Bread',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // Type a partial name.
+    await tester.enterText(find.byType(TextField), 'Mil');
+    await tester.pumpAndSettle();
+
+    // The suggestion dropdown should show "Milk" and "111111"
+    // (title and subtitle respectively).
+    expect(find.text('Milk'), findsWidgets);
+    expect(find.text('111111'), findsOneWidget);
+
+    // "Bread" / "222222" should not appear in suggestions.
+    expect(find.text('222222'), findsNothing);
+  });
+
+  testWidgets('autocomplete respects category filter', (tester) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '111111',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Milk',
+        productCategory: 'Dairy',
+      ),
+      const InventoryWithProduct(
+        barcode: '222222',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Milk Chocolate',
+        productCategory: 'Sweets',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // First, filter by "Dairy".
+    await tester.tap(find.text('Dairy'));
+    await tester.pumpAndSettle();
+
+    // Type "Milk".
+    await tester.enterText(find.byType(TextField), 'Milk');
+    await tester.pumpAndSettle();
+
+    // Only the Dairy "Milk" (barcode 111111) should be suggested.
+    expect(find.text('111111'), findsOneWidget);
+    // "Milk Chocolate" (Sweets, barcode 222222) should not appear.
+    expect(find.text('222222'), findsNothing);
+  });
+
+  testWidgets(
+    'suggestion shows barcode avatar when no product image',
+    (tester) async {
+      // productImageUrl is null by default in InventoryWithProduct.
+      const item = InventoryWithProduct(
+        barcode: '123',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Test Product',
+      );
+
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          inventoryWithProductProvider.overrideWith((ref) => [item]),
+          inventoryListProvider.overrideWith(
+            (ref) => <Map<String, dynamic>>[
+              {'id': 1, 'name': 'Home'},
+            ],
+          ),
+          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+          productRepositoryProvider.overrideWithValue(
+            createMockProductRepository(),
+          ),
+        ],
+      );
+
+      await tester.enterText(find.byType(TextField), 'Test');
+      await tester.pumpAndSettle();
+
+      // The suggestion should show a CircleAvatar with barcode initials.
+      // find.byType(CircleAvatar) — there is at least 1 from the suggestion.
+      // (InventoryCard's _buildLeadingImage may also use CircleAvatar for
+      // fallback, so we check for at least 1.)
+      expect(find.byType(CircleAvatar), findsWidgets);
+    },
+  );
+
+  testWidgets('accent-insensitive search filtering', (tester) async {
+    final items = [
+      const InventoryWithProduct(
+        barcode: '111111',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 1,
+        inventoryId: 1,
+        productName: 'Café crème',
+      ),
+      const InventoryWithProduct(
+        barcode: '222222',
+        quantity: 1,
+        unit: 'pcs',
+        location: 'pantry',
+        id: 2,
+        inventoryId: 1,
+        productName: 'Müsli',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith((ref) => items),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+      ],
+    );
+
+    // Both items visible initially.
+    expect(find.byType(InventoryCard), findsNWidgets(2));
+
+    // Type "cafe" — should match "Café crème" via removeDiacritics.
+    await tester.enterText(find.byType(TextField), 'cafe');
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InventoryCard), findsOneWidget);
+    expect(find.text('222222'), findsNothing);
+
+    // Clear, then type "musli" — should match "Müsli" via removeDiacritics.
+    await tester.tap(find.byIcon(Icons.clear));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'musli');
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InventoryCard), findsOneWidget);
+    expect(find.text('111111'), findsNothing);
   });
 }
