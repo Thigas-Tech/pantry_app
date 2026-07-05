@@ -506,4 +506,43 @@ void main() {
 
     expect(find.byType(StatsScreen), findsOneWidget);
   });
+
+  testWidgets('create pantry dialog creates an inventory', (tester) async {
+    final mockRepo = MockProductRepository();
+    when(
+      () => mockRepo.createInventory(any()),
+    ).thenAnswer((_) async => 3);
+
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: [
+        inventoryWithProductProvider.overrideWith(
+          (ref) => <InventoryWithProduct>[],
+        ),
+        inventoryListProvider.overrideWith(
+          (ref) => <Map<String, dynamic>>[
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(mockRepo),
+      ],
+    );
+
+    await tester.tap(find.byIcon(Icons.swap_horiz));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Create new pantry'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('New pantry'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Camping');
+    await tester.tap(find.text('Create'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockRepo.createInventory('Camping')).called(1);
+  });
 }
