@@ -17,6 +17,23 @@
 ### Bugfixes
 - **Missing `cacheWidth` in product detail**: `Image.network` in `ProductDetailScreen` was only constraining decode height. Added `cacheWidth` at screen width × device pixel ratio.
 
+### Stats & Analytics
+- **StatsScreen rewritten with fl_chart**: Summary cards (total products, total items, added this week/month), Nutri-Score distribution (BarChart), category breakdown (BarChart), location breakdown (BarChart), photo completeness cards with OFF comparison, and ComingSoonView stubs for price tracking and NFC-e receipts.
+- **fl_chart dependency added** (<300KB after tree shaking). All chart sections wrapped in `RepaintBoundary` for independent repaint isolation.
+- **PantryStats freezed model** with 3 sub-models (`WeeklyCount`, `CategoryCount`, `PhotoStats`).
+- **statsProvider** (FutureProvider.autoDispose) — 10 concurrent SQL aggregation queries via `Future.wait`. Refreshes on pantry switch.
+- **Product model extended** with 3 OFF image URL fields (`offNutritionImageUrl`, `offIngredientsImageUrl`, `offProductImageUrl`) for photo-completeness comparison.
+- **DB migration v8→v9**: 3 new TEXT columns on `products` table.
+- **OFF API parser** now reads `image_nutrition_url`, `image_ingredients_url`, `image_front_url` from API responses.
+- **8 new DAO aggregation methods**: `ProductDao` (nutriscoreDistribution, categoryDistribution, sourceDistribution, photoCompleteness, offPhotoCompleteness) and `InventoryDao` (locationDistribution, expiryDistribution, weeklyAdditions).
+- **10 new ARB keys** added to all 3 locales (price tracking, NFC-e, photo completeness).
+
+### Code health
+- **AGENTS.md rule 11**: Consider performance and footprint on every plan.
+- **AGENTS.md performance audit checklist**: 6-item checklist for new dependencies, screens, DB queries, providers, models, and rebuild scope.
+- **TODO.md**: 3 new items (price tracking, NFC-e, photo contribution).
+- 323 tests passing, 0 analyze issues.
+
 ### Code health
 - Removed CSV import/export: deleted `csv_service.dart`, `csv_service_provider.dart`, `filegate_provider.dart`, and all related test files. Removed `getExportData()` / `exportData()` from `DatabaseHelper`, `InventoryDao`, and `ProductRepository`.
 - Removed `csv`, `filegate`, `share_plus` dependencies from `pubspec.yaml`. Ran `flutter pub upgrade` (picked up `equatable` 2.1.0 transitively).

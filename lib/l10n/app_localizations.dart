@@ -1115,6 +1115,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This feature will be available soon.'**
   String get comingSoonDescription;
+
+  /// No description provided for @priceTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Tracking'**
+  String get priceTracking;
+
+  /// No description provided for @priceTrackingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Track how much you spend.'**
+  String get priceTrackingDescription;
+
+  /// No description provided for @receiptTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'NFC-e Receipts'**
+  String get receiptTracking;
+
+  /// No description provided for @receiptTrackingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan tax receipts to add products.'**
+  String get receiptTrackingDescription;
+
+  /// No description provided for @photoCompletenessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo Completeness'**
+  String get photoCompletenessTitle;
+
+  /// No description provided for @contributePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribute to Open Food Facts'**
+  String get contributePhotos;
+
+  /// No description provided for @offNeedsPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF needs photos for {count} products'**
+  String offNeedsPhotos(Object count);
+
+  /// No description provided for @noCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get noCategories;
+
+  /// No description provided for @addedThisWeekLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get addedThisWeekLabel;
+
+  /// No description provided for @addedThisMonthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get addedThisMonthLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

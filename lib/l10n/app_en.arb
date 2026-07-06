@@ -303,5 +303,20 @@
   },
   "whatsNewDismiss": "Got it",
   "settingsAbout": "About",
-  "comingSoonDescription": "This feature will be available soon."
+  "comingSoonDescription": "This feature will be available soon.",
+  "priceTracking": "Price Tracking",
+  "priceTrackingDescription": "Track how much you spend.",
+  "receiptTracking": "NFC-e Receipts",
+  "receiptTrackingDescription": "Scan tax receipts to add products.",
+  "photoCompletenessTitle": "Photo Completeness",
+  "contributePhotos": "Contribute to Open Food Facts",
+  "offNeedsPhotos": "OFF needs photos for {count} products",
+  "@offNeedsPhotos": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "noCategories": "No categories yet",
+  "addedThisWeekLabel": "This week",
+  "addedThisMonthLabel": "This month"
 }

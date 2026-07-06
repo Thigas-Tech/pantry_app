@@ -57,6 +57,7 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 8. **Set Product.source** — every `Product()` constructor call MUST pass `source`. Use `'api'` for OFF‑fetched data and `'manual'` for user‑entered or CSV‑imported data. The default is `'api'`. Never omit this field — it protects manual products from being deleted by `clearCachedProducts()` during cache flushes.
 9. **No emoji** — never use emoji characters anywhere in the codebase, including documentation, comments, commit messages, ARB strings, and TODOs. Use plain text alternatives (e.g., `Yes`/`No` instead of check/cross marks, `**Pitfalls**` instead of warning signs). Emojis render inconsistently across terminals, editors, and git tools, and this project's documentation must remain plain-text clean.
 10. **Audit every plan for pitfalls** — before implementing any plan, audit for regressions, edge cases, common issues, and common pitfalls. Document findings and mitigations in the plan before writing code. This includes: breaking changes to existing APIs, widget state loss during refactors, performance degradation, missing test coverage for changed code paths, locale/accessibility impact, and interaction with fire-and-forget async operations.
+11. **Consider performance and footprint** — before implementing any plan, evaluate: APK size impact of new dependencies, widget build count on new screens with `RepaintBoundary` strategy, memory footprint of new models and providers, SQL query cost for new database methods (concurrent read safety, index needs), and rebuild scope (provider disposal strategy, `autoDispose` vs `keepAlive`). Document tradeoffs in the plan before writing code.
 
 ### Code style
 - 80-character line limit (enforced by lint)
@@ -270,6 +271,23 @@ offscreen buffers that stress the GPU:
 - **Perfetto**: `flutter drive --profile --trace-startup` — generates a
   Perfetto trace file. Open in `ui.perfetto.dev` or use the `perfetto` CLI
   to analyze frame timing, jank, and CPU scheduling patterns.
+
+### Per-plan performance audit checklist
+
+Before shipping any feature that adds dependencies, screens, or queries,
+verify:
+
+- [ ] **Dependencies:** estimate APK size increase, verify tree shaking
+  trims unused code via `flutter build apk --analyze-size`
+- [ ] **Screens:** count widgets created per frame, add `RepaintBoundary`
+  on every independent chart, animated badge, or image-heavy section
+- [ ] **DB queries:** verify read-only for concurrent safety, estimate
+  runtime on 100/1 000/10 000 rows, confirm no missing indexes
+- [ ] **Providers:** choose `autoDispose` vs `keepAlive` based on access
+  pattern (background tabs, modals, always-visible widgets)
+- [ ] **Models:** estimate memory per instance, batch size in collections
+- [ ] **Rebuild scope:** verify `setState` calls rebuild the smallest
+  subtree; check that `const` constructors are used where possible
 
 ### Testing on real devices
 

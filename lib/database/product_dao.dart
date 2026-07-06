@@ -34,6 +34,9 @@ class ProductDao {
     'ingredients_image_path': p.ingredientsImagePath,
     'product_image_path': p.productImagePath,
     'submission_status': p.submissionStatus,
+    'off_nutrition_image_url': p.offNutritionImageUrl,
+    'off_ingredients_image_url': p.offIngredientsImageUrl,
+    'off_product_image_url': p.offProductImageUrl,
   };
 
   /// Converts a database row map into a [Product].
@@ -61,6 +64,9 @@ class ProductDao {
     productImagePath: map['product_image_path'] as String?,
     submissionStatus:
         map['submission_status'] as String? ?? productSubmissionNotSubmitted,
+    offNutritionImageUrl: map['off_nutrition_image_url'] as String?,
+    offIngredientsImageUrl: map['off_ingredients_image_url'] as String?,
+    offProductImageUrl: map['off_product_image_url'] as String?,
   );
 
   /// Inserts a product into the local cache (upsert).
@@ -174,5 +180,104 @@ class ProductDao {
       whereArgs: [source],
     );
     logInfo('Deleted $count products with source "$source"');
+  }
+
+  /// Returns counts of products grouped by Nutri-Score grade.
+  ///
+  /// Only API-sourced products with a non-null Nutri-Score are included.
+  /// The returned map uses grade strings as keys (e.g. `'a'`, `'b'`).
+  Future<Map<String, int>> nutriscoreDistribution(Database db) async {
+    final rows = await db.rawQuery('''
+      SELECT nutriscore_grade, COUNT(*) as cnt
+      FROM products
+      WHERE nutriscore_grade IS NOT NULL AND source = 'api'
+      GROUP BY nutriscore_grade
+    ''');
+    return {
+      for (final r in rows) r['nutriscore_grade']! as String: r['cnt']! as int,
+    };
+  }
+
+  /// Returns the top N categories with product counts.
+  Future<List<Map<String, dynamic>>> categoryDistribution(
+    Database db, {
+    int limit = 10,
+  }) {
+    return db.rawQuery(
+      '''
+      SELECT category, COUNT(*) as cnt
+      FROM products
+      WHERE category IS NOT NULL
+      GROUP BY category
+      ORDER BY cnt DESC
+      LIMIT ?
+    ''',
+      [limit],
+    );
+  }
+
+  /// Returns counts of products grouped by source (`api` / `manual`).
+  Future<Map<String, int>> sourceDistribution(Database db) async {
+    final rows = await db.rawQuery('''
+      SELECT source, COUNT(*) as cnt
+      FROM products
+      GROUP BY source
+    ''');
+    return {for (final r in rows) r['source']! as String: r['cnt']! as int};
+  }
+
+  /// Returns counts of local photos attached to products.
+  ///
+  /// The returned map has keys `total`, `nutrition`, `ingredients`,
+  /// `product`.
+  Future<Map<String, int>> photoCompleteness(Database db) async {
+    final rows = await db.rawQuery('''
+      SELECT
+        COUNT(*) as total,
+        SUM(CASE WHEN nutrition_image_path IS NOT NULL THEN 1 ELSE 0 END)
+          as nutrition,
+        SUM(CASE WHEN ingredients_image_path IS NOT NULL THEN 1 ELSE 0 END)
+          as ingredients,
+        SUM(CASE WHEN product_image_path IS NOT NULL THEN 1 ELSE 0 END)
+          as product
+      FROM products
+    ''');
+    final r = rows.first;
+    return {
+      'total': r['total']! as int,
+      'nutrition': r['nutrition']! as int,
+      'ingredients': r['ingredients']! as int,
+      'product': r['product']! as int,
+    };
+  }
+
+  /// Returns counts of OFF photo URLs available for products.
+  ///
+  /// Only products with `source = 'api'` are counted (manual products are
+  /// never on OFF). The returned map uses the same keys as
+  /// [photoCompleteness].
+  Future<Map<String, int>> offPhotoCompleteness(Database db) async {
+    final rows = await db.rawQuery('''
+      SELECT
+        COUNT(*) as total,
+        SUM(CASE WHEN off_nutrition_image_url IS NOT NULL
+              AND off_nutrition_image_url != '' THEN 1 ELSE 0 END)
+          as nutrition,
+        SUM(CASE WHEN off_ingredients_image_url IS NOT NULL
+              AND off_ingredients_image_url != '' THEN 1 ELSE 0 END)
+          as ingredients,
+        SUM(CASE WHEN off_product_image_url IS NOT NULL
+              AND off_product_image_url != '' THEN 1 ELSE 0 END)
+          as product
+      FROM products
+      WHERE source = 'api'
+    ''');
+    final r = rows.first;
+    return {
+      'total': r['total']! as int,
+      'nutrition': r['nutrition']! as int,
+      'ingredients': r['ingredients']! as int,
+      'product': r['product']! as int,
+    };
   }
 }

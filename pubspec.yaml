@@ -9,6 +9,7 @@ environment:
 dependencies:
   dio: ^5.9.2
   dynamic_color: ^1.8.1
+  fl_chart: ^1.2.0
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.1

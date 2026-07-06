@@ -555,6 +555,38 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get comingSoonDescription => 'Este recurso estará disponível em breve.';
+
+  @override
+  String get priceTracking => 'Controle de Preços';
+
+  @override
+  String get priceTrackingDescription => 'Acompanhe seus gastos.';
+
+  @override
+  String get receiptTracking => 'Notas NFC-e';
+
+  @override
+  String get receiptTrackingDescription => 'Escanear notas para adicionar produtos.';
+
+  @override
+  String get photoCompletenessTitle => 'Fotos dos Produtos';
+
+  @override
+  String get contributePhotos => 'Contribuir com fotos';
+
+  @override
+  String offNeedsPhotos(Object count) {
+    return 'OFF precisa de fotos para $count produtos';
+  }
+
+  @override
+  String get noCategories => 'Nenhuma categoria';
+
+  @override
+  String get addedThisWeekLabel => 'Esta semana';
+
+  @override
+  String get addedThisMonthLabel => 'Este mês';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1108,4 +1140,36 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get comingSoonDescription => 'Este recurso estará disponível em breve.';
+
+  @override
+  String get priceTracking => 'Controle de Preços';
+
+  @override
+  String get priceTrackingDescription => 'Acompanhe seus gastos.';
+
+  @override
+  String get receiptTracking => 'Notas NFC-e';
+
+  @override
+  String get receiptTrackingDescription => 'Escanear notas para adicionar produtos.';
+
+  @override
+  String get photoCompletenessTitle => 'Fotos dos Produtos';
+
+  @override
+  String get contributePhotos => 'Contribuir com fotos';
+
+  @override
+  String offNeedsPhotos(Object count) {
+    return 'OFF precisa de fotos para $count produtos';
+  }
+
+  @override
+  String get noCategories => 'Nenhuma categoria';
+
+  @override
+  String get addedThisWeekLabel => 'Esta semana';
+
+  @override
+  String get addedThisMonthLabel => 'Este mês';
 }

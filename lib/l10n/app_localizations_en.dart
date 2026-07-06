@@ -555,4 +555,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoonDescription => 'This feature will be available soon.';
+
+  @override
+  String get priceTracking => 'Price Tracking';
+
+  @override
+  String get priceTrackingDescription => 'Track how much you spend.';
+
+  @override
+  String get receiptTracking => 'NFC-e Receipts';
+
+  @override
+  String get receiptTrackingDescription => 'Scan tax receipts to add products.';
+
+  @override
+  String get photoCompletenessTitle => 'Photo Completeness';
+
+  @override
+  String get contributePhotos => 'Contribute to Open Food Facts';
+
+  @override
+  String offNeedsPhotos(Object count) {
+    return 'OFF needs photos for $count products';
+  }
+
+  @override
+  String get noCategories => 'No categories yet';
+
+  @override
+  String get addedThisWeekLabel => 'This week';
+
+  @override
+  String get addedThisMonthLabel => 'This month';
 }

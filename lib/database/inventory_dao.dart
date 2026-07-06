@@ -236,4 +236,77 @@ class InventoryDao {
         ) ??
         0;
   }
+
+  /// Returns counts of items grouped by storage location.
+  Future<Map<String, int>> locationDistribution(
+    Database db, {
+    required int inventoryId,
+  }) async {
+    final rows = await db.rawQuery(
+      '''
+      SELECT location, COUNT(*) as cnt
+      FROM inventory
+      WHERE inventory_id = ?
+      GROUP BY location
+    ''',
+      [inventoryId],
+    );
+    return {for (final r in rows) r['location']! as String: r['cnt']! as int};
+  }
+
+  /// Returns counts grouped by expiry status.
+  ///
+  /// Items with a NULL expiry date are counted as `good`. Items expiring
+  /// within [expiringSoonDays] days are counted as `expiring`. Items with
+  /// a date before today are counted as `expired`.
+  Future<Map<String, int>> expiryDistribution(
+    Database db, {
+    required int inventoryId,
+    required int expiringSoonDays,
+  }) async {
+    final rows = await db.rawQuery(
+      '''
+      SELECT
+        CASE
+          WHEN expiry_date IS NULL THEN 'good'
+          WHEN date(expiry_date) < date('now') THEN 'expired'
+          WHEN date(expiry_date) <= date('now', '+' || ? || ' days')
+            THEN 'expiring'
+          ELSE 'good'
+        END as status,
+        COUNT(*) as cnt
+      FROM inventory
+      WHERE inventory_id = ?
+      GROUP BY status
+    ''',
+      [expiringSoonDays, inventoryId],
+    );
+    return {
+      for (final r in rows) r['status']! as String: r['cnt']! as int,
+    };
+  }
+
+  /// Returns weekly item-addition counts for the last [weeks] weeks.
+  ///
+  /// Items without a `dateAdded` are excluded.
+  Future<List<Map<String, dynamic>>> weeklyAdditions(
+    Database db, {
+    required int inventoryId,
+    int weeks = 8,
+  }) {
+    return db.rawQuery(
+      '''
+      SELECT
+        strftime('%Y-%W', date_added / 1000, 'unixepoch') as week,
+        COUNT(*) as cnt
+      FROM inventory
+      WHERE inventory_id = ?
+        AND date_added IS NOT NULL
+      GROUP BY week
+      ORDER BY week DESC
+      LIMIT ?
+    ''',
+      [inventoryId, weeks],
+    );
+  }
 }

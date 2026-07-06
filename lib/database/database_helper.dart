@@ -67,7 +67,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 8,
+        version: 9,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -109,7 +109,10 @@ class DatabaseHelper {
         nutrition_image_path TEXT,
         ingredients_image_path TEXT,
         product_image_path TEXT,
-        submission_status TEXT NOT NULL DEFAULT 'not_submitted'
+        submission_status TEXT NOT NULL DEFAULT 'not_submitted',
+        off_nutrition_image_url TEXT,
+        off_ingredients_image_url TEXT,
+        off_product_image_url TEXT
       )
     ''');
 
@@ -208,6 +211,22 @@ class DatabaseHelper {
         "TEXT NOT NULL DEFAULT 'not_submitted'",
       );
       logInfo('Migration to version 8 completed');
+    }
+    if (oldVersion < 9) {
+      try {
+        await db.execute(
+          'ALTER TABLE products ADD COLUMN off_nutrition_image_url TEXT',
+        );
+        await db.execute(
+          'ALTER TABLE products ADD COLUMN off_ingredients_image_url TEXT',
+        );
+        await db.execute(
+          'ALTER TABLE products ADD COLUMN off_product_image_url TEXT',
+        );
+        logInfo('Migration to version 9 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v9 failed (columns may already exist): $e');
+      }
     }
   }
 

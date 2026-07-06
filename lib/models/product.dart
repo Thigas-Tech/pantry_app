@@ -86,6 +86,18 @@ abstract class Product with _$Product {
     /// May be `null` if no image has been uploaded for this product.
     @JsonKey(name: 'image_url') String? imageUrl,
 
+    /// OFF CDN URL for the nutrition facts table image, if available.
+    ///
+    /// Used by the photo-completeness stats screen to compare local user
+    /// photos against what OFF already has for this product.
+    @JsonKey(name: 'image_nutrition_url') String? offNutritionImageUrl,
+
+    /// OFF CDN URL for the ingredients list image, if available.
+    @JsonKey(name: 'image_ingredients_url') String? offIngredientsImageUrl,
+
+    /// OFF CDN URL for the product front/packaging image, if available.
+    @JsonKey(name: 'image_front_url') String? offProductImageUrl,
+
     /// The product category as assigned by the Open Food Facts community.
     ///
     /// Often a comma‑separated hierarchy (e.g. `"Spreads, Sweet spreads"`).

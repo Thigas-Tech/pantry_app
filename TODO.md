@@ -132,6 +132,18 @@ infrastructure or external server hosting are listed last.
   data retention) under `ExpansionTile`.
 - [ ] **DropdownMenu** — replace `PopupMenuButton` for inventory switcher
   with M3 `DropdownMenu`.
+- [ ] **Price tracking** — add `priceAmount` / `priceCurrency` fields to
+  `InventoryItem`. Track spending per product, monthly totals, and price
+  history over time. Stubbed with `ComingSoonView` on Stats screen.
+- [ ] **NFC-e receipt scanning** — parse Brazilian electronic tax receipts
+  (NFC-e QR codes) to auto-populate product lists with quantities and
+  prices. Requires camera integration, SEFAZ API for QR decoding, and
+  product-name matching against the local pantry. Stubbed with
+  `ComingSoonView` on Stats screen.
+- [ ] **Photo contribution to Open Food Facts** — identify products in the
+  user's pantry that lack nutrition/ingredient/product photos on OFF and
+  prompt the user to contribute via the OFF product submission API.
+  Composite stat already tracked in `PhotoStats.offPhotos`.
 
 ### Documentation
 
