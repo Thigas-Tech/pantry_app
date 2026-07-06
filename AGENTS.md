@@ -72,7 +72,9 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 
 ### Debugging with Logger and Snackbar
 
-Use these utilities at every decision point so that both developers and users can trace what the app is doing.
+Use these utilities at every decision point so that both developers and
+users can trace what the app is doing. Every call to `SnackbarHelper` also
+emits a corresponding `logInfo`/`logWarning`/`logError` — never duplicate.
 
 **Logger** (`lib/utils/logger.dart`) — terminal output with ANSI colours:
 
@@ -82,13 +84,63 @@ Use these utilities at every decision point so that both developers and users ca
 | `logWarning(msg)` | Yellow | Degraded paths, fallbacks, rate-limit backoff |
 | `logError(msg)` | Red | Exceptions, failed operations, data corruption |
 
-Rules:
-- Log **why** something was skipped, not just when it succeeds (e.g. `logInfo('Version unchanged — skipping cache flush')`).
-- Log at the start of every async operation that can fail silently (fire-and-forget futures, background refreshes).
-- Never log secrets, tokens, or PII.
-- Use string interpolation, not `+` concatenation.
+**`logInfo`** — log at the START or DECISION of every significant operation:
 
-**SnackbarHelper** (`lib/utils/snackbar_helper.dart`) — user-facing feedback:
+- **Async operations starting**: API calls, background refreshes, DB writes,
+  file I/O, notification scheduling.
+- **Cache decisions**: hit, miss, skip, flush. Always include the reason
+  (e.g. `'Version unchanged — skipping cache flush'`).
+- **User-triggered actions**: navigating to a new screen, opening a dialog,
+  selecting items, tapping a button that triggers an async result.
+- **Guards / feature toggles**: when a version check, permission denial, or
+  offline check blocks execution, log WHY (e.g. `'Skipping refresh —
+  device is offline'`).
+- **Fire-and-forget futures (`unawaited(...)`)**: always place a `logInfo`
+  immediately before the call describing what was triggered
+  (e.g. `'Batch delete triggered for 3 items'`).
+- **Connectivity transitions**: log both `'Connectivity restored — device
+  is online'` and `'Connectivity lost — device is offline'`. This is one
+  of the most important state changes in an offline-first app — do not
+  omit it.
+- **Form validation failures**: log when a form is rejected so remote
+  debugging can see the rejection even though the user sees inline errors
+  on screen (e.g. `'Add-to-inventory form validation failed'`).
+
+**`logWarning`** — log when the app takes a degraded or unexpected path:
+
+- **Fallbacks / retries**: network timeout triggers a local fallback, an
+  API call retries after failure, a stale cached value is served because
+  a refresh failed.
+- **Guard conditions that are expected but rare**: empty selection on
+  delete, missing target when moving items, no other pantries exist.
+- **Migration or column-already-exists warnings** in `try/catch`.
+- **Any `catch` block that intentionally swallows the exception**
+  (best-effort cleanup, fire-and-forget recovery). Never leave a catch
+  block completely empty — at minimum add `logWarning`.
+
+**`logError`** — log ONLY unexpected failures:
+
+- Exceptions from DB, network, file I/O, or parsing.
+- Operations that should never fail but did.
+- Do NOT use `logError` for user-recoverable situations — use
+  `logWarning` plus a `SnackbarHelper.showError` for those.
+
+**General rules:**
+
+- Log **why** something was skipped or blocked, not just when it succeeds.
+- Log at the start of every `unawaited(...)` fire-and-forget future.
+- Never log secrets, tokens, API keys, or personally identifiable
+  information (PII).
+- Use string interpolation (`'Found $count items'`), not `+` concatenation.
+- When a `ref.invalidate(...)` is triggered by a user action, the ACTION
+  should already have a log — do not add separate logs for the
+  invalidation itself. Log at the action level (delete, add, update,
+  undo, restore), not the state-invalidation level.
+
+**SnackbarHelper** (`lib/utils/snackbar_helper.dart`) — user-facing
+feedback. **Never** use raw `ScaffoldMessenger.of(context).showSnackBar()`
+directly — always go through `SnackbarHelper` for consistent styling and
+automatic log integration.
 
 | Method | Colour | Use case |
 |---|---|---|
@@ -98,9 +150,16 @@ Rules:
 | `SnackbarHelper.showUndo(ctx, msg, cb)` | Blue + Undo | Destructive actions with 5-second undo window |
 
 Rules:
-- Every `SnackbarHelper` call also emits a `logInfo`/`logWarning`/`logError` automatically — no need to log separately.
-- Use `showUndo` for all destructive actions (delete, move, clear) — never `showError` for actions the user can reverse.
-- Snackbars are floating with rounded corners and a leading icon; do not customise the visual style.
+
+- Every `SnackbarHelper` call also emits a `logInfo`/`logWarning`/
+  `logError` automatically — no need to log separately.
+- Use `showUndo` for ALL destructive actions (delete, move, clear) —
+  never `showError` for actions the user can reverse. Give the user a
+  way to recover.
+- Snackbars are floating with rounded corners and a leading icon; do
+  not customise the visual style.
+- All user-visible strings passed to `SnackbarHelper` MUST be localized
+  via ARB — never hardcode English strings.
 
 ### Architecture
 ```
