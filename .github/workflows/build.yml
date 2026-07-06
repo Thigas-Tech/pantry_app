@@ -107,7 +107,7 @@ jobs:
         run: >
           flutter build ${{ matrix.package-type }}
           --${{ matrix.build-type }}
-          ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info --strip' || '' }}
+          ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info --extra-gen-snapshot-options=--strip' || '' }}
         working-directory: code
       - name: Upload APK
         if: matrix.package-type == 'apk'
