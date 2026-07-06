@@ -28,12 +28,15 @@ categories:
 
 version-resolver:
   major:
-    when:
-      - labels: ['breaking']
+    labels:
+      - 'breaking'
   minor:
-    when:
-      - labels: ['feature', 'enhancement']
+    labels:
+      - 'feature'
+      - 'enhancement'
   patch:
-    when:
-      - labels: ['fix', 'documentation', 'maintenance']
+    labels:
+      - 'fix'
+      - 'documentation'
+      - 'maintenance'
   default: patch
