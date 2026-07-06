@@ -132,6 +132,46 @@ infrastructure or external server hosting are listed last.
   data retention) under `ExpansionTile`.
 - [ ] **DropdownMenu** — replace `PopupMenuButton` for inventory switcher
   with M3 `DropdownMenu`.
+- [ ] **Redesign inventory switcher with border card** — replace the plain
+  `PopupMenuButton` icon with a tappable card showing the pantry name,
+  average NutriScore badge, and a tap/swipe-down indicator. Style the
+  container with a border matching the search bar (`InputBorder` / outline
+  style) so it looks consistent.
+
+  **Implementation**:
+  1. Create `InventorySwitcherCard` widget in `lib/widgets/`.
+  2. Card shows active inventory name (resolved from `inventoryListProvider`),
+     an average `NutriScoreBadge` (read from `averageNutriscoreProvider`),
+     and a `Icons.swap_horiz` or `Icons.arrow_drop_down` icon.
+  3. On tap, show the existing `PopupMenuButton` content or a modal
+     bottom sheet with the inventory list.
+  4. Replace the inline `PopupMenuButton` in `HomeScreen.build()` with the
+     new widget.
+  5. Add tests: verify the card displays the correct name, badge, and
+     opens the menu on tap.
+
+  **Pitfalls & edge cases**:
+  - **Average NutriScore badge may be null**: If no products exist in the
+    active inventory, `averageNutriscoreProvider` returns `null`. Hide badge
+    in that case and widen the card to just name + icon.
+  - **Long inventory names**: Truncate with ellipsis (`TextOverflow.ellipsis`)
+    and set a `maxLines: 1` constraint. Use a `Flexible` row layout so the
+    NutriScore badge doesn't get clipped.
+  - **Tap area too small**: Follow Material Design minimum 48dp touch target.
+    Wrap the card in a `GestureDetector` with adequate padding.
+  - **Color contrast**: Border colour must be visible in both light and dark
+    modes. Use `colorScheme.outline` to match the search bar's default style.
+  - **Provider dependency**: `averageNutriscoreProvider` and
+    `inventoryListProvider` are async providers. Show a loading skeleton
+    while they resolve, or fall back to just the name if still loading.
+  - **Active inventory ID 1 default**: On first launch, `activeInventoryProvider`
+    returns `1` but inventory 1 may not exist. Handle gracefully — show
+    "No pantry" fallback label instead of a broken card.
+  - **Inventory name changes**: If user renames the active inventory, the
+    card must reflect the new name. Use `ref.watch(inventoryListProvider)`
+    to react to DB changes.
+  - **No inventories at all**: When the user has deleted all inventories,
+    hide the switcher entirely and show a "Create pantry" button instead.
 - [ ] **Price tracking** — add `priceAmount` / `priceCurrency` fields to
   `InventoryItem`. Track spending per product, monthly totals, and price
   history over time. Stubbed with `ComingSoonView` on Stats screen.
@@ -164,9 +204,156 @@ infrastructure or external server hosting are listed last.
 
 ### Code health
 
+- [ ] **Fix SearchScreen accent-insensitive + case-insensitive search** — the
+  `SearchScreen` (_SearchScreenState._search) does NOT apply
+  `removeDiacritics()` to the query or results before matching. The home
+  screen inline search (`_InventoryListState._filtered`) DOES use
+  `removeDiacritics`, creating inconsistency. Add normalization to
+  `SearchScreen`, then add comprehensive tests for both search paths with
+  diacritics, prefixes, suffixes, and empty queries.
+
+  **Implementation**:
+  1. In `SearchScreen._search()` (line 73), normalize the query via
+     `removeDiacritics(query.trim().toLowerCase())` before passing to both
+     `db.searchProducts()` and `api.searchProducts()`.
+  2. In `ProductDao.search()` (line 133), ensure the local DB search also
+     normalises both query and product name/barcode before comparing.
+     Currently it does — verify the test coverage.
+  3. Add tests in `test/screens/search_screen_test.dart`:
+     - Search "cafe" finds a locally cached "Cafe au lait" (case)
+     - Search "cafe" finds "Cafe au lait" (accent-insensitive: é → e)
+     - Search with accents finds local items
+     - Search with accent finds API items when combined with mock
+     - Empty query returns idle state
+     - Very short query (1 char) does not trigger API call
+  4. Add tests in `test/services/product_repository_test.dart`:
+     - `searchProducts` with diacritic query matches correctly
+  5. Add tests in `test/database/product_dao_test.dart`:
+     - `search` with accent-insensitive query returns correct rows
+
+  **Pitfalls & edge cases**:
+  - **Double-normalisation of API query**: The OFF SDK may already normalise
+    queries internally. Applying `removeDiacritics` to the query before
+    sending to the API could degrade results (e.g. "cafe" won't find French
+    "cafe" on OFF if the SDK expects accented input). Apply
+    `removeDiacritics` ONLY for local DB search; for API search, send both
+    the original and the normalised query as separate requests or try the
+    original first and fall back.
+  - **Performance on DB search**: `ProductDao.search()` already loads all
+    products and filters in Dart. Adding `removeDiacritics` on every keystroke
+    adds CPU cost. For 500+ products, consider caching the normalised name
+    column or using LIKE with COLLATE NOCASE at SQL level.
+  - **Search "tomato" inconsistency in logs**: The emulator logs show that
+    "tom" and "tomat" fail with OFF server error, but "toma" and "tomato"
+    succeed. This is an OFF server-side issue — not caused by client code.
+    Document that 503/offline OFF responses are expected and handled.
+  - **Stale request guard interaction**: If the user types "cafe" and the
+    debounce fires two searches (original + normalised), the stale request
+    guard (`_requestId`) must correctly track both. Fire only ONE search
+    per debounce tick.
+  - **SQLite COLLATE NOCASE only handles ASCII**: For proper Unicode
+    accent-insensitive SQL search, use `COLLATE UNICODE` or load ICU
+    extension. Current Dart-level filtering works but doesn't scale. Decide
+    whether to add a separate `normalized_name` column.
+
+- [ ] **Fix Riverpod `setState() called during build` exception** — the crash
+  triggered after adding an item to inventory:
+
+  ```
+  setState() or markNeedsBuild() called during build.
+  This UncontrolledProviderScope widget cannot be marked as needing to build
+  because the framework is already in the process of building widgets.
+  ```
+
+  Triggered by: `ProviderScheduler.scheduleProviderRefresh` → `_UncontrolledProviderScopeState.scheduleRefresh` → `State.setState` during `_OverlayEntryWidget` build.
+
+  **Root cause**: A Riverpod provider watched by the widget tree is being
+  invalidated synchronously during a build phase (when `_TickerModeState`
+  calls `didUpdateWidget` which triggers `notifyListeners`, which causes
+  Riverpod's `ConsumerStatefulElement._updateTickerMode` to flush a pending
+  provider notification, which invalidates a provider, which tries to call
+  `setState` on `UncontrolledProviderScope` while still in the build).
+
+  **Fix**: Identify the provider that's being invalidated during the
+  Snackbar/overlay build. Likely candidates: `inventoryWithProductProvider`
+  or `inventoryCountProvider`. Wrap the `ref.invalidate()` call in
+  `WidgetsBinding.instance.addPostFrameCallback` or replace with
+  `ref.invalidateSelf()` deferred using `Future.microtask`.
+
+  **Pitfalls & edge cases**:
+  - **Not all `ref.invalidate()` calls are affected**: Only those triggered
+    during an overlay/snackbar build. Audit every `ref.invalidate()` in
+    `product_detail_screen.dart` (lines 368-369 comment acknowledges this).
+  - **`addPostFrameCallback` may already be in effect**: Some calls already
+    use it. Check if the offending invalidate is an omission. Search for
+    `addPostFrameCallback` across the codebase to find existing patterns.
+  - **`Future.microtask` vs `addPostFrameCallback`**: Both defer to after
+    build, but `addPostFrameCallback` is the recommended Riverpad pattern.
+  - **Root cause may be in `NotificationService.scheduleExpiryReminders`**:
+    If the notification plugin internally triggers a widget rebuild during
+    scheduling, that could cascade. Test with a mock notification service
+    to isolate.
+  - **Regression risk**: Deferring invalidations may cause a brief stale
+    state. Ensure the invalidated provider is re-watched and re-resolves
+    on the next frame.
+
 - [ ] **SearchBar/SearchAnchor upgrade** — replace manual `TextField` in
   SearchScreen and HomeScreen with M3 `SearchBar`/`SearchAnchor` for native
   autocomplete and animation.
+- [ ] **Fix issues discovered during emulator run** — address the following
+  warnings and errors from an Android emulator debug session:
+
+  1. **Kotlin Gradle Plugin (KGP) warning**: Plugins `dynamic_color`,
+     `mobile_scanner` apply KGP directly. Future Flutter versions will
+     fail if plugins use KGP instead of Built-in Kotlin. Check each
+     plugin's changelog for a version that supports Built-in Kotlin.
+     If no such version exists, report the issue to the plugin authors.
+  2. **Timezone resolution for raw UTC offsets**: The log shows `[WARN] Raw
+     UTC offset "-03" detected (common on Linux desktop). Falling back to
+     UTC for timezone calculations.` This causes notification scheduling
+     to use UTC instead of the device's actual timezone. Fix in
+     `NotificationService._resolveFromOffset()` — resolve offsets like
+     `-03`, `+05:30`, etc. to their IANA timezone names (e.g. `America/
+     Sao_Paulo`) using the `timezone` package database.
+  3. **Dynamic color not detected**: The log shows `dynamic_color: Dynamic
+     color not detected on this device.` This is expected on emulators
+     (no dynamic colour support). Suppress the log level to `debug`
+     instead of `info` to avoid confusion. Verify on a real device with
+     Android 12+ and a Material You wallpaper.
+  4. **Impeller EGL warnings**: `[ERROR:flutter/impeller/toolkit/egl/
+     egl.cc(56)] EGL Error: Success (12288) in display.cc:161`. These are
+     harmless Impeller init noise. Research whether they indicate a
+     misconfiguration or can be safely ignored. Document in
+     `ARCHITECTURE.md` section 11.7.
+  5. **OFF API "Page temporarily unavailable" errors**: The log shows
+     frequent `WARN Search "query" failed: Exception: JSON expected, server
+     error found: Page temporarily unavailable - Open Food Facts`. These
+     are OFF server-side 503 errors. The client already handles them
+     gracefully (logs warning, shows local results). Verify that the
+     current retry/fallback logic in `OffAdapter.searchProducts()` and
+     `SearchScreen._search()` is optimal — add a 2-second delay before
+     showing "no results" when the API fails, in case local results are
+     still rendering.
+  6. **Contribute Photos button not implemented**: The `OutlinedButton` on
+     `StatsScreen` logs `Contribute Photos tapped — not yet implemented`
+     and does nothing. Decide whether to implement or change the button
+     text to "Coming soon" and wrap in `ComingSoonScreen`.
+  7. **Notification settings toggle doesn't re-request permission**: The
+     settings toggle updates `notificationsEnabled` but does not call
+     `requestPermission()`. Add permission request (or "Go to Settings"
+     dialog if previously denied) when toggling ON.
+  8. **No expiry date skip logs**: `[INFO] No expiry date for item null,
+     skipping reminders`. The log says "item null" because `item.id` is
+     null for newly created items. Fix the log message to show the
+     barcode instead.
+  9. **Skipped 35 frames on startup**: `[INFO] Skipped 35 frames! The
+     application may be doing too much work on its main thread.` This is
+     expected on debug builds during first launch (DB init + product
+     refresh). Verify on a release build; if persists, investigate
+     `_runDatabaseCleanup` and `main.dart` init ordering.
+  10. **`Composing region changed by the framework` after search**: Text
+      input log spam after searching with Japanese/Chinese IME. This is a
+      Flutter framework issue on Android — no action needed.
 - [ ] **Thread strategy audit** — identify heavy work that blocks the UI
   thread: OFF API JSON parsing, CSV import/export processing, image
   encoding. Offload to `Isolate` / `compute()` where beneficial. sqflite
@@ -213,8 +400,371 @@ infrastructure or external server hosting are listed last.
     entries from `last_seen` to `current`, not just the latest.
   - **Inline HTML**: `flutter_markdown` does not support inline HTML
     (`<br/>`, `<div>`). Strip or escape before rendering.
-  - **No `CHANGELOG.md` in release bundle**: Ensure `pubspec.yaml` includes
-    `assets: [CHANGELOG.md]` or switch to a bundled JSON release‑notes file.
+   - **No `CHANGELOG.md` in release bundle**: Ensure `pubspec.yaml` includes
+     `assets: [CHANGELOG.md]` or switch to a bundled JSON release‑notes file.
+
+- [ ] **Fix expiry notifications not triggering** — notifications are not
+  firing for scheduled expiry reminders. Debug and fix the entire scheduling
+  pipeline. Re-use the existing `NotificationService` but fix the root cause
+  of missed or silent notifications.
+
+  **Investigation steps**:
+  1. Verify `FlutterLocalNotificationsPlugin.zonedSchedule()` is being called
+     with correct `TZDateTime` values (check `tz.local` vs `tz.UTC` mismatch).
+  2. Verify `AndroidScheduleMode.inexactAllowWhileIdle` works on Android 12+.
+     Test with `exactAllowWhileIdle` as fallback.
+  3. Verify notification channel ID `'expiry_channel'` is created before
+     scheduling (it must exist in `initialize()` — confirm line 57-62).
+  4. Check `requestPermission()` result on Android 13+ — if user denied,
+     notifications are silently dropped. Show permission rationale dialog.
+  5. Add integration test: schedule a notification 1 minute in the future,
+     advance the device clock, verify notification appears.
+  6. Check that `cancelReminders()` is not called accidentally before the
+     notification fires (check `_openAddEditScreen` flow — it cancels old
+     reminders for the same item on edit, not on add).
+  7. Verify the `payload` field is set in `NotificationDetails` — without
+     payload, the notification tap action is null.
+  8. Log every `zonedSchedule` call with its ID, time, and channel so
+     debugging is possible from device logs.
+
+  **Pitfalls & edge cases**:
+  - **Android 15+ notification cooldown**: May delay or suppress
+    notifications from the same app within a short window. Use
+    importance `High` and category `Alarm`.
+  - **`inexactAllowWhileIdle` vs `exactAllowWhileIdle`**: On Android 12+,
+    exact alarms require `SCHEDULE_EXACT_ALARM` permission. If not granted,
+    `zonedSchedule` fails silently. Check permission before scheduling and
+    fall back to inexact.
+  - **Timezone mismatch**: The `timezone` package may return `tz.UTC` when
+    the device timezone is a raw UTC offset (e.g. `-03`). The log already
+    shows `[WARN] Raw UTC offset "-03" detected`. This causes notifications
+    scheduled at 9 AM UTC to fire at 6 AM local. Fix the timezone resolution
+    in `NotificationService._resolveFromOffset`.
+  - **Notification not showing in debug mode**: Android may suppress
+    notifications from debug builds. Test on a release build or via
+    `adb shell dumpsys notification`.
+  - **Multiple notifications for same item**: If `scheduleExpiryReminders`
+    is called multiple times for the same item (e.g. add, then edit
+    location), old notifications with the same ID are replaced. This is
+    correct — no duplicate.
+  - **Crash when `expiryDate` is malformed**: `DateTime.tryParse` silently
+    returns `null` for invalid dates. The method already checks for
+    `null` expiry. Add a logWarning when parsing fails.
+  - **Device reboot**: `inexactAllowWhileIdle` and `exactAllowWhileIdle`
+    alarms survive reboot. But on Android 12+, `ALARM_SERVICE` may not
+    persist across reboot for scheduled notifications. Test by rebooting
+    device and verifying notification fires.
+  - **App killed by user**: Android may cancel all pending alarms when the
+    app is force-stopped. On next launch, `main.dart` should reschedule
+    all pending notifications. Currently no reschedule-on-boot exists.
+  - **`flutter_local_notifications` version compatibility**: The current
+    version is `^22.0.1`. Check changelog for any known `zonedSchedule`
+    bugs in this version. Reference:
+    https://pub.dev/packages/flutter_local_notifications/changelog — the
+    official package changelog.
+  - **Notification IDs must be unique per item**: Currently uses
+    `item.id?.hashCode ?? item.barcode.hashCode`. If two items have the
+    same barcode (different locations), their notifications may collide.
+    Use `item.id!` directly (already non-null for saved items) and
+    `(item.id! * 2)` / `(item.id! * 2 + 1)` for the two reminders.
+
+- [ ] **Re-engagement notifications (inactivity reminder)** — if the user
+  has not opened the app for 7+ days, send a notification reminding them
+  to check their pantry for expiring items. Configurable interval in
+  Settings (default 7 days).
+
+  **Implementation**:
+  1. Create `ReengagementService` that tracks last-open timestamp in
+     `SharedPreferences`.
+  2. On app launch, check if last open was > N days ago. If so, schedule
+     a one-time notification for the next morning.
+  3. Use `flutter_local_notifications.zonedSchedule()` with a new channel
+     `'reengagement_channel'` (separate from expiry channel for user
+     control — allow muting re-engagement independently).
+  4. Add toggle in Settings: "Remind me to check my pantry" with interval
+     picker (3, 7, 14, 30 days).
+  5. Cancel pending re-engagement notification when user opens the app.
+  6. New ARB strings: `reengagementTitle`, `reengagementBody`,
+     `reengagementEnabled`, `reengagementInterval`.
+
+  **Pitfalls & edge cases**:
+  - **User opens app at 11:59 PM and notification fires at 12:01 AM**:
+    If the user opens the app late at night, the "tomorrow morning"
+    notification could fire within minutes. Cancel any pending
+    re-engagement notification on app open, then schedule the next one
+    only after N days of inactivity.
+  - **Time-of-day scheduling**: Schedule for 9:00 AM local time using
+    `TZDateTime` with `tz.local`. Use `tz.TZDateTime(tz.local, year, month,
+    day, 9, 0)`.
+  - **User disables all notifications**: Check `settings.notificationsEnabled`
+    before scheduling. If disabled, skip entirely.
+  - **First launch**: Do not send re-engagement notification on first
+    launch. Seed `lastOpened` timestamp on first open.
+  - **App uninstall/reinstall**: `SharedPreferences` is cleared on
+    uninstall. Treat as first launch — no notification.
+  - **Multiple re-engagement notifications**: Only schedule one at a time.
+    Cancel existing before scheduling new.
+  - **Battery/Doze mode**: Use `AndroidScheduleMode.inexactAllowWhileIdle`
+    to ensure delivery in Doze. The 9:00 AM window is approximate —
+    acceptable for a reminder.
+  - **Weekend vs weekday**: Some users may prefer weekday-only reminders.
+    Defer to a future enhancement.
+  - **User changes interval in Settings**: Cancel existing re-engagement
+    notification and reschedule with new interval.
+
+- [ ] **Recipe recommendation notifications from pantry** — generate
+  personalised recipe suggestions based on the user's current inventory:
+  "Hey, how about making a chicken sandwich today? You have all the
+  ingredients!" Fetch recipes from a public recipe API (e.g. Spoonacular,
+  Edamam, or TheMealDB) matching available ingredients. Send as a
+  notification (not a push — scheduled locally).
+
+  **Implementation (Phase 1 — notification-only, no recipe UI)**:
+  1. Create `RecipeService` that queries a recipe API with available
+     ingredients from the user's inventory.
+  2. Batch query: send top 3-5 ingredient names as comma-separated list.
+  3. Parse response, pick one recipe at random, format notification with
+     recipe name and a short preview.
+  4. Schedule weekly on Sunday evening (or configurable day/time).
+  5. New ARB strings: `recipeSuggestionTitle`, `recipeSuggestionBody` (with
+     \`{recipeName}\` and \`{itemCount}\` placeholders),
+     `recipeSuggestionEnabled`, `recipeDay`, `recipeTime`.
+  6. Toggle in Settings: "Weekly recipe suggestions" with day-of-week
+     picker and time picker.
+  7. Tap notification → open a recipe detail screen (coming soon).
+
+  **Pitfalls & edge cases**:
+  - **Empty pantry**: If the user has 0 items, skip recipe suggestion
+    entirely. Log reason.
+  - **Few items (1-2)**: Recipe API may not find matches with so few
+    ingredients. Fall back to "quick meals" endpoint or suggest based on
+    recently added items instead.
+  - **Dietary restrictions**: Not implemented in Phase 1 — notifications
+    may suggest recipes with ingredients the user doesn't eat. Add a
+    disclaimer: "This suggestion is based on your inventory. Always check
+    ingredients for dietary suitability."
+  - **Recipe API cost**: Spoonacular offers 150 free queries/day. Edamam
+    offers 5000/month free tier. TheMealDB is free (no API key). Choose
+    TheMealDB for Phase 1 to avoid cost; provide `RecipeApiService`
+    abstraction so the backend can be swapped later.
+  - **Rate limiting**: TheMealDB has no documented rate limit but limit
+    to 1 query per suggestion to be respectful. Cache results.
+  - **Offline**: Skip suggestion when offline. Log warning.
+  - **Notification not actionable (Phase 1)**: Tapping the notification
+    does nothing in Phase 1 (no recipe detail screen yet). Mark as
+    `noAction` in notification payload, or navigate to a ComingSoonView.
+  - **Language**: Recipe names from the API are in English. If the app
+    locale is pt-BR, the notification will mix languages. Defer
+    translation to a future phase.
+  - **Duplicate suggestions**: Avoid suggesting the same recipe twice in a
+    row. Keep a `lastSuggestedRecipe` key in SharedPreferences.
+  - **Perishable ingredients first**: Prioritise recipes that use items
+    expiring soon. Query the recipe API with the user's soon-to-expire
+    items first, then fall back to all items.
+  - **User removes all relevant ingredients before notification fires**:
+    The notification was scheduled with a snapshot of the inventory.
+    Accept this limitation — the recipe may still be useful.
+
+- [ ] **Fix manual product registration & OFF submission flow** — users
+  report being unable to submit products to Open Food Facts, and having
+  issues with product photos (cannot retake, cannot replace, cannot delete
+  a bad photo). Revamp the photo management in `AddProductScreen` and the
+  submission UX.
+
+  **Implementation**:
+  1. **Gallery support** — add `ImageSource.gallery` option to
+     `AddProductScreen._pickImage()` (currently camera-only). Show a
+     bottom sheet with "Take Photo" and "Choose from Gallery".
+  2. **Photo preview + replace** — after taking/selecting a photo, show a
+     full-screen preview. Add a "Retake" / "Replace" button.
+  3. **Photo deletion** — add a delete/X button on each image tile in the
+     add product form to remove a previously taken photo.
+  4. **Submission progress UI** — after tapping "Save", show a progress
+     indicator (e.g. `LinearProgressIndicator` or a bottom sheet with
+     step status: "Submitting metadata...", "Uploading photos (1/3)...")
+     instead of silently fire-and-forgetting via `unawaited()`.
+  5. **Submission retry from failure state** — if submission fails, show
+     a persistent status in the product detail screen (already exists)
+     AND allow the user to retry with the option to change photos before
+     retrying.
+  6. **Photo management from detail screen** — on `ProductDetailScreen`,
+     when viewing a manually-entered product, show the 3 local photos with
+     edit/delete/replace options.
+  7. **Camera permission denied handling** — detect when camera permission
+     is denied and show a helpful dialog with a "Open Settings" button.
+  8. Study the official Open Food Facts app (smooth-app) for UX patterns:
+     - Photo capture flow with retake
+     - Progress indicators during submission
+     - Error states and retry
+     - Image quality guidelines before upload
+     Reference: https://github.com/openfoodfacts/smooth-app
+
+  **Pitfalls & edge cases**:
+  - **Image file size**: Camera photos can be 3-10 MB. Resize/compress
+    before submission (target <1 MB per image). Use `flutter_image_compress`
+    or resize at capture time via `ImagePicker` `maxWidth`/`maxHeight`.
+  - **Storage permissions**: Saving images to app-local directory
+    (`getApplicationDocumentsDirectory()`) does NOT require storage
+    permission. Loading from gallery DOES require `READ_MEDIA_IMAGES`
+    on Android 13+ or `READ_EXTERNAL_STORAGE` on older versions. Handle
+    permission request gracefully.
+  - **Photo deletion deletes local file**: Deleting a photo from the form
+    should also delete the local file from
+    `product_images/<barcode>_<suffix>.jpg`. Add cleanup in
+    `AddProductScreen.dispose()`.
+  - **Submission in progress when user navigates away**: Current
+    `unawaited(_cacheAndSubmit(...))` makes the submission fire-and-forget.
+    If the user pops the screen, submission still runs but errors are
+    logged only. Replace with a `SubmitNotifier` that outlives the screen
+    and shows status via snackbar or a persistent notification.
+  - **OFF API submission quota**: The OFF API may rate-limit submissions.
+    Check `OffAdapter.submitProduct()` response for 429 status. Wait and
+    retry with exponential backoff.
+  - **Image upload ordering**: Currently sequential (front, ingredients,
+    nutrition). If the 2nd or 3rd upload fails, the product is marked
+    `failed` even though metadata and some images succeeded. Consider
+    partial success: mark as `submitted` if metadata + at least 1 image
+    succeeds; report partial failure in the UI.
+  - **Network timeout during upload**: Image uploads can take 10-30s on
+    slow connections. Set a per-image timeout of 60s. Show per-image
+    progress if the SDK supports it.
+  - **Product already exists on OFF**: The `submitProduct()` call may fail
+    if the barcode already exists in the OFF database. Add a check before
+    submission: query OFF for the barcode first. If it exists, show "This
+    product is already in Open Food Facts" instead of submitting.
+  - **Submission of product without photos**: Allow submitting metadata
+    only. The OFF API accepts products with no image fields.
+   - **Photo EXIF data stripping**: Strip EXIF location data from uploaded
+     photos for privacy. Use `flutter_image_compress` or a manual EXIF
+     removal step before upload.
+
+- [ ] **Text extraction from product photos (OCR)** — let users take a
+  photo of a product's nutrition facts table, ingredients list, or barcode,
+  and automatically extract text using on-device OCR. Pre-fill the
+  registration form fields from extracted text, making manual entry much
+  faster.
+
+  **Implementation (Phase 1 — barcode + nutrition OCR)**:
+  1. Add `google_mlkit_text_recognition` or `mlkit` Flutter plugin for
+     on-device text recognition (no network required).
+  2. On `AddProductScreen`, add "Scan nutrition facts" button next to the
+     nutrition photo field. Use OCR to extract: energy, protein, carbs,
+     fat, fiber, salt values from the recognised text.
+  3. Parse numerical values using regex patterns like
+     `(\d+[,.]?\d*)\s*(kcal|kJ|g|mg)` and a mapping of known nutrient
+     names in multiple languages (e.g. `"Energia"`, `"Energi"`,
+     `"Energy"`, `"Proteínas"`, `"Protein"`, etc.).
+  4. Pre-fill the corresponding form fields. Show a confirmation dialog
+     before filling: "Extracted values: Energy 250kcal, Protein 8g. Apply?"
+  5. Also extract the barcode from a photo of the barcode using
+     `MobileScanner` or the existing `image_picker` + ML Kit barcode
+     scanning.
+  6. New ARB strings: `scanNutrition`, `extractFromPhoto`,
+     `extractedValues`, `applyExtracted`, `ocrFailed`, `ocrRetry`.
+
+  **Pitfalls & edge cases**:
+  - **OCR accuracy varies**: Nutrition facts table layout differs by
+    country and brand. The OCR may misread "0" as "O", "1" as "l", or
+    miss decimal separators ("," vs "."). Show extracted values for user
+    confirmation — never silently fill.
+  - **Multi-language nutrient names**: A product sold in Brazil has
+    Portuguese labels, in France French labels. Build a language-agnostic
+    parser using known nutrient synonyms across 10+ languages (EN, PT,
+    FR, ES, DE, IT, NL, PL, SV, DA). Start with EN + PT (app's target
+    languages).
+  - **`google_mlkit_text_recognition` Android/iOS only**: No web or Linux
+    desktop support. Gate OCR feature behind platform check and show a
+    ComingSoonView on unsupported platforms.
+  - **APK size increase**: ML Kit adds ~5-8 MB to the APK (OCR model).
+    Consider downloading the model at runtime via
+    `ModelManager.download()` for on-demand use.
+  - **Permission**: Camera permission is already requested for photo
+    capture. OCR from gallery does not need extra permission.
+  - **Barcode scanning via image**: ML Kit can detect barcodes in images
+    without using `MobileScanner` (which requires the live camera).
+    Add a "Scan barcode from photo" button in the add product form.
+  - **Dark / blurry photos**: OCR accuracy drops significantly on poorly
+    lit or blurry images. Show a warning: "Photo is too dark/blurry for
+    accurate text recognition. Retake?" using image brightness detection.
+  - **Nutrition table in non-standard format**: Some products use
+    horizontal layout (row per nutrient) vs vertical (column). The parser
+    should handle both orientations. Start with horizontal (most common)
+    and detect orientation from recognised text bounding boxes.
+  - **Ingredient list OCR**: Extracting ingredients is harder than
+    nutrition (free-form text, may be in multiple languages). Defer to
+    Phase 2.
+  - **Offline-first**: ML Kit runs entirely on-device. No network needed
+    for text recognition. Perfect for offline-first architecture.
+  - **CPU/GPU usage**: OCR runs on the CPU and may take 1-3 seconds.
+    Show a loading indicator. Use `compute()` isolate to avoid blocking
+    the UI thread.
+  - **Testing**: Mock `InputImage` from file path in unit tests. Use
+    fixture nutrition table images for golden-level integration tests.
+
+- [ ] **In-app issue/error reporting integrated with GitHub Issues** — add
+  a way for users to report bugs, suggest features, and send feedback
+  directly from the app, creating GitHub Issues automatically via the
+  GitHub API.
+
+  **Implementation (Phase 1 — feedback form)**:
+  1. Create `FeedbackScreen` with fields: issue type (bug / feature
+     request / general feedback), title, description, optional screenshot
+     attachment, optional device info (app version, OS version, device
+     model).
+  2. Create `GithubIssueService` that posts to the GitHub Issues API:
+     `POST /repos/{owner}/{repo}/issues`.
+  3. Store a GitHub personal access token (classic with `public_repo` scope)
+     in a secure config or env var. The token must have minimal scope —
+     not the user's personal token, a dedicated bot account token.
+  4. Show confirmation: "Thanks! Your report has been submitted." with
+     the issue URL (so the user can track progress).
+  5. Add a "Report an issue" button in Settings (About section).
+  6. New ARB strings: `reportIssue`, `issueType`, `bugReport`,
+     `featureRequest`, `generalFeedback`, `issueTitle`, `issueDescription`,
+     `attachScreenshot`, `includeDeviceInfo`, `issueSubmitted`,
+     `issueSubmissionFailed`, `issueUrl`.
+
+  **Pitfalls & edge cases**:
+  - **GitHub API token security**: The token must NOT be embedded in the
+    client app binary — anyone can decompile the APK and extract it. Use
+    a backend proxy or GitHub App installation token flow. For Phase 1,
+    accept this limitation (token with `public_repo` scope only, for a
+    bot account with no other privileges). Phase 2: add a lightweight
+    Cloudflare Worker / Firebase Function that proxies the request with
+    the token stored server-side.
+  - **Token expiry**: GitHub PATs can expire. If the token expires, all
+    submissions fail silently. Log the failure and show a generic "Could
+    not submit. Please try again later." message.
+  - **Rate limiting**: GitHub API allows 5000 requests/hour for
+    authenticated requests. For a single-user app, this is ample. But if
+    every app install submits, a bug could trigger thousands of issues.
+    Add client-side rate limiting: max 1 issue per 60 seconds, max 5 per
+    day per device.
+  - **Spam / duplicate issues**: Add a simple title+description hash to
+    SharedPreferences to prevent identical submissions within 24 hours.
+    GitHub doesn't have a built-in dedup.
+  - **No internet**: Queue the issue locally and submit when connectivity
+    returns. Show "Your report will be submitted when you're back online."
+  - **Screenshot attachment**: GitHub Issues API accepts base64-encoded
+    images via `POST /repos/{owner}/{repo}/issues/{issue_number}/comments`
+    with `application/octet-stream`. Or upload to a CDN and include the
+    URL in the issue body. Phase 1: include screenshot as base64 in the
+    issue body (max 10 MB per issue).
+  - **Privacy**: Device info (Android version, model) is not PII but may
+    reveal device fingerprint. Add a checkbox "Include device info" that
+    is ON by default but can be unchecked.
+  - **Repository owner/repo config**: Store `GITHUB_OWNER` and
+    `GITHUB_REPO` in `.env` alongside other configs. Example values:
+    `GITHUB_OWNER=ThiagoAssis`, `GITHUB_REPO=pantry_app`.
+  - **Loading state**: Issue creation via API takes 1-3 seconds. Show a
+    full-screen loading overlay with "Submitting your report..."
+  - **Wrong repo**: If `GITHUB_REPO` is misconfigured, the API returns
+    404. Show "Could not submit — repository not found. Please report
+    manually at https://github.com/{owner}/{repo}/issues."
+  - **OAuth vs PAT**: GitHub Apps with OAuth offer better security but
+    require a web server for the OAuth flow. Defer to Phase 2.
+  - **Legal**: Include a note: "By submitting, you agree that this
+    information will be publicly visible on GitHub."
 
 - [ ] **Product name translations** — pass `lc=<app_locale>` to OFF API v3.
   `product_name` and `ingredients_text` return in the user's locale. Brands
@@ -373,18 +923,23 @@ infrastructure or external server hosting are listed last.
   `NotificationService` for reliability: precise expiry‑day‑at‑morning and
   expiry‑soon (N days before) scheduling, multi‑item grouping,
   per‑inventory notification channels, proper timezone handling, and
-  resilient rescheduling on app boot.
+  resilient rescheduling on app boot. **Prerequisite**: complete "Fix
+  expiry notifications not triggering" (Medium Effort) first, then build
+  on top of the fixed foundation.
 - [ ] **Remake import/export from scratch** — rewrite `CsvService` to
   support: export only cached (API-fetched) products, export a specific
   inventory, export products from a specific inventory, and import via
   `filegate` (platform file picker). Replace the stats-screen picker with a
   streamlined FileGate-based flow.
 - [ ] **Recipe suggestions** — call a recipe API with items expiring this
-  week; suggest meals that use them. Coordinate with Samsung Food meal
-  planning integration below — if both are implemented, Samsung Food can
-  serve as the meal planning UI layer and recipe source, while the generic
-  recipe API provides wider coverage in regions where Samsung Food is
-  unavailable.
+  week; suggest meals that use them. Coordinate with "Recipe notification
+  recommendations from pantry" (Medium Effort). If both are implemented,
+  the notification feature triggers on a schedule, while the full Recipe
+  suggestions tab provides a richer UI with filtering, saving, and meal
+  planning. Coordinate with Samsung Food meal planning integration below
+  — if all three are implemented, Samsung Food can serve as the meal
+  planning UI layer and recipe source, while the generic recipe API
+  provides wider coverage in regions where Samsung Food is unavailable.
 - [ ] **Patrol E2E tests** — real‑device integration tests via
   [Patrol](https://patrol.leancode.co). Uses `patrol_cli` and `patrol`
   dev-dependency. Replace the generic `integration_test/` with
