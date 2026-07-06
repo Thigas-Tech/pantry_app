@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// A thin wrapper around [ScaffoldMessenger] that shows styled snackbars.
@@ -6,8 +7,8 @@ import 'package:pantry_app/utils/logger.dart';
 /// Every method shows a floating snackbar with a short duration, rounded
 /// corners, and a leading icon that matches the severity level.
 ///
-/// See [SnackbarHelper.showInfo], [SnackbarHelper.showWarning], and
-/// [SnackbarHelper.showError] for the individual severity levels.
+/// See [SnackbarHelper.showInfo], [SnackbarHelper.showWarning],
+/// [SnackbarHelper.showError], and [SnackbarHelper.showUndo].
 class SnackbarHelper {
   const SnackbarHelper._();
 
@@ -49,44 +50,41 @@ class SnackbarHelper {
   }
 
   /// Shows an info snackbar with an undo action.
+  ///
+  /// The undo button label is resolved from the app's active locale via
+  /// [AppLocalizations].
   static void showUndo(
     BuildContext context,
     String message,
     VoidCallback onUndo,
   ) {
-    final snackBar = SnackBar(
-      content: Row(
-        children: [
-          const Icon(Icons.info_outline, color: Colors.white),
-          const SizedBox(width: 12),
-          Expanded(child: Text(message)),
-        ],
-      ),
-      action: SnackBarAction(
-        label: 'Undo',
-        onPressed: onUndo,
-      ),
+    _show(
+      context,
+      message: message,
+      icon: Icons.info_outline,
       backgroundColor: Colors.blue.shade700,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      foregroundColor: Colors.white,
+      onUndo: onUndo,
+      undoLabel: AppLocalizations.of(context)!.undo,
       duration: const Duration(seconds: 5),
     );
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackBar);
     logInfo('Info from SnackBar (undo): $message');
   }
 
   /// Internal helper that builds and shows the snackbar.
+  ///
+  /// When [onUndo] and [undoLabel] are both provided, a [SnackBarAction] is
+  /// added to the snackbar. The [duration] defaults to 3 seconds; undo
+  /// snackbars typically use 5 seconds.
   static void _show(
     BuildContext context, {
     required String message,
     required IconData icon,
     required Color backgroundColor,
     required Color foregroundColor,
+    VoidCallback? onUndo,
+    String? undoLabel,
+    Duration duration = const Duration(seconds: 3),
   }) {
     final snackBar = SnackBar(
       content: Row(
@@ -96,12 +94,15 @@ class SnackbarHelper {
           Expanded(child: Text(message)),
         ],
       ),
+      action: onUndo != null
+          ? SnackBarAction(label: undoLabel!, onPressed: onUndo)
+          : null,
       backgroundColor: backgroundColor,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      duration: const Duration(seconds: 3),
+      duration: duration,
     );
 
     ScaffoldMessenger.of(context)
