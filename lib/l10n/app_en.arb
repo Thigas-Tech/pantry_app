@@ -317,6 +317,8 @@
     }
   },
   "noCategories": "No categories yet",
+  "statsEmptyTitle": "No items to analyze",
+  "statsEmptySubtitle": "Add products to your pantry to see statistics here.",
   "addedThisWeekLabel": "This week",
   "addedThisMonthLabel": "This month",
   "productDataUnavailable": "Product data unavailable — pull to refresh when online",

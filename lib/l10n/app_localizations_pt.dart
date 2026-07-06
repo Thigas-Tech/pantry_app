@@ -583,6 +583,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noCategories => 'Nenhuma categoria';
 
   @override
+  String get statsEmptyTitle => 'No items to analyze';
+
+  @override
+  String get statsEmptySubtitle => 'Add products to your pantry to see statistics here.';
+
+  @override
   String get addedThisWeekLabel => 'Esta semana';
 
   @override

@@ -203,7 +203,8 @@ class ProductDao {
       GROUP BY nutriscore_grade
     ''');
     return {
-      for (final r in rows) r['nutriscore_grade']! as String: r['cnt']! as int,
+      for (final r in rows)
+        r['nutriscore_grade'] as String? ?? '': r['cnt'] as int? ?? 0,
     };
   }
 
@@ -232,7 +233,9 @@ class ProductDao {
       FROM products
       GROUP BY source
     ''');
-    return {for (final r in rows) r['source']! as String: r['cnt']! as int};
+    return {
+      for (final r in rows) r['source'] as String? ?? '': r['cnt'] as int? ?? 0,
+    };
   }
 
   /// Returns counts of local photos attached to products.
@@ -253,10 +256,10 @@ class ProductDao {
     ''');
     final r = rows.first;
     return {
-      'total': r['total']! as int,
-      'nutrition': r['nutrition']! as int,
-      'ingredients': r['ingredients']! as int,
-      'product': r['product']! as int,
+      'total': r['total'] as int? ?? 0,
+      'nutrition': r['nutrition'] as int? ?? 0,
+      'ingredients': r['ingredients'] as int? ?? 0,
+      'product': r['product'] as int? ?? 0,
     };
   }
 
@@ -283,10 +286,10 @@ class ProductDao {
     ''');
     final r = rows.first;
     return {
-      'total': r['total']! as int,
-      'nutrition': r['nutrition']! as int,
-      'ingredients': r['ingredients']! as int,
-      'product': r['product']! as int,
+      'total': r['total'] as int? ?? 0,
+      'nutrition': r['nutrition'] as int? ?? 0,
+      'ingredients': r['ingredients'] as int? ?? 0,
+      'product': r['product'] as int? ?? 0,
     };
   }
 

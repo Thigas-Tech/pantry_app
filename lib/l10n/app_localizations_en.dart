@@ -583,6 +583,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCategories => 'No categories yet';
 
   @override
+  String get statsEmptyTitle => 'No items to analyze';
+
+  @override
+  String get statsEmptySubtitle => 'Add products to your pantry to see statistics here.';
+
+  @override
   String get addedThisWeekLabel => 'This week';
 
   @override

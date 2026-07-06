@@ -1164,6 +1164,18 @@ abstract class AppLocalizations {
   /// **'No categories yet'**
   String get noCategories;
 
+  /// No description provided for @statsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No items to analyze'**
+  String get statsEmptyTitle;
+
+  /// No description provided for @statsEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add products to your pantry to see statistics here.'**
+  String get statsEmptySubtitle;
+
   /// No description provided for @addedThisWeekLabel.
   ///
   /// In en, this message translates to:

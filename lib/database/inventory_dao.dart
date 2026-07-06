@@ -251,7 +251,10 @@ class InventoryDao {
     ''',
       [inventoryId],
     );
-    return {for (final r in rows) r['location']! as String: r['cnt']! as int};
+    return {
+      for (final r in rows)
+        r['location'] as String? ?? 'unknown': r['cnt'] as int? ?? 0,
+    };
   }
 
   /// Returns counts grouped by expiry status.
@@ -282,7 +285,8 @@ class InventoryDao {
       [expiringSoonDays, inventoryId],
     );
     return {
-      for (final r in rows) r['status']! as String: r['cnt']! as int,
+      for (final r in rows)
+        r['status'] as String? ?? 'good': r['cnt'] as int? ?? 0,
     };
   }
 

@@ -94,6 +94,11 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
     every reference. For plain text examples that aren't cross-referenceable
     (e.g. markdown format samples), use 4-space indented code blocks instead of
     triple backticks.
+15. **No `!` on SQL query results** — always use `??` fallback for
+    database row values. SQLite aggregate functions (SUM, AVG, MAX,
+    MIN) return NULL on empty result sets. Use `as T? ?? defaultValue`
+    instead of `!`. The `count()` methods already follow this pattern
+    via `Sqflite.firstIntValue(...) ?? 0`.
 
 ### Code style
 - 80-character line limit (enforced by lint)

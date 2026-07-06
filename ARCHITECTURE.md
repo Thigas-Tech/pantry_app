@@ -82,6 +82,13 @@ Every DAO method receives a `Database` instance so it can be tested independentl
 migrations, and delegates CRUD to the DAOs.  It is the **only public entry
 point** for database access in production code.
 
+**Null safety rule**: All row value access MUST use null-coalescing
+(`as T? ?? defaultValue`) instead of the null-check operator (`!`).
+Aggregate functions (SUM, AVG) return NULL when the result set is empty,
+and schema columns without NOT NULL constraints can contain NULL values.
+The `count()` methods set the precedent with
+`Sqflite.firstIntValue(...) ?? 0`.
+
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
