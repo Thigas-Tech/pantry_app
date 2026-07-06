@@ -56,7 +56,10 @@ jobs:
         working-directory: code
       - name: Run Flutter ${{ matrix.category }} tests
         if: matrix.category != 'static'
-        run: flutter test --no-pub --concurrency=2 --coverage --coverage-path=./coverage/lcov.${{ matrix.category }}.info test/${{ matrix.category }}s
+        run: >
+          flutter test --no-pub --concurrency=2 --coverage
+          --coverage-path=./coverage/lcov.${{ matrix.category }}.info
+          ${{ matrix.category == 'unit' && 'test/config_test.dart test/database test/models test/providers test/services test/utils' || 'test/widgets test/screens' }}
         working-directory: code
       - name: Upload code coverage to GitHub
         if: matrix.category != 'static'
