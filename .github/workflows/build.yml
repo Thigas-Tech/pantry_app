@@ -38,6 +38,18 @@ jobs:
       - name: Get Flutter packages
         run: flutter pub get
         working-directory: code
+      - name: Inject environment
+        working-directory: code
+        env:
+          OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
+          OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+        run: |
+          ./scripts/inject_env.sh \
+            "${OFF_USER_ID:-}" \
+            "${OFF_PASSWORD:-}" \
+            "${CONTACT_EMAIL:-pantry-app@example.com}" \
+            "false"
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: flutter analyze --fatal-infos --fatal-warnings

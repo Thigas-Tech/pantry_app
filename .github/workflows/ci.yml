@@ -38,6 +38,11 @@ jobs:
       - name: Get Flutter packages
         run: flutter pub get
         working-directory: code
+      - name: Create .env for CI
+        run: |
+          echo "OFF_USER_ID=ci" > code/.env
+          echo "OFF_PASSWORD=ci" >> code/.env
+          echo "CONTACT_EMAIL=ci@pantry-app.dev" >> code/.env
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: flutter analyze --fatal-infos --fatal-warnings
