@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-  "appTitle": "Pantry",
   "myPantry": "My Pantry",
   "settings": "Settings",
   "scanBarcode": "Scan Barcode",
@@ -51,8 +50,6 @@
   "pantryStats": "Pantry Stats",
   "totalProducts": "Total products",
   "inventoryItems": "Inventory items",
-  "exportCsv": "Export as CSV",
-  "importCsv": "Import CSV",
   "createNewPantry": "Create new pantry",
   "newPantry": "New pantry",
   "renamePantry": "Rename pantry",
@@ -70,7 +67,6 @@
   "cameraTooltip": "Scan with camera",
   "typeOrPasteBarcode": "Type or paste a barcode",
   "submit": "Submit",
-  "alignBarcode": "Align the barcode inside the frame",
   "itemUpdated": "Item updated.",
   "itemAdded": "Item added to pantry.",
   "itemRemoved": "Item removed from pantry.",
@@ -100,17 +96,11 @@
   "viewOnOpenFoodFacts": "View on Open Food Facts",
   "couldNotOpenLink": "Could not open the link.",
   "nutrient": "Nutrient",
-  "inLocation": "in",
-  "noExpiry": "No expiry",
   "deleteItemTitle": "Delete item?",
   "deleteItemContent": "This cannot be undone.",
   "delete": "Delete",
   "failedToLoadInventoryItems": "Failed to load inventory items.",
   "enterPositiveNumber": "Enter a positive number",
-  "csvImportComingSoon": "CSV import coming soon.",
-  "noDataToExport": "No data to export.",
-  "pantryExport": "Pantry Export",
-  "exportFailed": "Export failed",
   "notificationsEnabled": "Notifications enabled.",
   "notificationsDisabled": "Notifications disabled.",
   "themeChanged": "Theme: {theme}",
@@ -155,7 +145,6 @@
   "nameLabel": "Name",
   "create": "Create",
   "rename": "Rename",
-  "delete": "Delete",
   "inventoryCreated": "\"{name}\" created.",
   "@inventoryCreated": {
     "placeholders": {
@@ -212,7 +201,6 @@
       }
     }
   },
-  "expiringSoon": "Expiring soon",
   "expiringToday": "Food expiring today",
   "expiresTomorrow": "{barcode} expires tomorrow",
   "@expiresTomorrow": {
@@ -241,36 +229,8 @@
   "confirmExitScannerHint": "The current scan will be discarded.",
   "stay": "Stay",
   "leave": "Leave",
-  "importCsvSuccess": "Import complete — {products} products, {items} items.",
-  "@importCsvSuccess": {
-    "placeholders": {
-      "products": {
-        "type": "int",
-        "example": "5"
-      },
-      "items": {
-        "type": "int",
-        "example": "7"
-      }
-    }
-  },
-  "importCsvFailed": "CSV import failed: {error}",
-  "@importCsvFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String",
-        "example": "Invalid format"
-      }
-    }
-  },
-  "customUnit": "Custom...",
-  "customLocation": "Custom...",
   "enterCustomUnit": "Enter custom unit",
   "enterCustomLocation": "Enter custom location",
-  "close": "Close",
-  "exportedToShare": "Export ready — share to save.",
-  "errorLoadingInventory": "Failed to load inventory.",
-  "items": "items",
   "enterProductDetails": "Enter product details",
   "productNameLabel": "Product name",
   "requiredField": "This field is required",
@@ -281,7 +241,6 @@
   "ingredientsImage": "Ingredients list photo",
   "productImage": "Product photo",
   "saveProduct": "Save product",
-  "submittingToOff": "Will be submitted to Open Food Facts when online",
   "offlineWarning": "You are offline — adding product manually",
   "nutriscoreExplanation": "Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.",
   "nutriscoreNotApplicable": "Nutri-Score is not applicable to this product ({category}).",
@@ -300,8 +259,6 @@
   "submissionSubmitted": "Submitted to Open Food Facts",
   "submissionFailed": "Submission to Open Food Facts failed",
   "submissionNotSubmitted": "Not submitted to Open Food Facts",
-  "submitToOff": "Submit to Open Food Facts",
-  "submittingToOffTitle": "Submitting…",
   "submissionSuccess": "Product submitted to Open Food Facts.",
   "submissionError": "Failed to submit product. Tap to retry.",
   "navHome": "Home",
@@ -344,5 +301,7 @@
       }
     }
   },
-  "whatsNewDismiss": "Got it"
+  "whatsNewDismiss": "Got it",
+  "settingsAbout": "About",
+  "comingSoonDescription": "This feature will be available soon."
 }

@@ -185,15 +185,17 @@ User scans barcode
 
 ```
 HomeScreen
-├── AppBar (title, switcher, stats, settings)
+├── AppBar (title, switcher, settings)
 ├── ErrorView (loading/error states)
 ├── EmptyPantry (empty state with scan prompt)
 └── _InventoryList
-    ├── SearchBar
+    ├── SearchBar (Autocomplete with image thumbnails)
+    ├── StockCountBadges (horizontal ListView.builder)
+    ├── CategoryFilterChips (horizontal ListView.builder)
     ├── RefreshIndicator (pull-to-refresh)
-    └── ListView
+    └── ListView.builder (RepaintBoundary on each card)
         ├── SectionHeader (expired / expiring soon / good)
-        └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot + label)
+        └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot)
 
 ProductDetailScreen
 ├── AppBar (name, OFF link)
@@ -211,7 +213,14 @@ AddProductScreen (manual entry when offline or barcode not found)
 ├── Ingredients (multi-line)
 └── Image capture (nutrition table, ingredients, product photos)
 
-ScannerScreen
+SearchScreen
+├── SearchBar (300ms debounce timer)
+├── ResultTile (product image or CircleAvatar fallback)
+├── Swipe-to-add (Dismissible, start-to-end)
+└── Long-press menu (add to inventory, copy barcode)
+
+StatsScreen (placeholder)
+└── ComingSoonScreen (construction icon, title, subtitle)
 ├── PopScope (confirmation dialog on back)
 ├── _MobileScannerView (camera + ScannerOverlayPainter)
 └── _ManualEntryView (text field + submit button)
@@ -221,7 +230,9 @@ SettingsScreen
 ├── Notifications switch
 ├── Data retention dialog (days input)
 ├── Expiring-soon threshold dialog
-└── Manage Inventories link
+├── Manage Inventories link
+├── Flush cache (API products + image cache)
+└── About (What's New changelog sheet)
 ```
 
 ---
@@ -318,9 +329,10 @@ is ~30% smaller than JPEG at equivalent quality, reducing network transfer
 and storage footprint. Cached images are served instantly — no network calls
 on subsequent views.
 
-Future enhancement: request images at display resolution (width ×
-`devicePixelRatio`) instead of full-size, reducing memory usage and decode
-time on the UI thread.
+All `Image.network` calls set `cacheWidth` and `cacheHeight` at display
+resolution (display dp × `devicePixelRatio`) to prevent full-resolution
+decode. Inventory card and search thumbnails are 40×40 dp; product detail
+photos are 200 dp tall × screen-width wide.
 
 ### 11.3 Offline-first architecture
 
@@ -338,8 +350,11 @@ products are never re‑fetched.
 - Animate repeatedly (e.g., badge transitions, progress indicators)
 - Are embedded in a scrolling parent but have static content
 
-This prevents the entire screen from being repainted when only a small part
-changes, reducing GPU work on the raster thread.
+In v1.0.0 each `InventoryCard` in the main inventory `ListView.builder` is
+wrapped in `RepaintBoundary` with `ValueKey(item.id)`. This prevents parent
+scroll events from triggering card repaints and enables efficient widget
+recycling. Cards that load network images or toggle selection do not
+force their siblings to repaint.
 
 ### 11.5 Thread strategy
 

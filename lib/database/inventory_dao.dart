@@ -220,59 +220,6 @@ class InventoryDao {
     }
   }
 
-  /// Returns all inventory rows joined with product nutrition for CSV export.
-  ///
-  /// Uses a `LEFT JOIN` on `products` so export works even after a cache
-  /// flush. Product columns will be `NULL` for orphaned inventory items.
-  Future<List<Map<String, dynamic>>> exportData(
-    Database db, {
-    required int inventoryId,
-  }) async {
-    try {
-      final result = await db.rawQuery(
-        '''
-        SELECT
-          products.name AS product_name,
-          products.brand,
-          products.category,
-          inventory.barcode,
-          inventory.quantity,
-          inventory.unit,
-          inventory.expiry_date,
-          inventory.location,
-          inventory.notes,
-          inventory.date_added,
-          products.serving_size,
-          products.nutriscore_grade,
-          products.nutriscore_not_applicable_category,
-          products.source,
-          products.nutrition_image_path,
-          products.ingredients_image_path,
-          products.product_image_path,
-          products.submission_status,
-          products.energy_kcal,
-          products.protein_g,
-          products.carbs_g,
-          products.fat_g,
-          products.fiber_g,
-          products.salt_g,
-          inventories.name AS inventory_name
-        FROM inventory
-        LEFT JOIN products ON inventory.barcode = products.barcode
-        INNER JOIN inventories ON inventory.inventory_id = inventories.id
-        WHERE inventory.inventory_id = ?
-        ORDER BY inventory.expiry_date ASC
-      ''',
-        [inventoryId],
-      );
-      logInfo('Export data: ${result.length} rows');
-      return result;
-    } on Exception catch (e) {
-      logError('Error fetching export data: $e');
-      rethrow;
-    }
-  }
-
   /// Returns the total number of rows in the inventory table.
   Future<int> count(Database db, {int? inventoryId}) async {
     if (inventoryId != null) {

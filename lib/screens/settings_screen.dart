@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/database/database_helper.dart';
@@ -9,9 +10,11 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
+import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/whats_new_sheet.dart';
 
 /// A screen where the user can adjust application preferences.
 ///
@@ -112,9 +115,43 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+          ExpansionTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(l10n.settingsAbout),
+            children: [
+              ListTile(
+                title: Text(l10n.whatsNewTitle),
+                subtitle: Text(l10n.whatsNewDismiss),
+                onTap: () => _showWhatsNew(context),
+              ),
+            ],
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _showWhatsNew(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final raw = await rootBundle.loadString('CHANGELOG.md');
+      if (!context.mounted) return;
+      final parser = ChangelogParser();
+      final allEntries = parser.parse(raw);
+
+      if (allEntries.isEmpty) {
+        SnackbarHelper.showInfo(context, l10n.whatsNewDismiss);
+        return;
+      }
+
+      if (!context.mounted) return;
+      await showWhatsNewSheet(context, allEntries);
+    } on Exception catch (e) {
+      logError('Failed to show changelog from settings: $e');
+      if (context.mounted) {
+        SnackbarHelper.showError(context, l10n.flushCacheFailed);
+      }
+    }
   }
 
   Future<void> _showThemeDialog(BuildContext context, WidgetRef ref) async {

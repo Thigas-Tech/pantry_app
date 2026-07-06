@@ -124,11 +124,11 @@ infrastructure or external server hosting are listed last.
   Detect via `MediaQuery.platformBrightness` at launch.
 - [ ] **SegmentedButton** — replace `FilterChip` row on home screen with
   `SegmentedButton` for multi-category selection.
-- [ ] **Autocomplete** — add autocomplete suggestions to the home screen
+- [x] **Autocomplete** — add autocomplete suggestions to the home screen
   search bar based on cached product names.
-- [ ] **InteractiveViewer** — enable pinch-to-zoom on product
+- [x] **InteractiveViewer** — enable pinch-to-zoom on product
   nutrition/ingredient photos.
-- [ ] **ExpansionTile in settings** — group related settings (notifications,
+- [x] **ExpansionTile in settings** — group related settings (notifications,
   data retention) under `ExpansionTile`.
 - [ ] **DropdownMenu** — replace `PopupMenuButton` for inventory switcher
   with M3 `DropdownMenu`.
@@ -168,7 +168,7 @@ infrastructure or external server hosting are listed last.
 
 ### Feature development
 
-- [ ] **Changelog at startup** — detect app update via existing
+- [x] **Changelog at startup** — detect app update via existing
   `_handleAppUpdate()` scaffolding (`package_info_plus` +
   `SharedPreferences` `app_version` key). On first launch after update, show
   a `WhatsNewDialog` or bottom sheet with new entries from `CHANGELOG.md`.

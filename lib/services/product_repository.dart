@@ -183,13 +183,6 @@ class ProductRepository {
     return _db.getInventoryCount(inventoryId: inventoryId);
   }
 
-  /// Returns export data (joined with product info) for a given [inventoryId].
-  Future<List<Map<String, dynamic>>> getExportData({
-    required int inventoryId,
-  }) {
-    return _db.getExportData(inventoryId: inventoryId);
-  }
-
   /// Inserts a product directly into the local cache.
   ///
   /// Used when the user manually creates a product (e.g., via the

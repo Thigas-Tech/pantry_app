@@ -252,17 +252,6 @@ void main() {
       final count = await repository.getInventoryCount(inventoryId: 1);
       expect(count, 5);
     });
-
-    test('getExportData delegates to DB', () async {
-      final rows = <Map<String, dynamic>>[
-        {'barcode': '123', 'product_name': 'Milk'},
-      ];
-      when(
-        () => mockDb.getExportData(inventoryId: 1),
-      ).thenAnswer((_) async => rows);
-      final result = await repository.getExportData(inventoryId: 1);
-      expect(result, rows);
-    });
   });
 
   group('refreshInventoryProducts', () {

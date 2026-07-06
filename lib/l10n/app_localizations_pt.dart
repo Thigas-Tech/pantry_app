@@ -9,9 +9,6 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
-  String get appTitle => 'Despensa';
-
-  @override
   String get myPantry => 'Minha Despensa';
 
   @override
@@ -162,12 +159,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get inventoryItems => 'Itens do estoque';
 
   @override
-  String get exportCsv => 'Exportar CSV';
-
-  @override
-  String get importCsv => 'Importar CSV';
-
-  @override
   String get createNewPantry => 'Criar nova despensa';
 
   @override
@@ -195,9 +186,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get submit => 'Enviar';
-
-  @override
-  String get alignBarcode => 'Alinhe o código de barras dentro da moldura';
 
   @override
   String get itemUpdated => 'Item atualizado.';
@@ -261,12 +249,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get nutrient => 'Nutriente';
 
   @override
-  String get inLocation => 'em';
-
-  @override
-  String get noExpiry => 'Sem validade';
-
-  @override
   String get deleteItemTitle => 'Excluir item?';
 
   @override
@@ -280,18 +262,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get enterPositiveNumber => 'Digite um número positivo';
-
-  @override
-  String get csvImportComingSoon => 'Importação de CSV em breve.';
-
-  @override
-  String get noDataToExport => 'Nenhum dado para exportar.';
-
-  @override
-  String get pantryExport => 'Exportar Despensa';
-
-  @override
-  String get exportFailed => 'Falha na exportação';
 
   @override
   String get notificationsEnabled => 'Notificações ativadas.';
@@ -436,38 +406,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get leave => 'Sair';
 
   @override
-  String importCsvSuccess(int products, int items) {
-    return 'Importação concluída — $products produtos, $items itens.';
-  }
-
-  @override
-  String importCsvFailed(String error) {
-    return 'Falha na importação CSV: $error';
-  }
-
-  @override
-  String get customUnit => 'Personalizado...';
-
-  @override
-  String get customLocation => 'Personalizado...';
-
-  @override
   String get enterCustomUnit => 'Digite a unidade personalizada';
 
   @override
   String get enterCustomLocation => 'Digite o local personalizado';
-
-  @override
-  String get close => 'Fechar';
-
-  @override
-  String get exportedToShare => 'Exportação pronta — compartilhe pra salvar.';
-
-  @override
-  String get errorLoadingInventory => 'Não foi possível carregar o estoque.';
-
-  @override
-  String get items => 'itens';
 
   @override
   String get enterProductDetails => 'Preencha os dados do produto';
@@ -498,9 +440,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get saveProduct => 'Salvar produto';
-
-  @override
-  String get submittingToOff => 'Será enviado pro Open Food Facts quando houver conexão';
 
   @override
   String get offlineWarning => 'Você está offline — adicionando produto manualmente';
@@ -542,12 +481,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get submissionNotSubmitted => 'Não enviado pro Open Food Facts';
-
-  @override
-  String get submitToOff => 'Enviar pro Open Food Facts';
-
-  @override
-  String get submittingToOffTitle => 'Enviando…';
 
   @override
   String get submissionSuccess => 'Produto enviado pro Open Food Facts.';
@@ -616,6 +549,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get whatsNewDismiss => 'Entendi';
+
+  @override
+  String get settingsAbout => 'Sobre';
+
+  @override
+  String get comingSoonDescription => 'Este recurso estará disponível em breve.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -623,9 +562,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   AppLocalizationsPtBr(): super('pt_BR');
 
   @override
-  String get appTitle => 'Despensa';
-
-  @override
   String get myPantry => 'Minha Despensa';
 
   @override
@@ -776,12 +712,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get inventoryItems => 'Itens do estoque';
 
   @override
-  String get exportCsv => 'Exportar CSV';
-
-  @override
-  String get importCsv => 'Importar CSV';
-
-  @override
   String get createNewPantry => 'Criar nova despensa';
 
   @override
@@ -809,9 +739,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get submit => 'Enviar';
-
-  @override
-  String get alignBarcode => 'Alinhe o código de barras dentro da moldura';
 
   @override
   String get itemUpdated => 'Item atualizado.';
@@ -875,12 +802,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get nutrient => 'Nutriente';
 
   @override
-  String get inLocation => 'em';
-
-  @override
-  String get noExpiry => 'Sem validade';
-
-  @override
   String get deleteItemTitle => 'Excluir item?';
 
   @override
@@ -894,18 +815,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get enterPositiveNumber => 'Digite um número positivo';
-
-  @override
-  String get csvImportComingSoon => 'Importação de CSV em breve.';
-
-  @override
-  String get noDataToExport => 'Nenhum dado para exportar.';
-
-  @override
-  String get pantryExport => 'Exportar Despensa';
-
-  @override
-  String get exportFailed => 'Falha na exportação';
 
   @override
   String get notificationsEnabled => 'Notificações ativadas.';
@@ -1050,38 +959,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get leave => 'Sair';
 
   @override
-  String importCsvSuccess(int products, int items) {
-    return 'Importação concluída — $products produtos, $items itens.';
-  }
-
-  @override
-  String importCsvFailed(String error) {
-    return 'Falha na importação CSV: $error';
-  }
-
-  @override
-  String get customUnit => 'Personalizado...';
-
-  @override
-  String get customLocation => 'Personalizado...';
-
-  @override
   String get enterCustomUnit => 'Digite a unidade personalizada';
 
   @override
   String get enterCustomLocation => 'Digite o local personalizado';
-
-  @override
-  String get close => 'Fechar';
-
-  @override
-  String get exportedToShare => 'Exportação pronta — compartilhe pra salvar.';
-
-  @override
-  String get errorLoadingInventory => 'Não foi possível carregar o estoque.';
-
-  @override
-  String get items => 'itens';
 
   @override
   String get enterProductDetails => 'Preencha os dados do produto';
@@ -1112,9 +993,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get saveProduct => 'Salvar produto';
-
-  @override
-  String get submittingToOff => 'Será enviado pro Open Food Facts quando houver conexão';
 
   @override
   String get offlineWarning => 'Você está offline — adicionando produto manualmente';
@@ -1156,12 +1034,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get submissionNotSubmitted => 'Não enviado pro Open Food Facts';
-
-  @override
-  String get submitToOff => 'Enviar pro Open Food Facts';
-
-  @override
-  String get submittingToOffTitle => 'Enviando…';
 
   @override
   String get submissionSuccess => 'Produto enviado pro Open Food Facts.';
@@ -1230,4 +1102,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get whatsNewDismiss => 'Entendi';
+
+  @override
+  String get settingsAbout => 'Sobre';
+
+  @override
+  String get comingSoonDescription => 'Este recurso estará disponível em breve.';
 }

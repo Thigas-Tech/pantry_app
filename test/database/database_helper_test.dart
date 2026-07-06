@@ -276,48 +276,6 @@ void main() {
     });
   });
 
-  group('getExportData', () {
-    test('returns export data scoped to inventory', () async {
-      /// Export data includes product nutrition, brand, category, and
-      /// inventory name.
-      final workId = await db.createInventory('Work');
-      await db.insertProduct(
-        const Product(
-          barcode: 'p1',
-          name: 'Prod1',
-          brand: 'Brand1',
-          category: 'Cat1',
-          energyKcal: 100,
-        ),
-      );
-      await db.insertInventoryItem(
-        InventoryItem(
-          barcode: 'p1',
-          quantity: 5,
-          expiryDate: '2026-06-01',
-          location: 'fridge',
-          notes: 'note',
-          dateAdded: 123456789,
-          inventoryId: workId, // place it in the Work inventory
-        ),
-      );
-
-      final rows = await db.getExportData(inventoryId: workId);
-      expect(rows.length, 1);
-      expect(rows.first['product_name'], 'Prod1');
-      expect(rows.first['brand'], 'Brand1');
-      expect(rows.first['category'], 'Cat1');
-      expect(rows.first['barcode'], 'p1');
-      expect(rows.first['quantity'], 5);
-      expect(rows.first['unit'], 'pieces');
-      expect(rows.first['expiry_date'], '2026-06-01');
-      expect(rows.first['location'], 'fridge');
-      expect(rows.first['notes'], 'note');
-      expect(rows.first['date_added'], 123456789);
-      expect(rows.first['energy_kcal'], 100);
-      expect(rows.first['inventory_name'], 'Work');
-    });
-  });
   group('Migration v1 → v2', () {
     test('upgrades a v1 database correctly', () async {
       // Create a temporary file for the v1 database.

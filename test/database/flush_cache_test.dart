@@ -97,35 +97,6 @@ void main() {
       expect((await db.getProduct('m'))!.name, 'M');
       expect(await db.getProductCount(), 1);
     });
-
-    test('exportData uses LEFT JOIN and survives flush', () async {
-      await db.insertProduct(
-        const Product(barcode: 'api1', name: 'API One', energyKcal: 100),
-      );
-      await db.insertInventoryItem(
-        const InventoryItem(barcode: 'api1', quantity: 2),
-      );
-
-      // Before flush: export data has product info.
-      var exportRows = await db.getExportData(inventoryId: 1);
-      expect(exportRows.length, 1);
-      expect(exportRows.first['product_name'], 'API One');
-      expect(exportRows.first['energy_kcal'], 100);
-
-      // Flush.
-      await db.clearCachedProducts();
-
-      // After flush: export still returns the row with null product fields.
-      exportRows = await db.getExportData(inventoryId: 1);
-      expect(
-        exportRows.length,
-        1,
-        reason: 'export must return orphaned items via LEFT JOIN',
-      );
-      expect(exportRows.first['product_name'], isNull);
-      expect(exportRows.first['energy_kcal'], isNull);
-      expect(exportRows.first['barcode'], 'api1');
-    });
   });
 
   group('re-fetch after flush (simulating refreshInventoryProducts)', () {

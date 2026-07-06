@@ -1,6 +1,5 @@
 {
   "@@locale": "pt",
-  "appTitle": "Despensa",
   "myPantry": "Minha Despensa",
   "settings": "Configurações",
   "scanBarcode": "Escanear Código",
@@ -51,8 +50,6 @@
   "pantryStats": "Estatísticas",
   "totalProducts": "Total de produtos",
   "inventoryItems": "Itens do estoque",
-  "exportCsv": "Exportar CSV",
-  "importCsv": "Importar CSV",
   "createNewPantry": "Criar nova despensa",
   "newPantry": "Nova despensa",
   "renamePantry": "Renomear despensa",
@@ -70,7 +67,6 @@
   "cameraTooltip": "Escanear com a câmera",
   "typeOrPasteBarcode": "Digite ou cole um código de barras",
   "submit": "Enviar",
-  "alignBarcode": "Alinhe o código de barras dentro da moldura",
   "itemUpdated": "Item atualizado.",
   "itemAdded": "Item adicionado à despensa.",
   "itemRemoved": "Item removido da despensa.",
@@ -100,17 +96,11 @@
   "viewOnOpenFoodFacts": "Ver no Open Food Facts",
   "couldNotOpenLink": "Não foi possível abrir o link.",
   "nutrient": "Nutriente",
-  "inLocation": "em",
-  "noExpiry": "Sem validade",
   "deleteItemTitle": "Excluir item?",
   "deleteItemContent": "Isso não pode ser desfeito.",
   "delete": "Excluir",
   "failedToLoadInventoryItems": "Não foi possível carregar os itens do estoque.",
   "enterPositiveNumber": "Digite um número positivo",
-  "csvImportComingSoon": "Importação de CSV em breve.",
-  "noDataToExport": "Nenhum dado para exportar.",
-  "pantryExport": "Exportar Despensa",
-  "exportFailed": "Falha na exportação",
   "notificationsEnabled": "Notificações ativadas.",
   "notificationsDisabled": "Notificações desativadas.",
   "themeChanged": "Tema: {theme}",
@@ -239,36 +229,8 @@
   "confirmExitScannerHint": "A leitura atual será descartada.",
   "stay": "Ficar",
   "leave": "Sair",
-  "importCsvSuccess": "Importação concluída — {products} produtos, {items} itens.",
-  "@importCsvSuccess": {
-    "placeholders": {
-      "products": {
-        "type": "int",
-        "example": "5"
-      },
-      "items": {
-        "type": "int",
-        "example": "7"
-      }
-    }
-  },
-  "importCsvFailed": "Falha na importação CSV: {error}",
-  "@importCsvFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String",
-        "example": "Formato inválido"
-      }
-    }
-  },
-  "customUnit": "Personalizado...",
-  "customLocation": "Personalizado...",
   "enterCustomUnit": "Digite a unidade personalizada",
   "enterCustomLocation": "Digite o local personalizado",
-  "close": "Fechar",
-  "exportedToShare": "Exportação pronta — compartilhe pra salvar.",
-  "errorLoadingInventory": "Não foi possível carregar o estoque.",
-  "items": "itens",
   "enterProductDetails": "Preencha os dados do produto",
   "productNameLabel": "Nome do produto",
   "requiredField": "Campo obrigatório",
@@ -279,7 +241,6 @@
   "ingredientsImage": "Foto da lista de ingredientes",
   "productImage": "Foto do produto",
   "saveProduct": "Salvar produto",
-  "submittingToOff": "Será enviado pro Open Food Facts quando houver conexão",
   "offlineWarning": "Você está offline — adicionando produto manualmente",
   "nutriscoreExplanation": "Nutri-Score é um selo nutricional que classifica produtos de A (melhor) a E (pior) com base na qualidade nutricional. Ajuda a comparar produtos parecidos rapidamente.",
   "nutriscoreNotApplicable": "Nutri-Score não se aplica a esse produto ({category}).",
@@ -298,8 +259,6 @@
   "submissionSubmitted": "Enviado pro Open Food Facts",
   "submissionFailed": "Falha no envio pro Open Food Facts",
   "submissionNotSubmitted": "Não enviado pro Open Food Facts",
-  "submitToOff": "Enviar pro Open Food Facts",
-  "submittingToOffTitle": "Enviando…",
   "submissionSuccess": "Produto enviado pro Open Food Facts.",
   "submissionError": "Falha ao enviar o produto. Toque pra tentar de novo.",
   "navHome": "Início",
@@ -342,5 +301,7 @@
       }
     }
   },
-  "whatsNewDismiss": "Entendi"
+  "whatsNewDismiss": "Entendi",
+  "settingsAbout": "Sobre",
+  "comingSoonDescription": "Este recurso estará disponível em breve."
 }

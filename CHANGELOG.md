@@ -3,11 +3,26 @@
 ## [Unreleased]
 
 ### Documentation
-- `ARCHITECTURE.md` section 11: Carbon footprint design decisions (dark mode energy savings, image caching, offline-first, RepaintBoundary strategy, thread strategy, AAB/deferred components, eco-mode pattern, performance measurement).
-- `AGENTS.md` performance & footprint optimization section (build-time/runtime optimizations, expensive raster ops, measuring performance with DevTools/Flashlight/Perfetto, eco-mode pattern, rules of thumb).
-- `TODO.md` footprint optimization roadmap: 20+ new items across Quick Wins, Code Health, Features, Larger Projects, CI/CD, and Documentation sections. Updated Effort x Importance matrix.
-- `AGENTS.md` debugging with Logger and Snackbar section: guidelines on `logInfo`/`logWarning`/`logError` and `SnackbarHelper` methods for developer and user-visible traceability at every decision point.
-- `AGENTS.md` platform documentation references: Android Developers Blog, AOSP docs, Android Developers, and Samsung Developers for authoritative platform behaviour guidance.
+- `ARCHITECTURE.md` section 5: updated tree diagrams to reflect `ListView.builder` with `RepaintBoundary`, SearchScreen images, StatsScreen placeholder, and Settings changelog button.
+- `ARCHITECTURE.md` section 11.2 and 11.4: updated with actual `cacheWidth`/`cacheHeight` and `RepaintBoundary` implementations.
+- `AGENTS.md` code style: added `ComingSoonView` / `ComingSoonScreen` stub pattern.
+- `TODO.md` marked Autocomplete, InteractiveViewer, ExpansionTile, Changelog at startup as done.
+
+### Enhancements
+- **ComingSoonView / ComingSoonScreen**: Reusable placeholder widgets (`lib/widgets/coming_soon_view.dart`, `lib/screens/coming_soon_screen.dart`). Configurable icon, title, and subtitle. Follows the `ErrorView` / `EmptyPantry` pattern.
+- **StatsScreen replaced with ComingSoon placeholder**: CSV import/export features removed. The tab now shows a "Coming soon" placeholder. Original stats will be re-implemented in a future release.
+- **SearchScreen product images**: Result tiles now show product thumbnails (`ClipOval` 40×40 `Image.network`) with `cacheWidth`/`cacheHeight` and `CircleAvatar` fallback.
+- **Settings "What's New" button**: New "About" section with a button that loads `CHANGELOG.md` and shows the changelog sheet on demand, bypassing the version-guard auto-trigger.
+
+### Bugfixes
+- **Missing `cacheWidth` in product detail**: `Image.network` in `ProductDetailScreen` was only constraining decode height. Added `cacheWidth` at screen width × device pixel ratio.
+
+### Code health
+- Removed CSV import/export: deleted `csv_service.dart`, `csv_service_provider.dart`, `filegate_provider.dart`, and all related test files. Removed `getExportData()` / `exportData()` from `DatabaseHelper`, `InventoryDao`, and `ProductRepository`.
+- Removed `csv`, `filegate`, `share_plus` dependencies from `pubspec.yaml`. Ran `flutter pub upgrade` (picked up `equatable` 2.1.0 transitively).
+- Removed 19 unused ARB translation keys from all 3 locales (en, pt, pt_BR). Verified zero stale references with regex before removal.
+- Added 2 new ARB keys: `settingsAbout`, `comingSoonDescription` — translated in en, pt, pt_BR.
+- 340 tests passing, 0 analyze issues.
 
 ### Bugfixes
 - **Changelog not showing on re-launch**: `_handleAppUpdate` returned early when the app version was unchanged (`if (lastVersion == currentVersion) return;`), which prevented the `changelog_show_pending` flag from ever being set. Moved the changelog tracking above the version-match guard so it runs unconditionally. Added `logInfo` traces at every decision point in `_showChangelogIfPending()` (skip, no entries, show) for easier debugging.

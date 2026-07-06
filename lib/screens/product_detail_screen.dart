@@ -146,6 +146,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             child: Image.network(
                               widget.product.imageUrl!,
                               height: 200,
+                              cacheWidth:
+                                  (MediaQuery.sizeOf(context).width *
+                                          MediaQuery.devicePixelRatioOf(
+                                            context,
+                                          ))
+                                      .round(),
                               cacheHeight:
                                   (200 * MediaQuery.devicePixelRatioOf(context))
                                       .round(),

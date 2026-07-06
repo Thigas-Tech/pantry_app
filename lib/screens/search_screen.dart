@@ -305,18 +305,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
             unawaited(_addToInventory(product));
           },
           child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              child: Text(
-                product.barcode.length >= 3
-                    ? product.barcode.substring(0, 3)
-                    : product.barcode.padRight(3, '0'),
-                style: TextStyle(
-                  color: theme.colorScheme.onSecondaryContainer,
-                  fontSize: 11,
-                ),
-              ),
-            ),
+            leading: _searchResultAvatar(product, theme, context),
             title: Text(
               product.name != 'Unknown' ? product.name : product.barcode,
               maxLines: 1,
@@ -354,6 +343,47 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _searchResultAvatar(
+    Product product,
+    ThemeData theme,
+    BuildContext context,
+  ) {
+    if (product.imageUrl != null) {
+      final ratio = MediaQuery.devicePixelRatioOf(context);
+      return ClipOval(
+        child: Image.network(
+          product.imageUrl!,
+          width: 40,
+          height: 40,
+          cacheWidth: (40 * ratio).round(),
+          cacheHeight: (40 * ratio).round(),
+          fit: BoxFit.cover,
+          loadingBuilder: (_, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _barcodeAvatar(product.barcode, theme);
+          },
+          errorBuilder: (_, _, _) => _barcodeAvatar(product.barcode, theme),
+        ),
+      );
+    }
+    return _barcodeAvatar(product.barcode, theme);
+  }
+
+  Widget _barcodeAvatar(String barcode, ThemeData theme) {
+    return CircleAvatar(
+      backgroundColor: theme.colorScheme.secondaryContainer,
+      child: Text(
+        barcode.length >= 3
+            ? barcode.substring(0, 3)
+            : barcode.padRight(3, '0'),
+        style: TextStyle(
+          color: theme.colorScheme.onSecondaryContainer,
+          fontSize: 11,
+        ),
+      ),
     );
   }
 }

@@ -392,12 +392,4 @@ class DatabaseHelper {
     final db = await database;
     return inventoryDao.count(db, inventoryId: inventoryId);
   }
-
-  /// Returns inventory rows joined with product nutrition for CSV export.
-  Future<List<Map<String, dynamic>>> getExportData({
-    required int inventoryId,
-  }) async {
-    final db = await database;
-    return inventoryDao.exportData(db, inventoryId: inventoryId);
-  }
 }

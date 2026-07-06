@@ -96,12 +96,6 @@ abstract class AppLocalizations {
     Locale('pt', 'BR')
   ];
 
-  /// No description provided for @appTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pantry'**
-  String get appTitle;
-
   /// No description provided for @myPantry.
   ///
   /// In en, this message translates to:
@@ -402,18 +396,6 @@ abstract class AppLocalizations {
   /// **'Inventory items'**
   String get inventoryItems;
 
-  /// No description provided for @exportCsv.
-  ///
-  /// In en, this message translates to:
-  /// **'Export as CSV'**
-  String get exportCsv;
-
-  /// No description provided for @importCsv.
-  ///
-  /// In en, this message translates to:
-  /// **'Import CSV'**
-  String get importCsv;
-
   /// No description provided for @createNewPantry.
   ///
   /// In en, this message translates to:
@@ -467,12 +449,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submit'**
   String get submit;
-
-  /// No description provided for @alignBarcode.
-  ///
-  /// In en, this message translates to:
-  /// **'Align the barcode inside the frame'**
-  String get alignBarcode;
 
   /// No description provided for @itemUpdated.
   ///
@@ -588,18 +564,6 @@ abstract class AppLocalizations {
   /// **'Nutrient'**
   String get nutrient;
 
-  /// No description provided for @inLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'in'**
-  String get inLocation;
-
-  /// No description provided for @noExpiry.
-  ///
-  /// In en, this message translates to:
-  /// **'No expiry'**
-  String get noExpiry;
-
   /// No description provided for @deleteItemTitle.
   ///
   /// In en, this message translates to:
@@ -629,30 +593,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a positive number'**
   String get enterPositiveNumber;
-
-  /// No description provided for @csvImportComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'CSV import coming soon.'**
-  String get csvImportComingSoon;
-
-  /// No description provided for @noDataToExport.
-  ///
-  /// In en, this message translates to:
-  /// **'No data to export.'**
-  String get noDataToExport;
-
-  /// No description provided for @pantryExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Pantry Export'**
-  String get pantryExport;
-
-  /// No description provided for @exportFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Export failed'**
-  String get exportFailed;
 
   /// No description provided for @notificationsEnabled.
   ///
@@ -894,30 +834,6 @@ abstract class AppLocalizations {
   /// **'Leave'**
   String get leave;
 
-  /// No description provided for @importCsvSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Import complete — {products} products, {items} items.'**
-  String importCsvSuccess(int products, int items);
-
-  /// No description provided for @importCsvFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'CSV import failed: {error}'**
-  String importCsvFailed(String error);
-
-  /// No description provided for @customUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom...'**
-  String get customUnit;
-
-  /// No description provided for @customLocation.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom...'**
-  String get customLocation;
-
   /// No description provided for @enterCustomUnit.
   ///
   /// In en, this message translates to:
@@ -929,30 +845,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter custom location'**
   String get enterCustomLocation;
-
-  /// No description provided for @close.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get close;
-
-  /// No description provided for @exportedToShare.
-  ///
-  /// In en, this message translates to:
-  /// **'Export ready — share to save.'**
-  String get exportedToShare;
-
-  /// No description provided for @errorLoadingInventory.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to load inventory.'**
-  String get errorLoadingInventory;
-
-  /// No description provided for @items.
-  ///
-  /// In en, this message translates to:
-  /// **'items'**
-  String get items;
 
   /// No description provided for @enterProductDetails.
   ///
@@ -1013,12 +905,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save product'**
   String get saveProduct;
-
-  /// No description provided for @submittingToOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Will be submitted to Open Food Facts when online'**
-  String get submittingToOff;
 
   /// No description provided for @offlineWarning.
   ///
@@ -1097,18 +983,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not submitted to Open Food Facts'**
   String get submissionNotSubmitted;
-
-  /// No description provided for @submitToOff.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit to Open Food Facts'**
-  String get submitToOff;
-
-  /// No description provided for @submittingToOffTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Submitting…'**
-  String get submittingToOffTitle;
 
   /// No description provided for @submissionSuccess.
   ///
@@ -1229,6 +1103,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Got it'**
   String get whatsNewDismiss;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @comingSoonDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature will be available soon.'**
+  String get comingSoonDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

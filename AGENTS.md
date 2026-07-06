@@ -65,6 +65,9 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 - Use `const` constructors where possible
 - Prefer Riverpod `Provider`/`NotifierProvider` for state
 - Use `unawaited()` for fire-and-forget futures (import `dart:async`)
+- Use `ComingSoonView` or `ComingSoonScreen` when stubbing planned features.
+  `ComingSoonScreen` for full-tab placeholders; `ComingSoonView` for inline
+  placeholders (inside existing layouts).
 
 ### Debugging with Logger and Snackbar
 

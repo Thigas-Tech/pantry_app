@@ -9,9 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Pantry';
-
-  @override
   String get myPantry => 'My Pantry';
 
   @override
@@ -162,12 +159,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inventoryItems => 'Inventory items';
 
   @override
-  String get exportCsv => 'Export as CSV';
-
-  @override
-  String get importCsv => 'Import CSV';
-
-  @override
   String get createNewPantry => 'Create new pantry';
 
   @override
@@ -195,9 +186,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submit => 'Submit';
-
-  @override
-  String get alignBarcode => 'Align the barcode inside the frame';
 
   @override
   String get itemUpdated => 'Item updated.';
@@ -261,12 +249,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutrient => 'Nutrient';
 
   @override
-  String get inLocation => 'in';
-
-  @override
-  String get noExpiry => 'No expiry';
-
-  @override
   String get deleteItemTitle => 'Delete item?';
 
   @override
@@ -280,18 +262,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterPositiveNumber => 'Enter a positive number';
-
-  @override
-  String get csvImportComingSoon => 'CSV import coming soon.';
-
-  @override
-  String get noDataToExport => 'No data to export.';
-
-  @override
-  String get pantryExport => 'Pantry Export';
-
-  @override
-  String get exportFailed => 'Export failed';
 
   @override
   String get notificationsEnabled => 'Notifications enabled.';
@@ -436,38 +406,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leave => 'Leave';
 
   @override
-  String importCsvSuccess(int products, int items) {
-    return 'Import complete — $products products, $items items.';
-  }
-
-  @override
-  String importCsvFailed(String error) {
-    return 'CSV import failed: $error';
-  }
-
-  @override
-  String get customUnit => 'Custom...';
-
-  @override
-  String get customLocation => 'Custom...';
-
-  @override
   String get enterCustomUnit => 'Enter custom unit';
 
   @override
   String get enterCustomLocation => 'Enter custom location';
-
-  @override
-  String get close => 'Close';
-
-  @override
-  String get exportedToShare => 'Export ready — share to save.';
-
-  @override
-  String get errorLoadingInventory => 'Failed to load inventory.';
-
-  @override
-  String get items => 'items';
 
   @override
   String get enterProductDetails => 'Enter product details';
@@ -498,9 +440,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveProduct => 'Save product';
-
-  @override
-  String get submittingToOff => 'Will be submitted to Open Food Facts when online';
 
   @override
   String get offlineWarning => 'You are offline — adding product manually';
@@ -542,12 +481,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submissionNotSubmitted => 'Not submitted to Open Food Facts';
-
-  @override
-  String get submitToOff => 'Submit to Open Food Facts';
-
-  @override
-  String get submittingToOffTitle => 'Submitting…';
 
   @override
   String get submissionSuccess => 'Product submitted to Open Food Facts.';
@@ -616,4 +549,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get whatsNewDismiss => 'Got it';
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String get comingSoonDescription => 'This feature will be available soon.';
 }
