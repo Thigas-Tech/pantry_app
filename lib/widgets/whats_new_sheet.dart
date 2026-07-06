@@ -62,12 +62,13 @@ class _WhatsNewSheet extends StatelessWidget {
             ),
           ),
           Flexible(
-            child: ListView(
+            child: ListView.builder(
               shrinkWrap: true,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                if (entries.isEmpty)
-                  Padding(
+              itemCount: entries.isEmpty ? 1 : entries.length,
+              itemBuilder: (context, index) {
+                if (entries.isEmpty) {
+                  return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24),
                     child: Center(
                       child: Text(
@@ -75,16 +76,21 @@ class _WhatsNewSheet extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
-                  )
-                else
-                  for (final entry in entries) ...[
+                  );
+                }
+                final entry = entries[index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     const SizedBox(height: 12),
                     _VersionHeader(entry: entry),
                     const SizedBox(height: 8),
                     _SectionContent(content: entry.content),
                     const Divider(),
                   ],
-              ],
+                );
+              },
             ),
           ),
           Padding(

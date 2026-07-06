@@ -36,10 +36,12 @@ class ManageInventoriesScreen extends ConsumerWidget {
             return Center(child: Text(l10n.noInventories));
           }
 
-          return ListView(
-            children: [
-              for (final inv in list)
-                Dismissible(
+          return ListView.builder(
+            itemCount: list.length + 2,
+            itemBuilder: (context, index) {
+              if (index < list.length) {
+                final inv = list[index];
+                return Dismissible(
                   key: ValueKey('manage-inv-${inv['id'] as int}'),
                   direction: DismissDirection.endToStart,
                   background: Container(
@@ -74,14 +76,17 @@ class ManageInventoriesScreen extends ConsumerWidget {
                       inv['name'] as String,
                     ),
                   ),
-                ),
-              const Divider(),
-              ListTile(
+                );
+              }
+              if (index == list.length) {
+                return const Divider();
+              }
+              return ListTile(
                 leading: const Icon(Icons.add),
                 title: Text(l10n.createNewPantry),
                 onTap: () => _showCreateDialog(context, ref),
-              ),
-            ],
+              );
+            },
           );
         },
       ),

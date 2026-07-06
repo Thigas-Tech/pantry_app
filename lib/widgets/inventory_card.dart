@@ -204,11 +204,14 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
           );
         }
         if (widget.item.productImageUrl != null) {
+          final pixelRatio = MediaQuery.devicePixelRatioOf(context);
           return ClipOval(
             child: Image.network(
               widget.item.productImageUrl!,
               width: 40,
               height: 40,
+              cacheWidth: (40 * pixelRatio).round(),
+              cacheHeight: (40 * pixelRatio).round(),
               fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;

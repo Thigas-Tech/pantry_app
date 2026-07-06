@@ -56,6 +56,7 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 7. **Update CHANGELOG.md** — after every feature addition, bugfix, or significant change, add an entry under `[Unreleased]` grouped by category. Keep entries concise and user-facing. This is the canonical record of what ships in each release.
 8. **Set Product.source** — every `Product()` constructor call MUST pass `source`. Use `'api'` for OFF‑fetched data and `'manual'` for user‑entered or CSV‑imported data. The default is `'api'`. Never omit this field — it protects manual products from being deleted by `clearCachedProducts()` during cache flushes.
 9. **No emoji** — never use emoji characters anywhere in the codebase, including documentation, comments, commit messages, ARB strings, and TODOs. Use plain text alternatives (e.g., `Yes`/`No` instead of check/cross marks, `**Pitfalls**` instead of warning signs). Emojis render inconsistently across terminals, editors, and git tools, and this project's documentation must remain plain-text clean.
+10. **Audit every plan for pitfalls** — before implementing any plan, audit for regressions, edge cases, common issues, and common pitfalls. Document findings and mitigations in the plan before writing code. This includes: breaking changes to existing APIs, widget state loss during refactors, performance degradation, missing test coverage for changed code paths, locale/accessibility impact, and interaction with fire-and-forget async operations.
 
 ### Code style
 - 80-character line limit (enforced by lint)

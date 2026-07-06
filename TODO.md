@@ -79,39 +79,39 @@ infrastructure or external server hosting are listed last.
 
 ### Performance audits
 
-- [ ] **Repaint boundaries audit** — wrap animated or independently-scrolling
+- [x] **Repaint boundaries audit** — wrap animated or independently-scrolling
   widget subtrees with `RepaintBoundary`. Audit `HomeScreen._InventoryList`
   (scroll), `SearchScreen` results list, `StatsScreen` charts. Reference:
   [Flutter Performance Best Practices](https://docs.flutter.dev/perf/best-practices).
-- [ ] **`ListView.builder` audit** — audit all uses of `ListView()` across
+- [x] **`ListView.builder` audit** — audit all uses of `ListView()` across
   screens. The default `ListView(children: [])` builds ALL children at once
   (O(n) build cost), causing jank on large lists. Convert to
   `ListView.builder` or `ListView.separated` where item count exceeds ~10 or
   is dynamic. Priority: `home_screen.dart` inventory list,
   `product_detail_screen.dart` inventory tiles, `stats_screen.dart` stat
   rows. `search_screen.dart` already uses `ListView.separated`.
-- [ ] **Confine setState audit** — extract stateful logic into small isolated
+- [x] **Confine setState audit** — extract stateful logic into small isolated
   widgets so `setState` does not rebuild the entire parent screen. Audit 32
   `setState` calls; highest impact: `PantryShell._onPageChanged` (rebuilds
   entire PageView on every swipe), `HomeScreen._searchQuery`,
   `HomeScreen._selectedItems`, `StatsScreen._refreshKey`. Pattern: extract
   `ScrollToTopButton`-style widgets that call their own `setState` only when
   visibility actually changes.
-- [ ] **Image resolution audit** — check network images are requested at
+- [x] **Image resolution audit** — check network images are requested at
   display resolution, not full size. OFF CDN images are loaded at full
   resolution (~200 KB) and scaled to 40x40 dp on cards or full-width on
   detail screens, wasting memory and decode time. Check if OFF API supports
   resize parameters.
-- [ ] **Impeller usage check** — verify Impeller is enabled for release
+- [x] **Impeller usage check** — verify Impeller is enabled for release
   builds (`--enable-impeller`). Impeller is default on Android API 29+;
   verify it is not disabled in `AndroidManifest.xml`.
-- [ ] **Tree shaking audit** — run `flutter build apk --analyze-size` and
+- [x] **Tree shaking audit** — run `flutter build apk --analyze-size` and
   inspect the app size breakdown. Verify unused packages, assets, and fonts
   are stripped. Remove any dead dependency imports.
-- [ ] **Asset optimization audit** — convert remaining PNG assets to WebP
+- [x] **Asset optimization audit** — convert remaining PNG assets to WebP
   with lossless encoding. Check if bundled fonts can be subsetted to only
   used glyphs. Verify `pubspec.yaml` font declarations are minimal.
-- [ ] **Expensive raster ops audit** — check for widgets that trigger
+- [x] **Expensive raster ops audit** — check for widgets that trigger
   `saveLayer` on the raster thread: `ShaderMask`, `Opacity` (alpha < 1.0),
   `ClipPath`, `ColorFiltered`, multiple `ClipRRect` instances. Only 1
   `ClipRRect` found (`add_product_screen.dart`) — low priority but verify.

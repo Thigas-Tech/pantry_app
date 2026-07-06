@@ -650,6 +650,51 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   String? _cachedSelectedCategory;
   int? _cachedThreshold;
   Map<String, List<InventoryWithProduct>> _normalizedNameMap = {};
+  List<_SectionedItem>? _cachedSectionedItems;
+
+  /// A flat list of section headers interleaved with inventory items,
+  /// ready for [ListView.builder].
+  List<_SectionedItem> get _sectionedItems {
+    if (_cacheValid && _cachedSectionedItems != null) {
+      return _cachedSectionedItems!;
+    }
+    final items = <_SectionedItem>[];
+    if (_expired.isNotEmpty) {
+      items
+        ..add(
+          const _SectionHeaderItem(
+            titleKey: 'expired',
+            color: Colors.red,
+            icon: Icons.error_outline,
+          ),
+        )
+        ..addAll(_expired.map(_ProductItem.new));
+    }
+    if (_expiringSoon.isNotEmpty) {
+      items
+        ..add(
+          const _SectionHeaderItem(
+            titleKey: 'expiringSoon',
+            color: Colors.orange,
+            icon: Icons.warning_amber,
+          ),
+        )
+        ..addAll(_expiringSoon.map(_ProductItem.new));
+    }
+    if (_good.isNotEmpty) {
+      items
+        ..add(
+          const _SectionHeaderItem(
+            titleKey: 'good',
+            color: Colors.green,
+            icon: Icons.check_circle_outline,
+          ),
+        )
+        ..addAll(_good.map(_ProductItem.new));
+    }
+    _cachedSectionedItems = items;
+    return items;
+  }
 
   void _rebuildNameMap() {
     final map = <String, List<InventoryWithProduct>>{};
@@ -671,6 +716,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     _cachedSearchQuery = null;
     _cachedSelectedCategory = null;
     _cachedThreshold = null;
+    _cachedSectionedItems = null;
   }
 
   bool get _cacheValid =>
@@ -720,6 +766,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     _cachedExpired = null;
     _cachedExpiringSoon = null;
     _cachedGood = null;
+    _cachedSectionedItems = null;
     return _cachedFiltered!;
   }
 
@@ -912,15 +959,13 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                 clipBehavior: Clip.antiAlias,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxHeight: 280),
-                  child: ListView(
+                  child: ListView.builder(
                     padding: EdgeInsets.zero,
-                    children: [
-                      for (final item in items)
-                        _suggestionTile(
-                          item: item,
-                          onTap: () => onSelected(item),
-                        ),
-                    ],
+                    itemCount: items.length,
+                    itemBuilder: (context, index) => _suggestionTile(
+                      item: items[index],
+                      onTap: () => onSelected(items[index]),
+                    ),
                   ),
                 ),
               );
@@ -933,28 +978,31 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
             child: SizedBox(
               height: 36,
-              child: ListView(
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                children: [
-                  FilterChip(
-                    label: Text(l10n.filterAll),
-                    selected: _selectedCategory == null,
-                    onSelected: (_) => setState(() => _selectedCategory = null),
-                  ),
-                  const SizedBox(width: 6),
-                  for (final cat in categories)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: FilterChip(
-                        label: Text(_displayCategory(cat)),
-                        selected: _selectedCategory == cat,
-                        onSelected: (selected) => setState(
-                          () => _selectedCategory = selected ? cat : null,
-                        ),
-                        visualDensity: VisualDensity.compact,
+                itemCount: 1 + categories.length,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return FilterChip(
+                      label: Text(l10n.filterAll),
+                      selected: _selectedCategory == null,
+                      onSelected: (_) =>
+                          setState(() => _selectedCategory = null),
+                    );
+                  }
+                  final cat = categories.elementAt(index - 1);
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: FilterChip(
+                      label: Text(_displayCategory(cat)),
+                      selected: _selectedCategory == cat,
+                      onSelected: (selected) => setState(
+                        () => _selectedCategory = selected ? cat : null,
                       ),
+                      visualDensity: VisualDensity.compact,
                     ),
-                ],
+                  );
+                },
               ),
             ),
           ),
@@ -982,75 +1030,57 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
               }
               ref.invalidate(inventoryWithProductProvider);
             },
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                if (_expired.isNotEmpty) ...[
-                  _sectionHeader(
-                    l10n.expired,
-                    Colors.red,
-                    Icons.error_outline,
-                  ),
-                  ..._expired.map(
-                    (item) => InventoryCard(
-                      item: item,
-                      showCheckbox: widget.selectionMode,
-                      isSelected: widget.selectedIds.contains(item.id),
-                      onToggleSelection: () =>
-                          widget.onToggleSelection?.call(item.id!),
-                      onLongPress: () => widget.onLongPressItem?.call(item.id!),
-                    ),
-                  ),
-                ],
-                if (_expiringSoon.isNotEmpty) ...[
-                  _sectionHeader(
-                    l10n.expiringSoon,
-                    Colors.orange,
-                    Icons.warning_amber,
-                  ),
-                  ..._expiringSoon.map(
-                    (item) => InventoryCard(
-                      item: item,
-                      showCheckbox: widget.selectionMode,
-                      isSelected: widget.selectedIds.contains(item.id),
-                      onToggleSelection: () =>
-                          widget.onToggleSelection?.call(item.id!),
-                      onLongPress: () => widget.onLongPressItem?.call(item.id!),
-                    ),
-                  ),
-                ],
-                if (_good.isNotEmpty) ...[
-                  _sectionHeader(
-                    l10n.good,
-                    Colors.green,
-                    Icons.check_circle_outline,
-                  ),
-                  ..._good.map(
-                    (item) => InventoryCard(
-                      item: item,
-                      showCheckbox: widget.selectionMode,
-                      isSelected: widget.selectedIds.contains(item.id),
-                      onToggleSelection: () =>
-                          widget.onToggleSelection?.call(item.id!),
-                      onLongPress: () => widget.onLongPressItem?.call(item.id!),
-                    ),
-                  ),
-                ],
-                if (_filtered.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Center(
-                      child: Text(
-                        _selectedCategory != null
-                            ? '${l10n.noItemsMatch} '
-                                  '(${l10n.filterByCategory}: '
-                                  '${_displayCategory(_selectedCategory!)})'
-                            : l10n.noItemsMatch,
+            child: _sectionedItems.isEmpty
+                ? ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Center(
+                          child: Text(
+                            _selectedCategory != null
+                                ? '${l10n.noItemsMatch} '
+                                      '(${l10n.filterByCategory}: '
+                                      '${_displayCategory(_selectedCategory!)})'
+                                : l10n.noItemsMatch,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: _sectionedItems.length,
+                    itemBuilder: (context, index) {
+                      final element = _sectionedItems[index];
+                      if (element is _SectionHeaderItem) {
+                        final title = switch (element.titleKey) {
+                          'expired' => l10n.expired,
+                          'expiringSoon' => l10n.expiringSoon,
+                          'good' => l10n.good,
+                          _ => '',
+                        };
+                        return _sectionHeader(
+                          title,
+                          element.color,
+                          element.icon,
+                        );
+                      }
+                      final item = (element as _ProductItem).item;
+                      return RepaintBoundary(
+                        child: InventoryCard(
+                          key: ValueKey(item.id),
+                          item: item,
+                          showCheckbox: widget.selectionMode,
+                          isSelected: widget.selectedIds.contains(item.id),
+                          onToggleSelection: () =>
+                              widget.onToggleSelection?.call(item.id!),
+                          onLongPress: () =>
+                              widget.onLongPressItem?.call(item.id!),
+                        ),
+                      );
+                    },
                   ),
-              ],
-            ),
           ),
         ),
       ],
@@ -1114,6 +1144,10 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                 item.productImageUrl!,
                 width: 32,
                 height: 32,
+                cacheWidth: (32 * MediaQuery.devicePixelRatioOf(context))
+                    .round(),
+                cacheHeight: (32 * MediaQuery.devicePixelRatioOf(context))
+                    .round(),
                 fit: BoxFit.cover,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
@@ -1145,4 +1179,28 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
       ),
     );
   }
+}
+
+sealed class _SectionedItem {
+  const _SectionedItem();
+}
+
+class _SectionHeaderItem extends _SectionedItem {
+  const _SectionHeaderItem({
+    required this.titleKey,
+    required this.color,
+    required this.icon,
+  });
+
+  final String titleKey;
+
+  final Color color;
+
+  final IconData icon;
+}
+
+class _ProductItem extends _SectionedItem {
+  const _ProductItem(this.item);
+
+  final InventoryWithProduct item;
 }

@@ -92,6 +92,7 @@
 - Singleton `DatabaseHelper` delegates to `const` DAOs
 - Resolved lint rule conflict: disabled `prefer_adjacent_string_concatenation`, `no_adjacent_strings_in_list`, and `missing_whitespace_between_adjacent_strings` to eliminate false positives on multi-line string building
 - Resolved all info‑level lint diagnostics (`avoid_redundant_argument_values` in database helper test, `omit_local_variable_types` in inventory card test). Updated AGENTS.md rule 5 to explicitly forbid info‑level issues of any severity.
+- Performance audits completed (8/8 items): converted main inventory list, autocomplete suggestions, category chips, manage inventories, and changelog sheet to `ListView.builder`; wrapped inventory cards in `RepaintBoundary`; added `cacheWidth`/`cacheHeight` to all 3 `Image.network` calls (40×40 thumbnails, 32×32 autocomplete icons, 200dp product photos); verified Impeller default on API 29+ and Material Icons tree-shaken 99.5%. Single ClipRRect and empty asset folder confirmed benign. Updated AGENTS.md rule 10 requiring pitfall audits on every plan.
 - Removed dead `product_api_service.dart`
 - Deduplicated custom-input and days-dialog builders in `AddToInventoryScreen`
 - Singleton `DatabaseHelper` delegates to `const` DAOs
