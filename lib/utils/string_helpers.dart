@@ -6,10 +6,8 @@
 /// 95th‑percentile case for food‑product names at a fraction of the complexity.
 ///
 /// Example:
-/// ```dart
-/// removeDiacritics('Café crème') // → 'cafe creme'
-/// removeDiacritics('Müsli')       // → 'musli'
-/// ```
+/// `removeDiacritics('Cafe creme')` returns `'cafe creme'`.
+/// `removeDiacritics('Musli')` returns `'musli'`.
 String removeDiacritics(String input) {
   if (input.isEmpty) return input;
   final buffer = StringBuffer();

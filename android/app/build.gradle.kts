@@ -24,9 +24,6 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        ndk {
-            debugSymbolLevel = "symbol_table"
-        }
     }
 
     buildTypes {

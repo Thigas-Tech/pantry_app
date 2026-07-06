@@ -396,13 +396,16 @@ The project uses GitHub Actions for continuous integration and delivery.
 Workflows live in `.github/workflows/`:
 
 | Workflow | Trigger | Purpose |
-|---|---|---|
+|---|---|---|---|
 | `ci.yml` | Pull request to `main` | Format check, `flutter analyze`, unit + widget tests, coverage report with PR comment |
-| `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB, uploads as artifacts (7-day retention) |
-| `release-drafter.yml` | Push to `main` | Auto-creates a draft release with changelog compiled from PR labels |
+| `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB + release APK + AAB, uploads artifacts (7-day retention), and runs release-drafter (publish job) |
 | `patrol-e2e.yml` | Weekly (Sun 03:00 UTC) | Patrol integration test suite on Android emulator |
 | `flashlight.yml` | Weekly (Sun 04:00 UTC) | Flashlight battery/CPU/GPU profiling on emulator |
 | `perfetto.yml` | Weekly (Sun 05:00 UTC) | Perfetto startup trace collection and frame-timing analysis |
+
+> **Note:** release-drafter is no longer a standalone workflow. It runs as the
+> `publish` job inside `build.yml` so it has access to build artifacts for
+> asset upload.
 
 All workflows use SHA-pinned actions for supply-chain security. Dependabot
 updates GitHub Action versions monthly. Runner: `ubuntu-latest` for QA and

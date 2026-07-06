@@ -31,6 +31,10 @@ infrastructure or external server hosting are listed last.
   scanner start). Parse with `perfetto` CLI for frame timing violations,
   jank metrics, and CPU scheduling patterns. Fail CI if metrics degrade below
   baseline. Reference: [Flutter performance profiling](https://docs.flutter.dev/perf/ui-performance).
+- [ ] **Track Flutter 3.44.0 AAB stripping regression** — upstream fix
+  expected in a patch release. Remove `ndk { debugSymbolLevel }` workaround
+  when fixed.
+  Follow [flutter/flutter#186810](https://github.com/flutter/flutter/issues/186810).
 - [ ] **GitHub Actions — Play Store deployment** — on new tag (`v*`):
   - `flutter build appbundle` + `flutter build apk` (release)
   - Upload both to Google Play Console via `r0adkll/upload-google-play`

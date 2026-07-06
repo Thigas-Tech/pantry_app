@@ -21,15 +21,14 @@ class ChangelogEntry {
 /// version strings and body content. No external markdown library is used.
 ///
 /// ## Markdown format expected
-/// ```md
-/// ## [Unreleased]
-/// ### Enhancements
-/// - Item 1
 ///
-/// ## [0.1.0] — Initial release (MVP)
-/// ### Core
-/// - Item A
-/// ```
+///     ## [Unreleased]
+///     ### Enhancements
+///     - Item 1
+///
+///     ## [0.1.0] -- Initial release (MVP)
+///     ### Core
+///     - Item A
 class ChangelogParser {
   /// Sentinel value used to sort the `[Unreleased]` entry above all
   /// numbered versions.

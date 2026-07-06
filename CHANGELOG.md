@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### Fixed
+- **release-drafter labels format**: `version-resolver.{major,minor,patch}.labels`
+  must be direct arrays (not nested under `when`) per release-drafter v6 schema.
+  ([release-drafter docs](https://github.com/release-drafter/release-drafter#version-resolver))
+- **Release AAB native stripping regression (Flutter 3.44.0)**: Removed
+  `--extra-gen-snapshot-options=--strip` flag. The DWARF warning it silenced
+  is cosmetic -- the real optimization (`--obfuscate` + `--split-debug-info`)
+  remains. Tracked upstream at
+  [flutter/flutter#186810](https://github.com/flutter/flutter/issues/186810) and
+  [flutter/flutter#186806](https://github.com/flutter/flutter/issues/186806).
+
+### Changed
+- **Doc comment style**: Replaced all triple-backtick code blocks in
+  hand-written source files with `[square bracket]` cross-references or
+  4-space indented blocks. This enables LSP go-to-definition and hover
+  documentation on doc-comment references. Rule 14 added to `AGENTS.md`.
+
 ### Added
 - **GitHub Actions CI**: PR quality gate (lint, format, test, coverage) on every PR.
 - **GitHub Actions build**: APK/AAB debug artifacts on every push to `main`.

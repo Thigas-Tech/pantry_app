@@ -6,13 +6,8 @@ import 'package:pantry_app/utils/logger.dart';
 /// Every method shows a floating snackbar with a short duration, rounded
 /// corners, and a leading icon that matches the severity level.
 ///
-/// ## Usage
-///
-/// ```dart
-/// SnackbarHelper.showInfo(context, 'Product found');
-/// SnackbarHelper.showWarning(context, 'Expiring soon');
-/// SnackbarHelper.showError(context, 'Export failed');
-/// ```
+/// See [SnackbarHelper.showInfo], [SnackbarHelper.showWarning], and
+/// [SnackbarHelper.showError] for the individual severity levels.
 class SnackbarHelper {
   const SnackbarHelper._();
 

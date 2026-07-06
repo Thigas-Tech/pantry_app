@@ -67,6 +67,12 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 11. **Consider performance and footprint** — before implementing any plan, evaluate: APK size impact of new dependencies, widget build count on new screens with `RepaintBoundary` strategy, memory footprint of new models and providers, SQL query cost for new database methods (concurrent read safety, index needs), and rebuild scope (provider disposal strategy, `autoDispose` vs `keepAlive`). Document tradeoffs in the plan before writing code.
 12. **Report test coverage after every implementation** — after every commit, run `flutter test --concurrency=8 --coverage` and report the total test count (passed/failed/skipped) and coverage summary (overall percentage and uncovered files if any). Include this in the PR or commit description.
 13. **Sync with remote** — before starting any work, run `git fetch && git pull --rebase` to ensure you're working on the latest version of the branch. This avoids merge conflicts and stale baselines.
+14. **Doc comment style** — use square bracket cross-references
+    (`[ClassName]`, `[ClassName.method]`) instead of triple-backtick code blocks
+    for examples. This enables LSP go-to-definition and hover documentation on
+    every reference. For plain text examples that aren't cross-referenceable
+    (e.g. markdown format samples), use 4-space indented code blocks instead of
+    triple backticks.
 
 ### Code style
 - 80-character line limit (enforced by lint)

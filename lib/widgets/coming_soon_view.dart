@@ -6,15 +6,8 @@ import 'package:flutter/material.dart';
 /// inline inside an existing layout or wrap with `ComingSoonScreen` for a
 /// full-screen placeholder with an [AppBar].
 ///
-/// ## Usage
-///
-/// ```dart
-/// // Inline -- inside a [Column] or [ListView] child.
-/// const ComingSoonView(title: 'Shopping list');
-///
-/// // Full screen -- with an AppBar.
-/// ComingSoonScreen(title: 'Stats', subtitle: 'Available soon.');
-/// ```
+/// See [ComingSoonView] for inline use inside a [Column] or [ListView],
+/// or [ComingSoonScreen] for a full-screen wrapper with an [AppBar].
 class ComingSoonView extends StatelessWidget {
   /// Creates a [ComingSoonView].
   const ComingSoonView({
