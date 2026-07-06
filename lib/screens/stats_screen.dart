@@ -296,7 +296,8 @@ class StatsScreen extends ConsumerWidget {
               barGroups: barGroups,
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: true, 
+                  sideTitles: SideTitles(
+                    showTitles: true,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i >= 0 && i < grades.length) {
@@ -310,7 +311,8 @@ class StatsScreen extends ConsumerWidget {
                   ),
                 ),
                 leftTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: true, 
+                  sideTitles: SideTitles(
+                    showTitles: true,
                     reservedSize: 30,
                     getTitlesWidget: (value, meta) => Text(
                       value.toInt().toString(),
@@ -372,7 +374,7 @@ class StatsScreen extends ConsumerWidget {
         _buildSectionTitle(context, l10n.categoryLabel),
         const SizedBox(height: 8),
         SizedBox(
-          height: barGroups.length * 36.0 + 20,
+          height: barGroups.length * 36.0 + 80,
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.center,
@@ -384,7 +386,8 @@ class StatsScreen extends ConsumerWidget {
               barGroups: barGroups,
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: true, 
+                  sideTitles: SideTitles(
+                    showTitles: true,
                     reservedSize: 120,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
@@ -395,8 +398,8 @@ class StatsScreen extends ConsumerWidget {
                         }
                         return Padding(
                           padding: const EdgeInsets.only(right: 4),
-                          child: Align(
-                            alignment: Alignment.centerRight,
+                          child: RotatedBox(
+                            quarterTurns: 3,
                             child: Text(
                               label,
                               style: TextStyle(fontSize: 11, color: textColor),
@@ -468,7 +471,8 @@ class StatsScreen extends ConsumerWidget {
               barGroups: barGroups,
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: true, 
+                  sideTitles: SideTitles(
+                    showTitles: true,
                     reservedSize: 80,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
@@ -510,7 +514,7 @@ class StatsScreen extends ConsumerWidget {
         _buildSectionTitle(context, l10n.photoCompletenessTitle),
         const SizedBox(height: 8),
         SizedBox(
-          height: 100,
+          height: 120,
           child: Row(
             children: [
               Expanded(
