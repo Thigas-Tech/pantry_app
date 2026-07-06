@@ -66,6 +66,7 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 10. **Audit every plan for pitfalls** — before implementing any plan, audit for regressions, edge cases, common issues, and common pitfalls. Document findings and mitigations in the plan before writing code. This includes: breaking changes to existing APIs, widget state loss during refactors, performance degradation, missing test coverage for changed code paths, locale/accessibility impact, and interaction with fire-and-forget async operations.
 11. **Consider performance and footprint** — before implementing any plan, evaluate: APK size impact of new dependencies, widget build count on new screens with `RepaintBoundary` strategy, memory footprint of new models and providers, SQL query cost for new database methods (concurrent read safety, index needs), and rebuild scope (provider disposal strategy, `autoDispose` vs `keepAlive`). Document tradeoffs in the plan before writing code.
 12. **Report test coverage after every implementation** — after every commit, run `flutter test --concurrency=8 --coverage` and report the total test count (passed/failed/skipped) and coverage summary (overall percentage and uncovered files if any). Include this in the PR or commit description.
+13. **Sync with remote** — before starting any work, run `git fetch && git pull --rebase` to ensure you're working on the latest version of the branch. This avoids merge conflicts and stale baselines.
 
 ### Code style
 - 80-character line limit (enforced by lint)
