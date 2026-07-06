@@ -58,6 +58,7 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 9. **No emoji** — never use emoji characters anywhere in the codebase, including documentation, comments, commit messages, ARB strings, and TODOs. Use plain text alternatives (e.g., `Yes`/`No` instead of check/cross marks, `**Pitfalls**` instead of warning signs). Emojis render inconsistently across terminals, editors, and git tools, and this project's documentation must remain plain-text clean.
 10. **Audit every plan for pitfalls** — before implementing any plan, audit for regressions, edge cases, common issues, and common pitfalls. Document findings and mitigations in the plan before writing code. This includes: breaking changes to existing APIs, widget state loss during refactors, performance degradation, missing test coverage for changed code paths, locale/accessibility impact, and interaction with fire-and-forget async operations.
 11. **Consider performance and footprint** — before implementing any plan, evaluate: APK size impact of new dependencies, widget build count on new screens with `RepaintBoundary` strategy, memory footprint of new models and providers, SQL query cost for new database methods (concurrent read safety, index needs), and rebuild scope (provider disposal strategy, `autoDispose` vs `keepAlive`). Document tradeoffs in the plan before writing code.
+12. **Report test coverage after every implementation** — after every commit, run `flutter test --concurrency=8 --coverage` and report the total test count (passed/failed/skipped) and coverage summary (overall percentage and uncovered files if any). Include this in the PR or commit description.
 
 ### Code style
 - 80-character line limit (enforced by lint)
@@ -69,6 +70,13 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 - Use `ComingSoonView` or `ComingSoonScreen` when stubbing planned features.
   `ComingSoonScreen` for full-tab placeholders; `ComingSoonView` for inline
   placeholders (inside existing layouts).
+- **fl_chart** (`^1.2.0` — pinned): use `PieTouchData`/`BarTouchData` for
+  touch interactions. Set `duration: Duration.zero` for static charts.
+  Always guard against empty data before passing to chart constructors.
+  Docs: https://pub.dev/packages/fl_chart,
+  https://pub.dev/documentation/fl_chart/,
+  https://github.com/imaNNeo/fl_chart,
+  https://github.com/imaNNeo/fl_chart/tree/main/example
 
 ### Debugging with Logger and Snackbar
 

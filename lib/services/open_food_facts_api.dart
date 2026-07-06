@@ -231,6 +231,9 @@ class OpenFoodFactsApi {
       offNutritionImageUrl: json['image_nutrition_url'] as String?,
       offIngredientsImageUrl: json['image_ingredients_url'] as String?,
       offProductImageUrl: json['image_front_url'] as String?,
+      categoriesHierarchy: (json['categories_hierarchy'] as List<dynamic>?)
+          ?.map((e) => e.toString())
+          .toList(),
       category: json['categories'] as String?,
       ingredients: json['ingredients_text'] as String?,
       servingSize: json['serving_size'] as String?,

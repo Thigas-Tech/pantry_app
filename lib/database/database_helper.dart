@@ -67,7 +67,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 9,
+        version: 10,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -112,7 +112,8 @@ class DatabaseHelper {
         submission_status TEXT NOT NULL DEFAULT 'not_submitted',
         off_nutrition_image_url TEXT,
         off_ingredients_image_url TEXT,
-        off_product_image_url TEXT
+        off_product_image_url TEXT,
+        categories_hierarchy TEXT
       )
     ''');
 
@@ -226,6 +227,16 @@ class DatabaseHelper {
         logInfo('Migration to version 9 completed');
       } on Exception catch (e) {
         logWarning('Migration v9 failed (columns may already exist): $e');
+      }
+    }
+    if (oldVersion < 10) {
+      try {
+        await db.execute(
+          'ALTER TABLE products ADD COLUMN categories_hierarchy TEXT',
+        );
+        logInfo('Migration to version 10 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v10 failed (column may already exist): $e');
       }
     }
   }

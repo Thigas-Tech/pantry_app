@@ -98,6 +98,14 @@ abstract class Product with _$Product {
     /// OFF CDN URL for the product front/packaging image, if available.
     @JsonKey(name: 'image_front_url') String? offProductImageUrl,
 
+    /// The OFF taxonomy hierarchy for this product, from broadest to
+    /// most specific. Each entry is a language‑prefixed tag
+    /// (e.g. `en:eggs`, `en:chicken-eggs`).
+    ///
+    /// May be `null` for manually entered products or when OFF has no
+    /// taxonomy data.
+    @JsonKey(name: 'categories_hierarchy') List<String>? categoriesHierarchy,
+
     /// The product category as assigned by the Open Food Facts community.
     ///
     /// Often a comma‑separated hierarchy (e.g. `"Spreads, Sweet spreads"`).

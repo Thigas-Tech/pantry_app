@@ -14,6 +14,9 @@ _Product _$ProductFromJson(Map<String, dynamic> json) => _Product(
   offNutritionImageUrl: json['image_nutrition_url'] as String?,
   offIngredientsImageUrl: json['image_ingredients_url'] as String?,
   offProductImageUrl: json['image_front_url'] as String?,
+  categoriesHierarchy: (json['categories_hierarchy'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
   category: json['category'] as String?,
   ingredients: json['ingredients_text'] as String?,
   servingSize: json['serving_size'] as String?,
@@ -35,6 +38,7 @@ Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
   'image_nutrition_url': instance.offNutritionImageUrl,
   'image_ingredients_url': instance.offIngredientsImageUrl,
   'image_front_url': instance.offProductImageUrl,
+  'categories_hierarchy': instance.categoriesHierarchy,
   'category': instance.category,
   'ingredients_text': instance.ingredients,
   'serving_size': instance.servingSize,

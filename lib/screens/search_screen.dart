@@ -70,8 +70,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       return;
     }
     _requestId++;
-    _cancelToken?.cancel();
-    _cancelToken = CancelToken();
     _debounce = Timer(const Duration(milliseconds: 500), () => _search(query));
   }
 
@@ -94,10 +92,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       if (query.length >= 2) {
         try {
           final api = ref.read(apiServiceProvider);
-          final apiResults = await api.searchProducts(
-            query,
-            cancelToken: _cancelToken,
-          );
+          final apiResults = await api.searchProducts(query);
           if (capturedRequestId != _requestId || !mounted) return;
           final existingBarcodes = results
               .map((r) => r.product.barcode)

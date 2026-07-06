@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/string_helpers.dart';
@@ -37,6 +39,9 @@ class ProductDao {
     'off_nutrition_image_url': p.offNutritionImageUrl,
     'off_ingredients_image_url': p.offIngredientsImageUrl,
     'off_product_image_url': p.offProductImageUrl,
+    'categories_hierarchy': p.categoriesHierarchy != null
+        ? jsonEncode(p.categoriesHierarchy)
+        : null,
   };
 
   /// Converts a database row map into a [Product].
@@ -67,6 +72,10 @@ class ProductDao {
     offNutritionImageUrl: map['off_nutrition_image_url'] as String?,
     offIngredientsImageUrl: map['off_ingredients_image_url'] as String?,
     offProductImageUrl: map['off_product_image_url'] as String?,
+    categoriesHierarchy: map['categories_hierarchy'] != null
+        ? (jsonDecode(map['categories_hierarchy'] as String) as List<dynamic>)
+              .cast<String>()
+        : null,
   );
 
   /// Inserts a product into the local cache (upsert).
@@ -279,5 +288,16 @@ class ProductDao {
       'ingredients': r['ingredients']! as int,
       'product': r['product']! as int,
     };
+  }
+
+  /// Returns all product rows with category and hierarchy for grouping.
+  Future<List<Map<String, dynamic>>> productsWithCategories(
+    Database db,
+  ) {
+    return db.rawQuery('''
+      SELECT category, categories_hierarchy
+      FROM products
+      WHERE category IS NOT NULL
+    ''');
   }
 }

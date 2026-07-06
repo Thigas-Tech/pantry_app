@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
@@ -34,18 +35,33 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
       expiringSoonDays: settings.expiringSoonDays,
     ),
     db.inventoryDao.weeklyAdditions(database, inventoryId: activeId),
+    db.productDao.productsWithCategories(database),
   ]);
 
   final prodCount = results[0] as int;
   final itemCount = results[1] as int;
   final nutriDist = results[2] as Map<String, int>;
-  final catDist = results[3] as List<Map<String, dynamic>>;
   final srcDist = results[4] as Map<String, int>;
   final localPhoto = results[5] as Map<String, int>;
   final offPhoto = results[6] as Map<String, int>;
   final locDist = results[7] as Map<String, int>;
   final expiryDist = results[8] as Map<String, int>;
   final weekly = results[9] as List<Map<String, dynamic>>;
+  final productCategories = results[10] as List<Map<String, dynamic>>;
+
+  // Compute parent categories from hierarchy data.
+  final parentCounts = <String, int>{};
+  for (final row in productCategories) {
+    final parent = _parentCategory(
+      row['category'] as String?,
+      row['categories_hierarchy'] as String?,
+    );
+    if (parent != null) {
+      parentCounts[parent] = (parentCounts[parent] ?? 0) + 1;
+    }
+  }
+  final sortedParents = parentCounts.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
 
   const gradeValues = {'a': 5, 'b': 4, 'c': 3, 'd': 2, 'e': 1};
   var nutriSum = 0;
@@ -85,12 +101,10 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
         )
         .toList(),
     itemsByLocation: locDist,
-    categoriesTop: catDist
+    categoriesTop: sortedParents
+        .take(10)
         .map(
-          (c) => CategoryCount(
-            category: c['category'] as String,
-            count: c['cnt'] as int,
-          ),
+          (e) => CategoryCount(category: e.key, count: e.value),
         )
         .toList(),
     nutriscoreDistribution: nutriDist,
@@ -109,3 +123,37 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     ),
   );
 });
+
+/// Returns a broad parent category from OFF hierarchy data.
+///
+/// When [hierarchyJson] is available, picks the 3rd-level English entry
+/// (e.g. `en:eggs` from `[en:products, en:eggs-and-their-products,
+/// en:eggs, en:chicken-eggs]`). When not available, falls back to the
+/// first non‑language‑tagged word of [rawCategory]. Returns `null` when
+/// both inputs are unavailable.
+String? _parentCategory(String? rawCategory, String? hierarchyJson) {
+  if (hierarchyJson != null && hierarchyJson.isNotEmpty) {
+    try {
+      final hierarchy = (jsonDecode(hierarchyJson) as List).cast<String>();
+      if (hierarchy.isNotEmpty) {
+        final enEntries = hierarchy.where((t) => t.startsWith('en:')).toList();
+        if (enEntries.isNotEmpty) {
+          final idx = (enEntries.length - 2).clamp(0, enEntries.length - 1);
+          var name = enEntries[idx].substring(3);
+          name = name.replaceAll('-', ' ');
+          return name[0].toUpperCase() + name.substring(1);
+        }
+      }
+    } on Exception {
+      // Fall through to rawCategory fallback.
+    }
+  }
+  if (rawCategory != null && rawCategory.isNotEmpty) {
+    final parts = rawCategory.split(',');
+    for (final part in parts) {
+      final trimmed = part.trim();
+      if (!trimmed.contains(':')) return trimmed;
+    }
+  }
+  return null;
+}

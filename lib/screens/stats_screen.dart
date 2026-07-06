@@ -13,12 +13,28 @@ import 'package:pantry_app/widgets/error_view.dart';
 /// Shows summary cards, Nutri-Score distribution, category breakdown,
 /// location breakdown, expiry donut, photo completeness, and Coming Soon
 /// stubs for price tracking and NFC-e receipts.
-class StatsScreen extends ConsumerWidget {
+///
+/// Uses `fl_chart` for PieChart and BarChart. All charts support touch
+/// interaction (tap a section to highlight it and its legend).
+///
+/// See: https://pub.dev/packages/fl_chart
+/// Docs: https://pub.dev/documentation/fl_chart/
+/// Examples: https://github.com/imaNNeo/fl_chart/tree/main/example
+class StatsScreen extends ConsumerStatefulWidget {
   /// Creates a [StatsScreen].
   const StatsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends ConsumerState<StatsScreen> {
+  int _touchedExpiryIndex = -1;
+  int _touchedCategoryIndex = -1;
+  int _touchedNutriIndex = -1;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final statsAsync = ref.watch(statsProvider);
 
@@ -160,7 +176,7 @@ class StatsScreen extends ConsumerWidget {
         value: stats.expiredCount.toDouble(),
         color: Colors.red.shade400,
         title: stats.expiredCount > 0 ? stats.expiredCount.toString() : '',
-        radius: 40,
+        radius: _touchedExpiryIndex == 0 ? 55 : 40,
         titleStyle: const TextStyle(color: Colors.white, fontSize: 14),
       ),
       PieChartSectionData(
@@ -169,14 +185,14 @@ class StatsScreen extends ConsumerWidget {
         title: stats.expiringSoonCount > 0
             ? stats.expiringSoonCount.toString()
             : '',
-        radius: 40,
+        radius: _touchedExpiryIndex == 1 ? 55 : 40,
         titleStyle: const TextStyle(color: Colors.white, fontSize: 14),
       ),
       PieChartSectionData(
         value: stats.goodCount.toDouble(),
         color: Colors.green.shade400,
         title: stats.goodCount > 0 ? stats.goodCount.toString() : '',
-        radius: 40,
+        radius: _touchedExpiryIndex == 2 ? 55 : 40,
         titleStyle: const TextStyle(color: Colors.white, fontSize: 14),
       ),
     ];
@@ -196,6 +212,16 @@ class StatsScreen extends ConsumerWidget {
                   sections: sections,
                   centerSpaceRadius: 36,
                   sectionsSpace: 2,
+                  pieTouchData: PieTouchData(
+                    touchCallback: (event, response) {
+                      if (event is! FlTapUpEvent) return;
+                      if (!mounted) return;
+                      setState(
+                        () => _touchedExpiryIndex =
+                            response?.touchedSection?.touchedSectionIndex ?? -1,
+                      );
+                    },
+                  ),
                 ),
               ),
               Text(
@@ -206,29 +232,49 @@ class StatsScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        Wrap(
+          spacing: 12,
+          runSpacing: 6,
           children: [
-            _legendDot(Colors.red.shade400, l10n.expired),
-            _legendDot(Colors.orange.shade400, l10n.expiringSoon),
-            _legendDot(Colors.green.shade400, l10n.good),
+            for (var i = 0; i < 3; i++) ...[
+              GestureDetector(
+                onTap: () => setState(
+                  () => _touchedExpiryIndex = _touchedExpiryIndex == i ? -1 : i,
+                ),
+                child: _legendDot(
+                  [
+                    Colors.red.shade400,
+                    Colors.orange.shade400,
+                    Colors.green.shade400,
+                  ][i],
+                  [l10n.expired, l10n.expiringSoon, l10n.good][i],
+                  selected: _touchedExpiryIndex == i,
+                ),
+              ),
+            ],
           ],
         ),
       ],
     );
   }
 
-  Widget _legendDot(Color color, String label) {
+  Widget _legendDot(Color color, String label, {bool selected = false}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10,
-          height: 10,
+          width: selected ? 14 : 10,
+          height: selected ? 14 : 10,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
       ],
     );
   }
@@ -261,6 +307,7 @@ class StatsScreen extends ConsumerWidget {
 
     for (var i = 0; i < grades.length; i++) {
       final count = stats.nutriscoreDistribution[grades[i]] ?? 0;
+      final touched = _touchedNutriIndex == i;
       barGroups.add(
         BarChartGroupData(
           x: i,
@@ -268,7 +315,7 @@ class StatsScreen extends ConsumerWidget {
             BarChartRodData(
               toY: count.toDouble(),
               color: colors[i],
-              width: 20,
+              width: touched ? 26 : 20,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(4),
               ),
@@ -294,6 +341,16 @@ class StatsScreen extends ConsumerWidget {
                       .reduce((a, b) => a > b ? a : b) +
                   1,
               barGroups: barGroups,
+              barTouchData: BarTouchData(
+                touchCallback: (event, response) {
+                  if (event is! FlTapUpEvent) return;
+                  if (!mounted) return;
+                  setState(
+                    () => _touchedNutriIndex =
+                        response?.spot?.touchedBarGroupIndex ?? -1,
+                  );
+                },
+              ),
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
@@ -373,7 +430,7 @@ class StatsScreen extends ConsumerWidget {
           value: cat.count.toDouble(),
           color: colors[i],
           title: cat.count > 0 ? cat.count.toString() : '',
-          radius: 50,
+          radius: _touchedCategoryIndex == i ? 65 : 50,
           titleStyle: const TextStyle(color: Colors.white, fontSize: 12),
         ),
       );
@@ -394,6 +451,16 @@ class StatsScreen extends ConsumerWidget {
                   sections: sections,
                   centerSpaceRadius: 32,
                   sectionsSpace: 2,
+                  pieTouchData: PieTouchData(
+                    touchCallback: (event, response) {
+                      if (event is! FlTapUpEvent) return;
+                      if (!mounted) return;
+                      setState(
+                        () => _touchedCategoryIndex =
+                            response?.touchedSection?.touchedSectionIndex ?? -1,
+                      );
+                    },
+                  ),
                 ),
               ),
               Text('$total', style: theme.textTheme.headlineMedium),
@@ -401,20 +468,63 @@ class StatsScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Wrap(
-          spacing: 12,
-          runSpacing: 6,
-          children: [
-            for (
-              var i = 0;
-              i < stats.categoriesTop.length && i < colors.length;
-              i++
-            )
-              _legendDot(colors[i], stats.categoriesTop[i].category),
-          ],
-        ),
+        const SizedBox(height: 12),
+        for (
+          var i = 0;
+          i < stats.categoriesTop.length && i < colors.length;
+          i++
+        ) ...[
+          GestureDetector(
+            onTap: () => setState(
+              () => _touchedCategoryIndex = _touchedCategoryIndex == i ? -1 : i,
+            ),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: _touchedCategoryIndex == i
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : null,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: colors[i],
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _truncatedLabel(stats.categoriesTop[i].category),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: _touchedCategoryIndex == i
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${stats.categoriesTop[i].count}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
     );
+  }
+
+  String _truncatedLabel(String label) {
+    if (label.length <= 25) return label;
+    return '${label.substring(0, 25)}\u2026';
   }
 
   Widget _buildLocationChart(BuildContext context, PantryStats stats) {
