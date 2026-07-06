@@ -5,6 +5,10 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Section headings in CHANGELOG.md that describe internal development
+/// work and should not be displayed to end users in the in-app sheet.
+const _devOnlySections = {'Documentation', 'Code health'};
+
 /// Shows a bottom sheet listing changelog entries since the last seen version.
 ///
 /// [entries] should be the result of [ChangelogParser.parse] filtered by
@@ -171,6 +175,10 @@ class _SectionContent extends StatelessWidget {
           ? part.trim()
           : part.substring(0, headerEnd).trim();
       final lines = headerEnd == -1 ? '' : part.substring(headerEnd + 1).trim();
+
+      if (_devOnlySections.contains(title)) {
+        continue;
+      }
 
       sections.add(_ChangelogSection(title: title, body: lines));
     }

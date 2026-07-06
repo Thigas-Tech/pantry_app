@@ -528,45 +528,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           'Deleted inventory item ${item.id} (${widget.product.barcode})',
         );
         if (mounted) {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.itemRemoved),
-              action: SnackBarAction(
-                label: l10n.undo,
-                onPressed: () async {
-                  try {
-                    final restoredId = await repo.addInventoryItem(item);
-                    logInfo('Undo delete: restored item $restoredId');
-                    final restoredItem = item.copyWith(id: restoredId);
-                    await notificationService.scheduleExpiryReminders(
-                      restoredItem,
-                      expiringSoonTitle: l10n.expiringSoon,
-                      expiringSoonBody: l10n.expiresTomorrow(
-                        restoredItem.barcode,
-                      ),
-                      expiringTodayTitle: l10n.expiringToday,
-                      expiringTodayBody: l10n.expiresToday(
-                        restoredItem.barcode,
-                      ),
-                      channelName: l10n.expiryChannelName,
-                      channelDescription: l10n.expiryChannelDescription,
-                    );
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.itemRestored)),
-                      );
-                      setState(() => _inventoryVersion++);
-                      ref.invalidate(inventoryWithProductProvider);
-                    }
-                  } on Exception catch (e) {
-                    logError('Failed to undo delete: $e');
-                  }
-                },
-              ),
-            ),
-          );
+          SnackbarHelper.showUndo(context, l10n.itemRemoved, () async {
+            try {
+              final restoredId = await repo.addInventoryItem(item);
+              logInfo('Undo delete: restored item $restoredId');
+              final restoredItem = item.copyWith(id: restoredId);
+              await notificationService.scheduleExpiryReminders(
+                restoredItem,
+                expiringSoonTitle: l10n.expiringSoon,
+                expiringSoonBody: l10n.expiresTomorrow(restoredItem.barcode),
+                expiringTodayTitle: l10n.expiringToday,
+                expiringTodayBody: l10n.expiresToday(restoredItem.barcode),
+                channelName: l10n.expiryChannelName,
+                channelDescription: l10n.expiryChannelDescription,
+              );
+              if (mounted) {
+                SnackbarHelper.showInfo(context, l10n.itemRestored);
+                setState(() => _inventoryVersion++);
+                ref.invalidate(inventoryWithProductProvider);
+              }
+            } on Exception catch (e) {
+              logError('Failed to undo delete: $e');
+            }
+          });
         }
         setState(() => _inventoryVersion++);
         WidgetsBinding.instance.addPostFrameCallback((_) {

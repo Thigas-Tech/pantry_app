@@ -120,7 +120,10 @@ class _MobileScannerViewState extends State<_MobileScannerView>
         children: [
           MobileScanner(
             onDetect: (capture) {
-              if (_hasScanned) return;
+              if (_hasScanned) {
+                logInfo('Scan already captured — ignoring duplicate');
+                return;
+              }
               final barcode = capture.barcodes.first;
               if (barcode.rawValue == null) return;
               _hasScanned = true;

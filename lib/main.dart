@@ -109,6 +109,7 @@ Future<void> _scheduleCacheRefresh() async {
     final container = ProviderContainer();
     final repo = container.read(productRepositoryProvider);
     if (!await repo.isCacheOverdue()) {
+      logInfo('Cache is fresh — skipping scheduled refresh');
       container.dispose();
       return;
     }

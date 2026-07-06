@@ -318,5 +318,6 @@
   },
   "noCategories": "No categories yet",
   "addedThisWeekLabel": "This week",
-  "addedThisMonthLabel": "This month"
+  "addedThisMonthLabel": "This month",
+  "productDataUnavailable": "Product data unavailable — pull to refresh when online"
 }

@@ -16,6 +16,8 @@
 
 ### Bugfixes
 - **Missing `cacheWidth` in product detail**: `Image.network` in `ProductDetailScreen` was only constraining decode height. Added `cacheWidth` at screen width × device pixel ratio.
+- **Stats summary cards overflow**: `_SummaryCard` and `_PhotoCard` Column widgets overflowed by 12px on tight layouts. Added `mainAxisSize: MainAxisSize.min`.
+- **Chart label colors**: Bar chart axis labels in NutriScoreBar, CategoryChart, and LocationChart now use `colorScheme.onSurface` for readability in dark mode.
 
 ### Stats & Analytics
 - **StatsScreen rewritten with fl_chart**: Summary cards (total products, total items, added this week/month), Nutri-Score distribution (BarChart), category breakdown (BarChart), location breakdown (BarChart), photo completeness cards with OFF comparison, and ComingSoonView stubs for price tracking and NFC-e receipts.
@@ -27,6 +29,17 @@
 - **OFF API parser** now reads `image_nutrition_url`, `image_ingredients_url`, `image_front_url` from API responses.
 - **8 new DAO aggregation methods**: `ProductDao` (nutriscoreDistribution, categoryDistribution, sourceDistribution, photoCompleteness, offPhotoCompleteness) and `InventoryDao` (locationDistribution, expiryDistribution, weeklyAdditions).
 - **10 new ARB keys** added to all 3 locales (price tracking, NFC-e, photo completeness).
+
+### UX & Debugging
+- **Changelog dev-section filter**: `whats_new_sheet` now hides `### Documentation` and `### Code health` from the in-app display. Users see only product-facing changes.
+- **Connectivity transition logging**: `connectivityProvider` now logs online/offline state changes.
+- **Action-level logging**: added `logInfo` before every `unawaited()` fire-and-forget, `logWarning` for guard conditions, `logInfo` for form validation failures.
+- **Snackbar consistency**: replaced raw `ScaffoldMessenger.showSnackBar` in delete flow with `SnackbarHelper.showUndo`. Replaced hardcoded English string in `inventory_card` with ARB-localized `productDataUnavailable`.
+
+### Bugfixes
+- **Stats summary cards overflow**: `_SummaryCard` and `_PhotoCard` added `mainAxisSize: MainAxisSize.min` to prevent RenderFlex overflow.
+- **Chart label colors**: Bar chart axis labels now use `colorScheme.onSurface` for dark mode readability.
+- **Dead `Contribute Photos` button**: added `logInfo` for the unimplemented feature.
 
 ### Code health
 - **AGENTS.md rule 11**: Consider performance and footprint on every plan.

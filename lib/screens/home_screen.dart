@@ -61,8 +61,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     try {
       final repo = ref.read(productRepositoryProvider);
       final online = await InternetConnectionChecker.instance.hasConnection;
-      if (!online) return;
-      if (!await repo.isCacheOverdue()) return;
+      if (!online) {
+        logInfo('Skipping refresh — device is offline');
+        return;
+      }
+      if (!await repo.isCacheOverdue()) {
+        logInfo('Cache is fresh — skipping refresh');
+        return;
+      }
       logInfo('Cache overdue — scheduling background refresh');
       final activeId = ref.read(activeInventoryProvider);
       repo.refreshInventoryProductsBackground(activeId);
@@ -91,7 +97,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Future<void> _deleteSelected(List<InventoryWithProduct> allItems) async {
     final l10n = AppLocalizations.of(context)!;
     final count = _selectedIds.length;
-    if (count == 0) return;
+    if (count == 0) {
+      logWarning('Delete triggered but selected count is 0');
+      return;
+    }
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -169,7 +178,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   ) async {
     final l10n = AppLocalizations.of(context)!;
     final count = _selectedIds.length;
-    if (count == 0) return;
+    if (count == 0) {
+      logWarning('Move triggered but selected count is 0');
+      return;
+    }
 
     final ids = Set<int>.from(_selectedIds);
     final itemsToMove = allItems
@@ -181,7 +193,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         .where((inv) => (inv['id'] as int) != activeId)
         .toList();
 
-    if (targetInventories.isEmpty) return;
+    if (targetInventories.isEmpty) {
+      logInfo('Move cancelled — no other pantry to move to');
+      return;
+    }
 
     final targetInv = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -272,6 +287,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         tooltip: l10n.switchPantry,
         onSelected: (value) {
           if (value == '__manage__') {
+            logInfo('Navigating to Manage Inventories');
             unawaited(
               Navigator.of(context).push<void>(
                 MaterialPageRoute(
@@ -280,6 +296,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             );
           } else if (value == '__create__') {
+            logInfo('Showing Create Pantry dialog');
             unawaited(_showCreatePantryDialog(context, ref));
           } else {
             final id = int.tryParse(value);
@@ -352,23 +369,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 IconButton(
                   icon: const Icon(Icons.delete),
                   tooltip: l10n.delete,
-                  onPressed: () => unawaited(
-                    _deleteSelected(
-                      inventoryAsync.value ?? [],
-                    ),
-                  ),
+                  onPressed: () {
+                    logInfo(
+                      'Delete triggered for ${_selectedIds.length} items',
+                    );
+                    unawaited(
+                      _deleteSelected(
+                        inventoryAsync.value ?? [],
+                      ),
+                    );
+                  },
                 ),
                 if (inventoriesAsync.value != null &&
                     inventoriesAsync.value!.length > 1)
                   IconButton(
                     icon: const Icon(Icons.move_up),
                     tooltip: l10n.moveToPantry,
-                    onPressed: () => unawaited(
-                      _moveSelected(
-                        inventoryAsync.value ?? [],
-                        inventoriesAsync.value!,
-                      ),
-                    ),
+                    onPressed: () {
+                      logInfo(
+                        'Move triggered for ${_selectedIds.length} items',
+                      );
+                      unawaited(
+                        _moveSelected(
+                          inventoryAsync.value ?? [],
+                          inventoriesAsync.value!,
+                        ),
+                      );
+                    },
                   ),
                 IconButton(
                   icon: const Icon(Icons.close),

@@ -106,8 +106,8 @@ class _PantryShellState extends ConsumerState<PantryShell> {
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('changelog_show_pending', 'false');
-      } on Exception {
-        // Best-effort cleanup.
+      } on Exception catch (e) {
+        logWarning('Failed to reset changelog flag during cleanup: $e');
       }
     }
   }

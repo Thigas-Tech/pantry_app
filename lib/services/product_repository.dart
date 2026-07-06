@@ -114,17 +114,27 @@ class ProductRepository {
   // ---------- Named inventories ----------
 
   /// Creates a new inventory (pantry) with the given [name].
-  Future<int> createInventory(String name) => _db.createInventory(name);
+  Future<int> createInventory(String name) {
+    logInfo('Creating inventory "$name"');
+    return _db.createInventory(name);
+  }
 
   /// Returns all inventories.
-  Future<List<Map<String, dynamic>>> getInventories() => _db.getInventories();
+  Future<List<Map<String, dynamic>>> getInventories() {
+    return _db.getInventories();
+  }
 
   /// Deletes the inventory with the given [id] and all its items.
-  Future<void> deleteInventory(int id) => _db.deleteInventory(id);
+  Future<void> deleteInventory(int id) {
+    logInfo('Deleting inventory $id');
+    return _db.deleteInventory(id);
+  }
 
   /// Renames the inventory with the given [id].
-  Future<void> renameInventory(int id, String newName) =>
-      _db.renameInventory(id, newName);
+  Future<void> renameInventory(int id, String newName) {
+    logInfo('Renaming inventory $id to "$newName"');
+    return _db.renameInventory(id, newName);
+  }
 
   // ---------- Inventory items (scoped) ----------
 

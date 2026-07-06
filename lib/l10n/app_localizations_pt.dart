@@ -587,6 +587,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addedThisMonthLabel => 'Este mês';
+
+  @override
+  String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1172,4 +1175,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get addedThisMonthLabel => 'Este mês';
+
+  @override
+  String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
 }

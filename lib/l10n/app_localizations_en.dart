@@ -587,4 +587,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addedThisMonthLabel => 'This month';
+
+  @override
+  String get productDataUnavailable => 'Product data unavailable — pull to refresh when online';
 }

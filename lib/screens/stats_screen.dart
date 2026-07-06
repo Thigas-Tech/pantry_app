@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 
@@ -174,6 +175,7 @@ class StatsScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final textColor = Theme.of(context).colorScheme.onSurface;
     final grades = ['a', 'b', 'c', 'd', 'e'];
     final colors = [
       Colors.green.shade700,
@@ -222,10 +224,13 @@ class StatsScreen extends ConsumerWidget {
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
-                                        getTitlesWidget: (value, meta) {
+                    getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i >= 0 && i < grades.length) {
-                        return Text(grades[i].toUpperCase());
+                        return Text(
+                          grades[i].toUpperCase(),
+                          style: TextStyle(color: textColor),
+                        );
                       }
                       return const Text('');
                     },
@@ -233,9 +238,11 @@ class StatsScreen extends ConsumerWidget {
                 ),
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
-                                        reservedSize: 30,
-                    getTitlesWidget: (value, meta) =>
-                        Text(value.toInt().toString()),
+                    reservedSize: 30,
+                    getTitlesWidget: (value, meta) => Text(
+                      value.toInt().toString(),
+                      style: TextStyle(color: textColor),
+                    ),
                   ),
                 ),
                 topTitles: const AxisTitles(),
@@ -255,6 +262,7 @@ class StatsScreen extends ConsumerWidget {
     AppLocalizations l10n,
     PantryStats stats,
   ) {
+    final textColor = Theme.of(context).colorScheme.onSurface;
     if (stats.categoriesTop.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +312,7 @@ class StatsScreen extends ConsumerWidget {
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
-                                        reservedSize: 120,
+                    reservedSize: 120,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i >= 0 && i < stats.categoriesTop.length) {
@@ -318,7 +326,7 @@ class StatsScreen extends ConsumerWidget {
                             alignment: Alignment.centerRight,
                             child: Text(
                               label,
-                              style: const TextStyle(fontSize: 11),
+                              style: TextStyle(fontSize: 11, color: textColor),
                             ),
                           ),
                         );
@@ -345,6 +353,7 @@ class StatsScreen extends ConsumerWidget {
     if (stats.itemsByLocation.isEmpty) {
       return const SizedBox.shrink();
     }
+    final textColor = Theme.of(context).colorScheme.onSurface;
 
     final entries = stats.itemsByLocation.entries.toList();
     final barGroups = <BarChartGroupData>[];
@@ -386,13 +395,16 @@ class StatsScreen extends ConsumerWidget {
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
-                                        reservedSize: 80,
+                    reservedSize: 80,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i >= 0 && i < entries.length) {
                         return Padding(
                           padding: const EdgeInsets.only(right: 4),
-                          child: Text(entries[i].key),
+                          child: Text(
+                            entries[i].key,
+                            style: TextStyle(color: textColor),
+                          ),
                         );
                       }
                       return const Text('');
@@ -465,7 +477,7 @@ class StatsScreen extends ConsumerWidget {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
-                // Link to OFF — URL launcher integration deferred.
+                logInfo('Contribute Photos tapped — not yet implemented');
               },
               icon: const Icon(Icons.open_in_browser),
               label: Text(l10n.contributePhotos),
@@ -494,6 +506,7 @@ class _SummaryCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
@@ -531,6 +544,7 @@ class _PhotoCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),

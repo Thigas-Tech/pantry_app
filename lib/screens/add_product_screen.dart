@@ -82,7 +82,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      logInfo('Add-product form validation failed');
+      return;
+    }
     _formKey.currentState!.save();
 
     final nutritionPath = await _saveImageToStorage(

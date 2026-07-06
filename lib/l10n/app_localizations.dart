@@ -1175,6 +1175,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This month'**
   String get addedThisMonthLabel;
+
+  /// No description provided for @productDataUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Product data unavailable — pull to refresh when online'**
+  String get productDataUnavailable;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

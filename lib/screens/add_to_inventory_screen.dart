@@ -123,7 +123,10 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   }
 
   void _save() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      logInfo('Add-to-inventory form validation failed');
+      return;
+    }
     _formKey.currentState!.save();
 
     final item = InventoryItem(

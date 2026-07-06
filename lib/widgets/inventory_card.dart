@@ -165,8 +165,7 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                     if (context.mounted) {
                       SnackbarHelper.showInfo(
                         context,
-                        'Product data unavailable'
-                        ' — pull to refresh when online',
+                        l10n.productDataUnavailable,
                       );
                     }
                   } on Exception catch (e) {
