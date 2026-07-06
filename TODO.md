@@ -36,9 +36,42 @@ infrastructure or external server hosting are listed last.
   when fixed.
   Follow [flutter/flutter#186810](https://github.com/flutter/flutter/issues/186810).
 - [ ] **GitHub Actions — Play Store deployment** — on new tag (`v*`):
-  - `flutter build appbundle` + `flutter build apk` (release)
+  - Decode keystore from `ANDROID_KEYSTORE_BASE64` secret
+  - `flutter build appbundle` + `flutter build apk` (release, signed)
   - Upload both to Google Play Console via `r0adkll/upload-google-play`
-  - Requires Play Store service account JSON stored as a GitHub secret.
+  - Requires: Play Store service account JSON, signing keystore, and
+    AdMob/Firebase configs stored as GitHub secrets.
+- [ ] **Deploy-to-Play-Store workflow file** — create
+  `.github/workflows/deploy-to-playstore.yml` triggering on `v*` tags.
+  Runs analysis, tests, injects `.env`, signs with keystore from secrets,
+  uploads to internal track.
+- [ ] **Signing setup** — create upload keystore, configure
+  `android/key.properties` template, update `build.gradle.kts` for
+  release signing (reads from `key.properties` or env vars at CI).
+
+### Monetization (shipped with Play Store launch)
+
+- [ ] **AdMob integration** — add `google_mobile_ads` package, create
+  `AdService` (init, load banners/native ads, dispose), `AdBanner`
+  widget and `SearchNativeAd` widget. Banner on Home, Product Detail,
+  Settings, Stats. Native ad in Search results (every 5th).
+- [ ] **GDPR/LGPD consent flow** — UMP SDK consent on first launch,
+  "Ad Preferences" toggle in Settings, privacy policy link.
+- [ ] **Donation IAP** — add `in_app_purchase` package, create
+  `DonationService` wrapping Play Billing. Three consumable tiers
+  ($2.99, $4.99, $9.99). "Support Development" section in Settings.
+- [ ] **Pro subscription** — monthly ($0.99) and yearly ($9.99)
+  auto-renewing subscription. Removes all ads when active. Tied to
+  cloud backup feature.
+- [ ] **Firebase setup** — create Firebase project, register Android
+  app `com.thigas_tech.pantry_app`, download `google-services.json`,
+  add `firebase_core`, `firebase_auth`, `firebase_storage` dependencies.
+  Enable Google Sign-In in Firebase Console.
+- [ ] **Cloud backup service** — `FirebaseService` (Auth + Storage init),
+  `CloudBackupService` (export DB → upload to `users/{uid}/backup.db`,
+  restore by download + replace + provider invalidation).
+  `CloudBackupScreen` with sign-in prompt, backup/restore buttons,
+  last-backup metadata display. Gated behind Pro subscription.
 
 ---
 

@@ -4,7 +4,8 @@ An offline-first Flutter application for managing pantry inventory and expiry da
 
 ## Project overview
 
-- **Stack:** Flutter (stable), Dart 3.12+, Riverpod 3.x, SQLite (sqflite)
+- **Stack:** Flutter (stable), Dart 3.12+, Riverpod 3.x, SQLite (sqflite),
+  Firebase (Auth, Storage), Google Mobile Ads, Play Billing
 - **Platforms:** Android (primary), iOS, Linux, macOS, Web, Windows
 - **State management:** Riverpod (`flutter_riverpod`)
 - **Database:** SQLite via `sqflite` with DAO pattern (see `lib/database/`)
@@ -147,6 +148,10 @@ emits a corresponding `logInfo`/`logWarning`/`logError` — never duplicate.
 - **Form validation failures**: log when a form is rejected so remote
   debugging can see the rejection even though the user sees inline errors
   on screen (e.g. `'Add-to-inventory form validation failed'`).
+- **Ad lifecycle events**: log ad load success/failure, ad impression,
+  consent status changes. Ad failures are `logWarning` — they are expected
+  (no-fill, network) and should not alarm. Only log `logError` if ads
+  fail to initialize entirely.
 
 **`logWarning`** — log when the app takes a degraded or unexpected path:
 
@@ -317,6 +322,49 @@ These sites are authoritative references for Android and Samsung platform behavi
 | Android Open Source Project | <https://source.android.com/docs/> | AOSP internals, HAL, system architecture |
 | Android Developers | <https://developer.android.com/> | Official SDK/API docs, Jetpack libraries, Material Design |
 | Samsung Developers | <https://developer.samsung.com/> | One UI behaviour, Samsung-specific APIs, device testing guides |
+
+## Firebase References
+
+These are authoritative references for FlutterFire, Firebase Auth, and
+Cloud Storage:
+
+| Source | URL | Scope |
+|---|---|---|
+| FlutterFire docs | https://firebase.flutter.dev | All FlutterFire plugins, setup, CLI |
+| Firebase Console | https://console.firebase.google.com | Project management, Auth setup, Storage rules |
+| firebase_core | https://pub.dev/packages/firebase_core | Required base plugin |
+| firebase_auth | https://pub.dev/packages/firebase_auth | Google Sign-In, email/password, anonymous |
+| firebase_storage | https://pub.dev/packages/firebase_storage | Cloud file upload/download |
+| firebase_analytics | https://pub.dev/packages/firebase_analytics | User analytics and events |
+| firebase_crashlytics | https://pub.dev/packages/firebase_crashlytics | Crash reporting |
+| firebase_messaging | https://pub.dev/packages/firebase_messaging | Push notifications |
+| FirebaseUI Flutter | https://pub.dev/packages/firebase_ui_auth | Pre-built auth UI widgets |
+| FlutterFire CLI | https://firebase.flutter.dev/docs/cli | `flutterfire configure` tool |
+| FlutterFire GitHub | https://github.com/FirebaseExtended/flutterfire | Source code, examples, issues |
+| Auth codelab | https://firebase.google.com/codelabs/firebase-flutter-auth | Hands-on auth tutorial |
+| FlutterFire codelab | https://firebase.google.com/codelabs/firebase-flutter | Introductory Flutter + Firebase codelab |
+| freeCodeCamp handbook | https://www.freecodecamp.org/news/how-to-integrate-firebase-into-flutter-applications/ | Comprehensive integration guide |
+| Firebase docs | https://firebase.google.com/docs | Official Firebase product docs |
+
+## Google Mobile Ads References
+
+| Source | URL | Scope |
+|---|---|---|
+| google_mobile_ads | https://pub.dev/packages/google_mobile_ads | AdMob Flutter plugin |
+| AdMob docs | https://developers.google.com/admob/flutter/quick-start | AdMob setup, ad units, mediation |
+| UMP SDK (consent) | https://developers.google.com/admob/flutter/privacy | GDPR/LGPD consent collection |
+| AdMob policies | https://support.google.com/admob/answer/6128543 | Ad placement policies, invalid traffic |
+| Ad Inspector | https://developers.google.com/admob/flutter/ad-inspector | Debug tool for ad serving |
+
+## In-App Purchase References
+
+| Source | URL | Scope |
+|---|---|---|
+| in_app_purchase | https://pub.dev/packages/in_app_purchase | Flutter IAP plugin |
+| Play Billing Library | https://developer.android.com/google/play/billing | Android billing integration |
+| Play Console | https://play.google.com/console | IAP product creation, pricing, testing |
+| App Store Small Business | https://developer.apple.com/app-store/small-business-program/ | 15% reduced commission |
+| IAP codelab | https://codelabs.developers.google.com/codelabs/flutter-in-app-purchases | Hands-on IAP tutorial |
 
 ## Performance & footprint optimization
 
