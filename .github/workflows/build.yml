@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@4830be28ce81da52ec70d65c552a7403821d98d4
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@3db98c0363e2fa5df3e1c4c471777a7c10b24cc9
 
   testing:
     name: Run ${{ matrix.category }} testing
@@ -28,17 +28,17 @@ jobs:
       fail-fast: false
     steps:
       - name: Clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           path: code
       - name: Get Flutter version
         id: get-flutter-version
-        uses: zgosalvez/github-actions-get-flutter-version-env@22ab458dabc3aa2dce4dd9f1632a6800869d00de
+        uses: zgosalvez/github-actions-get-flutter-version-env@db80c000d15b0a11d86bfa4d5a9dc885f054f46d
         with:
           pubspec-file-path: code/pubspec.yaml
       - name: Cache Flutter
         id: flutter-cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: flutter
           key: ${{ env.cache-name }}-ubuntu-latest-${{ steps.get-flutter-version.outputs.version }}-${{ hashFiles('code/pubspec.lock') }}
@@ -50,7 +50,7 @@ jobs:
           cache-name: flutter-cache
       - name: Clone the Flutter repository
         if: steps.flutter-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           repository: flutter/flutter
           ref: ${{ steps.get-flutter-version.outputs.version }}
@@ -69,7 +69,7 @@ jobs:
         working-directory: code
       - name: Analyze Flutter
         if: matrix.category == 'static'
-        uses: zgosalvez/github-actions-analyze-dart@92375956021937d35938504eefb62b18bfebb154
+        uses: zgosalvez/github-actions-analyze-dart@e0ecdf9d71924700dec2d2e9b52ab08fe606142d
         with:
           fail-on-warnings: true
           working-directory: code
@@ -79,7 +79,7 @@ jobs:
         working-directory: code
       - name: Upload code coverage to GitHub
         if: matrix.category != 'static'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: code-coverage-${{ matrix.category }}
           path: code/coverage/lcov.${{ matrix.category }}.info
@@ -90,17 +90,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           path: code
       - name: Get Flutter version
         id: get-flutter-version
-        uses: zgosalvez/github-actions-get-flutter-version-env@22ab458dabc3aa2dce4dd9f1632a6800869d00de
+        uses: zgosalvez/github-actions-get-flutter-version-env@db80c000d15b0a11d86bfa4d5a9dc885f054f46d
         with:
           pubspec-file-path: code/pubspec.yaml
       - name: Cache Flutter
         id: flutter-cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         with:
           path: flutter
           key: ${{ env.cache-name }}-ubuntu-latest-${{ steps.get-flutter-version.outputs.version }}-${{ hashFiles('code/pubspec.lock') }}
@@ -112,7 +112,7 @@ jobs:
           cache-name: flutter-cache
       - name: Clone the Flutter repository
         if: steps.flutter-cache.outputs.cache-hit != 'true'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           repository: flutter/flutter
           ref: ${{ steps.get-flutter-version.outputs.version }}
@@ -148,13 +148,13 @@ jobs:
         run: flutter build appbundle --debug
         working-directory: code
       - name: Upload APK artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: app-debug-apk
           path: code/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 7
       - name: Upload AAB artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: app-debug-aab
           path: code/build/app/outputs/bundle/debug/app-debug.aab

@@ -19,7 +19,7 @@ jobs:
           - x86_64
     steps:
       - name: Clone the repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Setup Flutter
         uses: subosito/flutter-action@e14214cc42435fc0c2609c5e614a5e63a2fcd6f5
         with:
@@ -29,7 +29,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@e14e7e5b6cea0b4e56862d4ef4b7a605e50a8cb6
       - name: AVD cache
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
         id: avd-cache
         with:
           path: |
@@ -59,7 +59,7 @@ jobs:
             flutter test --no-pub --concurrency=2 integration_test/
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: patrol-e2e-results
           path: |
