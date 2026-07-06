@@ -1,3 +1,4 @@
+import 'package:pantry_app/database/feedback_queue_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
@@ -54,6 +55,9 @@ class DatabaseHelper {
   /// DAO for the `inventories` table.
   final InventoriesDao inventoriesDao = const InventoriesDao();
 
+  /// DAO for the `feedback_queue` table.
+  final FeedbackQueueDao feedbackQueueDao = const FeedbackQueueDao();
+
   /// The lazily‑opened database instance.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -67,7 +71,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 10,
+        version: 11,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -143,6 +147,8 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_inventory_id ON inventory(inventory_id)',
     );
+
+    await feedbackQueueDao.createTable(db);
 
     await inventoriesDao.seedDefault(db);
 
@@ -238,6 +244,10 @@ class DatabaseHelper {
       } on Exception catch (e) {
         logWarning('Migration v10 failed (column may already exist): $e');
       }
+    }
+    if (oldVersion < 11) {
+      await feedbackQueueDao.createTable(db);
+      logInfo('Migration to version 11 completed');
     }
   }
 
@@ -421,5 +431,57 @@ class DatabaseHelper {
   Future<int> getInventoryCount({int? inventoryId}) async {
     final db = await database;
     return inventoryDao.count(db, inventoryId: inventoryId);
+  }
+
+  // ---- Feedback queue (delegating to FeedbackQueueDao) ------
+
+  /// Queues a feedback issue for offline submission.
+  Future<int> queueFeedbackIssue({
+    required String title,
+    required String body,
+    String? label,
+    String? screenshotPath,
+  }) async {
+    final db = await database;
+    return feedbackQueueDao.insert(
+      db,
+      title: title,
+      body: body,
+      label: label,
+      screenshotPath: screenshotPath,
+    );
+  }
+
+  /// Returns all pending (non-failed) feedback queue rows.
+  Future<List<Map<String, dynamic>>> getPendingFeedbackIssues() async {
+    final db = await database;
+    return feedbackQueueDao.getAllPending(db);
+  }
+
+  /// Deletes a feedback queue row.
+  Future<void> deleteFeedbackIssue(int id) async {
+    final db = await database;
+    return feedbackQueueDao.delete(db, id);
+  }
+
+  /// Increments the retry count for a feedback queue row.
+  Future<void> incrementFeedbackRetry(int id) async {
+    final db = await database;
+    return feedbackQueueDao.incrementRetry(db, id);
+  }
+
+  /// Marks a feedback queue row as permanently failed.
+  Future<void> markFeedbackFailed(int id) async {
+    final db = await database;
+    return feedbackQueueDao.markFailed(db, id);
+  }
+
+  /// Deletes stale failed feedback queue rows.
+  Future<int> deleteStaleFeedbackFailures({int olderThanDays = 30}) async {
+    final db = await database;
+    return feedbackQueueDao.deleteStaleFailures(
+      db,
+      olderThanDays: olderThanDays,
+    );
   }
 }

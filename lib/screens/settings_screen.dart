@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,7 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
+import 'package:pantry_app/screens/feedback_screen.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -123,6 +126,11 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(l10n.whatsNewDismiss),
                 onTap: () => _showWhatsNew(context),
               ),
+              ListTile(
+                leading: const Icon(Icons.bug_report_outlined),
+                title: Text(l10n.sendFeedback),
+                onTap: () => _sendFeedback(context),
+              ),
             ],
           ),
         ],
@@ -151,6 +159,16 @@ class SettingsScreen extends ConsumerWidget {
         SnackbarHelper.showError(context, l10n.flushCacheFailed);
       }
     }
+  }
+
+  void _sendFeedback(BuildContext context) {
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const FeedbackScreen(),
+        ),
+      ),
+    );
   }
 
   Future<void> _showThemeDialog(BuildContext context, WidgetRef ref) async {

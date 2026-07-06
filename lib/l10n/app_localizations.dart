@@ -1205,6 +1205,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Product'**
   String get productPhoto;
+
+  /// No description provided for @sendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Feedback'**
+  String get sendFeedback;
+
+  /// No description provided for @issueType.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue type'**
+  String get issueType;
+
+  /// No description provided for @bugReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug Report'**
+  String get bugReport;
+
+  /// No description provided for @featureRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature Request'**
+  String get featureRequest;
+
+  /// No description provided for @generalFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'General Feedback'**
+  String get generalFeedback;
+
+  /// No description provided for @issueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get issueTitle;
+
+  /// No description provided for @issueTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required (min 5 characters)'**
+  String get issueTitleRequired;
+
+  /// No description provided for @issueDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get issueDescription;
+
+  /// No description provided for @issueDescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Description is required (min 10 characters)'**
+  String get issueDescriptionRequired;
+
+  /// No description provided for @attachScreenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach screenshot'**
+  String get attachScreenshot;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @includeDeviceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Include device info'**
+  String get includeDeviceInfo;
+
+  /// No description provided for @sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get sending;
+
+  /// No description provided for @issueCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create issue'**
+  String get issueCreate;
+
+  /// No description provided for @issueSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks! Your report has been submitted.'**
+  String get issueSubmitted;
+
+  /// No description provided for @issueQueuedOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Your report will be submitted when you are back online.'**
+  String get issueQueuedOffline;
+
+  /// No description provided for @issueSubmissionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to submit. Please try again.'**
+  String get issueSubmissionFailed;
+
+  /// No description provided for @viewOnGitHub.
+  ///
+  /// In en, this message translates to:
+  /// **'View on GitHub'**
+  String get viewOnGitHub;
+
+  /// No description provided for @issueDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'You recently submitted a similar report.'**
+  String get issueDuplicate;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

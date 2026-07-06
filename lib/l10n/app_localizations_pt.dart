@@ -602,6 +602,66 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productPhoto => 'Produto';
+
+  @override
+  String get sendFeedback => 'Send Feedback';
+
+  @override
+  String get issueType => 'Issue type';
+
+  @override
+  String get bugReport => 'Bug Report';
+
+  @override
+  String get featureRequest => 'Feature Request';
+
+  @override
+  String get generalFeedback => 'General Feedback';
+
+  @override
+  String get issueTitle => 'Title';
+
+  @override
+  String get issueTitleRequired => 'Title is required (min 5 characters)';
+
+  @override
+  String get issueDescription => 'Description';
+
+  @override
+  String get issueDescriptionRequired => 'Description is required (min 10 characters)';
+
+  @override
+  String get attachScreenshot => 'Attach screenshot';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get includeDeviceInfo => 'Include device info';
+
+  @override
+  String get sending => 'Sending...';
+
+  @override
+  String get issueCreate => 'Create issue';
+
+  @override
+  String get issueSubmitted => 'Thanks! Your report has been submitted.';
+
+  @override
+  String get issueQueuedOffline => 'You are offline. Your report will be submitted when you are back online.';
+
+  @override
+  String get issueSubmissionFailed => 'Failed to submit. Please try again.';
+
+  @override
+  String get viewOnGitHub => 'View on GitHub';
+
+  @override
+  String get issueDuplicate => 'You recently submitted a similar report.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

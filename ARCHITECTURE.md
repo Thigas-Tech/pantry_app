@@ -188,6 +188,22 @@ User scans barcode
 - **CloudBackupService** — exports SQLite database to a temp file, uploads to `users/{uid}/pantry_backup.db` in Firebase Storage. Restore downloads and replaces the local database file, then invalidates all Riverpod providers.
 - **Authentication** — Google Sign-In via `google_sign_in` + `firebase_auth`. Auth state stream drives the backup UI (sign-in prompt, backup button disabled when signed out).
 
+### 3.8 Feedback service (GitHub Issues)
+
+- `GithubIssueService` — HTTP POST to GitHub Issues API with PAT from
+  `.env` (`GITHUB_FEEDBACK_TOKEN`), never committed.
+- Offline queue: unresolved issues stored in `feedback_queue` SQLite table
+  (version 11 migration). Flushed when `connectivityProvider` emits `true`
+  via listener in `PantryShell` and at app startup.
+- Screenshots: user attaches from gallery or camera via `image_picker`,
+  encoded as PNG base64, embedded as data URI in issue body (no external
+  CDN needed — GitHub renders data URIs natively).
+- Rate limiting: max 1 issue per 60 seconds, max 5 per 24h per device
+  (via `SharedPreferences` counters).
+- Duplicate detection: hash of title+body, skipped if submitted within 24h.
+- Platform gating: on web/mobile the feedback from opens the `FeedbackScreen`;
+  screenshot attachment hidden on web and desktop platforms.
+
 ---
 
 ## 4. Provider layer (`lib/providers/`)
@@ -216,6 +232,7 @@ User scans barcode
 | `firebaseServiceProvider`       | `Provider`        | Firebase Auth + Storage instances  |
 | `cloudBackupServiceProvider`    | `Provider`        | Backup/restore operations          |
 | `backupStatusProvider`          | `FutureProvider`  | Last backup timestamp + file size  |
+| `githubIssueServiceProvider`    | `Provider`        | GitHub Issues API wrapper          |
 
 ---
 

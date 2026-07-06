@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
+import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
@@ -41,6 +43,17 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     super.initState();
     _pageController = PageController(initialPage: _selectedIndex);
     unawaited(_showChangelogIfPending());
+  }
+
+  void _onConnectivityChanged(
+    AsyncValue<bool>? prev,
+    AsyncValue<bool> next,
+  ) {
+    final online = next.asData?.value;
+    if (online == true) {
+      final service = ref.read(githubIssueServiceProvider);
+      unawaited(service.flushQueue());
+    }
   }
 
   @override
@@ -93,6 +106,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    ref.listen(connectivityProvider, _onConnectivityChanged);
 
     return Scaffold(
       body: PageView(

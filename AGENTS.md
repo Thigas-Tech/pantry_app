@@ -366,6 +366,13 @@ Cloud Storage:
 | App Store Small Business | https://developer.apple.com/app-store/small-business-program/ | 15% reduced commission |
 | IAP codelab | https://codelabs.developers.google.com/codelabs/flutter-in-app-purchases | Hands-on IAP tutorial |
 
+## GitHub API References
+
+| Source | URL | Scope |
+|---|---|---|
+| GitHub Issues API | https://docs.github.com/en/rest/issues/issues | Issue creation, labels, comments |
+| Fine-grained tokens | https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens | Per-repo, per-permission tokens |
+
 ## Performance & footprint optimization
 
 ### Build-time optimizations

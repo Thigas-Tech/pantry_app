@@ -13,11 +13,13 @@ import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
+import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,6 +61,7 @@ Future<void> main() async {
   unawaited(container.read(notificationServiceProvider).requestPermission());
   await container.read(notificationServiceProvider).initialize();
   unawaited(_runDatabaseCleanup(container));
+  unawaited(_flushFeedbackQueue(container));
 }
 
 /// Clears the product database and image cache when the app version changes.
@@ -158,6 +161,26 @@ Future<void> _runDatabaseCleanup(ProviderContainer container) async {
   } on Exception catch (e) {
     logError('Database cleanup failed: $e');
   } finally {
+    container.dispose();
+  }
+}
+
+/// Flushes any queued feedback issues at startup.
+Future<void> _flushFeedbackQueue(ProviderContainer container) async {
+  logInfo('Checking for pending feedback issues');
+  await GithubIssueService.initPreferences();
+  try {
+    final service = container.read(githubIssueServiceProvider);
+    final result = await service.flushQueue();
+    if (result.submitted > 0) {
+      logInfo('Flushed ${result.submitted} queued feedback issues');
+    }
+    if (result.failed > 0) {
+      logWarning('${result.failed} feedback issues failed to flush');
+    }
+    container.dispose();
+  } on Exception catch (e) {
+    logWarning('Feedback queue flush skipped: $e');
     container.dispose();
   }
 }

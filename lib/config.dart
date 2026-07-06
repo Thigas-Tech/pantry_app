@@ -36,4 +36,21 @@ class AppConfig {
   /// production server (`false`).
   static bool get useOffStaging =>
       dotenv.env['USE_OFF_STAGING']?.toLowerCase() == 'true';
+
+  /// The GitHub personal access token used for in-app feedback submissions.
+  ///
+  /// Must have `Issues: Read and write` permission on the repository
+  /// specified by [githubOwner] and [githubRepo].
+  static String get githubFeedbackToken =>
+      dotenv.env['GITHUB_FEEDBACK_TOKEN'] ?? '';
+
+  /// The GitHub repository owner for in-app feedback submissions.
+  static String get githubOwner => dotenv.env['GITHUB_OWNER'] ?? 'Thigas-Tech';
+
+  /// The GitHub repository name for in-app feedback submissions.
+  static String get githubRepo => dotenv.env['GITHUB_REPO'] ?? 'pantry_app';
+
+  /// Whether in-app feedback submission is enabled.
+  static bool get feedbackEnabled =>
+      (dotenv.env['FEEDBACK_ENABLED'] ?? 'true').toLowerCase() == 'true';
 }
