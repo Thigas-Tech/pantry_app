@@ -24,11 +24,11 @@ flutter gen-l10n
 # Analyze
 flutter analyze
 
-# Test (all)
-flutter test --concurrency=2
+# Test (all — local; CI uses --concurrency=2)
+flutter test --concurrency=8
 
 # Test with coverage
-flutter test --concurrency=2 --coverage
+flutter test --concurrency=8 --coverage
 
 # Build
 flutter build apk --debug          # debug APK
@@ -46,12 +46,32 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 ## Rules for contributions
 
 ### Always
-0. **Check TODO.md** — before starting new work, consult `TODO.md` for the current roadmap and pick an item at the appropriate effort/importance level.
-1. **Doc comments** — every public class, constructor, field, and method must have a `///` doc comment. Run `flutter analyze` to verify (zero issues required).
-2. **Tests** — add tests for ALL new code. Use `mocktail` for mocks. Place tests in the corresponding `test/` subdirectory. New screens/services need new test files.
-3. **Update generated code** — after changing models (freezed) or ARB files (l10n), run `dart run build_runner build --delete-conflicting-outputs` AND `flutter gen-l10n`.
-4. **Localize** — all user-visible strings go in `lib/l10n/app_en.arb`. Never hardcode English strings in widgets or services (except in doc comments).
-5. **Run the full suite** — before committing: `flutter analyze && flutter test --concurrency=2`. Zero issues of any severity (error, warning, info) and all tests passing. Info‑level diagnostics such as `avoid_redundant_argument_values` and `omit_local_variable_types` must also be resolved.
+0. **Follow every rule — do not skip** — every rule in this section exists
+    because a real failure proved it necessary. Commit `07e4382` caused a
+    preventable CI failure (`comment_references` lint) because the pre-commit
+    analysis was skipped. Read each rule, understand why it exists, and
+    follow it without exception. If a rule feels burdensome, raise it in
+    review rather than ignoring it.
+1. **Check TODO.md** — before starting new work, consult `TODO.md` for the
+    current roadmap and pick an item at the appropriate effort/importance
+    level.
+2. **Doc comments** — every public class, constructor, field, and method
+    must have a `///` doc comment. Run `flutter analyze` to verify (zero
+    issues required).
+3. **Tests** — add tests for ALL new code. Use `mocktail` for mocks. Place
+    tests in the corresponding `test/` subdirectory. New screens/services
+    need new test files.
+4. **Update generated code** — after changing models (freezed) or ARB files
+    (l10n), run `dart run build_runner build --delete-conflicting-outputs`
+    AND `flutter gen-l10n`.
+5. **Localize** — all user-visible strings go in `lib/l10n/app_en.arb`.
+    Never hardcode English strings in widgets or services (except in doc
+    comments).
+6. **Run the full suite before every commit** — run
+    `flutter analyze && flutter test --concurrency=8` **before every commit**
+    and fix **every** issue found (error, warning, info). Never rely on CI
+    to catch what local analysis would find — CI runs take 3+ minutes and
+    waste time on preventable failures.
 
 ### CI/CD
 - **PR quality gate** — every PR to `main` runs `ci.yml`: format check, static analysis, unit tests, widget tests, coverage report.

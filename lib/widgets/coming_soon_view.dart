@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantry_app/screens/coming_soon_screen.dart';
 
 /// A reusable placeholder that indicates a feature is under development.
 ///
