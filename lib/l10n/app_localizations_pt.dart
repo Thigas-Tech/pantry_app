@@ -590,6 +590,18 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
+
+  @override
+  String get locationStats => 'Local';
+
+  @override
+  String get nutritionPhoto => 'Nutrição';
+
+  @override
+  String get ingredientsPhoto => 'Ingredientes';
+
+  @override
+  String get productPhoto => 'Produto';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1178,4 +1190,16 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
+
+  @override
+  String get locationStats => 'Local';
+
+  @override
+  String get nutritionPhoto => 'Nutrição';
+
+  @override
+  String get ingredientsPhoto => 'Ingredientes';
+
+  @override
+  String get productPhoto => 'Produto';
 }

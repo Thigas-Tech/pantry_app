@@ -319,5 +319,9 @@
   "noCategories": "Nenhuma categoria",
   "addedThisWeekLabel": "Esta semana",
   "addedThisMonthLabel": "Este mês",
-  "productDataUnavailable": "Dados do produto indisponíveis — atualize para baixar"
+  "productDataUnavailable": "Dados do produto indisponíveis — atualize para baixar",
+  "locationStats": "Local",
+  "nutritionPhoto": "Nutrição",
+  "ingredientsPhoto": "Ingredientes",
+  "productPhoto": "Produto"
 }

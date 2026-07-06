@@ -590,4 +590,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productDataUnavailable => 'Product data unavailable — pull to refresh when online';
+
+  @override
+  String get locationStats => 'Location';
+
+  @override
+  String get nutritionPhoto => 'Nutrition';
+
+  @override
+  String get ingredientsPhoto => 'Ingredients';
+
+  @override
+  String get productPhoto => 'Product';
 }

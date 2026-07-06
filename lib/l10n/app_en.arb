@@ -319,5 +319,9 @@
   "noCategories": "No categories yet",
   "addedThisWeekLabel": "This week",
   "addedThisMonthLabel": "This month",
-  "productDataUnavailable": "Product data unavailable — pull to refresh when online"
+  "productDataUnavailable": "Product data unavailable — pull to refresh when online",
+  "locationStats": "Location",
+  "nutritionPhoto": "Nutrition",
+  "ingredientsPhoto": "Ingredients",
+  "productPhoto": "Product"
 }

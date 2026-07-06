@@ -25,7 +25,7 @@ class StatsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.pantryStats)),
       body: statsAsync.when(
-        data: (stats) => _buildBody(context, l10n, stats),
+        data: (stats) => _buildBody(context, l10n, stats, ref),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(
           message: error.toString(),
@@ -39,11 +39,11 @@ class StatsScreen extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     PantryStats stats,
+    WidgetRef ref,
   ) {
     return RefreshIndicator(
       onRefresh: () async {
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-        return;
+        ref.invalidate(statsProvider);
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -103,7 +103,7 @@ class StatsScreen extends ConsumerWidget {
     PantryStats stats,
   ) {
     return SizedBox(
-      height: 100,
+      height: 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 4,
@@ -151,12 +151,85 @@ class StatsScreen extends ConsumerWidget {
         stats.expiredCount + stats.expiringSoonCount + stats.goodCount;
 
     if (total == 0) {
-      return _buildSectionTitle(context, l10n.expired);
+      return const SizedBox.shrink();
     }
 
-    return _buildSectionTitle(
-      context,
-      l10n.expired,
+    final theme = Theme.of(context);
+    final sections = [
+      PieChartSectionData(
+        value: stats.expiredCount.toDouble(),
+        color: Colors.red.shade400,
+        title: stats.expiredCount > 0 ? stats.expiredCount.toString() : '',
+        radius: 40,
+        titleStyle: const TextStyle(color: Colors.white, fontSize: 14),
+      ),
+      PieChartSectionData(
+        value: stats.expiringSoonCount.toDouble(),
+        color: Colors.orange.shade400,
+        title: stats.expiringSoonCount > 0
+            ? stats.expiringSoonCount.toString()
+            : '',
+        radius: 40,
+        titleStyle: const TextStyle(color: Colors.white, fontSize: 14),
+      ),
+      PieChartSectionData(
+        value: stats.goodCount.toDouble(),
+        color: Colors.green.shade400,
+        title: stats.goodCount > 0 ? stats.goodCount.toString() : '',
+        radius: 40,
+        titleStyle: const TextStyle(color: Colors.white, fontSize: 14),
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(context, l10n.expired),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 180,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PieChart(
+                PieChartData(
+                  sections: sections,
+                  centerSpaceRadius: 36,
+                  sectionsSpace: 2,
+                ),
+              ),
+              Text(
+                '$total',
+                style: theme.textTheme.headlineMedium,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _legendDot(Colors.red.shade400, l10n.expired),
+            _legendDot(Colors.orange.shade400, l10n.expiringSoon),
+            _legendDot(Colors.green.shade400, l10n.good),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _legendDot(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
     );
   }
 
@@ -354,6 +427,7 @@ class StatsScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final textColor = Theme.of(context).colorScheme.onSurface;
+    final l10n = AppLocalizations.of(context)!;
 
     final entries = stats.itemsByLocation.entries.toList();
     final barGroups = <BarChartGroupData>[];
@@ -379,7 +453,7 @@ class StatsScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(context, 'Location'),
+        _buildSectionTitle(context, l10n.locationStats),
         const SizedBox(height: 8),
         SizedBox(
           height: barGroups.length * 36.0 + 20,
@@ -442,7 +516,7 @@ class StatsScreen extends ConsumerWidget {
               Expanded(
                 child: _PhotoCard(
                   icon: Icons.restaurant_menu,
-                  label: 'Nutrition',
+                  label: l10n.nutritionPhoto,
                   local: stats.localPhotos.withNutrition,
                   off: stats.offPhotos.withNutrition,
                   total: stats.localPhotos.total,
@@ -452,7 +526,7 @@ class StatsScreen extends ConsumerWidget {
               Expanded(
                 child: _PhotoCard(
                   icon: Icons.list_alt,
-                  label: 'Ingredients',
+                  label: l10n.ingredientsPhoto,
                   local: stats.localPhotos.withIngredients,
                   off: stats.offPhotos.withIngredients,
                   total: stats.localPhotos.total,
@@ -462,7 +536,7 @@ class StatsScreen extends ConsumerWidget {
               Expanded(
                 child: _PhotoCard(
                   icon: Icons.image,
-                  label: 'Product',
+                  label: l10n.productPhoto,
                   local: stats.localPhotos.withProduct,
                   off: stats.offPhotos.withProduct,
                   total: stats.localPhotos.total,
@@ -504,16 +578,16 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 8),
+            Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 4),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],
@@ -542,7 +616,7 @@ class _PhotoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -558,7 +632,7 @@ class _PhotoCard extends StatelessWidget {
               Text(
                 'OFF: $off',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.green,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
           ],

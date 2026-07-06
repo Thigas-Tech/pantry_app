@@ -1181,6 +1181,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Product data unavailable — pull to refresh when online'**
   String get productDataUnavailable;
+
+  /// No description provided for @locationStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get locationStats;
+
+  /// No description provided for @nutritionPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get nutritionPhoto;
+
+  /// No description provided for @ingredientsPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get ingredientsPhoto;
+
+  /// No description provided for @productPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
+  String get productPhoto;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
