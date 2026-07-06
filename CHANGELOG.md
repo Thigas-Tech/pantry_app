@@ -91,6 +91,11 @@
 - Deduplicated custom-input and days-dialog builders in `AddToInventoryScreen`
 - Singleton `DatabaseHelper` delegates to `const` DAOs
 - Resolved lint rule conflict: disabled `prefer_adjacent_string_concatenation`, `no_adjacent_strings_in_list`, and `missing_whitespace_between_adjacent_strings` to eliminate false positives on multi-line string building
+- Resolved all info‑level lint diagnostics (`avoid_redundant_argument_values` in database helper test, `omit_local_variable_types` in inventory card test). Updated AGENTS.md rule 5 to explicitly forbid info‑level issues of any severity.
+- Removed dead `product_api_service.dart`
+- Deduplicated custom-input and days-dialog builders in `AddToInventoryScreen`
+- Singleton `DatabaseHelper` delegates to `const` DAOs
+- Resolved lint rule conflict: disabled `prefer_adjacent_string_concatenation`, `no_adjacent_strings_in_list`, and `missing_whitespace_between_adjacent_strings` to eliminate false positives on multi-line string building
 
 ### Localization
 - All user-visible strings externalised via ARB (`flutter gen-l10n`)

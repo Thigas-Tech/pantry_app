@@ -152,7 +152,7 @@ void main() {
 
   testWidgets('long-press triggers onLongPress callback', (tester) async {
     final item = createItem(name: 'LongPressItem');
-    bool longPressed = false;
+    var longPressed = false;
 
     await pumpApp(
       tester,
@@ -176,7 +176,7 @@ void main() {
     tester,
   ) async {
     final item = createItem(name: 'SelectItem');
-    bool longPressed = false;
+    var longPressed = false;
 
     await pumpApp(
       tester,

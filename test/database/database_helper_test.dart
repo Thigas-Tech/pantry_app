@@ -171,10 +171,10 @@ void main() {
 
       // Insert two items in Pantry A.
       final id1 = await db.insertInventoryItem(
-        const InventoryItem(barcode: '001', quantity: 1, inventoryId: 1),
+        const InventoryItem(barcode: '001'),
       );
       final id2 = await db.insertInventoryItem(
-        const InventoryItem(barcode: '001', quantity: 2, inventoryId: 1),
+        const InventoryItem(barcode: '001', quantity: 2),
       );
 
       // Move both items to Pantry B.
