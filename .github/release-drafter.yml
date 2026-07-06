@@ -1,0 +1,36 @@
+template: |
+  ## What's Changed
+
+  $CHANGES
+
+  ---
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$TAG
+
+categories:
+  - title: Breaking Changes
+    label: breaking
+  - title: Features
+    label: feature
+  - title: Bug Fixes
+    label: fix
+  - title: Enhancements
+    label: enhancement
+  - title: Documentation
+    label: documentation
+  - title: Maintenance
+    label: maintenance
+
+version-resolver:
+  major:
+    labels:
+      - breaking
+  minor:
+    labels:
+      - feature
+      - enhancement
+  patch:
+    labels:
+      - fix
+      - documentation
+      - maintenance
+  default: patch

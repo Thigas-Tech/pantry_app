@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+- **GitHub Actions CI**: PR quality gate (lint, format, test, coverage) on every PR.
+- **GitHub Actions build**: APK/AAB debug artifacts on every push to `main`.
+- **GitHub Actions release drafter**: Auto-creates draft releases with changelog from PR labels.
+- **GitHub Actions PR labeler**: Auto-labels pull requests by title prefix.
+- **Scheduled workflows**: Patrol E2E, Flashlight performance, Perfetto trace analysis (weekly, Sunday 03:00-05:00 UTC).
+- **Dependabot**: Monthly auto-update of GitHub Action versions.
+- **`scripts/inject_env.sh`**: Injects `.env` from GitHub secrets for CI builds.
+- **`scripts/quality_gate.sh`**: Composite check running format, analyze, and test.
+
 ### Fixed
 - **DotEnv not initialized in widget tests**: `pumpApp()` now calls `dotenv.loadFromString(isOptional: true, mergeWith: {})` before rendering the widget tree, preventing `NotInitializedError` from `AppConfig` accesses in tests that transitively read `dotenv.env`.
 

@@ -1,0 +1,30 @@
+breaking:
+  - ^breaking
+  - ^break
+  - ^major
+
+feature:
+  - ^feature
+  - ^feat
+  - ^add
+
+fix:
+  - ^fix
+  - ^bug
+  - ^hotfix
+
+enhancement:
+  - ^enhancement
+  - ^improve
+  - ^refactor
+
+documentation:
+  - ^docs
+  - ^documentation
+
+maintenance:
+  - ^chore
+  - ^maintenance
+  - ^ci
+  - ^test
+  - ^build

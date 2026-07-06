@@ -25,10 +25,10 @@ flutter gen-l10n
 flutter analyze
 
 # Test (all)
-flutter test --concurrency=8
+flutter test --concurrency=2
 
 # Test with coverage
-flutter test --concurrency=8 --coverage
+flutter test --concurrency=2 --coverage
 
 # Build
 flutter build apk --debug          # debug APK
@@ -51,7 +51,14 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 2. **Tests** — add tests for ALL new code. Use `mocktail` for mocks. Place tests in the corresponding `test/` subdirectory. New screens/services need new test files.
 3. **Update generated code** — after changing models (freezed) or ARB files (l10n), run `dart run build_runner build --delete-conflicting-outputs` AND `flutter gen-l10n`.
 4. **Localize** — all user-visible strings go in `lib/l10n/app_en.arb`. Never hardcode English strings in widgets or services (except in doc comments).
-5. **Run the full suite** — before committing: `flutter analyze && flutter test --concurrency=8`. Zero issues of any severity (error, warning, info) and all tests passing. Info‑level diagnostics such as `avoid_redundant_argument_values` and `omit_local_variable_types` must also be resolved.
+5. **Run the full suite** — before committing: `flutter analyze && flutter test --concurrency=2`. Zero issues of any severity (error, warning, info) and all tests passing. Info‑level diagnostics such as `avoid_redundant_argument_values` and `omit_local_variable_types` must also be resolved.
+
+### CI/CD
+- **PR quality gate** — every PR to `main` runs `ci.yml`: format check, static analysis, unit tests, widget tests, coverage report.
+- **Build artifacts** — every push to `main` runs `build.yml`: tests + debug APK/AAB uploaded as workflow artifacts (7-day retention).
+- **Release drafter** — on push to `main`, auto-creates a draft release with changelog from PR labels.
+- **Scheduled workflows** (weekly, Sunday 03:00–05:00 UTC): Patrol E2E, Flashlight performance, Perfetto trace analysis.
+- **Dependabot** — monthly auto-update of GitHub Action versions.
 6. **Update documentation** — after making changes, update `CHANGELOG.md`, `README.md`, `ARCHITECTURE.md`, and/or `AGENTS.md` to reflect new features, structure changes, or updated commands. Always generate fresh API docs with `dart doc .`.
 7. **Update CHANGELOG.md** — after every feature addition, bugfix, or significant change, add an entry under `[Unreleased]` grouped by category. Keep entries concise and user-facing. This is the canonical record of what ships in each release.
 8. **Set Product.source** — every `Product()` constructor call MUST pass `source`. Use `'api'` for OFF‑fetched data and `'manual'` for user‑entered or CSV‑imported data. The default is `'api'`. Never omit this field — it protects manual products from being deleted by `clearCachedProducts()` during cache flushes.

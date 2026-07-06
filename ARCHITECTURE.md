@@ -390,12 +390,34 @@ opt into reduced energy consumption. When enabled:
 
 Designed to complement Android Battery Saver and iOS Low Power Mode.
 
-### 11.8 Performance measurement
+### 11.8 CI/CD pipeline
 
-Future CI pipeline additions will integrate:
-- **Flashlight** — automated battery, CPU, GPU profiling on physical devices.
-  Compares before/after reports to catch regressions.
-- **Perfetto** — startup and frame timing traces. Open in `ui.perfetto.dev`
+The project uses GitHub Actions for continuous integration and delivery.
+Workflows live in `.github/workflows/`:
+
+| Workflow | Trigger | Purpose |
+|---|---|---|
+| `ci.yml` | Pull request to `main` | Format check, `flutter analyze`, unit + widget tests, coverage report with PR comment |
+| `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB, uploads as artifacts (7-day retention) |
+| `release-drafter.yml` | Push to `main` | Auto-creates a draft release with changelog compiled from PR labels |
+| `patrol-e2e.yml` | Weekly (Sun 03:00 UTC) | Patrol integration test suite on Android emulator |
+| `flashlight.yml` | Weekly (Sun 04:00 UTC) | Flashlight battery/CPU/GPU profiling on emulator |
+| `perfetto.yml` | Weekly (Sun 05:00 UTC) | Perfetto startup trace collection and frame-timing analysis |
+
+All workflows use SHA-pinned actions for supply-chain security. Dependabot
+updates GitHub Action versions monthly. Runner: `ubuntu-latest` for QA and
+build, `macos-latest` for emulator-based workloads (E2E, Flashlight, Perfetto).
+
+Helper scripts in `scripts/` are shared across workflows:
+- `quality_gate.sh` — `dart format` + `flutter analyze` + `flutter test --concurrency=2 --coverage`
+- `inject_env.sh` — creates `.env` from GitHub secrets for build-time config injection
+
+### 11.9 Performance measurement
+
+The CI pipeline integrates automated performance profiling:
+- **Flashlight** — weekly automated battery, CPU, GPU profiling on emulator.
+  Reports stored as artifacts; baseline comparison planned for PR gating.
+- **Perfetto** — weekly startup and frame timing traces. Open in `ui.perfetto.dev`
   or parse with `perfetto` CLI for jank metrics.
 - **Dart DevTools** — manual profiling during development: Performance page
   (widget rebuilds, oversized images) and CPU Profiler (Flame Chart for

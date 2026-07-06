@@ -4,6 +4,9 @@ An offline-first Flutter application to manage your pantry inventory and track
 expiration dates. Scan barcodes, look up products via Open Food Facts, and
 never waste food again.
 
+[![CI](https://github.com/Thigas-Tech/pantry_app/actions/workflows/ci.yml/badge.svg)](https://github.com/Thigas-Tech/pantry_app/actions/workflows/ci.yml)
+[![Build](https://github.com/Thigas-Tech/pantry_app/actions/workflows/build.yml/badge.svg)](https://github.com/Thigas-Tech/pantry_app/actions/workflows/build.yml)
+
 ## Features
 
 - **Barcode scanning** — camera-based via Google ML Kit (`mobile_scanner`) or manual text entry
@@ -120,14 +123,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture overview.
 3. **Localization** — all user-visible strings go in `lib/l10n/app_en.arb`
 4. **Code generation** — after changing models or ARB files, run `build_runner` and `flutter gen-l10n`
 5. **Zero lint issues** — `flutter analyze` must report zero issues before committing
-6. **All tests pass** — `flutter test --concurrency=8` must pass before committing
+6. **All tests pass** — `flutter test --concurrency=2` must pass before committing
 
 ### Running checks
 
 ```bash
 flutter analyze                      # Lint + static analysis
-flutter test --concurrency=8         # All tests
-flutter test --concurrency=8 --coverage  # With coverage
+flutter test --concurrency=2         # All tests
+flutter test --concurrency=2 --coverage  # With coverage
 ```
 
 ## Tech stack

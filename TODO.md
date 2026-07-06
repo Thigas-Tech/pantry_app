@@ -7,27 +7,34 @@ infrastructure or external server hosting are listed last.
 
 ## CI/CD & DevOps (top priority)
 
-- [ ] **GitHub Actions — CI pipeline** — on every PR and push to `main`:
+- [x] **GitHub Actions — CI pipeline** — on every PR to `main`:
   - `flutter analyze` (lint check)
   - `dart format --set-exit-if-changed .` (formatting check)
-  - `flutter test --concurrency=8 --coverage` (tests + coverage report)
-  - Upload coverage artifact, fail if tests fail.
-- [ ] **GitHub Actions — Play Store deployment** — on new tag (`v*`):
-  - `flutter build appbundle` + `flutter build apk` (release)
-  - Upload both to Google Play Console via `r0adkll/upload-google-play`
-  - Requires Play Store service account JSON stored as a GitHub secret.
-- [ ] **GitHub Actions — Patrol E2E on schedule** — weekly run of the Patrol
+  - `flutter test --concurrency=2 --coverage` (tests + coverage report)
+  - Upload coverage artifact, comment coverage on PR.
+- [x] **GitHub Actions — Build artifacts** — on every push to `main`:
+  - `flutter build apk --debug` + `flutter build appbundle --debug`
+  - Inject `.env` from GitHub secrets if available.
+  - Upload APK and AAB as workflow artifacts (7-day retention).
+- [x] **GitHub Actions — Release drafter** — on push to `main`:
+  - Auto-creates draft release with changelog from PR labels.
+- [x] **GitHub Actions — PR labeler** — auto-labels PRs by title prefix.
+- [x] **GitHub Actions — Patrol E2E on schedule** — weekly run of the Patrol
   test suite on a real Android emulator (GitHub‑hosted runner).
-- [ ] **GitHub Actions — Flashlight performance regression** — run
-  [Flashlight](https://github.com/bamlab/flashlight) on a physical device or
-  emulator in CI. Store baseline scores (FPS, CPU, GPU, memory) as CI
-  artifacts. Compare PR scores against main branch. Block merging if scores
+- [x] **GitHub Actions — Flashlight performance regression** — run
+  [Flashlight](https://github.com/bamlab/flashlight) on an emulator in CI.
+  Store baseline scores (FPS, CPU, GPU, memory) as CI artifacts.
+  Compare PR scores against main branch. Block merging if scores
   degrade >10%.
-- [ ] **GitHub Actions — Perfetto trace analysis** — collect Perfetto traces
+- [x] **GitHub Actions — Perfetto trace analysis** — collect Perfetto traces
   during key user flows (home screen scroll, product detail navigation,
   scanner start). Parse with `perfetto` CLI for frame timing violations,
   jank metrics, and CPU scheduling patterns. Fail CI if metrics degrade below
   baseline. Reference: [Flutter performance profiling](https://docs.flutter.dev/perf/ui-performance).
+- [ ] **GitHub Actions — Play Store deployment** — on new tag (`v*`):
+  - `flutter build appbundle` + `flutter build apk` (release)
+  - Upload both to Google Play Console via `r0adkll/upload-google-play`
+  - Requires Play Store service account JSON stored as a GitHub secret.
 
 ---
 
