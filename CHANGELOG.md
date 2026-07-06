@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+### Fixed
+- **DotEnv not initialized in widget tests**: `pumpApp()` now calls `dotenv.loadFromString(isOptional: true, mergeWith: {})` before rendering the widget tree, preventing `NotInitializedError` from `AppConfig` accesses in tests that transitively read `dotenv.env`.
+
+### Changed
+- **Migrated to official `openfoodfacts` Dart SDK**: Replaced the custom 470-line `OpenFoodFactsApi` Dio client with the official `openfoodfacts` package (v3.30.2). The SDK is maintained by Open Food Facts and used by the official smooth-app (1.4k stars, 5k+ commits). A thin `OffAdapter` wrapper preserves Riverpod injectability and testability.
+- **Open Food Facts lint rules**: Added `openfoodfacts_flutter_lints` (OFF's own lint package) to the analysis options, replacing `flutter_lints`. Existing `very_good_analysis` and `lint/strict` rules are retained with final precedence.
+- **`http` package for image caching**: `ImageCacheService` now uses `package:http` for image downloads instead of the now-removed `dio` dependency.
+- **Search screen simplified**: Removed `CancelToken` from search (SDK does not support cancellation). The existing 500ms debounce and `_requestId` stale guard are sufficient.
+
+### Removed
+- `lib/services/open_food_facts_api.dart` (~470 lines of hand-rolled Dio client with retry/backoff/jitter)
+- `lib/providers/dio_provider.dart` (22 lines)
+- `dio` dependency (SDK uses `http` package internally)
+- `Product.g.dart` (model no longer parses raw JSON via `json_serializable`)
+- `@JsonKey` annotations and `Product.fromJson` factory
+
 ### Documentation
 - `ARCHITECTURE.md` section 5: updated tree diagrams to reflect `ListView.builder` with `RepaintBoundary`, SearchScreen images, StatsScreen placeholder, and Settings changelog button.
 - `ARCHITECTURE.md` section 11.2 and 11.4: updated with actual `cacheWidth`/`cacheHeight` and `RepaintBoundary` implementations.

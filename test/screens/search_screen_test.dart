@@ -17,16 +17,16 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
+import 'package:pantry_app/services/off_adapter.dart';
 import '../helpers/pump_app.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-class MockOpenFoodFactsApi extends Mock implements OpenFoodFactsApi {}
+class MockOffAdapter extends Mock implements OffAdapter {}
 
 void main() {
   late MockDatabaseHelper mockDb;
-  late MockOpenFoodFactsApi mockApi;
+  late MockOffAdapter mockApi;
 
   const localProduct = Product(
     barcode: '001',
@@ -41,11 +41,14 @@ void main() {
 
   setUp(() {
     mockDb = MockDatabaseHelper();
-    mockApi = MockOpenFoodFactsApi();
+    mockApi = MockOffAdapter();
 
     when(() => mockDb.searchProducts(any())).thenAnswer((_) async => []);
     when(
-      () => mockApi.searchProducts(any(), pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+      () => mockApi.searchProducts(
+        any(),
+        pageSize: any(named: 'pageSize'),
+      ),
     ).thenAnswer((_) async => []);
   });
 
@@ -102,7 +105,10 @@ void main() {
         () => mockDb.searchProducts('milk'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
       ).thenAnswer((_) async => []);
 
       await pumpSearchScreen(tester);
@@ -120,7 +126,10 @@ void main() {
     testWidgets('shows API search results with cloud icon', (tester) async {
       when(() => mockDb.searchProducts('bread')).thenAnswer((_) async => []);
       when(
-        () => mockApi.searchProducts('bread', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+        () => mockApi.searchProducts(
+          'bread',
+          pageSize: any(named: 'pageSize'),
+        ),
       ).thenAnswer((_) async => [apiProduct]);
 
       await pumpSearchScreen(tester);
@@ -140,7 +149,10 @@ void main() {
         () => mockDb.searchProducts('dup'),
       ).thenAnswer((_) async => [sameProduct]);
       when(
-        () => mockApi.searchProducts('dup', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+        () => mockApi.searchProducts(
+          'dup',
+          pageSize: any(named: 'pageSize'),
+        ),
       ).thenAnswer(
         (_) async => [
           const Product(barcode: '999', name: 'API Duplicate'),
@@ -163,7 +175,10 @@ void main() {
         () => mockDb.searchProducts('milk'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
       ).thenAnswer((_) async => []);
 
       final mockRepo = createMockProductRepository();
@@ -216,7 +231,10 @@ void main() {
         () => mockDb.searchProducts('milk'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
       ).thenAnswer((_) async => []);
 
       await pumpSearchScreen(tester);
@@ -324,7 +342,10 @@ void main() {
         () => mockDb.searchProducts('new'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts(any(), pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+        () => mockApi.searchProducts(
+          any(),
+          pageSize: any(named: 'pageSize'),
+        ),
       ).thenAnswer((_) async => []);
 
       await pumpSearchScreen(tester);
@@ -365,7 +386,10 @@ void main() {
       expect(find.text('Local Milk'), findsOneWidget);
       // API should NOT have been called.
       verifyNever(
-        () => api.searchProducts(any(), pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
+        () => api.searchProducts(
+          any(),
+          pageSize: any(named: 'pageSize'),
+        ),
       );
     });
   });

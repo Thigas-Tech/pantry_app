@@ -18,3 +18,12 @@ final connectivityProvider = StreamProvider<bool>((ref) {
     return online;
   });
 });
+
+/// Provides a one-shot connectivity check.
+///
+/// Unlike [connectivityProvider] (a stream), this resolves once and
+/// is ideal for cache-flush flows and other places where you need a
+/// simple true/false answer at a single point in time.
+final hasConnectionProvider = FutureProvider<bool>((ref) {
+  return InternetConnectionChecker.instance.hasConnection;
+});

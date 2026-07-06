@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
+import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// Coordinates the submission of a manually entered product to Open Food Facts.
@@ -21,7 +21,7 @@ class ProductSubmissionService {
   });
 
   final DatabaseHelper _db;
-  final OpenFoodFactsApi _api;
+  final OffAdapter _api;
 
   /// Submits [product] to Open Food Facts along with any local images.
   ///
@@ -96,11 +96,10 @@ class ProductSubmissionService {
       return true;
     }
     try {
-      final bytes = await file.readAsBytes();
       return await _api.uploadProductImage(
         barcode: product.barcode,
         imageField: imageField,
-        imageBytes: bytes,
+        imagePath: imagePath,
       );
     } on Exception catch (e) {
       logError('Error uploading $imageField image: $e');

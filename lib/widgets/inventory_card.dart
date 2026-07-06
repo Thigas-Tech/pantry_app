@@ -156,7 +156,9 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                       ),
                     );
                     if (context.mounted) {
-                      ref.invalidate(inventoryWithProductProvider);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ref.invalidate(inventoryWithProductProvider);
+                      });
                     }
                   } on FetchFailedException {
                     logError(

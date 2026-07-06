@@ -86,10 +86,7 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     averageNutriscoreNumeric: avgNutri,
     expiredCount: expiryDist['expired'] ?? 0,
     expiringSoonCount: expiryDist['expiring'] ?? 0,
-    goodCount:
-        (expiryDist['good'] ?? 0) +
-        (expiryDist['expired'] ?? 0) +
-        (expiryDist['expiring'] ?? 0),
+    goodCount: expiryDist['good'] ?? 0,
     addedThisWeek: addedAll,
     addedThisMonth: addedAll,
     weeklyAdditions: weekly

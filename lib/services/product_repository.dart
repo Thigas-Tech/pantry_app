@@ -4,14 +4,14 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
+import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// The central data access point that implements the offline‑first pattern.
 ///
 /// [ProductRepository] coordinates between the local SQLite cache
-/// ([DatabaseHelper]) and the remote API (`OpenFoodFactsApi`).
+/// ([DatabaseHelper]) and the remote API ([OffAdapter]).
 ///
 /// ## Offline‑first strategy
 ///
@@ -32,7 +32,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// ## Fallback API
 ///
-/// The constructor accepts an optional fallback `OpenFoodFactsApi`. This is
+/// The constructor accepts an optional fallback [OffAdapter]. This is
 /// currently unused but could be re‑enabled in the future if a second API
 /// is desired.
 class ProductRepository {
@@ -49,8 +49,8 @@ class ProductRepository {
   });
 
   final DatabaseHelper _db;
-  final OpenFoodFactsApi _api;
-  final OpenFoodFactsApi? _fallbackApi;
+  final OffAdapter _api;
+  final OffAdapter? _fallbackApi;
   final SharedPreferences? _prefs;
 
   Future<SharedPreferences> get _sharedPrefs async =>
@@ -212,10 +212,8 @@ class ProductRepository {
   /// absorbs transient rate‑limiting or server hiccups without blocking the
   /// UI for longer than necessary.
   ///
-  /// Each individual API call is retried internally by
-  /// [OpenFoodFactsApi.getByBarcode] with exponential backoff (1s, 2s, 4s)
-  /// for 429, 5xx, and timeout errors before the repository even sees the
-  /// failure.
+  /// Each individual API call may fail transiently; the two-pass
+  /// strategy absorbs rate-limiting and server hiccups.
   ///
   /// Freshly fetched data is **merged** with any cached product via
   /// `Product.mergeFromApi`, ensuring that fields the API doesn't return

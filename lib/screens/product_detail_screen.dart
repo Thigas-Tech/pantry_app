@@ -117,7 +117,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 tag: widget.product.barcode,
                 child: Consumer(
                   builder: (context, ref, _) {
-                    final imageCache = ref.watch(imageCacheProvider);
+                    final imageCache = ref.read(imageCacheProvider);
                     return FutureBuilder<String?>(
                       future: imageCache.cacheImage(
                         widget.product.imageUrl,
@@ -487,7 +487,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       );
       logInfo('Quantity updated: ${item.barcode} — $newQuantity');
       setState(() => _inventoryVersion++);
-      ref.invalidate(inventoryWithProductProvider);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(inventoryWithProductProvider);
+      });
     } on Exception catch (e) {
       logError('Failed to update quantity: $e');
       if (mounted) {
@@ -545,7 +547,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               if (mounted) {
                 SnackbarHelper.showInfo(context, l10n.itemRestored);
                 setState(() => _inventoryVersion++);
-                ref.invalidate(inventoryWithProductProvider);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ref.invalidate(inventoryWithProductProvider);
+                });
               }
             } on Exception catch (e) {
               logError('Failed to undo delete: $e');

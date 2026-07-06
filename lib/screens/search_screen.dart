@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +32,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     with AutomaticKeepAliveClientMixin {
   final _searchController = TextEditingController();
   Timer? _debounce;
-  CancelToken? _cancelToken;
   List<_SearchResult> _results = [];
   bool _isSearching = false;
   bool _hasSearched = false;
@@ -54,7 +52,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       ..removeListener(_onSearchChanged)
       ..dispose();
     _debounce?.cancel();
-    _cancelToken?.cancel();
     super.dispose();
   }
 

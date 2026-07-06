@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -33,6 +36,17 @@ Future<void> main() async {
 
   await dotenv.load();
   logInfo('Environment loaded');
+
+  off.OpenFoodAPIConfiguration.userAgent = off.UserAgent(
+    name: 'PantryApp',
+    version: '1.0',
+    system: Platform.operatingSystem,
+    comment: AppConfig.contactEmail,
+  );
+  off.OpenFoodAPIConfiguration.globalLanguages = [
+    off.OpenFoodFactsLanguage.ENGLISH,
+  ];
+  logInfo('OFF SDK configured');
 
   await _handleAppUpdate();
 

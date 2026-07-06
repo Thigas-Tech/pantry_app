@@ -8,9 +8,9 @@ An offline-first Flutter application for managing pantry inventory and expiry da
 - **Platforms:** Android (primary), iOS, Linux, macOS, Web, Windows
 - **State management:** Riverpod (`flutter_riverpod`)
 - **Database:** SQLite via `sqflite` with DAO pattern (see `lib/database/`)
-- **API:** Open Food Facts v3 REST API via `dio`
+- **API:** Open Food Facts v3 via official `openfoodfacts` Dart SDK
 - **Code generation:** freezed, json_serializable (via `build_runner`)
-- **Linting:** `very_good_analysis`, `lint/strict`, `flutter_lints`
+- **Linting:** `very_good_analysis`, `lint/strict`, `openfoodfacts_flutter_lints`
 - **Testing:** `flutter_test` + `mocktail`
 - **Localization:** ARB files in `lib/l10n/`, code-generated via `flutter gen-l10n`
 
@@ -209,6 +209,24 @@ test/
 - Database tests use `DatabaseHelper.withPath(':memory:')` with `sqflite_common_ffi`
 - For screens with MobileScanner, use `settle: false` and manual `pump()` — perpetual animations prevent `pumpAndSettle`
 - Mock `NotificationService`, `ProductRepository`, and `ImageCacheService` with mocktail
+
+## Open Food Facts References
+
+These are authoritative references for the OFF API, SDK, and ecosystem:
+
+| Source | URL | Scope |
+|---|---|---|
+| OFF Dart SDK | https://pub.dev/packages/openfoodfacts | Product queries, search, image upload, price tracking, Robotoff |
+| OFF Dart SDK docs | https://pub.dev/documentation/openfoodfacts/latest/ | Full API class/method reference |
+| OFF Dart SDK repo | https://github.com/openfoodfacts/openfoodfacts-dart | Source code, examples, issues |
+| smooth-app (official app) | https://github.com/openfoodfacts/smooth-app | Canonical Flutter app using the SDK |
+| smooth-app docs | https://openfoodfacts.github.io/smooth-app/ | Official app documentation |
+| OFF mobile app landing | https://world.openfoodfacts.org/open-food-facts-mobile-app | User-facing info |
+| OFF API Reference | https://openfoodfacts.github.io/openfoodfacts-server/api/ | REST API v2/v3 |
+| OFF Infrastructure | https://openfoodfacts.github.io/openfoodfacts-infrastructure/ | Server architecture, deployment |
+| Robotoff AI | https://openfoodfacts.github.io/robotoff/ | AI-powered data extraction from photos |
+| Knowledge Panels | https://openfoodfacts.github.io/facets-knowledge-panels/ | Environmental/health impact cards |
+| OFF Flutter Lints | https://github.com/openfoodfacts/openfoodfacts_flutter_lints | OFF-specific lint rules for Flutter apps |
 
 ## API documentation (`dart doc`)
 

@@ -4,7 +4,7 @@ import 'package:pantry_app/config.dart';
 
 void main() {
   setUp(() {
-    dotenv.testLoad(mergeWith: {});
+    dotenv.loadFromString(isOptional: true, mergeWith: {});
   });
 
   group('AppConfig', () {
@@ -25,7 +25,8 @@ void main() {
     });
 
     test('reads values from environment', () {
-      dotenv.testLoad(
+      dotenv.loadFromString(
+        isOptional: true,
         mergeWith: {
           'OFF_USER_ID': 'testuser',
           'OFF_PASSWORD': 'secret',

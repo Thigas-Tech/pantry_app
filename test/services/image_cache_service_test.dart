@@ -1,29 +1,36 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 
-/// A mock of [Dio] to control network responses.
-class MockDio extends Mock implements Dio {}
+/// A mock of [http.Client] to control network responses.
+class MockHttpClient extends Mock implements http.Client {}
 
 /// Tests for [ImageCacheService].
 ///
 /// A test directory is provided so the service doesn't touch the real
 /// application documents directory. Network calls are mocked via
-/// [MockDio].
+/// [MockHttpClient].
 void main() {
   late ImageCacheService service;
-  late MockDio mockDio;
+  late MockHttpClient mockClient;
   late Directory cacheDir;
 
+  setUpAll(() {
+    registerFallbackValue(Uri());
+  });
+
   setUp(() {
-    mockDio = MockDio();
+    mockClient = MockHttpClient();
     cacheDir = Directory.systemTemp.createTempSync('pantry_cache_test_');
-    service = ImageCacheService(dio: mockDio, cacheDirectory: cacheDir);
+    service = ImageCacheService(
+      httpClient: mockClient,
+      cacheDirectory: cacheDir,
+    );
   });
 
   tearDown(() {
@@ -44,7 +51,7 @@ void main() {
       /// Null and empty URLs return null immediately without any network call.
       expect(await service.cacheImage(null, 'b1'), isNull);
       expect(await service.cacheImage('', 'b1'), isNull);
-      verifyNever(() => mockDio.get<List<int>>(any()));
+      verifyNever(() => mockClient.get(any()));
     });
 
     test('returns cached file if already exists', () async {
@@ -54,24 +61,16 @@ void main() {
 
       final path = await service.cacheImage('http://example.com/img.png', 'b1');
       expect(path, file.path);
-      verifyNever(() => mockDio.get<List<int>>(any()));
+      verifyNever(() => mockClient.get(any()));
     });
 
     test('downloads, converts to WebP, and caches the file', () async {
-      /// A successful download results in a WebP‑encoded cache file.
+      /// A successful download results in a WebP-encoded cache file.
       final pngBytes = createTestImage();
 
       when(
-        () => mockDio.get<List<int>>(
-          'http://example.com/img.png',
-          options: any(named: 'options'),
-        ),
-      ).thenAnswer(
-        (_) async => Response<List<int>>(
-          requestOptions: RequestOptions(),
-          data: pngBytes,
-        ),
-      );
+        () => mockClient.get(any()),
+      ).thenAnswer((_) async => http.Response.bytes(pngBytes, 200));
 
       final path = await service.cacheImage('http://example.com/img.png', 'b1');
       expect(path, isNotNull);
@@ -83,33 +82,19 @@ void main() {
       expect(decoded, isNotNull);
     });
 
-    test('returns null when response data is null', () async {
-      /// If the server returns no data, null is returned.
+    test('returns null for non-200 response', () async {
+      /// If the server returns a non-200 status, null is returned.
       when(
-        () => mockDio.get<List<int>>(
-          'http://example.com/img.png',
-          options: any(named: 'options'),
-        ),
-      ).thenAnswer(
-        (_) async => Response<List<int>>(
-          requestOptions: RequestOptions(),
-        ),
-      );
+        () => mockClient.get(any()),
+      ).thenAnswer((_) async => http.Response('Not Found', 404));
 
       final path = await service.cacheImage('http://example.com/img.png', 'b1');
       expect(path, isNull);
     });
 
     test('returns null on network error', () async {
-      /// A [DioException] is caught and null is returned.
-      when(
-        () => mockDio.get<List<int>>(
-          'http://example.com/img.png',
-          options: any(named: 'options'),
-        ),
-      ).thenThrow(
-        DioException(requestOptions: RequestOptions()),
-      );
+      /// An exception is caught and null is returned.
+      when(() => mockClient.get(any())).thenThrow(Exception('Network error'));
 
       final path = await service.cacheImage('http://example.com/img.png', 'b1');
       expect(path, isNull);

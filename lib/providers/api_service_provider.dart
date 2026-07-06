@@ -1,20 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
-import 'package:pantry_app/providers/dio_provider.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
+import 'package:pantry_app/services/off_adapter.dart';
 
-/// Provides the configured [OpenFoodFactsApi] instance.
+/// Provides the configured [OffAdapter] instance.
 ///
-/// Credentials are read from [AppConfig]. Set [AppConfig.offUserId] and
-/// [AppConfig.offPassword] to enable product submissions; leave them
-/// empty to disable submission features.
-final apiServiceProvider = Provider<OpenFoodFactsApi>((ref) {
-  final dio = ref.read(dioProvider);
-  return OpenFoodFactsApi(
-    dio,
-    userId: AppConfig.offUserId,
-    password: AppConfig.offPassword,
-    contactEmail: AppConfig.contactEmail,
-    useStaging: AppConfig.useOffStaging,
-  );
+/// Uses [AppConfig.useOffStaging] to select between OFF production
+/// and staging servers. No credentials are needed for read operations;
+/// the adapter uses a test user (`smoothie-app/strawberrybanana`)
+/// following the convention established by the official smooth-app.
+final apiServiceProvider = Provider<OffAdapter>((ref) {
+  return OffAdapter(useStaging: AppConfig.useOffStaging);
 });

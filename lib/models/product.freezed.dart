@@ -11,120 +11,110 @@ part of 'product.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
-
 /// @nodoc
 mixin _$Product {
 
-/// The barcode (EAN‑13, UPC, etc.) that uniquely identifies the product.
+/// The barcode (EAN-13, UPC, etc.) that uniquely identifies the product.
 ///
 /// This is the primary key in the local database and the lookup key for
 /// the Open Food Facts API.
-@JsonKey(name: '_id') String get barcode;/// The product name as returned by Open Food Facts.
+ String get barcode;/// The product name as returned by Open Food Facts.
 ///
 /// In rare cases the API may return an empty string; the repository
 /// should handle that gracefully.
-@JsonKey(name: 'product_name') String get name;/// The brand name(s), often comma‑separated when multiple brands exist
-/// (e.g. `"Ferrero"`, `"Nestlé, Nespresso"`).
-@JsonKey(name: 'brands') String? get brand;/// A URL to the product’s front image on the Open Food Facts CDN.
+ String get name;/// The brand name(s), often comma-separated when multiple brands exist
+/// (e.g. `"Ferrero"`, `"Nestle, Nespresso"`).
+ String? get brand;/// A URL to the product's front image on the Open Food Facts CDN.
 ///
 /// May be `null` if no image has been uploaded for this product.
-@JsonKey(name: 'image_url') String? get imageUrl;/// OFF CDN URL for the nutrition facts table image, if available.
+ String? get imageUrl;/// OFF CDN URL for the nutrition facts table image, if available.
 ///
 /// Used by the photo-completeness stats screen to compare local user
 /// photos against what OFF already has for this product.
-@JsonKey(name: 'image_nutrition_url') String? get offNutritionImageUrl;/// OFF CDN URL for the ingredients list image, if available.
-@JsonKey(name: 'image_ingredients_url') String? get offIngredientsImageUrl;/// OFF CDN URL for the product front/packaging image, if available.
-@JsonKey(name: 'image_front_url') String? get offProductImageUrl;/// The OFF taxonomy hierarchy for this product, from broadest to
-/// most specific. Each entry is a language‑prefixed tag
+ String? get offNutritionImageUrl;/// OFF CDN URL for the ingredients list image, if available.
+ String? get offIngredientsImageUrl;/// OFF CDN URL for the product front/packaging image, if available.
+ String? get offProductImageUrl;/// The OFF taxonomy hierarchy for this product, from broadest to
+/// most specific. Each entry is a language-prefixed tag
 /// (e.g. `en:eggs`, `en:chicken-eggs`).
 ///
 /// May be `null` for manually entered products or when OFF has no
 /// taxonomy data.
-@JsonKey(name: 'categories_hierarchy') List<String>? get categoriesHierarchy;/// The product category as assigned by the Open Food Facts community.
+ List<String>? get categoriesHierarchy;/// The product category as assigned by the Open Food Facts community.
 ///
-/// Often a comma‑separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
-/// Used in the add‑to‑inventory screen to suggest a default expiry date
-/// based on the category (e.g., dairy → +7 days).
-@JsonKey(name: 'category') String? get category;/// The full ingredients list as plain text.
+/// Often a comma-separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
+/// Used in the add-to-inventory screen to suggest a default expiry date
+/// based on the category (e.g., dairy -> +7 days).
+ String? get category;/// The full ingredients list as plain text.
 ///
 /// Currently stored as a single string, exactly as returned by the API.
 /// In the future this could be migrated to a separate `ingredients` table
-/// to enable allergen filtering or per‑ingredient search.
-@JsonKey(name: 'ingredients_text') String? get ingredients;/// The suggested serving size, typically with a unit (e.g. `"15 g"`,
+/// to enable allergen filtering or per-ingredient search.
+ String? get ingredients;/// The suggested serving size, typically with a unit (e.g. `"15 g"`,
 /// `"1 cookie (28 g)"`).
-@JsonKey(name: 'serving_size') String? get servingSize;/// Energy content in **kilocalories per 100 g** (or 100 ml).
+ String? get servingSize;/// Energy content in **kilocalories per 100 g** (or 100 ml).
 ///
 /// Sourced from `nutriments.energy-kcal_100g` in the API response.
-@JsonKey(name: 'energy_kcal') double? get energyKcal;/// Protein content in **grams per 100 g** (or 100 ml).
-@JsonKey(name: 'protein_g') double? get proteinG;/// Carbohydrate content in **grams per 100 g** (or 100 ml).
-@JsonKey(name: 'carbs_g') double? get carbsG;/// Fat content in **grams per 100 g** (or 100 ml).
-@JsonKey(name: 'fat_g') double? get fatG;/// Fiber content in **grams per 100 g** (or 100 ml).
-@JsonKey(name: 'fiber_g') double? get fiberG;/// Salt content in **grams per 100 g** (or 100 ml).
-@JsonKey(name: 'salt_g') double? get saltG;/// Epoch timestamp (milliseconds since Unix epoch) of when the product
+ double? get energyKcal;/// Protein content in **grams per 100 g** (or 100 ml).
+ double? get proteinG;/// Carbohydrate content in **grams per 100 g** (or 100 ml).
+ double? get carbsG;/// Fat content in **grams per 100 g** (or 100 ml).
+ double? get fatG;/// Fiber content in **grams per 100 g** (or 100 ml).
+ double? get fiberG;/// Salt content in **grams per 100 g** (or 100 ml).
+ double? get saltG;/// Epoch timestamp (milliseconds since Unix epoch) of when the product
 /// data was last fetched from the API or submitted by the user.
 ///
-/// Set automatically in `OpenFoodFactsApi.getByBarcode` and
-/// `OpenFoodFactsApi.submitProduct`.
-@JsonKey(name: 'last_synced') int? get lastSynced;/// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
+/// Set automatically in [OffAdapter.getByBarcode] and
+/// [OffAdapter.submitProduct].
+ int? get lastSynced;/// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
 /// if the data is unavailable. May also be `'not-applicable'` when the
 /// Nutri-Score system does not apply to this product category (e.g. food
 /// additives).
 ///
-/// Sourced from `nutriscore_grade` in the Open Food Facts v3 API.
-@JsonKey(name: 'nutriscore_grade') String? get nutriscoreGrade;/// The product category that makes Nutri-Score not applicable, if any.
+/// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
+/// the SDK's `nutriscore` field.
+ String? get nutriscoreGrade;/// The product category that makes Nutri-Score not applicable, if any.
 ///
 /// This is present only when [nutriscoreGrade] is `'not-applicable'` and
 /// explains why (e.g. `'en:food-additives'`).
 ///
-/// Sourced from `nutriscore_data.nutriscore_not_applicable_for_category`
-/// in the API response. This field is not included in the JSON generated
-/// by `json_serializable` because the value comes from a nested object.
-@JsonKey(includeFromJson: false, includeToJson: false) String? get nutriscoreNotApplicableCategory;/// The origin of this product record.
+/// Note: the official Dart SDK does not expose the
+/// `nutriscore_data.nutriscore_not_applicable_for_category` field, so
+/// this value is only populated when reading from the local database
+/// for previously cached products.
+ String? get nutriscoreNotApplicableCategory;/// The origin of this product record.
 ///
 /// - `'api'` — fetched from Open Food Facts (can be safely flushed and
-///   re‑fetched).
-/// - `'manual'` — entered by the user via the add‑product screen or
+///   re-fetched).
+/// - `'manual'` — entered by the user via the add-product screen or
 ///   imported from CSV (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
-/// integration. The add‑product screen and CSV import override it to
+/// integration. The add-product screen and CSV import override it to
 /// `'manual'`.
+ String get source;/// Local file path to a photo of the nutrition facts table.
 ///
-/// Not serialised from JSON because the OFF API does not include this
-/// field; it is only stored in the local database.
-@JsonKey(includeFromJson: false, includeToJson: false) String get source;/// Local file path to a photo of the nutrition facts table.
-///
-/// Populated when the user captures a photo on the manual‑entry screen.
+/// Populated when the user captures a photo on the manual-entry screen.
 /// Stored as a stable path inside `<app-documents>/product_images/`.
-/// Not serialised to/from JSON because it is only used locally.
-@JsonKey(includeFromJson: false, includeToJson: false) String? get nutritionImagePath;/// Local file path to a photo of the ingredients list.
+ String? get nutritionImagePath;/// Local file path to a photo of the ingredients list.
 ///
-/// Populated when the user captures a photo on the manual‑entry screen.
+/// Populated when the user captures a photo on the manual-entry screen.
 /// Stored as a stable path inside `<app-documents>/product_images/`.
-/// Not serialised to/from JSON because it is only used locally.
-@JsonKey(includeFromJson: false, includeToJson: false) String? get ingredientsImagePath;/// Local file path to a photo of the product packaging / front.
+ String? get ingredientsImagePath;/// Local file path to a photo of the product packaging / front.
 ///
-/// Populated when the user captures a photo on the manual‑entry screen.
+/// Populated when the user captures a photo on the manual-entry screen.
 /// Stored as a stable path inside `<app-documents>/product_images/`.
-/// Not serialised to/from JSON because it is only used locally.
-@JsonKey(includeFromJson: false, includeToJson: false) String? get productImagePath;/// The submission status of this product to Open Food Facts.
+ String? get productImagePath;/// The submission status of this product to Open Food Facts.
 ///
-/// - [productSubmissionNotSubmitted] – not yet submitted (default).
-/// - [productSubmissionPending] – queued for submission.
-/// - [productSubmissionSubmitted] – successfully submitted.
-/// - [productSubmissionFailed] – submission failed; retry possible.
-///
-/// Not serialised from JSON because the OFF API does not include this
-/// field; it is only stored in the local database.
-@JsonKey(includeFromJson: false, includeToJson: false) String get submissionStatus;
+/// - [productSubmissionNotSubmitted] — not yet submitted (default).
+/// - [productSubmissionPending] — queued for submission.
+/// - [productSubmissionSubmitted] — successfully submitted.
+/// - [productSubmissionFailed] — submission failed; retry possible.
+ String get submissionStatus;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as Product, _$identity);
 
-  /// Serializes this Product to a JSON map.
-  Map<String, dynamic> toJson();
 
 
 @override
@@ -132,7 +122,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.offNutritionImageUrl, offNutritionImageUrl) || other.offNutritionImageUrl == offNutritionImageUrl)&&(identical(other.offIngredientsImageUrl, offIngredientsImageUrl) || other.offIngredientsImageUrl == offIngredientsImageUrl)&&(identical(other.offProductImageUrl, offProductImageUrl) || other.offProductImageUrl == offProductImageUrl)&&const DeepCollectionEquality().equals(other.categoriesHierarchy, categoriesHierarchy)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory)&&(identical(other.source, source) || other.source == source)&&(identical(other.nutritionImagePath, nutritionImagePath) || other.nutritionImagePath == nutritionImagePath)&&(identical(other.ingredientsImagePath, ingredientsImagePath) || other.ingredientsImagePath == ingredientsImagePath)&&(identical(other.productImagePath, productImagePath) || other.productImagePath == productImagePath)&&(identical(other.submissionStatus, submissionStatus) || other.submissionStatus == submissionStatus));
 }
 
-@JsonKey(includeFromJson: false, includeToJson: false)
+
 @override
 int get hashCode => Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(categoriesHierarchy),category,ingredients,servingSize,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus]);
 
@@ -149,7 +139,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'image_nutrition_url') String? offNutritionImageUrl,@JsonKey(name: 'image_ingredients_url') String? offIngredientsImageUrl,@JsonKey(name: 'image_front_url') String? offProductImageUrl,@JsonKey(name: 'categories_hierarchy') List<String>? categoriesHierarchy,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced,@JsonKey(name: 'nutriscore_grade') String? nutriscoreGrade,@JsonKey(includeFromJson: false, includeToJson: false) String? nutriscoreNotApplicableCategory,@JsonKey(includeFromJson: false, includeToJson: false) String source,@JsonKey(includeFromJson: false, includeToJson: false) String? nutritionImagePath,@JsonKey(includeFromJson: false, includeToJson: false) String? ingredientsImagePath,@JsonKey(includeFromJson: false, includeToJson: false) String? productImagePath,@JsonKey(includeFromJson: false, includeToJson: false) String submissionStatus
+ String barcode, String name, String? brand, String? imageUrl, String? offNutritionImageUrl, String? offIngredientsImageUrl, String? offProductImageUrl, List<String>? categoriesHierarchy, String? category, String? ingredients, String? servingSize, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, int? lastSynced, String? nutriscoreGrade, String? nutriscoreNotApplicableCategory, String source, String? nutritionImagePath, String? ingredientsImagePath, String? productImagePath, String submissionStatus
 });
 
 
@@ -278,7 +268,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'image_nutrition_url')  String? offNutritionImageUrl, @JsonKey(name: 'image_ingredients_url')  String? offIngredientsImageUrl, @JsonKey(name: 'image_front_url')  String? offProductImageUrl, @JsonKey(name: 'categories_hierarchy')  List<String>? categoriesHierarchy, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutriscoreNotApplicableCategory, @JsonKey(includeFromJson: false, includeToJson: false)  String source, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutritionImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String? ingredientsImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String? productImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String submissionStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus);case _:
@@ -299,7 +289,7 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNut
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'image_nutrition_url')  String? offNutritionImageUrl, @JsonKey(name: 'image_ingredients_url')  String? offIngredientsImageUrl, @JsonKey(name: 'image_front_url')  String? offProductImageUrl, @JsonKey(name: 'categories_hierarchy')  List<String>? categoriesHierarchy, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutriscoreNotApplicableCategory, @JsonKey(includeFromJson: false, includeToJson: false)  String source, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutritionImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String? ingredientsImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String? productImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String submissionStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
 return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus);case _:
@@ -319,7 +309,7 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNut
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String barcode, @JsonKey(name: 'product_name')  String name, @JsonKey(name: 'brands')  String? brand, @JsonKey(name: 'image_url')  String? imageUrl, @JsonKey(name: 'image_nutrition_url')  String? offNutritionImageUrl, @JsonKey(name: 'image_ingredients_url')  String? offIngredientsImageUrl, @JsonKey(name: 'image_front_url')  String? offProductImageUrl, @JsonKey(name: 'categories_hierarchy')  List<String>? categoriesHierarchy, @JsonKey(name: 'category')  String? category, @JsonKey(name: 'ingredients_text')  String? ingredients, @JsonKey(name: 'serving_size')  String? servingSize, @JsonKey(name: 'energy_kcal')  double? energyKcal, @JsonKey(name: 'protein_g')  double? proteinG, @JsonKey(name: 'carbs_g')  double? carbsG, @JsonKey(name: 'fat_g')  double? fatG, @JsonKey(name: 'fiber_g')  double? fiberG, @JsonKey(name: 'salt_g')  double? saltG, @JsonKey(name: 'last_synced')  int? lastSynced, @JsonKey(name: 'nutriscore_grade')  String? nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutriscoreNotApplicableCategory, @JsonKey(includeFromJson: false, includeToJson: false)  String source, @JsonKey(includeFromJson: false, includeToJson: false)  String? nutritionImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String? ingredientsImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String? productImagePath, @JsonKey(includeFromJson: false, includeToJson: false)  String submissionStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
 return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus);case _:
@@ -331,52 +321,52 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNut
 }
 
 /// @nodoc
-@JsonSerializable()
+
 
 class _Product implements Product {
-  const _Product({@JsonKey(name: '_id') required this.barcode, @JsonKey(name: 'product_name') required this.name, @JsonKey(name: 'brands') this.brand, @JsonKey(name: 'image_url') this.imageUrl, @JsonKey(name: 'image_nutrition_url') this.offNutritionImageUrl, @JsonKey(name: 'image_ingredients_url') this.offIngredientsImageUrl, @JsonKey(name: 'image_front_url') this.offProductImageUrl, @JsonKey(name: 'categories_hierarchy') final  List<String>? categoriesHierarchy, @JsonKey(name: 'category') this.category, @JsonKey(name: 'ingredients_text') this.ingredients, @JsonKey(name: 'serving_size') this.servingSize, @JsonKey(name: 'energy_kcal') this.energyKcal, @JsonKey(name: 'protein_g') this.proteinG, @JsonKey(name: 'carbs_g') this.carbsG, @JsonKey(name: 'fat_g') this.fatG, @JsonKey(name: 'fiber_g') this.fiberG, @JsonKey(name: 'salt_g') this.saltG, @JsonKey(name: 'last_synced') this.lastSynced, @JsonKey(name: 'nutriscore_grade') this.nutriscoreGrade, @JsonKey(includeFromJson: false, includeToJson: false) this.nutriscoreNotApplicableCategory, @JsonKey(includeFromJson: false, includeToJson: false) this.source = 'api', @JsonKey(includeFromJson: false, includeToJson: false) this.nutritionImagePath, @JsonKey(includeFromJson: false, includeToJson: false) this.ingredientsImagePath, @JsonKey(includeFromJson: false, includeToJson: false) this.productImagePath, @JsonKey(includeFromJson: false, includeToJson: false) this.submissionStatus = productSubmissionNotSubmitted}): _categoriesHierarchy = categoriesHierarchy;
-  factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
+  const _Product({required this.barcode, required this.name, this.brand, this.imageUrl, this.offNutritionImageUrl, this.offIngredientsImageUrl, this.offProductImageUrl, final  List<String>? categoriesHierarchy, this.category, this.ingredients, this.servingSize, this.energyKcal, this.proteinG, this.carbsG, this.fatG, this.fiberG, this.saltG, this.lastSynced, this.nutriscoreGrade, this.nutriscoreNotApplicableCategory, this.source = 'api', this.nutritionImagePath, this.ingredientsImagePath, this.productImagePath, this.submissionStatus = productSubmissionNotSubmitted}): _categoriesHierarchy = categoriesHierarchy;
+  
 
-/// The barcode (EAN‑13, UPC, etc.) that uniquely identifies the product.
+/// The barcode (EAN-13, UPC, etc.) that uniquely identifies the product.
 ///
 /// This is the primary key in the local database and the lookup key for
 /// the Open Food Facts API.
-@override@JsonKey(name: '_id') final  String barcode;
+@override final  String barcode;
 /// The product name as returned by Open Food Facts.
 ///
 /// In rare cases the API may return an empty string; the repository
 /// should handle that gracefully.
-@override@JsonKey(name: 'product_name') final  String name;
-/// The brand name(s), often comma‑separated when multiple brands exist
-/// (e.g. `"Ferrero"`, `"Nestlé, Nespresso"`).
-@override@JsonKey(name: 'brands') final  String? brand;
-/// A URL to the product’s front image on the Open Food Facts CDN.
+@override final  String name;
+/// The brand name(s), often comma-separated when multiple brands exist
+/// (e.g. `"Ferrero"`, `"Nestle, Nespresso"`).
+@override final  String? brand;
+/// A URL to the product's front image on the Open Food Facts CDN.
 ///
 /// May be `null` if no image has been uploaded for this product.
-@override@JsonKey(name: 'image_url') final  String? imageUrl;
+@override final  String? imageUrl;
 /// OFF CDN URL for the nutrition facts table image, if available.
 ///
 /// Used by the photo-completeness stats screen to compare local user
 /// photos against what OFF already has for this product.
-@override@JsonKey(name: 'image_nutrition_url') final  String? offNutritionImageUrl;
+@override final  String? offNutritionImageUrl;
 /// OFF CDN URL for the ingredients list image, if available.
-@override@JsonKey(name: 'image_ingredients_url') final  String? offIngredientsImageUrl;
+@override final  String? offIngredientsImageUrl;
 /// OFF CDN URL for the product front/packaging image, if available.
-@override@JsonKey(name: 'image_front_url') final  String? offProductImageUrl;
+@override final  String? offProductImageUrl;
 /// The OFF taxonomy hierarchy for this product, from broadest to
-/// most specific. Each entry is a language‑prefixed tag
+/// most specific. Each entry is a language-prefixed tag
 /// (e.g. `en:eggs`, `en:chicken-eggs`).
 ///
 /// May be `null` for manually entered products or when OFF has no
 /// taxonomy data.
  final  List<String>? _categoriesHierarchy;
 /// The OFF taxonomy hierarchy for this product, from broadest to
-/// most specific. Each entry is a language‑prefixed tag
+/// most specific. Each entry is a language-prefixed tag
 /// (e.g. `en:eggs`, `en:chicken-eggs`).
 ///
 /// May be `null` for manually entered products or when OFF has no
 /// taxonomy data.
-@override@JsonKey(name: 'categories_hierarchy') List<String>? get categoriesHierarchy {
+@override List<String>? get categoriesHierarchy {
   final value = _categoriesHierarchy;
   if (value == null) return null;
   if (_categoriesHierarchy is EqualUnmodifiableListView) return _categoriesHierarchy;
@@ -386,97 +376,90 @@ class _Product implements Product {
 
 /// The product category as assigned by the Open Food Facts community.
 ///
-/// Often a comma‑separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
-/// Used in the add‑to‑inventory screen to suggest a default expiry date
-/// based on the category (e.g., dairy → +7 days).
-@override@JsonKey(name: 'category') final  String? category;
+/// Often a comma-separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
+/// Used in the add-to-inventory screen to suggest a default expiry date
+/// based on the category (e.g., dairy -> +7 days).
+@override final  String? category;
 /// The full ingredients list as plain text.
 ///
 /// Currently stored as a single string, exactly as returned by the API.
 /// In the future this could be migrated to a separate `ingredients` table
-/// to enable allergen filtering or per‑ingredient search.
-@override@JsonKey(name: 'ingredients_text') final  String? ingredients;
+/// to enable allergen filtering or per-ingredient search.
+@override final  String? ingredients;
 /// The suggested serving size, typically with a unit (e.g. `"15 g"`,
 /// `"1 cookie (28 g)"`).
-@override@JsonKey(name: 'serving_size') final  String? servingSize;
-/// Energy content in **kilocalories per 100 g** (or 100 ml).
+@override final  String? servingSize;
+/// Energy content in **kilocalories per 100 g** (or 100 ml).
 ///
 /// Sourced from `nutriments.energy-kcal_100g` in the API response.
-@override@JsonKey(name: 'energy_kcal') final  double? energyKcal;
-/// Protein content in **grams per 100 g** (or 100 ml).
-@override@JsonKey(name: 'protein_g') final  double? proteinG;
-/// Carbohydrate content in **grams per 100 g** (or 100 ml).
-@override@JsonKey(name: 'carbs_g') final  double? carbsG;
-/// Fat content in **grams per 100 g** (or 100 ml).
-@override@JsonKey(name: 'fat_g') final  double? fatG;
-/// Fiber content in **grams per 100 g** (or 100 ml).
-@override@JsonKey(name: 'fiber_g') final  double? fiberG;
-/// Salt content in **grams per 100 g** (or 100 ml).
-@override@JsonKey(name: 'salt_g') final  double? saltG;
+@override final  double? energyKcal;
+/// Protein content in **grams per 100 g** (or 100 ml).
+@override final  double? proteinG;
+/// Carbohydrate content in **grams per 100 g** (or 100 ml).
+@override final  double? carbsG;
+/// Fat content in **grams per 100 g** (or 100 ml).
+@override final  double? fatG;
+/// Fiber content in **grams per 100 g** (or 100 ml).
+@override final  double? fiberG;
+/// Salt content in **grams per 100 g** (or 100 ml).
+@override final  double? saltG;
 /// Epoch timestamp (milliseconds since Unix epoch) of when the product
 /// data was last fetched from the API or submitted by the user.
 ///
-/// Set automatically in `OpenFoodFactsApi.getByBarcode` and
-/// `OpenFoodFactsApi.submitProduct`.
-@override@JsonKey(name: 'last_synced') final  int? lastSynced;
+/// Set automatically in [OffAdapter.getByBarcode] and
+/// [OffAdapter.submitProduct].
+@override final  int? lastSynced;
 /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
 /// if the data is unavailable. May also be `'not-applicable'` when the
 /// Nutri-Score system does not apply to this product category (e.g. food
 /// additives).
 ///
-/// Sourced from `nutriscore_grade` in the Open Food Facts v3 API.
-@override@JsonKey(name: 'nutriscore_grade') final  String? nutriscoreGrade;
+/// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
+/// the SDK's `nutriscore` field.
+@override final  String? nutriscoreGrade;
 /// The product category that makes Nutri-Score not applicable, if any.
 ///
 /// This is present only when [nutriscoreGrade] is `'not-applicable'` and
 /// explains why (e.g. `'en:food-additives'`).
 ///
-/// Sourced from `nutriscore_data.nutriscore_not_applicable_for_category`
-/// in the API response. This field is not included in the JSON generated
-/// by `json_serializable` because the value comes from a nested object.
-@override@JsonKey(includeFromJson: false, includeToJson: false) final  String? nutriscoreNotApplicableCategory;
+/// Note: the official Dart SDK does not expose the
+/// `nutriscore_data.nutriscore_not_applicable_for_category` field, so
+/// this value is only populated when reading from the local database
+/// for previously cached products.
+@override final  String? nutriscoreNotApplicableCategory;
 /// The origin of this product record.
 ///
 /// - `'api'` — fetched from Open Food Facts (can be safely flushed and
-///   re‑fetched).
-/// - `'manual'` — entered by the user via the add‑product screen or
+///   re-fetched).
+/// - `'manual'` — entered by the user via the add-product screen or
 ///   imported from CSV (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
-/// integration. The add‑product screen and CSV import override it to
+/// integration. The add-product screen and CSV import override it to
 /// `'manual'`.
-///
-/// Not serialised from JSON because the OFF API does not include this
-/// field; it is only stored in the local database.
-@override@JsonKey(includeFromJson: false, includeToJson: false) final  String source;
+@override@JsonKey() final  String source;
 /// Local file path to a photo of the nutrition facts table.
 ///
-/// Populated when the user captures a photo on the manual‑entry screen.
+/// Populated when the user captures a photo on the manual-entry screen.
 /// Stored as a stable path inside `<app-documents>/product_images/`.
-/// Not serialised to/from JSON because it is only used locally.
-@override@JsonKey(includeFromJson: false, includeToJson: false) final  String? nutritionImagePath;
+@override final  String? nutritionImagePath;
 /// Local file path to a photo of the ingredients list.
 ///
-/// Populated when the user captures a photo on the manual‑entry screen.
+/// Populated when the user captures a photo on the manual-entry screen.
 /// Stored as a stable path inside `<app-documents>/product_images/`.
-/// Not serialised to/from JSON because it is only used locally.
-@override@JsonKey(includeFromJson: false, includeToJson: false) final  String? ingredientsImagePath;
+@override final  String? ingredientsImagePath;
 /// Local file path to a photo of the product packaging / front.
 ///
-/// Populated when the user captures a photo on the manual‑entry screen.
+/// Populated when the user captures a photo on the manual-entry screen.
 /// Stored as a stable path inside `<app-documents>/product_images/`.
-/// Not serialised to/from JSON because it is only used locally.
-@override@JsonKey(includeFromJson: false, includeToJson: false) final  String? productImagePath;
+@override final  String? productImagePath;
 /// The submission status of this product to Open Food Facts.
 ///
-/// - [productSubmissionNotSubmitted] – not yet submitted (default).
-/// - [productSubmissionPending] – queued for submission.
-/// - [productSubmissionSubmitted] – successfully submitted.
-/// - [productSubmissionFailed] – submission failed; retry possible.
-///
-/// Not serialised from JSON because the OFF API does not include this
-/// field; it is only stored in the local database.
-@override@JsonKey(includeFromJson: false, includeToJson: false) final  String submissionStatus;
+/// - [productSubmissionNotSubmitted] — not yet submitted (default).
+/// - [productSubmissionPending] — queued for submission.
+/// - [productSubmissionSubmitted] — successfully submitted.
+/// - [productSubmissionFailed] — submission failed; retry possible.
+@override@JsonKey() final  String submissionStatus;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
@@ -484,17 +467,14 @@ class _Product implements Product {
 @pragma('vm:prefer-inline')
 _$ProductCopyWith<_Product> get copyWith => __$ProductCopyWithImpl<_Product>(this, _$identity);
 
-@override
-Map<String, dynamic> toJson() {
-  return _$ProductToJson(this, );
-}
+
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.offNutritionImageUrl, offNutritionImageUrl) || other.offNutritionImageUrl == offNutritionImageUrl)&&(identical(other.offIngredientsImageUrl, offIngredientsImageUrl) || other.offIngredientsImageUrl == offIngredientsImageUrl)&&(identical(other.offProductImageUrl, offProductImageUrl) || other.offProductImageUrl == offProductImageUrl)&&const DeepCollectionEquality().equals(other._categoriesHierarchy, _categoriesHierarchy)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory)&&(identical(other.source, source) || other.source == source)&&(identical(other.nutritionImagePath, nutritionImagePath) || other.nutritionImagePath == nutritionImagePath)&&(identical(other.ingredientsImagePath, ingredientsImagePath) || other.ingredientsImagePath == ingredientsImagePath)&&(identical(other.productImagePath, productImagePath) || other.productImagePath == productImagePath)&&(identical(other.submissionStatus, submissionStatus) || other.submissionStatus == submissionStatus));
 }
 
-@JsonKey(includeFromJson: false, includeToJson: false)
+
 @override
 int get hashCode => Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(_categoriesHierarchy),category,ingredients,servingSize,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus]);
 
@@ -511,7 +491,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: '_id') String barcode,@JsonKey(name: 'product_name') String name,@JsonKey(name: 'brands') String? brand,@JsonKey(name: 'image_url') String? imageUrl,@JsonKey(name: 'image_nutrition_url') String? offNutritionImageUrl,@JsonKey(name: 'image_ingredients_url') String? offIngredientsImageUrl,@JsonKey(name: 'image_front_url') String? offProductImageUrl,@JsonKey(name: 'categories_hierarchy') List<String>? categoriesHierarchy,@JsonKey(name: 'category') String? category,@JsonKey(name: 'ingredients_text') String? ingredients,@JsonKey(name: 'serving_size') String? servingSize,@JsonKey(name: 'energy_kcal') double? energyKcal,@JsonKey(name: 'protein_g') double? proteinG,@JsonKey(name: 'carbs_g') double? carbsG,@JsonKey(name: 'fat_g') double? fatG,@JsonKey(name: 'fiber_g') double? fiberG,@JsonKey(name: 'salt_g') double? saltG,@JsonKey(name: 'last_synced') int? lastSynced,@JsonKey(name: 'nutriscore_grade') String? nutriscoreGrade,@JsonKey(includeFromJson: false, includeToJson: false) String? nutriscoreNotApplicableCategory,@JsonKey(includeFromJson: false, includeToJson: false) String source,@JsonKey(includeFromJson: false, includeToJson: false) String? nutritionImagePath,@JsonKey(includeFromJson: false, includeToJson: false) String? ingredientsImagePath,@JsonKey(includeFromJson: false, includeToJson: false) String? productImagePath,@JsonKey(includeFromJson: false, includeToJson: false) String submissionStatus
+ String barcode, String name, String? brand, String? imageUrl, String? offNutritionImageUrl, String? offIngredientsImageUrl, String? offProductImageUrl, List<String>? categoriesHierarchy, String? category, String? ingredients, String? servingSize, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, int? lastSynced, String? nutriscoreGrade, String? nutriscoreNotApplicableCategory, String source, String? nutritionImagePath, String? ingredientsImagePath, String? productImagePath, String submissionStatus
 });
 
 

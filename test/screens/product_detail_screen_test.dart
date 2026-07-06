@@ -37,10 +37,12 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
+import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import '../helpers/pump_app.dart';
 
@@ -84,6 +86,37 @@ const gradeAProduct = Product(
   nutriscoreGrade: 'a',
 );
 
+/// A manual product with submitted status.
+const submittedManualProduct = Product(
+  barcode: '123456789',
+  name: 'Manual Submitted',
+  source: 'manual',
+  submissionStatus: 'submitted',
+);
+
+/// A manual product with failed status.
+const failedManualProduct = Product(
+  barcode: '234567890',
+  name: 'Manual Failed',
+  source: 'manual',
+  submissionStatus: 'failed',
+);
+
+/// A manual product with pending status.
+const pendingManualProduct = Product(
+  barcode: '345678901',
+  name: 'Manual Pending',
+  source: 'manual',
+  submissionStatus: 'pending',
+);
+
+/// A manual product with no submission status.
+const notSubmittedManualProduct = Product(
+  barcode: '456789012',
+  name: 'Manual Not Submitted',
+  source: 'manual',
+);
+
 /// A sample inventory item.
 InventoryItem makeItem({
   int? id,
@@ -117,6 +150,9 @@ class MockProductRepository extends Mock implements ProductRepository {}
 
 class MockNotificationService extends Mock implements NotificationService {}
 
+class MockProductSubmissionService extends Mock
+    implements ProductSubmissionService {}
+
 void _registerFallbacks() {
   registerFallbackValue(const InventoryItem(barcode: 'fallback'));
   registerFallbackValue(
@@ -131,6 +167,7 @@ void _registerFallbacks() {
     ),
   );
   registerFallbackValue(AndroidScheduleMode.inexactAllowWhileIdle);
+  registerFallbackValue(const Product(barcode: 'fallback', name: 'Fallback'));
 }
 
 // ---------- Test harness overrides ------------------------------------------
@@ -139,10 +176,13 @@ void _registerFallbacks() {
 List<Override> screenOverrides({
   required MockProductRepository mockRepo,
   required MockNotificationService mockNotif,
+  MockProductSubmissionService? mockSubmissionService,
 }) {
   return [
     productRepositoryProvider.overrideWithValue(mockRepo),
     notificationServiceProvider.overrideWithValue(mockNotif),
+    if (mockSubmissionService != null)
+      productSubmissionServiceProvider.overrideWithValue(mockSubmissionService),
     activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
   ];
 }
@@ -578,5 +618,314 @@ void main() {
       find.descendant(of: button, matching: find.byIcon(Icons.open_in_browser)),
       findsOneWidget,
     );
+  });
+
+  // --------------------------------------------------------------------------
+  // Submission status chips (source = 'manual')
+  // --------------------------------------------------------------------------
+
+  testWidgets('shows submitted chip for manual product', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: submittedManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+    expect(find.text('Submitted to Open Food Facts'), findsOneWidget);
+  });
+
+  testWidgets('shows failed chip with retry for manual product', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: failedManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+    expect(find.text('Submission to Open Food Facts failed'), findsOneWidget);
+  });
+
+  testWidgets('shows pending chip for manual product', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: pendingManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+      settle: false,
+    );
+    await tester.pump();
+    expect(find.text('Pending submission to Open Food Facts'), findsOneWidget);
+  });
+
+  testWidgets('shows not submitted chip for manual product', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: notSubmittedManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+    expect(find.text('Not submitted to Open Food Facts'), findsOneWidget);
+  });
+
+  // --------------------------------------------------------------------------
+  // Quantity dialog
+  // --------------------------------------------------------------------------
+
+  testWidgets('quantity dialog opens and saves new value', (tester) async {
+    setLargeScreen(tester);
+    final item = makeItem(id: 1, quantity: 5);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => [item]);
+    when(
+      () => mockRepo.updateInventoryItem(any()),
+    ).thenAnswer((_) => Future<int>.value(1));
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.textContaining('5.0'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '3');
+    await tester.tap(find.widgetWithText(TextButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => mockRepo.updateInventoryItem(
+        any(that: predicate<InventoryItem>((i) => i.quantity == 3)),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('quantity dialog cancel does not change quantity', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    final item = makeItem(id: 1, quantity: 5);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => [item]);
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.textContaining('5.0'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+  });
+
+  // --------------------------------------------------------------------------
+  // Quantity increment / decrement buttons
+  // --------------------------------------------------------------------------
+
+  testWidgets('increment button increases quantity', (tester) async {
+    setLargeScreen(tester);
+    final item = makeItem(id: 1);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => [item]);
+    when(
+      () => mockRepo.updateInventoryItem(any()),
+    ).thenAnswer((_) => Future<int>.value(1));
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.byIcon(Icons.add_circle_outline));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => mockRepo.updateInventoryItem(
+        any(that: predicate<InventoryItem>((i) => i.quantity == 3)),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('decrement button when qty>1 decreases quantity', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    final item = makeItem(id: 1, quantity: 3);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => [item]);
+    when(
+      () => mockRepo.updateInventoryItem(any()),
+    ).thenAnswer((_) => Future<int>.value(1));
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.byIcon(Icons.remove_circle_outline));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => mockRepo.updateInventoryItem(
+        any(that: predicate<InventoryItem>((i) => i.quantity == 2)),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('decrement button when qty==1 triggers delete', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    final item = makeItem(id: 1, quantity: 1);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => [item]);
+    when(
+      () => mockRepo.deleteInventoryItem(any()),
+    ).thenAnswer((_) => Future<int>.value(1));
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.byIcon(Icons.remove_circle_outline));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete item?'), findsOneWidget);
+  });
+
+  // --------------------------------------------------------------------------
+  // Error handling in operations
+  // --------------------------------------------------------------------------
+
+  testWidgets('save failure shows error snackbar', (tester) async {
+    setLargeScreen(tester);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => [makeItem(id: 1)]);
+    when(
+      () => mockRepo.updateInventoryItem(any()),
+    ).thenThrow(Exception('DB error'));
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.byIcon(Icons.add_circle_outline));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Failed to save'), findsOneWidget);
+  });
+
+  // --------------------------------------------------------------------------
+  // Undo delete flow
+  // --------------------------------------------------------------------------
+
+  testWidgets('undo delete restores item', (tester) async {
+    setLargeScreen(tester);
+    final item = makeItem(id: 1, quantity: 1);
+    when(
+      () => mockRepo.getInventoryForBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => [item]);
+    when(
+      () => mockRepo.deleteInventoryItem(any()),
+    ).thenAnswer((_) => Future<int>.value(1));
+    when(
+      () => mockRepo.addInventoryItem(any()),
+    ).thenAnswer((_) => Future<int>.value(2));
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    // Delete the item.
+    await tester.tap(find.byIcon(Icons.delete));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await tester.pumpAndSettle();
+
+    // The undo snackbar appears.
+    expect(find.textContaining('Item removed'), findsOneWidget);
+
+    // Tap the undo action (the SnackBar action button).
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockRepo.addInventoryItem(any())).called(1);
+  });
+
+  // --------------------------------------------------------------------------
+  // Retry submission
+  // --------------------------------------------------------------------------
+
+  testWidgets('retry submission on failed chip', (tester) async {
+    setLargeScreen(tester);
+    final mockSubmission = MockProductSubmissionService();
+    when(
+      () => mockSubmission.submitProduct(any()),
+    ).thenAnswer(
+      (_) async => const Product(
+        barcode: '234567890',
+        name: 'Manual Failed',
+        source: 'manual',
+        submissionStatus: 'submitted',
+      ),
+    );
+
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: failedManualProduct),
+      overrides: screenOverrides(
+        mockRepo: mockRepo,
+        mockNotif: mockNotif,
+        mockSubmissionService: mockSubmission,
+      ),
+    );
+
+    // Tap the refresh icon on the failed chip.
+    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.pumpAndSettle();
+
+    verify(() => mockSubmission.submitProduct(any())).called(1);
   });
 }

@@ -143,7 +143,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _selectedIds.clear();
       _selectionMode = false;
     });
-    ref.invalidate(inventoryWithProductProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(inventoryWithProductProvider);
+    });
 
     if (mounted) {
       SnackbarHelper.showUndo(
@@ -163,7 +165,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             );
             await repo.addInventoryItem(inventoryItem);
           }
-          ref.invalidate(inventoryWithProductProvider);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.invalidate(inventoryWithProductProvider);
+          });
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.itemsRestored);
           }
@@ -241,7 +245,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       _selectedIds.clear();
       _selectionMode = false;
     });
-    ref.invalidate(inventoryWithProductProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(inventoryWithProductProvider);
+    });
 
     if (mounted) {
       SnackbarHelper.showUndo(
@@ -249,7 +255,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         '${itemsToMove.length} moved to $targetName',
         () async {
           await repo.moveItemsToInventory(ids.toList(), activeId);
-          ref.invalidate(inventoryWithProductProvider);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.invalidate(inventoryWithProductProvider);
+          });
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.itemsRestored);
           }
@@ -488,7 +496,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       try {
         await repo.createInventory(name);
         logInfo('Created inventory "$name"');
-        ref.invalidate(inventoryListProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryListProvider);
+        });
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.inventoryCreated(name));
         }
@@ -530,7 +540,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             );
           }
-          ref.invalidate(inventoryWithProductProvider);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.invalidate(inventoryWithProductProvider);
+          });
         }
       }
       return;
@@ -547,7 +559,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             builder: (_) => ProductDetailScreen(product: product),
           ),
         );
-        ref.invalidate(inventoryWithProductProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryWithProductProvider);
+        });
       }
     } on ProductNotFoundException {
       logWarning('Product not found for $barcode');
@@ -602,7 +616,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                 ProductDetailScreen(product: result),
                           ),
                         );
-                        ref.invalidate(inventoryWithProductProvider);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          ref.invalidate(inventoryWithProductProvider);
+                        });
                       }
                     }
                   }
@@ -1044,7 +1060,9 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                   DateTime.now().difference(lastRefresh).inMinutes >= 1;
               if (!cooldownExpired) {
                 logInfo('Refresh skipped — cooldown active');
-                ref.invalidate(inventoryWithProductProvider);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ref.invalidate(inventoryWithProductProvider);
+                });
                 return;
               }
 
@@ -1055,7 +1073,9 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                 repo.refreshInventoryProductsBackground(activeId);
                 await repo.setLastRefreshTime();
               }
-              ref.invalidate(inventoryWithProductProvider);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref.invalidate(inventoryWithProductProvider);
+              });
             },
             child: _sectionedItems.isEmpty
                 ? ListView(

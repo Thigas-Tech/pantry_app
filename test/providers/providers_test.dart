@@ -24,7 +24,7 @@ void main() {
   late ProviderContainer container;
 
   setUp(() {
-    dotenv.testLoad(mergeWith: {});
+    dotenv.loadFromString(isOptional: true, mergeWith: {});
     container = ProviderContainer();
   });
 
@@ -139,7 +139,7 @@ void main() {
     });
   });
   group('apiServiceProvider', () {
-    test('returns an OpenFoodFactsApi instance', () {
+    test('returns an OffAdapter instance', () {
       final api = container.read(apiServiceProvider);
       expect(api, isNotNull);
     });

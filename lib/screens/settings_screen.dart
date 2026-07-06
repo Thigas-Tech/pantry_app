@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/services/changelog_parser.dart';
-import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
@@ -288,10 +287,10 @@ class SettingsScreen extends ConsumerWidget {
 
     try {
       logInfo('Flushing cache manually');
-      await ImageCacheService().clearCache();
-      await DatabaseHelper().clearCachedProducts();
+      await ref.read(imageCacheProvider).clearCache();
+      await ref.read(databaseProvider).clearCachedProducts();
 
-      final isOnline = await InternetConnectionChecker.instance.hasConnection;
+      final isOnline = await ref.read(hasConnectionProvider.future);
       if (isOnline) {
         logInfo('Online — re-fetching products for all inventories');
         final repo = ref.read(productRepositoryProvider);
@@ -305,10 +304,14 @@ class SettingsScreen extends ConsumerWidget {
         logInfo('Re-fetched $totalRefreshed products after cache flush');
         await repo.setLastRefreshTime();
         if (!context.mounted) return;
-        ref.invalidate(inventoryWithProductProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryWithProductProvider);
+        });
       } else {
         logInfo('Offline — products will appear with barcode as name');
-        ref.invalidate(inventoryWithProductProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryWithProductProvider);
+        });
       }
 
       if (context.mounted) {

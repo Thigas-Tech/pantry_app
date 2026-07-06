@@ -1,14 +1,13 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:pantry_app/utils/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Caches product images locally in the WebP format.
 ///
-/// Images are downloaded from the network, decoded, re‑encoded as WebP for
+/// Images are downloaded from the network, decoded, re-encoded as WebP for
 /// storage efficiency, and saved to `<app-documents>/image_cache/<barcode>.webp`.
 /// On subsequent requests the cached file is returned without a network call.
 ///
@@ -16,12 +15,13 @@ import 'package:path_provider/path_provider.dart';
 class ImageCacheService {
   /// Creates an [ImageCacheService].
   ///
-  /// If [dio] is not provided, a new [Dio] instance is created.
+  /// If [_httpClient] is not provided, a new [http.Client] instance is created.
   /// If [_cacheDirectory] is not provided, the default application documents
   /// directory is used. Both parameters allow unit tests to inject mocks.
-  ImageCacheService({Dio? dio, this._cacheDirectory}) : _dio = dio ?? Dio();
+  ImageCacheService({http.Client? httpClient, this._cacheDirectory})
+    : _httpClient = httpClient ?? http.Client();
 
-  final Dio _dio;
+  final http.Client _httpClient;
   final Directory? _cacheDirectory;
 
   /// Downloads the image at [imageUrl] for the product with [barcode],
@@ -34,20 +34,15 @@ class ImageCacheService {
     final cacheDir = await _imageCacheDirectory();
     final cachedFile = File('${cacheDir.path}/$barcode.webp');
 
-    // `await exists()` is used intentionally over `existsSync()` to avoid
-    // blocking the UI thread, even though the linter flags it as slower.
     if (await cachedFile.exists()) {
       return cachedFile.path;
     }
 
     try {
-      final response = await _dio.get<List<int>>(
-        imageUrl,
-        options: Options(responseType: ResponseType.bytes),
-      );
-      if (response.data == null) return null;
+      final response = await _httpClient.get(Uri.parse(imageUrl));
+      if (response.statusCode != 200) return null;
 
-      final originalImage = img.decodeImage(Uint8List.fromList(response.data!));
+      final originalImage = img.decodeImage(response.bodyBytes);
       if (originalImage == null) return null;
 
       final webpBytes = img.encodeWebP(originalImage);
@@ -67,9 +62,6 @@ class ImageCacheService {
     }
     final appDir = await getApplicationDocumentsDirectory();
     final dir = Directory('${appDir.path}/image_cache');
-    // Async file I/O is intentionally used here instead of sync (which would
-    // be flagged as `avoid_slow_async_io`) because blocking the UI thread is
-    // worse than performing an async existence check on a fast local file.
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }

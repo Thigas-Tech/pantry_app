@@ -4,24 +4,24 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/open_food_facts_api.dart';
+import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-class MockOpenFoodFactsApi extends Mock implements OpenFoodFactsApi {}
+class MockOffAdapter extends Mock implements OffAdapter {}
 
 void main() {
   late ProductRepository repository;
   late MockDatabaseHelper mockDb;
-  late MockOpenFoodFactsApi mockApi;
-  late MockOpenFoodFactsApi fallbackApi;
+  late MockOffAdapter mockApi;
+  late MockOffAdapter fallbackApi;
 
   setUp(() {
     mockDb = MockDatabaseHelper();
-    mockApi = MockOpenFoodFactsApi();
-    fallbackApi = MockOpenFoodFactsApi();
+    mockApi = MockOffAdapter();
+    fallbackApi = MockOffAdapter();
     repository = ProductRepository(mockDb, mockApi, fallbackApi: fallbackApi);
     registerFallbackValue(const Product(barcode: '', name: ''));
   });

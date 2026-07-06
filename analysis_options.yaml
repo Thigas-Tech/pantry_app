@@ -1,5 +1,5 @@
 include:
-  - package:flutter_lints/flutter.yaml
+  - package:openfoodfacts_flutter_lints/flutter.yaml
   - package:very_good_analysis/analysis_options.yaml
   - package:lint/strict.yaml
 
@@ -7,6 +7,10 @@ linter:
   rules:
     # ----- Disabled (not applicable to Flutter apps) -----
     avoid_slow_async_io: false
+
+    # ----- Disabled (OFF lint rules — too much churn) -----
+    always_specify_types: false
+    always_put_control_body_on_new_line: false
 
     # ----- Disabled (conflicts with multi-line string building) -----
     prefer_adjacent_string_concatenation: false

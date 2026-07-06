@@ -64,8 +64,8 @@ infrastructure or external server hosting are listed last.
 - [x] **Screenshots section** — removed placeholder table; added single‑line
   placeholder.
 - [x] **Remove unused `product_api_service.dart`** — removed;
-  `ProductRepository` now uses `OpenFoodFactsApi` directly. `close()` method
-  removed from `OpenFoodFactsApi`.
+  `ProductRepository` now uses `OffAdapter` directly. `close()` method
+  removed from `OffAdapter`.
 - [x] **Golden tests for `NutriScoreBadge`** — verify A–E colours render
   correctly via `matchesGoldenFile`.
 - [x] **Accessibility audit** — added Semantics label to NutriScoreBadge; 5
@@ -223,7 +223,7 @@ infrastructure or external server hosting are listed last.
 
   **Implementation**:
   1. Add `lc` and `tags_lc` query parameters to
-     `OpenFoodFactsApi.getByBarcode()` and `searchProducts()`.
+     `OffAdapter.getByBarcode()` and `searchProducts()`.
   2. Extract locale from `Localizations.localeOf(context).languageCode` (or
      `PlatformDispatcher.instance.locale.languageCode` for non‑widget code).
   3. Add `lang` field to `Product` model (persisted in DB).
@@ -269,7 +269,7 @@ infrastructure or external server hosting are listed last.
   "show original" toggle.
 
   **Implementation**:
-  1. Extend `OpenFoodFactsApi._parseProduct()` to extract
+  1. Extend `OffAdapter` conversion to extract
      `ingredients_text_with_allergens_XX` and `ingredients_text_languages`
      (requires `fields=ingredients_text_languages` in API call).
   2. Add `ingredientsTextLanguages` field to `Product` model

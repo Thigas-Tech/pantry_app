@@ -7,14 +7,14 @@ import 'package:pantry_app/services/product_repository.dart';
 /// Provides the single [ProductRepository] instance used throughout the app.
 ///
 /// The repository combines the local database (from [databaseProvider]) and
-/// the Open Food Facts API (from [apiServiceProvider]) to implement the
-/// offline‑first product lookup.
+/// the Open Food Facts SDK adapter (from [apiServiceProvider]) to implement
+/// the offline-first product lookup.
 ///
 /// ## Dependencies
 ///
-/// - [databaseProvider] – supplies the [DatabaseHelper] singleton for local
+/// - [databaseProvider] — supplies the [DatabaseHelper] singleton for local
 ///   caching and inventory operations.
-/// - [apiServiceProvider] – supplies the configured `OpenFoodFactsApi` for
+/// - [apiServiceProvider] — supplies the configured OFF SDK adapter for
 ///   fetching product data from the internet.
 ///
 /// ## Lifetime
@@ -22,7 +22,7 @@ import 'package:pantry_app/services/product_repository.dart';
 /// Because this is a `Provider` (not a `FutureProvider` or `StateProvider`),
 /// the repository is created **once** and reused for the entire app session.
 /// The repository itself holds no mutable state; it delegates all storage to
-/// the database and all network requests to the API service.
+/// the database and all network requests to the SDK adapter.
 ///
 /// ## Usage
 ///

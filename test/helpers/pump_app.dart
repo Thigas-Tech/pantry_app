@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart'; // Override
@@ -53,6 +54,9 @@ Future<void> pumpApp(
   when(
     () => effectiveImageCache.cacheImage(any(), any()),
   ).thenAnswer((_) async => null);
+
+  // Seed an empty env so providers that read AppConfig don't crash.
+  dotenv.loadFromString(isOptional: true, mergeWith: {});
 
   await tester.pumpWidget(
     ProviderScope(
