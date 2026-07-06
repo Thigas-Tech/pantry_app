@@ -337,7 +337,6 @@ class StatsScreen extends ConsumerWidget {
     AppLocalizations l10n,
     PantryStats stats,
   ) {
-    final textColor = Theme.of(context).colorScheme.onSurface;
     if (stats.categoriesTop.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,22 +347,34 @@ class StatsScreen extends ConsumerWidget {
       );
     }
 
-    final barGroups = <BarChartGroupData>[];
-    for (var i = 0; i < stats.categoriesTop.length; i++) {
+    final theme = Theme.of(context);
+    final colors = [
+      Colors.blue,
+      Colors.red,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.indigo,
+      Colors.amber,
+      Colors.cyan,
+    ];
+    final total = stats.categoriesTop.fold<int>(
+      0,
+      (sum, c) => sum + c.count,
+    );
+
+    final sections = <PieChartSectionData>[];
+    for (var i = 0; i < stats.categoriesTop.length && i < colors.length; i++) {
       final cat = stats.categoriesTop[i];
-      barGroups.add(
-        BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: cat.count.toDouble(),
-              color: Theme.of(context).colorScheme.primary,
-              width: 16,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(4),
-              ),
-            ),
-          ],
+      sections.add(
+        PieChartSectionData(
+          value: cat.count.toDouble(),
+          color: colors[i],
+          title: cat.count > 0 ? cat.count.toString() : '',
+          radius: 50,
+          titleStyle: const TextStyle(color: Colors.white, fontSize: 12),
         ),
       );
     }
@@ -374,52 +385,33 @@ class StatsScreen extends ConsumerWidget {
         _buildSectionTitle(context, l10n.categoryLabel),
         const SizedBox(height: 8),
         SizedBox(
-          height: barGroups.length * 36.0 + 80,
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.center,
-              maxY:
-                  barGroups
-                      .map((g) => g.barRods.first.toY)
-                      .reduce((a, b) => a > b ? a : b) +
-                  1,
-              barGroups: barGroups,
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 120,
-                    getTitlesWidget: (value, meta) {
-                      final i = value.toInt();
-                      if (i >= 0 && i < stats.categoriesTop.length) {
-                        var label = stats.categoriesTop[i].category;
-                        if (label.length > 20) {
-                          label = '${label.substring(0, 20)}...';
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: RotatedBox(
-                            quarterTurns: 3,
-                            child: Text(
-                              label,
-                              style: TextStyle(fontSize: 11, color: textColor),
-                            ),
-                          ),
-                        );
-                      }
-                      return const Text('');
-                    },
-                  ),
+          height: 180,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PieChart(
+                PieChartData(
+                  sections: sections,
+                  centerSpaceRadius: 32,
+                  sectionsSpace: 2,
                 ),
-                leftTitles: const AxisTitles(),
-                topTitles: const AxisTitles(),
-                rightTitles: const AxisTitles(),
               ),
-              gridData: const FlGridData(show: false),
-              borderData: FlBorderData(show: false),
-            ),
-            duration: Duration.zero,
+              Text('$total', style: theme.textTheme.headlineMedium),
+            ],
           ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            for (
+              var i = 0;
+              i < stats.categoriesTop.length && i < colors.length;
+              i++
+            )
+              _legendDot(colors[i], stats.categoriesTop[i].category),
+          ],
         ),
       ],
     );
@@ -429,76 +421,68 @@ class StatsScreen extends ConsumerWidget {
     if (stats.itemsByLocation.isEmpty) {
       return const SizedBox.shrink();
     }
-    final textColor = Theme.of(context).colorScheme.onSurface;
     final l10n = AppLocalizations.of(context)!;
-
     final entries = stats.itemsByLocation.entries.toList();
-    final barGroups = <BarChartGroupData>[];
-
-    for (var i = 0; i < entries.length; i++) {
-      barGroups.add(
-        BarChartGroupData(
-          x: i,
-          barRods: [
-            BarChartRodData(
-              toY: entries[i].value.toDouble(),
-              color: Theme.of(context).colorScheme.secondary,
-              width: 16,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(4),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final maxCount = entries
+        .map((e) => e.value)
+        .fold<int>(0, (a, b) => a > b ? a : b)
+        .toDouble();
+    final theme = Theme.of(context);
+    final icons = <String, IconData>{
+      'pantry': Icons.kitchen,
+      'fridge': Icons.ac_unit,
+      'freezer': Icons.ac_unit,
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle(context, l10n.locationStats),
         const SizedBox(height: 8),
-        SizedBox(
-          height: barGroups.length * 36.0 + 20,
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.center,
-              maxY:
-                  barGroups
-                      .map((g) => g.barRods.first.toY)
-                      .reduce((a, b) => a > b ? a : b) +
-                  1,
-              barGroups: barGroups,
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 80,
-                    getTitlesWidget: (value, meta) {
-                      final i = value.toInt();
-                      if (i >= 0 && i < entries.length) {
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Text(
-                            entries[i].key,
-                            style: TextStyle(color: textColor),
-                          ),
-                        );
-                      }
-                      return const Text('');
-                    },
+        for (final entry in entries)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Icon(
+                  icons[entry.key.toLowerCase()] ?? Icons.place,
+                  size: 18,
+                  color: theme.colorScheme.secondary,
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 80,
+                  child: Text(
+                    entry.key,
+                    style: theme.textTheme.bodyMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                leftTitles: const AxisTitles(),
-                topTitles: const AxisTitles(),
-                rightTitles: const AxisTitles(),
-              ),
-              gridData: const FlGridData(show: false),
-              borderData: FlBorderData(show: false),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: entry.value / maxCount,
+                      minHeight: 10,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    '${entry.value}',
+                    textAlign: TextAlign.right,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ],
             ),
-            duration: Duration.zero,
           ),
-        ),
       ],
     );
   }

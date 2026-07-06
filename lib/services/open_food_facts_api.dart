@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
@@ -87,7 +89,8 @@ class OpenFoodFactsApi {
           throw ProductNotFoundException(barcode);
         }
         if (attempt < maxRetries && _isRetryable(e)) {
-          final delay = baseDelay * (1 << attempt); // 1s, 2s, 4s
+          final jitter = Duration(milliseconds: Random().nextInt(500));
+          final delay = baseDelay * (1 << attempt) + jitter;
           logWarning(
             'Retryable error for $barcode (${_describeError(e)})'
             ' — retrying in ${delay.inSeconds}s',
@@ -182,7 +185,8 @@ class OpenFoodFactsApi {
           return [];
         }
         if (attempt < maxRetries && _isRetryable(e)) {
-          final delay = baseDelay * (1 << attempt);
+          final jitter = Duration(milliseconds: Random().nextInt(500));
+          final delay = baseDelay * (1 << attempt) + jitter;
           logWarning(
             'Retryable search error for "$query" '
             '(${_describeError(e)}) — retrying in ${delay.inSeconds}s',
