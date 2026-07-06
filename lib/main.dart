@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,9 +52,9 @@ Future<void> main() async {
 /// This ensures products cached before the Nutri-Score badge feature (or any
 /// other schema change) get re-fetched from Open Food Facts with fresh data.
 ///
-/// The changelog tracking runs unconditionally (before the version-match
-/// guard) so that the `[Unreleased]` section is still surfaced on upgrades
-/// even when the app version string has not changed.
+/// The changelog detection is content-hash‑driven (compares the hash of
+/// `CHANGELOG.md`) so that new `[Unreleased]` entries surface even when the
+/// app version string has not changed between development builds.
 Future<void> _handleAppUpdate() async {
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -61,18 +62,18 @@ Future<void> _handleAppUpdate() async {
     final currentVersion = '${info.version}+${info.buildNumber}';
     final lastVersion = prefs.getString('app_version');
 
-    // Changelog tracking — always runs, regardless of cache-flush guard.
-    final lastSeenChangelog = prefs.getString('changelog_last_seen');
-    if (lastSeenChangelog != null && lastSeenChangelog != currentVersion) {
+    // Changelog tracking — content-hash-driven, not version-driven.
+    // This ensures new [Unreleased] entries are surfaced even when the
+    // app version string has not changed between development builds.
+    final raw = await rootBundle.loadString('CHANGELOG.md');
+    final contentHash = raw.hashCode.toString();
+    final lastSeenHash = prefs.getString('changelog_content_hash');
+
+    if (lastSeenHash != null && lastSeenHash != contentHash) {
       unawaited(prefs.setString('changelog_show_pending', 'true'));
-      logInfo(
-        'Changelog flagged: last seen $lastSeenChangelog, '
-        'now $currentVersion',
-      );
+      logInfo('Changelog content changed — flagged for display');
     }
-    // Always store the current version so future updates are detected and
-    // the parser knows where to start filtering (handles first install too).
-    await prefs.setString('changelog_last_seen', currentVersion);
+    await prefs.setString('changelog_content_hash', contentHash);
 
     if (lastVersion == currentVersion) {
       logInfo('Version unchanged ($currentVersion) — skipping cache flush');

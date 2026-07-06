@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
@@ -59,10 +58,6 @@ class _PantryShellState extends ConsumerState<PantryShell> {
         return;
       }
 
-      final lastSeen = prefs.getString('changelog_last_seen');
-      final info = await PackageInfo.fromPlatform();
-      final currentVersion = info.version;
-
       final raw = await rootBundle.loadString('CHANGELOG.md');
       final parser = ChangelogParser();
       final allEntries = parser.parse(raw);
@@ -72,33 +67,16 @@ class _PantryShellState extends ConsumerState<PantryShell> {
         return;
       }
 
-      final entries = parser.filterUnseen(
-        allEntries,
-        lastSeen ?? '0.0.0',
-        currentVersion,
-      );
-
-      if (entries.isEmpty) {
-        logInfo(
-          'No unseen changelog entries (lastSeen: '
-          '${lastSeen ?? 'null'}, current: $currentVersion)',
-        );
-        return;
-      }
-
-      logInfo(
-        'Showing changelog: ${entries.length} unseen '
-        'entries since ${lastSeen ?? 'first install'}',
-      );
+      // Content-hash detection already guarantees this runs only when the
+      // changelog content has changed. Show all parsed entries.
+      logInfo('Showing changelog: ${allEntries.length} entries');
 
       // Wait for the first frame so the sheet overlay has a valid context.
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        await showWhatsNewSheet(context, entries);
-        // Mark as seen regardless of how the sheet was dismissed.
+        await showWhatsNewSheet(context, allEntries);
         await prefs.setString('changelog_show_pending', 'false');
-        await prefs.setString('changelog_last_seen', currentVersion);
       });
     } on Exception catch (e) {
       logError('Failed to show changelog: $e');

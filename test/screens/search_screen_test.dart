@@ -45,7 +45,7 @@ void main() {
 
     when(() => mockDb.searchProducts(any())).thenAnswer((_) async => []);
     when(
-      () => mockApi.searchProducts(any(), pageSize: any(named: 'pageSize')),
+      () => mockApi.searchProducts(any(), pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
     ).thenAnswer((_) async => []);
   });
 
@@ -90,7 +90,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'milk');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
@@ -102,13 +102,13 @@ void main() {
         () => mockDb.searchProducts('milk'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize')),
+        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
       ).thenAnswer((_) async => []);
 
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'milk');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -120,13 +120,13 @@ void main() {
     testWidgets('shows API search results with cloud icon', (tester) async {
       when(() => mockDb.searchProducts('bread')).thenAnswer((_) async => []);
       when(
-        () => mockApi.searchProducts('bread', pageSize: any(named: 'pageSize')),
+        () => mockApi.searchProducts('bread', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
       ).thenAnswer((_) async => [apiProduct]);
 
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'bread');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       expect(find.text('API Bread'), findsOneWidget);
@@ -140,7 +140,7 @@ void main() {
         () => mockDb.searchProducts('dup'),
       ).thenAnswer((_) async => [sameProduct]);
       when(
-        () => mockApi.searchProducts('dup', pageSize: any(named: 'pageSize')),
+        () => mockApi.searchProducts('dup', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
       ).thenAnswer(
         (_) async => [
           const Product(barcode: '999', name: 'API Duplicate'),
@@ -150,7 +150,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'dup');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       // Only one result (the local one), showing local name.
@@ -163,7 +163,7 @@ void main() {
         () => mockDb.searchProducts('milk'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize')),
+        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
       ).thenAnswer((_) async => []);
 
       final mockRepo = createMockProductRepository();
@@ -182,7 +182,7 @@ void main() {
       );
 
       await tester.enterText(find.byType(TextField), 'milk');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       await tester.tap(find.text('Local Milk'));
@@ -199,7 +199,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'zzzzz');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       expect(
@@ -216,13 +216,13 @@ void main() {
         () => mockDb.searchProducts('milk'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize')),
+        () => mockApi.searchProducts('milk', pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
       ).thenAnswer((_) async => []);
 
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'milk');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -276,7 +276,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'short');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       // Should render "120" (padded to 3 chars) instead of crashing.
@@ -297,7 +297,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'milk');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       final dismissible = tester.widget<Dismissible>(
@@ -324,18 +324,18 @@ void main() {
         () => mockDb.searchProducts('new'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts(any(), pageSize: any(named: 'pageSize')),
+        () => mockApi.searchProducts(any(), pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
       ).thenAnswer((_) async => []);
 
       await pumpSearchScreen(tester);
 
       // Start first search (type "old").
       await tester.enterText(find.byType(TextField), 'old');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
 
       // Before the first search completes, type "new".
       await tester.enterText(find.byType(TextField), 'new');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       // Now complete the old search — its results should be ignored.
@@ -358,14 +358,14 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(TextField), 'a');
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
       // Local result should appear.
       expect(find.text('Local Milk'), findsOneWidget);
       // API should NOT have been called.
       verifyNever(
-        () => api.searchProducts(any(), pageSize: any(named: 'pageSize')),
+        () => api.searchProducts(any(), pageSize: any(named: 'pageSize'), cancelToken: any(named: 'cancelToken')),
       );
     });
   });

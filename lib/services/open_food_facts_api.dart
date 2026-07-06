@@ -129,43 +129,77 @@ class OpenFoodFactsApi {
   /// Uses the legacy search API at `$_baseUrl/cgi/search.pl`.
   /// Returns at most [pageSize] results (default 20).
   ///
-  /// Returns an empty list on network errors (failures are silently logged).
+  /// Retries up to 3 times with exponential backoff on transient errors
+  /// (503, 429, timeouts). Pass [cancelToken] to cancel in-flight
+  /// searches when the user starts a new query.
+  ///
+  /// Returns an empty list after exhausting all retries.
   Future<List<Product>> searchProducts(
     String query, {
     int pageSize = 20,
+    CancelToken? cancelToken,
   }) async {
-    try {
-      final url = '$_baseUrl/cgi/search.pl';
-      logInfo('Searching OFF for "$query" (pageSize=$pageSize)');
-      final response = await _dio.get<Map<String, dynamic>>(
-        url,
-        queryParameters: {
-          'search_terms': query,
-          'page_size': pageSize,
-          'json': 1,
-        },
-        options: Options(headers: {'User-Agent': _userAgent}),
+    const maxRetries = 3;
+    const baseDelay = Duration(seconds: 1);
+    final url = '$_baseUrl/cgi/search.pl';
+
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      logInfo(
+        'Searching OFF for "$query" (pageSize=$pageSize,'
+        ' attempt ${attempt + 1})',
       );
-      final data = response.data;
-      if (data == null || data['products'] == null) {
-        logInfo('OFF search returned no results for "$query"');
+      try {
+        final response = await _dio.get<Map<String, dynamic>>(
+          url,
+          queryParameters: {
+            'search_terms': query,
+            'page_size': pageSize,
+            'json': 1,
+            'lc': 'world',
+            'cc': 'world',
+          },
+          options: Options(headers: {'User-Agent': _userAgent}),
+          cancelToken: cancelToken,
+        );
+        final data = response.data;
+        if (data == null || data['products'] == null) {
+          logInfo('OFF search returned no results for "$query"');
+          return [];
+        }
+        final productsJson = data['products'] as List<dynamic>;
+        final products = productsJson
+            .cast<Map<String, dynamic>>()
+            .map(_parseProduct)
+            .where((p) => p.barcode.isNotEmpty)
+            .toList();
+        logInfo(
+          'OFF search returned ${products.length} products for "$query"',
+        );
+        return products;
+      } on DioException catch (e) {
+        if (e.type == DioExceptionType.cancel) {
+          logInfo('OFF search cancelled for "$query"');
+          return [];
+        }
+        if (attempt < maxRetries && _isRetryable(e)) {
+          final delay = baseDelay * (1 << attempt);
+          logWarning(
+            'Retryable search error for "$query" '
+            '(${_describeError(e)}) — retrying in ${delay.inSeconds}s',
+          );
+          await Future<void>.delayed(delay);
+          continue;
+        }
+        logWarning(
+          'OFF search failed for "$query": ${e.message}',
+        );
+        return [];
+      } on Exception catch (e) {
+        logWarning('OFF search unexpected error for "$query": $e');
         return [];
       }
-      final productsJson = data['products'] as List<dynamic>;
-      final products = productsJson
-          .cast<Map<String, dynamic>>()
-          .map(_parseProduct)
-          .where((p) => p.barcode.isNotEmpty)
-          .toList();
-      logInfo('OFF search returned ${products.length} products for "$query"');
-      return products;
-    } on DioException catch (e) {
-      logWarning('OFF search failed for "$query": ${e.message}');
-      return [];
-    } on Exception catch (e) {
-      logWarning('OFF search unexpected error for "$query": $e');
-      return [];
     }
+    return [];
   }
 
   /// Returns a short human‑readable label for a [DioException] reason.
@@ -186,7 +220,7 @@ class OpenFoodFactsApi {
     final nutriscoreData = json['nutriscore_data'] as Map<String, dynamic>?;
 
     return Product(
-      barcode: json['_id'] as String? ?? '',
+      barcode: (json['_id'] ?? json['code']) as String? ?? '',
       name: json['product_name'] as String? ?? 'Unknown',
       brand: json['brands'] as String?,
       imageUrl: json['image_url'] as String?,

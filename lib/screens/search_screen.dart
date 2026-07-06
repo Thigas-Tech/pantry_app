@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,6 +33,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     with AutomaticKeepAliveClientMixin {
   final _searchController = TextEditingController();
   Timer? _debounce;
+  CancelToken? _cancelToken;
   List<_SearchResult> _results = [];
   bool _isSearching = false;
   bool _hasSearched = false;
@@ -52,6 +54,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       ..removeListener(_onSearchChanged)
       ..dispose();
     _debounce?.cancel();
+    _cancelToken?.cancel();
     super.dispose();
   }
 
@@ -67,7 +70,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       return;
     }
     _requestId++;
-    _debounce = Timer(const Duration(milliseconds: 300), () => _search(query));
+    _cancelToken?.cancel();
+    _cancelToken = CancelToken();
+    _debounce = Timer(const Duration(milliseconds: 500), () => _search(query));
   }
 
   Future<void> _search(String query) async {
@@ -89,7 +94,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       if (query.length >= 2) {
         try {
           final api = ref.read(apiServiceProvider);
-          final apiResults = await api.searchProducts(query);
+          final apiResults = await api.searchProducts(
+            query,
+            cancelToken: _cancelToken,
+          );
           if (capturedRequestId != _requestId || !mounted) return;
           final existingBarcodes = results
               .map((r) => r.product.barcode)

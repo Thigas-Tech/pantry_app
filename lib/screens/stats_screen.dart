@@ -296,7 +296,7 @@ class StatsScreen extends ConsumerWidget {
               barGroups: barGroups,
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
+                  sideTitles: SideTitles(showTitles: true, 
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
                       if (i >= 0 && i < grades.length) {
@@ -310,7 +310,7 @@ class StatsScreen extends ConsumerWidget {
                   ),
                 ),
                 leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
+                  sideTitles: SideTitles(showTitles: true, 
                     reservedSize: 30,
                     getTitlesWidget: (value, meta) => Text(
                       value.toInt().toString(),
@@ -384,7 +384,7 @@ class StatsScreen extends ConsumerWidget {
               barGroups: barGroups,
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
+                  sideTitles: SideTitles(showTitles: true, 
                     reservedSize: 120,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
@@ -468,7 +468,7 @@ class StatsScreen extends ConsumerWidget {
               barGroups: barGroups,
               titlesData: FlTitlesData(
                 bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
+                  sideTitles: SideTitles(showTitles: true, 
                     reservedSize: 80,
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();

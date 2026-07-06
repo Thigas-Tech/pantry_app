@@ -30,6 +30,12 @@
 - **8 new DAO aggregation methods**: `ProductDao` (nutriscoreDistribution, categoryDistribution, sourceDistribution, photoCompleteness, offPhotoCompleteness) and `InventoryDao` (locationDistribution, expiryDistribution, weeklyAdditions).
 - **10 new ARB keys** added to all 3 locales (price tracking, NFC-e, photo completeness).
 
+### Bugfixes
+- **Chart axis labels invisible**: `SideTitles` constructors in fl_chart were missing `showTitles: true` after an earlier lint-cleanup mistakenly removed them (fl_chart defaults to `false`). Added back to all 4 chart label sets (NutriScoreBar, CategoryChart, LocationChart).
+- **Search returns fewer results than OFF website**: Added `lc=world` and `cc=world` query parameters to `searchProducts` (matches OFF website behavior). Added `code` field fallback in `_parseProduct` for legacy API barcode responses. Added retry logic (3 attempts, exponential backoff 1s/2s/4s) matching `getByBarcode` pattern.
+- **Search API 503 errors without user feedback**: `searchProducts` now retries with cancel support. Search debounce increased to 500ms. Added `CancelToken` to cancel in-flight searches on new query.
+- **Changelog not showing on content changes**: Replaced version-string detection with content-hash detection. `_handleAppUpdate` now compares `CHANGELOG.md.hashCode` with stored hash — shows changelog whenever content changes, regardless of version number.
+
 ### UX & Debugging
 - **Changelog dev-section filter**: `whats_new_sheet` now hides `### Documentation` and `### Code health` from the in-app display. Users see only product-facing changes.
 - **Connectivity transition logging**: `connectivityProvider` now logs online/offline state changes.
