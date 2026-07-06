@@ -6,6 +6,11 @@
 - `ARCHITECTURE.md` section 11: Carbon footprint design decisions (dark mode energy savings, image caching, offline-first, RepaintBoundary strategy, thread strategy, AAB/deferred components, eco-mode pattern, performance measurement).
 - `AGENTS.md` performance & footprint optimization section (build-time/runtime optimizations, expensive raster ops, measuring performance with DevTools/Flashlight/Perfetto, eco-mode pattern, rules of thumb).
 - `TODO.md` footprint optimization roadmap: 20+ new items across Quick Wins, Code Health, Features, Larger Projects, CI/CD, and Documentation sections. Updated Effort x Importance matrix.
+- `AGENTS.md` debugging with Logger and Snackbar section: guidelines on `logInfo`/`logWarning`/`logError` and `SnackbarHelper` methods for developer and user-visible traceability at every decision point.
+- `AGENTS.md` platform documentation references: Android Developers Blog, AOSP docs, Android Developers, and Samsung Developers for authoritative platform behaviour guidance.
+
+### Bugfixes
+- **Changelog not showing on re-launch**: `_handleAppUpdate` returned early when the app version was unchanged (`if (lastVersion == currentVersion) return;`), which prevented the `changelog_show_pending` flag from ever being set. Moved the changelog tracking above the version-match guard so it runs unconditionally. Added `logInfo` traces at every decision point in `_showChangelogIfPending()` (skip, no entries, show) for easier debugging.
 
 ### Enhancements
 - **Long-press to select**: Inventory cards now respond to long-press by entering multi-select mode with haptic feedback (`HapticFeedback.mediumImpact()`). Long-press is suppressed when checkboxes are already visible.
@@ -89,6 +94,7 @@
 
 ### Localization
 - All user-visible strings externalised via ARB (`flutter gen-l10n`)
+- Brazilian Portuguese (pt / pt_BR) translation of all 100+ UI strings with informal/colloquial tone. Both base `pt` and country-specific `pt_BR` locale ARB files added.
 - English base with Portuguese planned for future release
 
 ### Connectivity

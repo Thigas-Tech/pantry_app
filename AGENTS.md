@@ -65,6 +65,38 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 - Prefer Riverpod `Provider`/`NotifierProvider` for state
 - Use `unawaited()` for fire-and-forget futures (import `dart:async`)
 
+### Debugging with Logger and Snackbar
+
+Use these utilities at every decision point so that both developers and users can trace what the app is doing.
+
+**Logger** (`lib/utils/logger.dart`) — terminal output with ANSI colours:
+
+| Function | Colour | When to use |
+|---|---|---|
+| `logInfo(msg)` | Blue | Happy-path milestones, feature toggles, cache hits |
+| `logWarning(msg)` | Yellow | Degraded paths, fallbacks, rate-limit backoff |
+| `logError(msg)` | Red | Exceptions, failed operations, data corruption |
+
+Rules:
+- Log **why** something was skipped, not just when it succeeds (e.g. `logInfo('Version unchanged — skipping cache flush')`).
+- Log at the start of every async operation that can fail silently (fire-and-forget futures, background refreshes).
+- Never log secrets, tokens, or PII.
+- Use string interpolation, not `+` concatenation.
+
+**SnackbarHelper** (`lib/utils/snackbar_helper.dart`) — user-facing feedback:
+
+| Method | Colour | Use case |
+|---|---|---|
+| `SnackbarHelper.showInfo(ctx, msg)` | Blue | Success confirmations, state changes |
+| `SnackbarHelper.showWarning(ctx, msg)` | Amber | Non-fatal warnings (offline, degraded) |
+| `SnackbarHelper.showError(ctx, msg)` | Red | User-visible failures |
+| `SnackbarHelper.showUndo(ctx, msg, cb)` | Blue + Undo | Destructive actions with 5-second undo window |
+
+Rules:
+- Every `SnackbarHelper` call also emits a `logInfo`/`logWarning`/`logError` automatically — no need to log separately.
+- Use `showUndo` for all destructive actions (delete, move, clear) — never `showError` for actions the user can reverse.
+- Snackbars are floating with rounded corners and a leading icon; do not customise the visual style.
+
 ### Architecture
 ```
 lib/
@@ -150,6 +182,17 @@ dart pub global run dhttpd --path doc/api
 ### Core library docs
 
 The official Dart core library API reference at [api.dart.dev](https://api.dart.dev) is also built with `dart doc`.
+
+### Platform documentation references
+
+These sites are authoritative references for Android and Samsung platform behaviour. Consult them when implementing platform-specific features, debugging device quirks, or aligning with OEM conventions.
+
+| Site | URL | Scope |
+|---|---|---|
+| Android Developers Blog | <https://android-developers.googleblog.com/> | Feature announcements, best practices, API deep-dives |
+| Android Open Source Project | <https://source.android.com/docs/> | AOSP internals, HAL, system architecture |
+| Android Developers | <https://developer.android.com/> | Official SDK/API docs, Jetpack libraries, Material Design |
+| Samsung Developers | <https://developer.samsung.com/> | One UI behaviour, Samsung-specific APIs, device testing guides |
 
 ## Performance & footprint optimization
 

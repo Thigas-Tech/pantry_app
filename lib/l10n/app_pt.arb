@@ -1,0 +1,346 @@
+{
+  "@@locale": "pt",
+  "appTitle": "Despensa",
+  "myPantry": "Minha Despensa",
+  "settings": "Configurações",
+  "scanBarcode": "Escanear Código",
+  "enterBarcode": "Digitar Código",
+  "expired": "Vencido",
+  "expiringSoon": "Vence em breve",
+  "good": "Bom",
+  "searchHint": "Buscar por nome ou código",
+  "noItemsMatch": "Nenhum item encontrado",
+  "emptyPantryTitle": "Sua despensa está vazia",
+  "emptyPantrySubtitle": "Toque no botão abaixo pra escanear seu primeiro produto",
+  "scanFirstProduct": "Escanear um código",
+  "barcodeLabel": "Código de barras",
+  "brandLabel": "Marca",
+  "categoryLabel": "Categoria",
+  "servingSize": "Porção",
+  "energy": "Energia",
+  "protein": "Proteína",
+  "carbs": "Carboidratos",
+  "fat": "Gordura",
+  "fiber": "Fibra",
+  "salt": "Sal",
+  "per100g": "Por 100 g",
+  "ingredients": "Ingredientes",
+  "yourInventory": "Seu estoque",
+  "noItemsInPantry": "Nenhum item na despensa ainda.",
+  "addToInventory": "Adicionar ao Estoque",
+  "copyBarcode": "Copiar código",
+  "barcodeCopied": "Código copiado!",
+  "removedFromPantry": "Removido da despensa.",
+  "updateItem": "Atualizar Item",
+  "addToPantry": "Adicionar à Despensa",
+  "quantityLabel": "Quantidade",
+  "unitLabel": "Unidade",
+  "locationLabel": "Local",
+  "expiryDateOptional": "Validade (opcional)",
+  "pickDate": "Escolher data",
+  "notesLabel": "Observações",
+  "theme": "Tema",
+  "expiryNotifications": "Notificações de validade",
+  "remindBeforeExpiry": "Avisar antes de vencer",
+  "dataRetention": "Retenção de dados",
+  "manageInventories": "Gerenciar Despensas",
+  "manageInventoriesSub": "Criar, renomear ou excluir despensas",
+  "chooseTheme": "Escolher tema",
+  "cancel": "Cancelar",
+  "save": "Salvar",
+  "pantryStats": "Estatísticas",
+  "totalProducts": "Total de produtos",
+  "inventoryItems": "Itens do estoque",
+  "exportCsv": "Exportar CSV",
+  "importCsv": "Importar CSV",
+  "createNewPantry": "Criar nova despensa",
+  "newPantry": "Nova despensa",
+  "renamePantry": "Renomear despensa",
+  "deletePantry": "Excluir despensa?",
+  "deletePantryContent": "Todos os itens de \"{name}\" serão excluídos permanentemente.",
+  "@deletePantryContent": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Casa"
+      }
+    }
+  },
+  "manualEntryTooltip": "Digitar código manualmente",
+  "cameraTooltip": "Escanear com a câmera",
+  "typeOrPasteBarcode": "Digite ou cole um código de barras",
+  "submit": "Enviar",
+  "alignBarcode": "Alinhe o código de barras dentro da moldura",
+  "itemUpdated": "Item atualizado.",
+  "itemAdded": "Item adicionado à despensa.",
+  "itemRemoved": "Item removido da despensa.",
+  "saveFailed": "Não foi possível salvar o item.",
+  "deleteInventoryItem": "Excluir itens?",
+  "deleteCountSub": "Excluir {count} itens selecionados?",
+  "@deleteCountSub": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemsDeleted": "{count} excluído(s).",
+  "@itemsDeleted": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "itemsRestored": "Itens restaurados.",
+  "selectItems": "Selecionar itens",
+  "deleteFailed": "Não foi possível excluir o item.",
+  "moveToPantry": "Mover para despensa",
+  "moveFailed": "Não foi possível mover os itens.",
+  "inventoryLoadFailed": "Não foi possível carregar o estoque.",
+  "expiryPrefix": "Val",
+  "switchPantry": "Trocar despensa",
+  "couldNotOpenPlayStore": "Não foi possível abrir a Play Store.",
+  "viewOnOpenFoodFacts": "Ver no Open Food Facts",
+  "couldNotOpenLink": "Não foi possível abrir o link.",
+  "nutrient": "Nutriente",
+  "inLocation": "em",
+  "noExpiry": "Sem validade",
+  "deleteItemTitle": "Excluir item?",
+  "deleteItemContent": "Isso não pode ser desfeito.",
+  "delete": "Excluir",
+  "failedToLoadInventoryItems": "Não foi possível carregar os itens do estoque.",
+  "enterPositiveNumber": "Digite um número positivo",
+  "csvImportComingSoon": "Importação de CSV em breve.",
+  "noDataToExport": "Nenhum dado para exportar.",
+  "pantryExport": "Exportar Despensa",
+  "exportFailed": "Falha na exportação",
+  "notificationsEnabled": "Notificações ativadas.",
+  "notificationsDisabled": "Notificações desativadas.",
+  "themeChanged": "Tema: {theme}",
+  "@themeChanged": {
+    "placeholders": {
+      "theme": {
+        "type": "String",
+        "example": "sistema"
+      }
+    }
+  },
+  "retentionDaysValue": "{days} dias",
+  "@retentionDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "60"
+      }
+    }
+  },
+  "dataRetentionDialogTitle": "Retenção de dados (dias)",
+  "daysLabel": "Dias",
+  "retentionPeriodSet": "Período de retenção definido para {days} dias.",
+  "@retentionPeriodSet": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "60"
+      }
+    }
+  },
+  "noInventories": "Nenhuma despensa.",
+  "itemsCount": "Itens: {count}",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "nameLabel": "Nome",
+  "create": "Criar",
+  "rename": "Renomear",
+  "inventoryCreated": "\"{name}\" criada.",
+  "@inventoryCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Trabalho"
+      }
+    }
+  },
+  "inventoryRenamed": "Renomeada para \"{name}\".",
+  "@inventoryRenamed": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Escritório"
+      }
+    }
+  },
+  "inventoryDeleted": "\"{name}\" excluída.",
+  "@inventoryDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Despensa Antiga"
+      }
+    }
+  },
+  "couldNotCreateInventory": "Não foi possível criar a despensa.",
+  "couldNotRenameInventory": "Não foi possível renomear a despensa.",
+  "couldNotDeleteInventory": "Não foi possível excluir a despensa.",
+  "networkError": "Erro de rede. Verifique sua conexão.",
+  "productNotFound": "Produto não encontrado",
+  "productNotFoundHint": "Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.",
+  "addManually": "Adicionar manualmente",
+  "contributeToOpenFoodFacts": "Contribuir pro Open Food Facts",
+  "retry": "Tentar de novo",
+  "expiringSoonDays": "Aviso de vencimento",
+  "expiringSoonDaysValue": "{days} dias",
+  "@expiringSoonDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "expiringSoonDaysDialogTitle": "Aviso de vencimento (dias)",
+  "expiringSoonDaysSet": "Aviso de vencimento definido para {days} dias.",
+  "@expiringSoonDaysSet": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "expiringToday": "Comida vencendo hoje",
+  "expiresTomorrow": "{barcode} vence amanhã",
+  "@expiresTomorrow": {
+    "placeholders": {
+      "barcode": {
+        "type": "String",
+        "example": "5901234123457"
+      }
+    }
+  },
+  "expiresToday": "{barcode} vence hoje!",
+  "@expiresToday": {
+    "placeholders": {
+      "barcode": {
+        "type": "String",
+        "example": "5901234123457"
+      }
+    }
+  },
+  "expiryChannelName": "Lembretes de validade",
+  "expiryChannelDescription": "Avisa sobre alimentos vencendo",
+  "itemRestored": "Item restaurado.",
+  "undo": "Desfazer",
+  "scanHint": "Alinhe o código de barras dentro da moldura",
+  "confirmExitScanner": "Parar de escanear?",
+  "confirmExitScannerHint": "A leitura atual será descartada.",
+  "stay": "Ficar",
+  "leave": "Sair",
+  "importCsvSuccess": "Importação concluída — {products} produtos, {items} itens.",
+  "@importCsvSuccess": {
+    "placeholders": {
+      "products": {
+        "type": "int",
+        "example": "5"
+      },
+      "items": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
+  "importCsvFailed": "Falha na importação CSV: {error}",
+  "@importCsvFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Formato inválido"
+      }
+    }
+  },
+  "customUnit": "Personalizado...",
+  "customLocation": "Personalizado...",
+  "enterCustomUnit": "Digite a unidade personalizada",
+  "enterCustomLocation": "Digite o local personalizado",
+  "close": "Fechar",
+  "exportedToShare": "Exportação pronta — compartilhe pra salvar.",
+  "errorLoadingInventory": "Não foi possível carregar o estoque.",
+  "items": "itens",
+  "enterProductDetails": "Preencha os dados do produto",
+  "productNameLabel": "Nome do produto",
+  "requiredField": "Campo obrigatório",
+  "servingSizeHint": "ex: 100 g, 1 biscoito (28 g)",
+  "nutritionInfo": "Nutrição (por 100 g / 100 ml)",
+  "captureImages": "Fotos",
+  "nutritionTableImage": "Foto da tabela nutricional",
+  "ingredientsImage": "Foto da lista de ingredientes",
+  "productImage": "Foto do produto",
+  "saveProduct": "Salvar produto",
+  "submittingToOff": "Será enviado pro Open Food Facts quando houver conexão",
+  "offlineWarning": "Você está offline — adicionando produto manualmente",
+  "nutriscoreExplanation": "Nutri-Score é um selo nutricional que classifica produtos de A (melhor) a E (pior) com base na qualidade nutricional. Ajuda a comparar produtos parecidos rapidamente.",
+  "nutriscoreNotApplicable": "Nutri-Score não se aplica a esse produto ({category}).",
+  "@nutriscoreNotApplicable": {
+    "placeholders": {
+      "category": {}
+    }
+  },
+  "nutriscoreNotApplicableGeneric": "Nutri-Score não se aplica a essa categoria de produto.",
+  "flushCache": "Limpar cache",
+  "flushCacheSub": "Excluir dados e imagens em cache",
+  "flushCacheConfirm": "Isso vai excluir todos os dados e imagens em cache obtidos do Open Food Facts. Produtos adicionados manualmente e seus itens de estoque serão mantidos. Os produtos em cache serão baixados de novo na próxima vez que você visualizá-los.",
+  "flushCacheSuccess": "Cache limpo. Os produtos serão atualizados automaticamente.",
+  "flushCacheFailed": "Não foi possível limpar o cache. Tente de novo.",
+  "submissionPending": "Envio pendente pro Open Food Facts",
+  "submissionSubmitted": "Enviado pro Open Food Facts",
+  "submissionFailed": "Falha no envio pro Open Food Facts",
+  "submissionNotSubmitted": "Não enviado pro Open Food Facts",
+  "submitToOff": "Enviar pro Open Food Facts",
+  "submittingToOffTitle": "Enviando…",
+  "submissionSuccess": "Produto enviado pro Open Food Facts.",
+  "submissionError": "Falha ao enviar o produto. Toque pra tentar de novo.",
+  "navHome": "Início",
+  "navSearch": "Buscar",
+  "navStats": "Estatísticas",
+  "navSettings": "Config",
+  "searchTitle": "Buscar Produtos",
+  "searchProductsHint": "Busque produtos por nome ou código de barras",
+  "noSearchResults": "Nenhum produto encontrado",
+  "totalItemsCount": "Total de itens: {count}",
+  "@totalItemsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "expiringSoonCount": "Vencendo em breve: {count}",
+  "@expiringSoonCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "addedThisWeek": "Adicionados esta semana: {count}",
+  "@addedThisWeek": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "filterAll": "Todos",
+  "filterByCategory": "Categoria",
+  "settingsAppearance": "Aparência",
+  "settingsDataManagement": "Gerenciamento de Dados",
+  "settingsMaintenance": "Manutenção",
+  "whatsNewTitle": "Novidades",
+  "whatsNewVersion": "Versão {version}",
+  "@whatsNewVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "1.0.0"
+      }
+    }
+  },
+  "whatsNewDismiss": "Entendi"
+}

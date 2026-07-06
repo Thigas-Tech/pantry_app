@@ -54,7 +54,10 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final showPending = prefs.getString('changelog_show_pending') == 'true';
-      if (!showPending) return;
+      if (!showPending) {
+        logInfo('No changelog show pending — skipping');
+        return;
+      }
 
       final lastSeen = prefs.getString('changelog_last_seen');
       final info = await PackageInfo.fromPlatform();
@@ -75,7 +78,18 @@ class _PantryShellState extends ConsumerState<PantryShell> {
         currentVersion,
       );
 
-      if (entries.isEmpty) return;
+      if (entries.isEmpty) {
+        logInfo(
+          'No unseen changelog entries (lastSeen: '
+          '${lastSeen ?? 'null'}, current: $currentVersion)',
+        );
+        return;
+      }
+
+      logInfo(
+        'Showing changelog: ${entries.length} unseen '
+        'entries since ${lastSeen ?? 'first install'}',
+      );
 
       // Wait for the first frame so the sheet overlay has a valid context.
       if (!mounted) return;

@@ -50,6 +50,10 @@ Future<void> main() async {
 ///
 /// This ensures products cached before the Nutri-Score badge feature (or any
 /// other schema change) get re-fetched from Open Food Facts with fresh data.
+///
+/// The changelog tracking runs unconditionally (before the version-match
+/// guard) so that the `[Unreleased]` section is still surfaced on upgrades
+/// even when the app version string has not changed.
 Future<void> _handleAppUpdate() async {
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -57,22 +61,27 @@ Future<void> _handleAppUpdate() async {
     final currentVersion = '${info.version}+${info.buildNumber}';
     final lastVersion = prefs.getString('app_version');
 
-    if (lastVersion == currentVersion) return;
+    // Changelog tracking — always runs, regardless of cache-flush guard.
+    final lastSeenChangelog = prefs.getString('changelog_last_seen');
+    if (lastSeenChangelog != null && lastSeenChangelog != currentVersion) {
+      unawaited(prefs.setString('changelog_show_pending', 'true'));
+      logInfo(
+        'Changelog flagged: last seen $lastSeenChangelog, '
+        'now $currentVersion',
+      );
+    }
+    // Always store the current version so future updates are detected and
+    // the parser knows where to start filtering (handles first install too).
+    await prefs.setString('changelog_last_seen', currentVersion);
+
+    if (lastVersion == currentVersion) {
+      logInfo('Version unchanged ($currentVersion) — skipping cache flush');
+      return;
+    }
 
     logInfo(
       'App updated from ${lastVersion ?? 'first install'} to $currentVersion',
     );
-
-    // If this is NOT a first install, flag the changelog for display so
-    // the user sees what changed since their last version.
-    final lastSeenChangelog = prefs.getString('changelog_last_seen');
-    if (lastSeenChangelog != null && lastSeenChangelog != currentVersion) {
-      unawaited(prefs.setString('changelog_show_pending', 'true'));
-    }
-
-    // Always store the current version so future updates are detected and
-    // the parser knows where to start filtering (handles first install too).
-    await prefs.setString('changelog_last_seen', currentVersion);
 
     // Clear image cache so stale images don't persist across updates.
     await ImageCacheService().clearCache();
