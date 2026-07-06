@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/screens/feedback_screen.dart';

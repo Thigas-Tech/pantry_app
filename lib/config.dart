@@ -41,8 +41,7 @@ class AppConfig {
   ///
   /// Must have `Issues: Read and write` permission on the repository
   /// specified by [githubOwner] and [githubRepo].
-  static String get githubFeedbackToken =>
-      dotenv.env['GITHUB_FEEDBACK_TOKEN'] ?? '';
+  static String get feedbackToken => dotenv.env['FEEDBACK_TOKEN'] ?? '';
 
   /// The GitHub repository owner for in-app feedback submissions.
   static String get githubOwner => dotenv.env['GITHUB_OWNER'] ?? 'Thigas-Tech';

@@ -310,7 +310,7 @@ class GithubIssueService {
 
   Map<String, String> _headers() {
     return {
-      'Authorization': 'Bearer ${AppConfig.githubFeedbackToken}',
+      'Authorization': 'Bearer ${AppConfig.feedbackToken}',
       'Accept': 'application/vnd.github+json',
       'User-Agent': 'PantryApp/1.0',
       'Content-Type': 'application/json',
