@@ -47,7 +47,7 @@ jobs:
             adb wait-for-device
             adb install build/app/outputs/flutter-apk/app-profile.apk
             flashlight measure \
-              --appId com.example.pantry_app \
+              --appId com.thigas_tech.pantry_app \
               --duration 30 \
               --output flashlight-report.json
       - name: Upload Flashlight report

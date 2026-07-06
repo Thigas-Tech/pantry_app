@@ -70,9 +70,14 @@ jobs:
           path: code/coverage/lcov.${{ matrix.category }}.info
 
   build:
-    name: Build artifacts
+    name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
     needs: testing
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build-type: [debug, release]
+        package-type: [apk, appbundle]
+      fail-fast: false
     steps:
       - name: Clone the repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -98,21 +103,58 @@ jobs:
             "${OFF_PASSWORD:-}" \
             "${CONTACT_EMAIL:-pantry-app@example.com}" \
             "false"
-      - name: Build APK (debug)
-        run: flutter build apk --debug
+      - name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
+        run: >
+          flutter build ${{ matrix.package-type }}
+          --${{ matrix.build-type }}
+          ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info' || '' }}
         working-directory: code
-      - name: Build App Bundle (debug)
-        run: flutter build appbundle --debug
-        working-directory: code
-      - name: Upload APK artifact
+      - name: Upload APK
+        if: matrix.package-type == 'apk'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: app-debug-apk
-          path: code/build/app/outputs/flutter-apk/app-debug.apk
-          retention-days: 7
-      - name: Upload AAB artifact
+          name: ${{ matrix.build-type }}-apk
+          path: code/build/app/outputs/flutter-apk/app-${{ matrix.build-type }}.apk
+          retention-days: 90
+      - name: Upload AAB
+        if: matrix.package-type == 'appbundle'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: app-debug-aab
-          path: code/build/app/outputs/bundle/debug/app-debug.aab
-          retention-days: 7
+          name: ${{ matrix.build-type }}-aab
+          path: code/build/app/outputs/bundle/${{ matrix.build-type }}/app-${{ matrix.build-type }}.aab
+          retention-days: 90
+      - name: Upload debug symbols
+        if: matrix.build-type == 'release' && matrix.package-type == 'apk'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-debug-info
+          path: code/debug-info/
+          retention-days: 90
+
+  publish:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - name: Draft release
+        id: release-drafter
+        uses: release-drafter/release-drafter@4d75298e00d9e34c483e5ff8c68d0ea1c1940c1e
+        with:
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download all artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: artifacts
+          pattern: '*-*'
+          merge-multiple: true
+      - name: Upload assets to release
+        run: |
+          gh release upload "${{ steps.release-drafter.outputs.tag_name }}" artifacts/* --repo "$GITHUB_REPOSITORY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

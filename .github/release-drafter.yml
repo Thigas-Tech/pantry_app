@@ -8,29 +8,32 @@ template: |
 
 categories:
   - title: Breaking Changes
-    label: breaking
+    when:
+      - label: breaking
   - title: Features
-    label: feature
+    when:
+      - label: feature
   - title: Bug Fixes
-    label: fix
+    when:
+      - label: fix
   - title: Enhancements
-    label: enhancement
+    when:
+      - label: enhancement
   - title: Documentation
-    label: documentation
+    when:
+      - label: documentation
   - title: Maintenance
-    label: maintenance
+    when:
+      - label: maintenance
 
 version-resolver:
   major:
-    labels:
-      - breaking
+    when:
+      - labels: ['breaking']
   minor:
-    labels:
-      - feature
-      - enhancement
+    when:
+      - labels: ['feature', 'enhancement']
   patch:
-    labels:
-      - fix
-      - documentation
-      - maintenance
+    when:
+      - labels: ['fix', 'documentation', 'maintenance']
   default: patch

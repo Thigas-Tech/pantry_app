@@ -1,0 +1,3 @@
+-keep class com.thigas_tech.pantry_app.** { *; }
+-keep class com.dexterous.** { *; }
+-keep class com.journeyapps.** { *; }
