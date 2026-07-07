@@ -45,5 +45,49 @@ void main() {
       logWarning('warning');
       logError('error');
     });
+
+    /// Verifies [logDebug] prints in debug mode (when [_verbose] is true).
+    test('logDebug prints in debug mode', () {
+      final logs = <String>[];
+      debugPrint = (message, {wrapWidth}) {
+        logs.add(message!);
+      };
+
+      logDebug('debug message');
+      expect(logs, isNotEmpty);
+      expect(logs.first, contains('debug message'));
+      expect(logs.first, contains('[DEBUG]'));
+    });
+
+    /// Verifies [logException] prints the message, exception type, and
+    /// stack trace when a [StackTrace] is provided.
+    test('logException prints exception with stack trace', () {
+      final logs = <String>[];
+      debugPrint = (message, {wrapWidth}) {
+        logs.add(message!);
+      };
+
+      final exception = Exception('test failure');
+      final stackTrace = StackTrace.current;
+      logException('An error occurred', exception, stackTrace);
+
+      expect(logs, isNotEmpty);
+      expect(logs.first, contains('An error occurred'));
+      expect(logs.first, contains('Exception'));
+      expect(logs.first, contains(stackTrace.toString()));
+    });
+
+    /// Verifies [logException] handles a null [StackTrace] gracefully.
+    test('logException handles null stack trace', () {
+      final logs = <String>[];
+      debugPrint = (message, {wrapWidth}) {
+        logs.add(message!);
+      };
+
+      logException('Simple error', 'string error', null);
+
+      expect(logs, isNotEmpty);
+      expect(logs.first, contains('Simple error'));
+    });
   });
 }

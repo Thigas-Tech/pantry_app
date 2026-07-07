@@ -49,7 +49,7 @@ class ImageCacheService {
       await cachedFile.writeAsBytes(webpBytes);
       logInfo('Image cached for $barcode');
       return cachedFile.path;
-    } on Exception catch (e) {
+    } on Object catch (e) {
       logError('Failed to cache image for $barcode: $e');
       return null;
     }

@@ -99,5 +99,46 @@ void main() {
       final path = await service.cacheImage('http://example.com/img.png', 'b1');
       expect(path, isNull);
     });
+
+    test('returns null when image decode fails', () async {
+      /// Non-image bytes (corrupted data) cause decodeImage to return
+      /// null, and cacheImage returns null.
+      when(
+        () => mockClient.get(any()),
+      ).thenAnswer(
+        (_) async => http.Response.bytes(
+          Uint8List.fromList([1, 2, 3]),
+          200,
+        ),
+      );
+
+      final path = await service.cacheImage('http://example.com/img.png', 'b1');
+      expect(path, isNull);
+    });
+  });
+
+  group('clearCache', () {
+    test('deletes cached files and recreates directory', () async {
+      /// Create a test file in the cache directory, call clearCache, then
+      /// verify the file is gone and the directory still exists.
+      final testFile = File('${cacheDir.path}/test.webp');
+      await testFile.writeAsBytes([1, 2, 3]);
+      expect(testFile.existsSync(), isTrue);
+
+      await service.clearCache();
+
+      expect(testFile.existsSync(), isFalse);
+      expect(cacheDir.existsSync(), isTrue);
+    });
+
+    test('does not throw when directory does not exist', () async {
+      /// If the cache directory does not exist yet, clearCache should
+      /// handle it gracefully without throwing.
+      cacheDir.deleteSync(recursive: true);
+      expect(cacheDir.existsSync(), isFalse);
+
+      await service.clearCache();
+      // No exception should be thrown.
+    });
   });
 }

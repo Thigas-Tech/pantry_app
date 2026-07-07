@@ -7,10 +7,12 @@ library;
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -145,6 +147,38 @@ void main() {
         expect(ex.message, 'Test error');
         expect(ex.toString(), contains('Test error'));
       });
+    });
+
+    group('submitIssue rate limiting', () {
+      /// Verifies [submitIssue] throws [IssueSubmissionException] when
+      /// called within 60 seconds of the last submission.
+      test('respects 60-second cooldown', () async {
+        final recent = DateTime.now().subtract(const Duration(seconds: 30));
+        SharedPreferences.setMockInitialValues({
+          'feedback_last_submit': recent.millisecondsSinceEpoch,
+        });
+        await GithubIssueService.initPreferences();
+
+        final svc = GithubIssueService(httpClient: mockHttp);
+        expect(
+          () => svc.submitIssue(title: 'Rapid', body: 'Rapid'),
+          throwsA(isA<IssueSubmissionException>()),
+        );
+        svc.dispose();
+      });
+    });
+  });
+
+  group('encodeScreenshotBase64', () {
+    /// Verifies that a valid PNG image is resized and base64-encoded.
+    test('encodes a small PNG to base64', () async {
+      final image = img.Image(width: 2, height: 2);
+      final pngBytes = Uint8List.fromList(img.encodePng(image));
+      expect(pngBytes, isNotEmpty);
+
+      final result = await encodeScreenshotBase64(pngBytes);
+      expect(result, isNotEmpty);
+      expect(result, isA<String>());
     });
   });
 }

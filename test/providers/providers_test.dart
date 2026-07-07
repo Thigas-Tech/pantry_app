@@ -10,6 +10,7 @@ import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 
@@ -145,6 +146,13 @@ void main() {
     });
   });
 
+  group('productSubmissionServiceProvider', () {
+    test('returns a ProductSubmissionService instance', () {
+      final svc = container.read(productSubmissionServiceProvider);
+      expect(svc, isNotNull);
+    });
+  });
+
   group('productRepositoryProvider', () {
     test('returns a ProductRepository instance', () {
       final repo = container.read(productRepositoryProvider);
@@ -163,6 +171,112 @@ void main() {
     test('returns an ImageCacheService instance', () {
       final svc = container.read(imageCacheProvider);
       expect(svc, isNotNull);
+    });
+  });
+
+  group('inventoryCountProvider', () {
+    /// Verifies [inventoryCountProvider] returns the length of the
+    /// [inventoryWithProductProvider] list.
+    test('returns item count from inventoryWithProductProvider', () async {
+      final mockDb = MockDatabaseHelper();
+      final rows = <Map<String, dynamic>>[
+        {
+          'id': 1,
+          'barcode': '001',
+          'quantity': 1,
+          'unit': 'pcs',
+          'inventory_id': 1,
+          'product_name': 'Milk',
+        },
+        {
+          'id': 2,
+          'barcode': '002',
+          'quantity': 2,
+          'unit': 'kg',
+          'inventory_id': 1,
+          'product_name': 'Bread',
+        },
+      ];
+      when(
+        () => mockDb.getInventoryWithProduct(inventoryId: 1),
+      ).thenAnswer((_) async => rows);
+
+      container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final count = await container.read(inventoryCountProvider.future);
+      expect(count, 2);
+    });
+  });
+
+  group('averageNutriscoreProvider', () {
+    /// Verifies [averageNutriscoreProvider] returns null when none of
+    /// the products have a NutriScore grade.
+    test('returns null when no products have NutriScore', () async {
+      final mockDb = MockDatabaseHelper();
+      when(
+        () => mockDb.getInventoryWithProduct(inventoryId: 1),
+      ).thenAnswer(
+        (_) async => [
+          {
+            'id': 1,
+            'barcode': '001',
+            'inventory_id': 1,
+            'product_name': 'Milk',
+          },
+        ],
+      );
+
+      container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final grade = await container.read(averageNutriscoreProvider.future);
+      expect(grade, isNull);
+    });
+
+    /// Verifies [averageNutriscoreProvider] returns the correct letter
+    /// grade when products have NutriScore grades.
+    test('returns correct grade for mixed scores', () async {
+      final mockDb = MockDatabaseHelper();
+      when(
+        () => mockDb.getInventoryWithProduct(inventoryId: 1),
+      ).thenAnswer(
+        (_) async => [
+          {
+            'id': 1,
+            'barcode': '001',
+            'inventory_id': 1,
+            'product_name': 'Milk',
+            'nutriscore_grade': 'a',
+          },
+          {
+            'id': 2,
+            'barcode': '002',
+            'inventory_id': 1,
+            'product_name': 'Candy',
+            'nutriscore_grade': 'e',
+          },
+        ],
+      );
+
+      container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // a=5, e=1 → avg=3 → rounded=3 → grade='c'
+      final grade = await container.read(averageNutriscoreProvider.future);
+      expect(grade, 'c');
     });
   });
 }
