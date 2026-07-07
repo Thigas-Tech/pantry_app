@@ -36,6 +36,9 @@ enum IssueType {
 
   /// A regression — something that used to work but no longer does.
   regression,
+
+  /// A translation report — incorrect or missing translation.
+  translation,
 }
 
 /// Convenience methods to map [IssueType] values to user-facing and
@@ -47,6 +50,7 @@ extension IssueTypeLabel on IssueType {
     IssueType.feature => l10n.featureRequest,
     IssueType.feedback => l10n.generalFeedback,
     IssueType.regression => l10n.regressionReport,
+    IssueType.translation => l10n.translationReport,
   };
 
   /// Returns a short explanation of this issue type.
@@ -55,6 +59,7 @@ extension IssueTypeLabel on IssueType {
     IssueType.feature => l10n.featureRequestExplanation,
     IssueType.feedback => l10n.generalFeedbackExplanation,
     IssueType.regression => l10n.regressionReportExplanation,
+    IssueType.translation => l10n.translationReportExplanation,
   };
 
   /// Returns the GitHub label for this issue type.
@@ -63,6 +68,7 @@ extension IssueTypeLabel on IssueType {
     IssueType.feature => 'enhancement',
     IssueType.feedback => '',
     IssueType.regression => 'regression',
+    IssueType.translation => 'translation',
   };
 }
 

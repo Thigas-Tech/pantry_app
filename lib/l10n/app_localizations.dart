@@ -1553,6 +1553,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get amoledNudgeDismiss;
+
+  /// No description provided for @translationReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation Report'**
+  String get translationReport;
+
+  /// No description provided for @translationReportExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Report an issue with a product translation or suggest a new translation.'**
+  String get translationReportExplanation;
+
+  /// No description provided for @feedbackRateLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only submit one report per minute and up to 5 per day. Please try again later.'**
+  String get feedbackRateLimit;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

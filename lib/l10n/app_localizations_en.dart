@@ -784,4 +784,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get amoledNudgeDismiss => 'Not now';
+
+  @override
+  String get translationReport => 'Translation Report';
+
+  @override
+  String get translationReportExplanation => 'Report an issue with a product translation or suggest a new translation.';
+
+  @override
+  String get feedbackRateLimit => 'You can only submit one report per minute and up to 5 per day. Please try again later.';
 }

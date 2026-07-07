@@ -400,5 +400,8 @@
   "amoledNudgeTitle": "Trocar para o modo escuro?",
   "amoledNudgeBody": "O modo escuro pode economizar bateria no seu dispositivo, especialmente se a tela for AMOLED. Voce tambem pode ativar o fundo preto puro nas Configuracoes para economia maxima de energia.",
   "amoledNudgeEnable": "Ativar modo escuro",
-  "amoledNudgeDismiss": "Agora nao"
+  "amoledNudgeDismiss": "Agora nao",
+  "translationReport": "Relato de Traducao",
+  "translationReportExplanation": "Relate um problema com a traducao de um produto ou sugira uma nova traducao.",
+  "feedbackRateLimit": "Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde."
 }

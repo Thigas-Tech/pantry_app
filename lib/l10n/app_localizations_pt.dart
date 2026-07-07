@@ -784,6 +784,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get amoledNudgeDismiss => 'Agora nao';
+
+  @override
+  String get translationReport => 'Relato de Traducao';
+
+  @override
+  String get translationReportExplanation => 'Relate um problema com a traducao de um produto ou sugira uma nova traducao.';
+
+  @override
+  String get feedbackRateLimit => 'Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

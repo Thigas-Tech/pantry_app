@@ -74,6 +74,36 @@
   4-space indented blocks. This enables LSP go-to-definition and hover
   documentation on doc-comment references. Rule 14 added to `AGENTS.md`.
 
+### Fixed
+- **Screenshot compression in feedback**: `_buildBody()` now calls
+  `encodeScreenshotBase64()` instead of raw `base64Encode()`, fixing the
+  dead-code regression that caused screenshots to be embedded uncompressed
+  and exceed the GitHub API body size limit. Added INTERNET permission to
+  `AndroidManifest.xml`. Added rate-limit ARB string.
+  (`lib/services/github_issue_service.dart`,
+  `android/app/src/main/AndroidManifest.xml`, `lib/l10n/app_en.arb`,
+  `lib/l10n/app_pt.arb`)
+
+### Added
+- **Translation report issue type**: New `IssueType.translation` enum value
+  for reporting incorrect or missing product translations.
+  (`lib/screens/feedback_screen.dart`, `lib/l10n/app_en.arb`,
+  `lib/l10n/app_pt.arb`)
+- **CI permissions fix**: Added `contents: read` to `coverage_report` job in
+  `ci.yml` and `publish` job in `build.yml` to fix `actions/checkout` failure
+  on private repos. (`.github/workflows/ci.yml`, `.github/workflows/build.yml`)
+- **Regression tests for screenshot compression**: Three new tests verify that
+  `submitIssue` compresses screenshots (not raw base64), stays under the
+  GitHub API body size limit, and omits image data when no screenshots are
+  provided. (`test/services/github_issue_service_test.dart`)
+
+### Changed
+- **Version bumped**: `pubspec.yaml` version changed from `1.0.0+1` to
+  `0.0.4+1` to align with the alpha release tag sequence.
+- **Branch protection**: Repository made public. GitHub ruleset `protect-main`
+  applied: requires PR with 1 approval, passing status checks, and blocks
+  deletion/force-push on `main`.
+
 ### Added
 - **GitHub Actions CI**: PR quality gate (lint, format, test, coverage) on every PR.
 - **GitHub Actions build**: APK/AAB debug artifacts on every push to `main`.

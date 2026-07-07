@@ -122,6 +122,119 @@ void main() {
           throwsA(isA<IssueSubmissionException>()),
         );
       });
+
+      /// Regression test: verifies screenshot bytes are compressed via
+      /// [encodeScreenshotBase64] and not embedded raw (prevents dead code
+      /// regression where [base64Encode] was called directly instead).
+      test('compresses screenshots before sending', () async {
+        final image = img.Image(width: 2000, height: 2000);
+        final rawBytes = Uint8List.fromList(img.encodePng(image));
+        final rawBase64 = base64Encode(rawBytes);
+        final screenshots = <List<int>>[rawBytes];
+
+        String? capturedBody;
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer((invocation) async {
+          capturedBody = invocation.namedArguments[#body] as String;
+          return http.Response(
+            jsonEncode({
+              'html_url': 'https://github.com/owner/repo/issues/1',
+            }),
+            201,
+          );
+        });
+
+        await service.submitIssue(
+          title: 'Regression',
+          body: 'Description',
+          label: 'bug',
+          screenshotBytesList: screenshots,
+        );
+
+        expect(capturedBody, isNot(contains(rawBase64)));
+        final match = RegExp(
+          'data:image/png;base64,([A-Za-z0-9+/=]+)',
+        ).firstMatch(capturedBody!);
+        expect(match, isNotNull);
+        final decoded = img.decodeImage(base64Decode(match!.group(1)!));
+        expect(decoded, isNotNull);
+        expect(decoded!.width, lessThanOrEqualTo(1024));
+        expect(decoded.height, lessThanOrEqualTo(1024));
+      });
+
+      /// Regression test: verifies body stays under GitHub API size limit
+      /// (~256 KB) even with large screenshots, ensuring that compression
+      /// is active.
+      test(
+        'body size is within GitHub API limits with large screenshots',
+        () async {
+          final image = img.Image(width: 2000, height: 2000);
+          final rawBytes = Uint8List.fromList(img.encodePng(image));
+          final screenshots = <List<int>>[rawBytes];
+
+          String? capturedBody;
+          when(
+            () => mockHttp.post(
+              any(),
+              headers: any(named: 'headers'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer((invocation) async {
+            capturedBody = invocation.namedArguments[#body] as String;
+            return http.Response(
+              jsonEncode({
+                'html_url': 'https://github.com/owner/repo/issues/1',
+              }),
+              201,
+            );
+          });
+
+          await service.submitIssue(
+            title: 'Large',
+            body: 'Description',
+            label: 'bug',
+            screenshotBytesList: screenshots,
+          );
+
+          expect(capturedBody!.length, lessThan(256 * 1024));
+        },
+      );
+
+      /// Verifies that when no screenshots are attached, the body does not
+      /// contain any image markdown.
+      test('body has no image data when no screenshots provided', () async {
+        String? capturedBody;
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer((invocation) async {
+          capturedBody = invocation.namedArguments[#body] as String;
+          return http.Response(
+            jsonEncode({
+              'html_url': 'https://github.com/owner/repo/issues/1',
+            }),
+            201,
+          );
+        });
+
+        await service.submitIssue(
+          title: 'No screenshot test',
+          body: 'Plain description',
+          label: 'bug',
+        );
+
+        expect(capturedBody, isNot(contains('data:image')));
+        expect(capturedBody, contains('No screenshot test'));
+        expect(capturedBody, contains('Plain description'));
+      });
     });
 
     group('isDuplicate', () {
