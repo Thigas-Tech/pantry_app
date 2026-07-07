@@ -15,8 +15,8 @@ import 'package:path_provider/path_provider.dart';
 class ImageCacheService {
   /// Creates an [ImageCacheService].
   ///
-  /// If `httpClient` is not provided, a new [http.Client] instance is created.
-  /// If `cacheDirectory` is not provided, the default application documents
+  /// If [http.Client] is not provided, a new instance is created.
+  /// If [Directory] is not provided, the default application documents
   /// directory is used. Both parameters allow unit tests to inject mocks.
   ImageCacheService({http.Client? httpClient, this._cacheDirectory})
     : _httpClient = httpClient ?? http.Client();

@@ -155,6 +155,6 @@ jobs:
           merge-multiple: true
       - name: Upload assets to release
         run: |
-          gh release upload "${{ steps.release-drafter.outputs.tag_name }}" artifacts/* --repo "$GITHUB_REPOSITORY"
+          gh release upload "${{ steps.release-drafter.outputs.tag_name }}" artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/database/inventory_dao.dart';
+import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -9,9 +11,9 @@ import 'package:pantry_app/providers/settings_provider.dart';
 
 /// Aggregated statistics for the active pantry inventory.
 ///
-/// Computed from SQL aggregation queries in `ProductDao` and
-/// `InventoryDao`. Depends on [activeInventoryProvider] so it
-/// refreshes when the user switches pantries. Uses autoDispose
+/// Computed from SQL aggregation queries in [ProductDao] and
+/// [InventoryDao]. Depends on [activeInventoryProvider] so it
+/// refreshes when the user switches pantries. Uses [FutureProvider.autoDispose]
 /// to release memory when leaving the Stats tab.
 // ignore: specify_nonobvious_property_types
 final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
