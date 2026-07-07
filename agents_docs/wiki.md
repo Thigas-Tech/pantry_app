@@ -12,6 +12,21 @@ constructor, and field with a `///` doc comment appears in the wiki.
 The wiki is **automatically updated on every push to `main`** by the
 `.github/workflows/wiki.yml` CI job.
 
+### One-time setup
+
+GitHub does not expose a programmatic API for creating the first wiki page.
+The wiki repo (`pantry_app.wiki.git`) is lazy-initialized when the first
+page is saved through the GitHub web interface.
+
+1. Navigate to https://github.com/Thigas-Tech/pantry_app/wiki
+2. Click **Create the first page**
+3. Set the title to **Home**
+4. Paste or type any content (the CI will overwrite it on the next push)
+5. Click **Save Page**
+
+After this one-time step, the CI workflow will clone the wiki repo and
+push updates automatically.
+
 ## How doc comments become the wiki
 
 1. `dart doc .` reads every `///` doc comment in the source tree.
