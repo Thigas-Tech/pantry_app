@@ -91,35 +91,48 @@ class OffAdapter {
 
   /// Searches for products matching [query] by name or barcode prefix.
   ///
-  /// Returns an empty list on any error (graceful degradation).
-  /// Results are deduplicated by barcode and products with empty
-  /// barcodes are filtered out.
+  /// Returns an empty list on any error after exhausting retries
+  /// (graceful degradation). Results are deduplicated by barcode and
+  /// products with empty barcodes are filtered out.
   Future<List<Product>> searchProducts(
     String query, {
     int pageSize = 20,
   }) async {
-    logInfo('Searching "$query" via SDK');
-    try {
-      final result = await off.OpenFoodAPIClient.searchProducts(
-        readUser,
-        OffQuery.searchConfig(query, pageSize: pageSize),
-        uriHelper: _uriHelper,
-      );
-      if (result.products == null) return <Product>[];
-      final products = <Product>[];
-      final seen = <String>{};
-      for (final offProduct in result.products!) {
-        final converted = Product.fromOffProduct(offProduct);
-        if (converted.barcode.isNotEmpty && seen.add(converted.barcode)) {
-          products.add(converted);
+    const maxRetries = 2;
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        logInfo('Searching "$query" via SDK (attempt ${attempt + 1})');
+        final result = await off.OpenFoodAPIClient.searchProducts(
+          readUser,
+          OffQuery.searchConfig(query, pageSize: pageSize),
+          uriHelper: _uriHelper,
+        );
+        if (result.products == null) return <Product>[];
+        final products = <Product>[];
+        final seen = <String>{};
+        for (final offProduct in result.products!) {
+          final converted = Product.fromOffProduct(offProduct);
+          if (converted.barcode.isNotEmpty && seen.add(converted.barcode)) {
+            products.add(converted);
+          }
+        }
+        logInfo('Search "$query" returned ${products.length} results');
+        return products;
+      } on Exception catch (e) {
+        if (attempt < maxRetries) {
+          final delay = Duration(seconds: attempt + 1);
+          logWarning(
+            'Search "$query" failed (attempt ${attempt + 1}), '
+            'retrying in ${delay.inSeconds}s: $e',
+          );
+          await Future<void>.delayed(delay);
+        } else {
+          logWarning('Search "$query" failed after all retries: $e');
+          return <Product>[];
         }
       }
-      logInfo('Search "$query" returned ${products.length} results');
-      return products;
-    } on Exception catch (e) {
-      logWarning('Search "$query" failed: $e');
-      return <Product>[];
     }
+    return <Product>[];
   }
 
   /// Submits a product to Open Food Facts.

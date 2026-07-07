@@ -24,7 +24,7 @@ import 'package:pantry_app/utils/string_helpers.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
-import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// The main dashboard of the app.
@@ -277,98 +277,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final averageNutriscore = ref.watch(averageNutriscoreProvider);
 
     var appBarTitle = l10n.myPantry;
+    String? activeName;
+    final allInventories = inventoriesAsync.asData?.value;
     inventoriesAsync.whenData((list) {
       for (final inv in list) {
         if (inv['id'] == activeId) {
           appBarTitle = inv['name'] as String;
+          activeName = inv['name'] as String;
           break;
         }
       }
     });
-
-    // Always show the inventory switcher with "Create" at the bottom.
-    final switcher = inventoriesAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (error, stackTrace) => const SizedBox.shrink(),
-      data: (list) => PopupMenuButton<String>(
-        icon: const Icon(Icons.swap_horiz),
-        tooltip: l10n.switchPantry,
-        onSelected: (value) {
-          if (value == '__manage__') {
-            logInfo('Navigating to Manage Inventories');
-            unawaited(
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(
-                  builder: (_) => const ManageInventoriesScreen(),
-                ),
-              ),
-            );
-          } else if (value == '__create__') {
-            logInfo('Showing Create Pantry dialog');
-            unawaited(_showCreatePantryDialog(context, ref));
-          } else {
-            final id = int.tryParse(value);
-            if (id != null) {
-              logInfo('Switched to inventory $id');
-              ref.read(activeInventoryProvider.notifier).value = id;
-            }
-          }
-        },
-        itemBuilder: (_) => [
-          for (final inv in list)
-            PopupMenuItem<String>(
-              value: '${inv['id']}',
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      inv['name'] as String,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if ((inv['id'] as int) == activeId)
-                    const Icon(Icons.check, size: 18, color: Colors.teal),
-                ],
-              ),
-            ),
-          const PopupMenuDivider(),
-          PopupMenuItem<String>(
-            value: '__create__',
-            child: Row(
-              children: [
-                const Icon(Icons.add, size: 18),
-                const SizedBox(width: 8),
-                Flexible(child: Text(l10n.createNewPantry)),
-              ],
-            ),
-          ),
-          PopupMenuItem<String>(
-            value: '__manage__',
-            child: Row(
-              children: [
-                const Icon(Icons.folder, size: 18),
-                const SizedBox(width: 8),
-                Flexible(child: Text(l10n.manageInventories)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(child: Text(appBarTitle, overflow: TextOverflow.ellipsis)),
-            if (averageNutriscore.value != null) ...[
-              const SizedBox(width: 8),
-              NutriScoreBadge(
-                grade: averageNutriscore.value,
-                size: 24,
+            if (allInventories != null && allInventories.isNotEmpty)
+              InventorySwitcherCard(
+                name: activeName,
+                nutriscoreGrade: averageNutriscore.value,
+                isLoading: inventoriesAsync.isLoading,
+                onTap: () => _showSwitcherSheet(context, ref, allInventories),
+              )
+            else
+              Flexible(
+                child: Text(
+                  appBarTitle,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ],
           ],
         ),
         centerTitle: true,
@@ -412,7 +351,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ]
             : [
-                switcher,
                 IconButton(
                   icon: const Icon(Icons.checklist),
                   tooltip: l10n.selectItems,
@@ -431,7 +369,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           });
           return ErrorView(
             message: l10n.inventoryLoadFailed,
-            onRetry: () => ref.invalidate(inventoryWithProductProvider),
+            onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
+              (_) => ref.invalidate(inventoryWithProductProvider),
+            ),
           );
         },
         data: (items) {
@@ -509,6 +449,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         }
       }
     }
+  }
+
+  void _showSwitcherSheet(
+    BuildContext context,
+    WidgetRef ref,
+    List<Map<String, dynamic>> inventories,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final activeId = ref.read<int>(activeInventoryProvider);
+
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final inv in inventories)
+                ListTile(
+                  title: Text(
+                    inv['name'] as String,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: (inv['id'] as int) == activeId
+                      ? const Icon(Icons.check, color: Colors.teal)
+                      : null,
+                  onTap: () {
+                    final id = inv['id'] as int;
+                    logInfo('Switched to inventory $id');
+                    ref.read(activeInventoryProvider.notifier).value = id;
+                    Navigator.pop(ctx);
+                  },
+                ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.add),
+                title: Text(l10n.createNewPantry),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  unawaited(_showCreatePantryDialog(context, ref));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder),
+                title: Text(l10n.manageInventories),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  unawaited(
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) => const ManageInventoriesScreen(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _scanBarcode(BuildContext context, WidgetRef ref) async {

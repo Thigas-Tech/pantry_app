@@ -216,6 +216,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'zzzzz');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(
         find.text('No products found matching your search'),

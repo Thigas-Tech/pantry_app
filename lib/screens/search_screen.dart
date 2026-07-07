@@ -13,6 +13,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/utils/string_helpers.dart';
 
 /// A search‑focused tab that lets the user find products by name or
 /// barcode, querying both the local cache and the Open Food Facts API.
@@ -36,6 +37,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   bool _isSearching = false;
   bool _hasSearched = false;
   int _requestId = 0;
+  Timer? _graceTimer;
 
   @override
   bool get wantKeepAlive => true;
@@ -52,11 +54,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       ..removeListener(_onSearchChanged)
       ..dispose();
     _debounce?.cancel();
+    _graceTimer?.cancel();
     super.dispose();
   }
 
   void _onSearchChanged() {
     _debounce?.cancel();
+    _graceTimer?.cancel();
     final query = _searchController.text.trim();
     if (query.isEmpty) {
       setState(() {
@@ -76,8 +80,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     setState(() => _isSearching = true);
 
     try {
+      final normalizedQuery = removeDiacritics(query.trim());
       final db = ref.read(databaseProvider);
-      final localResults = await db.searchProducts(query);
+      final localResults = await db.searchProducts(normalizedQuery);
       if (capturedRequestId != _requestId || !mounted) return;
 
       final results = <_SearchResult>[
@@ -85,12 +90,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           _SearchResult(product: p, source: _ResultSource.local),
       ];
 
-      // Search the API only for queries with at least 2 characters.
+      var apiHadResults = false;
       if (query.length >= 2) {
         try {
           final api = ref.read(apiServiceProvider);
-          final apiResults = await api.searchProducts(query);
+          var apiResults = await api.searchProducts(normalizedQuery);
           if (capturedRequestId != _requestId || !mounted) return;
+
+          if (apiResults.isEmpty && normalizedQuery != query) {
+            apiResults = await api.searchProducts(query);
+            if (capturedRequestId != _requestId || !mounted) return;
+          }
+
+          apiHadResults = apiResults.isNotEmpty;
           final existingBarcodes = results
               .map((r) => r.product.barcode)
               .toSet();
@@ -107,11 +119,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       }
 
       if (!mounted) return;
-      setState(() {
-        _results = results;
-        _isSearching = false;
-        _hasSearched = true;
-      });
+      _graceTimer?.cancel();
+      if (results.isEmpty && !apiHadResults) {
+        _graceTimer = Timer(const Duration(seconds: 1), () {
+          if (!mounted) return;
+          setState(() {
+            _results = results;
+            _isSearching = false;
+            _hasSearched = true;
+          });
+        });
+        setState(() => _results = []);
+      } else {
+        setState(() {
+          _results = results;
+          _isSearching = false;
+          _hasSearched = true;
+        });
+      }
     } on Exception catch (e) {
       logError('Search failed: $e');
       if (!mounted) return;

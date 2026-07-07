@@ -41,6 +41,7 @@ import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
+import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import '../helpers/pump_app.dart';
 
 /// A fake [ActiveInventoryNotifier] that always returns 1
@@ -228,7 +229,8 @@ void main() {
       ],
     );
 
-    expect(find.byIcon(Icons.swap_horiz), findsOneWidget);
+    expect(find.byType(InventorySwitcherCard), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_drop_down), findsOneWidget);
   });
 
   testWidgets('does not show switcher when only one inventory exists', (
@@ -254,7 +256,8 @@ void main() {
       ],
     );
 
-    expect(find.byIcon(Icons.swap_horiz), findsOneWidget);
+    // Still shows card (with just pantry name, no dropdown needed).
+    expect(find.byType(InventorySwitcherCard), findsOneWidget);
   });
 
   // ---------- Additional tests for uncovered paths ----------
@@ -386,7 +389,10 @@ void main() {
       ],
     );
 
-    await tester.tap(find.byIcon(Icons.swap_horiz));
+    // Tap the switcher card to open bottom sheet.
+    final card = find.byType(InventorySwitcherCard);
+    expect(card, findsOneWidget);
+    await tester.tap(card);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Work').last);
@@ -568,7 +574,10 @@ void main() {
       ],
     );
 
-    await tester.tap(find.byIcon(Icons.swap_horiz));
+    // Tap the switcher card to open bottom sheet.
+    final card = find.byType(InventorySwitcherCard);
+    expect(card, findsOneWidget);
+    await tester.tap(card);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Create new pantry'));

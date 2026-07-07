@@ -46,3 +46,4 @@ Read these when implementing specific features:
 - Performance optimization -> ~/.config/opencode/instructions/performance_guide.md
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
 - Project architecture -> ARCHITECTURE.md
+- API docs (generated) -> doc/api/ (run `dart doc .` first if missing)

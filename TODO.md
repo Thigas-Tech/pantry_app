@@ -176,7 +176,10 @@ infrastructure or external server hosting are listed last.
   data retention) under `ExpansionTile`.
 - [ ] **DropdownMenu** — replace `PopupMenuButton` for inventory switcher
   with M3 `DropdownMenu`.
-- [ ] **Redesign inventory switcher with border card** — replace the plain
+- [x] **Redesign inventory switcher with border card** — replaced plain
+  `PopupMenuButton` icon with [InventorySwitcherCard] widget showing pantry
+  name, average NutriScore badge, and dropdown arrow. Opens modal bottom
+  sheet on tap with inventory list, create, and manage options.
   `PopupMenuButton` icon with a tappable card showing the pantry name,
   average NutriScore badge, and a tap/swipe-down indicator. Style the
   container with a border matching the search bar (`InputBorder` / outline
@@ -248,7 +251,7 @@ infrastructure or external server hosting are listed last.
 
 ### Code health
 
-- [ ] **Fix SearchScreen accent-insensitive + case-insensitive search** — the
+- [x] **Fix SearchScreen accent-insensitive + case-insensitive search** — the
   `SearchScreen` (_SearchScreenState._search) does NOT apply
   `removeDiacritics()` to the query or results before matching. The home
   screen inline search (`_InventoryListState._filtered`) DOES use
@@ -300,46 +303,11 @@ infrastructure or external server hosting are listed last.
     extension. Current Dart-level filtering works but doesn't scale. Decide
     whether to add a separate `normalized_name` column.
 
-- [ ] **Fix Riverpod `setState() called during build` exception** — the crash
-  triggered after adding an item to inventory:
-
-  ```
-  setState() or markNeedsBuild() called during build.
-  This UncontrolledProviderScope widget cannot be marked as needing to build
-  because the framework is already in the process of building widgets.
-  ```
-
-  Triggered by: `ProviderScheduler.scheduleProviderRefresh` → `_UncontrolledProviderScopeState.scheduleRefresh` → `State.setState` during `_OverlayEntryWidget` build.
-
-  **Root cause**: A Riverpod provider watched by the widget tree is being
-  invalidated synchronously during a build phase (when `_TickerModeState`
-  calls `didUpdateWidget` which triggers `notifyListeners`, which causes
-  Riverpod's `ConsumerStatefulElement._updateTickerMode` to flush a pending
-  provider notification, which invalidates a provider, which tries to call
-  `setState` on `UncontrolledProviderScope` while still in the build).
-
-  **Fix**: Identify the provider that's being invalidated during the
-  Snackbar/overlay build. Likely candidates: `inventoryWithProductProvider`
-  or `inventoryCountProvider`. Wrap the `ref.invalidate()` call in
-  `WidgetsBinding.instance.addPostFrameCallback` or replace with
-  `ref.invalidateSelf()` deferred using `Future.microtask`.
-
-  **Pitfalls & edge cases**:
-  - **Not all `ref.invalidate()` calls are affected**: Only those triggered
-    during an overlay/snackbar build. Audit every `ref.invalidate()` in
-    `product_detail_screen.dart` (lines 368-369 comment acknowledges this).
-  - **`addPostFrameCallback` may already be in effect**: Some calls already
-    use it. Check if the offending invalidate is an omission. Search for
-    `addPostFrameCallback` across the codebase to find existing patterns.
-  - **`Future.microtask` vs `addPostFrameCallback`**: Both defer to after
-    build, but `addPostFrameCallback` is the recommended Riverpad pattern.
-  - **Root cause may be in `NotificationService.scheduleExpiryReminders`**:
-    If the notification plugin internally triggers a widget rebuild during
-    scheduling, that could cascade. Test with a mock notification service
-    to isolate.
-  - **Regression risk**: Deferring invalidations may cause a brief stale
-    state. Ensure the invalidated provider is re-watched and re-resolves
-    on the next frame.
+- [x] **Fix Riverpod `setState() called during build` exception** — all
+  unwrapped `ref.invalidate()` calls wrapped in `addPostFrameCallback`.
+  Sites fixed: stats_screen.dart (2), manage_inventories_screen.dart (4),
+  home_screen.dart (1). Removed empty `setState(() {})` from
+  `product_detail_screen.dart._retrySubmission()`.
 
 - [ ] **SearchBar/SearchAnchor upgrade** — replace manual `TextField` in
   SearchScreen and HomeScreen with M3 `SearchBar`/`SearchAnchor` for native
@@ -355,36 +323,24 @@ infrastructure or external server hosting are listed last.
   - [x] 2. **Timezone resolution for raw UTC offsets**: Resolved via
      `flutter_timezone.getLocalTimezone()` on mobile platforms. Linux
      desktop may still return raw offsets — falls back to UTC.
-  3. **Dynamic color not detected**: The log shows `dynamic_color: Dynamic
-     color not detected on this device.` This is expected on emulators
-     (no dynamic colour support). Suppress the log level to `debug`
-     instead of `info` to avoid confusion. Verify on a real device with
-     Android 12+ and a Material You wallpaper.
+  3. **Dynamic color not detected**: This is a third‑party package debug
+     message (`dynamic_color` v1.8.1, `debugPrint` inside `initPlatformState`).
+     Cannot suppress without forking the package. No action needed.
   4. **Impeller EGL warnings**: `[ERROR:flutter/impeller/toolkit/egl/
      egl.cc(56)] EGL Error: Success (12288) in display.cc:161`. These are
      harmless Impeller init noise. Research whether they indicate a
      misconfiguration or can be safely ignored. Document in
      `ARCHITECTURE.md` section 11.7.
-  5. **OFF API "Page temporarily unavailable" errors**: The log shows
-     frequent `WARN Search "query" failed: Exception: JSON expected, server
-     error found: Page temporarily unavailable - Open Food Facts`. These
-     are OFF server-side 503 errors. The client already handles them
-     gracefully (logs warning, shows local results). Verify that the
-     current retry/fallback logic in `OffAdapter.searchProducts()` and
-     `SearchScreen._search()` is optimal — add a 2-second delay before
-     showing "no results" when the API fails, in case local results are
-     still rendering.
-  6. **Contribute Photos button not implemented**: The `OutlinedButton` on
-     `StatsScreen` logs `Contribute Photos tapped — not yet implemented`
-     and does nothing. Decide whether to implement or change the button
-     text to "Coming soon" and wrap in `ComingSoonScreen`.
+  5. **OFF API "Page temporarily unavailable" errors**: Added retry loop
+     in `OffAdapter.searchProducts()` (3 attempts, 1s/2s backoff). Added
+     1s grace timer in `SearchScreen._search()` before showing "No results"
+     when API fails and local results are empty.
+  6. **Contribute Photos button**: Wired to ComingSoonScreen navigation.
   - [x] 7. **Notification settings toggle doesn't re-request permission**:
      The toggle now calls `requestPermission()` when toggled on and shows
      an "Open Settings" dialog if permission was previously denied.
-  8. **No expiry date skip logs**: `[INFO] No expiry date for item null,
-     skipping reminders`. The log says "item null" because `item.id` is
-     null for newly created items. Fix the log message to show the
-     barcode instead.
+  8. **No expiry date skip logs**: Fixed log message to show barcode
+     instead of null id (`item.id` → `item.barcode`).
   9. **Skipped 35 frames on startup**: `[INFO] Skipped 35 frames! The
      application may be doing too much work on its main thread.` This is
      expected on debug builds during first launch (DB init + product

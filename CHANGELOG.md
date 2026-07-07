@@ -3,6 +3,23 @@
 ## [Unreleased]
 
 ### Changed
+- **Inventory switcher redesign**: Replaced plain `PopupMenuButton` icon with
+  `InventorySwitcherCard` widget showing the pantry name, average Nutri-Score
+  badge, and a dropdown arrow. Tapping opens a modal bottom sheet with the
+  inventory list, create, and manage options. Border styling matches the
+  search bar for visual consistency.
+  (`lib/widgets/inventory_switcher_card.dart`, `lib/screens/home_screen.dart`)
+- **SearchScreen accent-insensitive search**: Normalized search queries with
+  `removeDiacritics()` for both local DB and API search. Dual-pass API
+  strategy: sends normalized query first, falls back to raw query if results
+  are empty and the original had diacritics. This makes SearchScreen
+  consistent with HomeScreen inline search.
+  (`lib/screens/search_screen.dart`)
+- **OFF API search retry**: Added retry loop (3 attempts, 1s/2s backoff) to
+  `OffAdapter.searchProducts()` for transient 503/server errors. Added 1s
+  grace timer in SearchScreen before showing "No results" when API fails and
+  local results are empty.
+  (`lib/services/off_adapter.dart`, `lib/screens/search_screen.dart`)
 - **Notification service rewrite**: Replaced the fragile `hashCode`-based
   notification ID scheme with `itemId * 2` / `itemId * 2 + 1` (guaranteed
   positive, collision‑free). Timezone resolution now uses
@@ -70,7 +87,17 @@
 - **Search API 503 errors without user feedback**: `searchProducts` now retries with cancel support. Search debounce increased to 500ms. Added `CancelToken` to cancel in-flight searches on new query.
 - **Changelog not showing on content changes**: Replaced version-string detection with content-hash detection. `_handleAppUpdate` now compares `CHANGELOG.md.hashCode` with stored hash — shows changelog whenever content changes, regardless of version number.
 - **Changelog not showing on re-launch**: `_handleAppUpdate` returned early when the app version was unchanged, which prevented the `changelog_show_pending` flag from ever being set. Moved the changelog tracking above the version-match guard so it runs unconditionally.
-- **Dead `Contribute Photos` button**: added `logInfo` for the unimplemented feature.
+- **Dead `Contribute Photos` button**: Wired to `ComingSoonScreen` navigation
+  instead of a do-nothing `logInfo`.
+- **`setState()` crash when invalidating providers during overlay build**:
+  All 7 unwrapped `ref.invalidate()` calls wrapped in
+  `addPostFrameCallback`. Removed empty `setState(() {})` from
+  `_retrySubmission`. Sites fixed: stats_screen (2), manage_inventories (4),
+  home_screen (1), product_detail_screen (1).
+- **Expiry notification log shows "item null"**: Changed log message from
+  `item.id` to `item.barcode` (barcode is always non-null).
+- **CI security hardening failure**: Pinned unpinned GitHub Actions in
+  `opencode.yml` to full commit SHAs.
 
 ### Stats & Analytics
 - **StatsScreen rewritten with fl_chart**: Summary cards (total products, total items, added this week/month), Nutri-Score distribution (BarChart), category breakdown (BarChart), location breakdown (BarChart), photo completeness cards with OFF comparison, and ComingSoonView stubs for price tracking and NFC-e receipts.

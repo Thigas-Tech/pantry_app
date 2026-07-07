@@ -364,10 +364,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       } else {
         SnackbarHelper.showError(context, l10n.submissionError);
       }
-      setState(() {
-        // Trigger rebuild with new status (widget.product is final, but
-        // the caller should invalidate the upstream provider).
-      });
     }
   }
 

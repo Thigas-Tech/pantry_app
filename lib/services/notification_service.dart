@@ -167,7 +167,7 @@ class NotificationService {
     }
 
     if (item.expiryDate == null) {
-      logInfo('No expiry date for item ${item.id}, skipping reminders');
+      logInfo('No expiry date for item ${item.barcode}, skipping reminders');
       return;
     }
 

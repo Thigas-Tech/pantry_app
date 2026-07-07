@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
-import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/screens/coming_soon_screen.dart';
 import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 
@@ -45,7 +47,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(
           message: error.toString(),
-          onRetry: () => ref.invalidate(statsProvider),
+          onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
+            (_) => ref.invalidate(statsProvider),
+          ),
         ),
       ),
     );
@@ -88,7 +92,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(statsProvider);
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => ref.invalidate(statsProvider),
+        );
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -678,7 +684,14 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
-                logInfo('Contribute Photos tapped — not yet implemented');
+                unawaited(
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          ComingSoonScreen(title: l10n.contributePhotos),
+                    ),
+                  ),
+                );
               },
               icon: const Icon(Icons.open_in_browser),
               label: Text(l10n.contributePhotos),
