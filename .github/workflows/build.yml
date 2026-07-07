@@ -45,12 +45,14 @@ jobs:
           OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
           OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
           CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+          FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
         run: |
           ./scripts/inject_env.sh \
             "${OFF_USER_ID:-}" \
             "${OFF_PASSWORD:-}" \
             "${CONTACT_EMAIL:-pantry-app@example.com}" \
-            "false"
+            "false" \
+            "${FEEDBACK_TOKEN:-}"
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: flutter analyze --fatal-infos --fatal-warnings
@@ -97,12 +99,14 @@ jobs:
           OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
           OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
           CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+          FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
         run: |
           ./scripts/inject_env.sh \
             "${OFF_USER_ID:-}" \
             "${OFF_PASSWORD:-}" \
             "${CONTACT_EMAIL:-pantry-app@example.com}" \
-            "false"
+            "false" \
+            "${FEEDBACK_TOKEN:-}"
       - name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
         run: >
           flutter build ${{ matrix.package-type }}
