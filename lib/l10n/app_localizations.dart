@@ -1505,6 +1505,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Inactivity threshold set to {days} days.'**
   String inactivityThresholdSet(int days);
+
+  /// No description provided for @amoledDarkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED dark mode'**
+  String get amoledDarkMode;
+
+  /// No description provided for @amoledDarkModeExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use pure black surfaces in dark mode to save power on AMOLED displays'**
+  String get amoledDarkModeExplanation;
+
+  /// No description provided for @amoledDarkModeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED dark mode enabled.'**
+  String get amoledDarkModeEnabled;
+
+  /// No description provided for @amoledDarkModeDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'AMOLED dark mode disabled.'**
+  String get amoledDarkModeDisabled;
+
+  /// No description provided for @amoledNudgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to dark mode?'**
+  String get amoledNudgeTitle;
+
+  /// No description provided for @amoledNudgeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode can save battery life on your device, especially if it has an AMOLED screen. You can also enable pure-black surfaces in Settings for maximum power savings.'**
+  String get amoledNudgeBody;
+
+  /// No description provided for @amoledNudgeEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable dark mode'**
+  String get amoledNudgeEnable;
+
+  /// No description provided for @amoledNudgeDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get amoledNudgeDismiss;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   security_hardening:
@@ -17,6 +20,7 @@ jobs:
 
   testing:
     name: Run ${{ matrix.category }} testing
+    if: github.event_name == 'push'
     needs: security_hardening
     runs-on: ubuntu-latest
     strategy:
@@ -72,7 +76,9 @@ jobs:
           path: code/coverage/lcov.${{ matrix.category }}.info
 
   build:
+    # TODO: Add Patrol E2E tests here once implemented
     name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     needs: testing
     runs-on: ubuntu-latest
     strategy:
@@ -108,6 +114,9 @@ jobs:
             "false" \
             "${FEEDBACK_TOKEN:-}"
       - name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
+        if: |
+          github.event_name != 'pull_request' ||
+          (matrix.build-type == 'debug' && matrix.package-type == 'apk')
         run: >
           flutter build ${{ matrix.package-type }}
           --${{ matrix.build-type }}
@@ -137,6 +146,7 @@ jobs:
 
   publish:
     name: Publish release
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     permissions:

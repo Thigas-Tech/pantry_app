@@ -760,6 +760,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String inactivityThresholdSet(int days) {
     return 'Limite de inatividade definido para $days dias.';
   }
+
+  @override
+  String get amoledDarkMode => 'Modo escuro AMOLED';
+
+  @override
+  String get amoledDarkModeExplanation => 'Usar fundo preto no modo escuro para economizar bateria em telas AMOLED';
+
+  @override
+  String get amoledDarkModeEnabled => 'Modo escuro AMOLED ativado.';
+
+  @override
+  String get amoledDarkModeDisabled => 'Modo escuro AMOLED desativado.';
+
+  @override
+  String get amoledNudgeTitle => 'Trocar para o modo escuro?';
+
+  @override
+  String get amoledNudgeBody => 'O modo escuro pode economizar bateria no seu dispositivo, especialmente se a tela for AMOLED. Voce tambem pode ativar o fundo preto puro nas Configuracoes para economia maxima de energia.';
+
+  @override
+  String get amoledNudgeEnable => 'Ativar modo escuro';
+
+  @override
+  String get amoledNudgeDismiss => 'Agora nao';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

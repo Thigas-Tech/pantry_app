@@ -119,15 +119,17 @@ void main() {
     );
 
     final switchFinder = find.byType(Switch);
-    expect(switchFinder, findsNWidgets(2));
-    var sw = tester.widget<Switch>(switchFinder.first);
+    expect(switchFinder, findsNWidgets(3));
+    // The first switch is AMOLED toggle (defaults off). The second switch
+    // (at index 1) is the notifications switch.
+    var sw = tester.widget<Switch>(switchFinder.at(1));
     expect(sw.value, isTrue);
 
     // Tap to turn off.
-    await tester.tap(switchFinder.first);
+    await tester.tap(switchFinder.at(1));
     await tester.pumpAndSettle();
 
-    sw = tester.widget<Switch>(switchFinder.first);
+    sw = tester.widget<Switch>(switchFinder.at(1));
     expect(sw.value, isFalse);
     // Snackbar message (from log: "Notifications disabled.").
     expect(find.text('Notifications disabled.'), findsOneWidget);
@@ -146,6 +148,10 @@ void main() {
         settingsProvider.overrideWith(FakeSettingsNotifier.new),
       ],
     );
+
+    // Scroll down to reveal the Data Management section.
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
 
     // Expand the "Data Management" section.
     await tester.tap(find.byIcon(Icons.timer));
@@ -213,6 +219,10 @@ void main() {
       ],
     );
 
+    // Scroll down to reveal the Data Management section.
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
     // Expand the "Data Management" section.
     await tester.tap(find.byIcon(Icons.timer));
     await tester.pumpAndSettle();
@@ -244,6 +254,9 @@ void main() {
       ],
     );
 
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byIcon(Icons.info_outline));
     await tester.pumpAndSettle();
 
@@ -260,6 +273,9 @@ void main() {
         settingsProvider.overrideWith(FakeSettingsNotifier.new),
       ],
     );
+
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.info_outline));
     await tester.pumpAndSettle();

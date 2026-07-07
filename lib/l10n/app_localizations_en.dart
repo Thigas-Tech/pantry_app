@@ -760,4 +760,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String inactivityThresholdSet(int days) {
     return 'Inactivity threshold set to $days days.';
   }
+
+  @override
+  String get amoledDarkMode => 'AMOLED dark mode';
+
+  @override
+  String get amoledDarkModeExplanation => 'Use pure black surfaces in dark mode to save power on AMOLED displays';
+
+  @override
+  String get amoledDarkModeEnabled => 'AMOLED dark mode enabled.';
+
+  @override
+  String get amoledDarkModeDisabled => 'AMOLED dark mode disabled.';
+
+  @override
+  String get amoledNudgeTitle => 'Switch to dark mode?';
+
+  @override
+  String get amoledNudgeBody => 'Dark mode can save battery life on your device, especially if it has an AMOLED screen. You can also enable pure-black surfaces in Settings for maximum power savings.';
+
+  @override
+  String get amoledNudgeEnable => 'Enable dark mode';
+
+  @override
+  String get amoledNudgeDismiss => 'Not now';
 }

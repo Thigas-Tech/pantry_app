@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
+import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
@@ -46,6 +47,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     _pageController = PageController(initialPage: _selectedIndex);
     unawaited(_showChangelogIfPending());
     unawaited(_showNotificationDeniedWarning());
+    unawaited(_showAmoledNudge());
   }
 
   Future<void> _showNotificationDeniedWarning() async {
@@ -63,6 +65,54 @@ class _PantryShellState extends ConsumerState<PantryShell> {
       });
     } on Exception catch (e) {
       logWarning('Failed to show notification denied warning: $e');
+    }
+  }
+
+  Future<void> _showAmoledNudge() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final alreadyShown = prefs.getBool('amoled_nudge_shown') == true;
+      if (alreadyShown) return;
+      if (!mounted) return;
+
+      final brightness = MediaQuery.of(context).platformBrightness;
+      if (brightness == Brightness.dark) return;
+
+      await prefs.setBool('amoled_nudge_shown', true);
+
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context)!;
+        final result = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n.amoledNudgeTitle),
+            content: Text(l10n.amoledNudgeBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.amoledNudgeDismiss),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.amoledNudgeEnable),
+              ),
+            ],
+          ),
+        );
+        if (result == true && mounted) {
+          ref.read(themeModeProvider.notifier).value = ThemeModeOption.dark;
+          if (mounted) {
+            SnackbarHelper.showInfo(
+              context,
+              l10n.amoledDarkModeEnabled,
+            );
+          }
+        }
+      });
+    } on Exception catch (e) {
+      logWarning('Failed to show AMOLED nudge: $e');
     }
   }
 

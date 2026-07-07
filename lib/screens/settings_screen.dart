@@ -50,6 +50,26 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(themeMode.name),
                 onTap: () => _showThemeDialog(context, ref),
               ),
+              SwitchListTile(
+                title: Text(l10n.amoledDarkMode),
+                subtitle: Text(l10n.amoledDarkModeExplanation),
+                value: settings.amoledDarkMode,
+                onChanged: (value) {
+                  logInfo('AMOLED dark mode toggled: $value');
+                  final current = ref.read(settingsProvider);
+                  ref.read(settingsProvider.notifier).value = current.copyWith(
+                    amoledDarkMode: value,
+                  );
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      value
+                          ? l10n.amoledDarkModeEnabled
+                          : l10n.amoledDarkModeDisabled,
+                    );
+                  }
+                },
+              ),
             ],
           ),
           ExpansionTile(
