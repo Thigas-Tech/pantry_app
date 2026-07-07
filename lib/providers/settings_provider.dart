@@ -9,6 +9,8 @@ class Settings {
     this.notificationsEnabled = true,
     this.retentionDays = 60,
     this.expiringSoonDays = 3,
+    this.inactivityReminderEnabled = true,
+    this.inactivityThresholdDays = 10,
   });
 
   /// Whether expiry notifications are enabled.
@@ -20,16 +22,34 @@ class Settings {
   /// Number of days within which an item is considered "expiring soon".
   final int expiringSoonDays;
 
+  /// Whether the inactivity reminder is enabled.
+  ///
+  /// When disabled, no notification is scheduled even if the inactivity
+  /// threshold is exceeded.
+  final bool inactivityReminderEnabled;
+
+  /// Number of days of inactivity before a reminder is sent.
+  ///
+  /// The reminder fires at 9 AM on the day after this threshold is crossed.
+  /// Defaults to 10.
+  final int inactivityThresholdDays;
+
   /// Returns a copy with the given fields replaced.
   Settings copyWith({
     bool? notificationsEnabled,
     int? retentionDays,
     int? expiringSoonDays,
+    bool? inactivityReminderEnabled,
+    int? inactivityThresholdDays,
   }) {
     return Settings(
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       retentionDays: retentionDays ?? this.retentionDays,
       expiringSoonDays: expiringSoonDays ?? this.expiringSoonDays,
+      inactivityReminderEnabled:
+          inactivityReminderEnabled ?? this.inactivityReminderEnabled,
+      inactivityThresholdDays:
+          inactivityThresholdDays ?? this.inactivityThresholdDays,
     );
   }
 }

@@ -290,6 +290,21 @@ class InventoryDao {
     };
   }
 
+  /// Returns the most recent [InventoryItem.dateAdded] across all inventories.
+  ///
+  /// Returns `null` if the inventory table is empty.
+  Future<int?> getLastAddDate(Database db) async {
+    try {
+      final result = await db.rawQuery(
+        'SELECT MAX(date_added) AS last_added FROM inventory',
+      );
+      return result.first['last_added'] as int?;
+    } on Exception catch (e) {
+      logError('Failed to get last add date: $e');
+      return null;
+    }
+  }
+
   /// Returns weekly item-addition counts for the last [weeks] weeks.
   ///
   /// Items without a `dateAdded` are excluded.

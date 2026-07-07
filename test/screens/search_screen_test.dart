@@ -92,7 +92,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'milk');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -113,7 +113,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'milk');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -134,7 +134,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'bread');
+      await tester.enterText(find.byType(SearchBar), 'bread');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -161,7 +161,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'dup');
+      await tester.enterText(find.byType(SearchBar), 'dup');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -196,7 +196,7 @@ void main() {
         ],
       );
 
-      await tester.enterText(find.byType(TextField), 'milk');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -213,7 +213,7 @@ void main() {
     testWidgets('shows search_off icon when no results found', (tester) async {
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'zzzzz');
+      await tester.enterText(find.byType(SearchBar), 'zzzzz');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
@@ -240,7 +240,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'milk');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -263,7 +263,7 @@ void main() {
     testWidgets('does not search before 300ms debounce', (tester) async {
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'milk');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       // Pump only a short duration (less than debounce).
       await tester.pump(const Duration(milliseconds: 50));
 
@@ -273,11 +273,11 @@ void main() {
   });
 
   group('UI fixes', () {
-    testWidgets('TextField has TextInputAction.search', (tester) async {
+    testWidgets('SearchBar has TextInputAction.search', (tester) async {
       await pumpSearchScreen(tester);
 
-      final textField = tester.widget<TextField>(find.byType(TextField));
-      expect(textField.textInputAction, TextInputAction.search);
+      final searchBar = tester.widget<SearchBar>(find.byType(SearchBar));
+      expect(searchBar.textInputAction, TextInputAction.search);
     });
 
     testWidgets('short barcode does not crash CircleAvatar', (tester) async {
@@ -294,7 +294,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'short');
+      await tester.enterText(find.byType(SearchBar), 'short');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -315,7 +315,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'milk');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -352,11 +352,11 @@ void main() {
       await pumpSearchScreen(tester);
 
       // Start first search (type "old").
-      await tester.enterText(find.byType(TextField), 'old');
+      await tester.enterText(find.byType(SearchBar), 'old');
       await tester.pump(const Duration(milliseconds: 550));
 
       // Before the first search completes, type "new".
-      await tester.enterText(find.byType(TextField), 'new');
+      await tester.enterText(find.byType(SearchBar), 'new');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
@@ -379,7 +379,7 @@ void main() {
 
       await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(TextField), 'a');
+      await tester.enterText(find.byType(SearchBar), 'a');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 

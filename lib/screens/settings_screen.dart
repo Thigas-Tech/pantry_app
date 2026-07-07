@@ -96,6 +96,49 @@ class SettingsScreen extends ConsumerWidget {
                   }
                 },
               ),
+              SwitchListTile(
+                title: Text(l10n.inactivityReminderEnabled),
+                value: settings.inactivityReminderEnabled,
+                onChanged: (value) async {
+                  logInfo('Inactivity reminder toggled: $value');
+                  final notifService = ref.read(
+                    notificationServiceProvider,
+                  );
+                  if (value) {
+                    final granted = await notifService.requestPermission();
+                    if (granted == false) {
+                      if (context.mounted) {
+                        await _showPermissionDeniedDialog(
+                          context,
+                          l10n,
+                        );
+                      }
+                      return;
+                    }
+                  } else {
+                    await notifService.cancelInactivityReminder();
+                  }
+                  final current = ref.read(settingsProvider);
+                  ref.read(settingsProvider.notifier).value = current.copyWith(
+                    inactivityReminderEnabled: value,
+                  );
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      value
+                          ? l10n.notificationsEnabled
+                          : l10n.notificationsDisabled,
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                title: Text(l10n.inactivityThresholdDays),
+                subtitle: Text(
+                  l10n.expiringSoonDaysValue(settings.inactivityThresholdDays),
+                ),
+                onTap: () => _showInactivityThresholdDialog(context, ref),
+              ),
             ],
           ),
           ExpansionTile(
@@ -302,6 +345,31 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _showInactivityThresholdDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.read(settingsProvider);
+    final days = await _showDaysDialog(
+      context,
+      title: l10n.inactivityThresholdDays,
+      initialValue: current.inactivityThresholdDays,
+    );
+    if (days != null) {
+      logInfo('Inactivity threshold changed to $days days');
+      ref.read(settingsProvider.notifier).value = current.copyWith(
+        inactivityThresholdDays: days,
+      );
+      if (context.mounted) {
+        SnackbarHelper.showInfo(
+          context,
+          l10n.inactivityThresholdSet(days),
+        );
+      }
+    }
   }
 
   Future<void> _flushCache(BuildContext context, WidgetRef ref) async {

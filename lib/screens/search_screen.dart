@@ -43,25 +43,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   bool get wantKeepAlive => true;
 
   @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  @override
   void dispose() {
-    _searchController
-      ..removeListener(_onSearchChanged)
-      ..dispose();
+    _searchController.dispose();
     _debounce?.cancel();
     _graceTimer?.cancel();
     super.dispose();
   }
 
-  void _onSearchChanged() {
+  void _onSearchChanged(String value) {
     _debounce?.cancel();
     _graceTimer?.cancel();
-    final query = _searchController.text.trim();
+    final query = value.trim();
     if (query.isEmpty) {
       setState(() {
         _results = [];
@@ -224,28 +216,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: TextField(
+            child: SearchBar(
               controller: _searchController,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                hintText: l10n.searchHint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _results = [];
-                            _hasSearched = false;
-                          });
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              hintText: l10n.searchHint,
+              leading: const Padding(
+                padding: EdgeInsets.only(left: 12),
+                child: Icon(Icons.search),
               ),
+              trailing: [
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _results = [];
+                        _hasSearched = false;
+                      });
+                    },
+                  ),
+              ],
+              onChanged: _onSearchChanged,
+              textInputAction: TextInputAction.search,
             ),
           ),
           Expanded(child: _buildResults(l10n, theme)),

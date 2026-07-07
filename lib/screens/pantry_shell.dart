@@ -13,6 +13,7 @@ import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,6 +45,25 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     super.initState();
     _pageController = PageController(initialPage: _selectedIndex);
     unawaited(_showChangelogIfPending());
+    unawaited(_showNotificationDeniedWarning());
+  }
+
+  Future<void> _showNotificationDeniedWarning() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final showWarning = prefs.getBool('notification_denied_warning') == true;
+      if (!showWarning) return;
+
+      await prefs.setBool('notification_denied_warning', false);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context)!;
+        SnackbarHelper.showInfo(context, l10n.notificationDeniedWarning);
+      });
+    } on Exception catch (e) {
+      logWarning('Failed to show notification denied warning: $e');
+    }
   }
 
   void _onConnectivityChanged(

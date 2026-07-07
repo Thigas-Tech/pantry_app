@@ -7,11 +7,13 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
@@ -381,6 +383,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
+  /// Cancels any pending inactivity reminder and re-schedules based on the
+  /// latest product-add date from the database.
+  Future<void> _rescheduleInactivityReminder() async {
+    try {
+      final notificationService = ref.read(notificationServiceProvider);
+      await notificationService.cancelInactivityReminder();
+      final db = ref.read(databaseProvider);
+      final lastAddDateEpoch = await db.getLastAddDate();
+      final settings = ref.read(settingsProvider);
+      await notificationService.scheduleInactivityReminder(
+        lastAddDateEpoch: lastAddDateEpoch,
+        thresholdDays: settings.inactivityThresholdDays,
+        title: 'Time to restock your pantry?',
+        buildBody: (days) => 'You have not added any products in $days days.',
+        channelName: 'Inactivity reminders',
+        channelDescription: 'Reminds you to add products regularly',
+        notificationsEnabled: settings.notificationsEnabled,
+      );
+    } on Exception catch (e) {
+      logError('Failed to reschedule inactivity reminder: $e');
+    }
+  }
+
   /// Opens the [AddToInventoryScreen] for creating or editing an item.
   Future<void> _openAddEditScreen({InventoryItem? existing}) async {
     final activeId = ref.read<int>(activeInventoryProvider);
@@ -434,6 +459,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             '''Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
           await repo.addInventoryItem(result);
+          await _rescheduleInactivityReminder();
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.itemAdded);
           }

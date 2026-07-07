@@ -434,6 +434,14 @@ class DatabaseHelper {
     return inventoryDao.listWithProduct(db, inventoryId: inventoryId);
   }
 
+  /// Returns the most recent [InventoryItem.dateAdded] epoch across all items.
+  ///
+  /// Returns `null` if the inventory table is empty.
+  Future<int?> getLastAddDate() async {
+    final db = await database;
+    return inventoryDao.getLastAddDate(db);
+  }
+
   /// Returns the total number of rows in the inventory table.
   Future<int> getInventoryCount({int? inventoryId}) async {
     final db = await database;

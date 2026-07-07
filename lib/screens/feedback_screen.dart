@@ -33,6 +33,9 @@ enum IssueType {
 
   /// General feedback that is not a bug or feature request.
   feedback,
+
+  /// A regression — something that used to work but no longer does.
+  regression,
 }
 
 /// Convenience methods to map [IssueType] values to user-facing and
@@ -43,6 +46,15 @@ extension IssueTypeLabel on IssueType {
     IssueType.bug => l10n.bugReport,
     IssueType.feature => l10n.featureRequest,
     IssueType.feedback => l10n.generalFeedback,
+    IssueType.regression => l10n.regressionReport,
+  };
+
+  /// Returns a short explanation of this issue type.
+  String explanation(AppLocalizations l10n) => switch (this) {
+    IssueType.bug => l10n.bugReportExplanation,
+    IssueType.feature => l10n.featureRequestExplanation,
+    IssueType.feedback => l10n.generalFeedbackExplanation,
+    IssueType.regression => l10n.regressionReportExplanation,
   };
 
   /// Returns the GitHub label for this issue type.
@@ -50,6 +62,7 @@ extension IssueTypeLabel on IssueType {
     IssueType.bug => 'bug',
     IssueType.feature => 'enhancement',
     IssueType.feedback => '',
+    IssueType.regression => 'regression',
   };
 }
 
@@ -140,15 +153,30 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   }
 
   Widget _buildIssueTypeDropdown(AppLocalizations l10n) {
-    return DropdownButtonFormField<IssueType>(
-      initialValue: _issueType,
-      decoration: InputDecoration(labelText: l10n.issueType),
-      items: IssueType.values.map((type) {
-        return DropdownMenuItem(value: type, child: Text(type.label(l10n)));
-      }).toList(),
-      onChanged: (value) {
-        if (value != null) setState(() => _issueType = value);
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<IssueType>(
+          initialValue: _issueType,
+          decoration: InputDecoration(labelText: l10n.issueType),
+          items: IssueType.values.map((type) {
+            return DropdownMenuItem(value: type, child: Text(type.label(l10n)));
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) setState(() => _issueType = value);
+          },
+        ),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: Text(
+            _issueType.explanation(l10n),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

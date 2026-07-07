@@ -5,7 +5,13 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Manages local notifications for expiry reminders.
+/// Notification ID for the single daily inactivity reminder.
+///
+/// Chosen far above any realistic [InventoryItem.id] so it never collides
+/// with expiry IDs (which use `itemId * 2` / `itemId * 2 + 1`).
+const _inactivityReminderId = 999_999_001;
+
+/// Manages local notifications for expiry and inactivity reminders.
 ///
 /// Designed for **Android** (and ready for iOS when that platform is added).
 /// Desktop and web are not supported for scheduled notifications.
@@ -116,6 +122,33 @@ class NotificationService {
       logInfo('Notification plugin initialised successfully');
     } on Exception catch (e) {
       logError('Failed to initialise notification plugin: $e');
+    }
+  }
+
+  /// Creates the `inactivity_channel` notification channel with
+  /// [Importance.low] and [AndroidNotificationCategory.recommendation].
+  ///
+  /// Uses [AndroidNotificationChannelAction.createIfNotExists] so existing
+  /// user-configured channel settings are never overwritten.
+  Future<void> ensureInactivityChannel() async {
+    const channel = AndroidNotificationChannel(
+      'inactivity_channel',
+      'Inactivity reminders',
+      description: 'Reminds you to add products regularly',
+      importance: Importance.low,
+    );
+
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidPlugin == null) return;
+
+    try {
+      await androidPlugin.createNotificationChannel(channel);
+      logInfo('Inactivity notification channel created/verified');
+    } on Exception catch (e) {
+      logWarning('Failed to create inactivity notification channel: $e');
     }
   }
 
@@ -282,6 +315,109 @@ class NotificationService {
       logInfo('All reminder notifications cancelled');
     } on Exception catch (e) {
       logError('Failed to cancel all reminders: $e');
+    }
+  }
+
+  /// Schedules a one-shot inactivity reminder for tomorrow at 9 AM if the
+  /// user has not added any product for [thresholdDays] or more.
+  ///
+  /// Pass `null` for [lastAddDateEpoch] when the inventory table is empty
+  /// (first launch) — no notification is scheduled. The reminder is rescheduled
+  /// on every app startup and whenever a new product is added.
+  ///
+  /// Uses a fixed ID ([_inactivityReminderId]) — calling this again replaces
+  /// any previously scheduled inactivity reminder.
+  ///
+  /// See also:
+  /// - [cancelInactivityReminder] to cancel the pending reminder.
+  Future<void> scheduleInactivityReminder({
+    required int? lastAddDateEpoch,
+    required int thresholdDays,
+    required String title,
+    required String Function(int days) buildBody,
+    required String channelName,
+    required String channelDescription,
+    bool notificationsEnabled = true,
+  }) async {
+    if (!notificationsEnabled) {
+      logInfo('Notifications disabled, skipping inactivity reminder');
+      return;
+    }
+
+    if (lastAddDateEpoch == null) {
+      logInfo(
+        'No last add date (empty inventory), skipping inactivity '
+        'reminder',
+      );
+      return;
+    }
+
+    final systemEnabled = await areNotificationsEnabled();
+    if (systemEnabled == false) {
+      logWarning('System notifications disabled, skipping inactivity reminder');
+      return;
+    }
+
+    await ensureInactivityChannel();
+
+    final lastAddDate = DateTime.fromMillisecondsSinceEpoch(lastAddDateEpoch);
+    final now = DateTime.now();
+    final daysSinceLastAdd = now.difference(lastAddDate).inDays;
+
+    if (daysSinceLastAdd < thresholdDays) {
+      logInfo(
+        'Only $daysSinceLastAdd day(s) since last add '
+        '(< $thresholdDays), skipping inactivity reminder',
+      );
+      return;
+    }
+
+    // Schedule tomorrow at 9 AM
+    final tomorrow = now.add(const Duration(days: 1));
+    final scheduledDate = _toMorningTZDateTime(tomorrow);
+
+    final notificationDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'inactivity_channel',
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.low,
+        category: AndroidNotificationCategory.recommendation,
+      ),
+      iOS: const DarwinNotificationDetails(),
+    );
+
+    try {
+      await _plugin.zonedSchedule(
+        id: _inactivityReminderId,
+        title: title,
+        body: buildBody(daysSinceLastAdd),
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: 'inactivity_reminder',
+      );
+      logInfo(
+        'Scheduled inactivity reminder for $scheduledDate '
+        '(last add: $daysSinceLastAdd days ago)',
+      );
+    } on Exception catch (e) {
+      logError('Failed to schedule inactivity reminder: $e');
+    }
+  }
+
+  /// Cancels the daily inactivity reminder associated with
+  /// [_inactivityReminderId].
+  ///
+  /// Safe to call even if no reminder is pending — the plugin ignores
+  /// cancellation of non-existent notifications.
+  Future<void> cancelInactivityReminder() async {
+    logInfo('Cancelling inactivity reminder');
+    try {
+      await _plugin.cancel(id: _inactivityReminderId);
+      logInfo('Inactivity reminder cancelled');
+    } on Exception catch (e) {
+      logError('Failed to cancel inactivity reminder: $e');
     }
   }
 

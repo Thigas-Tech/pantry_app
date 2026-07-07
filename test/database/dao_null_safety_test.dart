@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -184,6 +185,44 @@ void main() {
       final map = {'barcode': '123'};
       final item = db.inventoryDao.fromMap(map);
       expect(item.inventoryId, 1);
+    });
+
+    /// Verifies [InventoryDao.getLastAddDate] returns null for empty tables.
+    test('getLastAddDate returns null for empty inventory', () async {
+      final rawDb = await db.database;
+      final result = await db.inventoryDao.getLastAddDate(rawDb);
+      expect(result, isNull);
+    });
+
+    /// Verifies [InventoryDao.getLastAddDate] returns the max date_added.
+    test('getLastAddDate returns latest dateAdded', () async {
+      final rawDb = await db.database;
+      await db.inventoryDao.insert(
+        rawDb,
+        const InventoryItem(
+          barcode: '111',
+          id: 1,
+          dateAdded: 1000,
+        ),
+      );
+      await db.inventoryDao.insert(
+        rawDb,
+        const InventoryItem(
+          barcode: '222',
+          id: 2,
+          dateAdded: 3000,
+        ),
+      );
+      await db.inventoryDao.insert(
+        rawDb,
+        const InventoryItem(
+          barcode: '333',
+          id: 3,
+          dateAdded: 2000,
+        ),
+      );
+      final result = await db.inventoryDao.getLastAddDate(rawDb);
+      expect(result, 3000);
     });
 
     /// Verifies [InventoryDao.fromMap] handles null id, notes, dateAdded.

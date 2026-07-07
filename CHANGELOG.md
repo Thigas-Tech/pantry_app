@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+- **Inactivity reminder notification**: Sends a daily notification at 9 AM if the user has not added any product for 10+ days (configurable in Settings). Tracks last add date via `MAX(date_added)` from the inventory table. New `inactivity_channel` (Importance.low) separate from expiry channel. Toggle + threshold picker in Settings. Rescheduled on product add and app startup. Permission-denied warning shown once via SnackBar. (`lib/screens/settings_screen.dart`, `lib/services/notification_service.dart`, `lib/providers/settings_provider.dart`, `lib/database/inventory_dao.dart`, `lib/database/database_helper.dart`, `lib/main.dart`, `lib/screens/pantry_shell.dart`, `lib/screens/product_detail_screen.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`)
+
+### Changed
+- **SearchScreen upgraded to M3 SearchBar**: Replaced the manual `TextField` in `SearchScreen` with Material 3 `SearchBar` widget for native M3 styling and animation. `textInputAction: TextInputAction.search` preserved. HomeScreen autocomplete unchanged (`Autocomplete` still wraps a `TextField` — `SearchAnchor.bar` tested but reverted due to poor test interaction support). (`lib/screens/search_screen.dart`)
+
 ### Fixed
 - **Feedback form fixes**: Added support for attaching multiple screenshots
   to feedback submissions. Fixed missing Portuguese (pt) translations for

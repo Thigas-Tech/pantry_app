@@ -634,6 +634,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalFeedback => 'General Feedback';
 
   @override
+  String get regressionReport => 'Regression';
+
+  @override
+  String get bugReportExplanation => 'Something is broken or not working as expected.';
+
+  @override
+  String get featureRequestExplanation => 'Suggest a new feature or improvement.';
+
+  @override
+  String get generalFeedbackExplanation => 'Other comments, questions, or suggestions.';
+
+  @override
+  String get regressionReportExplanation => 'A feature that used to work but no longer does.';
+
+  @override
   String get issueTitle => 'Title';
 
   @override
@@ -702,4 +717,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get osLabel => 'OS';
+
+  @override
+  String get cameraPermissionDenied => 'Camera permission denied. Grant access in Settings.';
+
+  @override
+  String get cameraNotAvailable => 'Camera not available on this device.';
+
+  @override
+  String get scannerGenericError => 'An unexpected error occurred while starting the camera.';
+
+  @override
+  String get switchToManualEntry => 'Enter barcode manually';
+
+  @override
+  String get retryScan => 'Retry';
+
+  @override
+  String get inactivityReminderTitle => 'Time to restock your pantry?';
+
+  @override
+  String inactivityReminderBody(int days) {
+    return 'You haven\'t added any products in $days days.';
+  }
+
+  @override
+  String get inactivityReminderEnabled => 'Remind me to add products regularly';
+
+  @override
+  String get inactivityThresholdDays => 'Inactivity threshold (days)';
+
+  @override
+  String get inactivityReminderChannelName => 'Inactivity reminders';
+
+  @override
+  String get inactivityReminderChannelDescription => 'Reminds you to add products regularly';
+
+  @override
+  String get notificationDeniedWarning => 'Notifications are disabled. Expiry and inactivity reminders will only show when you open the app. Enable them in Settings at any time.';
+
+  @override
+  String inactivityThresholdSet(int days) {
+    return 'Inactivity threshold set to $days days.';
+  }
 }

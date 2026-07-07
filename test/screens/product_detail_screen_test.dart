@@ -32,9 +32,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/misc.dart'; // for Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
@@ -153,6 +155,8 @@ class MockNotificationService extends Mock implements NotificationService {}
 class MockProductSubmissionService extends Mock
     implements ProductSubmissionService {}
 
+class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+
 void _registerFallbacks() {
   registerFallbackValue(const InventoryItem(barcode: 'fallback'));
   registerFallbackValue(
@@ -177,12 +181,14 @@ List<Override> screenOverrides({
   required MockProductRepository mockRepo,
   required MockNotificationService mockNotif,
   MockProductSubmissionService? mockSubmissionService,
+  MockDatabaseHelper? mockDb,
 }) {
   return [
     productRepositoryProvider.overrideWithValue(mockRepo),
     notificationServiceProvider.overrideWithValue(mockNotif),
     if (mockSubmissionService != null)
       productSubmissionServiceProvider.overrideWithValue(mockSubmissionService),
+    if (mockDb != null) databaseProvider.overrideWithValue(mockDb),
     activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
   ];
 }
@@ -208,10 +214,13 @@ void main() {
 
   late MockProductRepository mockRepo;
   late MockNotificationService mockNotif;
+  late MockDatabaseHelper mockDb;
 
   setUp(() {
     mockRepo = MockProductRepository();
     mockNotif = MockNotificationService();
+    mockDb = MockDatabaseHelper();
+    when(() => mockDb.getLastAddDate()).thenAnswer((_) => Future.value());
     when(
       () => mockNotif.scheduleExpiryReminders(
         any(),
@@ -225,6 +234,20 @@ void main() {
     ).thenAnswer((_) => Future<void>.value());
     when(
       () => mockNotif.cancelReminders(any()),
+    ).thenAnswer((_) => Future<void>.value());
+    when(
+      () => mockNotif.cancelInactivityReminder(),
+    ).thenAnswer((_) => Future<void>.value());
+    when(
+      () => mockNotif.scheduleInactivityReminder(
+        lastAddDateEpoch: any(named: 'lastAddDateEpoch'),
+        thresholdDays: any(named: 'thresholdDays'),
+        title: any(named: 'title'),
+        buildBody: any(named: 'buildBody'),
+        channelName: any(named: 'channelName'),
+        channelDescription: any(named: 'channelDescription'),
+        notificationsEnabled: any(named: 'notificationsEnabled'),
+      ),
     ).thenAnswer((_) => Future<void>.value());
     // Default inventory – empty list
     when(
@@ -295,7 +318,10 @@ void main() {
     await pumpApp(
       tester,
       const ProductDetailScreen(product: notApplicableProduct),
-      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+      overrides: screenOverrides(
+        mockRepo: mockRepo,
+        mockNotif: mockNotif,
+      ),
     );
     expect(find.text('—'), findsOneWidget);
   });
@@ -485,7 +511,11 @@ void main() {
     await pumpApp(
       tester,
       const ProductDetailScreen(product: testProduct),
-      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+      overrides: screenOverrides(
+        mockRepo: mockRepo,
+        mockNotif: mockNotif,
+        mockDb: mockDb,
+      ),
     );
 
     await tester.tap(find.text('Add to Inventory'));

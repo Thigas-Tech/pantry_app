@@ -119,15 +119,15 @@ void main() {
     );
 
     final switchFinder = find.byType(Switch);
-    expect(switchFinder, findsOneWidget);
-    var sw = tester.widget<Switch>(switchFinder);
+    expect(switchFinder, findsNWidgets(2));
+    var sw = tester.widget<Switch>(switchFinder.first);
     expect(sw.value, isTrue);
 
     // Tap to turn off.
-    await tester.tap(switchFinder);
+    await tester.tap(switchFinder.first);
     await tester.pumpAndSettle();
 
-    sw = tester.widget<Switch>(switchFinder);
+    sw = tester.widget<Switch>(switchFinder.first);
     expect(sw.value, isFalse);
     // Snackbar message (from log: "Notifications disabled.").
     expect(find.text('Notifications disabled.'), findsOneWidget);
@@ -188,6 +188,8 @@ void main() {
       );
 
       await tester.tap(find.byIcon(Icons.timer));
+      await tester.pumpAndSettle();
+      await tester.drag(find.byType(ListView), const Offset(0, -400));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Manage Inventories'));
       await tester.pump();

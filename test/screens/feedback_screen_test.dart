@@ -35,12 +35,13 @@ void main() {
       expect(IssueType.feedback.gitHubLabel(), '');
     });
 
-    /// Verifies that [IssueType.values] contains all three variants.
-    test('values contains bug, feature, and feedback', () {
+    /// Verifies that [IssueType.values] contains all four variants.
+    test('values contains bug, feature, feedback, and regression', () {
       expect(IssueType.values, contains(IssueType.bug));
       expect(IssueType.values, contains(IssueType.feature));
       expect(IssueType.values, contains(IssueType.feedback));
-      expect(IssueType.values.length, 3);
+      expect(IssueType.values, contains(IssueType.regression));
+      expect(IssueType.values.length, 4);
     });
   });
 

@@ -1266,6 +1266,36 @@ abstract class AppLocalizations {
   /// **'General Feedback'**
   String get generalFeedback;
 
+  /// No description provided for @regressionReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Regression'**
+  String get regressionReport;
+
+  /// No description provided for @bugReportExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Something is broken or not working as expected.'**
+  String get bugReportExplanation;
+
+  /// No description provided for @featureRequestExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest a new feature or improvement.'**
+  String get featureRequestExplanation;
+
+  /// No description provided for @generalFeedbackExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Other comments, questions, or suggestions.'**
+  String get generalFeedbackExplanation;
+
+  /// No description provided for @regressionReportExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'A feature that used to work but no longer does.'**
+  String get regressionReportExplanation;
+
   /// No description provided for @issueTitle.
   ///
   /// In en, this message translates to:
@@ -1397,6 +1427,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'OS'**
   String get osLabel;
+
+  /// No description provided for @cameraPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission denied. Grant access in Settings.'**
+  String get cameraPermissionDenied;
+
+  /// No description provided for @cameraNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera not available on this device.'**
+  String get cameraNotAvailable;
+
+  /// No description provided for @scannerGenericError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while starting the camera.'**
+  String get scannerGenericError;
+
+  /// No description provided for @switchToManualEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter barcode manually'**
+  String get switchToManualEntry;
+
+  /// No description provided for @retryScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryScan;
+
+  /// No description provided for @inactivityReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to restock your pantry?'**
+  String get inactivityReminderTitle;
+
+  /// No description provided for @inactivityReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t added any products in {days} days.'**
+  String inactivityReminderBody(int days);
+
+  /// No description provided for @inactivityReminderEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me to add products regularly'**
+  String get inactivityReminderEnabled;
+
+  /// No description provided for @inactivityThresholdDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactivity threshold (days)'**
+  String get inactivityThresholdDays;
+
+  /// No description provided for @inactivityReminderChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactivity reminders'**
+  String get inactivityReminderChannelName;
+
+  /// No description provided for @inactivityReminderChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminds you to add products regularly'**
+  String get inactivityReminderChannelDescription;
+
+  /// No description provided for @notificationDeniedWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are disabled. Expiry and inactivity reminders will only show when you open the app. Enable them in Settings at any time.'**
+  String get notificationDeniedWarning;
+
+  /// No description provided for @inactivityThresholdSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactivity threshold set to {days} days.'**
+  String inactivityThresholdSet(int days);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

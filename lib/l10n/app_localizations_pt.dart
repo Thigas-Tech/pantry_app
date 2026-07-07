@@ -634,6 +634,21 @@ class AppLocalizationsPt extends AppLocalizations {
   String get generalFeedback => 'Feedback Geral';
 
   @override
+  String get regressionReport => 'Regressao';
+
+  @override
+  String get bugReportExplanation => 'Algo esta quebrado ou nao funciona como esperado.';
+
+  @override
+  String get featureRequestExplanation => 'Sugira uma nova funcionalidade ou melhoria.';
+
+  @override
+  String get generalFeedbackExplanation => 'Outros comentarios, duvidas ou sugestoes.';
+
+  @override
+  String get regressionReportExplanation => 'Uma funcionalidade que funcionava antes mas nao funciona mais.';
+
+  @override
   String get issueTitle => 'Título';
 
   @override
@@ -702,6 +717,49 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get osLabel => 'SO';
+
+  @override
+  String get cameraPermissionDenied => 'Camera permission denied. Grant access in Settings.';
+
+  @override
+  String get cameraNotAvailable => 'Camera not available on this device.';
+
+  @override
+  String get scannerGenericError => 'An unexpected error occurred while starting the camera.';
+
+  @override
+  String get switchToManualEntry => 'Enter barcode manually';
+
+  @override
+  String get retryScan => 'Retry';
+
+  @override
+  String get inactivityReminderTitle => 'Hora de reabastecer sua despensa?';
+
+  @override
+  String inactivityReminderBody(int days) {
+    return 'Voce nao adicionou nenhum produto em $days dias.';
+  }
+
+  @override
+  String get inactivityReminderEnabled => 'Lembrar de adicionar produtos regularmente';
+
+  @override
+  String get inactivityThresholdDays => 'Limite de inatividade (dias)';
+
+  @override
+  String get inactivityReminderChannelName => 'Lembretes de inatividade';
+
+  @override
+  String get inactivityReminderChannelDescription => 'Lembra voce de adicionar produtos regularmente';
+
+  @override
+  String get notificationDeniedWarning => 'Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.';
+
+  @override
+  String inactivityThresholdSet(int days) {
+    return 'Limite de inatividade definido para $days dias.';
+  }
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

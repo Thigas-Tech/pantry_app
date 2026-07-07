@@ -46,6 +46,26 @@ void main() {
         importance: Importance.high,
       ),
     );
+    registerFallbackValue(
+      const AndroidNotificationChannel(
+        'inactivity_channel',
+        'Inactivity reminders',
+        description: 'Reminds you to add products regularly',
+        importance: Importance.low,
+      ),
+    );
+    registerFallbackValue(
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'inactivity_channel',
+          'Inactivity reminders',
+          channelDescription: 'Reminds you to add products regularly',
+          importance: Importance.low,
+          category: AndroidNotificationCategory.recommendation,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
   });
 
   late MockFlutterLocalNotificationsPlugin mockPlugin;
@@ -549,6 +569,203 @@ void main() {
         ),
         completes,
       );
+    });
+  });
+
+  group('scheduleInactivityReminder', () {
+    const title = 'Time to restock your pantry?';
+    const channelName = 'Inactivity reminders';
+    const channelDescription = 'Reminds you to add products regularly';
+
+    late void Function() stubZonedSchedule;
+    late void Function() stubNotificationsEnabled;
+
+    const inactivityReminderId = 999_999_001;
+
+    setUp(() {
+      stubZonedSchedule = () {
+        when(
+          () => mockPlugin.zonedSchedule(
+            id: any(named: 'id'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            scheduledDate: any(named: 'scheduledDate'),
+            notificationDetails: any(named: 'notificationDetails'),
+            androidScheduleMode: any(named: 'androidScheduleMode'),
+            payload: any(named: 'payload'),
+          ),
+        ).thenAnswer((_) => Future.value());
+      };
+
+      stubNotificationsEnabled = () {
+        when(
+          mockAndroidPlugin.areNotificationsEnabled,
+        ).thenAnswer((_) => Future.value(true));
+      };
+    });
+
+    test('skips when notifications disabled', () async {
+      await service.scheduleInactivityReminder(
+        lastAddDateEpoch: 0,
+        thresholdDays: 10,
+        title: title,
+        buildBody: (_) => 'body',
+        channelName: channelName,
+        channelDescription: channelDescription,
+        notificationsEnabled: false,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('skips when lastAddDateEpoch is null', () async {
+      await service.scheduleInactivityReminder(
+        lastAddDateEpoch: null,
+        thresholdDays: 10,
+        title: title,
+        buildBody: (_) => 'body',
+        channelName: channelName,
+        channelDescription: channelDescription,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('skips when days since last add is under threshold', () async {
+      stubNotificationsEnabled();
+      when(
+        () => mockAndroidPlugin.createNotificationChannel(any()),
+      ).thenAnswer((_) => Future.value());
+
+      final recentEpoch = DateTime.now()
+          .subtract(const Duration(days: 2))
+          .millisecondsSinceEpoch;
+
+      await service.scheduleInactivityReminder(
+        lastAddDateEpoch: recentEpoch,
+        thresholdDays: 10,
+        title: title,
+        buildBody: (_) => 'body',
+        channelName: channelName,
+        channelDescription: channelDescription,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('schedules when days since last add exceeds threshold', () async {
+      stubNotificationsEnabled();
+      when(
+        () => mockAndroidPlugin.createNotificationChannel(any()),
+      ).thenAnswer((_) => Future.value());
+      stubZonedSchedule();
+
+      final oldEpoch = DateTime.now()
+          .subtract(const Duration(days: 15))
+          .millisecondsSinceEpoch;
+
+      await service.scheduleInactivityReminder(
+        lastAddDateEpoch: oldEpoch,
+        thresholdDays: 10,
+        title: title,
+        buildBody: (days) => 'You have not added products in $days days.',
+        channelName: channelName,
+        channelDescription: channelDescription,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: inactivityReminderId,
+          title: title,
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
+    });
+
+    test('handles exception gracefully', () async {
+      stubNotificationsEnabled();
+      when(
+        () => mockAndroidPlugin.createNotificationChannel(any()),
+      ).thenAnswer((_) => Future.value());
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenThrow(Exception('schedule failed'));
+
+      await expectLater(
+        service.scheduleInactivityReminder(
+          lastAddDateEpoch: DateTime.now()
+              .subtract(const Duration(days: 15))
+              .millisecondsSinceEpoch,
+          thresholdDays: 10,
+          title: title,
+          buildBody: (_) => 'body',
+          channelName: channelName,
+          channelDescription: channelDescription,
+        ),
+        completes,
+      );
+    });
+  });
+
+  group('cancelInactivityReminder', () {
+    test('cancels the fixed inactivity ID', () async {
+      when(
+        () => mockPlugin.cancel(id: any(named: 'id')),
+      ).thenAnswer((_) => Future.value());
+
+      await service.cancelInactivityReminder();
+
+      verify(() => mockPlugin.cancel(id: 999_999_001)).called(1);
+    });
+
+    test('handles cancel throwing gracefully', () async {
+      when(
+        () => mockPlugin.cancel(id: any(named: 'id')),
+      ).thenThrow(Exception('cancel failed'));
+
+      await expectLater(service.cancelInactivityReminder(), completes);
     });
   });
 

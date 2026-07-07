@@ -73,8 +73,13 @@ Future<void> main() async {
   final granted = await notifService.requestPermission();
   if (granted != false) {
     unawaited(_rescheduleNotifications(container));
+  } else {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notification_denied_warning', true);
+    logInfo('Notification permission denied — flagged warning for PantryShell');
   }
 
+  unawaited(_scheduleInactivityReminder(container));
   unawaited(_runDatabaseCleanup(container));
   unawaited(_flushFeedbackQueue(container));
 }
@@ -258,6 +263,45 @@ Future<void> _rescheduleNotifications(ProviderContainer container) async {
     logInfo('Notification reschedule completed');
   } on Exception catch (e) {
     logError('Notification reschedule failed: $e');
+  } finally {
+    container.dispose();
+  }
+}
+
+/// Checks the inactivity threshold and schedules a daily reminder if the user
+/// has not added any product for more than [Settings.inactivityThresholdDays]
+/// days.
+Future<void> _scheduleInactivityReminder(ProviderContainer container) async {
+  logInfo('Scheduling inactivity reminder check');
+  try {
+    final notifService = container.read(notificationServiceProvider);
+    if (!notifService.initialized) {
+      logWarning(
+        'Notification service not initialized, skipping inactivity reminder',
+      );
+      return;
+    }
+    final db = DatabaseHelper();
+    final lastAddDateEpoch = await db.getLastAddDate();
+    final settings = container.read(settingsProvider);
+
+    if (!settings.inactivityReminderEnabled) {
+      logInfo('Inactivity reminder disabled in settings, skipping');
+      return;
+    }
+
+    await notifService.scheduleInactivityReminder(
+      lastAddDateEpoch: lastAddDateEpoch,
+      thresholdDays: settings.inactivityThresholdDays,
+      title: 'Time to restock your pantry?',
+      buildBody: (days) => 'You have not added any products in $days days.',
+      channelName: 'Inactivity reminders',
+      channelDescription: 'Reminds you to add products regularly',
+      notificationsEnabled: settings.notificationsEnabled,
+    );
+    logInfo('Inactivity reminder scheduling completed');
+  } on Exception catch (e) {
+    logError('Inactivity reminder scheduling failed: $e');
   } finally {
     container.dispose();
   }

@@ -331,6 +331,11 @@
   "bugReport": "Relato de Bug",
   "featureRequest": "Sugestão de Funcionalidade",
   "generalFeedback": "Feedback Geral",
+  "regressionReport": "Regressao",
+  "bugReportExplanation": "Algo esta quebrado ou nao funciona como esperado.",
+  "featureRequestExplanation": "Sugira uma nova funcionalidade ou melhoria.",
+  "generalFeedbackExplanation": "Outros comentarios, duvidas ou sugestoes.",
+  "regressionReportExplanation": "Uma funcionalidade que funcionava antes mas nao funciona mais.",
   "issueTitle": "Título",
   "issueTitleRequired": "Título obrigatório (mín. 5 caracteres)",
   "issueDescription": "Descrição",
@@ -363,5 +368,29 @@
   },
   "couldNotAttachImage": "Não foi possível anexar a imagem",
   "appVersionLabel": "Versão do app",
-  "osLabel": "SO"
+  "osLabel": "SO",
+  "inactivityReminderTitle": "Hora de reabastecer sua despensa?",
+  "inactivityReminderBody": "Voce nao adicionou nenhum produto em {days} dias.",
+  "@inactivityReminderBody": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "inactivityReminderEnabled": "Lembrar de adicionar produtos regularmente",
+  "inactivityThresholdDays": "Limite de inatividade (dias)",
+  "inactivityReminderChannelName": "Lembretes de inatividade",
+  "inactivityReminderChannelDescription": "Lembra voce de adicionar produtos regularmente",
+  "notificationDeniedWarning": "Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.",
+  "inactivityThresholdSet": "Limite de inatividade definido para {days} dias.",
+  "@inactivityThresholdSet": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  }
 }
