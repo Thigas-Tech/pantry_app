@@ -39,7 +39,7 @@ class GithubIssueService {
     required String title,
     required String body,
     String? label,
-    List<int>? screenshotBytes,
+    List<List<int>> screenshotBytesList = const [],
   }) async {
     if (kIsWeb) {
       throw UnsupportedError('GitHub API submissions are not supported on web');
@@ -51,7 +51,7 @@ class GithubIssueService {
       );
     }
 
-    final fullBody = _buildBody(body, screenshotBytes);
+    final fullBody = _buildBody(body, screenshotBytesList);
 
     late final http.Response response;
     try {
@@ -90,19 +90,24 @@ class GithubIssueService {
 
   /// Queues an issue for offline submission.
   ///
-  /// The [screenshotBytes], if provided, are saved to a temporary file
-  /// whose path is stored in the queue row. On web this is a no-op.
+  /// Each set of screenshot bytes is saved to a separate temporary file.
+  /// Paths are stored as a JSON-encoded list in the queue row.
+  /// On web this is a no-op.
   Future<void> queueOffline({
     required String title,
     required String body,
     String? label,
-    List<int>? screenshotBytes,
+    List<List<int>> screenshotBytesList = const [],
   }) async {
     if (kIsWeb) return;
 
-    String? screenshotPath;
-    if (screenshotBytes != null) {
-      screenshotPath = await _saveScreenshot(screenshotBytes);
+    String? screenshotPathsJson;
+    if (screenshotBytesList.isNotEmpty) {
+      final paths = <String>[];
+      for (final bytes in screenshotBytesList) {
+        paths.add(await _saveScreenshot(bytes));
+      }
+      screenshotPathsJson = jsonEncode(paths);
     }
 
     final db = DatabaseHelper();
@@ -112,7 +117,7 @@ class GithubIssueService {
       title: title,
       body: body,
       label: label,
-      screenshotPath: screenshotPath,
+      screenshotPath: screenshotPathsJson,
     );
     logInfo('Issue queued for offline submission: $title');
   }
@@ -152,14 +157,23 @@ class GithubIssueService {
         final title = row['title'] as String;
         final body = row['body'] as String;
         final label = row['label'] as String?;
-        final screenshotPath = row['screenshot_path'] as String?;
+        final screenshotPathsJson = row['screenshot_path'] as String?;
         final retryCount = row['retry_count'] as int;
 
-        List<int>? screenshotBytes;
-        if (screenshotPath != null) {
-          final file = File(screenshotPath);
-          if (await file.exists()) {
-            screenshotBytes = await file.readAsBytes();
+        final List<List<int>> screenshotBytesList = [];
+        if (screenshotPathsJson != null) {
+          try {
+            final paths =
+                (jsonDecode(screenshotPathsJson) as List<dynamic>)
+                    .cast<String>();
+            for (final path in paths) {
+              final file = File(path);
+              if (await file.exists()) {
+                screenshotBytesList.add(await file.readAsBytes());
+              }
+            }
+          } on Exception {
+            // best-effort
           }
         }
 
@@ -168,12 +182,21 @@ class GithubIssueService {
             title: title,
             body: body,
             label: label,
-            screenshotBytes: screenshotBytes,
+            screenshotBytesList: screenshotBytesList,
           );
           await _queueDao.delete(dbInstance, id);
-          if (screenshotPath != null) {
+          if (screenshotPathsJson != null) {
             try {
-              await File(screenshotPath).delete();
+              final paths =
+                  (jsonDecode(screenshotPathsJson) as List<dynamic>)
+                      .cast<String>();
+              for (final path in paths) {
+                try {
+                  await File(path).delete();
+                } on Exception {
+                  // best-effort cleanup
+                }
+              }
             } on Exception {
               // best-effort cleanup
             }
@@ -317,14 +340,16 @@ class GithubIssueService {
     };
   }
 
-  String _buildBody(String description, List<int>? screenshotBytes) {
+  String _buildBody(String description, List<List<int>> screenshotBytesList) {
     final buffer = StringBuffer()..writeln(description);
 
-    if (screenshotBytes != null && screenshotBytes.isNotEmpty) {
-      final base64 = base64Encode(screenshotBytes);
-      buffer
-        ..writeln()
-        ..writeln('![screenshot](data:image/png;base64,$base64)');
+    for (final bytes in screenshotBytesList) {
+      if (bytes.isNotEmpty) {
+        final base64 = base64Encode(bytes);
+        buffer
+          ..writeln()
+          ..writeln('![screenshot](data:image/png;base64,$base64)');
+      }
     }
 
     return buffer.toString();
