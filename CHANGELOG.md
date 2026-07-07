@@ -95,7 +95,19 @@
 - **Regression tests for screenshot compression**: Three new tests verify that
   `submitIssue` compresses screenshots (not raw base64), stays under the
   GitHub API body size limit, and omits image data when no screenshots are
-  provided. (`test/services/github_issue_service_test.dart`)
+   provided. (`test/services/github_issue_service_test.dart`)
+- **GitHub Wiki for API docs**: CI workflow (`.github/workflows/wiki.yml`)
+   automatically publishes `dart doc` output to the GitHub Wiki on every push
+   to `main`. Wiki conventions documented in `agents_docs/wiki.md`.
+   (`agents_docs/wiki.md`, `.github/workflows/wiki.yml`)
+- **Doc comment quality: AGENTS.md rule 2** now states that doc comments
+   feed the public GitHub Wiki, requiring them to be written as proper
+   sentences for user-facing documentation.
+
+### Changed
+- **Emulator smoke test removed** from AGENTS.md pre-merge gate. Steps
+   renumbered. Dev workflow and reference docs updated. (`AGENTS.md`,
+   `agents_docs/emulator_instructions.md`)
 
 ### Changed
 - **Version bumped**: `pubspec.yaml` version changed from `1.0.0+1` to
