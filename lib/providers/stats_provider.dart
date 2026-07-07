@@ -10,8 +10,8 @@ import 'package:pantry_app/providers/settings_provider.dart';
 /// Aggregated statistics for the active pantry inventory.
 ///
 /// Computed from SQL aggregation queries in `ProductDao` and
-/// `InventoryDao`. Depends on `activeInventoryProvider` so it
-/// refreshes when the user switches pantries. Uses `autoDispose`
+/// `InventoryDao`. Depends on [activeInventoryProvider] so it
+/// refreshes when the user switches pantries. Uses autoDispose
 /// to release memory when leaving the Stats tab.
 // ignore: specify_nonobvious_property_types
 final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {

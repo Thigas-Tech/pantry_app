@@ -352,13 +352,9 @@ infrastructure or external server hosting are listed last.
      fail if plugins use KGP instead of Built-in Kotlin. Check each
      plugin's changelog for a version that supports Built-in Kotlin.
      If no such version exists, report the issue to the plugin authors.
-  2. **Timezone resolution for raw UTC offsets**: The log shows `[WARN] Raw
-     UTC offset "-03" detected (common on Linux desktop). Falling back to
-     UTC for timezone calculations.` This causes notification scheduling
-     to use UTC instead of the device's actual timezone. Fix in
-     `NotificationService._resolveFromOffset()` — resolve offsets like
-     `-03`, `+05:30`, etc. to their IANA timezone names (e.g. `America/
-     Sao_Paulo`) using the `timezone` package database.
+  - [x] 2. **Timezone resolution for raw UTC offsets**: Resolved via
+     `flutter_timezone.getLocalTimezone()` on mobile platforms. Linux
+     desktop may still return raw offsets — falls back to UTC.
   3. **Dynamic color not detected**: The log shows `dynamic_color: Dynamic
      color not detected on this device.` This is expected on emulators
      (no dynamic colour support). Suppress the log level to `debug`
@@ -382,10 +378,9 @@ infrastructure or external server hosting are listed last.
      `StatsScreen` logs `Contribute Photos tapped — not yet implemented`
      and does nothing. Decide whether to implement or change the button
      text to "Coming soon" and wrap in `ComingSoonScreen`.
-  7. **Notification settings toggle doesn't re-request permission**: The
-     settings toggle updates `notificationsEnabled` but does not call
-     `requestPermission()`. Add permission request (or "Go to Settings"
-     dialog if previously denied) when toggling ON.
+  - [x] 7. **Notification settings toggle doesn't re-request permission**:
+     The toggle now calls `requestPermission()` when toggled on and shows
+     an "Open Settings" dialog if permission was previously denied.
   8. **No expiry date skip logs**: `[INFO] No expiry date for item null,
      skipping reminders`. The log says "item null" because `item.id` is
      null for newly created items. Fix the log message to show the
@@ -447,7 +442,7 @@ infrastructure or external server hosting are listed last.
    - **No `CHANGELOG.md` in release bundle**: Ensure `pubspec.yaml` includes
      `assets: [CHANGELOG.md]` or switch to a bundled JSON release‑notes file.
 
-- [ ] **Fix expiry notifications not triggering** — notifications are not
+- [x] **Fix expiry notifications not triggering** — notifications are not
   firing for scheduled expiry reminders. Debug and fix the entire scheduling
   pipeline. Re-use the existing `NotificationService` but fix the root cause
   of missed or silent notifications.

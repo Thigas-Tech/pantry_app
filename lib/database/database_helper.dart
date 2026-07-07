@@ -21,16 +21,23 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Three tables are created on first launch (version 2):
+/// Four tables are created on first launch (version 11):
 /// - `products` – product data fetched from Open Food Facts.
 /// - `inventories` – named pantries (e.g. "Home", "Work").
 /// - `inventory` – instances of products the user has added to a pantry.
+/// - `feedback_queue` – offline queue for GitHub issue reports.
 ///
 /// ## Delegation
 ///
 /// CRUD operations are delegated to dedicated DAO classes:
 /// [ProductDao], [InventoryDao], [InventoriesDao]. This keeps each file
 /// focused on a single table.
+///
+/// See also:
+/// - [sqflite](https://pub.dev/packages/sqflite) — the SQLite plugin
+///   used for local storage.
+/// - [path_provider](https://pub.dev/packages/path_provider)
+///   — platform‑specific directory resolution.
 class DatabaseHelper {
   /// Returns the single [DatabaseHelper] instance.
   factory DatabaseHelper() => _instance;

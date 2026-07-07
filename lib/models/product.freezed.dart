@@ -88,7 +88,7 @@ mixin _$Product {
 ///   imported from CSV (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
-/// integration. The add-product screen and CSV import override it to
+    /// integration. The add-product screen overrides it to
 /// `'manual'`.
  String get source;/// Local file path to a photo of the nutrition facts table.
 ///
@@ -435,7 +435,7 @@ class _Product implements Product {
 ///   imported from CSV (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
-/// integration. The add-product screen and CSV import override it to
+    /// integration. The add-product screen overrides it to
 /// `'manual'`.
 @override@JsonKey() final  String source;
 /// Local file path to a photo of the nutrition facts table.

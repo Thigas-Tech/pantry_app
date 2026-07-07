@@ -18,7 +18,7 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 /// barcode, querying both the local cache and the Open Food Facts API.
 ///
 /// Results are shown in a scrollable list; tapping a result navigates to
-/// [ProductDetailScreen]. The search input is debounced (300 ms) to avoid
+/// [ProductDetailScreen]. The search input is debounced (500 ms) to avoid
 /// excessive API calls.
 class SearchScreen extends ConsumerStatefulWidget {
   /// Creates a [SearchScreen] widget.

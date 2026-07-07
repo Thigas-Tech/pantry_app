@@ -23,16 +23,17 @@ This document describes the architecture, patterns, and design decisions.
 │  providers/                                                   │
 │  activeInventoryProvider   inventoryWithProductProvider       │
 │  settingsProvider          themeModeProvider                  │
-│  apiServiceProvider        dioProvider                        │
-│  productRepositoryProvider csvServiceProvider                 │
+│  productRepositoryProvider statsProvider                      │
 │  imageCacheProvider        notificationServiceProvider        │
+│  connectivityProvider      githubIssueServiceProvider         │
+│  apiServiceProvider        inventoryCountProvider             │
 └─────────┬────────────────────────────────────────────────────┘
           │  calls
 ┌─────────▼────────────────────────────────────────────────────┐
 │                    Business Logic Layer                        │
 │  services/                                                    │
-│  ProductRepository    OpenFoodFactsApi    NotificationService │
-│  CsvService           ImageCacheService   AdService           │
+│  ProductRepository    OffAdapter    NotificationService       │
+│  ImageCacheService    GithubIssueService  AdService           │
 │  DonationService      CloudBackupService FirebaseService      │
 └─────────┬──────────────┬──────────────────┬─────────────────┘
           │              │                  │
@@ -40,7 +41,7 @@ This document describes the architecture, patterns, and design decisions.
 │  Local DB    │  │  Remote API        │   │
 │  database/   │  │  services/         │   │
 │  SQLite      │  │  Open Food Facts   │   │
-│  DAO pattern │  │  v3 REST (dio)     │   │
+│  DAO pattern │  │  v3 REST (SDK) │   │
 └──────────────┘  └────────────────────┘   │
                                            │
                               ┌────────────▼─────────┐
@@ -56,7 +57,7 @@ This document describes the architecture, patterns, and design decisions.
 
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 6)
+### 2.1 Schema (version 11)
 
 Three tables:
 
@@ -92,7 +93,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 → v6).
+- `_onUpgrade` handles version bumps (currently v1 → v11).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -103,6 +104,11 @@ Version history:
 | v3 → v4 | Added `nutriscore_grade TEXT` column to `products` |
 | v4 → v5 | Added `nutriscore_not_applicable_category TEXT` column |
 | v5 → v6 | Added `source TEXT NOT NULL DEFAULT 'api'` column |
+| v6 → v7 | Added photo path columns for manual products |
+| v7 → v8 | Added `submission_status` column for OFF product submission |
+| v8 → v9 | Added 3 OFF image URL columns for photo‑completeness |
+| v9 → v10 | Added `categories_hierarchy` column |
+| v10 → v11 | Added `feedback_queue` table for offline issue reporting |
 
 ### 2.4 Connectivity layer
 
@@ -164,24 +170,42 @@ User scans barcode
 
 ### 3.3 Notification service
 
-- Uses `flutter_local_notifications` + `timezone` for timezone-aware scheduling.
-- Two reminders per item: "Expiring soon" (1 day before) and "Expiring today".
-- Notification IDs: `item.id.hashCode` and `item.id.hashCode + 1`.
-- All notification strings are passed in by callers so they can be localized.
+- Uses `flutter_local_notifications` + `flutter_timezone` + `timezone` for
+  timezone-aware local scheduling on Android.
+- **Two reminders per item**: "Expiring soon" (1 day before) and
+  "Expiring today" (on the expiry day).
+- **Notification IDs**: `itemId * 2` (expiring soon) and `itemId * 2 + 1`
+  (expiring today). Guaranteed positive and collision‑free.
+- **Time-of-day**: All notifications fire at **9:00 AM** local time
+  (`_toMorningTZDateTime()`), not at midnight.
+- **Channel**: `'expiry_channel'` is created explicitly during
+  `ensureNotificationChannel()` with `Importance.high` and
+  `AndroidNotificationCategory.reminder`.
+- **Tap handling**: `onDidReceiveResponse` (main isolate) and
+  `onDidReceiveBackgroundResponse` (background isolate) are wired during
+  `initialize()`. The payload is the item's barcode for deep‑linking to
+  [ProductDetailScreen].
+- **Boot recovery**: `rescheduleAllItems()` cancels all pending alarms and
+  re‑schedules them from the current DB contents. Called in `main.dart`
+  after initialization.
+- **Permission**: `requestPermission()` requests `POST_NOTIFICATIONS` on
+  Android 13+. Returns `bool` — the settings screen reacts accordingly.
+- **Background handler**: Separated into
+  `notification_background_handler.dart` (top-level
+  `@pragma('vm:entry-point')`) to avoid the `unreachable_from_main` lint.
+- **Logging**: Every `zonedSchedule` call is logged with ID, time, and
+  channel. Channel creation warnings are logged at `logWarning`.
+- All notification strings are passed in by callers (as function callbacks)
+  so they can be localized via ARB.
 
-### 3.4 CSV import/export
-
-- Export: generates a 17-column CSV joined with product nutrition, shared via `share_plus`.
-- Import: picks a `.csv` file via `filegate`, parses it row-by-row, resumes on errors.
-
-### 3.5 Ad service (AdMob)
+### 3.4 Ad service (AdMob)
 
 - Uses `google_mobile_ads` for banner and native ads across free tier screens.
 - Consent managed via UMP SDK (GDPR/LGPD) on first launch.
 - Ad unit IDs read from `.env`, using test IDs in debug mode and production IDs in release.
 - Ad lifecycle logged: load success (`logInfo`), load failure (`logWarning`), init failure (`logError`).
 
-### 3.6 Donation and subscription service (Play Billing)
+### 3.5 Donation and subscription service (Play Billing)
 
 - Uses `in_app_purchase` plugin wrapping Google Play Billing.
 - Donation products: three consumable tiers ($2.99, $4.99, $9.99).
@@ -189,13 +213,13 @@ User scans barcode
 - `isPro` flag derived from `queryPastPurchases()` — checked before showing ads and enabling cloud backup.
 - Products are consumed (donations) or acknowledged (subscriptions) on purchase completion.
 
-### 3.7 Firebase integration
+### 3.6 Firebase integration
 
 - **FirebaseService** — initializes `firebase_core`, provides `FirebaseAuth` and `FirebaseStorage` instances.
 - **CloudBackupService** — exports SQLite database to a temp file, uploads to `users/{uid}/pantry_backup.db` in Firebase Storage. Restore downloads and replaces the local database file, then invalidates all Riverpod providers.
 - **Authentication** — Google Sign-In via `google_sign_in` + `firebase_auth`. Auth state stream drives the backup UI (sign-in prompt, backup button disabled when signed out).
 
-### 3.8 Feedback service (GitHub Issues)
+### 3.7 Feedback service (GitHub Issues)
 
 - `GithubIssueService` — HTTP POST to GitHub Issues API with PAT from
   `.env` (`GITHUB_FEEDBACK_TOKEN`), never committed.
@@ -218,19 +242,20 @@ User scans barcode
 | Provider                        | Type              | Purpose                            |
 |---------------------------------|-------------------|------------------------------------|
 | `databaseProvider`              | `Provider`        | Singleton `DatabaseHelper`         |
-| `dioProvider`                   | `Provider`        | Shared `Dio` HTTP client           |
-| `apiServiceProvider`            | `Provider`        | Configured `OpenFoodFactsApi`      |
+| `apiServiceProvider`            | `Provider`        | Configured `OffAdapter`            |
 | `productRepositoryProvider`     | `Provider`        | Repository (DB + API)              |
-| `csvServiceProvider`            | `Provider`        | CSV import/export                  |
 | `imageCacheProvider`            | `Provider`        | Image download/cache (WebP)        |
 | `notificationServiceProvider`   | `Provider`        | Expiry reminder scheduling         |
-| `filegateProvider`              | `Provider`        | File picker (overridable in tests) |
+| `statsProvider`                 | `FutureProvider`  | Aggregated pantry statistics       |
 | `activeInventoryProvider`       | `NotifierProvider`| Current pantry ID (default 1)      |
 | `inventoryWithProductProvider`  | `FutureProvider`  | Joined inventory list for home     |
 | `inventoryListProvider`         | `FutureProvider`  | All pantries (id, name)            |
+| `inventoryCountProvider`        | `FutureProvider`  | Item count for active inventory    |
 | `averageNutriscoreProvider`     | `FutureProvider`  | Average Nutri-Score for inventory  |
 | `connectivityProvider`          | `StreamProvider`  | Internet connectivity status       |
+| `hasConnectionProvider`         | `Provider`        | Cached connectivity boolean        |
 | `settingsProvider`              | `NotifierProvider`| Notifications, retention, threshold|
+| `themeModeProvider`             | `NotifierProvider`| Light / dark / system theme        |
 | `adServiceProvider`             | `Provider`        | AdMob SDK wrapper                  |
 | `isAdFreeProvider`              | `Provider`        | True when Pro subscription active  |
 | `donationServiceProvider`       | `Provider`        | IAP purchase wrapper               |
@@ -239,6 +264,7 @@ User scans barcode
 | `firebaseServiceProvider`       | `Provider`        | Firebase Auth + Storage instances  |
 | `cloudBackupServiceProvider`    | `Provider`        | Backup/restore operations          |
 | `backupStatusProvider`          | `FutureProvider`  | Last backup timestamp + file size  |
+| `productSubmissionServiceProvider` | `Provider`     | OFF product submission             |
 | `githubIssueServiceProvider`    | `Provider`        | GitHub Issues API wrapper          |
 
 ---
@@ -281,8 +307,17 @@ SearchScreen
 ├── Swipe-to-add (Dismissible, start-to-end)
 └── Long-press menu (add to inventory, copy barcode)
 
-StatsScreen (placeholder)
-└── ComingSoonScreen (construction icon, title, subtitle)
+StatsScreen
+├── Summary cards (total products, items, added this week/month)
+├── NutriScoreBar (fl_chart BarChart by grade A–E)
+├── CategoryChart (fl_chart BarChart by category)
+├── LocationChart (fl_chart BarChart by storage location)
+├── Photo completeness (local vs OFF photos)
+├── ComingSoonView (price tracking — placeholder)
+├── ComingSoonView (NFC-e receipts — placeholder)
+└── RefreshIndicator (pull-to-refresh)
+
+ScannerScreen
 ├── PopScope (confirmation dialog on back)
 ├── _MobileScannerView (camera + ScannerOverlayPainter)
 └── _ManualEntryView (text field + submit button)
@@ -369,7 +404,7 @@ A manual flush button is also available in the settings screen.
 9. **Batch delete with undo** — selection mode replaces the app bar actions and FAB with a delete button and close button. Checkboxes replace card images. Undo restores all deleted items via `SnackbarHelper.showUndo`.
 10. **Quick quantity adjustment** — `+/−` buttons on inventory tiles call `_updateQuantity`, which persists the change and re-schedules notifications. Tap the quantity to type a number directly. Decrementing to 0 triggers delete.
 11. **Nutri-Score fallback** — when the API returns `nutriscore_grade: "not-applicable"` (e.g. for food additives), the badge renders a grey dash. A tooltip explains the reason using the category from `nutriscore_data.nutriscore_not_applicable_for_category` (e.g. `en:food-additives` → "food additives"). This is stored as `nutriscore_not_applicable_category` on the product and surfaced through the `InventoryWithProduct` join.
-12. **Source column protects manual products** — every row in the `products` table carries a `source` column (`'api'` for OFF‑fetched data, `'manual'` for user‑entered or CSV‑imported data). Cache flush (`clearCachedProducts`) deletes only API‑sourced products; manual products and all inventory items survive across app updates. The image cache is inherently separated (stores only downloaded OFF CDN images) and safe to clear.
+12. **Source column protects manual products** — every row in the `products` table carries a `source` column (`'api'` for OFF‑fetched data, `'manual'` for user‑entered data). Cache flush (`clearCachedProducts`) deletes only API‑sourced products; manual products and all inventory items survive across app updates. The image cache is inherently separated (stores only downloaded OFF CDN images) and safe to clear.
 13. **Ads from day 1** — users see banner/native ads from first launch.
     This sets expectations upfront and avoids the "betrayal" reaction
     when ads appear post-launch. Ads are never shown on core workflow
@@ -434,7 +469,6 @@ force their siblings to repaint.
 sqflite already executes SQL on a background isolate internally. The
 following operations are candidates for `Isolate` / `compute()` offloading:
 - Open Food Facts API response parsing (`json.decode` of large payloads)
-- CSV import/export (row-by-row processing, string manipulation)
 - Image encoding (camera capture → WebP conversion in `ImageCacheService`)
 
 `compute()` from `package:flutter/foundation.dart` is preferred over raw
@@ -447,8 +481,7 @@ The app builds as an Android App Bundle (AAB) for Play Store distribution.
 A future optimization will split into dynamic feature modules so users only
 download the features they actually use:
 - `scanner` — MobileScanner camera integration
-- `search` — Open Food Facts API + Dio
-- `import_export` — CSV parsing, file picker
+- `search` — Open Food Facts SDK
 
 This reduces the initial install size and download bandwidth, especially
 for users on metered connections.

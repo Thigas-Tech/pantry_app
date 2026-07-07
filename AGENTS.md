@@ -85,7 +85,7 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
 - **Dependabot** — monthly auto-update of GitHub Action versions.
 6. **Update documentation** — after making changes, update `CHANGELOG.md`, `README.md`, `ARCHITECTURE.md`, and/or `AGENTS.md` to reflect new features, structure changes, or updated commands. Always generate fresh API docs with `dart doc .`.
 7. **Update CHANGELOG.md** — after every feature addition, bugfix, or significant change, add an entry under `[Unreleased]` grouped by category. Keep entries concise and user-facing. This is the canonical record of what ships in each release.
-8. **Set Product.source** — every `Product()` constructor call MUST pass `source`. Use `'api'` for OFF‑fetched data and `'manual'` for user‑entered or CSV‑imported data. The default is `'api'`. Never omit this field — it protects manual products from being deleted by `clearCachedProducts()` during cache flushes.
+8. **Set Product.source** — every `Product()` constructor call MUST pass `source`. Use `'api'` for OFF‑fetched data and `'manual'` for user‑entered data. The default is `'api'`. Never omit this field — it protects manual products from being deleted by `clearCachedProducts()` during cache flushes.
 9. **No emoji** — never use emoji characters anywhere in the codebase, including documentation, comments, commit messages, ARB strings, and TODOs. Use plain text alternatives (e.g., `Yes`/`No` instead of check/cross marks, `**Pitfalls**` instead of warning signs). Emojis render inconsistently across terminals, editors, and git tools, and this project's documentation must remain plain-text clean.
 10. **Audit every plan for pitfalls** — before implementing any plan, audit for regressions, edge cases, common issues, and common pitfalls. Document findings and mitigations in the plan before writing code. This includes: breaking changes to existing APIs, widget state loss during refactors, performance degradation, missing test coverage for changed code paths, locale/accessibility impact, and interaction with fire-and-forget async operations.
 11. **Consider performance and footprint** — before implementing any plan, evaluate: APK size impact of new dependencies, widget build count on new screens with `RepaintBoundary` strategy, memory footprint of new models and providers, SQL query cost for new database methods (concurrent read safety, index needs), and rebuild scope (provider disposal strategy, `autoDispose` vs `keepAlive`). Document tradeoffs in the plan before writing code.
@@ -230,7 +230,7 @@ lib/
   models/                # Freezed models (Product, InventoryItem, InventoryWithProduct)
   providers/             # Riverpod providers (state, DI)
   screens/               # UI pages
-  services/              # Business logic (API, repository, CSV, notifications)
+  services/              # Business logic (API, repository, notifications, feedback)
   utils/                 # Helpers (logger, snackbar)
   widgets/               # Reusable widgets
 test/
@@ -256,6 +256,32 @@ test/
 - Database tests use `DatabaseHelper.withPath(':memory:')` with `sqflite_common_ffi`
 - For screens with MobileScanner, use `settle: false` and manual `pump()` — perpetual animations prevent `pumpAndSettle`
 - Mock `NotificationService`, `ProductRepository`, and `ImageCacheService` with mocktail
+
+### Notification service architecture
+
+| Concept | Detail |
+|---|---|
+| **Plugin** | `flutter_local_notifications` (^22.0.1) — schedules Android local notifications via `zonedSchedule()` |
+| **Timezone** | `flutter_timezone` (^5.1.0) for device IANA identifier; `timezone` package for `TZDateTime` math |
+| **Channel** | `'expiry_channel'` created during `initialize()` with `Importance.high` and `AndroidNotificationCategory.reminder` |
+| **Notification IDs** | `itemId * 2` (expiring soon) / `itemId * 2 + 1` (expiring today) — positive, collision‑free |
+| **Time-of-day** | 9:00 AM via `_toMorningTZDateTime()` — more user-friendly than midnight |
+| **Schedule mode** | `AndroidScheduleMode.inexactAllowWhileIdle` — no extra permission required |
+| **Tap handling** | `onDidReceiveResponse` (main isolate) and `onDidReceiveBackgroundResponse` (background isolate) — payload set to item barcode for deep‑linking |
+| **Boot/app‑update recovery** | `rescheduleAllItems()` cancels all pending and re‑schedules from DB — called in `main.dart` startup after initialization |
+| **Permission** | `requestPermission()` calls android `POST_NOTIFICATIONS` on 13+; returns `bool` for caller reaction; settings toggle shows "Open Settings" dialog on denial |
+| **Background handler** | Separated into `notification_background_handler.dart` (top-level `@pragma('vm:entry-point')`) to avoid `unreachable_from_main` lint |
+| **Logging** | Every `zonedSchedule` call logged with ID, time, channel; channel creation warnings; reschedule start/completion logged |
+| **Key files** | `lib/services/notification_service.dart` (~415 lines), `lib/services/notification_background_handler.dart` |
+
+External references:
+| Source | URL | Scope |
+|---|---|---|
+| flutter_local_notifications | https://pub.dev/packages/flutter_local_notifications | Plugin docs, changelog |
+| flutter_timezone | https://pub.dev/packages/flutter_timezone | IANA timezone plugin |
+| timezone | https://pub.dev/packages/timezone | TZDateTime and database |
+| Android notification anatomy | https://developer.android.com/develop/ui/views/notifications | Channel, importance, categories |
+| Android POST_NOTIFICATIONS | https://developer.android.com/develop/ui/views/notifications/notification-permission | Runtime permission for 13+ |
 
 ## Open Food Facts References
 

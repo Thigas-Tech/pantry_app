@@ -49,6 +49,14 @@ const String productSubmissionFailed = 'failed';
 /// This class uses the `freezed` package, making it **immutable**. Any
 /// modification must be done via the generated `copyWith` method, which
 /// returns a new instance.
+///
+/// See also:
+/// - [openfoodfacts Dart SDK](https://pub.dev/packages/openfoodfacts)
+///   — the official Open Food Facts API client used to fetch and submit
+///   product data.
+/// - [freezed](https://pub.dev/packages/freezed)
+///   — the code‑generation package that provides immutability, `copyWith`,
+///   `==`, `hashCode`, and JSON serialisation.
 @freezed
 abstract class Product with _$Product {
   /// Constructs a [Product].
@@ -170,7 +178,7 @@ abstract class Product with _$Product {
     ///   imported from CSV (must never be deleted by a cache flush).
     ///
     /// Defaults to `'api'` because most products come from the OFF
-    /// integration. The add-product screen and CSV import override it to
+    /// integration. The add-product screen overrides it to
     /// `'manual'`.
     @Default('api') String source,
 

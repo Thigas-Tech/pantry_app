@@ -39,7 +39,7 @@ class ProductRepository {
   /// Creates a [ProductRepository] with the given [DatabaseHelper] and
   /// primary API. An optional fallback API can be provided for future use.
   ///
-  /// If `_prefs` is provided it is used for refresh‑time tracking; otherwise
+  /// If `prefs` is provided it is used for refresh‑time tracking; otherwise
   /// `SharedPreferences` is lazily obtained from the singleton instance.
   ProductRepository(
     this._db,

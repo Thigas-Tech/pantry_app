@@ -21,7 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Tabs:
 /// - **Home** — inventory dashboard with grouping by expiry status.
 /// - **Search** — product search by name or barcode.
-/// - **Stats** — inventory statistics and CSV export/import.
+/// - **Stats** — inventory statistics.
 /// - **Settings** — application preferences.
 ///
 /// Uses a [PageView] so that users can swipe horizontally between tabs.

@@ -38,6 +38,12 @@ import 'package:timezone/timezone.dart' as tz;
 /// Notifications fire at 9:00 AM on the reminder day rather than at
 /// midnight. Most users check their pantry in the morning, and a 9 AM
 /// notification is more useful than one at midnight.
+///
+/// See also:
+/// - [flutter_local_notifications](https://pub.dev/packages/flutter_local_notifications)
+///   — the underlying plugin.
+/// - [flutter_timezone](https://pub.dev/packages/flutter_timezone)
+///   — device IANA timezone identifier.
 class NotificationService {
   /// Creates a [NotificationService] that uses the given [plugin].
   NotificationService({
@@ -56,6 +62,12 @@ class NotificationService {
   /// Initializes the notification plugin with tap handlers.
   ///
   /// Must be called once at app startup, before any notification is
+  /// scheduled. Creates the [AndroidNotificationChannel] and registers
+  /// the response callbacks for tap handling.
+  ///
+  /// See also:
+  /// - [FlutterLocalNotificationsPlugin.initialize] — the underlying plugin
+  ///   method.
   ///
   /// [onDidReceiveResponse] is fired on the main isolate when the user
   /// taps a notification. [onDidReceiveBackgroundResponse] is fired in a

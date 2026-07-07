@@ -2,18 +2,22 @@
 
 ## [Unreleased]
 
-### Fixed
-- **release-drafter labels format**: `version-resolver.{major,minor,patch}.labels`
-  must be direct arrays (not nested under `when`) per release-drafter v6 schema.
-  ([release-drafter docs](https://github.com/release-drafter/release-drafter#version-resolver))
-- **Release AAB native stripping regression (Flutter 3.44.0)**: Removed
-  `--extra-gen-snapshot-options=--strip` flag. The DWARF warning it silenced
-  is cosmetic -- the real optimization (`--obfuscate` + `--split-debug-info`)
-  remains. Tracked upstream at
-  [flutter/flutter#186810](https://github.com/flutter/flutter/issues/186810) and
-  [flutter/flutter#186806](https://github.com/flutter/flutter/issues/186806).
-
 ### Changed
+- **Notification service rewrite**: Replaced the fragile `hashCode`-based
+  notification ID scheme with `itemId * 2` / `itemId * 2 + 1` (guaranteed
+  positive, collision‑free). Timezone resolution now uses
+  `flutter_timezone.getLocalTimezone()` instead of the
+  `DateTime.now().timeZoneName` + `_resolveFromOffset` hack. New features:
+  `rescheduleAllItems()` for reboot/app‑update recovery, 9:00 AM time‑of‑day
+  scheduling, explicit `AndroidNotificationChannel` creation
+  (`ensureNotificationChannel`), notification tap handlers with payload
+  deep‑linking, and `requestPermission()` for Android 13+
+  `POST_NOTIFICATIONS`. Background tap handler extracted to a separate
+  `notification_background_handler.dart` top‑level function. Settings toggle
+  now re‑requests permission and shows "Open Settings" dialog on denial.
+  (`lib/services/notification_service.dart`,
+  `lib/services/notification_background_handler.dart`,
+  `lib/screens/settings_screen.dart`)
 - **Doc comment style**: Replaced all triple-backtick code blocks in
   hand-written source files with `[square bracket]` cross-references or
   4-space indented blocks. This enables LSP go-to-definition and hover
@@ -59,8 +63,14 @@
 
 ### Bugfixes
 - **Missing `cacheWidth` in product detail**: `Image.network` in `ProductDetailScreen` was only constraining decode height. Added `cacheWidth` at screen width × device pixel ratio.
-- **Stats summary cards overflow**: `_SummaryCard` and `_PhotoCard` Column widgets overflowed by 12px on tight layouts. Added `mainAxisSize: MainAxisSize.min`.
-- **Chart label colors**: Bar chart axis labels in NutriScoreBar, CategoryChart, and LocationChart now use `colorScheme.onSurface` for readability in dark mode.
+- **Stats summary cards overflow**: `_SummaryCard` and `_PhotoCard` Column widgets added `mainAxisSize: MainAxisSize.min` to prevent RenderFlex overflow.
+- **Chart label colors**: Bar chart axis labels now use `colorScheme.onSurface` for dark mode readability.
+- **Chart axis labels invisible**: `SideTitles` constructors in fl_chart were missing `showTitles: true` after an earlier lint-cleanup mistakenly removed them (fl_chart defaults to `false`). Added back to all 4 chart label sets (NutriScoreBar, CategoryChart, LocationChart).
+- **Search returns fewer results than OFF website**: Added `lc=world` and `cc=world` query parameters to `searchProducts` (matches OFF website behavior). Added `code` field fallback in `_parseProduct` for legacy API barcode responses. Added retry logic (3 attempts, exponential backoff 1s/2s/4s) matching `getByBarcode` pattern.
+- **Search API 503 errors without user feedback**: `searchProducts` now retries with cancel support. Search debounce increased to 500ms. Added `CancelToken` to cancel in-flight searches on new query.
+- **Changelog not showing on content changes**: Replaced version-string detection with content-hash detection. `_handleAppUpdate` now compares `CHANGELOG.md.hashCode` with stored hash — shows changelog whenever content changes, regardless of version number.
+- **Changelog not showing on re-launch**: `_handleAppUpdate` returned early when the app version was unchanged, which prevented the `changelog_show_pending` flag from ever being set. Moved the changelog tracking above the version-match guard so it runs unconditionally.
+- **Dead `Contribute Photos` button**: added `logInfo` for the unimplemented feature.
 
 ### Stats & Analytics
 - **StatsScreen rewritten with fl_chart**: Summary cards (total products, total items, added this week/month), Nutri-Score distribution (BarChart), category breakdown (BarChart), location breakdown (BarChart), photo completeness cards with OFF comparison, and ComingSoonView stubs for price tracking and NFC-e receipts.
@@ -73,38 +83,21 @@
 - **8 new DAO aggregation methods**: `ProductDao` (nutriscoreDistribution, categoryDistribution, sourceDistribution, photoCompleteness, offPhotoCompleteness) and `InventoryDao` (locationDistribution, expiryDistribution, weeklyAdditions).
 - **10 new ARB keys** added to all 3 locales (price tracking, NFC-e, photo completeness).
 
-### Bugfixes
-- **Chart axis labels invisible**: `SideTitles` constructors in fl_chart were missing `showTitles: true` after an earlier lint-cleanup mistakenly removed them (fl_chart defaults to `false`). Added back to all 4 chart label sets (NutriScoreBar, CategoryChart, LocationChart).
-- **Search returns fewer results than OFF website**: Added `lc=world` and `cc=world` query parameters to `searchProducts` (matches OFF website behavior). Added `code` field fallback in `_parseProduct` for legacy API barcode responses. Added retry logic (3 attempts, exponential backoff 1s/2s/4s) matching `getByBarcode` pattern.
-- **Search API 503 errors without user feedback**: `searchProducts` now retries with cancel support. Search debounce increased to 500ms. Added `CancelToken` to cancel in-flight searches on new query.
-- **Changelog not showing on content changes**: Replaced version-string detection with content-hash detection. `_handleAppUpdate` now compares `CHANGELOG.md.hashCode` with stored hash — shows changelog whenever content changes, regardless of version number.
-
 ### UX & Debugging
 - **Changelog dev-section filter**: `whats_new_sheet` now hides `### Documentation` and `### Code health` from the in-app display. Users see only product-facing changes.
 - **Connectivity transition logging**: `connectivityProvider` now logs online/offline state changes.
 - **Action-level logging**: added `logInfo` before every `unawaited()` fire-and-forget, `logWarning` for guard conditions, `logInfo` for form validation failures.
 - **Snackbar consistency**: replaced raw `ScaffoldMessenger.showSnackBar` in delete flow with `SnackbarHelper.showUndo`. Replaced hardcoded English string in `inventory_card` with ARB-localized `productDataUnavailable`.
 
-### Bugfixes
-- **Stats summary cards overflow**: `_SummaryCard` and `_PhotoCard` added `mainAxisSize: MainAxisSize.min` to prevent RenderFlex overflow.
-- **Chart label colors**: Bar chart axis labels now use `colorScheme.onSurface` for dark mode readability.
-- **Dead `Contribute Photos` button**: added `logInfo` for the unimplemented feature.
-
 ### Code health
 - **AGENTS.md rule 11**: Consider performance and footprint on every plan.
 - **AGENTS.md performance audit checklist**: 6-item checklist for new dependencies, screens, DB queries, providers, models, and rebuild scope.
 - **TODO.md**: 3 new items (price tracking, NFC-e, photo contribution).
-- 323 tests passing, 0 analyze issues.
-
-### Code health
 - Removed CSV import/export: deleted `csv_service.dart`, `csv_service_provider.dart`, `filegate_provider.dart`, and all related test files. Removed `getExportData()` / `exportData()` from `DatabaseHelper`, `InventoryDao`, and `ProductRepository`.
 - Removed `csv`, `filegate`, `share_plus` dependencies from `pubspec.yaml`. Ran `flutter pub upgrade` (picked up `equatable` 2.1.0 transitively).
 - Removed 19 unused ARB translation keys from all 3 locales (en, pt, pt_BR). Verified zero stale references with regex before removal.
 - Added 2 new ARB keys: `settingsAbout`, `comingSoonDescription` — translated in en, pt, pt_BR.
 - 340 tests passing, 0 analyze issues.
-
-### Bugfixes
-- **Changelog not showing on re-launch**: `_handleAppUpdate` returned early when the app version was unchanged (`if (lastVersion == currentVersion) return;`), which prevented the `changelog_show_pending` flag from ever being set. Moved the changelog tracking above the version-match guard so it runs unconditionally. Added `logInfo` traces at every decision point in `_showChangelogIfPending()` (skip, no entries, show) for easier debugging.
 
 ### Enhancements
 - **Long-press to select**: Inventory cards now respond to long-press by entering multi-select mode with haptic feedback (`HapticFeedback.mediumImpact()`). Long-press is suppressed when checkboxes are already visible.
