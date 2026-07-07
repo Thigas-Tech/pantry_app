@@ -68,7 +68,7 @@ class GithubIssueService {
       'screenshots=${screenshotBytesList.length}',
     );
 
-    final fullBody = _buildBody(body, screenshotBytesList);
+    final fullBody = await _buildBody(body, screenshotBytesList);
 
     late final http.Response response;
     try {
@@ -353,12 +353,16 @@ class GithubIssueService {
     };
   }
 
-  String _buildBody(String description, List<List<int>> screenshotBytesList) {
+  Future<String> _buildBody(
+    String description,
+    List<List<int>> screenshotBytesList,
+  ) async {
     final buffer = StringBuffer()..writeln(description);
 
     for (final bytes in screenshotBytesList) {
       if (bytes.isNotEmpty) {
-        final base64 = base64Encode(bytes);
+        final base64 = await encodeScreenshotBase64(Uint8List.fromList(bytes));
+        if (base64.isEmpty) continue;
         buffer
           ..writeln()
           ..writeln('![screenshot](data:image/png;base64,$base64)');

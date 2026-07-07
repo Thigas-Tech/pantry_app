@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   security_hardening:
@@ -17,6 +20,7 @@ jobs:
 
   testing:
     name: Run ${{ matrix.category }} testing
+    if: github.event_name == 'push'
     needs: security_hardening
     runs-on: ubuntu-latest
     strategy:
@@ -72,7 +76,9 @@ jobs:
           path: code/coverage/lcov.${{ matrix.category }}.info
 
   build:
+    # TODO: Add Patrol E2E tests here once implemented
     name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     needs: testing
     runs-on: ubuntu-latest
     strategy:
@@ -108,6 +114,9 @@ jobs:
             "false" \
             "${FEEDBACK_TOKEN:-}"
       - name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
+        if: |
+          github.event_name != 'pull_request' ||
+          (matrix.build-type == 'debug' && matrix.package-type == 'apk')
         run: >
           flutter build ${{ matrix.package-type }}
           --${{ matrix.build-type }}
@@ -137,29 +146,32 @@ jobs:
 
   publish:
     name: Publish release
+    if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: read
     steps:
       - name: Clone the repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-      - name: Draft release
-        id: release-drafter
-        uses: release-drafter/release-drafter@4d75298e00d9e34c483e5ff8c68d0ea1c1940c1e
-        with:
-          prerelease: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract version from pubspec.yaml
+        id: version
+        run: |
+          VER=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          echo "tag=v$VER" >> "$GITHUB_OUTPUT"
       - name: Download all artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           path: artifacts
           pattern: '*-*'
           merge-multiple: true
-      - name: Upload assets to release
-        run: |
-          gh release upload "${{ steps.release-drafter.outputs.tag_name }}" artifacts/* --clobber --repo "$GITHUB_REPOSITORY"
+      - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes \
+            --target "${{ github.sha }}" \
+            --prerelease \
+            artifacts/*

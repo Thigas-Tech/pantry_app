@@ -325,12 +325,23 @@ class PantryApp extends ConsumerWidget {
       builder: (lightDynamic, darkDynamic) {
         final lightScheme =
             lightDynamic ?? ColorScheme.fromSeed(seedColor: Colors.teal);
-        final darkScheme =
+        final rawDarkScheme =
             darkDynamic ??
             ColorScheme.fromSeed(
               seedColor: Colors.teal,
               brightness: Brightness.dark,
             );
+
+        final settings = ref.watch(settingsProvider);
+        final darkScheme = settings.amoledDarkMode
+            ? rawDarkScheme.copyWith(
+                surface: Colors.black,
+                surfaceContainerHighest: const Color(0xFF1C1C1E),
+                surfaceContainerLow: const Color(0xFF1C1C1E),
+                surfaceContainer: const Color(0xFF2C2C2E),
+                surfaceContainerHigh: const Color(0xFF3A3A3C),
+              )
+            : rawDarkScheme;
 
         return MaterialApp(
           title: 'Pantry',

@@ -22,6 +22,7 @@ class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 /// Each test creates a fresh [ProviderContainer] and overrides the
 /// dependencies with mocks so the providers are fully isolated.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late ProviderContainer container;
 
   setUp(() {

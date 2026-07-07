@@ -1,5 +1,8 @@
 # Android Emulator Instructions
 
+NOTE: Emulator smoke testing is no longer part of the pre-merge gate.
+This document remains as a reference for manual debugging.
+
 Instructions for `opencode` agents to create, start, and manage an Android
 emulator from the command line.
 

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Persistent settings for the pantry app.
 ///
@@ -11,6 +14,7 @@ class Settings {
     this.expiringSoonDays = 3,
     this.inactivityReminderEnabled = true,
     this.inactivityThresholdDays = 10,
+    this.amoledDarkMode = false,
   });
 
   /// Whether expiry notifications are enabled.
@@ -34,6 +38,12 @@ class Settings {
   /// Defaults to 10.
   final int inactivityThresholdDays;
 
+  /// Whether pure-black surfaces should be used in dark mode.
+  ///
+  /// When enabled, surfaces use `Colors.black` instead of the default dark
+  /// surface colours, which reduces power consumption on AMOLED displays.
+  final bool amoledDarkMode;
+
   /// Returns a copy with the given fields replaced.
   Settings copyWith({
     bool? notificationsEnabled,
@@ -41,6 +51,7 @@ class Settings {
     int? expiringSoonDays,
     bool? inactivityReminderEnabled,
     int? inactivityThresholdDays,
+    bool? amoledDarkMode,
   }) {
     return Settings(
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -50,20 +61,64 @@ class Settings {
           inactivityReminderEnabled ?? this.inactivityReminderEnabled,
       inactivityThresholdDays:
           inactivityThresholdDays ?? this.inactivityThresholdDays,
+      amoledDarkMode: amoledDarkMode ?? this.amoledDarkMode,
     );
   }
 }
 
-/// A [Notifier] that holds the current [Settings].
+/// A [Notifier] that holds the current [Settings] and persists every field
+/// to [SharedPreferences].
 class SettingsNotifier extends Notifier<Settings> {
   @override
-  Settings build() => const Settings();
+  Settings build() {
+    unawaited(_loadFromPrefs());
+    return const Settings();
+  }
+
+  Future<void> _loadFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      state = Settings(
+        notificationsEnabled: prefs.getBool('notificationsEnabled') ?? true,
+        retentionDays: prefs.getInt('retentionDays') ?? 60,
+        expiringSoonDays: prefs.getInt('expiringSoonDays') ?? 3,
+        inactivityReminderEnabled:
+            prefs.getBool('inactivityReminderEnabled') ?? true,
+        inactivityThresholdDays: prefs.getInt('inactivityThresholdDays') ?? 10,
+        amoledDarkMode: prefs.getBool('amoledDarkMode') ?? false,
+      );
+    } on Exception catch (_) {}
+  }
 
   /// The current settings.
   Settings get value => state;
 
-  /// Replaces the entire settings.
-  set value(Settings settings) => state = settings;
+  /// Replaces the entire settings and persists every field.
+  set value(Settings settings) {
+    state = settings;
+    unawaited(_persist(settings));
+  }
+
+  Future<void> _persist(Settings settings) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(
+        'notificationsEnabled',
+        settings.notificationsEnabled,
+      );
+      await prefs.setInt('retentionDays', settings.retentionDays);
+      await prefs.setInt('expiringSoonDays', settings.expiringSoonDays);
+      await prefs.setBool(
+        'inactivityReminderEnabled',
+        settings.inactivityReminderEnabled,
+      );
+      await prefs.setInt(
+        'inactivityThresholdDays',
+        settings.inactivityThresholdDays,
+      );
+      await prefs.setBool('amoledDarkMode', settings.amoledDarkMode);
+    } on Exception catch (_) {}
+  }
 }
 
 /// The provider for [SettingsNotifier].

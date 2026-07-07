@@ -33,15 +33,18 @@ void main() {
       expect(IssueType.bug.gitHubLabel(), 'bug');
       expect(IssueType.feature.gitHubLabel(), 'enhancement');
       expect(IssueType.feedback.gitHubLabel(), '');
+      expect(IssueType.regression.gitHubLabel(), 'regression');
+      expect(IssueType.translation.gitHubLabel(), 'translation');
     });
 
-    /// Verifies that [IssueType.values] contains all four variants.
-    test('values contains bug, feature, feedback, and regression', () {
+    /// Verifies that [IssueType.values] contains all five variants.
+    test('values contains all issue types', () {
       expect(IssueType.values, contains(IssueType.bug));
       expect(IssueType.values, contains(IssueType.feature));
       expect(IssueType.values, contains(IssueType.feedback));
       expect(IssueType.values, contains(IssueType.regression));
-      expect(IssueType.values.length, 4);
+      expect(IssueType.values, contains(IssueType.translation));
+      expect(IssueType.values.length, 5);
     });
   });
 

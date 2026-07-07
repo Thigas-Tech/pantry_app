@@ -401,5 +401,16 @@
         "example": "10"
       }
     }
-  }
+  },
+  "amoledDarkMode": "AMOLED dark mode",
+  "amoledDarkModeExplanation": "Use pure black surfaces in dark mode to save power on AMOLED displays",
+  "amoledDarkModeEnabled": "AMOLED dark mode enabled.",
+  "amoledDarkModeDisabled": "AMOLED dark mode disabled.",
+  "amoledNudgeTitle": "Switch to dark mode?",
+  "amoledNudgeBody": "Dark mode can save battery life on your device, especially if it has an AMOLED screen. You can also enable pure-black surfaces in Settings for maximum power savings.",
+  "amoledNudgeEnable": "Enable dark mode",
+  "amoledNudgeDismiss": "Not now",
+  "translationReport": "Translation Report",
+  "translationReportExplanation": "Report an issue with a product translation or suggest a new translation.",
+  "feedbackRateLimit": "You can only submit one report per minute and up to 5 per day. Please try again later."
 }

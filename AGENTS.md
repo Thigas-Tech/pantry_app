@@ -2,12 +2,29 @@
 
 ## Pre-commit gate (NEVER SKIP)
 
-Run before EVERY commit. Fix ALL issues:
-  git fetch && git pull --rebase
+Run BEFORE every local commit. Fix ALL issues:
+  git fetch
   flutter analyze --fatal-infos --fatal-warnings
   flutter test --concurrency=8
   flutter build apk --debug
   dart doc .
+
+## Pre-merge gate (run BEFORE creating a PR or converting draft to ready)
+
+  1. Push: git push -u origin <branch>
+  2. Open a draft PR to trigger GitHub Actions.
+  3. Verify ALL CI checks pass:
+     - CI / Run static testing       (lint + formatting)
+     - CI / Run unit testing
+     - CI / Run widget testing
+      - Build / Build debug apk       (from build.yml on PR)
+   4. Convert draft PR -> Ready for Review.
+   5. Merge via GitHub UI (Squash and merge).
+   6. Delete remote branch; git checkout main && git pull
+
+  Notes:
+    - Feedback -> GitHub requires FEEDBACK_TOKEN in .env
+    - Reference test product data in agents_docs/off_test_products.*
 
 ## Post-commit gate
 
@@ -39,6 +56,14 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 10. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
 11. Never ! on SQL aggregate results. Use ?? fallback instead.
 
+## Development workflow
+
+- Branch from main: git checkout -b feat/description
+- Implement -> pre-commit gate -> push
+- Open draft PR -> wait for CI -> convert to ready -> merge
+- Never commit directly to main.
+- After merge: git checkout main && git pull
+
 ## Code style
 
 80-char lines. Single quotes. const constructors. Riverpod providers.
@@ -58,7 +83,8 @@ Read these when implementing specific features:
 - Gestures & touch behaviors -> ~/.config/opencode/instructions/flutter_gestures.md
 - Firebase / FlutterFire -> ~/.config/opencode/instructions/firebase_refs.md
 - OFF API / SDK -> ~/.config/opencode/instructions/off_refs.md
-- Performance optimization -> ~/.config/opencode/instructions/performance_guide.md
+- Performance optimization -> agents_docs/performance_guide.md
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
 - Project architecture -> ARCHITECTURE.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
+- OFF test data -> agents_docs/off_test_products.*

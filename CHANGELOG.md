@@ -3,10 +3,20 @@
 ## [Unreleased]
 
 ### Added
+- **OFF test data**: Fetched 12 full API responses from Open Food Facts for emulator and CI testing. Stored as `agents_docs/off_test_products.json` (full JSON) and `agents_docs/off_test_products.md` (human-readable lookup table). Products cover spreads, sodas, biscuits, oils, juices. (`agents_docs/off_test_products.json`, `agents_docs/off_test_products.md`)
+- **Performance guide**: Copied to `agents_docs/performance_guide.md` for easy reference during development. (`agents_docs/performance_guide.md`)
+- **AMOLED dark mode**: New `amoledDarkMode` toggle in Settings > Appearance. When enabled with dark mode, surfaces use pure-black (`Colors.black`) instead of the default dark surface colours, reducing power consumption on AMOLED displays. One-time nudge dialog on first launch when device is in light mode. (`lib/providers/settings_provider.dart`, `lib/main.dart`, `lib/screens/settings_screen.dart`, `lib/screens/pantry_shell.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`)
+- **Settings & Theme persistence**: `ThemeModeNotifier` and `SettingsNotifier` now persist to `SharedPreferences` on every change and reload on startup. Fixes reset-on-restart bug. (`lib/providers/theme_provider.dart`, `lib/providers/settings_provider.dart`)
+- **Small-screen golden test**: New golden test for `HomeScreen` at 360dp width with 1.0 text scale factor. Overrides 4 providers with mock data covering expired, expiring-soon, good, and no-expiry items. (`test/screens/home_screen_golden_test.dart`, `test/screens/goldens/home_screen_360dp.png`)
 - **Inactivity reminder notification**: Sends a daily notification at 9 AM if the user has not added any product for 10+ days (configurable in Settings). Tracks last add date via `MAX(date_added)` from the inventory table. New `inactivity_channel` (Importance.low) separate from expiry channel. Toggle + threshold picker in Settings. Rescheduled on product add and app startup. Permission-denied warning shown once via SnackBar. (`lib/screens/settings_screen.dart`, `lib/services/notification_service.dart`, `lib/providers/settings_provider.dart`, `lib/database/inventory_dao.dart`, `lib/database/database_helper.dart`, `lib/main.dart`, `lib/screens/pantry_shell.dart`, `lib/screens/product_detail_screen.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`)
 
 ### Changed
+- **CI/CD workflow**: `build.yml` now triggers on pull requests to main (in addition to push). On PRs, only debug APK is built (skips release builds and publishing). Testing job only runs on push. Patrol E2E placeholder comment added. (`build.yml`)
+- **AGENTS.md**: Split into two gates: Pre-commit (local) and Pre-merge (PR + CI + emulator smoke test). Added Development workflow section. Updated performance guide reference to `agents_docs/`. Added OFF test data and emulator instructions to reference docs. (`AGENTS.md`)
 - **SearchScreen upgraded to M3 SearchBar**: Replaced the manual `TextField` in `SearchScreen` with Material 3 `SearchBar` widget for native M3 styling and animation. `textInputAction: TextInputAction.search` preserved. HomeScreen autocomplete unchanged (`Autocomplete` still wraps a `TextField` — `SearchAnchor.bar` tested but reverted due to poor test interaction support). (`lib/screens/search_screen.dart`)
+
+### Fixed
+- **Settings screen golden test**: Regenerated to account for the new AMOLED toggle switch. (`test/screens/__golden_test.dart`)
 
 ### Fixed
 - **Feedback form fixes**: Added support for attaching multiple screenshots
@@ -63,6 +73,36 @@
   hand-written source files with `[square bracket]` cross-references or
   4-space indented blocks. This enables LSP go-to-definition and hover
   documentation on doc-comment references. Rule 14 added to `AGENTS.md`.
+
+### Fixed
+- **Screenshot compression in feedback**: `_buildBody()` now calls
+  `encodeScreenshotBase64()` instead of raw `base64Encode()`, fixing the
+  dead-code regression that caused screenshots to be embedded uncompressed
+  and exceed the GitHub API body size limit. Added INTERNET permission to
+  `AndroidManifest.xml`. Added rate-limit ARB string.
+  (`lib/services/github_issue_service.dart`,
+  `android/app/src/main/AndroidManifest.xml`, `lib/l10n/app_en.arb`,
+  `lib/l10n/app_pt.arb`)
+
+### Added
+- **Translation report issue type**: New `IssueType.translation` enum value
+  for reporting incorrect or missing product translations.
+  (`lib/screens/feedback_screen.dart`, `lib/l10n/app_en.arb`,
+  `lib/l10n/app_pt.arb`)
+- **CI permissions fix**: Added `contents: read` to `coverage_report` job in
+  `ci.yml` and `publish` job in `build.yml` to fix `actions/checkout` failure
+  on private repos. (`.github/workflows/ci.yml`, `.github/workflows/build.yml`)
+- **Regression tests for screenshot compression**: Three new tests verify that
+  `submitIssue` compresses screenshots (not raw base64), stays under the
+  GitHub API body size limit, and omits image data when no screenshots are
+  provided. (`test/services/github_issue_service_test.dart`)
+
+### Changed
+- **Version bumped**: `pubspec.yaml` version changed from `1.0.0+1` to
+  `0.0.4+1` to align with the alpha release tag sequence.
+- **Branch protection**: Repository made public. GitHub ruleset `protect-main`
+  applied: requires PR with 1 approval, passing status checks, and blocks
+  deletion/force-push on `main`.
 
 ### Added
 - **GitHub Actions CI**: PR quality gate (lint, format, test, coverage) on every PR.
