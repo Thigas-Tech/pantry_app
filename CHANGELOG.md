@@ -52,6 +52,7 @@
 
 ### Fixed
 - **DotEnv not initialized in widget tests**: `pumpApp()` now calls `dotenv.loadFromString(isOptional: true, mergeWith: {})` before rendering the widget tree, preventing `NotInitializedError` from `AppConfig` accesses in tests that transitively read `dotenv.env`.
+- **Untranslated strings in stats and feedback screens**: Hardcoded English strings in the Nutri-Score section, photo completeness cards, image attach error, link open error, and device info labels (`App version`, `OS`) are now localized. Added 6 new ARB keys (`nutriScore`, `photoCoverageRatio`, `offPhotosCount`, `couldNotAttachImage`, `appVersionLabel`, `osLabel`) and wired up the existing-but-unused `couldNotOpenLink` key. (`lib/screens/stats_screen.dart`, `lib/screens/feedback_screen.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
 
 ### Changed
 - **Migrated to official `openfoodfacts` Dart SDK**: Replaced the custom 470-line `OpenFoodFactsApi` Dio client with the official `openfoodfacts` package (v3.30.2). The SDK is maintained by Open Food Facts and used by the official smooth-app (1.4k stars, 5k+ commits). A thin `OffAdapter` wrapper preserves Riverpod injectability and testability.

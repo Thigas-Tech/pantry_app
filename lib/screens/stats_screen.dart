@@ -111,7 +111,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               );
             case 2:
               return RepaintBoundary(
-                child: _buildNutriScoreBar(context, stats),
+                child: _buildNutriScoreBar(context, l10n, stats),
               );
             case 3:
               return RepaintBoundary(
@@ -324,7 +324,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  Widget _buildNutriScoreBar(BuildContext context, PantryStats stats) {
+  Widget _buildNutriScoreBar(
+    BuildContext context,
+    AppLocalizations l10n,
+    PantryStats stats,
+  ) {
     if (stats.nutriscoreDistribution.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -363,7 +367,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(context, 'Nutri-Score'),
+        _buildSectionTitle(context, l10n.nutriScore),
         const SizedBox(height: 8),
         SizedBox(
           height: 160,
@@ -653,6 +657,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   local: stats.localPhotos.withNutrition,
                   off: stats.offPhotos.withNutrition,
                   total: stats.localPhotos.total,
+                  l10n: l10n,
                 ),
               ),
               const SizedBox(width: 8),
@@ -663,6 +668,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   local: stats.localPhotos.withIngredients,
                   off: stats.offPhotos.withIngredients,
                   total: stats.localPhotos.total,
+                  l10n: l10n,
                 ),
               ),
               const SizedBox(width: 8),
@@ -673,6 +679,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   local: stats.localPhotos.withProduct,
                   off: stats.offPhotos.withProduct,
                   total: stats.localPhotos.total,
+                  l10n: l10n,
                 ),
               ),
             ],
@@ -744,6 +751,7 @@ class _PhotoCard extends StatelessWidget {
     required this.local,
     required this.off,
     required this.total,
+    required this.l10n,
   });
 
   final IconData icon;
@@ -751,6 +759,7 @@ class _PhotoCard extends StatelessWidget {
   final int local;
   final int off;
   final int total;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -765,12 +774,12 @@ class _PhotoCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
             Text(
-              '$local / $total',
+              l10n.photoCoverageRatio(local, total),
               style: Theme.of(context).textTheme.titleSmall,
             ),
             if (off > 0)
               Text(
-                'OFF: $off',
+                l10n.offPhotosCount(off),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                 ),

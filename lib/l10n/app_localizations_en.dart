@@ -677,4 +677,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get issueDuplicate => 'You recently submitted a similar report.';
+
+  @override
+  String get nutriScore => 'Nutri-Score';
+
+  @override
+  String photoCoverageRatio(Object local, Object total) {
+    return '$local / $total';
+  }
+
+  @override
+  String offPhotosCount(Object off) {
+    return 'OFF: $off';
+  }
+
+  @override
+  String get couldNotAttachImage => 'Could not attach image';
+
+  @override
+  String get appVersionLabel => 'App version';
+
+  @override
+  String get osLabel => 'OS';
 }

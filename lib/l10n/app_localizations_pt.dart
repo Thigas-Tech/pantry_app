@@ -1277,4 +1277,26 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get productPhoto => 'Produto';
+
+  @override
+  String get nutriScore => 'Nutri-Score';
+
+  @override
+  String photoCoverageRatio(Object local, Object total) {
+    return '$local / $total';
+  }
+
+  @override
+  String offPhotosCount(Object off) {
+    return 'OFF: $off';
+  }
+
+  @override
+  String get couldNotAttachImage => 'Não foi possível anexar a imagem';
+
+  @override
+  String get appVersionLabel => 'Versão do app';
+
+  @override
+  String get osLabel => 'SO';
 }
