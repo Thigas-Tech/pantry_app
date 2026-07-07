@@ -7,7 +7,20 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Section headings in CHANGELOG.md that describe internal development
 /// work and should not be displayed to end users in the in-app sheet.
-const _devOnlySections = {'Documentation', 'Code health'};
+///
+/// When adding a new dev-only section heading to the changelog, add it
+/// here as well so it is hidden from the What's New sheet.
+const _devOnlySections = {
+  'Code health',
+  'CSV',
+  'CSV export/import',
+  'Database',
+  'Dependencies',
+  'Documentation',
+  'Roadmap',
+  'Testing and coverage',
+  'Tests',
+};
 
 /// Shows a bottom sheet listing changelog entries since the last seen version.
 ///

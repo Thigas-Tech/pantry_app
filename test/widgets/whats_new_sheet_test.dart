@@ -256,5 +256,106 @@ void main() {
       // Content renders without overflow or contrast issues in dark mode.
       expect(find.text('Works in dark mode'), findsOneWidget);
     });
+
+    testWidgets('hides dev-only section headers', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              return SizedBox(
+                height: 600,
+                child: ElevatedButton(
+                  onPressed: () => showWhatsNewSheet(
+                    context,
+                    const [
+                      ChangelogEntry(
+                        version: '0.1.0',
+                        content:
+                            '### Tests\n'
+                            '- Unit test added\n'
+                            '### Documentation\n'
+                            '- Updated docs\n'
+                            '### Dependencies\n'
+                            '- Bumped foo to 2.0\n',
+                      ),
+                    ],
+                  ),
+                  child: const Text('Open'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      // Dev-only section headers are hidden.
+      expect(find.text('Tests'), findsNothing);
+      expect(find.text('Documentation'), findsNothing);
+      expect(find.text('Dependencies'), findsNothing);
+      // Content under those sections is also hidden.
+      expect(find.text('Unit test added'), findsNothing);
+      expect(find.text('Updated docs'), findsNothing);
+      expect(find.text('Bumped foo to 2.0'), findsNothing);
+    });
+
+    testWidgets('shows user-facing section headers', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) {
+              return SizedBox(
+                height: 600,
+                child: ElevatedButton(
+                  onPressed: () => showWhatsNewSheet(
+                    context,
+                    const [
+                      ChangelogEntry(
+                        version: '0.1.0',
+                        content:
+                            '### Enhancements\n'
+                            '- New feature\n'
+                            '### Bugfixes\n'
+                            '- Fixed crash\n',
+                      ),
+                    ],
+                  ),
+                  child: const Text('Open'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      // User-facing section headers and content are visible.
+      expect(find.text('Enhancements'), findsOneWidget);
+      expect(find.text('New feature'), findsOneWidget);
+      expect(find.text('Bugfixes'), findsOneWidget);
+      expect(find.text('Fixed crash'), findsOneWidget);
+    });
   });
 }

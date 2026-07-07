@@ -102,7 +102,7 @@ Future<void> _handleAppUpdate() async {
     final lastSeenHash = prefs.getString('changelog_content_hash');
 
     if (lastSeenHash != null && lastSeenHash != contentHash) {
-      unawaited(prefs.setString('changelog_show_pending', 'true'));
+      await prefs.setString('changelog_show_pending', 'true');
       logInfo('Changelog content changed — flagged for display');
     }
     await prefs.setString('changelog_content_hash', contentHash);

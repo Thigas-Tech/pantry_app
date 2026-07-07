@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
@@ -62,6 +63,10 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     super.dispose();
   }
 
+  /// The [SharedPreferences] key for tracking which version the user last
+  /// saw in the auto‑displayed changelog sheet.
+  static const _changelogLastSeenVersionKey = 'changelog_last_seen_version';
+
   Future<void> _showChangelogIfPending() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -80,20 +85,36 @@ class _PantryShellState extends ConsumerState<PantryShell> {
         return;
       }
 
-      // Content-hash detection already guarantees this runs only when the
-      // changelog content has changed. Show all parsed entries.
-      logInfo('Showing changelog: ${allEntries.length} entries');
+      // Show only the entries the user has NOT seen yet — not the
+      // entire changelog history. [Unreleased] is always included.
+      final info = await PackageInfo.fromPlatform();
+      final currentVersion = '${info.version}+${info.buildNumber}';
+      final lastSeen = prefs.getString(_changelogLastSeenVersionKey) ?? '0.0.0';
+      final unseen = parser.filterUnseen(allEntries, lastSeen, currentVersion);
 
-      // Wait for the first frame so the sheet overlay has a valid context.
+      if (unseen.isEmpty) {
+        logInfo('All changelog entries already seen — skipping');
+        await prefs.setString('changelog_show_pending', 'false');
+        return;
+      }
+
+      logInfo(
+        'Showing changelog: ${unseen.length} entries '
+        '(last seen $lastSeen → $currentVersion)',
+      );
+
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        await showWhatsNewSheet(context, allEntries);
+        await showWhatsNewSheet(context, unseen);
         await prefs.setString('changelog_show_pending', 'false');
+        await prefs.setString(
+          _changelogLastSeenVersionKey,
+          currentVersion,
+        );
       });
     } on Exception catch (e) {
       logError('Failed to show changelog: $e');
-      // Reset the flag so it doesn't block the next launch.
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('changelog_show_pending', 'false');
