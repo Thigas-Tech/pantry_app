@@ -10,33 +10,24 @@ categories:
   - title: Breaking Changes
     when:
       - label: breaking
+    semver-increment: major
   - title: Features
     when:
       - label: feature
+    semver-increment: minor
   - title: Bug Fixes
     when:
       - label: fix
+    semver-increment: patch
   - title: Enhancements
     when:
       - label: enhancement
+    semver-increment: minor
   - title: Documentation
     when:
       - label: documentation
+    semver-increment: patch
   - title: Maintenance
     when:
       - label: maintenance
-
-version-resolver:
-  major:
-    labels:
-      - 'breaking'
-  minor:
-    labels:
-      - 'feature'
-      - 'enhancement'
-  patch:
-    labels:
-      - 'fix'
-      - 'documentation'
-      - 'maintenance'
-  default: patch
+    semver-increment: patch
