@@ -1361,6 +1361,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get removeScreenshot;
+
+  /// No description provided for @nutriScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutri-Score'**
+  String get nutriScore;
+
+  /// No description provided for @photoCoverageRatio.
+  ///
+  /// In en, this message translates to:
+  /// **'{local} / {total}'**
+  String photoCoverageRatio(Object local, Object total);
+
+  /// No description provided for @offPhotosCount.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF: {off}'**
+  String offPhotosCount(Object off);
+
+  /// No description provided for @couldNotAttachImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not attach image'**
+  String get couldNotAttachImage;
+
+  /// No description provided for @appVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'App version'**
+  String get appVersionLabel;
+
+  /// No description provided for @osLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'OS'**
+  String get osLabel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

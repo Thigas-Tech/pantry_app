@@ -343,7 +343,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     } on Exception catch (e) {
       logWarning('Image pick failed: $e');
       if (mounted) {
-        SnackbarHelper.showWarning(context, 'Could not attach image');
+        final l10n = AppLocalizations.of(context)!;
+        SnackbarHelper.showWarning(context, l10n.couldNotAttachImage);
       }
     }
   }
@@ -377,7 +378,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     try {
       final label = _issueType.gitHubLabel();
       final effectiveLabel = label.isEmpty ? null : label;
-      final body = _buildBody(description);
+      final body = _buildBody(description, l10n);
 
       final screenshotBytesList = <List<int>>[];
       for (final path in _screenshotPaths) {
@@ -421,7 +422,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     }
   }
 
-  String _buildBody(String description) {
+  String _buildBody(String description, AppLocalizations l10n) {
     final buffer = StringBuffer(description);
 
     if (_includeDeviceInfo) {
@@ -429,9 +430,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         ..writeln()
         ..writeln()
         ..writeln('```')
-        ..writeln('App version: 1.0')
+        ..writeln('${l10n.appVersionLabel}: 1.0')
         ..writeln(
-          'OS: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
+          '${l10n.osLabel}: '
+          '${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
         )
         ..writeln('```');
     }
@@ -442,13 +444,14 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   Future<void> _openIssueUrl() async {
     if (_submittedIssueUrl == null) return;
     final url = Uri.parse(_submittedIssueUrl!);
+    final l10n = AppLocalizations.of(context)!;
     if (await launcher.canLaunchUrl(url) && mounted) {
       await launcher.launchUrl(
         url,
         mode: launcher.LaunchMode.externalApplication,
       );
     } else if (mounted) {
-      SnackbarHelper.showError(context, 'Could not open link');
+      SnackbarHelper.showError(context, l10n.couldNotOpenLink);
     }
   }
 }

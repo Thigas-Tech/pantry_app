@@ -346,5 +346,22 @@
   "issueSubmissionFailed": "Falha ao enviar. Tente novamente.",
   "viewOnGitHub": "Ver no GitHub",
   "issueDuplicate": "Você enviou um relato similar recentemente.",
-  "removeScreenshot": "Remover"
+  "removeScreenshot": "Remover",
+  "nutriScore": "Nutri-Score",
+  "photoCoverageRatio": "{local} / {total}",
+  "@photoCoverageRatio": {
+    "placeholders": {
+      "local": {},
+      "total": {}
+    }
+  },
+  "offPhotosCount": "OFF: {off}",
+  "@offPhotosCount": {
+    "placeholders": {
+      "off": {}
+    }
+  },
+  "couldNotAttachImage": "Não foi possível anexar a imagem",
+  "appVersionLabel": "Versão do app",
+  "osLabel": "SO"
 }

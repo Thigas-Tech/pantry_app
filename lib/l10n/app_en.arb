@@ -350,5 +350,22 @@
   "viewOnGitHub": "View on GitHub",
   "retry": "Retry",
   "issueDuplicate": "You recently submitted a similar report.",
-  "removeScreenshot": "Remove"
+  "removeScreenshot": "Remove",
+  "nutriScore": "Nutri-Score",
+  "photoCoverageRatio": "{local} / {total}",
+  "@photoCoverageRatio": {
+    "placeholders": {
+      "local": {},
+      "total": {}
+    }
+  },
+  "offPhotosCount": "OFF: {off}",
+  "@offPhotosCount": {
+    "placeholders": {
+      "off": {}
+    }
+  },
+  "couldNotAttachImage": "Could not attach image",
+  "appVersionLabel": "App version",
+  "osLabel": "OS"
 }

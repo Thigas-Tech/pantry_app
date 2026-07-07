@@ -12,6 +12,13 @@
   `lib/services/github_issue_service.dart`, `lib/l10n/app_pt.arb`,
   `lib/l10n/app_localizations_pt.dart`, `lib/l10n/app_localizations.dart`,
   `lib/l10n/app_localizations_en.dart`)
+- **Untranslated strings in stats and feedback screens**: Hardcoded English
+  strings in the Nutri-Score section title, photo completeness cards, image
+  attach error, link open error, and device info labels (`App version`, `OS`)
+  are now localized via 6 new ARB keys (`nutriScore`, `photoCoverageRatio`,
+  `offPhotosCount`, `couldNotAttachImage`, `appVersionLabel`, `osLabel`).
+  Wired up the existing-but-unused `couldNotOpenLink` key.
+  (`lib/screens/stats_screen.dart`, `lib/screens/feedback_screen.dart`)
 
 ### Changed
 - **Inventory switcher redesign**: Replaced plain `PopupMenuButton` icon with
