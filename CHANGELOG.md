@@ -8,7 +8,20 @@
 - **AMOLED dark mode**: New `amoledDarkMode` toggle in Settings > Appearance. When enabled with dark mode, surfaces use pure-black (`Colors.black`) instead of the default dark surface colours, reducing power consumption on AMOLED displays. One-time nudge dialog on first launch when device is in light mode. (`lib/providers/settings_provider.dart`, `lib/main.dart`, `lib/screens/settings_screen.dart`, `lib/screens/pantry_shell.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`)
 - **Settings & Theme persistence**: `ThemeModeNotifier` and `SettingsNotifier` now persist to `SharedPreferences` on every change and reload on startup. Fixes reset-on-restart bug. (`lib/providers/theme_provider.dart`, `lib/providers/settings_provider.dart`)
 - **Small-screen golden test**: New golden test for `HomeScreen` at 360dp width with 1.0 text scale factor. Overrides 4 providers with mock data covering expired, expiring-soon, good, and no-expiry items. (`test/screens/home_screen_golden_test.dart`, `test/screens/goldens/home_screen_360dp.png`)
-- **Inactivity reminder notification**: Sends a daily notification at 9 AM if the user has not added any product for 10+ days (configurable in Settings). Tracks last add date via `MAX(date_added)` from the inventory table. New `inactivity_channel` (Importance.low) separate from expiry channel. Toggle + threshold picker in Settings. Rescheduled on product add and app startup. Permission-denied warning shown once via SnackBar. (`lib/screens/settings_screen.dart`, `lib/services/notification_service.dart`, `lib/providers/settings_provider.dart`, `lib/database/inventory_dao.dart`, `lib/database/database_helper.dart`, `lib/main.dart`, `lib/screens/pantry_shell.dart`, `lib/screens/product_detail_screen.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`)
+- **Inactivity reminder notification**: Sends a daily notification at 9 AM if the user has not added any product for 10+ days (configurable in Settings). Tracks last add date via `MAX(date_added)` from the inventory table. New `inactivity_channel` (Importance.low) separate from expiry channel. Toggle + threshold picker in Settings. Rescheduled on product add and app startup. Permission-denied warning shown once via SnackBar. (`lib/screens/settings_screen.dart`, `lib/services/notification_service.dart`, `lib/providers/settings_provider.dart`, `lib/database/inventory_dao.dart`, `lib/database/database_helper.dart`, `lib/main.dart`, `lib/screens/pantry_shell.dart`,     `lib/screens/product_detail_screen.dart`, `lib/l10n/app_en.arb`,
+    `lib/l10n/app_pt.arb`)
+- **Play Store CD pipeline**: New CI workflow (`.github/workflows/deploy-to-playstore.yml`)
+   builds signed release AAB and APK on `v*.*.*` tags, uploads to Google Play
+   Console internal track via `r0adkll/upload-google-play`. Release signing
+   configured in `build.gradle.kts` reading from `android/key.properties`
+   (with env-var fallback for CI). (`agents_docs/playstore.md`,
+   `android/key.properties`, `android/app/build.gradle.kts`, `scripts/inject_env.sh`)
+- **Monetization reference docs**: Created `agents_docs/monetization.md`
+   covering AdMob, UMP consent, IAP donations, Pro subscriptions, and
+   Firebase cloud backup. All features deferred pending legal/accounting
+   review. (`agents_docs/monetization.md`)
+- **`.gitignore` updated**: Added `android/key.properties` and `*.jks`
+   to prevent accidental credential commits.
 
 ### Changed
 - **CI/CD workflow**: `build.yml` now triggers on pull requests to main (in addition to push). On PRs, only debug APK is built (skips release builds and publishing). Testing job only runs on push. Patrol E2E placeholder comment added. (`build.yml`)

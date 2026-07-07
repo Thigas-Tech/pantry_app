@@ -1,0 +1,103 @@
+name: Deploy to Play Store
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  security_hardening:
+    name: Check security hardening
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - name: Ensure SHA pinned actions
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@3db98c0363e2fa5df3e1c4c471777a7c10b24cc9
+
+  deploy:
+    name: Build and upload to Google Play
+    needs: security_hardening
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2.23.0
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get Flutter packages
+        run: flutter pub get
+
+      - name: Analyze Flutter
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Run Flutter tests
+        run: flutter test --concurrency=8
+
+      - name: Inject environment
+        env:
+          OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
+          OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+          FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
+        run: |
+          ./scripts/inject_env.sh \
+            "${OFF_USER_ID:-}" \
+            "${OFF_PASSWORD:-}" \
+            "${CONTACT_EMAIL:-pantry-app@example.com}" \
+            "false" \
+            "${FEEDBACK_TOKEN:-}"
+
+      - name: Decode upload keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "${ANDROID_KEYSTORE_BASE64}" ]; then
+            echo "${ANDROID_KEYSTORE_BASE64}" | base64 -d > android/upload-keystore.jks
+            echo "Keystore decoded (${#ANDROID_KEYSTORE_BASE64} bytes base64)"
+          else
+            echo "ANDROID_KEYSTORE_BASE64 secret is empty — signing will fail"
+            exit 1
+          fi
+
+      - name: Decode key properties
+        env:
+          KEY_PROPERTIES_BASE64: ${{ secrets.KEY_PROPERTIES_BASE64 }}
+        run: |
+          if [ -n "${KEY_PROPERTIES_BASE64}" ]; then
+            echo "${KEY_PROPERTIES_BASE64}" | base64 -d > android/key.properties
+            echo "Key properties decoded"
+          else
+            echo "KEY_PROPERTIES_BASE64 secret is empty — signing will fail"
+            exit 1
+          fi
+
+      - name: Build release App Bundle
+        run: flutter build appbundle --release
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload AAB to Google Play Console
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5  # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT }}
+          packageName: com.thigas_tech.pantry_app
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: release-artifacts
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 90
