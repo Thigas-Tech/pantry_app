@@ -117,7 +117,7 @@ abstract class InventoryItem with _$InventoryItem {
   /// Creates an [InventoryItem] from a JSON map.
   ///
   /// The map is expected to contain the keys `expiry_date`, `date_added`, and
-  /// `inventory_id` (as configured by the [@JsonKey] annotations). This
+  /// `inventory_id` (as configured by the [JsonKey] annotations). This
   /// factory is used when deserializing data from the database (via the raw
   /// row map) or from API responses.
   factory InventoryItem.fromJson(Map<String, dynamic> json) =>
