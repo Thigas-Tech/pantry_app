@@ -46,6 +46,8 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 0. Follow every rule. No exceptions.
 1. Check TODO.md before starting new work.
 2. /// doc comments on every public class, constructor, field, and method.
+   These feed the public GitHub Wiki (see agents_docs/wiki.md). Write them
+   as proper sentences — they are the user-facing API documentation.
 3. Tests for ALL new code. Use mocktail. Place in test/ subdirectory.
 4. After freezed or l10n changes: dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n
 5. Localize: all user-visible strings in lib/l10n/app_en.arb. Never hardcode English.
@@ -88,3 +90,4 @@ Read these when implementing specific features:
 - Project architecture -> ARCHITECTURE.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
 - OFF test data -> agents_docs/off_test_products.*
+- Wiki conventions -> agents_docs/wiki.md
