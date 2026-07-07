@@ -17,25 +17,14 @@ Run BEFORE every local commit. Fix ALL issues:
      - CI / Run static testing       (lint + formatting)
      - CI / Run unit testing
      - CI / Run widget testing
-     - Build / Build debug apk       (from build.yml on PR)
-  4. Run emulator smoke test (1080x1920, API 33+):
-     - Scanner opens, scan or enter "3017620422003" (Nutella)
-     - Nutella detail loads: image, Nutri-Score E, ingredients
-     - Search "nutella" returns the product
-     - Add to inventory with expiry -> works
-     - Stats screen loads charts
-     - Settings: toggle theme, toggle notifications, set retention
-     - Settings -> Send Feedback -> submit test issue
-     - Verify issue appears on GitHub Issues tab
-     - Delete the test issue from GitHub
-  5. Convert draft PR -> Ready for Review.
-  6. Merge via GitHub UI (Squash and merge).
-  7. Delete remote branch; git checkout main && git pull
+      - Build / Build debug apk       (from build.yml on PR)
+   4. Convert draft PR -> Ready for Review.
+   5. Merge via GitHub UI (Squash and merge).
+   6. Delete remote branch; git checkout main && git pull
 
   Notes:
     - Feedback -> GitHub requires FEEDBACK_TOKEN in .env
     - Reference test product data in agents_docs/off_test_products.*
-    - Reference performance guide in agents_docs/performance_guide.md
 
 ## Post-commit gate
 
@@ -71,7 +60,7 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 
 - Branch from main: git checkout -b feat/description
 - Implement -> pre-commit gate -> push
-- Open draft PR -> wait for CI -> verify emulator -> convert to ready -> merge
+- Open draft PR -> wait for CI -> convert to ready -> merge
 - Never commit directly to main.
 - After merge: git checkout main && git pull
 
@@ -98,5 +87,4 @@ Read these when implementing specific features:
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
 - Project architecture -> ARCHITECTURE.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
-- Emulator testing -> agents_docs/emulator_instructions.md
 - OFF test data -> agents_docs/off_test_products.*
