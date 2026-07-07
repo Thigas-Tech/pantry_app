@@ -748,7 +748,7 @@ void main() {
       ],
     );
 
-    expect(find.byType(FilterChip), findsNothing);
+    expect(find.byType(SegmentedButton), findsNothing);
   });
 
   testWidgets('selecting category filter hides other items', (tester) async {

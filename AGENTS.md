@@ -3,10 +3,26 @@
 ## Pre-commit gate (NEVER SKIP)
 
 Run before EVERY commit. Fix ALL issues:
+  git fetch && git pull --rebase
   flutter analyze --fatal-infos --fatal-warnings
   flutter test --concurrency=8
   flutter build apk --debug
   dart doc .
+
+## Post-commit gate
+
+Run AFTER every commit:
+  flutter test --coverage --concurrency=8
+  lcov --remove coverage/lcov.info \
+    '*.g.dart' '*.freezed.dart' '*.gr.dart' '*.config.dart' \
+    '*app_localizations*.dart' 'test/*' \
+    -o coverage/lcov_cleaned.info --ignore-errors unused
+  genhtml coverage/lcov_cleaned.info \
+    -o coverage/html --ignore-errors source --num-spaces 2 --branch-coverage
+  lcov --summary coverage/lcov_cleaned.info
+
+Report at coverage/html/index.html
+Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.md
 
 ## Rules
 
@@ -22,7 +38,6 @@ Run before EVERY commit. Fix ALL issues:
 9. Audit every plan for pitfalls before writing code.
 10. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
 11. Never ! on SQL aggregate results. Use ?? fallback instead.
-12. Sync before work: git fetch && git pull --rebase.
 
 ## Code style
 

@@ -683,6 +683,8 @@ class _InventoryList extends ConsumerStatefulWidget {
 }
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
+  static const _allSentinel = '__all__';
+
   String _searchQuery = '';
   String? _selectedCategory;
   List<InventoryWithProduct>? _cachedFiltered;
@@ -1020,32 +1022,27 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
         if (categories.length >= 2)
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-            child: SizedBox(
-              height: 36,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 1 + categories.length,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return FilterChip(
-                      label: Text(l10n.filterAll),
-                      selected: _selectedCategory == null,
-                      onSelected: (_) =>
-                          setState(() => _selectedCategory = null),
-                    );
-                  }
-                  final cat = categories.elementAt(index - 1);
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 6),
-                    child: FilterChip(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: _allSentinel,
+                    label: Text(l10n.filterAll),
+                  ),
+                  for (final cat in categories)
+                    ButtonSegment(
+                      value: cat,
                       label: Text(_displayCategory(cat)),
-                      selected: _selectedCategory == cat,
-                      onSelected: (selected) => setState(
-                        () => _selectedCategory = selected ? cat : null,
-                      ),
-                      visualDensity: VisualDensity.compact,
                     ),
-                  );
+                ],
+                selected: {_selectedCategory ?? _allSentinel},
+                onSelectionChanged: (selected) {
+                  setState(() {
+                    _selectedCategory = selected.contains(_allSentinel)
+                        ? null
+                        : selected.first;
+                  });
                 },
               ),
             ),

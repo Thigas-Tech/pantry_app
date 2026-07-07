@@ -8,6 +8,7 @@ void main() {
   });
 
   group('AppConfig', () {
+    /// Verifies OFF_USER_ID returns empty string when not configured.
     test('returns empty string for missing OFF_USER_ID', () {
       expect(AppConfig.offUserId, '');
     });
@@ -16,6 +17,7 @@ void main() {
       expect(AppConfig.offPassword, '');
     });
 
+    /// Verifies missing CONTACT_EMAIL returns the default email.
     test('returns default email for missing CONTACT_EMAIL', () {
       expect(AppConfig.contactEmail, 'pantry-app@example.com');
     });
@@ -39,6 +41,26 @@ void main() {
       expect(AppConfig.offPassword, 'secret');
       expect(AppConfig.contactEmail, 'dev@test.com');
       expect(AppConfig.useOffStaging, true);
+    });
+
+    /// Verifies FEEDBACK_TOKEN returns empty string when not set.
+    test('returns empty string for missing FEEDBACK_TOKEN', () {
+      expect(AppConfig.feedbackToken, '');
+    });
+
+    /// Verifies GITHUB_OWNER returns default when not set.
+    test('returns default for missing GITHUB_OWNER', () {
+      expect(AppConfig.githubOwner, 'Thigas-Tech');
+    });
+
+    /// Verifies GITHUB_REPO returns default when not set.
+    test('returns default for missing GITHUB_REPO', () {
+      expect(AppConfig.githubRepo, 'pantry_app');
+    });
+
+    /// Verifies FEEDBACK_ENABLED returns true as default.
+    test('returns true for missing FEEDBACK_ENABLED', () {
+      expect(AppConfig.feedbackEnabled, true);
     });
   });
 }

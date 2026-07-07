@@ -166,8 +166,35 @@ infrastructure or external server hosting are listed last.
 - [ ] **Dark mode nudge for AMOLED** — show a one-time prompt to AMOLED
   users suggesting dark mode (up to 60% less power with black pixels).
   Detect via `MediaQuery.platformBrightness` at launch.
-- [ ] **SegmentedButton** — replace `FilterChip` row on home screen with
-  `SegmentedButton` for multi-category selection.
+- [x] **SegmentedButton** — replaced `FilterChip` row on home screen with
+  M3 `SegmentedButton` inside horizontal `SingleChildScrollView`.
+- [ ] **OFF language & localization strategy** — product names, categories,
+  and ingredients from Open Food Facts are currently hardcoded to English
+  regardless of the user's app locale. Define a strategy to fetch and
+  display OFF data in the user's preferred language.
+
+  **Scope**:
+  - Make OFF query language dynamic via `offLanguageFromLocale()` utility.
+  - Add `languageCode` field to `Product` model.
+  - Update `stats_provider.dart` to filter by locale's prefix, with `en:`
+    fallback.
+  - Handle DB migration: new `language_code` column (v11 → v12), legacy
+    rows default to `'en'`.
+  - Lazy re-fetch: "Show in [lang]" `ActionChip` on product detail when
+    `product.languageCode` != current locale.
+  - Manual products (`source: 'manual'`) never overwritten.
+
+  **Pitfalls & edge cases**:
+  - `OpenFoodFactsLanguage.PORTUGUESE` has `offTag: 'pt'` — no Brazilian
+    Portuguese variant exists. `pt_BR` users get European Portuguese data.
+  - OFF silently falls back to English when data unavailable in requested
+    language. Store *requested* `languageCode`, not returned.
+  - Overwrite vs per-language storage: (A) overwrite is simpler, (B)
+    per-language table is more robust. Prefer (A) for now.
+  - Ingredients and numeric nutrients handled correctly across languages.
+  - Offline guard: show snackbar if user taps "Show in [lang]" while offline.
+  - Keep `OpenFoodAPIConfiguration.globalLanguages` as `[ENGLISH]` — only
+    change per-query language for safety.
 - [x] **Autocomplete** — add autocomplete suggestions to the home screen
   search bar based on cached product names.
 - [x] **InteractiveViewer** — enable pinch-to-zoom on product

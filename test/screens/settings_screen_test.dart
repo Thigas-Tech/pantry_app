@@ -9,6 +9,8 @@
 ///   entering a valid number and saving updates the retention period.
 /// - Tapping the manage inventories tile navigates to
 ///   [ManageInventoriesScreen].
+/// - Expiring-soon days tile opens and saves a dialog value.
+/// - "What's New" and "Send Feedback" tiles are present.
 ///
 /// All tests use the `pumpApp` helper.  We override `themeModeProvider` and
 /// `settingsProvider` with controlled fakes to isolate the screen from real
@@ -48,6 +50,8 @@ class MockNotificationService extends Mock implements NotificationService {}
 // ---------- Tests -----------------------------------------------------------
 
 void main() {
+  /// Verifies the theme mode is displayed as a subtitle under the
+  /// "Appearance" tile.
   testWidgets('displays current theme mode as subtitle', (tester) async {
     await pumpApp(
       tester,
@@ -62,6 +66,8 @@ void main() {
     expect(find.text('system'), findsOneWidget);
   });
 
+  /// Verifies tapping the theme tile opens a dialog with radio buttons,
+  /// and selecting one updates the theme and shows a snackbar.
   testWidgets('tapping theme tile opens dialog and changes theme', (
     tester,
   ) async {
@@ -93,6 +99,8 @@ void main() {
     expect(find.text('Theme: dark'), findsOneWidget);
   });
 
+  /// Verifies the notification switch toggles between enabled/disabled
+  /// and displays the appropriate snackbar.
   testWidgets('notification switch toggles and shows snackbar', (
     tester,
   ) async {
@@ -125,6 +133,8 @@ void main() {
     expect(find.text('Notifications disabled.'), findsOneWidget);
   });
 
+  /// Verifies the data retention tile opens a dialog, accepts a new
+  /// value, saves it, and shows a confirmation snackbar.
   testWidgets('tapping data retention opens dialog and saves value', (
     tester,
   ) async {
@@ -163,6 +173,8 @@ void main() {
     expect(find.text('Retention period set to 90 days.'), findsOneWidget);
   });
 
+  /// Verifies tapping the manage inventories tile navigates to
+  /// [ManageInventoriesScreen].
   testWidgets(
     'tapping manage inventories navigates to ManageInventoriesScreen',
     (tester) async {
@@ -175,21 +187,18 @@ void main() {
         ],
       );
 
-      // Expand the "Data Management" section.
       await tester.tap(find.byIcon(Icons.timer));
       await tester.pumpAndSettle();
-
-      // Tap the manage inventories tile.
       await tester.tap(find.text('Manage Inventories'));
-      // Give the navigation a moment to start – we don't use pumpAndSettle
-      // because ManageInventoriesScreen may run forever‑pending async work.
       await tester.pump();
       await tester.pump();
 
-      // The navigator should now show ManageInventoriesScreen.
       expect(find.byType(ManageInventoriesScreen), findsOneWidget);
     },
   );
+
+  /// Verifies that cancelling the retention dialog does not change the
+  /// current value and shows no snackbar.
   testWidgets('cancelling retention dialog does not change value', (
     tester,
   ) async {
@@ -220,5 +229,39 @@ void main() {
     expect(find.byType(AlertDialog), findsNothing);
     // No "Retention period set" message
     expect(find.textContaining('Retention period set'), findsNothing);
+  });
+
+  /// Verifies the "What's New" tile is present.
+  testWidgets('shows what is new tile', (tester) async {
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+      ],
+    );
+
+    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.pumpAndSettle();
+
+    expect(find.text("What's new"), findsOneWidget);
+  });
+
+  /// Verifies the "Send Feedback" tile is present.
+  testWidgets('shows send feedback tile', (tester) async {
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+      ],
+    );
+
+    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Send Feedback'), findsOneWidget);
   });
 }

@@ -1355,6 +1355,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You recently submitted a similar report.'**
   String get issueDuplicate;
+
+  /// No description provided for @removeScreenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeScreenshot;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

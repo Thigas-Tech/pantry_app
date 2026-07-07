@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
@@ -22,19 +23,33 @@ class FeedbackScreen extends ConsumerStatefulWidget {
   ConsumerState<FeedbackScreen> createState() => _FeedbackScreenState();
 }
 
-enum _IssueType { bug, feature, feedback }
+/// Issue type for the feedback form.
+enum IssueType {
+  /// A bug report.
+  bug,
 
-extension _IssueTypeLabel on _IssueType {
+  /// A feature request.
+  feature,
+
+  /// General feedback that is not a bug or feature request.
+  feedback,
+}
+
+/// Convenience methods to map [IssueType] values to user-facing and
+/// API-facing labels.
+extension IssueTypeLabel on IssueType {
+  /// Returns the human-readable label for this issue type.
   String label(AppLocalizations l10n) => switch (this) {
-    _IssueType.bug => l10n.bugReport,
-    _IssueType.feature => l10n.featureRequest,
-    _IssueType.feedback => l10n.generalFeedback,
+    IssueType.bug => l10n.bugReport,
+    IssueType.feature => l10n.featureRequest,
+    IssueType.feedback => l10n.generalFeedback,
   };
 
+  /// Returns the GitHub label for this issue type.
   String gitHubLabel() => switch (this) {
-    _IssueType.bug => 'bug',
-    _IssueType.feature => 'enhancement',
-    _IssueType.feedback => '',
+    IssueType.bug => 'bug',
+    IssueType.feature => 'enhancement',
+    IssueType.feedback => '',
   };
 }
 
@@ -42,34 +57,52 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  _IssueType _issueType = _IssueType.bug;
+  IssueType _issueType = IssueType.bug;
   bool _includeDeviceInfo = false;
   bool _isSubmitting = false;
-  String? _screenshotPath;
+  final List<String> _screenshotPaths = [];
   String? _submittedIssueUrl;
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _cleanupScreenshot();
+    _cleanupAllScreenshots();
     super.dispose();
   }
 
-  void _cleanupScreenshot() {
-    if (_screenshotPath == null) return;
-    try {
-      unawaited(File(_screenshotPath!).delete());
-    } on Exception {
-      // best-effort cleanup
+  void _cleanupAllScreenshots() {
+    for (final path in _screenshotPaths) {
+      try {
+        unawaited(File(path).delete());
+      } on Exception {
+        // best-effort cleanup
+      }
     }
-    _screenshotPath = null;
+    _screenshotPaths.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isOnline = ref.watch(connectivityProvider).asData?.value ?? false;
+    final isOnline = ref.watch(connectivityProvider).value ?? false;
+    final enabled = AppConfig.feedbackEnabled;
+
+    if (!enabled) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.sendFeedback)),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              l10n.comingSoonDescription,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.sendFeedback)),
@@ -107,10 +140,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   }
 
   Widget _buildIssueTypeDropdown(AppLocalizations l10n) {
-    return DropdownButtonFormField<_IssueType>(
+    return DropdownButtonFormField<IssueType>(
       initialValue: _issueType,
       decoration: InputDecoration(labelText: l10n.issueType),
-      items: _IssueType.values.map((type) {
+      items: IssueType.values.map((type) {
         return DropdownMenuItem(value: type, child: Text(type.label(l10n)));
       }).toList(),
       onChanged: (value) {
@@ -156,40 +189,54 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       return const SizedBox.shrink();
     }
 
-    if (_screenshotPath != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.attachScreenshot, style: _labelStyle()),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  File(_screenshotPath!),
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: 12),
-              TextButton.icon(
-                onPressed: _removeScreenshot,
-                icon: const Icon(Icons.close, size: 18),
-                label: Text(l10n.retry),
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(l10n.attachScreenshot, style: _labelStyle()),
         const SizedBox(height: 8),
+        if (_screenshotPaths.isNotEmpty) ...[
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(_screenshotPaths.length, (i) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Stack(
+                  children: [
+                    Image.file(
+                      File(_screenshotPaths[i]),
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () => _removeScreenshot(i),
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(8),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 8),
+        ],
         Wrap(
           spacing: 8,
           children: [
@@ -291,7 +338,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       final picked = await picker.pickImage(source: source, imageQuality: 80);
       if (!mounted) return;
       if (picked != null) {
-        setState(() => _screenshotPath = picked.path);
+        setState(() => _screenshotPaths.add(picked.path));
       }
     } on Exception catch (e) {
       logWarning('Image pick failed: $e');
@@ -301,8 +348,13 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     }
   }
 
-  void _removeScreenshot() {
-    _cleanupScreenshot();
+  void _removeScreenshot(int index) {
+    final path = _screenshotPaths.removeAt(index);
+    try {
+      unawaited(File(path).delete());
+    } on Exception {
+      // best-effort cleanup
+    }
     setState(() {});
   }
 
@@ -327,11 +379,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       final effectiveLabel = label.isEmpty ? null : label;
       final body = _buildBody(description);
 
-      List<int>? screenshotBytes;
-      if (_screenshotPath != null) {
-        final file = File(_screenshotPath!);
+      final screenshotBytesList = <List<int>>[];
+      for (final path in _screenshotPaths) {
+        final file = File(path);
         if (await file.exists()) {
-          screenshotBytes = await file.readAsBytes();
+          screenshotBytesList.add(await file.readAsBytes());
         }
       }
 
@@ -340,7 +392,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           title: title,
           body: body,
           label: effectiveLabel,
-          screenshotBytes: screenshotBytes,
+          screenshotBytesList: screenshotBytesList,
         );
         if (mounted) {
           setState(() => _submittedIssueUrl = url);
@@ -351,7 +403,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           title: title,
           body: body,
           label: effectiveLabel,
-          screenshotBytes: screenshotBytes,
+          screenshotBytesList: screenshotBytesList,
         );
         if (mounted) {
           SnackbarHelper.showWarning(context, l10n.issueQueuedOffline);

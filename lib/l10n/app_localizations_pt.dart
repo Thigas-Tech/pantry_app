@@ -592,10 +592,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noCategories => 'Nenhuma categoria';
 
   @override
-  String get statsEmptyTitle => 'No items to analyze';
+  String get statsEmptyTitle => 'Nenhum item para analisar';
 
   @override
-  String get statsEmptySubtitle => 'Add products to your pantry to see statistics here.';
+  String get statsEmptySubtitle => 'Adicione produtos à sua despensa para ver estatísticas aqui.';
 
   @override
   String get addedThisWeekLabel => 'Esta semana';
@@ -619,64 +619,67 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productPhoto => 'Produto';
 
   @override
-  String get sendFeedback => 'Send Feedback';
+  String get sendFeedback => 'Enviar Feedback';
 
   @override
-  String get issueType => 'Issue type';
+  String get issueType => 'Tipo de problema';
 
   @override
-  String get bugReport => 'Bug Report';
+  String get bugReport => 'Relato de Bug';
 
   @override
-  String get featureRequest => 'Feature Request';
+  String get featureRequest => 'Sugestão de Funcionalidade';
 
   @override
-  String get generalFeedback => 'General Feedback';
+  String get generalFeedback => 'Feedback Geral';
 
   @override
-  String get issueTitle => 'Title';
+  String get issueTitle => 'Título';
 
   @override
-  String get issueTitleRequired => 'Title is required (min 5 characters)';
+  String get issueTitleRequired => 'Título obrigatório (mín. 5 caracteres)';
 
   @override
-  String get issueDescription => 'Description';
+  String get issueDescription => 'Descrição';
 
   @override
-  String get issueDescriptionRequired => 'Description is required (min 10 characters)';
+  String get issueDescriptionRequired => 'Descrição obrigatória (mín. 10 caracteres)';
 
   @override
-  String get attachScreenshot => 'Attach screenshot';
+  String get attachScreenshot => 'Anexar captura de tela';
 
   @override
-  String get takePhoto => 'Take photo';
+  String get takePhoto => 'Tirar foto';
 
   @override
-  String get chooseFromGallery => 'Choose from gallery';
+  String get chooseFromGallery => 'Escolher da galeria';
 
   @override
-  String get includeDeviceInfo => 'Include device info';
+  String get includeDeviceInfo => 'Incluir informações do dispositivo';
 
   @override
-  String get sending => 'Sending...';
+  String get sending => 'Enviando...';
 
   @override
-  String get issueCreate => 'Create issue';
+  String get issueCreate => 'Criar issue';
 
   @override
-  String get issueSubmitted => 'Thanks! Your report has been submitted.';
+  String get issueSubmitted => 'Obrigado! Seu relato foi enviado.';
 
   @override
-  String get issueQueuedOffline => 'You are offline. Your report will be submitted when you are back online.';
+  String get issueQueuedOffline => 'Você está offline. Seu relato será enviado quando você estiver online.';
 
   @override
-  String get issueSubmissionFailed => 'Failed to submit. Please try again.';
+  String get issueSubmissionFailed => 'Falha ao enviar. Tente novamente.';
 
   @override
-  String get viewOnGitHub => 'View on GitHub';
+  String get viewOnGitHub => 'Ver no GitHub';
 
   @override
-  String get issueDuplicate => 'You recently submitted a similar report.';
+  String get issueDuplicate => 'Você enviou um relato similar recentemente.';
+
+  @override
+  String get removeScreenshot => 'Remover';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

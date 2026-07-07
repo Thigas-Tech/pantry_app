@@ -677,4 +677,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get issueDuplicate => 'You recently submitted a similar report.';
+
+  @override
+  String get removeScreenshot => 'Remove';
 }

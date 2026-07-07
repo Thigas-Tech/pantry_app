@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -148,11 +149,12 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(l10n.whatsNewDismiss),
                 onTap: () => _showWhatsNew(context),
               ),
-              ListTile(
-                leading: const Icon(Icons.bug_report_outlined),
-                title: Text(l10n.sendFeedback),
-                onTap: () => _sendFeedback(context),
-              ),
+              if (AppConfig.feedbackEnabled)
+                ListTile(
+                  leading: const Icon(Icons.bug_report_outlined),
+                  title: Text(l10n.sendFeedback),
+                  onTap: () => _sendFeedback(context),
+                ),
             ],
           ),
         ],

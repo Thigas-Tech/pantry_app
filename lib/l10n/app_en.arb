@@ -349,5 +349,6 @@
   "issueSubmissionFailed": "Failed to submit. Please try again.",
   "viewOnGitHub": "View on GitHub",
   "retry": "Retry",
-  "issueDuplicate": "You recently submitted a similar report."
+  "issueDuplicate": "You recently submitted a similar report.",
+  "removeScreenshot": "Remove"
 }

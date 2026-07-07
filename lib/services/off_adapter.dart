@@ -15,6 +15,10 @@ import 'package:pantry_app/utils/logger.dart';
 /// URI selection per call (inspired by smooth-app's explicit
 /// [off.UriProductHelper] pattern).
 ///
+/// Each SDK static call can be overridden via optional function parameters
+/// in the constructor for testing.  When omitted they default to the real
+/// [off.OpenFoodAPIClient] methods.
+///
 /// ## Read vs write users
 ///
 /// - [getByBarcode] and [searchProducts] use a test user
@@ -30,10 +34,73 @@ class OffAdapter {
   /// If [useStaging] is `true`, API calls target the OFF staging server
   /// (`world.openfoodfacts.net`); otherwise they target production
   /// (`world.openfoodfacts.org`).
-  OffAdapter({required this.useStaging});
+  ///
+  /// Each `on*` parameter overrides the corresponding SDK static call
+  /// for testing.  When omitted the real SDK method is used.
+  OffAdapter({
+    required this.useStaging,
+    Future<off.ProductResultV3> Function(
+      off.ProductQueryConfiguration, {
+      off.User? user,
+      off.UriProductHelper uriHelper,
+    })?
+    onGetProductV3,
+    Future<off.SearchResult> Function(
+      off.User,
+      off.ProductSearchQueryConfiguration, {
+      off.UriProductHelper uriHelper,
+    })?
+    onSearchProducts,
+    Future<off.Status> Function(
+      off.User,
+      off.Product, {
+      off.UriProductHelper uriHelper,
+    })?
+    onSaveProduct,
+    Future<off.Status> Function(
+      off.User,
+      off.SendImage, {
+      off.UriProductHelper uriHelper,
+    })?
+    onAddProductImage,
+  }) : _onGetProductV3 = onGetProductV3 ?? off.OpenFoodAPIClient.getProductV3,
+       _onSearchProducts =
+           onSearchProducts ?? off.OpenFoodAPIClient.searchProducts,
+       _onSaveProduct = onSaveProduct ?? off.OpenFoodAPIClient.saveProduct,
+       _onAddProductImage =
+           onAddProductImage ?? off.OpenFoodAPIClient.addProductImage;
 
   /// Whether to use the Open Food Facts staging server.
   final bool useStaging;
+
+  // SDK call overrides — defaults to real SDK static methods.
+  final Future<off.ProductResultV3> Function(
+    off.ProductQueryConfiguration, {
+    off.User? user,
+    off.UriProductHelper uriHelper,
+  })
+  _onGetProductV3;
+
+  final Future<off.SearchResult> Function(
+    off.User,
+    off.ProductSearchQueryConfiguration, {
+    off.UriProductHelper uriHelper,
+  })
+  _onSearchProducts;
+
+  final Future<off.Status> Function(
+    off.User,
+    off.Product, {
+    off.UriProductHelper uriHelper,
+  })
+  _onSaveProduct;
+
+  final Future<off.Status> Function(
+    off.User,
+    off.SendImage, {
+    off.UriProductHelper uriHelper,
+  })
+  _onAddProductImage;
 
   /// The product URI helper for the selected environment.
   off.UriProductHelper get _uriHelper =>
@@ -68,7 +135,7 @@ class OffAdapter {
   Future<Product> getByBarcode(String barcode) async {
     logInfo('Fetching $barcode via SDK');
     try {
-      final result = await off.OpenFoodAPIClient.getProductV3(
+      final result = await _onGetProductV3(
         OffQuery.barcodeConfig(barcode),
         user: readUser,
         uriHelper: _uriHelper,
@@ -102,7 +169,7 @@ class OffAdapter {
     for (var attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         logInfo('Searching "$query" via SDK (attempt ${attempt + 1})');
-        final result = await off.OpenFoodAPIClient.searchProducts(
+        final result = await _onSearchProducts(
           readUser,
           OffQuery.searchConfig(query, pageSize: pageSize),
           uriHelper: _uriHelper,
@@ -150,7 +217,7 @@ class OffAdapter {
         'Submitting product ${product.barcode} to OFF',
       );
       final offProduct = product.toOffProduct();
-      final status = await off.OpenFoodAPIClient.saveProduct(
+      final status = await _onSaveProduct(
         user,
         offProduct,
         uriHelper: _uriHelper,
@@ -206,7 +273,7 @@ class OffAdapter {
         imageField: parseImageField(imageField),
         imageUri: Uri.parse(imagePath),
       );
-      final status = await off.OpenFoodAPIClient.addProductImage(
+      final status = await _onAddProductImage(
         user,
         image,
         uriHelper: _uriHelper,

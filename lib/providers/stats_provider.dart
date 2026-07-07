@@ -54,7 +54,7 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
   // Compute parent categories from hierarchy data.
   final parentCounts = <String, int>{};
   for (final row in productCategories) {
-    final parent = _parentCategory(
+    final parent = parentCategory(
       row['category'] as String?,
       row['categories_hierarchy'] as String?,
     );
@@ -130,7 +130,7 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
 /// en:eggs, en:chicken-eggs]`). When not available, falls back to the
 /// first non‑language‑tagged word of [rawCategory]. Returns `null` when
 /// both inputs are unavailable.
-String? _parentCategory(String? rawCategory, String? hierarchyJson) {
+String? parentCategory(String? rawCategory, String? hierarchyJson) {
   if (hierarchyJson != null && hierarchyJson.isNotEmpty) {
     try {
       final hierarchy = (jsonDecode(hierarchyJson) as List).cast<String>();

@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Feedback form fixes**: Added support for attaching multiple screenshots
+  to feedback submissions. Fixed missing Portuguese (pt) translations for
+  all feedback-related strings. Replaced misleading "Retry" label on
+  screenshot removal with proper "Remove" string. Added `feedbackEnabled`
+  config guard to hide the feedback option when disabled.
+  (`lib/screens/feedback_screen.dart`, `lib/screens/settings_screen.dart`,
+  `lib/services/github_issue_service.dart`, `lib/l10n/app_pt.arb`,
+  `lib/l10n/app_localizations_pt.dart`, `lib/l10n/app_localizations.dart`,
+  `lib/l10n/app_localizations_en.dart`)
+
 ### Changed
 - **Inventory switcher redesign**: Replaced plain `PopupMenuButton` icon with
   `InventorySwitcherCard` widget showing the pantry name, average Nutri-Score
