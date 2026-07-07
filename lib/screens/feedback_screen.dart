@@ -388,6 +388,12 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         }
       }
 
+      logInfo(
+        'Feedback _submit: isOnline=$isOnline '
+        'screenshotCount=${screenshotBytesList.length} '
+        'titleLength=${title.length}',
+      );
+
       if (isOnline) {
         final url = await service.submitIssue(
           title: title,

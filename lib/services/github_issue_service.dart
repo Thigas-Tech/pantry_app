@@ -61,6 +61,13 @@ class GithubIssueService {
       );
     }
 
+    final tokenLength = AppConfig.feedbackToken.length;
+    logInfo(
+      'submitIssue: title="$title" tokenLength=$tokenLength '
+      'repo=${AppConfig.githubOwner}/${AppConfig.githubRepo} '
+      'screenshots=${screenshotBytesList.length}',
+    );
+
     final fullBody = _buildBody(body, screenshotBytesList);
 
     late final http.Response response;
@@ -94,7 +101,10 @@ class GithubIssueService {
     }
 
     final message = _parseGitHubError(response);
-    logError('GitHub API error ${response.statusCode}: $message');
+    logError(
+      'GitHub API error ${response.statusCode}: $message '
+      '(tokenLength=${AppConfig.feedbackToken.length})',
+    );
     throw IssueSubmissionException(message);
   }
 
