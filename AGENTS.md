@@ -69,10 +69,13 @@ flutter build appbundle --deferred-components  # Dynamic feature modules
     Never hardcode English strings in widgets or services (except in doc
     comments).
 6. **Run the full suite before every commit** — run
-    `flutter analyze && flutter test --concurrency=8` **before every commit**
-    and fix **every** issue found (error, warning, info). Never rely on CI
-    to catch what local analysis would find — CI runs take 3+ minutes and
-    waste time on preventable failures.
+    `flutter analyze --fatal-infos --fatal-warnings && flutter test --concurrency=8 && flutter build apk --debug`
+    **before every commit** and fix **every** issue found (error, warning,
+    info). Never rely on CI to catch what local analysis would find — CI
+    runs take 3+ minutes and waste time on preventable failures. The debug
+    APK build catches platform-configuration mistakes (missing manifest
+    entries, R8 stripping, resource references) that static analysis
+    cannot detect.
 
 ### CI/CD
 - **PR quality gate** — every PR to `main` runs `ci.yml`: format check, static analysis, unit tests, widget tests, coverage report.

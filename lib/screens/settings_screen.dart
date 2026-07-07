@@ -8,6 +8,7 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
@@ -17,6 +18,7 @@ import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// A screen where the user can adjust application preferences.
 ///
@@ -57,8 +59,28 @@ class SettingsScreen extends ConsumerWidget {
               SwitchListTile(
                 title: Text(l10n.remindBeforeExpiry),
                 value: settings.notificationsEnabled,
-                onChanged: (value) {
+                onChanged: (value) async {
                   logInfo('Notifications toggled: $value');
+                  if (value) {
+                    final notifService = ref.read(
+                      notificationServiceProvider,
+                    );
+                    final granted = await notifService.requestPermission();
+                    if (granted == false) {
+                      if (context.mounted) {
+                        await _showPermissionDeniedDialog(
+                          context,
+                          l10n,
+                        );
+                      }
+                      return;
+                    }
+                  } else {
+                    final notifService = ref.read(
+                      notificationServiceProvider,
+                    );
+                    await notifService.cancelAllReminders();
+                  }
                   final current = ref.read(settingsProvider);
                   ref.read(settingsProvider.notifier).value = current.copyWith(
                     notificationsEnabled: value,
@@ -340,6 +362,34 @@ class SettingsScreen extends ConsumerWidget {
       if (context.mounted) {
         SnackbarHelper.showError(context, l10n.flushCacheFailed);
       }
+    }
+  }
+
+  /// Shows a dialog explaining that notification permission was denied
+  /// and offering to open the device settings.
+  Future<void> _showPermissionDeniedDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.notificationPermissionTitle),
+        content: Text(l10n.notificationPermissionBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.openSettings),
+          ),
+        ],
+      ),
+    );
+    if (result == true) {
+      await openAppSettings();
     }
   }
 }

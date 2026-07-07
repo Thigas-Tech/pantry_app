@@ -17,10 +17,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
+import 'package:pantry_app/services/notification_service.dart';
 import '../helpers/pump_app.dart';
 
 // ---------- Fakes -----------------------------------------------------------
@@ -39,6 +42,8 @@ class FakeSettingsNotifier extends SettingsNotifier {
   @override
   Settings build() => const Settings();
 }
+
+class MockNotificationService extends Mock implements NotificationService {}
 
 // ---------- Tests -----------------------------------------------------------
 
@@ -91,12 +96,17 @@ void main() {
   testWidgets('notification switch toggles and shows snackbar', (
     tester,
   ) async {
+    final mockNotif = MockNotificationService();
+    when(mockNotif.requestPermission).thenAnswer((_) async => true);
+    when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+
     await pumpApp(
       tester,
       const SettingsScreen(),
       overrides: [
         themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
         settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        notificationServiceProvider.overrideWithValue(mockNotif),
       ],
     );
 

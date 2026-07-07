@@ -445,9 +445,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         await notificationService.scheduleExpiryReminders(
           result,
           expiringSoonTitle: l10n.expiringSoon,
-          expiringSoonBody: l10n.expiresTomorrow(result.barcode),
+          buildExpiringSoonBody: l10n.expiresTomorrow,
           expiringTodayTitle: l10n.expiringToday,
-          expiringTodayBody: l10n.expiresToday(result.barcode),
+          buildExpiringTodayBody: l10n.expiresToday,
           channelName: l10n.expiryChannelName,
           channelDescription: l10n.expiryChannelDescription,
         );
@@ -479,9 +479,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       await notificationService.scheduleExpiryReminders(
         updated,
         expiringSoonTitle: l10n.expiringSoon,
-        expiringSoonBody: l10n.expiresTomorrow(updated.barcode),
+        buildExpiringSoonBody: l10n.expiresTomorrow,
         expiringTodayTitle: l10n.expiringToday,
-        expiringTodayBody: l10n.expiresToday(updated.barcode),
+        buildExpiringTodayBody: l10n.expiresToday,
         channelName: l10n.expiryChannelName,
         channelDescription: l10n.expiryChannelDescription,
       );
@@ -538,9 +538,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               await notificationService.scheduleExpiryReminders(
                 restoredItem,
                 expiringSoonTitle: l10n.expiringSoon,
-                expiringSoonBody: l10n.expiresTomorrow(restoredItem.barcode),
+                buildExpiringSoonBody: l10n.expiresTomorrow,
                 expiringTodayTitle: l10n.expiringToday,
-                expiringTodayBody: l10n.expiresToday(restoredItem.barcode),
+                buildExpiringTodayBody: l10n.expiresToday,
                 channelName: l10n.expiryChannelName,
                 channelDescription: l10n.expiryChannelDescription,
               );

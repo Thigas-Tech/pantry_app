@@ -103,6 +103,9 @@
   "enterPositiveNumber": "Enter a positive number",
   "notificationsEnabled": "Notifications enabled.",
   "notificationsDisabled": "Notifications disabled.",
+  "notificationPermissionTitle": "Notification Permission Required",
+  "notificationPermissionBody": "To receive expiry reminders, grant notification permission in your device settings.",
+  "openSettings": "Open Settings",
   "themeChanged": "Theme: {theme}",
   "@themeChanged": {
     "placeholders": {

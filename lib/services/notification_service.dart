@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
@@ -7,60 +8,86 @@ import 'package:timezone/timezone.dart' as tz;
 /// Manages local notifications for expiry reminders.
 ///
 /// Designed for **Android** (and ready for iOS when that platform is added).
-/// Desktop and web are not supported.
+/// Desktop and web are not supported for scheduled notifications.
 ///
 /// ## Timezone handling
 ///
-/// Scheduled notifications require a timezone‑aware `TZDateTime`. The service
-/// loads the IANA timezone database and then attempts to match the device's
-/// local timezone name. If the name is unknown it falls back to UTC.
+/// Uses `flutter_timezone` to query the device's IANA timezone identifier
+/// and the `timezone` package for `TZDateTime` math. The combination
+/// provides reliable timezone resolution on all platforms without the
+/// fragile `DateTime.now().timeZoneName` workaround.
 ///
 /// ## Notification IDs
 ///
 /// Each inventory item can have up to two scheduled notifications:
-/// - ID = `item.id.hashCode`        -> "Expiring soon" (1 day before)
-/// - ID = `item.id.hashCode + 1`    -> "Expiring today" (on the expiry day)
+/// - ID = `itemId * 2`      -> "Expiring soon" (1 day before)
+/// - ID = `itemId * 2 + 1`  -> "Expiring today" (on the expiry day)
 ///
-/// ## Localization
+/// The ID scheme uses `itemId * 2` instead of `hashCode` to guarantee
+/// positivity (required by Android) and avoid collisions between items
+/// that share a barcode.
 ///
-/// Notification title and body strings are passed in by callers so they can
-/// be localized via `AppLocalizations`. If no strings are provided, English
-/// fallback values are used.
+/// ## Channel
+///
+/// All expiry reminders use `'expiry_channel'`, created explicitly during
+/// [initialize] with [Importance.high] and
+/// [AndroidNotificationCategory.reminder].
+///
+/// ## Time-of-day
+///
+/// Notifications fire at 9:00 AM on the reminder day rather than at
+/// midnight. Most users check their pantry in the morning, and a 9 AM
+/// notification is more useful than one at midnight.
 class NotificationService {
   /// Creates a [NotificationService] that uses the given [plugin].
-  ///
-  /// In production code the default [FlutterLocalNotificationsPlugin] is used;
-  /// in tests a mock can be injected.
-  NotificationService({FlutterLocalNotificationsPlugin? plugin})
-    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  NotificationService({
+    FlutterLocalNotificationsPlugin? plugin,
+    this._defaultLocation,
+  }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
   final FlutterLocalNotificationsPlugin _plugin;
+  final tz.Location? _defaultLocation;
+  bool _initialized = false;
+  bool _rescheduling = false;
 
-  /// Initialises the notification plugin.
+  /// Whether the service has been successfully initialized.
+  bool get initialized => _initialized;
+
+  /// Initializes the notification plugin with tap handlers.
   ///
   /// Must be called once at app startup, before any notification is
-  /// scheduled. The Android icon is `@mipmap/ic_launcher`.
-  Future<void> initialize() async {
+  ///
+  /// [onDidReceiveResponse] is fired on the main isolate when the user
+  /// taps a notification. [onDidReceiveBackgroundResponse] is fired in a
+  /// background isolate for actions that do not show the UI.
+  ///
+  /// Safe to call multiple times — subsequent calls are no-ops.
+  Future<void> initialize({
+    DidReceiveNotificationResponseCallback? onDidReceiveResponse,
+    DidReceiveBackgroundNotificationResponseCallback?
+    onDidReceiveBackgroundResponse,
+  }) async {
+    if (_initialized) {
+      logInfo('Notification service already initialised');
+      return;
+    }
+
     logInfo('Initialising notification service');
 
     tz_data.initializeTimeZones();
 
-    final localTimeZoneName = DateTime.now().timeZoneName;
-    logInfo('Detected device timezone name: $localTimeZoneName');
-
-    tz.Location location;
-    try {
-      location = tz.getLocation(localTimeZoneName);
-    } on Exception {
-      location = _resolveFromOffset(localTimeZoneName);
-    }
-
+    final location = await _resolveDeviceTimezone();
     tz.setLocalLocation(location);
     logInfo('Timezone set to ${location.name}');
 
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
+    try {
+      await ensureNotificationChannel();
+    } on Exception catch (e) {
+      logWarning('Failed to create notification channel: $e');
+      return;
+    }
+
+    const androidSettings = AndroidInitializationSettings('ic_notification');
     const iosSettings = DarwinInitializationSettings();
 
     try {
@@ -69,30 +96,71 @@ class NotificationService {
           android: androidSettings,
           iOS: iosSettings,
         ),
+        onDidReceiveNotificationResponse: onDidReceiveResponse,
+        onDidReceiveBackgroundNotificationResponse:
+            onDidReceiveBackgroundResponse,
       );
+      _initialized = true;
       logInfo('Notification plugin initialised successfully');
     } on Exception catch (e) {
       logError('Failed to initialise notification plugin: $e');
     }
   }
 
+  /// Creates the `expiry_channel` notification channel.
+  ///
+  /// Uses [AndroidNotificationChannelAction.createIfNotExists] so that
+  /// existing user-configured channel settings are never overwritten.
+  /// Should be called during [initialize] before any notification is
+  /// scheduled.
+  Future<void> ensureNotificationChannel() async {
+    const channel = AndroidNotificationChannel(
+      'expiry_channel',
+      'Expiry reminders',
+      description: 'Warns about expiring food',
+      importance: Importance.high,
+    );
+
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidPlugin == null) return;
+
+    try {
+      await androidPlugin.createNotificationChannel(channel);
+      logInfo('Notification channel created/verified');
+    } on Exception catch (e) {
+      logWarning('Failed to create notification channel: $e');
+    }
+  }
+
   /// Schedules two local notifications for [item].
   ///
-  /// [expiringSoonTitle], [expiringSoonBody], [expiringTodayTitle],
-  /// [expiringTodayBody], [channelName], and [channelDescription] can be
-  /// passed to localize the notifications. If omitted, English defaults
-  /// are used.
+  /// Skips scheduling if notifications are disabled or if the item
+  /// has no expiry date or the expiry date is in the past.
   Future<void> scheduleExpiryReminders(
     InventoryItem item, {
-    String expiringSoonTitle = 'Expiring soon',
-    String expiringSoonBody = '',
-    String expiringTodayTitle = 'Food expiring today',
-    String expiringTodayBody = '',
+    required String expiringSoonTitle,
+    required String expiringTodayTitle,
+    required String Function(String barcode) buildExpiringSoonBody,
+    required String Function(String barcode) buildExpiringTodayBody,
     String channelName = 'Expiry reminders',
     String channelDescription = 'Warns about expiring food',
+    bool notificationsEnabled = true,
   }) async {
+    if (!notificationsEnabled) {
+      logInfo('Notifications disabled in settings, skipping');
+      return;
+    }
+
     if (item.expiryDate == null) {
       logInfo('No expiry date for item ${item.id}, skipping reminders');
+      return;
+    }
+
+    if (item.id == null) {
+      logWarning('Item has no id, skipping expiry reminders');
       return;
     }
 
@@ -102,77 +170,82 @@ class NotificationService {
       return;
     }
 
-    final dayBefore = expiry.subtract(const Duration(days: 1));
-    final now = tz.TZDateTime.now(tz.local);
-    final id = item.id?.hashCode ?? item.barcode.hashCode;
+    final systemEnabled = await areNotificationsEnabled();
+    if (systemEnabled == false) {
+      logWarning('System notifications disabled, skipping reminders');
+      return;
+    }
 
-    // Reminder one day before
-    final dayBeforeTZ = tz.TZDateTime.from(dayBefore, tz.local);
-    if (dayBeforeTZ.isAfter(now)) {
+    final itemId = item.id!;
+    final now = tz.TZDateTime.now(tz.local);
+
+    final notificationDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'expiry_channel',
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.high,
+        category: AndroidNotificationCategory.reminder,
+      ),
+      iOS: const DarwinNotificationDetails(),
+    );
+
+    final oneDayBefore = expiry.subtract(const Duration(days: 1));
+
+    // "Expiring soon" — 9 AM one day before expiry
+    final expiringSoonDate = _toMorningTZDateTime(oneDayBefore);
+    if (expiringSoonDate.isAfter(now)) {
       try {
-        final body = expiringSoonBody.isNotEmpty
-            ? expiringSoonBody
-            : '${item.barcode} expires tomorrow';
         await _plugin.zonedSchedule(
-          id: id,
+          id: itemId * 2,
           title: expiringSoonTitle,
-          body: body,
-          scheduledDate: dayBeforeTZ,
-          notificationDetails: NotificationDetails(
-            android: AndroidNotificationDetails(
-              'expiry_channel',
-              channelName,
-              channelDescription: channelDescription,
-              importance: Importance.high,
-            ),
-            iOS: const DarwinNotificationDetails(),
-          ),
+          body: buildExpiringSoonBody(item.barcode),
+          scheduledDate: expiringSoonDate,
+          notificationDetails: notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          payload: item.barcode.isNotEmpty ? item.barcode : 'manual-${item.id}',
         );
         logInfo(
-          '''Scheduled "expiring soon" for barcode ${item.barcode} on $dayBeforeTZ''',
+          'Scheduled "expiring soon" for ${item.barcode} on $expiringSoonDate',
         );
       } on Exception catch (e) {
-        logError('Failed to schedule "expiring soon" for ${item.barcode}: $e');
+        logError(
+          'Failed to schedule "expiring soon" for ${item.barcode}: $e',
+        );
       }
     } else {
       logInfo(
-        '''Skipping "expiring soon" for ${item.barcode} – date is in the past''',
+        'Skipping "expiring soon" for ${item.barcode} '
+        '-- date is in the past',
       );
     }
 
-    // Reminder on expiry day
-    final expiryTZ = tz.TZDateTime.from(expiry, tz.local);
-    if (expiryTZ.isAfter(now)) {
+    // "Expiring today" — 9 AM on the expiry day
+    final expiringTodayDate = _toMorningTZDateTime(expiry);
+    if (expiringTodayDate.isAfter(now)) {
       try {
-        final body = expiringTodayBody.isNotEmpty
-            ? expiringTodayBody
-            : '${item.barcode} expires today!';
         await _plugin.zonedSchedule(
-          id: id + 1,
+          id: itemId * 2 + 1,
           title: expiringTodayTitle,
-          body: body,
-          scheduledDate: expiryTZ,
-          notificationDetails: NotificationDetails(
-            android: AndroidNotificationDetails(
-              'expiry_channel',
-              channelName,
-              channelDescription: channelDescription,
-              importance: Importance.high,
-            ),
-            iOS: const DarwinNotificationDetails(),
-          ),
+          body: buildExpiringTodayBody(item.barcode),
+          scheduledDate: expiringTodayDate,
+          notificationDetails: notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          payload: item.barcode.isNotEmpty ? item.barcode : 'manual-${item.id}',
         );
         logInfo(
-          '''Scheduled "expiring today" for barcode ${item.barcode} on $expiryTZ''',
+          'Scheduled "expiring today" for ${item.barcode}'
+          ' on $expiringTodayDate',
         );
       } on Exception catch (e) {
-        logError('Failed to schedule "expiring today" for ${item.barcode}: $e');
+        logError(
+          'Failed to schedule "expiring today" for ${item.barcode}: $e',
+        );
       }
     } else {
       logInfo(
-        '''Skipping "expiring today" for ${item.barcode} – date is in the past''',
+        'Skipping "expiring today" for ${item.barcode} '
+        '-- date is in the past',
       );
     }
   }
@@ -180,40 +253,157 @@ class NotificationService {
   /// Cancels both notifications associated with the given [itemId].
   Future<void> cancelReminders(int itemId) async {
     logInfo('Cancelling reminders for item $itemId');
-    final id = itemId.hashCode;
     try {
-      await _plugin.cancel(id: id);
-      await _plugin.cancel(id: id + 1);
+      await _plugin.cancel(id: itemId * 2);
+      await _plugin.cancel(id: itemId * 2 + 1);
       logInfo('Reminders cancelled for item $itemId');
     } on Exception catch (e) {
       logError('Failed to cancel reminders for item $itemId: $e');
     }
   }
 
+  /// Cancels all pending notification requests.
+  Future<void> cancelAllReminders() async {
+    logInfo('Cancelling all reminder notifications');
+    try {
+      await _plugin.cancelAll();
+      logInfo('All reminder notifications cancelled');
+    } on Exception catch (e) {
+      logError('Failed to cancel all reminders: $e');
+    }
+  }
+
+  /// Reschedules expiry reminders for all given [items].
+  ///
+  /// Cancels all existing scheduled notifications first, then schedules
+  /// new ones for items with future expiry dates. This recovers from
+  /// device reboots, app updates, and timezone changes.
+  ///
+  /// Guards against concurrent calls with an internal lock.
+  /// Best-effort — individual scheduling failures are caught and logged.
+  Future<void> rescheduleAllItems(
+    List<InventoryItem> items, {
+    required String expiringSoonTitle,
+    required String expiringTodayTitle,
+    required String Function(String barcode) buildExpiringSoonBody,
+    required String Function(String barcode) buildExpiringTodayBody,
+    bool notificationsEnabled = true,
+  }) async {
+    if (!notificationsEnabled) {
+      logInfo('Notifications disabled, skipping reschedule');
+      return;
+    }
+
+    if (_rescheduling) {
+      logInfo('Reschedule already in progress, skipping');
+      return;
+    }
+
+    _rescheduling = true;
+    logInfo('Starting reschedule for ${items.length} items');
+
+    try {
+      await _plugin.cancelAll();
+
+      for (final item in items) {
+        await scheduleExpiryReminders(
+          item,
+          expiringSoonTitle: expiringSoonTitle,
+          expiringTodayTitle: expiringTodayTitle,
+          buildExpiringSoonBody: buildExpiringSoonBody,
+          buildExpiringTodayBody: buildExpiringTodayBody,
+          notificationsEnabled: notificationsEnabled,
+        );
+      }
+
+      logInfo('Reschedule completed');
+    } on Exception catch (e) {
+      logError('Reschedule failed: $e');
+    } finally {
+      _rescheduling = false;
+    }
+  }
+
   /// Requests the `POST_NOTIFICATIONS` permission on Android 13+.
-  Future<void> requestPermission() async {
+  ///
+  /// Returns `true` if permission was granted, `false` if denied,
+  /// and `null` if the platform does not require permission handling
+  /// (desktop/web or Android < 13).
+  Future<bool?> requestPermission() async {
     logInfo('Requesting notification permission');
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
-    await androidPlugin?.requestNotificationsPermission();
-    logInfo('Notification permission request completed');
+    if (androidPlugin == null) {
+      logInfo('Not on Android, skipping permission request');
+      return null;
+    }
+
+    final granted = await androidPlugin.requestNotificationsPermission();
+    logInfo('Notification permission request result: $granted');
+    return granted;
   }
 
-  /// Handles raw UTC offset strings (e.g. `-03` on Linux desktop) by
-  /// returning [tz.UTC].  On Android/iOS the system provides a proper
-  /// IANA zone name, so this fallback is rarely hit in production.
-  static tz.Location _resolveFromOffset(String name) {
-    final match = RegExp(r'^[+-]\d{1,2}$').hasMatch(name);
-    if (match) {
-      logWarning(
-        'Raw UTC offset "$name" detected (common on Linux desktop).'
-        ' Falling back to UTC for timezone calculations.',
-      );
-    } else {
-      logWarning('Unknown timezone "$name", falling back to UTC');
+  /// Checks whether system notifications are currently enabled.
+  ///
+  /// Returns `true` if notifications are enabled, `false` if disabled,
+  /// and `null` if the platform does not support this check.
+  Future<bool?> areNotificationsEnabled() async {
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidPlugin == null) return null;
+
+    try {
+      return await androidPlugin.areNotificationsEnabled();
+    } on Exception catch (e) {
+      logWarning('Failed to check notification status: $e');
+      return null;
     }
-    return tz.UTC;
+  }
+
+  /// Returns whether the app was launched by tapping a notification.
+  ///
+  /// Call this on startup to handle cold-start notification taps.
+  Future<NotificationAppLaunchDetails?> getLaunchDetails() async {
+    try {
+      return await _plugin.getNotificationAppLaunchDetails();
+    } on Exception catch (e) {
+      logWarning('Failed to get notification launch details: $e');
+      return null;
+    }
+  }
+
+  /// Resolves the device's local timezone using `flutter_timezone`.
+  ///
+  /// Falls back to [tz.UTC] if the plugin fails or the returned IANA
+  /// identifier is not present in the bundled timezone database.
+  Future<tz.Location> _resolveDeviceTimezone() async {
+    if (_defaultLocation != null) return _defaultLocation;
+
+    try {
+      final tzInfo = await FlutterTimezone.getLocalTimezone();
+      try {
+        return tz.getLocation(tzInfo.identifier);
+      } on tz.LocationNotFoundException {
+        logWarning(
+          'IANA identifier "${tzInfo.identifier}" not in timezone '
+          'database, falling back to UTC',
+        );
+        return tz.UTC;
+      }
+    } on Exception catch (e) {
+      logWarning('Failed to resolve device timezone: $e, falling back to UTC');
+      return tz.UTC;
+    }
+  }
+
+  /// Converts a [DateTime] to a same-date [tz.TZDateTime] at 9:00 AM
+  /// in the local timezone.
+  tz.TZDateTime _toMorningTZDateTime(DateTime date) {
+    final morning = DateTime(date.year, date.month, date.day, 9);
+    return tz.TZDateTime.from(morning, tz.local);
   }
 }

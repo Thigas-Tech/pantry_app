@@ -2,73 +2,29 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/services/notification_background_handler.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-/// Tests for [NotificationService].
-///
-/// This suite verifies that the notification service correctly initialises the
-/// plugin, schedules expiry reminders, cancels them, and requests permissions.
-/// All native plugin calls are mocked using [Mock], so no real
-/// notifications are ever sent during testing.
-///
-/// The tests follow these key strategies:
-/// - A [MockFlutterLocalNotificationsPlugin] is injected into the service
-///   to replace the real plugin.
-/// - Every plugin method that returns a `Future` is stubbed with
-///   `thenAnswer((_) => Future.value())` to avoid `null` being returned
-///   (which would cause a type error when `await` is used).
-/// - Each test is `async` and uses `await` on the service method before
-///   verifying interactions. This ensures all asynchronous operations have
-///   completed and the verification sees the full set of calls.
-///
-/// Fallback values are registered for all matcher arguments that are passed
-/// to `any(named: ...)`, so Mocktail can match calls without caring about
-/// the concrete values.
-
-// ---------------------------------------------------------------------
-// Mock classes
-// ---------------------------------------------------------------------
-
-/// Mock implementation of [FlutterLocalNotificationsPlugin].
-///
-/// Used to verify that the service invokes the correct plugin methods
-/// with the expected arguments, without executing any native code.
 class MockFlutterLocalNotificationsPlugin extends Mock
     implements FlutterLocalNotificationsPlugin {}
 
-/// Mock implementation of the Android‑specific plugin interface.
-///
-/// Used to test permission requests on Android without invoking
-/// platform channels.
 class MockAndroidFlutterLocalNotificationsPlugin extends Mock
     implements AndroidFlutterLocalNotificationsPlugin {}
 
-// ---------------------------------------------------------------------
-// Test suite
-// ---------------------------------------------------------------------
-
 void main() {
-  // Set up timezone database and a default local timezone (UTC) for the
-  // entire test run. This avoids timezone‑related errors when constructing
-  // TZDateTime objects inside the service.
   setUpAll(() {
     tz_data.initializeTimeZones();
     tz.setLocalLocation(tz.UTC);
 
-    // Register fallback values so that `any(named: '...')` can be used
-    // with the correct type for each parameter.
     registerFallbackValue(
       const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings('ic_notification'),
         iOS: DarwinInitializationSettings(),
       ),
     );
     registerFallbackValue(tz.TZDateTime.now(tz.UTC));
-    registerFallbackValue(
-      const InventoryItem(barcode: '123', expiryDate: '2099-01-01'),
-    );
     registerFallbackValue(
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -76,227 +32,646 @@ void main() {
           'Expiry reminders',
           channelDescription: 'Warns about expiring food',
           importance: Importance.high,
+          category: AndroidNotificationCategory.reminder,
         ),
         iOS: DarwinNotificationDetails(),
       ),
     );
     registerFallbackValue(AndroidScheduleMode.inexactAllowWhileIdle);
+    registerFallbackValue(
+      const AndroidNotificationChannel(
+        'expiry_channel',
+        'Expiry reminders',
+        description: 'Warns about expiring food',
+        importance: Importance.high,
+      ),
+    );
   });
 
-  // Each test gets a fresh mock plugin and a new service instance to
-  // prevent state leaking between tests.
   late MockFlutterLocalNotificationsPlugin mockPlugin;
+  late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
   late NotificationService service;
 
   setUp(() {
     mockPlugin = MockFlutterLocalNotificationsPlugin();
-    service = NotificationService(plugin: mockPlugin);
-  });
+    mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
+    service = NotificationService(
+      plugin: mockPlugin,
+      defaultLocation: tz.UTC,
+    );
 
-  // -----------------------------------------------------------------
-  // Group: initialize
-  // -----------------------------------------------------------------
+    when(
+      () => mockPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >(),
+    ).thenReturn(mockAndroidPlugin);
+    when(
+      () => mockAndroidPlugin.createNotificationChannel(any()),
+    ).thenAnswer((_) => Future.value());
+  });
 
   group('initialize', () {
-    test('calls plugin.initialize with correct settings', () async {
-      // Arrange: stub the initialize method to return a completed future.
+    test('is idempotent', () async {
       when(
-        () => mockPlugin.initialize(settings: any(named: 'settings')),
-      ).thenAnswer((_) => Future.value());
-
-      // Act: call the service method.
+        () => mockPlugin.initialize(
+          settings: any(named: 'settings'),
+          onDidReceiveNotificationResponse: any(
+            named: 'onDidReceiveNotificationResponse',
+          ),
+          onDidReceiveBackgroundNotificationResponse: any(
+            named: 'onDidReceiveBackgroundNotificationResponse',
+          ),
+        ),
+      ).thenAnswer((_) => Future.value(true));
+      await service.initialize();
       await service.initialize();
 
-      // Assert: verify that initialize was called exactly once,
-      // with any settings (the exact content is not important for this test).
       verify(
-        () => mockPlugin.initialize(settings: any(named: 'settings')),
-      ).called(1);
-    });
-  });
-
-  // -----------------------------------------------------------------
-  // Group: scheduleExpiryReminders
-  // -----------------------------------------------------------------
-
-  group('scheduleExpiryReminders', () {
-    test('skips when expiryDate is null', () async {
-      // Arrange: an item without an expiry date.
-      const item = InventoryItem(barcode: '123');
-
-      // Act: schedule reminders for that item.
-      await service.scheduleExpiryReminders(item);
-
-      // Assert: no zonedSchedule calls should have been made.
-      verifyNever(
-        () => mockPlugin.zonedSchedule(
-          id: any(named: 'id'),
-          title: any(named: 'title'),
-          body: any(named: 'body'),
-          scheduledDate: any(named: 'scheduledDate'),
-          notificationDetails: any(named: 'notificationDetails'),
-          androidScheduleMode: any(named: 'androidScheduleMode'),
+        () => mockPlugin.initialize(
+          settings: any(named: 'settings'),
+          onDidReceiveNotificationResponse: any(
+            named: 'onDidReceiveNotificationResponse',
+          ),
+          onDidReceiveBackgroundNotificationResponse: any(
+            named: 'onDidReceiveBackgroundNotificationResponse',
+          ),
         ),
-      );
+      ).called(1);
+      expect(service.initialized, isTrue);
+    });
+
+    test('passes onDidReceiveResponse callback to plugin', () async {
+      when(
+        () => mockPlugin.initialize(
+          settings: any(named: 'settings'),
+          onDidReceiveNotificationResponse: any(
+            named: 'onDidReceiveNotificationResponse',
+          ),
+          onDidReceiveBackgroundNotificationResponse: any(
+            named: 'onDidReceiveBackgroundNotificationResponse',
+          ),
+        ),
+      ).thenAnswer((_) => Future.value(true));
+      await service.initialize(onDidReceiveResponse: (_) {});
+
+      verify(
+        () => mockPlugin.initialize(
+          settings: any(named: 'settings'),
+          onDidReceiveNotificationResponse: any(
+            named: 'onDidReceiveNotificationResponse',
+          ),
+        ),
+      ).called(1);
     });
 
     test(
-      'schedules two notifications when both dates are in the future',
+      'passes onDidReceiveBackgroundResponse callback',
       () async {
-        // Arrange: stub zonedSchedule to return a completed future.
-        // This is crucial: without this stub, the method would return `null`
-        // and `await` would fail with a type error. The stub ensures the
-        // method can be awaited and the second call can be reached.
         when(
-          () => mockPlugin.zonedSchedule(
-            id: any(named: 'id'),
-            title: any(named: 'title'),
-            body: any(named: 'body'),
-            scheduledDate: any(named: 'scheduledDate'),
-            notificationDetails: any(named: 'notificationDetails'),
-            androidScheduleMode: any(named: 'androidScheduleMode'),
+          () => mockPlugin.initialize(
+            settings: any(named: 'settings'),
+            onDidReceiveNotificationResponse: any(
+              named: 'onDidReceiveNotificationResponse',
+            ),
+            onDidReceiveBackgroundNotificationResponse: any(
+              named: 'onDidReceiveBackgroundNotificationResponse',
+            ),
           ),
-        ).thenAnswer((_) => Future.value());
-
-        // Create an item whose expiry date is 10 days from now
-        // (both the 1‑day‑before reminder and
-        // the expiry‑day reminder should be scheduled).
-        final expiry = DateTime.now().add(const Duration(days: 10));
-        const item = InventoryItem(barcode: '123', id: 1);
-        final itemWithExpiry = item.copyWith(
-          expiryDate: expiry.toIso8601String().substring(0, 10),
+        ).thenAnswer((_) => Future.value(true));
+        await service.initialize(
+          onDidReceiveBackgroundResponse: notificationTapBackground,
         );
 
-        // Act: schedule reminders.
-        await service.scheduleExpiryReminders(itemWithExpiry);
-
-        // Assert: verify that zonedSchedule was called exactly two times
-        // (once for each reminder). The exact IDs, titles, etc. are matched
-        // using `any()` because we only care about the count.
         verify(
-          () => mockPlugin.zonedSchedule(
-            id: any(named: 'id'),
-            title: any(named: 'title'),
-            body: any(named: 'body'),
-            scheduledDate: any(named: 'scheduledDate'),
-            notificationDetails: any(named: 'notificationDetails'),
-            androidScheduleMode: any(named: 'androidScheduleMode'),
+          () => mockPlugin.initialize(
+            settings: any(named: 'settings'),
+            onDidReceiveBackgroundNotificationResponse: any(
+              named: 'onDidReceiveBackgroundNotificationResponse',
+            ),
           ),
-        ).called(2);
+        ).called(1);
       },
     );
-    test('skips when expiryDate is invalid', () async {
-      /// An un‑parseable expiry date should skip scheduling without errors.
-      const item = InventoryItem(
-        barcode: '123',
-        expiryDate: 'not-a-date',
-      );
 
-      await service.scheduleExpiryReminders(item);
-
-      verifyNever(
-        () => mockPlugin.zonedSchedule(
-          id: any(named: 'id'),
-          title: any(named: 'title'),
-          body: any(named: 'body'),
-          scheduledDate: any(named: 'scheduledDate'),
-          notificationDetails: any(named: 'notificationDetails'),
-          androidScheduleMode: any(named: 'androidScheduleMode'),
-        ),
-      );
-    });
-    test('handles zonedSchedule throwing an exception', () async {
-      /// If [zonedSchedule] throws, the exception is caught and logged,
-      /// and the method still attempts the second call.
-      final expiry = DateTime.now().add(const Duration(days: 10));
-      const item = InventoryItem(barcode: '123', id: 1);
-      final itemWithExpiry = item.copyWith(
-        expiryDate: expiry.toIso8601String().substring(0, 10),
-      );
-
-      when(
-        () => mockPlugin.zonedSchedule(
-          id: any(named: 'id'),
-          title: any(named: 'title'),
-          body: any(named: 'body'),
-          scheduledDate: any(named: 'scheduledDate'),
-          notificationDetails: any(named: 'notificationDetails'),
-          androidScheduleMode: any(named: 'androidScheduleMode'),
-        ),
-      ).thenThrow(Exception('test'));
-
-      // The service should complete without throwing.
-      await service.scheduleExpiryReminders(itemWithExpiry);
-
-      // Both calls are attempted; each catches the exception internally.
-      verify(
-        () => mockPlugin.zonedSchedule(
-          id: any(named: 'id'),
-          title: any(named: 'title'),
-          body: any(named: 'body'),
-          scheduledDate: any(named: 'scheduledDate'),
-          notificationDetails: any(named: 'notificationDetails'),
-          androidScheduleMode: any(named: 'androidScheduleMode'),
-        ),
-      ).called(2);
-    });
-  });
-
-  // -----------------------------------------------------------------
-  // Group: cancelReminders
-  // -----------------------------------------------------------------
-
-  group('cancelReminders', () {
-    test('cancels two notification IDs', () async {
-      // Arrange: stub cancel to return a completed future.
-      when(
-        () => mockPlugin.cancel(id: any(named: 'id')),
-      ).thenAnswer((_) => Future.value());
-
-      // Act: cancel reminders for an item id.
-      await service.cancelReminders(42);
-
-      // Assert: verify that cancel was called exactly twice.
-      verify(() => mockPlugin.cancel(id: any(named: 'id'))).called(2);
-    });
-    test('handles cancel throwing an exception', () async {
-      /// If [cancel] throws, the exception is caught and the second call
-      /// is still attempted.
-      when(
-        () => mockPlugin.cancel(id: any(named: 'id')),
-      ).thenThrow(Exception('test'));
-
-      await service.cancelReminders(42);
-
-      // Cancel attempts are made.
-      verify(() => mockPlugin.cancel(id: any(named: 'id'))).called(1);
-    });
-  });
-
-  // -----------------------------------------------------------------
-  // Group: requestPermission
-  // -----------------------------------------------------------------
-
-  group('requestPermission', () {
-    test('calls requestNotificationsPermission on Android', () async {
-      // Arrange: create a mock Android plugin and stub the resolution
-      // and the permission request.
-      final mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
+    test('handles channel creation failure gracefully', () async {
+      final failingAndroid = MockAndroidFlutterLocalNotificationsPlugin();
       when(
         () => mockPlugin
             .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin
             >(),
-      ).thenReturn(mockAndroidPlugin);
+      ).thenReturn(failingAndroid);
+      when(
+        () => failingAndroid.createNotificationChannel(any()),
+      ).thenThrow(Exception('channel error'));
+      when(
+        () => mockPlugin.initialize(
+          settings: any(named: 'settings'),
+          onDidReceiveNotificationResponse: any(
+            named: 'onDidReceiveNotificationResponse',
+          ),
+          onDidReceiveBackgroundNotificationResponse: any(
+            named: 'onDidReceiveBackgroundNotificationResponse',
+          ),
+        ),
+      ).thenAnswer((_) => Future.value(true));
+
+      await service.initialize();
+      // Channel failure is non-fatal; the service still initialises.
+      expect(service.initialized, isTrue);
+      verify(
+        () => failingAndroid.createNotificationChannel(any()),
+      ).called(1);
+    });
+  });
+
+  group('ensureNotificationChannel', () {
+    test('creates channel with correct parameters', () async {
+      await service.ensureNotificationChannel();
+
+      verify(
+        () => mockAndroidPlugin.createNotificationChannel(any()),
+      ).called(1);
+    });
+
+    test('handles exception gracefully', () async {
+      when(
+        () => mockAndroidPlugin.createNotificationChannel(any()),
+      ).thenThrow(Exception('create failed'));
+
+      await expectLater(service.ensureNotificationChannel(), completes);
+    });
+  });
+
+  group('requestPermission', () {
+    test('returns true when granted', () async {
       when(
         mockAndroidPlugin.requestNotificationsPermission,
+      ).thenAnswer((_) => Future.value(true));
+
+      final result = await service.requestPermission();
+      expect(result, isTrue);
+    });
+
+    test('returns false when denied', () async {
+      when(
+        mockAndroidPlugin.requestNotificationsPermission,
+      ).thenAnswer((_) => Future.value(false));
+
+      final result = await service.requestPermission();
+      expect(result, isFalse);
+    });
+
+    test('returns null when not on Android', () async {
+      when(
+        () => mockPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >(),
+      ).thenReturn(null);
+
+      final result = await service.requestPermission();
+      expect(result, isNull);
+    });
+  });
+
+  group('areNotificationsEnabled', () {
+    test('returns true when Android reports enabled', () async {
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
+
+      expect(await service.areNotificationsEnabled(), isTrue);
+    });
+
+    test('returns null when not on Android', () async {
+      when(
+        () => mockPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >(),
+      ).thenReturn(null);
+
+      expect(await service.areNotificationsEnabled(), isNull);
+    });
+  });
+
+  group('scheduleExpiryReminders', () {
+    const expiringSoonTitle = 'Expiring soon';
+    const expiringTodayTitle = 'Food expiring today';
+    String buildExpiringSoonBody(String b) => '$b expires tomorrow';
+    String buildExpiringTodayBody(String b) => '$b expires today!';
+
+    void stubZonedSchedule() {
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenAnswer((_) => Future.value());
+    }
+
+    void stubNotificationsEnabled() {
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
+    }
+
+    test('skips when expiryDate is null', () async {
+      const item = InventoryItem(barcode: '123', id: 1);
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('skips when id is null', () async {
+      const item = InventoryItem(
+        barcode: '123',
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('skips when notificationsEnabled is false', () async {
+      const item = InventoryItem(
+        barcode: '123',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+        notificationsEnabled: false,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('skips when system notifications are disabled', () async {
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(false));
+
+      const item = InventoryItem(
+        barcode: '123',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('skips when expiryDate is invalid', () async {
+      const item = InventoryItem(
+        barcode: '123',
+        id: 1,
+        expiryDate: 'not-a-date',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
+    test('schedules two notifications for far-future expiry', () async {
+      stubNotificationsEnabled();
+      stubZonedSchedule();
+
+      const item = InventoryItem(
+        barcode: '123',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(2);
+    });
+
+    test('sets notification payload to barcode', () async {
+      stubNotificationsEnabled();
+      stubZonedSchedule();
+
+      const item = InventoryItem(
+        barcode: '789123456',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: '789123456',
+        ),
+      ).called(2);
+    });
+
+    test('uses itemId * 2 and itemId * 2 + 1 as notification ids', () async {
+      stubNotificationsEnabled();
+      stubZonedSchedule();
+
+      const item = InventoryItem(
+        barcode: '123',
+        id: 7,
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: 14,
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: 15,
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
+    });
+
+    test('handles zonedSchedule throwing gracefully', () async {
+      stubNotificationsEnabled();
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenThrow(Exception('schedule failed'));
+
+      const item = InventoryItem(
+        barcode: '123',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+
+      await expectLater(
+        service.scheduleExpiryReminders(
+          item,
+          expiringSoonTitle: expiringSoonTitle,
+          buildExpiringSoonBody: buildExpiringSoonBody,
+          expiringTodayTitle: expiringTodayTitle,
+          buildExpiringTodayBody: buildExpiringTodayBody,
+        ),
+        completes,
+      );
+    });
+  });
+
+  group('cancelReminders', () {
+    test('cancels both notification IDs', () async {
+      when(
+        () => mockPlugin.cancel(id: any(named: 'id')),
       ).thenAnswer((_) => Future.value());
 
-      // Act: request permission.
-      await service.requestPermission();
+      await service.cancelReminders(42);
 
-      // Assert: verify that the permission request was made exactly once.
-      verify(mockAndroidPlugin.requestNotificationsPermission).called(1);
+      verify(() => mockPlugin.cancel(id: 84)).called(1);
+      verify(() => mockPlugin.cancel(id: 85)).called(1);
+    });
+
+    test('handles cancel throwing gracefully', () async {
+      when(
+        () => mockPlugin.cancel(id: any(named: 'id')),
+      ).thenThrow(Exception('cancel failed'));
+
+      await expectLater(service.cancelReminders(42), completes);
+    });
+  });
+
+  group('cancelAllReminders', () {
+    test('calls plugin.cancelAll', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
+
+      await service.cancelAllReminders();
+
+      verify(() => mockPlugin.cancelAll()).called(1);
+    });
+  });
+
+  group('rescheduleAllItems', () {
+    const expiringSoonTitle = 'Expiring soon';
+    const expiringTodayTitle = 'Food expiring today';
+    String buildExpiringSoonBody(String b) => '$b expires tomorrow';
+    String buildExpiringTodayBody(String b) => '$b expires today!';
+
+    test('no-op when notifications disabled', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
+
+      await service.rescheduleAllItems(
+        [],
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+        notificationsEnabled: false,
+      );
+
+      verifyNever(() => mockPlugin.cancelAll());
+    });
+
+    test('cancels all before rescheduling', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenAnswer((_) => Future.value());
+
+      const item = InventoryItem(
+        barcode: '123',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.rescheduleAllItems(
+        [item],
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(() => mockPlugin.cancelAll()).called(1);
+    });
+
+    test('prevents concurrent reschedule', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer(
+        (_) => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+
+      final first = service.rescheduleAllItems(
+        [],
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+      final second = service.rescheduleAllItems(
+        [],
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      await Future.wait([first, second]);
+
+      verify(() => mockPlugin.cancelAll()).called(1);
+    });
+  });
+
+  group('getLaunchDetails', () {
+    test('returns launch details from plugin', () async {
+      const details = NotificationAppLaunchDetails(false);
+      when(
+        () => mockPlugin.getNotificationAppLaunchDetails(),
+      ).thenAnswer((_) => Future.value(details));
+
+      final result = await service.getLaunchDetails();
+      expect(result, same(details));
     });
   });
 }

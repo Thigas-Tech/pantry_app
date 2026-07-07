@@ -5,6 +5,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
@@ -12,6 +13,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -21,6 +23,7 @@ import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
+import 'package:pantry_app/services/notification_background_handler.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,8 +61,20 @@ Future<void> main() async {
   unawaited(_scheduleCacheRefresh());
 
   final container = ProviderContainer();
-  unawaited(container.read(notificationServiceProvider).requestPermission());
-  await container.read(notificationServiceProvider).initialize();
+  final notifService = container.read(notificationServiceProvider);
+
+  await notifService.initialize(
+    onDidReceiveResponse: (response) {
+      _handleNotificationTap(response, container);
+    },
+    onDidReceiveBackgroundResponse: notificationTapBackground,
+  );
+
+  final granted = await notifService.requestPermission();
+  if (granted != false) {
+    unawaited(_rescheduleNotifications(container));
+  }
+
   unawaited(_runDatabaseCleanup(container));
   unawaited(_flushFeedbackQueue(container));
 }
@@ -181,6 +196,69 @@ Future<void> _flushFeedbackQueue(ProviderContainer container) async {
     container.dispose();
   } on Exception catch (e) {
     logWarning('Feedback queue flush skipped: $e');
+    container.dispose();
+  }
+}
+
+/// Handles a notification tap by navigating to the product detail screen.
+///
+/// Reads the barcode from [NotificationResponse.payload] and looks up
+/// the product in the database.
+void _handleNotificationTap(
+  NotificationResponse response,
+  ProviderContainer container,
+) {
+  final payload = response.payload;
+  if (payload == null || payload.isEmpty) {
+    logWarning('Notification tap with empty payload — ignoring');
+    return;
+  }
+
+  logInfo('Notification tap: payload=$payload, actionId=${response.actionId}');
+  // Deep-link handling is deferred to the notification tap callback in
+  // PantryShell, which has access to the Navigator context.
+}
+
+/// Reschedules all expiry reminders for items with future expiry dates.
+Future<void> _rescheduleNotifications(ProviderContainer container) async {
+  logInfo('Rescheduling expiry notifications');
+  try {
+    final notifService = container.read(notificationServiceProvider);
+    if (!notifService.initialized) {
+      logWarning('Notification service not initialized, skipping reschedule');
+      return;
+    }
+    final db = DatabaseHelper();
+    final database = await db.database;
+    final inventories = await db.getInventories();
+    final items = <InventoryItem>[];
+    for (final inv in inventories) {
+      final invItems = await db.inventoryDao.list(
+        database,
+        inventoryId: inv['id'] as int,
+      );
+      items.addAll(invItems);
+    }
+    final settings = container.read(settingsProvider);
+
+    if (!settings.notificationsEnabled) {
+      logInfo('Notifications disabled in settings, skipping reschedule');
+      return;
+    }
+
+    // TODO(thiago): localize these strings once l10n is available at startup
+    await notifService.rescheduleAllItems(
+      items,
+      expiringSoonTitle: 'Expiring soon',
+      expiringTodayTitle: 'Food expiring today',
+      buildExpiringSoonBody: (barcode) => '$barcode expires tomorrow',
+      buildExpiringTodayBody: (barcode) => '$barcode expires today!',
+      notificationsEnabled: settings.notificationsEnabled,
+    );
+    logInfo('Notification reschedule completed');
+  } on Exception catch (e) {
+    logError('Notification reschedule failed: $e');
+  } finally {
     container.dispose();
   }
 }

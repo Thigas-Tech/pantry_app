@@ -270,6 +270,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notificationsDisabled => 'Notificações desativadas.';
 
   @override
+  String get notificationPermissionTitle => 'Notification Permission Required';
+
+  @override
+  String get notificationPermissionBody => 'To receive expiry reminders, grant notification permission in your device settings.';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
   String themeChanged(String theme) {
     return 'Tema: $theme';
   }

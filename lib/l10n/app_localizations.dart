@@ -606,6 +606,24 @@ abstract class AppLocalizations {
   /// **'Notifications disabled.'**
   String get notificationsDisabled;
 
+  /// No description provided for @notificationPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Permission Required'**
+  String get notificationPermissionTitle;
+
+  /// No description provided for @notificationPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To receive expiry reminders, grant notification permission in your device settings.'**
+  String get notificationPermissionBody;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
   /// No description provided for @themeChanged.
   ///
   /// In en, this message translates to:
