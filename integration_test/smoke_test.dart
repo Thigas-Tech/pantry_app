@@ -16,7 +16,7 @@ void main() {
 
   group('Smoke test', () {
     testWidgets('app launches and all tabs render', (tester) async {
-      app.main();
+      unawaited(app.main());
       await tester.pump();
       await tester.pump(const Duration(seconds: 2));
 
