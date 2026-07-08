@@ -28,6 +28,9 @@ jobs:
       - name: Generate API documentation
         run: dart doc .
 
+      - name: Save generated docs to temp directory
+        run: cp -r doc/api /tmp/doc-api
+
       - name: Checkout gh-pages branch
         run: |
           git fetch origin gh-pages --depth=1 || {
@@ -39,8 +42,9 @@ jobs:
       - name: Sync documentation
         run: |
           rm -rf api
-          cp -r ../doc/api api
+          cp -r /tmp/doc-api api
           git add -A
+          rm -rf /tmp/doc-api
 
       - name: Commit and push
         run: |
