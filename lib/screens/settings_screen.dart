@@ -491,13 +491,15 @@ class SettingsScreen extends ConsumerWidget {
           SizedBox(
             height: 320,
             width: 240,
-            child: ListView.builder(
-              itemCount: currencies.length,
-              itemBuilder: (ctx, i) => RadioListTile<String>(
-                value: currencies[i],
-                groupValue: current.baseCurrency,
-                title: Text(currencies[i]),
-                onChanged: (value) => Navigator.pop(ctx, value),
+            child: RadioGroup<String>(
+              groupValue: current.baseCurrency,
+              onChanged: (value) => Navigator.pop(ctx, value),
+              child: ListView.builder(
+                itemCount: currencies.length,
+                itemBuilder: (ctx, i) => RadioListTile<String>(
+                  value: currencies[i],
+                  title: Text(currencies[i]),
+                ),
               ),
             ),
           ),
