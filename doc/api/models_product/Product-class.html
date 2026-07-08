@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the Product class from the product library, for the Dart programming language.">
+  <title>Product class - product library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../models_product/">models&#47;product.dart</a></li>
+    <li class="self-crumb">Product class</li>
+  </ol>
+  <div class="self-name">Product</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="models_product&#47;models_product-library-sidebar.html"
+    data-below-sidebar="models_product&#47;Product-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">Product</span> class 
+    <a href="https://dart.dev/language/class-modifiers#abstract" class="feature feature-abstract" title="This type can not be directly constructed.">abstract</a>
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Represents a cached product from Open Food Facts.</p>
+<p>Each <code>Product</code> corresponds to a row in the <code>products</code> table. Unlike
+<code>InventoryItem</code>, which tracks a specific instance of a product in the
+user's pantry, this class holds <strong>static product information</strong> — data that
+rarely changes and is shared by all instances of the same barcode.</p>
+<h2 id="identity">Identity</h2>
+<p>The <code>barcode</code> field is the <strong>primary key</strong>. It is the unique identifier
+used to fetch the product from the Open Food Facts API and to join with
+the <code>inventory</code> table.</p>
+<h2 id="nutrition">Nutrition</h2>
+<p>All nutrition values (energy, protein, carbs, fat, fiber, salt) follow the
+Open Food Facts convention: they represent the amount <strong>per 100 g</strong> (or
+100 ml) of the product. The unit is always grams, except for energy which
+is kilocalories (kcal). These fields may be <code>null</code> if the data was not
+available from the API.</p>
+<h2 id="source-and-freshness">Source and freshness</h2>
+<ul>
+<li>Data is fetched from the Open Food Facts API via the official
+<code>openfoodfacts</code> Dart SDK and stored locally for offline use.</li>
+<li><code>lastSynced</code> records an epoch timestamp (milliseconds since Unix epoch)
+of when the product was last fetched. This can be used in the future to
+implement cache freshness checks (e.g. re-fetch if older than 30 days).</li>
+</ul>
+<h2 id="immutability">Immutability</h2>
+<p>This class uses the <code>freezed</code> package, making it <strong>immutable</strong>. Any
+modification must be done via the generated <code>copyWith</code> method, which
+returns a new instance.</p>
+<p>See also:</p>
+<ul>
+<li><a href="https://pub.dev/packages/openfoodfacts">openfoodfacts Dart SDK</a>
+— the official Open Food Facts API client used to fetch and submit
+product data.</li>
+<li><a href="https://pub.dev/packages/freezed">freezed</a>
+— the code‑generation package that provides immutability, <code>copyWith</code>,
+<code>==</code>, <code>hashCode</code>, and JSON serialisation.</li>
+</ul>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+
+        
+        
+
+
+        
+  <dt>Available extensions</dt>
+  <dd><ul class="comma-separated clazz-relationships">
+      <li><a href="../models_product/ProductMerge.html">ProductMerge</a></li>
+      <li><a href="../models_product/ProductPatterns.html">ProductPatterns</a></li>
+      <li><a href="../models_product/ProductToOff.html">ProductToOff</a></li>
+  </ul></dd>
+        
+  <dt>Annotations</dt>
+  <dd>
+    <ul class="annotation-list clazz-relationships">
+        <li>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/freezed-constant.html">freezed</a></li>
+    </ul>
+  </dd>
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="Product.new" class="callable">
+          <span class="name"><a href="../models_product/Product/Product.html">Product</a></span><span class="signature">({<span class="parameter" id="param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="param-name"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-brand"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">brand</span>, </span><span class="parameter" id="param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-offNutritionImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offNutritionImageUrl</span>, </span><span class="parameter" id="param-offIngredientsImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offIngredientsImageUrl</span>, </span><span class="parameter" id="param-offProductImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offProductImageUrl</span>, </span><span class="parameter" id="param-categoriesHierarchy"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">categoriesHierarchy</span>, </span><span class="parameter" id="param-category"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">category</span>, </span><span class="parameter" id="param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-servingSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">servingSize</span>, </span><span class="parameter" id="param-energyKcal"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">energyKcal</span>, </span><span class="parameter" id="param-proteinG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">proteinG</span>, </span><span class="parameter" id="param-carbsG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">carbsG</span>, </span><span class="parameter" id="param-fatG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fatG</span>, </span><span class="parameter" id="param-fiberG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fiberG</span>, </span><span class="parameter" id="param-saltG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">saltG</span>, </span><span class="parameter" id="param-lastSynced"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">lastSynced</span>, </span><span class="parameter" id="param-nutriscoreGrade"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreGrade</span>, </span><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span><span class="parameter" id="param-source"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(&#39;api&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">source</span>, </span><span class="parameter" id="param-nutritionImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutritionImagePath</span>, </span><span class="parameter" id="param-ingredientsImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredientsImagePath</span>, </span><span class="parameter" id="param-productImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productImagePath</span>, </span><span class="parameter" id="param-submissionStatus"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(productSubmissionNotSubmitted)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">submissionStatus</span></span>})</span>
+        </dt>
+        <dd>
+          Constructs a <a href="../models_product/Product-class.html">Product</a>.
+            <div class="constructor-modifier features">const</div>
+            <div class="constructor-modifier features">factory</div>
+        </dd>
+        <dt id="Product.fromOffProduct" class="callable">
+          <span class="name"><a href="../models_product/Product/Product.fromOffProduct.html">Product.fromOffProduct</a></span><span class="signature">(<span class="parameter" id="fromOffProduct-param-offProduct"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Product-class.html">Product</a></span> <span class="parameter-name">offProduct</span></span>)</span>
+        </dt>
+        <dd>
+          Creates a <a href="../models_product/Product-class.html">Product</a> from an SDK <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Product-class.html">off.Product</a>.
+            <div class="constructor-modifier features">factory</div>
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="barcode" class="property inherited">
+  <span class="name"><a href="../models_product/Product/barcode.html">barcode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The barcode (EAN-13, UPC, etc.) that uniquely identifies the product.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="brand" class="property inherited">
+  <span class="name"><a href="../models_product/Product/brand.html">brand</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The brand name(s), often comma-separated when multiple brands exist
+(e.g. <code>"Ferrero"</code>, <code>"Nestle, Nespresso"</code>).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="carbsG" class="property inherited">
+  <span class="name"><a href="../models_product/Product/carbsG.html">carbsG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Carbohydrate content in <strong>grams per 100 g</strong> (or 100 ml).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="categoriesHierarchy" class="property inherited">
+  <span class="name"><a href="../models_product/Product/categoriesHierarchy.html">categoriesHierarchy</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The OFF taxonomy hierarchy for this product, from broadest to
+most specific. Each entry is a language-prefixed tag
+(e.g. <code>en:eggs</code>, <code>en:chicken-eggs</code>).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="category" class="property inherited">
+  <span class="name"><a href="../models_product/Product/category.html">category</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The product category as assigned by the Open Food Facts community.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="copyWith" class="property inherited">
+  <span class="name"><a href="../models_product/Product/copyWith.html">copyWith</a></span>
+  <span class="signature">&#8594; $ProductCopyWith<span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd class="inherited">
+  Create a copy of Product
+with the given fields replaced by the non-null parameter values.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="energyKcal" class="property inherited">
+  <span class="name"><a href="../models_product/Product/energyKcal.html">energyKcal</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Energy content in <strong>kilocalories per 100 g</strong> (or 100 ml).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="fatG" class="property inherited">
+  <span class="name"><a href="../models_product/Product/fatG.html">fatG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Fat content in <strong>grams per 100 g</strong> (or 100 ml).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="fiberG" class="property inherited">
+  <span class="name"><a href="../models_product/Product/fiberG.html">fiberG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Fiber content in <strong>grams per 100 g</strong> (or 100 ml).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="../models_product/Product/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="imageUrl" class="property inherited">
+  <span class="name"><a href="../models_product/Product/imageUrl.html">imageUrl</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  A URL to the product's front image on the Open Food Facts CDN.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="ingredients" class="property inherited">
+  <span class="name"><a href="../models_product/Product/ingredients.html">ingredients</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The full ingredients list as plain text.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="ingredientsImagePath" class="property inherited">
+  <span class="name"><a href="../models_product/Product/ingredientsImagePath.html">ingredientsImagePath</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Local file path to a photo of the ingredients list.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="lastSynced" class="property inherited">
+  <span class="name"><a href="../models_product/Product/lastSynced.html">lastSynced</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Epoch timestamp (milliseconds since Unix epoch) of when the product
+data was last fetched from the API or submitted by the user.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="name" class="property inherited">
+  <span class="name"><a href="../models_product/Product/name.html">name</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The product name as returned by Open Food Facts.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="nutriscoreGrade" class="property inherited">
+  <span class="name"><a href="../models_product/Product/nutriscoreGrade.html">nutriscoreGrade</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The Nutri-Score grade of the product (<code>'a'</code> through <code>'e'</code>), or <code>null</code>
+if the data is unavailable. May also be <code>'not-applicable'</code> when the
+Nutri-Score system does not apply to this product category (e.g. food
+additives).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="nutriscoreNotApplicableCategory" class="property inherited">
+  <span class="name"><a href="../models_product/Product/nutriscoreNotApplicableCategory.html">nutriscoreNotApplicableCategory</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The product category that makes Nutri-Score not applicable, if any.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="nutritionImagePath" class="property inherited">
+  <span class="name"><a href="../models_product/Product/nutritionImagePath.html">nutritionImagePath</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Local file path to a photo of the nutrition facts table.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="offIngredientsImageUrl" class="property inherited">
+  <span class="name"><a href="../models_product/Product/offIngredientsImageUrl.html">offIngredientsImageUrl</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  OFF CDN URL for the ingredients list image, if available.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="offNutritionImageUrl" class="property inherited">
+  <span class="name"><a href="../models_product/Product/offNutritionImageUrl.html">offNutritionImageUrl</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  OFF CDN URL for the nutrition facts table image, if available.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="offProductImageUrl" class="property inherited">
+  <span class="name"><a href="../models_product/Product/offProductImageUrl.html">offProductImageUrl</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  OFF CDN URL for the product front/packaging image, if available.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="productImagePath" class="property inherited">
+  <span class="name"><a href="../models_product/Product/productImagePath.html">productImagePath</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Local file path to a photo of the product packaging / front.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="proteinG" class="property inherited">
+  <span class="name"><a href="../models_product/Product/proteinG.html">proteinG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Protein content in <strong>grams per 100 g</strong> (or 100 ml).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="saltG" class="property inherited">
+  <span class="name"><a href="../models_product/Product/saltG.html">saltG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Salt content in <strong>grams per 100 g</strong> (or 100 ml).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="servingSize" class="property inherited">
+  <span class="name"><a href="../models_product/Product/servingSize.html">servingSize</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The suggested serving size, typically with a unit (e.g. <code>"15 g"</code>,
+<code>"1 cookie (28 g)"</code>).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="source" class="property inherited">
+  <span class="name"><a href="../models_product/Product/source.html">source</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The origin of this product record.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="submissionStatus" class="property inherited">
+  <span class="name"><a href="../models_product/Product/submissionStatus.html">submissionStatus</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The submission status of this product to Open Food Facts.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="map" class="callable">
+  <span class="name"><a href="../models_product/ProductPatterns/map.html">map</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="map-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-value"><span class="type-annotation">_Product</span> <span class="parameter-name">value</span></span>)</span>)
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductPatterns.html">ProductPatterns</a> extension</span>
+      </p>
+  A <code>switch</code>-like method, using callbacks.
+  
+
+</dd>
+
+        <dt id="mapOrNull" class="callable">
+  <span class="name"><a href="../models_product/ProductPatterns/mapOrNull.html">mapOrNull</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="mapOrNull-param-$default"><span class="type-annotation">TResult?</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-value"><span class="type-annotation">_Product</span> <span class="parameter-name">value</span></span>)?</span>)
+    <span class="returntype parameter">&#8594; TResult?</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductPatterns.html">ProductPatterns</a> extension</span>
+      </p>
+  A variant of <code>map</code> that fallback to returning <code>null</code>.
+  
+
+</dd>
+
+        <dt id="maybeMap" class="callable">
+  <span class="name"><a href="../models_product/ProductPatterns/maybeMap.html">maybeMap</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="maybeMap-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-value"><span class="type-annotation">_Product</span> <span class="parameter-name">value</span></span>)?, {</span><span class="parameter" id="maybeMap-param-orElse"><span>required</span> <span class="type-annotation">TResult</span> <span class="parameter-name">orElse</span>()</span>})
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductPatterns.html">ProductPatterns</a> extension</span>
+      </p>
+  A variant of <code>map</code> that fallback to returning <code>orElse</code>.
+  
+
+</dd>
+
+        <dt id="maybeWhen" class="callable">
+  <span class="name"><a href="../models_product/ProductPatterns/maybeWhen.html">maybeWhen</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="maybeWhen-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-brand"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">brand</span>, </span><span class="parameter" id="param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-offNutritionImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offNutritionImageUrl</span>, </span><span class="parameter" id="param-offIngredientsImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offIngredientsImageUrl</span>, </span><span class="parameter" id="param-offProductImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offProductImageUrl</span>, </span><span class="parameter" id="param-categoriesHierarchy"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">categoriesHierarchy</span>, </span><span class="parameter" id="param-category"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">category</span>, </span><span class="parameter" id="param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-servingSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">servingSize</span>, </span><span class="parameter" id="param-energyKcal"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">energyKcal</span>, </span><span class="parameter" id="param-proteinG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">proteinG</span>, </span><span class="parameter" id="param-carbsG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">carbsG</span>, </span><span class="parameter" id="param-fatG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fatG</span>, </span><span class="parameter" id="param-fiberG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fiberG</span>, </span><span class="parameter" id="param-saltG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">saltG</span>, </span><span class="parameter" id="param-lastSynced"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">lastSynced</span>, </span><span class="parameter" id="param-nutriscoreGrade"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreGrade</span>, </span><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span><span class="parameter" id="param-source"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">source</span>, </span><span class="parameter" id="param-nutritionImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutritionImagePath</span>, </span><span class="parameter" id="param-ingredientsImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredientsImagePath</span>, </span><span class="parameter" id="param-productImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productImagePath</span>, </span><span class="parameter" id="param-submissionStatus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">submissionStatus</span></span>)?, {</span><span class="parameter" id="maybeWhen-param-orElse"><span>required</span> <span class="type-annotation">TResult</span> <span class="parameter-name">orElse</span>()</span>})
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductPatterns.html">ProductPatterns</a> extension</span>
+      </p>
+  A variant of <code>when</code> that fallback to an <code>orElse</code> callback.
+  
+
+</dd>
+
+        <dt id="mergeFromApi" class="callable">
+  <span class="name"><a href="../models_product/ProductMerge/mergeFromApi.html">mergeFromApi</a></span><span class="signature">(<wbr><span class="parameter" id="mergeFromApi-param-api"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">api</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../models_product/Product-class.html">Product</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductMerge.html">ProductMerge</a> extension</span>
+      </p>
+  Merges data from an API-fetched <code>api</code> product into this product,
+preserving local-only fields that the API does not return.
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toOffProduct" class="callable">
+  <span class="name"><a href="../models_product/ProductToOff/toOffProduct.html">toOffProduct</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Product-class.html">Product</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductToOff.html">ProductToOff</a> extension</span>
+      </p>
+  Converts this product to an SDK <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Product-class.html">off.Product</a>.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="../models_product/Product/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="when" class="callable">
+  <span class="name"><a href="../models_product/ProductPatterns/when.html">when</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="when-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-brand"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">brand</span>, </span><span class="parameter" id="param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-offNutritionImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offNutritionImageUrl</span>, </span><span class="parameter" id="param-offIngredientsImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offIngredientsImageUrl</span>, </span><span class="parameter" id="param-offProductImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offProductImageUrl</span>, </span><span class="parameter" id="param-categoriesHierarchy"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">categoriesHierarchy</span>, </span><span class="parameter" id="param-category"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">category</span>, </span><span class="parameter" id="param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-servingSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">servingSize</span>, </span><span class="parameter" id="param-energyKcal"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">energyKcal</span>, </span><span class="parameter" id="param-proteinG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">proteinG</span>, </span><span class="parameter" id="param-carbsG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">carbsG</span>, </span><span class="parameter" id="param-fatG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fatG</span>, </span><span class="parameter" id="param-fiberG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fiberG</span>, </span><span class="parameter" id="param-saltG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">saltG</span>, </span><span class="parameter" id="param-lastSynced"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">lastSynced</span>, </span><span class="parameter" id="param-nutriscoreGrade"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreGrade</span>, </span><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span><span class="parameter" id="param-source"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">source</span>, </span><span class="parameter" id="param-nutritionImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutritionImagePath</span>, </span><span class="parameter" id="param-ingredientsImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredientsImagePath</span>, </span><span class="parameter" id="param-productImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productImagePath</span>, </span><span class="parameter" id="param-submissionStatus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">submissionStatus</span></span>)</span>)
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductPatterns.html">ProductPatterns</a> extension</span>
+      </p>
+  A <code>switch</code>-like method, using callbacks.
+  
+
+</dd>
+
+        <dt id="whenOrNull" class="callable">
+  <span class="name"><a href="../models_product/ProductPatterns/whenOrNull.html">whenOrNull</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="whenOrNull-param-$default"><span class="type-annotation">TResult?</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-brand"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">brand</span>, </span><span class="parameter" id="param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-offNutritionImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offNutritionImageUrl</span>, </span><span class="parameter" id="param-offIngredientsImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offIngredientsImageUrl</span>, </span><span class="parameter" id="param-offProductImageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offProductImageUrl</span>, </span><span class="parameter" id="param-categoriesHierarchy"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">categoriesHierarchy</span>, </span><span class="parameter" id="param-category"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">category</span>, </span><span class="parameter" id="param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-servingSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">servingSize</span>, </span><span class="parameter" id="param-energyKcal"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">energyKcal</span>, </span><span class="parameter" id="param-proteinG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">proteinG</span>, </span><span class="parameter" id="param-carbsG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">carbsG</span>, </span><span class="parameter" id="param-fatG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fatG</span>, </span><span class="parameter" id="param-fiberG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fiberG</span>, </span><span class="parameter" id="param-saltG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">saltG</span>, </span><span class="parameter" id="param-lastSynced"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">lastSynced</span>, </span><span class="parameter" id="param-nutriscoreGrade"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreGrade</span>, </span><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span><span class="parameter" id="param-source"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">source</span>, </span><span class="parameter" id="param-nutritionImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutritionImagePath</span>, </span><span class="parameter" id="param-ingredientsImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredientsImagePath</span>, </span><span class="parameter" id="param-productImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productImagePath</span>, </span><span class="parameter" id="param-submissionStatus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">submissionStatus</span></span>)?</span>)
+    <span class="returntype parameter">&#8594; TResult?</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductPatterns.html">ProductPatterns</a> extension</span>
+      </p>
+  A variant of <code>when</code> that fallback to returning <code>null</code>
+  
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="../models_product/Product/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../models_product/">product</a></li>
+    <li class="self-crumb">Product class</li>
+</ol>
+
+    <h5>product library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

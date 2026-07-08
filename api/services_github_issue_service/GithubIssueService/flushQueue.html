@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the flushQueue method from the GithubIssueService class, for the Dart programming language.">
+  <title>flushQueue method - GithubIssueService class - github_issue_service library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_github_issue_service/">services&#47;github_issue_service.dart</a></li>
+    <li><a href="../../services_github_issue_service/GithubIssueService-class.html">GithubIssueService</a></li>
+    <li class="self-crumb">flushQueue method</li>
+  </ol>
+  <div class="self-name">flushQueue</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_github_issue_service&#47;GithubIssueService-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">flushQueue</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">(<span class="field">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="field-name">failed</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="field-name">submitted</span>}</span>)</span>&gt;</span></span>
+<span class="name ">flushQueue</span>(<wbr>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Flushes all queued issues to GitHub.</p>
+<p>Returns the number of successfully submitted and failed issues.
+Skips if a flush is already in progress.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;({int submitted, int failed})&gt; flushQueue() async {
+  if (_isFlushing) return (submitted: 0, failed: 0);
+
+  if (_lastFlushTime != null &amp;&amp;
+      DateTime.now().difference(_lastFlushTime!) &lt;
+          const Duration(seconds: 60)) {
+    return (submitted: 0, failed: 0);
+  }
+
+  _isFlushing = true;
+  _lastFlushTime = DateTime.now();
+  var submitted = 0;
+  var failed = 0;
+
+  late final Database dbInstance;
+
+  try {
+    dbInstance = await _dbHelper.database;
+    final pending = await _queueDao.getAllPending(dbInstance);
+    if (pending.isEmpty) {
+      logInfo(&#39;No queued issues to flush&#39;);
+      return (submitted: 0, failed: 0);
+    }
+
+    logInfo(&#39;Flushing ${pending.length} queued feedback issues&#39;);
+
+    for (final row in pending) {
+      final id = row[&#39;id&#39;] as int;
+      final title = row[&#39;title&#39;] as String;
+      final body = row[&#39;body&#39;] as String;
+      final label = row[&#39;label&#39;] as String?;
+      final screenshotPathsJson = row[&#39;screenshot_path&#39;] as String?;
+      final retryCount = row[&#39;retry_count&#39;] as int;
+
+      final screenshotBytesList = &lt;List&lt;int&gt;&gt;[];
+      if (screenshotPathsJson != null) {
+        try {
+          final paths = (jsonDecode(screenshotPathsJson) as List&lt;dynamic&gt;)
+              .cast&lt;String&gt;();
+          for (final path in paths) {
+            final file = File(path);
+            if (await file.exists()) {
+              screenshotBytesList.add(await file.readAsBytes());
+            }
+          }
+        } on Exception {
+          &#47;&#47; best-effort
+        }
+      }
+
+      try {
+        await submitIssue(
+          title: title,
+          body: body,
+          label: label,
+          screenshotBytesList: screenshotBytesList,
+        );
+        await _queueDao.delete(dbInstance, id);
+        if (screenshotPathsJson != null) {
+          try {
+            final paths = (jsonDecode(screenshotPathsJson) as List&lt;dynamic&gt;)
+                .cast&lt;String&gt;();
+            for (final path in paths) {
+              try {
+                await File(path).delete();
+              } on Exception {
+                &#47;&#47; best-effort cleanup
+              }
+            }
+          } on Exception {
+            &#47;&#47; best-effort cleanup
+          }
+        }
+        submitted++;
+      } on Exception {
+        await _queueDao.incrementRetry(dbInstance, id);
+        if (retryCount &gt;= 2) {
+          await _queueDao.markFailed(dbInstance, id);
+          logWarning(&#39;Feedback issue $id failed after 3 retries&#39;);
+        }
+        failed++;
+      }
+    }
+  } on Exception catch (e) {
+    logError(&#39;Queue flush failed: $e&#39;);
+  } finally {
+    _isFlushing = false;
+  }
+
+  &#47;&#47; Cleanup stale failed rows.
+  try {
+    await _queueDao.deleteStaleFailures(await _dbHelper.database);
+  } on Exception catch (e) {
+    logWarning(&#39;Stale failure cleanup failed: $e&#39;);
+  }
+
+  return (submitted: submitted, failed: failed);
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_github_issue_service/">github_issue_service</a></li>
+    <li><a href="../../services_github_issue_service/GithubIssueService-class.html">GithubIssueService</a></li>
+    <li class="self-crumb">flushQueue method</li>
+</ol>
+
+    <h5>GithubIssueService class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

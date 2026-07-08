@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the filterUnseen method from the ChangelogParser class, for the Dart programming language.">
+  <title>filterUnseen method - ChangelogParser class - changelog_parser library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_changelog_parser/">services&#47;changelog_parser.dart</a></li>
+    <li><a href="../../services_changelog_parser/ChangelogParser-class.html">ChangelogParser</a></li>
+    <li class="self-crumb">filterUnseen method</li>
+  </ol>
+  <div class="self-name">filterUnseen</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_changelog_parser&#47;ChangelogParser-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">filterUnseen</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../services_changelog_parser/ChangelogEntry-class.html">ChangelogEntry</a></span>&gt;</span></span>
+<span class="name ">filterUnseen</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="filterUnseen-param-allEntries"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../services_changelog_parser/ChangelogEntry-class.html">ChangelogEntry</a></span>&gt;</span></span> <span class="parameter-name">allEntries</span>, </span></li>
+<li><span class="parameter" id="filterUnseen-param-lastSeenVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">lastSeenVersion</span>, </span></li>
+<li><span class="parameter" id="filterUnseen-param-currentVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">currentVersion</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Returns entries between <code>lastSeenVersion</code> (exclusive) and
+<code>currentVersion</code> (inclusive).</p>
+<p>The <code>[Unreleased]</code> section is always included if the versions differ
+and the user is not on a first install.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">List&lt;ChangelogEntry&gt; filterUnseen(
+  List&lt;ChangelogEntry&gt; allEntries,
+  String lastSeenVersion,
+  String currentVersion,
+) {
+  final seen = &lt;ChangelogEntry&gt;[];
+  final currentSemver = _toSemver(currentVersion);
+
+  for (final entry in allEntries) {
+    if (entry.version == unreleasedVersion) {
+      &#47;&#47; Always show [Unreleased] when upgrading — it represents current
+      &#47;&#47; development changes not yet in a tagged release.
+      seen.add(entry);
+      continue;
+    }
+
+    final entrySemver = _toSemver(entry.version);
+    final lastSeenSemver = _toSemver(lastSeenVersion);
+
+    if (_compareSegments(entrySemver, lastSeenSemver) &gt; 0 &amp;&amp;
+        _compareSegments(entrySemver, currentSemver) &lt;= 0) {
+      seen.add(entry);
+    }
+  }
+
+  return seen;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_changelog_parser/">changelog_parser</a></li>
+    <li><a href="../../services_changelog_parser/ChangelogParser-class.html">ChangelogParser</a></li>
+    <li class="self-crumb">filterUnseen method</li>
+</ol>
+
+    <h5>ChangelogParser class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

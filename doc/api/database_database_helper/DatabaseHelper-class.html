@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the DatabaseHelper class from the database_helper library, for the Dart programming language.">
+  <title>DatabaseHelper class - database_helper library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../database_database_helper/">database&#47;database_helper.dart</a></li>
+    <li class="self-crumb">DatabaseHelper class</li>
+  </ol>
+  <div class="self-name">DatabaseHelper</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="database_database_helper&#47;database_database_helper-library-sidebar.html"
+    data-below-sidebar="database_database_helper&#47;DatabaseHelper-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">DatabaseHelper</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Provides access to the local SQLite database.</p>
+<p><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> is normally a <strong>singleton</strong> – only one instance exists
+during the lifetime of the app. The singleton pattern guarantees that all
+database operations use the same connection.</p>
+<p>For <strong>testing</strong> a separate instance can be created with the named
+constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
+or a temporary file.</p>
+<h2 id="schema-overview">Schema overview</h2>
+<p>Four tables are created on first launch (version 11):</p>
+<ul>
+<li><code>products</code> – product data fetched from Open Food Facts.</li>
+<li><code>inventories</code> – named pantries (e.g. "Home", "Work").</li>
+<li><code>inventory</code> – instances of products the user has added to a pantry.</li>
+<li><code>feedback_queue</code> – offline queue for GitHub issue reports.</li>
+</ul>
+<h2 id="delegation">Delegation</h2>
+<p>CRUD operations are delegated to dedicated DAO classes:
+<a href="../database_product_dao/ProductDao-class.html">ProductDao</a>, <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>, <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a>. This keeps each file
+focused on a single table.</p>
+<p>See also:</p>
+<ul>
+<li><a href="https://pub.dev/packages/sqflite">sqflite</a> — the SQLite plugin
+used for local storage.</li>
+<li><a href="https://pub.dev/packages/path_provider">path_provider</a>
+— platform‑specific directory resolution.</li>
+</ul>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="DatabaseHelper.new" class="callable">
+          <span class="name"><a href="../database_database_helper/DatabaseHelper/DatabaseHelper.html">DatabaseHelper</a></span><span class="signature">()</span>
+        </dt>
+        <dd>
+          Returns the single <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> instance.
+            <div class="constructor-modifier features">factory</div>
+        </dd>
+        <dt id="DatabaseHelper.withPath" class="callable">
+          <span class="name"><a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a></span><span class="signature">(<span class="parameter" id="withPath-param-path"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">path</span></span>)</span>
+        </dt>
+        <dd>
+          Creates a <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> that opens a database at the given <code>path</code>.
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="database" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/database.html">database</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd>
+  The lazily‑opened database instance.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="feedbackQueueDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/feedbackQueueDao.html">feedbackQueueDao</a></span>
+  <span class="signature">&#8594; <a href="../database_feedback_queue_dao/FeedbackQueueDao-class.html">FeedbackQueueDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the <code>feedback_queue</code> table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="inventoriesDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/inventoriesDao.html">inventoriesDao</a></span>
+  <span class="signature">&#8594; <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the <code>inventories</code> table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="inventoryDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/inventoryDao.html">inventoryDao</a></span>
+  <span class="signature">&#8594; <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the <code>inventory</code> table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="productDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/productDao.html">productDao</a></span>
+  <span class="signature">&#8594; <a href="../database_product_dao/ProductDao-class.html">ProductDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the <code>products</code> table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="cleanupOldEntries" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/cleanupOldEntries.html">cleanupOldEntries</a></span><span class="signature">(<wbr>{<span class="parameter" id="cleanupOldEntries-param-retentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">retentionDays</span> = <span class="default-value">60</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Removes stale inventory items and orphaned products.
+  
+
+</dd>
+
+        <dt id="clearAllProducts" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/clearAllProducts.html">clearAllProducts</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes every product from the <code>products</code> table.
+  
+
+</dd>
+
+        <dt id="clearCachedProducts" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/clearCachedProducts.html">clearCachedProducts</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes all API‑fetched products from the local cache.
+  
+
+</dd>
+
+        <dt id="createInventory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/createInventory.html">createInventory</a></span><span class="signature">(<wbr><span class="parameter" id="createInventory-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Creates a new inventory (pantry) with the given <code>name</code>.
+  
+
+</dd>
+
+        <dt id="deleteFeedbackIssue" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteFeedbackIssue.html">deleteFeedbackIssue</a></span><span class="signature">(<wbr><span class="parameter" id="deleteFeedbackIssue-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes a feedback queue row.
+  
+
+</dd>
+
+        <dt id="deleteInventory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteInventory.html">deleteInventory</a></span><span class="signature">(<wbr><span class="parameter" id="deleteInventory-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes the inventory with the given <code>id</code> and all its items.
+  
+
+</dd>
+
+        <dt id="deleteInventoryItem" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteInventoryItem.html">deleteInventoryItem</a></span><span class="signature">(<wbr><span class="parameter" id="deleteInventoryItem-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes an inventory item by its ID.
+  
+
+</dd>
+
+        <dt id="deleteStaleFeedbackFailures" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteStaleFeedbackFailures.html">deleteStaleFeedbackFailures</a></span><span class="signature">(<wbr>{<span class="parameter" id="deleteStaleFeedbackFailures-param-olderThanDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">olderThanDays</span> = <span class="default-value">30</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes stale failed feedback queue rows.
+  
+
+</dd>
+
+        <dt id="getAllProducts" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getAllProducts.html">getAllProducts</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all cached products.
+  
+
+</dd>
+
+        <dt id="getCachedProducts" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getCachedProducts.html">getCachedProducts</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns only products fetched from the Open Food Facts API.
+  
+
+</dd>
+
+        <dt id="getInventories" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getInventories.html">getInventories</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all inventories, ordered by creation time.
+  
+
+</dd>
+
+        <dt id="getInventoryCount" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getInventoryCount.html">getInventoryCount</a></span><span class="signature">(<wbr>{<span class="parameter" id="getInventoryCount-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total number of rows in the inventory table.
+  
+
+</dd>
+
+        <dt id="getInventoryItems" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getInventoryItems.html">getInventoryItems</a></span><span class="signature">(<wbr>{<span class="parameter" id="getInventoryItems-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="getInventoryItems-param-location"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">location</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Retrieves all inventory items for a specific <code>inventoryId</code>,
+optionally filtered by location.
+  
+
+</dd>
+
+        <dt id="getInventoryItemsByBarcode" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getInventoryItemsByBarcode.html">getInventoryItemsByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="getInventoryItemsByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getInventoryItemsByBarcode-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all inventory entries for a specific barcode and <code>inventoryId</code>,
+ordered by expiry date (oldest first).
+  
+
+</dd>
+
+        <dt id="getInventoryWithProduct" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">getInventoryWithProduct</a></span><span class="signature">(<wbr>{<span class="parameter" id="getInventoryWithProduct-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Retrieves all inventory rows joined with product metadata.
+  
+
+</dd>
+
+        <dt id="getLastAddDate" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getLastAddDate.html">getLastAddDate</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the most recent <code>InventoryItem.dateAdded</code> epoch across all items.
+  
+
+</dd>
+
+        <dt id="getPendingFeedbackIssues" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPendingFeedbackIssues.html">getPendingFeedbackIssues</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all pending (non-failed) feedback queue rows.
+  
+
+</dd>
+
+        <dt id="getProduct" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getProduct.html">getProduct</a></span><span class="signature">(<wbr><span class="parameter" id="getProduct-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Looks up a single product by its barcode.
+  
+
+</dd>
+
+        <dt id="getProductCount" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getProductCount.html">getProductCount</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total number of cached product records.
+  
+
+</dd>
+
+        <dt id="incrementFeedbackRetry" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/incrementFeedbackRetry.html">incrementFeedbackRetry</a></span><span class="signature">(<wbr><span class="parameter" id="incrementFeedbackRetry-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Increments the retry count for a feedback queue row.
+  
+
+</dd>
+
+        <dt id="insertInventoryItem" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertInventoryItem.html">insertInventoryItem</a></span><span class="signature">(<wbr><span class="parameter" id="insertInventoryItem-param-item"><span class="type-annotation"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a new inventory item.
+  
+
+</dd>
+
+        <dt id="insertProduct" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertProduct.html">insertProduct</a></span><span class="signature">(<wbr><span class="parameter" id="insertProduct-param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a product into the local cache (upsert).
+  
+
+</dd>
+
+        <dt id="markFeedbackFailed" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/markFeedbackFailed.html">markFeedbackFailed</a></span><span class="signature">(<wbr><span class="parameter" id="markFeedbackFailed-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Marks a feedback queue row as permanently failed.
+  
+
+</dd>
+
+        <dt id="moveItemsToInventory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/moveItemsToInventory.html">moveItemsToInventory</a></span><span class="signature">(<wbr><span class="parameter" id="moveItemsToInventory-param-itemIds"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">itemIds</span>, </span><span class="parameter" id="moveItemsToInventory-param-targetInventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">targetInventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Moves multiple inventory items to a different inventory (pantry).
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="queueFeedbackIssue" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/queueFeedbackIssue.html">queueFeedbackIssue</a></span><span class="signature">(<wbr>{<span class="parameter" id="queueFeedbackIssue-param-title"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span>, </span><span class="parameter" id="queueFeedbackIssue-param-body"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span>, </span><span class="parameter" id="queueFeedbackIssue-param-label"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">label</span>, </span><span class="parameter" id="queueFeedbackIssue-param-screenshotPath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">screenshotPath</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Queues a feedback issue for offline submission.
+  
+
+</dd>
+
+        <dt id="renameInventory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/renameInventory.html">renameInventory</a></span><span class="signature">(<wbr><span class="parameter" id="renameInventory-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span>, </span><span class="parameter" id="renameInventory-param-newName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">newName</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Renames the inventory with the given <code>id</code>.
+  
+
+</dd>
+
+        <dt id="searchProducts" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/searchProducts.html">searchProducts</a></span><span class="signature">(<wbr><span class="parameter" id="searchProducts-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Searches the products table by name or barcode.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="updateInventoryItem" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/updateInventoryItem.html">updateInventoryItem</a></span><span class="signature">(<wbr><span class="parameter" id="updateInventoryItem-param-item"><span class="type-annotation"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates an existing inventory item.
+  
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../database_database_helper/">database_helper</a></li>
+    <li class="self-crumb">DatabaseHelper class</li>
+</ol>
+
+    <h5>database_helper library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
