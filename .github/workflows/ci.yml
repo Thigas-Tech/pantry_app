@@ -44,6 +44,18 @@ jobs:
           echo "OFF_USER_ID=ci" > code/.env
           echo "OFF_PASSWORD=ci" >> code/.env
           echo "CONTACT_EMAIL=ci@pantry-app.dev" >> code/.env
+      - name: Check version ahead of latest release
+        if: matrix.category == 'static'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PUBSPEC_VER=$(grep '^version: ' code/pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          if gh release view "v$PUBSPEC_VER" --json tagName &>/dev/null; then
+            echo "ERROR: version $PUBSPEC_VER already has a release on GitHub."
+            echo "Bump the version in pubspec.yaml before merging."
+            exit 1
+          fi
+          echo "Version v$PUBSPEC_VER is ahead of latest release — OK"
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: flutter analyze --fatal-infos --fatal-warnings

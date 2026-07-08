@@ -8,6 +8,9 @@ Run BEFORE every local commit. Fix ALL issues:
   flutter test --concurrency=2
   flutter build apk --debug
   dart doc .
+  # If FEATURE_FREEZE.md is checked, verify only fixes + polish are included.
+  grep -q '[x] feature_freeze' FEATURE_FREEZE.md && \
+    echo "FEATURE FREEZE ACTIVE — only bug fixes and polish allowed" || true
 
 ## Pre-merge gate (run BEFORE creating a PR or converting draft to ready)
 
@@ -44,26 +47,30 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 
 ## Rules
 
-0. Follow every rule. No exceptions.
-1. Check TODO.md before starting new work.
-2. /// doc comments on every public class, constructor, field, and method.
+0. Before starting any feature work, check [FEATURE_FREEZE.md]. If
+   feature_freeze is checked, only bug fixes, polish, a11y/perf
+   improvements, and documentation are allowed. New features MUST be
+   deferred until the freeze is lifted.
+1. Follow every rule. No exceptions.
+2. Check [TODO.md] before starting new work.
+3. /// doc comments on every public class, constructor, field, and method.
    These feed the public GitHub Wiki (see agents_docs/wiki.md). Write them
    as proper sentences — they are the user-facing API documentation.
-3. Tests for ALL new code. Use mocktail. Place in test/ subdirectory.
-4. After freezed or l10n changes: dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n
-5. Localize: all user-visible strings in lib/l10n/app_en.arb. Never hardcode English.
-6. Update CHANGELOG.md for every feature, fix, or change. New dev-only ### section -> add to _devOnlySections in whats_new_sheet.dart.
-7. Product() MUST pass source: 'api' or 'manual'. Never omit.
-8. No emoji anywhere (code, docs, commits, ARB strings).
-9. Audit every plan for pitfalls before writing code.
-10. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
-11. Never ! on SQL aggregate results. Use ?? fallback instead.
-12. Keep all markdown files ([README.md], [ARCHITECTURE.md], [CHANGELOG.md],
+4. Tests for ALL new code. Use mocktail. Place in test/ subdirectory.
+5. After freezed or l10n changes: dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n
+6. Localize: all user-visible strings in lib/l10n/app_en.arb. Never hardcode English.
+7. Update CHANGELOG.md for every feature, fix, or change. New dev-only ### section -> add to _devOnlySections in whats_new_sheet.dart.
+8. Product() MUST pass source: 'api' or 'manual'. Never omit.
+9. No emoji anywhere (code, docs, commits, ARB strings).
+10. Audit every plan for pitfalls before writing code.
+11. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
+12. Never ! on SQL aggregate results. Use ?? fallback instead.
+13. Keep all markdown files ([README.md], [ARCHITECTURE.md], [CHANGELOG.md],
     [TODO.md], `agents_docs/*.md`) and `///` doc comments in sync with the
     codebase. After every feature, fix, or refactor, audit the affected docs
     in the same PR. When asked to find stale information, first consult
     `agents_docs/stale_info_checklist.md`.
-13. Never overwrite .env. It is gitignored and contains credentials.
+14. Never overwrite .env. It is gitignored and contains credentials.
     - scripts/inject_env.sh uses `cat >.env` which truncates — never run it
       locally. It is only for CI (build, deploy workflows).
     - Never echo/redirect into .env from scripts or ad-hoc commands.
