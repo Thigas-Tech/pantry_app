@@ -1,4 +1,4 @@
-name: Update Wiki
+name: Update API Docs
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-wiki:
-    name: Publish API docs to wiki
+  deploy:
+    name: Deploy API docs to GitHub Pages
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2.23.0
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           channel: stable
           cache: true
@@ -28,39 +28,28 @@ jobs:
       - name: Generate API documentation
         run: dart doc .
 
-      - name: Clone wiki repository
+      - name: Checkout gh-pages branch
         run: |
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git wiki
+          git fetch origin gh-pages --depth=1 || {
+            echo "gh-pages branch does not exist yet; run initial setup first"
+            exit 1
+          }
+          git checkout gh-pages
 
-      - name: Sync documentation to wiki
+      - name: Sync documentation
         run: |
-          cd wiki
-          # Preserve hand-maintained files
-          for f in Home.md _Sidebar.md _Footer.md .git; do
-            echo "Preserving $f"
-          done
-          # Remove all auto-generated content
-          find . -mindepth 1 -maxdepth 1 \
-            ! -name 'Home.md' \
-            ! -name '_Sidebar.md' \
-            ! -name '_Footer.md' \
-            ! -name '.git' \
-            -exec rm -rf {} +
-          # Copy fresh docs
-          cp -r ../doc/api/* .
-          # Ensure hand-maintained files still exist (create empty if missing)
-          touch Home.md _Sidebar.md _Footer.md
+          rm -rf api
+          cp -r ../doc/api api
+          git add -A
 
-      - name: Push to wiki
+      - name: Commit and push
         run: |
-          cd wiki
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
           if git diff --staged --quiet; then
-            echo "No changes to wiki"
+            echo "No changes to API docs"
           else
             git commit -m "Update API docs [skip ci]"
-            git push
-            echo "Wiki updated successfully"
+            git push origin gh-pages
+            echo "API docs deployed to gh-pages"
           fi
