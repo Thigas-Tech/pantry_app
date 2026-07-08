@@ -53,6 +53,7 @@ dev_dependencies:
   openfoodfacts_flutter_lints:
     git: https://github.com/openfoodfacts/openfoodfacts_flutter_lints.git
   very_good_analysis: ^10.3.0
+  vm_service: ^15.2.0
 
 flutter:
   uses-material-design: true
