@@ -12,7 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
+
 import 'package:pantry_app/providers/api_service_provider.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -62,6 +64,7 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         apiServiceProvider.overrideWithValue(mockApi),
+        connectivityProvider.overrideWith((ref) => Stream.value(true)),
         ...extraOverrides,
       ],
       settle: false,

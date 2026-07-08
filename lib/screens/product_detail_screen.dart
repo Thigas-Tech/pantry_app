@@ -418,6 +418,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
     if (price != null) {
       try {
+        await ref.read(productRepositoryProvider).cacheProduct(widget.product);
         await ref.read(priceRepositoryProvider).addPrice(price);
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.priceAdded);
@@ -638,6 +639,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           logInfo(
             '''Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
+          await repo.cacheProduct(widget.product);
           await repo.addInventoryItem(result);
           await _rescheduleInactivityReminder();
           if (mounted) {
