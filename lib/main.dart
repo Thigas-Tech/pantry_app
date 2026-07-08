@@ -72,16 +72,17 @@ Future<void> main() async {
 
   final granted = await notifService.requestPermission();
   if (granted != false) {
-    unawaited(_rescheduleNotifications(container));
+    unawaited(_rescheduleNotifications(ProviderContainer()));
   } else {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('notification_denied_warning', true);
     logInfo('Notification permission denied — flagged warning for PantryShell');
   }
 
-  unawaited(_scheduleInactivityReminder(container));
-  unawaited(_runDatabaseCleanup(container));
-  unawaited(_flushFeedbackQueue(container));
+  unawaited(_scheduleInactivityReminder(ProviderContainer()));
+  unawaited(_runDatabaseCleanup(ProviderContainer()));
+  unawaited(_flushFeedbackQueue(ProviderContainer()));
+  container.dispose();
 }
 
 /// Clears the product database and image cache when the app version changes.
