@@ -124,9 +124,8 @@ Read these when implementing specific features:
 - Gestures & touch behaviors -> ~/.config/opencode/instructions/flutter_gestures.md
 - Firebase / FlutterFire -> ~/.config/opencode/instructions/firebase_refs.md
 - OFF API / SDK -> ~/.config/opencode/instructions/off_refs.md
-- Performance optimization -> agents_docs/performance_guide.md
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
 - Project architecture -> ARCHITECTURE.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
-- OFF test data -> agents_docs/off_test_products.*
-- Wiki conventions -> agents_docs/wiki.md
+- Project-specific guides and testing procedures -> agents_docs/ directory
+  (read the relevant file for each task)
