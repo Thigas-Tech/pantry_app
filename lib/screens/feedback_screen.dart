@@ -9,6 +9,7 @@ import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
+import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
@@ -300,10 +301,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   }
 
   Widget _buildSubmitButton(AppLocalizations l10n) {
-    final isOnline = ref.watch(connectivityProvider).value ?? false;
-
     return FilledButton.icon(
-      onPressed: _isSubmitting ? null : () => _submit(l10n, isOnline),
+      onPressed: _isSubmitting ? null : () => _submit(l10n),
       icon: _isSubmitting
           ? const SizedBox(
               width: 18,
@@ -393,7 +392,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     setState(() {});
   }
 
-  Future<void> _submit(AppLocalizations l10n, bool isOnline) async {
+  Future<void> _submit(AppLocalizations l10n) async {
     if (!_formKey.currentState!.validate()) return;
 
     final title = _titleController.text.trim();
@@ -422,6 +421,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         }
       }
 
+      final isOnline = ref.read(connectivityProvider).value ?? false;
+
       logInfo(
         'Feedback _submit: isOnline=$isOnline '
         'screenshotCount=${screenshotBytesList.length} '
@@ -429,15 +430,30 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       );
 
       if (isOnline) {
-        final url = await service.submitIssue(
-          title: title,
-          body: body,
-          label: effectiveLabel,
-          screenshotBytesList: screenshotBytesList,
-        );
-        if (mounted) {
-          setState(() => _submittedIssueUrl = url);
-          SnackbarHelper.showInfo(context, l10n.issueSubmitted);
+        try {
+          final url = await service.submitIssue(
+            title: title,
+            body: body,
+            label: effectiveLabel,
+            screenshotBytesList: screenshotBytesList,
+          );
+          if (mounted) {
+            setState(() => _submittedIssueUrl = url);
+            SnackbarHelper.showInfo(context, l10n.issueSubmitted);
+          }
+        } on IssueSubmissionException {
+          logError(
+            'Online submission failed, falling back to offline queue',
+          );
+          await service.queueOffline(
+            title: title,
+            body: body,
+            label: effectiveLabel,
+            screenshotBytesList: screenshotBytesList,
+          );
+          if (mounted) {
+            SnackbarHelper.showWarning(context, l10n.issueQueuedOffline);
+          }
         }
       } else {
         await service.queueOffline(

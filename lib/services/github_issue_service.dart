@@ -20,8 +20,8 @@ import 'package:sqflite/sqflite.dart';
 /// device is offline the issue is stored in the `feedback_queue` SQLite
 /// table and flushed automatically when connectivity is restored.
 ///
-/// On web the service falls back to a `mailto:` URI because sqflite and
-/// direct HTTP calls to authenticated GitHub endpoints are not practical.
+/// On web, issue submissions are not supported;
+/// [GithubIssueService.submitIssue] throws [UnsupportedError].
 class GithubIssueService {
   /// Creates a [GithubIssueService].
   ///
@@ -53,6 +53,13 @@ class GithubIssueService {
   }) async {
     if (kIsWeb) {
       throw UnsupportedError('GitHub API submissions are not supported on web');
+    }
+
+    if (AppConfig.feedbackToken.isEmpty) {
+      logError('FEEDBACK_TOKEN is empty — in-app feedback will fail');
+      throw const IssueSubmissionException(
+        'Feedback token is not configured.',
+      );
     }
 
     if (!_canSubmit()) {
@@ -95,7 +102,7 @@ class GithubIssueService {
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final url = data['html_url'] as String;
-      _recordSubmission(title, body);
+      unawaited(_recordSubmission(title, body));
       logInfo('Issue created: $url');
       return url;
     }
@@ -268,29 +275,25 @@ class GithubIssueService {
   }
 
   /// Records a successful submission for rate limit tracking.
-  void _recordSubmission(String title, String body) {
+  Future<void> _recordSubmission(String title, String body) async {
     try {
       final prefs = _prefs;
       if (prefs == null) return;
 
       final now = DateTime.now().millisecondsSinceEpoch;
-      unawaited(prefs.setInt('feedback_last_submit', now));
+      await prefs.setInt('feedback_last_submit', now);
 
       final todayStart = prefs.getInt('feedback_daily_start') ?? 0;
       final todayCount = prefs.getInt('feedback_daily_count') ?? 0;
       if (_isSameDay(todayStart, now)) {
-        unawaited(prefs.setInt('feedback_daily_count', todayCount + 1));
+        await prefs.setInt('feedback_daily_count', todayCount + 1);
       } else {
-        unawaited(
-          Future.wait([
-            prefs.setInt('feedback_daily_start', now),
-            prefs.setInt('feedback_daily_count', 1),
-          ]),
-        );
+        await prefs.setInt('feedback_daily_start', now);
+        await prefs.setInt('feedback_daily_count', 1);
       }
 
       final hash = _hashIssue(title, body);
-      unawaited(prefs.setString('feedback_hash_$hash', now.toString()));
+      await prefs.setString('feedback_hash_$hash', now.toString());
     } on Exception {
       // best-effort
     }
