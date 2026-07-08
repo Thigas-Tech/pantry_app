@@ -41,7 +41,7 @@ class ProductRepository {
   ///
   /// If [SharedPreferences] is provided it is used for refresh‑time
   /// tracking; otherwise
-  /// `SharedPreferences` is lazily obtained from the singleton instance.
+  /// [SharedPreferences] is lazily obtained from the singleton instance.
   ProductRepository(
     this._db,
     this._api, {

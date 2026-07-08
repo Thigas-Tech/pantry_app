@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- **Price tracking**: Record purchase prices per product with optional currency conversion (ExchangeRate-API, free no-key endpoint with 24h cache). Prices are optional like expiry date. New `Price` freezed model, `prices` table (v12 migration), `PriceDao`, `PriceRepository`, `CurrencyService`, `OpenPricesService`. All-new UI: price section on product detail screen, price history screen with swipe-to-delete, `PriceMask` widget for privacy masking. Average price badge in the app bar (next to pantry switcher). Price statistics in Stats tab (total value + average item price). Settings: enable/disable, base currency picker, retention days, privacy masking, Open Prices sync (consent-only, proof upload pending receipt capture). Data retention defaults to 0 (keep forever) independent of inventory retention. (`lib/models/price.dart`, `lib/database/price_dao.dart`, `lib/database/database_helper.dart`, `lib/services/currency_service.dart`, `lib/services/price_repository.dart`, `lib/services/open_prices_service.dart`, `lib/providers/settings_provider.dart`, `lib/providers/price_provider.dart`, `lib/providers/price_repository_provider.dart`, `lib/providers/currency_service_provider.dart`, `lib/providers/open_prices_provider.dart`, `lib/screens/settings_screen.dart`, `lib/screens/product_detail_screen.dart`, `lib/screens/price_history_screen.dart`, `lib/screens/stats_screen.dart`, `lib/screens/home_screen.dart`, `lib/widgets/price_mask.dart`, `lib/widgets/price_entry_sheet.dart`, `lib/models/pantry_stats.dart`, `lib/l10n/app_en.arb`)
 - **OFF test data**: Fetched 12 full API responses from Open Food Facts for emulator and CI testing. Stored as `agents_docs/off_test_products.json` (full JSON) and `agents_docs/off_test_products.md` (human-readable lookup table). Products cover spreads, sodas, biscuits, oils, juices. (`agents_docs/off_test_products.json`, `agents_docs/off_test_products.md`)
 - **Performance guide**: Copied to `agents_docs/performance_guide.md` for easy reference during development. (`agents_docs/performance_guide.md`)
 - **AMOLED dark mode**: New `amoledDarkMode` toggle in Settings > Appearance. When enabled with dark mode, surfaces use pure-black (`Colors.black`) instead of the default dark surface colours, reducing power consumption on AMOLED displays. One-time nudge dialog on first launch when device is in light mode. (`lib/providers/settings_provider.dart`, `lib/main.dart`, `lib/screens/settings_screen.dart`, `lib/screens/pantry_shell.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`)
@@ -22,6 +23,23 @@
    review. (`agents_docs/monetization.md`)
 - **`.gitignore` updated**: Added `android/key.properties` and `*.jks`
    to prevent accidental credential commits.
+- **Shopping list**: New 5th tab in NavigationBar with dedicated screen.
+   `ShoppingItem` freezed model, `shopping_list` table (v13 migration),
+   `ShoppingListDao`. Items can be added as free‑text (FAB dialog) or
+   linked to products (from detail screen, inventory card long‑press,
+   search results). Checkbox toggles purchased state; swipe‑to‑delete
+   with undo snackbar. Batch clear purchased items. Share as plain text
+   via share_plus. NFC‑e barcode auto‑marking reserved for future
+   receipt scanning. (`lib/models/shopping_item.dart`, 
+   `lib/database/shopping_list_dao.dart`, 
+   `lib/database/database_helper.dart`, 
+   `lib/providers/shopping_list_provider.dart`, 
+   `lib/screens/shopping_list_screen.dart`, 
+   `lib/screens/pantry_shell.dart`, 
+   `lib/screens/product_detail_screen.dart`, 
+   `lib/widgets/inventory_card.dart`, 
+   `lib/screens/search_screen.dart`, 
+   `lib/l10n/app_en.arb`)
 
 ### Changed
 - **CI/CD workflow**: `build.yml` now triggers on pull requests to main (in addition to push). On PRs, only debug APK is built (skips release builds and publishing). Testing job only runs on push. Patrol E2E placeholder comment added. (`build.yml`)
@@ -163,7 +181,7 @@
 
 ### Enhancements
 - **ComingSoonView / ComingSoonScreen**: Reusable placeholder widgets (`lib/widgets/coming_soon_view.dart`, `lib/screens/coming_soon_screen.dart`). Configurable icon, title, and subtitle. Follows the `ErrorView` / `EmptyPantry` pattern.
-- **StatsScreen replaced with ComingSoon placeholder**: CSV import/export features removed. The tab now shows a "Coming soon" placeholder. Original stats will be re-implemented in a future release.
+- **StatsScreen rewritten with fl_chart**: Summary cards, Nutri-Score distribution (BarChart), category/location breakdown (BarChart), photo completeness cards with OFF comparison, and ComingSoonView stubs for price tracking and NFC-e receipts.
 - **SearchScreen product images**: Result tiles now show product thumbnails (`ClipOval` 40×40 `Image.network`) with `cacheWidth`/`cacheHeight` and `CircleAvatar` fallback.
 - **Settings "What's New" button**: New "About" section with a button that loads `CHANGELOG.md` and shows the changelog sheet on demand, bypassing the version-guard auto-trigger.
 
@@ -307,7 +325,7 @@
 - English base with Portuguese planned for future release
 
 ### Connectivity
-- `connectivity_plus` wrapping Riverpod provider
+- `internet_connection_checker` wrapping Riverpod provider
 - Offline-first: cached products shown immediately, background refresh when online
 
 ### CSV export/import

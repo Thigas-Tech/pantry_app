@@ -1,3 +1,4 @@
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
@@ -5,7 +6,7 @@ import 'package:sqflite/sqflite.dart';
 /// Data-access layer for the `inventory` table.
 ///
 /// All methods receive a [Database] instance so they can be used
-/// independently of `DatabaseHelper` in tests.
+/// independently of [DatabaseHelper] in tests.
 class InventoryDao {
   /// Creates an [InventoryDao].
   const InventoryDao();

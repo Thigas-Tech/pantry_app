@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/shopping_item.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Tests for [DatabaseHelper] using an in‑memory SQLite database.
@@ -580,6 +581,39 @@ void main() {
       expect(await db.getProductCount(), 2);
       await db.clearAllProducts();
       expect(await db.getProductCount(), 0);
+    });
+  });
+
+  group('Migration v12 -> v13', () {
+    test('shopping_list table is created on upgrade', () async {
+      final tempDir = Directory.systemTemp.createTempSync('pantry_v12_');
+      final v12Path = '${tempDir.path}/pantry.db';
+      final v12Db = await openDatabase(
+        v12Path,
+        version: 12,
+        onCreate: (db, _) async {
+          await db.execute('''
+            CREATE TABLE products (
+              barcode TEXT PRIMARY KEY,
+              name TEXT NOT NULL
+            )
+          ''');
+        },
+      );
+      await v12Db.close();
+
+      final dbHelper = DatabaseHelper.withPath(v12Path);
+      await dbHelper.database;
+
+      const item = ShoppingItem(name: 'Milk');
+      await dbHelper.insertShoppingItem(item);
+      final items = await dbHelper.getShoppingList();
+      expect(items.length, 1);
+      expect(items[0].name, 'Milk');
+
+      final migratedDb = await dbHelper.database;
+      await migratedDb.close();
+      tempDir.deleteSync(recursive: true);
     });
   });
 }

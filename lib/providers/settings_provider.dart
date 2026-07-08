@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +17,12 @@ class Settings {
     this.inactivityReminderEnabled = true,
     this.inactivityThresholdDays = 10,
     this.amoledDarkMode = false,
+    this.priceTrackingEnabled = false,
+    this.priceRetentionDays = 0,
+    this.pricesHidden = false,
+    this.baseCurrency = 'USD',
+    this.openPricesSyncEnabled = false,
+    this.openPricesToken = '',
   });
 
   /// Whether expiry notifications are enabled.
@@ -40,9 +48,32 @@ class Settings {
 
   /// Whether pure-black surfaces should be used in dark mode.
   ///
-  /// When enabled, surfaces use `Colors.black` instead of the default dark
+  /// When enabled, surfaces use [Colors.black] instead of the default dark
   /// surface colours, which reduces power consumption on AMOLED displays.
   final bool amoledDarkMode;
+
+  /// Whether price tracking is enabled.
+  ///
+  /// When disabled, all price UI surfaces are hidden.
+  final bool priceTrackingEnabled;
+
+  /// Number of days to retain price history (0 = keep forever).
+  final int priceRetentionDays;
+
+  /// Whether all prices should be masked for privacy.
+  final bool pricesHidden;
+
+  /// ISO 4217 currency code for displaying prices.
+  ///
+  /// Auto-detected from the device locale on first launch.
+  /// Common values: `'USD'`, `'BRL'`, `'EUR'`, `'GBP'`, `'JPY'`.
+  final String baseCurrency;
+
+  /// Whether syncing to the Open Prices community database is enabled.
+  final bool openPricesSyncEnabled;
+
+  /// Bearer token for the Open Prices API.
+  final String openPricesToken;
 
   /// Returns a copy with the given fields replaced.
   Settings copyWith({
@@ -52,6 +83,12 @@ class Settings {
     bool? inactivityReminderEnabled,
     int? inactivityThresholdDays,
     bool? amoledDarkMode,
+    bool? priceTrackingEnabled,
+    int? priceRetentionDays,
+    bool? pricesHidden,
+    String? baseCurrency,
+    bool? openPricesSyncEnabled,
+    String? openPricesToken,
   }) {
     return Settings(
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -62,6 +99,13 @@ class Settings {
       inactivityThresholdDays:
           inactivityThresholdDays ?? this.inactivityThresholdDays,
       amoledDarkMode: amoledDarkMode ?? this.amoledDarkMode,
+      priceTrackingEnabled: priceTrackingEnabled ?? this.priceTrackingEnabled,
+      priceRetentionDays: priceRetentionDays ?? this.priceRetentionDays,
+      pricesHidden: pricesHidden ?? this.pricesHidden,
+      baseCurrency: baseCurrency ?? this.baseCurrency,
+      openPricesSyncEnabled:
+          openPricesSyncEnabled ?? this.openPricesSyncEnabled,
+      openPricesToken: openPricesToken ?? this.openPricesToken,
     );
   }
 }
@@ -72,7 +116,9 @@ class SettingsNotifier extends Notifier<Settings> {
   @override
   Settings build() {
     unawaited(_loadFromPrefs());
-    return const Settings();
+    return Settings(
+      baseCurrency: _detectLocaleCurrency(),
+    );
   }
 
   Future<void> _loadFromPrefs() async {
@@ -86,6 +132,13 @@ class SettingsNotifier extends Notifier<Settings> {
             prefs.getBool('inactivityReminderEnabled') ?? true,
         inactivityThresholdDays: prefs.getInt('inactivityThresholdDays') ?? 10,
         amoledDarkMode: prefs.getBool('amoledDarkMode') ?? false,
+        priceTrackingEnabled: prefs.getBool('priceTrackingEnabled') ?? false,
+        priceRetentionDays: prefs.getInt('priceRetentionDays') ?? 0,
+        pricesHidden: prefs.getBool('pricesHidden') ?? false,
+        baseCurrency:
+            prefs.getString('baseCurrency') ?? _detectLocaleCurrency(),
+        openPricesSyncEnabled: prefs.getBool('openPricesSyncEnabled') ?? false,
+        openPricesToken: prefs.getString('openPricesToken') ?? '',
       );
     } on Exception catch (_) {}
   }
@@ -117,6 +170,21 @@ class SettingsNotifier extends Notifier<Settings> {
         settings.inactivityThresholdDays,
       );
       await prefs.setBool('amoledDarkMode', settings.amoledDarkMode);
+      await prefs.setBool(
+        'priceTrackingEnabled',
+        settings.priceTrackingEnabled,
+      );
+      await prefs.setInt(
+        'priceRetentionDays',
+        settings.priceRetentionDays,
+      );
+      await prefs.setBool('pricesHidden', settings.pricesHidden);
+      await prefs.setString('baseCurrency', settings.baseCurrency);
+      await prefs.setBool(
+        'openPricesSyncEnabled',
+        settings.openPricesSyncEnabled,
+      );
+      await prefs.setString('openPricesToken', settings.openPricesToken);
     } on Exception catch (_) {}
   }
 }
@@ -125,3 +193,72 @@ class SettingsNotifier extends Notifier<Settings> {
 final settingsProvider = NotifierProvider<SettingsNotifier, Settings>(
   SettingsNotifier.new,
 );
+
+/// Maps the device locale to an ISO 4217 currency code.
+///
+/// Uses [Platform.localeName] (e.g. `pt_BR`, `en_US`) to infer the most
+/// likely currency. Falls back to `'USD'` for unknown locales.
+String _detectLocaleCurrency() {
+  try {
+    final locale = Platform.localeName;
+    final code = locale.contains('_') ? locale.split('_').last : '';
+    return switch (code.toUpperCase()) {
+      'BR' => 'BRL',
+      'US' => 'USD',
+      'GB' => 'GBP',
+      'EU' ||
+      'DE' ||
+      'FR' ||
+      'ES' ||
+      'IT' ||
+      'PT' ||
+      'NL' ||
+      'BE' ||
+      'AT' ||
+      'IE' ||
+      'FI' ||
+      'GR' ||
+      'LU' ||
+      'SK' ||
+      'SI' ||
+      'EE' ||
+      'LV' ||
+      'LT' ||
+      'MT' ||
+      'CY' ||
+      'HR' => 'EUR',
+      'JP' => 'JPY',
+      'CA' => 'CAD',
+      'AU' => 'AUD',
+      'MX' => 'MXN',
+      'CN' => 'CNY',
+      'IN' => 'INR',
+      'RU' => 'RUB',
+      'KR' => 'KRW',
+      'CH' => 'CHF',
+      'SE' => 'SEK',
+      'NO' => 'NOK',
+      'DK' => 'DKK',
+      'PL' => 'PLN',
+      'CZ' => 'CZK',
+      'AR' => 'ARS',
+      'CL' => 'CLP',
+      'CO' => 'COP',
+      'ZA' => 'ZAR',
+      'NG' => 'NGN',
+      'TR' => 'TRY',
+      'IL' => 'ILS',
+      'SG' => 'SGD',
+      'HK' => 'HKD',
+      'TW' => 'TWD',
+      'TH' => 'THB',
+      'MY' => 'MYR',
+      'PH' => 'PHP',
+      'ID' => 'IDR',
+      'VN' => 'VND',
+      _ => 'USD',
+    };
+  } on Object catch (_) {
+    return 'USD';
+  }
+}

@@ -41,7 +41,8 @@ part 'inventory_item.g.dart';
 /// - [dateAdded] is an epoch timestamp (milliseconds since Unix epoch) set
 ///   automatically when the item is first created. It is used by
 /// [DatabaseHelper.cleanupOldEntries] to remove items that haven't been
-/// re‑added for the configured retention period (see `Settings.retentionDays`).
+/// re‑added for the configured retention period (see the retention days
+/// setting).
 ///
 /// ## Immutability
 ///

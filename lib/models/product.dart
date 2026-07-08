@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
+import 'package:pantry_app/models/inventory_item.dart';
 
 part 'product.freezed.dart';
 
@@ -17,8 +18,8 @@ const String productSubmissionFailed = 'failed';
 
 /// Represents a cached product from Open Food Facts.
 ///
-/// Each `Product` corresponds to a row in the `products` table. Unlike
-/// `InventoryItem`, which tracks a specific instance of a product in the
+/// Each [Product] corresponds to a row in the `products` table. Unlike
+/// [InventoryItem], which tracks a specific instance of a product in the
 /// user's pantry, this class holds **static product information** — data that
 /// rarely changes and is shared by all instances of the same barcode.
 ///
@@ -265,9 +266,9 @@ extension ProductToOff on Product {
 
 /// Extension that provides safe API merge semantics on [Product].
 ///
-/// `mergeFromApi` is defined as an extension rather than a method on the
+/// [mergeFromApi] is defined as an extension rather than a method on the
 /// abstract class because freezed generates a concrete implementation
-/// (`_Product`) that `implements` (not `extends`) the abstract class.
+/// ([_Product]) that `implements` (not `extends`) the abstract class.
 ///
 /// ## Merge rules
 ///

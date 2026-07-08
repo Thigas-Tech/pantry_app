@@ -1,0 +1,299 @@
+import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/utils/logger.dart';
+import 'package:sqflite/sqflite.dart';
+
+/// Data-access layer for the `prices` table.
+///
+/// All methods receive a [Database] instance so they can be used
+/// independently of [DatabaseHelper] in tests.
+class PriceDao {
+  /// Creates a [PriceDao].
+  const PriceDao();
+
+  /// Converts a [Price] to a map for database insertion.
+  Map<String, dynamic> toMap(Price p) => {
+    'barcode': p.barcode,
+    'price': p.price,
+    'currency': p.currency,
+    'store': p.store,
+    'is_discounted': p.isDiscounted ? 1 : 0,
+    'regular_price': p.regularPrice,
+    'date_purchased': p.datePurchased,
+    'sync_status': p.syncStatus,
+    'open_prices_id': p.openPricesId,
+    'location_osm_id': p.locationOsmId,
+    'location_osm_type': p.locationOsmType,
+    'receipt_series': p.receiptSeries,
+    'receipt_number': p.receiptNumber,
+    'receipt_item_index': p.receiptItemIndex,
+    'notes': p.notes,
+    'date_added': p.dateAdded ?? DateTime.now().millisecondsSinceEpoch,
+  };
+
+  /// Converts a database row map into a [Price].
+  Price fromMap(Map<String, dynamic> map) => Price(
+    barcode: map['barcode'] as String,
+    price: (map['price'] as num).toDouble(),
+    currency: map['currency'] as String? ?? 'USD',
+    id: map['id'] as int?,
+    store: map['store'] as String?,
+    isDiscounted: (map['is_discounted'] as int? ?? 0) == 1,
+    regularPrice: (map['regular_price'] as num?)?.toDouble(),
+    datePurchased: map['date_purchased'] as int?,
+    syncStatus: map['sync_status'] as String? ?? priceSyncLocalOnly,
+    openPricesId: map['open_prices_id'] as int?,
+    locationOsmId: map['location_osm_id'] as String?,
+    locationOsmType: map['location_osm_type'] as String?,
+    receiptSeries: map['receipt_series'] as String?,
+    receiptNumber: map['receipt_number'] as String?,
+    receiptItemIndex: map['receipt_item_index'] as int?,
+    notes: map['notes'] as String?,
+    dateAdded: map['date_added'] as int?,
+  );
+
+  /// Inserts a price row and returns its row ID.
+  Future<int> insert(Database db, Price price) async {
+    logInfo('Inserting price for barcode ${price.barcode}');
+    try {
+      final id = await db.insert('prices', toMap(price));
+      logInfo('Price inserted with id $id');
+      return id;
+    } on Exception catch (e) {
+      logError('Failed to insert price: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns the price with the given [id], or `null` if not found.
+  Future<Price?> getById(Database db, int id) async {
+    try {
+      final result = await db.query(
+        'prices',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      if (result.isEmpty) return null;
+      return fromMap(result.first);
+    } on Exception catch (e) {
+      logError('Error looking up price $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns all price entries for the given [barcode], ordered by
+  /// datePurchased descending.
+  Future<List<Price>> listByBarcode(
+    Database db,
+    String barcode, {
+    int? limit,
+    int? offset,
+  }) async {
+    try {
+      final result = await db.query(
+        'prices',
+        where: 'barcode = ?',
+        whereArgs: [barcode],
+        orderBy: 'date_purchased DESC',
+        limit: limit,
+        offset: offset,
+      );
+      return result.map(fromMap).toList();
+    } on Exception catch (e) {
+      logError('Error listing prices for $barcode: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns the most recent price for the given [barcode], or `null`
+  /// if none exist.
+  Future<Price?> getLatest(Database db, String barcode) async {
+    try {
+      final result = await db.query(
+        'prices',
+        where: 'barcode = ?',
+        whereArgs: [barcode],
+        orderBy: 'date_purchased DESC',
+        limit: 1,
+      );
+      if (result.isEmpty) return null;
+      return fromMap(result.first);
+    } on Exception catch (e) {
+      logError('Error getting latest price for $barcode: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns all prices in the database, ordered by datePurchased desc.
+  Future<List<Price>> listAll(Database db, {int? limit, int? offset}) async {
+    try {
+      final result = await db.query(
+        'prices',
+        orderBy: 'date_purchased DESC',
+        limit: limit,
+        offset: offset,
+      );
+      return result.map(fromMap).toList();
+    } on Exception catch (e) {
+      logError('Error listing all prices: $e');
+      rethrow;
+    }
+  }
+
+  /// Updates an existing price row. Returns the number of rows affected.
+  Future<int> update(Database db, Price price) async {
+    logInfo('Updating price ${price.id}');
+    try {
+      final affected = await db.update(
+        'prices',
+        toMap(price),
+        where: 'id = ?',
+        whereArgs: [price.id],
+      );
+      logInfo('Price ${price.id} updated, affected $affected rows');
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to update price ${price.id}: $e');
+      rethrow;
+    }
+  }
+
+  /// Deletes the price with the given [id]. Returns the number of rows
+  /// deleted.
+  Future<int> delete(Database db, int id) async {
+    logInfo('Deleting price $id');
+    try {
+      final affected = await db.delete(
+        'prices',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      logInfo('Price $id deleted');
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to delete price $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns the total number of prices on record for the given [barcode].
+  Future<int> countByBarcode(Database db, String barcode) async {
+    return Sqflite.firstIntValue(
+          await db.rawQuery(
+            'SELECT COUNT(*) FROM prices WHERE barcode = ?',
+            [barcode],
+          ),
+        ) ??
+        0;
+  }
+
+  /// Returns the total number of prices on record.
+  Future<int> count(Database db) async {
+    return Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM prices'),
+        ) ??
+        0;
+  }
+
+  /// Returns the total value of the most recent price for each distinct
+  /// product in the given inventory, summed together. Currency conversion
+  /// is not applied here — the caller should convert via CurrencyService.
+  ///
+  /// Returns `null` when no items in the inventory have prices.
+  Future<double?> totalInventoryValue(Database db, int inventoryId) async {
+    final result = await db.rawQuery(
+      '''
+      SELECT SUM(p.price) as total
+      FROM prices p
+      INNER JOIN (
+        SELECT barcode, MAX(date_purchased) as max_date
+        FROM prices
+        GROUP BY barcode
+      ) latest ON p.barcode = latest.barcode
+        AND p.date_purchased = latest.max_date
+      INNER JOIN inventory i ON i.barcode = p.barcode
+      WHERE i.inventory_id = ?
+    ''',
+      [inventoryId],
+    );
+    final total = result.first['total'] as double?;
+    return total;
+  }
+
+  /// Returns the average of the most recent price for each distinct product
+  /// in the given inventory.
+  ///
+  /// Returns `null` when no items in the inventory have prices.
+  Future<double?> averageItemPrice(Database db, int inventoryId) async {
+    final result = await db.rawQuery(
+      '''
+      SELECT AVG(p.price) as avg
+      FROM prices p
+      INNER JOIN (
+        SELECT barcode, MAX(date_purchased) as max_date
+        FROM prices
+        GROUP BY barcode
+      ) latest ON p.barcode = latest.barcode
+        AND p.date_purchased = latest.max_date
+      INNER JOIN inventory i ON i.barcode = p.barcode
+      WHERE i.inventory_id = ?
+    ''',
+      [inventoryId],
+    );
+    final avg = result.first['avg'] as double?;
+    return avg;
+  }
+
+  /// Returns the count of distinct products in the given inventory that
+  /// have at least one price.
+  Future<int> pricedItemCount(Database db, int inventoryId) async {
+    return Sqflite.firstIntValue(
+          await db.rawQuery(
+            '''
+        SELECT COUNT(DISTINCT i.barcode)
+        FROM inventory i
+        INNER JOIN prices p ON p.barcode = i.barcode
+        WHERE i.inventory_id = ?
+      ''',
+            [inventoryId],
+          ),
+        ) ??
+        0;
+  }
+
+  /// Returns prices with the given [syncStatus] for uploading to Open Prices.
+  Future<List<Price>> getBySyncStatus(Database db, String syncStatus) async {
+    try {
+      final result = await db.query(
+        'prices',
+        where: 'sync_status = ?',
+        whereArgs: [syncStatus],
+        orderBy: 'date_purchased ASC',
+      );
+      return result.map(fromMap).toList();
+    } on Exception catch (e) {
+      logError('Error getting prices by sync status $syncStatus: $e');
+      rethrow;
+    }
+  }
+
+  /// Deletes price rows older than the given [retentionDays].
+  ///
+  /// Only deletes when [retentionDays] is positive. A value of `0` means
+  /// keep prices forever (no deletion).
+  Future<int> deleteStale(Database db, int retentionDays) async {
+    if (retentionDays <= 0) return 0;
+    final cutoff = DateTime.now()
+        .subtract(Duration(days: retentionDays))
+        .millisecondsSinceEpoch;
+    final deleted = await db.delete(
+      'prices',
+      where: 'date_purchased < ? AND sync_status != ?',
+      whereArgs: [cutoff, priceSyncPending],
+    );
+    if (deleted > 0) {
+      logInfo('Deleted $deleted stale price rows');
+    }
+    return deleted;
+  }
+}

@@ -2,7 +2,7 @@ import 'package:openfoodfacts/openfoodfacts.dart';
 
 /// Centralized query configuration for Open Food Facts SDK calls.
 ///
-/// Inspired by smooth-app's `ProductQuery` class. Provides pre-configured
+/// Inspired by smooth-app's ProductQuery class. Provides pre-configured
 /// [ProductQueryConfiguration], [ProductSearchQueryConfiguration], and
 /// field lists that limit fetched data to only what we need — reducing
 /// payload size and parse time.

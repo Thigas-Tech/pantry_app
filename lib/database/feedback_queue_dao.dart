@@ -1,10 +1,11 @@
+import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// DAO for the `feedback_queue` table.
 ///
 /// Stores issues that could not be submitted immediately (e.g. because the
 /// device was offline). When connectivity is restored, the pending rows are
-/// flushed to the GitHub Issues API by `GithubIssueService.flushQueue`.
+/// flushed to the GitHub Issues API by [GithubIssueService.flushQueue].
 class FeedbackQueueDao {
   /// Creates a [FeedbackQueueDao].
   const FeedbackQueueDao();

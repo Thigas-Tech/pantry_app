@@ -1143,7 +1143,7 @@ abstract class AppLocalizations {
   /// No description provided for @priceTrackingDescription.
   ///
   /// In en, this message translates to:
-  /// **'Track how much you spend.'**
+  /// **'Record purchase prices and track how much you spend.'**
   String get priceTrackingDescription;
 
   /// No description provided for @receiptTracking.
@@ -1571,6 +1571,420 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can only submit one report per minute and up to 5 per day. Please try again later.'**
   String get feedbackRateLimit;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// No description provided for @prices.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices'**
+  String get prices;
+
+  /// No description provided for @addPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Add price'**
+  String get addPrice;
+
+  /// No description provided for @editPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit price'**
+  String get editPrice;
+
+  /// No description provided for @deletePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete price'**
+  String get deletePrice;
+
+  /// No description provided for @priceAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Price added.'**
+  String get priceAdded;
+
+  /// No description provided for @priceUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Price updated.'**
+  String get priceUpdated;
+
+  /// No description provided for @priceDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Price deleted.'**
+  String get priceDeleted;
+
+  /// No description provided for @priceHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Price history'**
+  String get priceHistory;
+
+  /// No description provided for @noPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'No prices recorded.'**
+  String get noPrices;
+
+  /// No description provided for @totalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total value'**
+  String get totalValue;
+
+  /// No description provided for @averagePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Average item price'**
+  String get averagePrice;
+
+  /// No description provided for @hidePrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide prices for privacy'**
+  String get hidePrices;
+
+  /// No description provided for @hidePricesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace price values with masked text everywhere, including the stats screen.'**
+  String get hidePricesDescription;
+
+  /// No description provided for @pricesHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices hidden.'**
+  String get pricesHidden;
+
+  /// No description provided for @pricesVisible.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices visible.'**
+  String get pricesVisible;
+
+  /// No description provided for @priceTrackingEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable price tracking'**
+  String get priceTrackingEnabled;
+
+  /// No description provided for @priceRetentionDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Price retention'**
+  String get priceRetentionDays;
+
+  /// No description provided for @priceRetentionDaysValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep prices for {days} days (0 = keep forever)'**
+  String priceRetentionDaysValue(int days);
+
+  /// No description provided for @currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get currency;
+
+  /// No description provided for @baseCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Base currency'**
+  String get baseCurrency;
+
+  /// No description provided for @baseCurrencyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'All prices are shown in this currency.'**
+  String get baseCurrencyDescription;
+
+  /// No description provided for @store.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get store;
+
+  /// No description provided for @discounted.
+  ///
+  /// In en, this message translates to:
+  /// **'Discounted'**
+  String get discounted;
+
+  /// No description provided for @regularPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular price'**
+  String get regularPrice;
+
+  /// No description provided for @confirmDeletePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this price entry?'**
+  String get confirmDeletePrice;
+
+  /// No description provided for @syncToOpenPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Share with Open Prices'**
+  String get syncToOpenPrices;
+
+  /// No description provided for @syncToOpenPricesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribute your price data to the community food-price database.'**
+  String get syncToOpenPricesDescription;
+
+  /// No description provided for @openPricesToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Prices API Token'**
+  String get openPricesToken;
+
+  /// No description provided for @openPricesTokenDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Token generated from your Open Food Facts account.'**
+  String get openPricesTokenDescription;
+
+  /// No description provided for @openPricesTokenSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Token saved.'**
+  String get openPricesTokenSaved;
+
+  /// No description provided for @openPricesSyncStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing prices...'**
+  String get openPricesSyncStarted;
+
+  /// No description provided for @openPricesSyncComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} prices synced.'**
+  String openPricesSyncComplete(int count);
+
+  /// No description provided for @priceSyncStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced'**
+  String get priceSyncStatus;
+
+  /// No description provided for @priceSyncPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending sync'**
+  String get priceSyncPending;
+
+  /// No description provided for @priceSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get priceSyncFailed;
+
+  /// No description provided for @priceTrendUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are rising'**
+  String get priceTrendUp;
+
+  /// No description provided for @priceTrendDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are falling'**
+  String get priceTrendDown;
+
+  /// No description provided for @priceTrendStable.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices are stable'**
+  String get priceTrendStable;
+
+  /// No description provided for @datePurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase date'**
+  String get datePurchased;
+
+  /// No description provided for @pricedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Items with prices'**
+  String get pricedItems;
+
+  /// No description provided for @itemWithPriceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} items have prices'**
+  String itemWithPriceCount(int count, int total);
+
+  /// No description provided for @openPricesProofExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.'**
+  String get openPricesProofExplanation;
+
+  /// No description provided for @openPricesConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribute to Open Prices'**
+  String get openPricesConsentTitle;
+
+  /// No description provided for @openPricesConsentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.'**
+  String get openPricesConsentBody;
+
+  /// No description provided for @iUnderstand.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand'**
+  String get iUnderstand;
+
+  /// No description provided for @notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get notes;
+
+  /// No description provided for @navList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get navList;
+
+  /// No description provided for @shoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping List'**
+  String get shoppingList;
+
+  /// No description provided for @addShoppingItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get addShoppingItem;
+
+  /// No description provided for @itemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get itemName;
+
+  /// No description provided for @markPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark purchased'**
+  String get markPurchased;
+
+  /// No description provided for @unmarkPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmark purchased'**
+  String get unmarkPurchased;
+
+  /// No description provided for @moveToInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to pantry'**
+  String get moveToInventory;
+
+  /// No description provided for @addAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Add again'**
+  String get addAgain;
+
+  /// No description provided for @emptyShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shopping list is empty'**
+  String get emptyShoppingList;
+
+  /// No description provided for @emptyShoppingListSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items from a product or tap + to add manually'**
+  String get emptyShoppingListSub;
+
+  /// No description provided for @deleteItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete item'**
+  String get deleteItem;
+
+  /// No description provided for @clearPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear purchased'**
+  String get clearPurchased;
+
+  /// No description provided for @clearPurchasedConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove all purchased items?'**
+  String get clearPurchasedConfirm;
+
+  /// No description provided for @purchasedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased'**
+  String get purchasedItems;
+
+  /// No description provided for @pendingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'To buy'**
+  String get pendingItems;
+
+  /// No description provided for @quickAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, e.g. Milk'**
+  String get quickAddHint;
+
+  /// No description provided for @undoDeleteShoppingItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item deleted'**
+  String get undoDeleteShoppingItem;
+
+  /// No description provided for @undoClearPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased items cleared'**
+  String get undoClearPurchased;
+
+  /// No description provided for @shareShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Share shopping list'**
+  String get shareShoppingList;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @addToShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to shopping list'**
+  String get addToShoppingList;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

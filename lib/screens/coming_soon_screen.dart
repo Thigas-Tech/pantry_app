@@ -6,7 +6,7 @@ import 'package:pantry_app/widgets/coming_soon_view.dart';
 /// Wraps [ComingSoonView] in a [Scaffold] with an [AppBar] so it can be
 /// used directly as a navigation target (e.g. a tab in a [PageView]).
 ///
-/// See [ComingSoonScreen] for details.
+/// A full-screen placeholder for features that are not yet implemented.
 class ComingSoonScreen extends StatelessWidget {
   /// Creates a [ComingSoonScreen].
   ///

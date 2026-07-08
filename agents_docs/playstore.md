@@ -100,7 +100,8 @@ All secrets are stored in **Settings > Secrets and variables > Actions**.
 
 File: `.github/workflows/deploy-to-playstore.yml`
 
-Triggers on: tags matching `v[0-9]+.[0-9]+.[0-9]+` (e.g. `v0.0.5`).
+Triggers on: workflow dispatch (tag push trigger is currently commented out
+pending Play Console document verification).
 
 Steps:
 1. Checkout + Flutter setup

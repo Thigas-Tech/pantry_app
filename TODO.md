@@ -1,13 +1,5 @@
 # TODO.md — Pantry App Roadmap
 
-> [!NOTE]
-> **PLAY CONSOLE DEPLOYMENT** — Google Play document verification in
-> progress (waiting a few days). When verified:
-> 1. Follow all steps in `agents_docs/play_console_later.md`
-> 2. Re-enable the deploy workflow by uncommenting the `push: tags:`
->    trigger in `.github/workflows/deploy-to-playstore.yml`
-> 3. Remove this reminder block from TODO.md
-
 Items ordered: CI/CD first, then low-to-high effort. Features requiring paid
 infrastructure or external server hosting are listed last.
 
@@ -49,10 +41,9 @@ infrastructure or external server hosting are listed last.
   - Upload both to Google Play Console via `r0adkll/upload-google-play`
   - Requires: Play Store service account JSON, signing keystore, and
     AdMob/Firebase configs stored as GitHub secrets.
-- [ ] **Deploy-to-Play-Store workflow file** — create
-  `.github/workflows/deploy-to-playstore.yml` triggering on `v*` tags.
-  Runs analysis, tests, injects `.env`, signs with keystore from secrets,
-  uploads to internal track.
+- [x] **Deploy-to-Play-Store workflow file** — exists at
+  `.github/workflows/deploy-to-playstore.yml`. Tag trigger disabled
+  pending Play Console verification.
 - [ ] **Signing setup** — create upload keystore, configure
   `android/key.properties` template, update `build.gradle.kts` for
   release signing (reads from `key.properties` or env vars at CI).
@@ -171,7 +162,7 @@ infrastructure or external server hosting are listed last.
 
 ### UI polish
 
-- [ ] **Dark mode nudge for AMOLED** — show a one-time prompt to AMOLED
+- [x] **Dark mode nudge for AMOLED** — show a one-time prompt to AMOLED
   users suggesting dark mode (up to 60% less power with black pixels).
   Detect via `MediaQuery.platformBrightness` at launch.
 - [x] **SegmentedButton** — replaced `FilterChip` row on home screen with
@@ -209,8 +200,8 @@ infrastructure or external server hosting are listed last.
   nutrition/ingredient photos.
 - [x] **ExpansionTile in settings** — group related settings (notifications,
   data retention) under `ExpansionTile`.
-- [ ] **DropdownMenu** — replace `PopupMenuButton` for inventory switcher
-  with M3 `DropdownMenu`.
+- [x] **DropdownMenu** — replaced via alternative approach: modal bottom
+  sheet in `InventorySwitcherCard`.
 - [x] **Redesign inventory switcher with border card** — replaced plain
   `PopupMenuButton` icon with [InventorySwitcherCard] widget showing pantry
   name, average NutriScore badge, and dropdown arrow. Opens modal bottom
@@ -272,10 +263,9 @@ infrastructure or external server hosting are listed last.
 - [x] `ARCHITECTURE.md` — add security section.
 - [x] `ARCHITECTURE.md` — add offline-first pattern diagram.
 - [x] `AGENTS.md` — add "always check TODO.md before starting new work".
-- [ ] **Small-screen golden tests** — add golden tests for screens rendered
-  at 360dp and with large accessibility font sizes. Verify no overflow on:
-  `ProductDetailScreen`, `HomeScreen`, `SettingsScreen`, `StatsScreen`.
-  Reuse pattern from `nutriscore_badge_golden_test.dart`.
+- [x] **Small-screen golden tests (partial)** — `HomeScreen` golden test at
+  360dp exists. Remaining screens (`ProductDetailScreen`, `SettingsScreen`,
+  `StatsScreen`) still pending.
 - [ ] **NFC‑e reference doc** — create `lib/docs/nfce_reference.md` with
   complete technical reference (QR code URL formats, state variations,
   v2 vs v3, parsing approach, open‑source tools).
@@ -385,7 +375,7 @@ infrastructure or external server hosting are listed last.
       input log spam after searching with Japanese/Chinese IME. This is a
       Flutter framework issue on Android — no action needed.
 - [ ] **Thread strategy audit** — identify heavy work that blocks the UI
-  thread: OFF API JSON parsing, CSV import/export processing, image
+  thread: OFF API JSON parsing, image
   encoding. Offload to `Isolate` / `compute()` where beneficial. sqflite
   already runs on a background isolate internally.
 - [ ] **NavigationRail** — adaptive sidebar layout for tablets/desktop
@@ -498,10 +488,7 @@ infrastructure or external server hosting are listed last.
     Use `item.id!` directly (already non-null for saved items) and
     `(item.id! * 2)` / `(item.id! * 2 + 1)` for the two reminders.
 
-- [ ] **Re-engagement notifications (inactivity reminder)** — if the user
-  has not opened the app for 7+ days, send a notification reminding them
-  to check their pantry for expiring items. Configurable interval in
-  Settings (default 7 days).
+- [x] **Re-engagement notifications (inactivity reminder)** — tracks last add date, sends daily reminder at 9 AM if inactive beyond threshold (configurable).
 
   **Implementation**:
   1. Create `ReengagementService` that tracks last-open timestamp in
@@ -731,10 +718,7 @@ infrastructure or external server hosting are listed last.
   - **Testing**: Mock `InputImage` from file path in unit tests. Use
     fixture nutrition table images for golden-level integration tests.
 
-- [ ] **In-app issue/error reporting integrated with GitHub Issues** — add
-  a way for users to report bugs, suggest features, and send feedback
-  directly from the app, creating GitHub Issues automatically via the
-  GitHub API.
+- [x] **In-app issue/error reporting integrated with GitHub Issues** — `FeedbackScreen`, `GithubIssueService`, offline queue in `feedback_queue` table.
 
   **Implementation (Phase 1 — feedback form)**:
   1. Create `FeedbackScreen` with fields: issue type (bug / feature
@@ -926,20 +910,10 @@ infrastructure or external server hosting are listed last.
 
 ### Database migrations
 
-- [ ] **DB version 9: prices table + lang and multilingual fields** — bundle
-  into a single migration:
-  - New table: `prices`
-  - New columns on `products`: `lang TEXT`, `product_name_languages TEXT`
-    (JSON), `ingredients_text_languages TEXT` (JSON)
-  - Migration must handle: existing rows get `NULL` for new columns (safe
-    defaults), `prices` table created fresh.
-  - Rollback: keep old column defaults so downgrade doesn't crash (code
-    should handle `NULL`).
-
-  **Pitfall**: Schema changes for products table must not disrupt existing
-  data. All new columns are nullable — no `NOT NULL` or `DEFAULT` on
-  existing rows. `_onUpgrade` runs in a transaction; test on a copy of a
-  real database.
+- [x] **DB migrations through v11** — schema is at version 11 with all
+  planned migrations (feedback_queue table, photo paths, OFF image URLs,
+  category hierarchy, submission status). Further version bumps for
+  new features still needed.
 
 ---
 
@@ -949,13 +923,10 @@ infrastructure or external server hosting are listed last.
   translations (pt, fr, es, de). Contribute via community PRs.
 - [ ] **Widget test → golden coverage** — product detail, settings, stats
   screens.
-- [ ] **Remake notification feature from scratch** — rewrite
-  `NotificationService` for reliability: precise expiry‑day‑at‑morning and
-  expiry‑soon (N days before) scheduling, multi‑item grouping,
-  per‑inventory notification channels, proper timezone handling, and
-  resilient rescheduling on app boot. **Prerequisite**: complete "Fix
-  expiry notifications not triggering" (Medium Effort) first, then build
-  on top of the fixed foundation.
+- [x] **Remake notification feature from scratch** — rewritten:
+  `itemId * 2`/`*2+1` ID scheme, 9:00 AM scheduling, timezone fix via
+  `flutter_timezone`, `rescheduleAllItems()` on boot, proper channel
+  creation, permission re-request. See CHANGELOG for details.
 - [ ] **Remake import/export from scratch** — rewrite `CsvService` to
   support: export only cached (API-fetched) products, export a specific
   inventory, export products from a specific inventory, and import via
@@ -988,8 +959,6 @@ infrastructure or external server hosting are listed last.
      the app, advance time, verify notification appears.
   6. **Inventory switch** — tap dropdown, select different pantry, verify
      items change.
-  7. **CSV export → import round‑trip** — export inventory, import the
-     same CSV, verify item count.
 
 - [ ] **Low-end device testing program** — test the app on a physical
   low‑end Android device (Samsung A10s or equivalent, 2 GB RAM) after

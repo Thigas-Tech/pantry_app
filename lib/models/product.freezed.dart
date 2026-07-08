@@ -62,8 +62,8 @@ mixin _$Product {
  double? get saltG;/// Epoch timestamp (milliseconds since Unix epoch) of when the product
 /// data was last fetched from the API or submitted by the user.
 ///
-/// Set automatically in [OffAdapter.getByBarcode] and
-/// [OffAdapter.submitProduct].
+/// Set automatically when the product is fetched from the API or
+/// submitted by the user.
  int? get lastSynced;/// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
 /// if the data is unavailable. May also be `'not-applicable'` when the
 /// Nutri-Score system does not apply to this product category (e.g. food
@@ -88,7 +88,7 @@ mixin _$Product {
 ///   imported from CSV (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
-    /// integration. The add-product screen overrides it to
+/// integration. The add-product screen overrides it to
 /// `'manual'`.
  String get source;/// Local file path to a photo of the nutrition facts table.
 ///
@@ -406,8 +406,8 @@ class _Product implements Product {
 /// Epoch timestamp (milliseconds since Unix epoch) of when the product
 /// data was last fetched from the API or submitted by the user.
 ///
-/// Set automatically in [OffAdapter.getByBarcode] and
-/// [OffAdapter.submitProduct].
+/// Set automatically when the product is fetched from the API or
+/// submitted by the user.
 @override final  int? lastSynced;
 /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
 /// if the data is unavailable. May also be `'not-applicable'` when the
@@ -435,7 +435,7 @@ class _Product implements Product {
 ///   imported from CSV (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
-    /// integration. The add-product screen overrides it to
+/// integration. The add-product screen overrides it to
 /// `'manual'`.
 @override@JsonKey() final  String source;
 /// Local file path to a photo of the nutrition facts table.

@@ -1,0 +1,252 @@
+import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/shopping_item.dart';
+import 'package:pantry_app/utils/logger.dart';
+import 'package:sqflite/sqflite.dart';
+
+/// Data-access layer for the `shopping_list` table.
+///
+/// All methods receive a [Database] instance so they can be used
+/// independently of [DatabaseHelper] in tests.
+class ShoppingListDao {
+  /// Creates a [ShoppingListDao].
+  const ShoppingListDao();
+
+  /// Creates the `shopping_list` table.
+  Future<void> createTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE shopping_list (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        barcode TEXT,
+        name TEXT NOT NULL,
+        quantity REAL NOT NULL DEFAULT 1.0,
+        unit TEXT NOT NULL DEFAULT 'pieces',
+        is_purchased INTEGER NOT NULL DEFAULT 0,
+        inventory_id INTEGER,
+        date_added INTEGER NOT NULL,
+        date_purchased INTEGER,
+        FOREIGN KEY (barcode) REFERENCES products(barcode)
+          ON DELETE SET NULL,
+        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
+          ON DELETE SET NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_shopping_barcode ON shopping_list(barcode)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_shopping_purchased ON shopping_list(is_purchased)',
+    );
+  }
+
+  /// Converts a [ShoppingItem] to a map for database insertion.
+  Map<String, dynamic> toMap(ShoppingItem item) => {
+    'barcode': item.barcode,
+    'name': item.name,
+    'quantity': item.quantity,
+    'unit': item.unit,
+    'is_purchased': item.isPurchased ? 1 : 0,
+    'inventory_id': item.inventoryId,
+    'date_added': item.dateAdded ?? DateTime.now().millisecondsSinceEpoch,
+    'date_purchased': item.datePurchased,
+  };
+
+  /// Converts a database row map into a [ShoppingItem].
+  ShoppingItem fromMap(Map<String, dynamic> map) => ShoppingItem(
+    name: map['name'] as String,
+    barcode: map['barcode'] as String?,
+    quantity: (map['quantity'] as num?)?.toDouble() ?? 1.0,
+    unit: map['unit'] as String? ?? 'pieces',
+    isPurchased: (map['is_purchased'] as int? ?? 0) == 1,
+    id: map['id'] as int?,
+    inventoryId: map['inventory_id'] as int?,
+    dateAdded: map['date_added'] as int?,
+    datePurchased: map['date_purchased'] as int?,
+  );
+
+  /// Inserts a shopping list item and returns its row ID.
+  Future<int> insert(Database db, ShoppingItem item) async {
+    logInfo('Inserting shopping item: ${item.name}');
+    try {
+      final id = await db.insert('shopping_list', toMap(item));
+      logInfo('Shopping item inserted with id $id');
+      return id;
+    } on Exception catch (e) {
+      logError('Failed to insert shopping item: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns all shopping list items, ordered by dateAdded descending.
+  Future<List<ShoppingItem>> listAll(Database db) async {
+    try {
+      final result = await db.query(
+        'shopping_list',
+        orderBy: 'date_added DESC',
+      );
+      return result.map(fromMap).toList();
+    } on Exception catch (e) {
+      logError('Error listing shopping items: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns only pending (not purchased) items, ordered by dateAdded desc.
+  Future<List<ShoppingItem>> listPending(Database db) async {
+    try {
+      final result = await db.query(
+        'shopping_list',
+        where: 'is_purchased = 0',
+        orderBy: 'date_added DESC',
+      );
+      return result.map(fromMap).toList();
+    } on Exception catch (e) {
+      logError('Error listing pending shopping items: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns only purchased items, ordered by datePurchased desc.
+  Future<List<ShoppingItem>> listPurchased(Database db) async {
+    try {
+      final result = await db.query(
+        'shopping_list',
+        where: 'is_purchased = 1',
+        orderBy: 'date_purchased DESC',
+      );
+      return result.map(fromMap).toList();
+    } on Exception catch (e) {
+      logError('Error listing purchased shopping items: $e');
+      rethrow;
+    }
+  }
+
+  /// Updates an existing shopping list item. Returns rows affected.
+  Future<int> update(Database db, ShoppingItem item) async {
+    logInfo('Updating shopping item ${item.id}');
+    try {
+      final affected = await db.update(
+        'shopping_list',
+        toMap(item),
+        where: 'id = ?',
+        whereArgs: [item.id],
+      );
+      logInfo('Shopping item ${item.id} updated');
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to update shopping item ${item.id}: $e');
+      rethrow;
+    }
+  }
+
+  /// Deletes the item with the given [id]. Returns rows deleted.
+  Future<int> delete(Database db, int id) async {
+    logInfo('Deleting shopping item $id');
+    try {
+      final affected = await db.delete(
+        'shopping_list',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      logInfo('Shopping item $id deleted');
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to delete shopping item $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Toggles isPurchased for the item with the given [id].
+  ///
+  /// Sets datePurchased to now when marking as purchased, or null when
+  /// un-marking.
+  Future<void> togglePurchased(Database db, int id) async {
+    logInfo('Toggling purchased state for item $id');
+    try {
+      final item = await getById(db, id);
+      if (item == null) {
+        logWarning('Item $id not found for toggle');
+        return;
+      }
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await db.update(
+        'shopping_list',
+        {
+          'is_purchased': item.isPurchased ? 0 : 1,
+          'date_purchased': item.isPurchased ? null : now,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      logInfo('Shopping item $id toggled');
+    } on Exception catch (e) {
+      logError('Failed to toggle item $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns the item with the given [id], or `null`.
+  Future<ShoppingItem?> getById(Database db, int id) async {
+    try {
+      final result = await db.query(
+        'shopping_list',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      if (result.isEmpty) return null;
+      return fromMap(result.first);
+    } on Exception catch (e) {
+      logError('Error looking up shopping item $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Deletes all purchased items. Returns the number of rows deleted.
+  Future<int> clearPurchased(Database db) async {
+    logInfo('Clearing all purchased shopping items');
+    try {
+      final affected = await db.delete(
+        'shopping_list',
+        where: 'is_purchased = 1',
+      );
+      logInfo('Cleared $affected purchased items');
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to clear purchased items: $e');
+      rethrow;
+    }
+  }
+
+  /// Marks items matching the given [barcode] as purchased.
+  ///
+  /// Used by NFC-e receipt scanning to auto-clear shopping list items
+  /// when their barcode appears on a receipt.
+  Future<int> markPurchasedByBarcode(Database db, String barcode) async {
+    logInfo('Marking items with barcode $barcode as purchased');
+    try {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final affected = await db.update(
+        'shopping_list',
+        {'is_purchased': 1, 'date_purchased': now},
+        where: 'barcode = ? AND is_purchased = 0',
+        whereArgs: [barcode],
+      );
+      if (affected > 0) {
+        logInfo('Marked $affected items as purchased via barcode $barcode');
+      }
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to mark by barcode $barcode: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns the count of pending items.
+  Future<int> pendingCount(Database db) async {
+    return Sqflite.firstIntValue(
+          await db.rawQuery(
+            'SELECT COUNT(*) FROM shopping_list WHERE is_purchased = 0',
+          ),
+        ) ??
+        0;
+  }
+}

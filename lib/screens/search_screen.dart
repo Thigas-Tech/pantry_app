@@ -6,10 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -195,6 +197,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     Clipboard.setData(ClipboardData(text: product.barcode)),
                   );
                   SnackbarHelper.showInfo(context, l10n.barcodeCopied);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.shopping_cart_outlined),
+                title: Text(l10n.addToShoppingList),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  final item = ShoppingItem(
+                    name: product.name,
+                    barcode: product.barcode,
+                  );
+                  unawaited(addShoppingItem(ref, item));
+                  SnackbarHelper.showInfo(context, l10n.addToShoppingList);
                 },
               ),
             ],

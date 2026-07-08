@@ -412,5 +412,104 @@
   "amoledNudgeDismiss": "Not now",
   "translationReport": "Translation Report",
   "translationReportExplanation": "Report an issue with a product translation or suggest a new translation.",
-  "feedbackRateLimit": "You can only submit one report per minute and up to 5 per day. Please try again later."
+  "feedbackRateLimit": "You can only submit one report per minute and up to 5 per day. Please try again later.",
+  "price": "Price",
+  "prices": "Prices",
+  "addPrice": "Add price",
+  "editPrice": "Edit price",
+  "deletePrice": "Delete price",
+  "priceAdded": "Price added.",
+  "priceUpdated": "Price updated.",
+  "priceDeleted": "Price deleted.",
+  "priceHistory": "Price history",
+  "noPrices": "No prices recorded.",
+  "totalValue": "Total value",
+  "averagePrice": "Average item price",
+  "hidePrices": "Hide prices for privacy",
+  "hidePricesDescription": "Replace price values with masked text everywhere, including the stats screen.",
+  "pricesHidden": "Prices hidden.",
+  "pricesVisible": "Prices visible.",
+  "priceTracking": "Price Tracking",
+  "priceTrackingDescription": "Record purchase prices and track how much you spend.",
+  "priceTrackingEnabled": "Enable price tracking",
+  "priceRetentionDays": "Price retention",
+  "priceRetentionDaysValue": "Keep prices for {days} days (0 = keep forever)",
+  "@priceRetentionDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "365"
+      }
+    }
+  },
+  "currency": "Currency",
+  "baseCurrency": "Base currency",
+  "baseCurrencyDescription": "All prices are shown in this currency.",
+  "store": "Store",
+  "discounted": "Discounted",
+  "regularPrice": "Regular price",
+  "confirmDeletePrice": "Delete this price entry?",
+  "syncToOpenPrices": "Share with Open Prices",
+  "syncToOpenPricesDescription": "Contribute your price data to the community food-price database.",
+  "openPricesToken": "Open Prices API Token",
+  "openPricesTokenDescription": "Token generated from your Open Food Facts account.",
+  "openPricesTokenSaved": "Token saved.",
+  "openPricesSyncStarted": "Syncing prices...",
+  "openPricesSyncComplete": "{count} prices synced.",
+  "@openPricesSyncComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "priceSyncStatus": "Synced",
+  "priceSyncPending": "Pending sync",
+  "priceSyncFailed": "Sync failed",
+  "priceTrendUp": "Prices are rising",
+  "priceTrendDown": "Prices are falling",
+  "priceTrendStable": "Prices are stable",
+  "datePurchased": "Purchase date",
+  "pricedItems": "Items with prices",
+  "itemWithPriceCount": "{count} of {total} items have prices",
+  "@itemWithPriceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "total": {
+        "type": "int",
+        "example": "20"
+      }
+    }
+  },
+  "openPricesProofExplanation": "To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.",
+  "openPricesConsentTitle": "Contribute to Open Prices",
+  "openPricesConsentBody": "Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.",
+  "iUnderstand": "I understand",
+  "notes": "Notes",
+  "navList": "List",
+  "shoppingList": "Shopping List",
+  "addShoppingItem": "Add item",
+  "itemName": "Item name",
+  "markPurchased": "Mark purchased",
+  "unmarkPurchased": "Unmark purchased",
+  "moveToInventory": "Move to pantry",
+  "addAgain": "Add again",
+  "emptyShoppingList": "Your shopping list is empty",
+  "emptyShoppingListSub": "Add items from a product or tap + to add manually",
+  "deleteItem": "Delete item",
+  "clearPurchased": "Clear purchased",
+  "clearPurchasedConfirm": "Remove all purchased items?",
+  "purchasedItems": "Purchased",
+  "pendingItems": "To buy",
+  "quickAddHint": "Name, e.g. Milk",
+  "undoDeleteShoppingItem": "Item deleted",
+  "undoClearPurchased": "Purchased items cleared",
+  "shareShoppingList": "Share shopping list",
+  "add": "Add",
+  "quantity": "Quantity",
+  "addToShoppingList": "Add to shopping list"
 }

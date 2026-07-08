@@ -15,15 +15,28 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
+import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/services/price_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+/// An [http.Client] that always throws, so [CurrencyService] falls back
+/// to empty cache (returning empty rates, which makes price queries safe).
+class _FailingHttpClient extends http.BaseClient {
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    throw Exception('FailingHttpClient: no network in test');
+  }
+}
 
 class _TestSettingsNotifier extends SettingsNotifier {
   _TestSettingsNotifier(this._settings);
@@ -166,6 +179,10 @@ void main() {
     /// Verifies [statsProvider] returns default/zero stats when the
     /// database is empty.
     test('returns zero stats on empty database', () async {
+      final priceRepo = PriceRepository(
+        dbHelper,
+        CurrencyService(httpClient: _FailingHttpClient()),
+      );
       final container = ProviderContainer(
         overrides: [
           databaseProvider.overrideWithValue(dbHelper),
@@ -175,6 +192,7 @@ void main() {
           settingsProvider.overrideWith(
             _TestSettingsNotifier.defaults,
           ),
+          priceRepositoryProvider.overrideWithValue(priceRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -278,6 +296,10 @@ void main() {
         ),
       );
 
+      final priceRepo = PriceRepository(
+        dbHelper,
+        CurrencyService(httpClient: _FailingHttpClient()),
+      );
       final container = ProviderContainer(
         overrides: [
           databaseProvider.overrideWithValue(dbHelper),
@@ -287,6 +309,7 @@ void main() {
           settingsProvider.overrideWith(
             _TestSettingsNotifier.defaults,
           ),
+          priceRepositoryProvider.overrideWithValue(priceRepo),
         ],
       );
       addTearDown(container.dispose);
@@ -325,6 +348,10 @@ void main() {
         ),
       );
 
+      final priceRepo = PriceRepository(
+        dbHelper,
+        CurrencyService(httpClient: _FailingHttpClient()),
+      );
       final container = ProviderContainer(
         overrides: [
           databaseProvider.overrideWithValue(dbHelper),
@@ -334,6 +361,7 @@ void main() {
           settingsProvider.overrideWith(
             _TestSettingsNotifier.days5,
           ),
+          priceRepositoryProvider.overrideWithValue(priceRepo),
         ],
       );
       addTearDown(container.dispose);

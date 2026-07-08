@@ -10,6 +10,8 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/price_provider.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
@@ -294,14 +296,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (allInventories != null && allInventories.isNotEmpty)
+            if (allInventories != null && allInventories.isNotEmpty) ...[
               InventorySwitcherCard(
                 name: activeName,
                 nutriscoreGrade: averageNutriscore.value,
                 isLoading: inventoriesAsync.isLoading,
                 onTap: () => _showSwitcherSheet(context, ref, allInventories),
-              )
-            else
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  final settings = ref.watch(settingsProvider);
+                  if (!settings.priceTrackingEnabled || settings.pricesHidden) {
+                    return const SizedBox.shrink();
+                  }
+                  final avgAsync = ref.watch(averagePriceProvider);
+                  return avgAsync.whenOrNull(
+                        data: (avg) {
+                          if (avg == null) return const SizedBox.shrink();
+                          final repo = ref.read(priceRepositoryProvider);
+                          final formatted = repo.formatPrice(
+                            avg,
+                            settings.baseCurrency,
+                          );
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Chip(
+                              avatar: const Icon(
+                                Icons.attach_money,
+                                size: 16,
+                              ),
+                              label: Text(
+                                formatted,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          );
+                        },
+                      ) ??
+                      const SizedBox.shrink();
+                },
+              ),
+            ] else
               Flexible(
                 child: Text(
                   appBarTitle,

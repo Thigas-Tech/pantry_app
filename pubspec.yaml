@@ -30,6 +30,7 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.6
   permission_handler: ^12.0.3
+  share_plus: ^13.2.0
   shared_preferences: ^2.5.5
   shimmer: ^3.0.0
   sqflite: ^2.4.3

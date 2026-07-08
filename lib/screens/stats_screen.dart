@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
 import 'package:pantry_app/screens/coming_soon_screen.dart';
 import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
+import 'package:pantry_app/widgets/price_mask.dart';
 
 /// Displays aggregated statistics for the active pantry.
 ///
@@ -16,7 +19,7 @@ import 'package:pantry_app/widgets/error_view.dart';
 /// location breakdown, expiry donut, photo completeness, and Coming Soon
 /// stubs for price tracking and NFC-e receipts.
 ///
-/// Uses `fl_chart` for PieChart and BarChart. All charts support touch
+/// Uses fl_chart for PieChart and BarChart. All charts support touch
 /// interaction (tap a section to highlight it and its legend).
 ///
 /// See: https://pub.dev/packages/fl_chart
@@ -127,10 +130,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               );
             case 6:
               return RepaintBoundary(
-                child: ComingSoonView(
-                  title: l10n.priceTracking,
-                  subtitle: l10n.priceTrackingDescription,
-                ),
+                child: _buildPriceSection(context, l10n, stats),
               );
             case 7:
               return RepaintBoundary(
@@ -705,6 +705,98 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             ),
           ),
         ],
+      ],
+    );
+  }
+
+  Widget _buildPriceSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    PantryStats stats,
+  ) {
+    final settings = ref.watch(settingsProvider);
+    if (!settings.priceTrackingEnabled) return const SizedBox.shrink();
+
+    final repo = ref.read(priceRepositoryProvider);
+    final baseCurrency = settings.baseCurrency;
+    final totalFormatted = repo.formatPrice(stats.totalValue, baseCurrency);
+    final avgFormatted = repo.formatPrice(stats.averagePrice, baseCurrency);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(context, l10n.priceTracking),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 120,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              SizedBox(
+                width: 160,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.totalValue,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 4),
+                        PriceMask(
+                          formattedPrice: totalFormatted,
+                          child: Text(
+                            totalFormatted,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 160,
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.averagePrice,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 4),
+                        PriceMask(
+                          formattedPrice: avgFormatted,
+                          child: Text(
+                            avgFormatted,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (stats.pricedItemCount > 0)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              l10n.itemWithPriceCount(
+                stats.pricedItemCount,
+                stats.totalItems,
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
       ],
     );
   }

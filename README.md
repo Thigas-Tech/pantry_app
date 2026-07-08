@@ -16,7 +16,7 @@ never waste food again.
 - **Expiry tracking** — items grouped into Expired / Expiring Soon / Good on the home screen
 - **Local notifications** — two reminders per item: one day before expiry and on expiry day
 - **Custom units & locations** — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options
-- **CSV import/export** — backup your pantry or restore from a CSV file
+
 - **Nutrition table** — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml
 - **Material You** — dynamic colours from your device wallpaper, light/dark/system theme
 - **Undo delete** — restore an accidentally deleted inventory item with a snackbar action
@@ -98,8 +98,9 @@ lib/
   database/
     database_helper.dart   # Singleton, schema, migrations
     product_dao.dart       # Product table CRUD
-    inventory_dao.dart     # Inventory items CRUD + joins
-    inventories_dao.dart   # Named pantries CRUD
+    inventory_dao.dart       # Inventory items CRUD + joins
+    inventories_dao.dart     # Named pantries CRUD
+    feedback_queue_dao.dart  # Offline feedback submission queue
   l10n/                # App translations (English ARB)
   models/              # Freezed data models
   providers/           # Riverpod state & dependency injection
@@ -141,7 +142,7 @@ flutter test --concurrency=2 --coverage  # With coverage
 | Language           | Dart 3.12+                      |
 | State management   | Riverpod 3.x                    |
 | Local database     | SQLite (sqflite)                |
-| HTTP client        | Dio                              |
+| HTTP client        | http                             |
 | Code generation    | freezed, json_serializable      |
 | Barcode scanning   | mobile_scanner (Google ML Kit)  |
 | Image capture      | image_picker                    |

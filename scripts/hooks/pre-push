@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Git pre-push hook — runs the stale-info check before every push.
+# Write to stderr so git preserves the messages.
+exec 1>&2
+set -euo pipefail
+
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$repo_root" ]; then
+  echo "ERROR: not in a git repository."
+  exit 1
+fi
+
+bash "$repo_root/scripts/check_stale_info.sh"

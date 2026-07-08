@@ -6,15 +6,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/price_provider.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:pantry_app/widgets/price_mask.dart';
 
 /// A tappable card representing one inventory item on the home screen.
 ///
@@ -114,12 +120,33 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                   child: _buildLeadingImage(),
                 ),
           title: Text(widget.item.productName ?? widget.item.barcode),
-          subtitle: _buildSubtitle(l10n),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildSubtitle(l10n),
+              _buildPriceLine(l10n),
+            ],
+          ),
           trailing: Semantics(
             label: expiryLabel,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_cart_outlined, size: 20),
+                  tooltip: 'Add to shopping list',
+                  onPressed: () {
+                    final name = widget.item.productName ?? widget.item.barcode;
+                    final item = ShoppingItem(
+                      name: name,
+                      barcode: widget.item.barcode,
+                    );
+                    unawaited(addShoppingItem(ref, item));
+                    final l10n = AppLocalizations.of(context)!;
+                    SnackbarHelper.showInfo(context, l10n.addToShoppingList);
+                  },
+                ),
                 NutriScoreBadge(
                   grade: widget.item.nutriscoreGrade,
                   size: 24,
@@ -187,6 +214,35 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
       sb.write(' · ${l10n.expiryPrefix}: ${widget.item.expiryDate}');
     }
     return Text(sb.toString());
+  }
+
+  Widget _buildPriceLine(AppLocalizations l10n) {
+    final settings = ref.watch(settingsProvider);
+    if (!settings.priceTrackingEnabled) return const SizedBox.shrink();
+
+    final priceAsync = ref.watch(latestPriceProvider(widget.item.barcode));
+    return priceAsync.whenOrNull(
+          data: (price) {
+            if (price == null) return const SizedBox.shrink();
+            final repo = ref.read(priceRepositoryProvider);
+            final formatted = repo.formatPrice(price.price, price.currency);
+            return Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: PriceMask(
+                formattedPrice: formatted,
+                child: Text(
+                  formatted,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            );
+          },
+        ) ??
+        const SizedBox.shrink();
   }
 
   Widget _buildLeadingImage() {

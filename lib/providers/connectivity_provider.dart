@@ -4,7 +4,7 @@ import 'package:pantry_app/utils/logger.dart';
 
 /// Provides a reactive stream of internet connectivity status.
 ///
-/// Uses `InternetConnectionChecker.instance` to monitor whether the
+/// Uses [InternetConnectionChecker.instance] to monitor whether the
 /// device has internet access. Emits `true` when connected, `false`
 /// when offline, and `null` during initial loading.
 final connectivityProvider = StreamProvider<bool>((ref) {
