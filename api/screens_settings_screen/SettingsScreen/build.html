@@ -272,12 +272,124 @@ Widget build(BuildContext context, WidgetRef ref) {
           ],
         ),
         ExpansionTile(
+          leading: const Icon(Icons.attach_money),
+          title: Text(l10n.priceTracking),
+          children: [
+            SwitchListTile(
+              title: Text(l10n.priceTrackingEnabled),
+              value: settings.priceTrackingEnabled,
+              onChanged: (value) {
+                logInfo(&#39;Price tracking toggled: $value&#39;);
+                final current = ref.read(settingsProvider);
+                ref.read(settingsProvider.notifier).value = current.copyWith(
+                  priceTrackingEnabled: value,
+                );
+                if (context.mounted) {
+                  SnackbarHelper.showInfo(
+                    context,
+                    value ? l10n.pricesVisible : l10n.pricesHidden,
+                  );
+                }
+              },
+            ),
+            ListTile(
+              title: Text(l10n.baseCurrency),
+              subtitle: Text(settings.baseCurrency),
+              onTap: () =&gt; _showCurrencyPicker(context, ref),
+            ),
+            ListTile(
+              title: Text(l10n.priceRetentionDays),
+              subtitle: Text(
+                l10n.priceRetentionDaysValue(settings.priceRetentionDays),
+              ),
+              onTap: () =&gt; _showPriceRetentionDialog(context, ref),
+            ),
+            SwitchListTile(
+              title: Text(l10n.hidePrices),
+              subtitle: Text(l10n.hidePricesDescription),
+              value: settings.pricesHidden,
+              onChanged: (value) {
+                logInfo(&#39;Prices hidden toggled: $value&#39;);
+                final current = ref.read(settingsProvider);
+                ref.read(settingsProvider.notifier).value = current.copyWith(
+                  pricesHidden: value,
+                );
+                if (context.mounted) {
+                  SnackbarHelper.showInfo(
+                    context,
+                    value ? l10n.pricesHidden : l10n.pricesVisible,
+                  );
+                }
+              },
+            ),
+            const Divider(),
+            SwitchListTile(
+              title: Text(l10n.syncToOpenPrices),
+              subtitle: Text(l10n.syncToOpenPricesDescription),
+              value: settings.openPricesSyncEnabled,
+              onChanged: (value) async {
+                if (value) {
+                  final consent = await _showOpenPricesConsentDialog(
+                    context,
+                    l10n,
+                  );
+                  if (consent != true) return;
+                }
+                logInfo(&#39;Open Prices sync toggled: $value&#39;);
+                final current = ref.read(settingsProvider);
+                ref.read(settingsProvider.notifier).value = current.copyWith(
+                  openPricesSyncEnabled: value,
+                );
+              },
+            ),
+            if (settings.openPricesSyncEnabled) ...[
+              ListTile(
+                title: Text(l10n.openPricesToken),
+                subtitle: Text(l10n.openPricesTokenDescription),
+                onTap: () =&gt; _showOpenPricesTokenDialog(context, ref),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Text(
+                  l10n.openPricesProofExplanation,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        ExpansionTile(
           leading: const Icon(Icons.cleaning_services),
           title: Text(l10n.settingsMaintenance),
           children: [
             ListTile(
               title: Text(l10n.flushCache),
               subtitle: Text(l10n.flushCacheSub),
+              trailing: Consumer(
+                builder: (context, ref, child) {
+                  return FutureBuilder&lt;int&gt;(
+                    future: ref
+                        .read(currencyServiceProvider)
+                        .cacheSizeBytes(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data == 0) {
+                        return const SizedBox.shrink();
+                      }
+                      return Text(
+                        _formatBytes(snapshot.data!),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                      );
+                    },
+                  );
+                },
+              ),
               onTap: () =&gt; _flushCache(context, ref),
             ),
           ],

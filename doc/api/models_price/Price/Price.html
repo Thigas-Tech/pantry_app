@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the Price.new constructor from Class Price from the price library, for the Dart programming language.">
+  <title>Price.new constructor - Price - price library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../models_price/">models&#47;price.dart</a></li>
+    <li><a href="../../models_price/Price-class.html">Price</a></li>
+    <li class="self-crumb">Price.new const constructor</li>
+  </ol>
+  <div class="self-name">Price.new</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="models_price&#47;Price-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-constructor">Price</span> constructor 
+</h1></div>
+
+    <section class="multi-line-signature">
+      const
+      <span class="name ">Price</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span></li>
+<li><span class="parameter" id="param-price"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">price</span>, </span></li>
+<li><span class="parameter" id="param-currency"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(&#39;USD&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">currency</span>, </span></li>
+<li><span class="parameter" id="param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">id</span>, </span></li>
+<li><span class="parameter" id="param-store"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">store</span>, </span></li>
+<li><span class="parameter" id="param-isDiscounted"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(false)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isDiscounted</span>, </span></li>
+<li><span class="parameter" id="param-regularPrice"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">regularPrice</span>, </span></li>
+<li><span class="parameter" id="param-datePurchased"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">datePurchased</span>, </span></li>
+<li><span class="parameter" id="param-syncStatus"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(priceSyncLocalOnly)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">syncStatus</span>, </span></li>
+<li><span class="parameter" id="param-openPricesId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">openPricesId</span>, </span></li>
+<li><span class="parameter" id="param-locationOsmId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">locationOsmId</span>, </span></li>
+<li><span class="parameter" id="param-locationOsmType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">locationOsmType</span>, </span></li>
+<li><span class="parameter" id="param-receiptSeries"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">receiptSeries</span>, </span></li>
+<li><span class="parameter" id="param-receiptNumber"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">receiptNumber</span>, </span></li>
+<li><span class="parameter" id="param-receiptItemIndex"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">receiptItemIndex</span>, </span></li>
+<li><span class="parameter" id="param-notes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">notes</span>, </span></li>
+<li><span class="parameter" id="param-dateAdded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">dateAdded</span>, </span></li>
+</ol>})
+    </section>
+    
+<section class="desc markdown">
+  <p>Creates a <a href="../../models_price/Price-class.html">Price</a>.</p>
+<p>Only <code>barcode</code> and <code>price</code> are required; all other fields are optional.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">const factory Price({
+  &#47;&#47;&#47; The product barcode this price is associated with.
+  required String barcode,
+
+  &#47;&#47;&#47; The monetary amount (taxes included).
+  required double price,
+
+  &#47;&#47;&#47; ISO 4217 currency code (e.g. `&#39;BRL&#39;`, `&#39;USD&#39;`, `&#39;EUR&#39;`).
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; Defaults to `&#39;USD&#39;`; auto-detected from locale on first launch.
+  @Default(&#39;USD&#39;) String currency,
+
+  &#47;&#47;&#47; Auto-increment primary key.
+  int? id,
+
+  &#47;&#47;&#47; Free-form store or supermarket name.
+  String? store,
+
+  &#47;&#47;&#47; Whether this is a discounted &#47; sale price.
+  @Default(false) bool isDiscounted,
+
+  &#47;&#47;&#47; Original price before discount, if [isDiscounted] is true.
+  double? regularPrice,
+
+  &#47;&#47;&#47; Epoch timestamp (milliseconds since Unix epoch) of the purchase.
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; Defaults to the current time when no value is provided.
+  int? datePurchased,
+
+  &#47;&#47;&#47; Open prices sync status.
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; - [priceSyncLocalOnly] — not shared (no proof photo).
+  &#47;&#47;&#47; - [priceSyncPending] — queued for sync.
+  &#47;&#47;&#47; - [priceSyncSynced] — successfully synced.
+  &#47;&#47;&#47; - [priceSyncFailed] — sync failed.
+  @Default(priceSyncLocalOnly) String syncStatus,
+
+  &#47;&#47;&#47; Remote ID on Open Prices after successful sync.
+  int? openPricesId,
+
+  &#47;&#47;&#47; OpenStreetMap node&#47;way ID for the store location.
+  String? locationOsmId,
+
+  &#47;&#47;&#47; OpenStreetMap location type (`NODE`, `WAY`, or `RELATION`).
+  String? locationOsmType,
+
+  &#47;&#47;&#47; NFC-e receipt series (reserved for future tax receipt integration).
+  String? receiptSeries,
+
+  &#47;&#47;&#47; NFC-e receipt number (reserved for future tax receipt integration).
+  String? receiptNumber,
+
+  &#47;&#47;&#47; NFC-e line-item index (reserved for future tax receipt integration).
+  int? receiptItemIndex,
+
+  &#47;&#47;&#47; Free-form notes about this price observation.
+  String? notes,
+
+  &#47;&#47;&#47; Epoch timestamp (milliseconds since Unix epoch) of when this record
+  &#47;&#47;&#47; was created locally.
+  int? dateAdded,
+}) = _Price;</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../models_price/">price</a></li>
+    <li><a href="../../models_price/Price-class.html">Price</a></li>
+    <li class="self-crumb">Price.new const constructor</li>
+</ol>
+
+    <h5>Price class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-left-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

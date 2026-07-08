@@ -83,7 +83,9 @@ executions of <a href="../../providers_settings_provider/SettingsNotifier/build.
   <pre class="language-dart"><code class="language-dart">@override
 Settings build() {
   unawaited(_loadFromPrefs());
-  return const Settings();
+  return Settings(
+    baseCurrency: _detectLocaleCurrency(),
+  );
 }</code></pre>
 </section>
 

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the PriceRepository class from the price_repository library, for the Dart programming language.">
+  <title>PriceRepository class - price_repository library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_price_repository/">services&#47;price_repository.dart</a></li>
+    <li class="self-crumb">PriceRepository class</li>
+  </ol>
+  <div class="self-name">PriceRepository</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_price_repository&#47;services_price_repository-library-sidebar.html"
+    data-below-sidebar="services_price_repository&#47;PriceRepository-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">PriceRepository</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Coordinates price CRUD, formatting, currency conversion, and aggregation.</p>
+<p><a href="../services_price_repository/PriceRepository-class.html">PriceRepository</a> combines the local PriceDao (via <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a>)
+with the <a href="../services_currency_service/CurrencyService-class.html">CurrencyService</a> for display conversions.</p>
+<h2 id="architecture">Architecture</h2>
+<p>Local CRUD methods delegate directly to PriceDao. Formatting and
+conversion methods use CurrencyService to convert prices to the
+user's base currency for display.</p>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="PriceRepository.new" class="callable">
+          <span class="name"><a href="../services_price_repository/PriceRepository/PriceRepository.html">PriceRepository</a></span><span class="signature">(<span class="parameter" id="param-_db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span><span class="parameter" id="param-_currencyService"><span class="type-annotation"><a href="../services_currency_service/CurrencyService-class.html">CurrencyService</a></span> <span class="parameter-name">_currencyService</span>, [</span><span class="parameter" id="param-openPricesService"><span class="type-annotation"><a href="../services_open_prices_service/OpenPricesService-class.html">OpenPricesService</a>?</span> <span class="parameter-name">openPricesService</span></span>])</span>
+        </dt>
+        <dd>
+          Creates a <a href="../services_price_repository/PriceRepository-class.html">PriceRepository</a>.
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="addPrice" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/addPrice.html">addPrice</a></span><span class="signature">(<wbr><span class="parameter" id="addPrice-param-price"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a></span> <span class="parameter-name">price</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a price observation. Returns the new row ID.
+  
+
+</dd>
+
+        <dt id="averageItemPrice" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/averageItemPrice.html">averageItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="averageItemPrice-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the average of the most recent price per distinct product in
+the given inventory, or <code>null</code> if no prices exist.
+  
+
+</dd>
+
+        <dt id="convertToBase" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/convertToBase.html">convertToBase</a></span><span class="signature">(<wbr><span class="parameter" id="convertToBase-param-amount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">amount</span>, </span><span class="parameter" id="convertToBase-param-fromCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fromCurrency</span>, </span><span class="parameter" id="convertToBase-param-baseCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseCurrency</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts <code>amount</code> from <code>fromCurrency</code> to <code>baseCurrency</code>.
+  
+
+</dd>
+
+        <dt id="deletePrice" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/deletePrice.html">deletePrice</a></span><span class="signature">(<wbr><span class="parameter" id="deletePrice-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes the price with the given <code>id</code>.
+  
+
+</dd>
+
+        <dt id="formatPrice" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/formatPrice.html">formatPrice</a></span><span class="signature">(<wbr><span class="parameter" id="formatPrice-param-amount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">amount</span>, </span><span class="parameter" id="formatPrice-param-currencyCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">currencyCode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Formats <code>amount</code> as a currency string in <code>currencyCode</code>.
+  
+
+</dd>
+
+        <dt id="getLatestPrice" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/getLatestPrice.html">getLatestPrice</a></span><span class="signature">(<wbr><span class="parameter" id="getLatestPrice-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the most recent price for the given <code>barcode</code>, or <code>null</code>.
+  
+
+</dd>
+
+        <dt id="getPendingSyncPrices" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/getPendingSyncPrices.html">getPendingSyncPrices</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns prices pending sync to Open Prices.
+  
+
+</dd>
+
+        <dt id="getPriceById" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/getPriceById.html">getPriceById</a></span><span class="signature">(<wbr><span class="parameter" id="getPriceById-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the price with the given <code>id</code>, or <code>null</code> if not found.
+  
+
+</dd>
+
+        <dt id="getPriceCount" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/getPriceCount.html">getPriceCount</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total number of prices on record.
+  
+
+</dd>
+
+        <dt id="getPriceHistory" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/getPriceHistory.html">getPriceHistory</a></span><span class="signature">(<wbr><span class="parameter" id="getPriceHistory-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getPriceHistory-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">limit</span>, </span><span class="parameter" id="getPriceHistory-param-offset"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">offset</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all price entries for the given <code>barcode</code>, ordered by
+datePurchased descending.
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="pricedItemCount" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/pricedItemCount.html">pricedItemCount</a></span><span class="signature">(<wbr><span class="parameter" id="pricedItemCount-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the count of distinct items in the inventory that have at
+least one price.
+  
+
+</dd>
+
+        <dt id="syncToOpenPrices" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/syncToOpenPrices.html">syncToOpenPrices</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_open_prices_service/SyncResult-class.html">SyncResult</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Syncs all pending prices to the Open Prices database.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="totalInventoryValue" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/totalInventoryValue.html">totalInventoryValue</a></span><span class="signature">(<wbr><span class="parameter" id="totalInventoryValue-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the sum of the most recent price per distinct product in
+the given inventory, or <code>null</code> if no prices exist.
+  
+
+</dd>
+
+        <dt id="updatePrice" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/updatePrice.html">updatePrice</a></span><span class="signature">(<wbr><span class="parameter" id="updatePrice-param-price"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a></span> <span class="parameter-name">price</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates an existing price row.
+  
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_price_repository/">price_repository</a></li>
+    <li class="self-crumb">PriceRepository class</li>
+</ol>
+
+    <h5>price_repository library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

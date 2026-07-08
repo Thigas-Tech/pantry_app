@@ -62,12 +62,14 @@ database operations use the same connection.</p>
 constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
 or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
-<p>Four tables are created on first launch (version 11):</p>
+<p>Six tables are created on first launch (version 13):</p>
 <ul>
 <li><code>products</code> – product data fetched from Open Food Facts.</li>
 <li><code>inventories</code> – named pantries (e.g. "Home", "Work").</li>
 <li><code>inventory</code> – instances of products the user has added to a pantry.</li>
 <li><code>feedback_queue</code> – offline queue for GitHub issue reports.</li>
+<li><code>prices</code> – purchase price observations per barcode.</li>
+<li><code>shopping_list</code> – items the user intends to buy.</li>
 </ul>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
@@ -169,6 +171,18 @@ used for local storage.</li>
 
 </dd>
 
+        <dt id="priceDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/priceDao.html">priceDao</a></span>
+  <span class="signature">&#8594; <a href="../database_price_dao/PriceDao-class.html">PriceDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the <code>prices</code> table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="productDao" class="property">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/productDao.html">productDao</a></span>
   <span class="signature">&#8594; <a href="../database_product_dao/ProductDao-class.html">ProductDao</a></span>
@@ -193,6 +207,18 @@ used for local storage.</li>
 
 </dd>
 
+        <dt id="shoppingListDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/shoppingListDao.html">shoppingListDao</a></span>
+  <span class="signature">&#8594; <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the <code>shopping_list</code> table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
     </dl>
   </section>
 
@@ -203,14 +229,14 @@ used for local storage.</li>
     <h2>Methods</h2>
     <dl class="callables">
         <dt id="cleanupOldEntries" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/cleanupOldEntries.html">cleanupOldEntries</a></span><span class="signature">(<wbr>{<span class="parameter" id="cleanupOldEntries-param-retentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">retentionDays</span> = <span class="default-value">60</span></span>})
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/cleanupOldEntries.html">cleanupOldEntries</a></span><span class="signature">(<wbr>{<span class="parameter" id="cleanupOldEntries-param-retentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">retentionDays</span> = <span class="default-value">60</span>, </span><span class="parameter" id="cleanupOldEntries-param-priceRetentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">priceRetentionDays</span> = <span class="default-value">0</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Removes stale inventory items and orphaned products.
+  Removes stale inventory items, orphaned products, and old prices.
   
 
 </dd>
@@ -237,6 +263,19 @@ used for local storage.</li>
 </dt>
 <dd>
   Deletes all API‑fetched products from the local cache.
+  
+
+</dd>
+
+        <dt id="clearPurchasedShoppingItems" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/clearPurchasedShoppingItems.html">clearPurchasedShoppingItems</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes all purchased shopping list items.
   
 
 </dd>
@@ -293,6 +332,32 @@ used for local storage.</li>
 
 </dd>
 
+        <dt id="deletePrice" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deletePrice.html">deletePrice</a></span><span class="signature">(<wbr><span class="parameter" id="deletePrice-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes the price with the given <code>id</code>.
+  
+
+</dd>
+
+        <dt id="deleteShoppingItem" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteShoppingItem.html">deleteShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="deleteShoppingItem-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes a shopping list item by <code>id</code>.
+  
+
+</dd>
+
         <dt id="deleteStaleFeedbackFailures" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteStaleFeedbackFailures.html">deleteStaleFeedbackFailures</a></span><span class="signature">(<wbr>{<span class="parameter" id="deleteStaleFeedbackFailures-param-olderThanDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">olderThanDays</span> = <span class="default-value">30</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -315,6 +380,20 @@ used for local storage.</li>
 </dt>
 <dd>
   Returns all cached products.
+  
+
+</dd>
+
+        <dt id="getAverageItemPrice" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getAverageItemPrice.html">getAverageItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="getAverageItemPrice-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the average of the most recent price per distinct product in
+the given inventory.
   
 
 </dd>
@@ -412,6 +491,19 @@ ordered by expiry date (oldest first).
 
 </dd>
 
+        <dt id="getLatestPrice" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getLatestPrice.html">getLatestPrice</a></span><span class="signature">(<wbr><span class="parameter" id="getLatestPrice-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the most recent price for the given <code>barcode</code>, or <code>null</code>.
+  
+
+</dd>
+
         <dt id="getPendingFeedbackIssues" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/getPendingFeedbackIssues.html">getPendingFeedbackIssues</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
@@ -421,6 +513,112 @@ ordered by expiry date (oldest first).
 </dt>
 <dd>
   Returns all pending (non-failed) feedback queue rows.
+  
+
+</dd>
+
+        <dt id="getPendingShoppingCount" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPendingShoppingCount.html">getPendingShoppingCount</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the count of pending (not purchased) shopping list items.
+  
+
+</dd>
+
+        <dt id="getPendingShoppingItems" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPendingShoppingItems.html">getPendingShoppingItems</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns only pending (not purchased) items.
+  
+
+</dd>
+
+        <dt id="getPriceById" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPriceById.html">getPriceById</a></span><span class="signature">(<wbr><span class="parameter" id="getPriceById-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the price with the given <code>id</code>, or <code>null</code> if not found.
+  
+
+</dd>
+
+        <dt id="getPriceCount" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPriceCount.html">getPriceCount</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total number of prices on record.
+  
+
+</dd>
+
+        <dt id="getPriceCountByBarcode" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPriceCountByBarcode.html">getPriceCountByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="getPriceCountByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total number of prices for the given <code>barcode</code>.
+  
+
+</dd>
+
+        <dt id="getPricedItemCount" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPricedItemCount.html">getPricedItemCount</a></span><span class="signature">(<wbr><span class="parameter" id="getPricedItemCount-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the count of distinct inventory items that have at least one
+price.
+  
+
+</dd>
+
+        <dt id="getPricesByBarcode" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPricesByBarcode.html">getPricesByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="getPricesByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getPricesByBarcode-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">limit</span>, </span><span class="parameter" id="getPricesByBarcode-param-offset"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">offset</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all price entries for the given <code>barcode</code>, ordered by date
+descending.
+  
+
+</dd>
+
+        <dt id="getPricesBySyncStatus" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPricesBySyncStatus.html">getPricesBySyncStatus</a></span><span class="signature">(<wbr><span class="parameter" id="getPricesBySyncStatus-param-syncStatus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">syncStatus</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns prices with the given <code>syncStatus</code> for Open Prices sync.
   
 
 </dd>
@@ -451,6 +649,46 @@ ordered by expiry date (oldest first).
 
 </dd>
 
+        <dt id="getPurchasedShoppingItems" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPurchasedShoppingItems.html">getPurchasedShoppingItems</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns only purchased items.
+  
+
+</dd>
+
+        <dt id="getShoppingList" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getShoppingList.html">getShoppingList</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all shopping list items, ordered by dateAdded desc.
+  
+
+</dd>
+
+        <dt id="getTotalInventoryValue" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getTotalInventoryValue.html">getTotalInventoryValue</a></span><span class="signature">(<wbr><span class="parameter" id="getTotalInventoryValue-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the sum of the most recent price per distinct product in the
+given inventory.
+  
+
+</dd>
+
         <dt id="incrementFeedbackRetry" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/incrementFeedbackRetry.html">incrementFeedbackRetry</a></span><span class="signature">(<wbr><span class="parameter" id="incrementFeedbackRetry-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -477,6 +715,19 @@ ordered by expiry date (oldest first).
 
 </dd>
 
+        <dt id="insertPrice" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertPrice.html">insertPrice</a></span><span class="signature">(<wbr><span class="parameter" id="insertPrice-param-price"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a></span> <span class="parameter-name">price</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a price observation. Returns the new row ID.
+  
+
+</dd>
+
         <dt id="insertProduct" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/insertProduct.html">insertProduct</a></span><span class="signature">(<wbr><span class="parameter" id="insertProduct-param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -490,6 +741,19 @@ ordered by expiry date (oldest first).
 
 </dd>
 
+        <dt id="insertShoppingItem" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertShoppingItem.html">insertShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="insertShoppingItem-param-item"><span class="type-annotation"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a shopping list item. Returns the new row ID.
+  
+
+</dd>
+
         <dt id="markFeedbackFailed" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/markFeedbackFailed.html">markFeedbackFailed</a></span><span class="signature">(<wbr><span class="parameter" id="markFeedbackFailed-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -499,6 +763,19 @@ ordered by expiry date (oldest first).
 </dt>
 <dd>
   Marks a feedback queue row as permanently failed.
+  
+
+</dd>
+
+        <dt id="markShoppingItemsByBarcode" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/markShoppingItemsByBarcode.html">markShoppingItemsByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="markShoppingItemsByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Marks items matching the given <code>barcode</code> as purchased.
   
 
 </dd>
@@ -568,6 +845,19 @@ ordered by expiry date (oldest first).
 
 </dd>
 
+        <dt id="toggleShoppingItemPurchased" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/toggleShoppingItemPurchased.html">toggleShoppingItemPurchased</a></span><span class="signature">(<wbr><span class="parameter" id="toggleShoppingItemPurchased-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Toggles the purchased state for the item with the given <code>id</code>.
+  
+
+</dd>
+
         <dt id="toString" class="callable inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
@@ -590,6 +880,32 @@ ordered by expiry date (oldest first).
 </dt>
 <dd>
   Updates an existing inventory item.
+  
+
+</dd>
+
+        <dt id="updatePrice" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/updatePrice.html">updatePrice</a></span><span class="signature">(<wbr><span class="parameter" id="updatePrice-param-price"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a></span> <span class="parameter-name">price</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates an existing price row.
+  
+
+</dd>
+
+        <dt id="updateShoppingItem" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/updateShoppingItem.html">updateShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="updateShoppingItem-param-item"><span class="type-annotation"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates a shopping list item.
   
 
 </dd>
