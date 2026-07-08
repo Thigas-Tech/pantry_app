@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the build method from the SettingsScreen class, for the Dart programming language.">
+  <title>build method - SettingsScreen class - settings_screen library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../file-___home_thiago_Projects_pantry_app_lib_screens_settings_screen/">screens&#47;settings_screen.dart</a></li>
+    <li><a href="../../file-___home_thiago_Projects_pantry_app_lib_screens_settings_screen/SettingsScreen-class.html">SettingsScreen</a></li>
+    <li class="self-crumb">build method</li>
+  </ol>
+  <div class="self-name">build</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="file-___home_thiago_Projects_pantry_app_lib_screens_settings_screen&#47;SettingsScreen-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">build</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+<span class="returntype">dynamic</span>
+<span class="name ">build</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="build-param-context"><span class="type-annotation">dynamic</span> <span class="parameter-name">context</span>, </span></li>
+<li><span class="parameter" id="build-param-ref"><span class="type-annotation">dynamic</span> <span class="parameter-name">ref</span></span></li>
+</ol>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Widget build(BuildContext context, WidgetRef ref) {
+  final l10n = AppLocalizations.of(context)!;
+  final themeMode = ref.watch(themeModeProvider);
+  final settings = ref.watch(settingsProvider);
+
+  return Scaffold(
+    appBar: AppBar(title: Text(l10n.settings)),
+    body: ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        ExpansionTile(
+          leading: const Icon(Icons.brightness_6),
+          title: Text(l10n.settingsAppearance),
+          initiallyExpanded: true,
+          children: [
+            ListTile(
+              title: Text(l10n.theme),
+              subtitle: Text(themeMode.name),
+              onTap: () =&gt; _showThemeDialog(context, ref),
+            ),
+            SwitchListTile(
+              title: Text(l10n.amoledDarkMode),
+              subtitle: Text(l10n.amoledDarkModeExplanation),
+              value: settings.amoledDarkMode,
+              onChanged: (value) {
+                logInfo(&#39;AMOLED dark mode toggled: $value&#39;);
+                final current = ref.read(settingsProvider);
+                ref.read(settingsProvider.notifier).value = current.copyWith(
+                  amoledDarkMode: value,
+                );
+                if (context.mounted) {
+                  SnackbarHelper.showInfo(
+                    context,
+                    value
+                        ? l10n.amoledDarkModeEnabled
+                        : l10n.amoledDarkModeDisabled,
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+        ExpansionTile(
+          leading: const Icon(Icons.notifications_active),
+          title: Text(l10n.expiryNotifications),
+          initiallyExpanded: true,
+          children: [
+            SwitchListTile(
+              title: Text(l10n.remindBeforeExpiry),
+              value: settings.notificationsEnabled,
+              onChanged: (value) async {
+                logInfo(&#39;Notifications toggled: $value&#39;);
+                if (value) {
+                  final notifService = ref.read(
+                    notificationServiceProvider,
+                  );
+                  final granted = await notifService.requestPermission();
+                  if (granted == false) {
+                    if (context.mounted) {
+                      await _showPermissionDeniedDialog(
+                        context,
+                        l10n,
+                      );
+                    }
+                    return;
+                  }
+                } else {
+                  final notifService = ref.read(
+                    notificationServiceProvider,
+                  );
+                  await notifService.cancelAllReminders();
+                }
+                final current = ref.read(settingsProvider);
+                ref.read(settingsProvider.notifier).value = current.copyWith(
+                  notificationsEnabled: value,
+                );
+                if (context.mounted) {
+                  SnackbarHelper.showInfo(
+                    context,
+                    value
+                        ? l10n.notificationsEnabled
+                        : l10n.notificationsDisabled,
+                  );
+                }
+              },
+            ),
+            SwitchListTile(
+              title: Text(l10n.inactivityReminderEnabled),
+              value: settings.inactivityReminderEnabled,
+              onChanged: (value) async {
+                logInfo(&#39;Inactivity reminder toggled: $value&#39;);
+                final notifService = ref.read(
+                  notificationServiceProvider,
+                );
+                if (value) {
+                  final granted = await notifService.requestPermission();
+                  if (granted == false) {
+                    if (context.mounted) {
+                      await _showPermissionDeniedDialog(
+                        context,
+                        l10n,
+                      );
+                    }
+                    return;
+                  }
+                } else {
+                  await notifService.cancelInactivityReminder();
+                }
+                final current = ref.read(settingsProvider);
+                ref.read(settingsProvider.notifier).value = current.copyWith(
+                  inactivityReminderEnabled: value,
+                );
+                if (context.mounted) {
+                  SnackbarHelper.showInfo(
+                    context,
+                    value
+                        ? l10n.notificationsEnabled
+                        : l10n.notificationsDisabled,
+                  );
+                }
+              },
+            ),
+            ListTile(
+              title: Text(l10n.inactivityThresholdDays),
+              subtitle: Text(
+                l10n.expiringSoonDaysValue(settings.inactivityThresholdDays),
+              ),
+              onTap: () =&gt; _showInactivityThresholdDialog(context, ref),
+            ),
+          ],
+        ),
+        ExpansionTile(
+          leading: const Icon(Icons.timer),
+          title: Text(l10n.settingsDataManagement),
+          children: [
+            ListTile(
+              title: Text(l10n.dataRetention),
+              subtitle: Text(
+                l10n.retentionDaysValue(settings.retentionDays),
+              ),
+              onTap: () =&gt; _showRetentionDialog(context, ref),
+            ),
+            ListTile(
+              title: Text(l10n.expiringSoonDays),
+              subtitle: Text(
+                l10n.expiringSoonDaysValue(settings.expiringSoonDays),
+              ),
+              onTap: () =&gt; _showExpiringSoonDialog(context, ref),
+            ),
+            ListTile(
+              title: Text(l10n.manageInventories),
+              subtitle: Text(l10n.manageInventoriesSub),
+              onTap: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute&lt;void&gt;(
+                    builder: (_) =&gt; const ManageInventoriesScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        ExpansionTile(
+          leading: const Icon(Icons.cleaning_services),
+          title: Text(l10n.settingsMaintenance),
+          children: [
+            ListTile(
+              title: Text(l10n.flushCache),
+              subtitle: Text(l10n.flushCacheSub),
+              onTap: () =&gt; _flushCache(context, ref),
+            ),
+          ],
+        ),
+        ExpansionTile(
+          leading: const Icon(Icons.info_outline),
+          title: Text(l10n.settingsAbout),
+          children: [
+            ListTile(
+              title: Text(l10n.whatsNewTitle),
+              subtitle: Text(l10n.whatsNewDismiss),
+              onTap: () =&gt; _showWhatsNew(context),
+            ),
+            if (AppConfig.feedbackEnabled)
+              ListTile(
+                leading: const Icon(Icons.bug_report_outlined),
+                title: Text(l10n.sendFeedback),
+                onTap: () =&gt; _sendFeedback(context),
+              ),
+          ],
+        ),
+      ],
+    ),
+  );
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../file-___home_thiago_Projects_pantry_app_lib_screens_settings_screen/">settings_screen</a></li>
+    <li><a href="../../file-___home_thiago_Projects_pantry_app_lib_screens_settings_screen/SettingsScreen-class.html">SettingsScreen</a></li>
+    <li class="self-crumb">build method</li>
+</ol>
+
+    <h5>SettingsScreen class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the InventoryDao class from the inventory_dao library, for the Dart programming language.">
+  <title>InventoryDao class - inventory_dao library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/">database&#47;inventory_dao.dart</a></li>
+    <li class="self-crumb">InventoryDao class</li>
+  </ol>
+  <div class="self-name">InventoryDao</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao&#47;file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao-library-sidebar.html"
+    data-below-sidebar="file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao&#47;InventoryDao-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">InventoryDao</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Data-access layer for the <code>inventory</code> table.</p>
+<p>All methods receive a <a href="https://api.flutter.dev/flutter/dart-indexed_db/Database-class.html">Database</a> instance so they can be used
+independently of <code>DatabaseHelper</code> in tests.</p>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="InventoryDao.new" class="callable">
+          <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/InventoryDao.html">InventoryDao</a></span><span class="signature">()</span>
+        </dt>
+        <dd>
+          Creates an <a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao-class.html">InventoryDao</a>.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="count" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/count.html">count</a></span><span class="signature">(<wbr><span class="parameter" id="count-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="count-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total number of rows in the inventory table.
+  
+
+</dd>
+
+        <dt id="delete" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/delete.html">delete</a></span><span class="signature">(<wbr><span class="parameter" id="delete-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, </span><span class="parameter" id="delete-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes an inventory item by its ID.
+  
+
+</dd>
+
+        <dt id="expiryDistribution" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/expiryDistribution.html">expiryDistribution</a></span><span class="signature">(<wbr><span class="parameter" id="expiryDistribution-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="expiryDistribution-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="expiryDistribution-param-expiringSoonDays"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">expiringSoonDays</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns counts grouped by expiry status.
+  
+
+</dd>
+
+        <dt id="fromMap" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/fromMap.html">fromMap</a></span><span class="signature">(<wbr><span class="parameter" id="fromMap-param-map"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span> <span class="parameter-name">map</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts a database row map into an <a href="../file-___home_thiago_Projects_pantry_app_lib_models_inventory_item/InventoryItem-class.html">InventoryItem</a>.
+  
+
+</dd>
+
+        <dt id="getLastAddDate" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/getLastAddDate.html">getLastAddDate</a></span><span class="signature">(<wbr><span class="parameter" id="getLastAddDate-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the most recent <code>InventoryItem.dateAdded</code> across all inventories.
+  
+
+</dd>
+
+        <dt id="insert" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/insert.html">insert</a></span><span class="signature">(<wbr><span class="parameter" id="insert-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, </span><span class="parameter" id="insert-param-item"><span class="type-annotation">dynamic</span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a new inventory item.
+  
+
+</dd>
+
+        <dt id="list" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/list.html">list</a></span><span class="signature">(<wbr><span class="parameter" id="list-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="list-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="list-param-location"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">location</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Retrieves all inventory items for a specific <code>inventoryId</code>,
+optionally filtered by location.
+  
+
+</dd>
+
+        <dt id="listByBarcode" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/listByBarcode.html">listByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="listByBarcode-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, </span><span class="parameter" id="listByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="listByBarcode-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all inventory entries for a specific barcode and <code>inventoryId</code>,
+ordered by expiry date (oldest first).
+  
+
+</dd>
+
+        <dt id="listWithProduct" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/listWithProduct.html">listWithProduct</a></span><span class="signature">(<wbr><span class="parameter" id="listWithProduct-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="listWithProduct-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Retrieves all inventory rows joined with product metadata for a
+specific <code>inventoryId</code>.
+  
+
+</dd>
+
+        <dt id="locationDistribution" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/locationDistribution.html">locationDistribution</a></span><span class="signature">(<wbr><span class="parameter" id="locationDistribution-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="locationDistribution-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns counts of items grouped by storage location.
+  
+
+</dd>
+
+        <dt id="moveItemsToInventory" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/moveItemsToInventory.html">moveItemsToInventory</a></span><span class="signature">(<wbr><span class="parameter" id="moveItemsToInventory-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, </span><span class="parameter" id="moveItemsToInventory-param-itemIds"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">itemIds</span>, </span><span class="parameter" id="moveItemsToInventory-param-targetInventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">targetInventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Moves multiple inventory items to a different inventory (pantry).
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toMap" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/toMap.html">toMap</a></span><span class="signature">(<wbr><span class="parameter" id="toMap-param-item"><span class="type-annotation">dynamic</span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts an <a href="../file-___home_thiago_Projects_pantry_app_lib_models_inventory_item/InventoryItem-class.html">InventoryItem</a> to a map for database insertion.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="update" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/update.html">update</a></span><span class="signature">(<wbr><span class="parameter" id="update-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, </span><span class="parameter" id="update-param-item"><span class="type-annotation">dynamic</span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates an existing inventory item.
+  
+
+</dd>
+
+        <dt id="weeklyAdditions" class="callable">
+  <span class="name"><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/InventoryDao/weeklyAdditions.html">weeklyAdditions</a></span><span class="signature">(<wbr><span class="parameter" id="weeklyAdditions-param-db"><span class="type-annotation">dynamic</span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="weeklyAdditions-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="weeklyAdditions-param-weeks"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">weeks</span> = <span class="default-value">8</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns weekly item-addition counts for the last <code>weeks</code> weeks.
+  
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../file-___home_thiago_Projects_pantry_app_lib_database_inventory_dao/">inventory_dao</a></li>
+    <li class="self-crumb">InventoryDao class</li>
+</ol>
+
+    <h5>inventory_dao library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.4+1
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
