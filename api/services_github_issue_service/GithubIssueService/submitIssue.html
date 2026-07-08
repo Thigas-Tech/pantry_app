@@ -85,6 +85,13 @@
     throw UnsupportedError(&#39;GitHub API submissions are not supported on web&#39;);
   }
 
+  if (AppConfig.feedbackToken.isEmpty) {
+    logError(&#39;FEEDBACK_TOKEN is empty — in-app feedback will fail&#39;);
+    throw const IssueSubmissionException(
+      &#39;Feedback token is not configured.&#39;,
+    );
+  }
+
   if (!_canSubmit()) {
     throw const IssueSubmissionException(
       &#39;Rate limit reached. Try again later.&#39;,
@@ -125,7 +132,7 @@
   if (response.statusCode == 201) {
     final data = jsonDecode(response.body) as Map&lt;String, dynamic&gt;;
     final url = data[&#39;html_url&#39;] as String;
-    _recordSubmission(title, body);
+    unawaited(_recordSubmission(title, body));
     logInfo(&#39;Issue created: $url&#39;);
     return url;
   }
