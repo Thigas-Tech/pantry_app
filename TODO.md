@@ -1,5 +1,13 @@
 # TODO.md — Pantry App Roadmap
 
+> [!NOTE]
+> **PLAY CONSOLE DEPLOYMENT** — Google Play document verification in
+> progress (waiting a few days). When verified:
+> 1. Follow all steps in `agents_docs/play_console_later.md`
+> 2. Re-enable the deploy workflow by uncommenting the `push: tags:`
+>    trigger in `.github/workflows/deploy-to-playstore.yml`
+> 3. Remove this reminder block from TODO.md
+
 Items ordered: CI/CD first, then low-to-high effort. Features requiring paid
 infrastructure or external server hosting are listed last.
 
