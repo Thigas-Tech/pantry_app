@@ -219,6 +219,11 @@ class _ShoppingListBody extends ConsumerWidget {
     final pendingAsync = ref.watch(pendingShoppingListProvider);
     final purchasedAsync = ref.watch(purchasedShoppingListProvider);
 
+    final isLoading = pendingAsync.isLoading || purchasedAsync.isLoading;
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final pending = pendingAsync.asData?.value ?? [];
     final purchased = purchasedAsync.asData?.value ?? [];
 

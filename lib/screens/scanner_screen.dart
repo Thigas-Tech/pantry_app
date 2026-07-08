@@ -381,30 +381,35 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(l10n.typeOrPasteBarcode, textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: l10n.barcodeLabel,
-                border: const OutlineInputBorder(),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(l10n.typeOrPasteBarcode, textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _controller,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: l10n.barcodeLabel,
+                  border: const OutlineInputBorder(),
+                ),
+                onSubmitted: (_) => _submit(),
               ),
-              onSubmitted: (_) => _submit(),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _submit,
-              icon: const Icon(Icons.check),
-              label: Text(l10n.submit),
-            ),
-          ],
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _submit,
+                icon: const Icon(Icons.check),
+                label: Text(l10n.submit),
+              ),
+            ],
+          ),
         ),
       ),
     );

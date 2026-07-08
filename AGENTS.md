@@ -63,6 +63,14 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
     codebase. After every feature, fix, or refactor, audit the affected docs
     in the same PR. When asked to find stale information, first consult
     `agents_docs/stale_info_checklist.md`.
+13. Never overwrite .env. It is gitignored and contains credentials.
+    - scripts/inject_env.sh uses `cat >.env` which truncates — never run it
+      locally. It is only for CI (build, deploy workflows).
+    - Never echo/redirect into .env from scripts or ad-hoc commands.
+    - If .env is missing or empty, copy .env.example and fill in real values.
+    - FEEDBACK_TOKEN is a GitHub PAT with repo scope. Create at
+      https://github.com/settings/tokens (classic) or
+      https://github.com/settings/tokens?type=beta (fine-grained).
 
 ## Pre-push gate (run BEFORE every push)
 
@@ -83,7 +91,7 @@ every `git push`. Use `git push --no-verify` to bypass.
 ### Manual steps
 
   1. Run smoke test: `scripts/run_smoke_test.sh`
-     (integration_test/smoke_test.dart — app startup + 4 main tabs)
+      (integration_test/smoke_test.dart — app startup + 5 main tabs)
      Emulator-required. ~10 s on warm emulator, ~3 min first run.
   2. Audit stale docs: if `agents_docs/stale_info_checklist.md` hot spots
      are triggered by this branch, open the file and check the affected
@@ -116,9 +124,8 @@ Read these when implementing specific features:
 - Gestures & touch behaviors -> ~/.config/opencode/instructions/flutter_gestures.md
 - Firebase / FlutterFire -> ~/.config/opencode/instructions/firebase_refs.md
 - OFF API / SDK -> ~/.config/opencode/instructions/off_refs.md
-- Performance optimization -> agents_docs/performance_guide.md
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
 - Project architecture -> ARCHITECTURE.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
-- OFF test data -> agents_docs/off_test_products.*
-- Wiki conventions -> agents_docs/wiki.md
+- Project-specific guides and testing procedures -> agents_docs/ directory
+  (read the relevant file for each task)

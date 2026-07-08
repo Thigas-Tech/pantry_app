@@ -41,4 +41,5 @@ To kill the emulator manually:
 
 - `integration_test/smoke_test.dart` — smoke test implementation
 - `scripts/run_smoke_test.sh` — local runner script
+- `manual_testing_guide.md` — interactive ADB testing and per-feature verification
 - Report issues at https://github.com/Thigas-Tech/pantry_app/issues

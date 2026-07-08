@@ -394,25 +394,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ],
       ),
-      body: inventoryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) {
-          logError('Failed to load inventory: $err');
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              SnackbarHelper.showError(context, l10n.inventoryLoadFailed);
-            }
-          });
-          return ErrorView(
-            message: l10n.inventoryLoadFailed,
-            onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
-              (_) => ref.invalidate(inventoryWithProductProvider),
-            ),
-          );
-        },
-        data: (items) {
+      body: () {
+        final items = inventoryAsync.asData?.value;
+        if (items != null) {
           if (items.isEmpty) {
-            return EmptyPantry(onScan: () => _scanBarcode(context, ref));
+            return EmptyPantry(
+              onScan: () => _scanBarcode(context, ref),
+            );
           }
           return _InventoryList(
             items: items,
@@ -429,8 +417,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             }),
             onLongPressItem: _onLongPressItem,
           );
-        },
-      ),
+        }
+        return inventoryAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) {
+            logError('Failed to load inventory: $err');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                SnackbarHelper.showError(
+                  context,
+                  l10n.inventoryLoadFailed,
+                );
+              }
+            });
+            return ErrorView(
+              message: l10n.inventoryLoadFailed,
+              onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
+                (_) => ref.invalidate(inventoryWithProductProvider),
+              ),
+            );
+          },
+          data: (items) {
+            if (items.isEmpty) {
+              return EmptyPantry(
+                onScan: () => _scanBarcode(context, ref),
+              );
+            }
+            return _InventoryList(
+              items: items,
+              onScan: () => _scanBarcode(context, ref),
+              expiringSoonDays: settings.expiringSoonDays,
+              selectionMode: _selectionMode,
+              selectedIds: _selectedIds,
+              onToggleSelection: (id) => setState(() {
+                if (_selectedIds.contains(id)) {
+                  _selectedIds.remove(id);
+                } else {
+                  _selectedIds.add(id);
+                }
+              }),
+              onLongPressItem: _onLongPressItem,
+            );
+          },
+        );
+      }(),
       floatingActionButton: _selectionMode
           ? null
           : FloatingActionButton(

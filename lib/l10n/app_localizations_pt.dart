@@ -1006,6 +1006,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addToShoppingList => 'Add to shopping list';
+
+  @override
+  String get addToShoppingListTooltip => 'Shopping list';
+
+  @override
+  String get invalidPriceAmount => 'Enter a valid price amount';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

@@ -119,7 +119,11 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                   label: widget.item.productName,
                   child: _buildLeadingImage(),
                 ),
-          title: Text(widget.item.productName ?? widget.item.barcode),
+          title: Text(
+            widget.item.productName ?? widget.item.barcode,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -135,7 +139,7 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.shopping_cart_outlined, size: 20),
-                  tooltip: 'Add to shopping list',
+                  tooltip: l10n.addToShoppingListTooltip,
                   onPressed: () {
                     final name = widget.item.productName ?? widget.item.barcode;
                     final item = ShoppingItem(
@@ -143,7 +147,6 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                       barcode: widget.item.barcode,
                     );
                     unawaited(addShoppingItem(ref, item));
-                    final l10n = AppLocalizations.of(context)!;
                     SnackbarHelper.showInfo(context, l10n.addToShoppingList);
                   },
                 ),

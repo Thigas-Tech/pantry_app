@@ -71,6 +71,7 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | `playstore.md` | CI/CD deploy workflow changed |
 | `play_console_later.md` | Play Console verification complete |
 | `emulator_instructions.md` | Smoke test script or AVD config changed |
+| `manual_testing_guide.md` | Smoke test, emulator script, or AVD config changed |
 | `wiki.md` | Wiki CI workflow changed |
 
 ---

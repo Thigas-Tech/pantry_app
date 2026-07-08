@@ -42,19 +42,22 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final statsAsync = ref.watch(statsProvider);
+    final previousStats = statsAsync.asData?.value;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.pantryStats)),
-      body: statsAsync.when(
-        data: (stats) => _buildBody(context, l10n, stats, ref),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => ErrorView(
-          message: error.toString(),
-          onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
-            (_) => ref.invalidate(statsProvider),
-          ),
-        ),
-      ),
+      body: previousStats != null
+          ? _buildBody(context, l10n, previousStats, ref)
+          : statsAsync.when(
+              data: (stats) => _buildBody(context, l10n, stats, ref),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => ErrorView(
+                message: error.toString(),
+                onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
+                  (_) => ref.invalidate(statsProvider),
+                ),
+              ),
+            ),
     );
   }
 
