@@ -11,16 +11,17 @@ Run BEFORE every local commit. Fix ALL issues:
 
 ## Pre-merge gate (run BEFORE creating a PR or converting draft to ready)
 
-  1. Push: git push -u origin <branch>
-  2. Open a draft PR to trigger GitHub Actions.
-  3. Verify ALL CI checks pass:
+  1. Run smoke test: scripts/run_smoke_test.sh
+  2. Push: git push -u origin <branch>
+  3. Open a draft PR to trigger GitHub Actions.
+  4. Verify ALL CI checks pass:
      - CI / Run static testing       (lint + formatting)
      - CI / Run unit testing
      - CI / Run widget testing
-      - Build / Build debug apk       (from build.yml on PR)
-   4. Convert draft PR -> Ready for Review.
-   5. Merge via GitHub UI (Squash and merge).
-   6. Delete remote branch; git checkout main && git pull
+     - Build / Build debug apk       (from build.yml on PR)
+  5. Convert draft PR -> Ready for Review.
+  6. Merge via GitHub UI (Squash and merge).
+  7. Delete remote branch; git checkout main && git pull
 
   Notes:
     - Feedback -> GitHub requires FEEDBACK_TOKEN in .env
@@ -61,10 +62,30 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 ## Development workflow
 
 - Branch from main: git checkout -b feat/description
-- Implement -> pre-commit gate -> push
+- Implement -> pre-commit gate -> smoke test -> push
 - Open draft PR -> wait for CI -> convert to ready -> merge
 - Never commit directly to main.
 - After merge: git checkout main && git pull
+
+## Smoke test (pre-push only, not pre-commit)
+
+The integration_test/smoke_test.dart suite verifies the app starts and
+all 4 main tabs render without crashes on a real Android emulator.
+
+Run ONCE before pushing the branch:
+
+    scripts/run_smoke_test.sh
+
+First run: ~3 min (AVD creation + boot + tests).
+Subsequent runs (emulator kept alive): ~10s (tests only).
+
+Keep the emulator running between iterations for fast feedback.
+Do NOT run before every commit — only once before push.
+
+The script requires:
+  - ANDROID_HOME set (or sdkmanager/avdmanager in PATH)
+  - KVM enabled (hardware acceleration)
+  - .env present in project root (your normal development .env)
 
 ## Code style
 
