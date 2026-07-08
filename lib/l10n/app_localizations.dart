@@ -1985,6 +1985,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add to shopping list'**
   String get addToShoppingList;
+
+  /// No description provided for @addToShoppingListTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list'**
+  String get addToShoppingListTooltip;
+
+  /// No description provided for @invalidPriceAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid price amount'**
+  String get invalidPriceAmount;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

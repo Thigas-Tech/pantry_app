@@ -175,9 +175,10 @@ Future<void> _scheduleCacheRefresh() async {
 Future<void> _runDatabaseCleanup(ProviderContainer container) async {
   logInfo('Starting database cleanup');
   try {
-    final settings = container.read(settingsProvider);
+    final prefs = await SharedPreferences.getInstance();
+    final retentionDays = prefs.getInt('retentionDays') ?? 60;
     final dbHelper = DatabaseHelper();
-    await dbHelper.cleanupOldEntries(retentionDays: settings.retentionDays);
+    await dbHelper.cleanupOldEntries(retentionDays: retentionDays);
     logInfo('Database cleanup completed');
   } on Exception catch (e) {
     logError('Database cleanup failed: $e');
@@ -245,9 +246,10 @@ Future<void> _rescheduleNotifications(ProviderContainer container) async {
       );
       items.addAll(invItems);
     }
-    final settings = container.read(settingsProvider);
+    final prefs = await SharedPreferences.getInstance();
+    final notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
 
-    if (!settings.notificationsEnabled) {
+    if (!notificationsEnabled) {
       logInfo('Notifications disabled in settings, skipping reschedule');
       return;
     }
@@ -259,7 +261,7 @@ Future<void> _rescheduleNotifications(ProviderContainer container) async {
       expiringTodayTitle: 'Food expiring today',
       buildExpiringSoonBody: (barcode) => '$barcode expires tomorrow',
       buildExpiringTodayBody: (barcode) => '$barcode expires today!',
-      notificationsEnabled: settings.notificationsEnabled,
+      notificationsEnabled: notificationsEnabled,
     );
     logInfo('Notification reschedule completed');
   } on Exception catch (e) {
@@ -284,21 +286,26 @@ Future<void> _scheduleInactivityReminder(ProviderContainer container) async {
     }
     final db = DatabaseHelper();
     final lastAddDateEpoch = await db.getLastAddDate();
-    final settings = container.read(settingsProvider);
+    final prefs = await SharedPreferences.getInstance();
+    final inactivityReminderEnabled =
+        prefs.getBool('inactivityReminderEnabled') ?? true;
+    final inactivityThresholdDays =
+        prefs.getInt('inactivityThresholdDays') ?? 10;
+    final notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
 
-    if (!settings.inactivityReminderEnabled) {
+    if (!inactivityReminderEnabled) {
       logInfo('Inactivity reminder disabled in settings, skipping');
       return;
     }
 
     await notifService.scheduleInactivityReminder(
       lastAddDateEpoch: lastAddDateEpoch,
-      thresholdDays: settings.inactivityThresholdDays,
+      thresholdDays: inactivityThresholdDays,
       title: 'Time to restock your pantry?',
       buildBody: (days) => 'You have not added any products in $days days.',
       channelName: 'Inactivity reminders',
       channelDescription: 'Reminds you to add products regularly',
-      notificationsEnabled: settings.notificationsEnabled,
+      notificationsEnabled: notificationsEnabled,
     );
     logInfo('Inactivity reminder scheduling completed');
   } on Exception catch (e) {

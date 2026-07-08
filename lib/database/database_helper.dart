@@ -25,7 +25,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Six tables are created on first launch (version 13):
+/// Six tables are created on first launch (version 14):
 /// - `products` – product data fetched from Open Food Facts.
 /// - `inventories` – named pantries (e.g. "Home", "Work").
 /// - `inventory` – instances of products the user has added to a pantry.
@@ -90,7 +90,10 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 13,
+        version: 14,
+        onConfigure: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+        },
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -165,6 +168,9 @@ class DatabaseHelper {
     );
     await db.execute(
       'CREATE INDEX idx_inventory_id ON inventory(inventory_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_inventory_date_added ON inventory(date_added)',
     );
 
     await feedbackQueueDao.createTable(db);
@@ -316,6 +322,17 @@ class DatabaseHelper {
       await _createShoppingListTable(db);
       logInfo('Migration to version 13 completed');
     }
+    if (oldVersion < 14) {
+      try {
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_inventory_date_added'
+          ' ON inventory(date_added)',
+        );
+        logInfo('Migration to version 14 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v14 failed (table may not exist): $e');
+      }
+    }
   }
 
   // --------------------- Product (delegating to ProductDao) -------
@@ -365,9 +382,25 @@ class DatabaseHelper {
   ///
   /// Products with [Product.source] `'manual'` are kept. Used during app
   /// update and manual cache flush so that user‑entered data is never lost.
+  ///
+  /// Foreign key enforcement is temporarily disabled because inventory rows
+  /// and prices legitimately survive cache flushes (they are LEFT JOINed).
+  /// Shopping list items have ON DELETE SET NULL which also requires FK
+  /// enforcement to be active — after deletion, shopping list barcode
+  /// references are explicitly cleaned up.
   Future<void> clearCachedProducts() async {
     final db = await database;
-    return productDao.deleteBySource(db, 'api');
+    await db.execute('PRAGMA foreign_keys = OFF');
+    try {
+      // Null out shopping list barcode refs to API products before deleting.
+      await db.rawUpdate('''
+        UPDATE shopping_list SET barcode = NULL
+        WHERE barcode IN (SELECT barcode FROM products WHERE source = 'api')
+      ''');
+      return productDao.deleteBySource(db, 'api');
+    } finally {
+      await db.execute('PRAGMA foreign_keys = ON');
+    }
   }
 
   /// Deletes every product from the `products` table.

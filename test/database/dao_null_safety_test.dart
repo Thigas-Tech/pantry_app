@@ -15,6 +15,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -197,6 +198,15 @@ void main() {
     /// Verifies [InventoryDao.getLastAddDate] returns the max date_added.
     test('getLastAddDate returns latest dateAdded', () async {
       final rawDb = await db.database;
+      await db.insertProduct(
+        const Product(barcode: '111', name: '111'),
+      );
+      await db.insertProduct(
+        const Product(barcode: '222', name: '222'),
+      );
+      await db.insertProduct(
+        const Product(barcode: '333', name: '333'),
+      );
       await db.inventoryDao.insert(
         rawDb,
         const InventoryItem(

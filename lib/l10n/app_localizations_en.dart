@@ -1006,4 +1006,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addToShoppingList => 'Add to shopping list';
+
+  @override
+  String get addToShoppingListTooltip => 'Shopping list';
+
+  @override
+  String get invalidPriceAmount => 'Enter a valid price amount';
 }

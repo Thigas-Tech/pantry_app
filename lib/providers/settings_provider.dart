@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Persistent settings for the pantry app.
@@ -140,7 +141,9 @@ class SettingsNotifier extends Notifier<Settings> {
         openPricesSyncEnabled: prefs.getBool('openPricesSyncEnabled') ?? false,
         openPricesToken: prefs.getString('openPricesToken') ?? '',
       );
-    } on Exception catch (_) {}
+    } on Exception catch (e) {
+      logWarning('Failed to load settings from SharedPreferences: $e');
+    }
   }
 
   /// The current settings.
@@ -185,7 +188,9 @@ class SettingsNotifier extends Notifier<Settings> {
         settings.openPricesSyncEnabled,
       );
       await prefs.setString('openPricesToken', settings.openPricesToken);
-    } on Exception catch (_) {}
+    } on Exception catch (e) {
+      logWarning('Failed to persist settings to SharedPreferences: $e');
+    }
   }
 }
 

@@ -32,11 +32,10 @@ fi
 # 3. Start emulator if not already running.
 EMULATOR_STARTED=false
 if ! adb get-state 2>/dev/null | grep -q device; then
-	echo "Starting emulator..."
+	echo "Starting emulator (with window)..."
 	"$ANDROID_HOME/emulator/emulator" \
 		-avd "$AVD_NAME" \
-		-no-window \
-		-gpu swiftshader_indirect \
+		-gpu host \
 		-no-snapshot \
 		-noaudio \
 		-no-boot-anim &

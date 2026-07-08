@@ -598,6 +598,14 @@ void main() {
               name TEXT NOT NULL
             )
           ''');
+          await db.execute('''
+            CREATE TABLE inventories (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              created_at INTEGER
+            )
+          ''');
+          await db.execute("INSERT INTO inventories VALUES (1, 'Default', 0)");
         },
       );
       await v12Db.close();
