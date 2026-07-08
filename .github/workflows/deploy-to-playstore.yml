@@ -1,9 +1,12 @@
 name: Deploy to Play Store
 
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+  # Disabled while waiting for Google Play document verification.
+  # Uncomment the push: tags: block below when ready to deploy.
+  # push:
+  #   tags:
+  #     - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   security_hardening:
