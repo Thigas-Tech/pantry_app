@@ -31,7 +31,10 @@ void main() {
     late GithubIssueService service;
 
     setUp(() async {
-      dotenv.loadFromString(isOptional: true, mergeWith: {});
+      dotenv.loadFromString(
+        isOptional: true,
+        mergeWith: {'FEEDBACK_TOKEN': 'test-token-for-ci'},
+      );
       SharedPreferences.setMockInitialValues({});
       await GithubIssueService.initPreferences();
       mockHttp = MockHttpClient();

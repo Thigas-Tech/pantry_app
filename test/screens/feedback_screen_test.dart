@@ -270,5 +270,67 @@ void main() {
         findsOneWidget,
       );
     });
+
+    /// Verifies that when [GithubIssueService.submitIssue] throws
+    /// [IssueSubmissionException], the form falls back to
+    /// [GithubIssueService.queueOffline] and shows the queued message.
+    testWidgets('online submit falls back to queue on failure', (
+      tester,
+    ) async {
+      final mockService = MockGithubIssueService();
+
+      when(
+        () => mockService.submitIssue(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          label: any(named: 'label'),
+          screenshotBytesList: any(named: 'screenshotBytesList'),
+        ),
+      ).thenThrow(const IssueSubmissionException('Network error'));
+      when(() => mockService.isDuplicate(any(), any())).thenReturn(false);
+      when(
+        () => mockService.queueOffline(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          label: any(named: 'label'),
+          screenshotBytesList: any(named: 'screenshotBytesList'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await pumpApp(
+        tester,
+        const FeedbackScreen(),
+        settle: false,
+        overrides: [
+          connectivityProvider.overrideWith(
+            (ref) => Stream<bool>.value(true),
+          ),
+          githubIssueServiceProvider.overrideWithValue(mockService),
+        ],
+      );
+      await tester.pump();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Title'),
+        'Network error test title',
+      );
+      await tester.pump();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Test description with enough characters.',
+      );
+      await tester.pump();
+      await tester.tap(find.text('Create issue'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(
+        find.text(
+          'You are offline. Your report will be submitted when you are '
+          'back online.',
+        ),
+        findsAtLeast(1),
+      );
+    });
   });
 }
