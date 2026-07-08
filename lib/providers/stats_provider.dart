@@ -7,6 +7,7 @@ import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 
 /// Aggregated statistics for the active pantry inventory.
@@ -20,6 +21,7 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
   final activeId = ref.watch(activeInventoryProvider);
   final db = ref.watch(databaseProvider);
   final settings = ref.watch(settingsProvider);
+  final priceRepo = ref.read(priceRepositoryProvider);
   final database = await db.database;
 
   final results = await Future.wait([
@@ -86,6 +88,9 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     totalProducts: prodCount,
     totalItems: itemCount,
     averageNutriscoreNumeric: avgNutri,
+    totalValue: await priceRepo.totalInventoryValue(activeId) ?? 0,
+    averagePrice: await priceRepo.averageItemPrice(activeId) ?? 0,
+    pricedItemCount: await priceRepo.pricedItemCount(activeId),
     expiredCount: expiryDist['expired'] ?? 0,
     expiringSoonCount: expiryDist['expiring'] ?? 0,
     goodCount: expiryDist['good'] ?? 0,

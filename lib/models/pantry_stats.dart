@@ -4,8 +4,8 @@ part 'pantry_stats.freezed.dart';
 
 /// Aggregated statistics for a single pantry inventory.
 ///
-/// Computed by the `statsProvider` from SQL aggregation queries in
-/// `ProductDao` and `InventoryDao`. All counts and distributions
+/// Computed from SQL aggregation queries in the product and inventory DAOs.
+/// All counts and distributions
 /// are scoped to the active inventory.
 @freezed
 abstract class PantryStats with _$PantryStats {
@@ -26,6 +26,9 @@ abstract class PantryStats with _$PantryStats {
     required Map<String, int> itemsBySource,
     required PhotoStats localPhotos,
     required PhotoStats offPhotos,
+    @Default(0) double totalValue,
+    @Default(0) double averagePrice,
+    @Default(0) int pricedItemCount,
   }) = _PantryStats;
 }
 

@@ -30,11 +30,11 @@ class ChangelogEntry {
 ///     ### Core
 ///     - Item A
 class ChangelogParser {
-  /// Sentinel value used to sort the `[Unreleased]` entry above all
+  /// Sentinel value used to sort the Unreleased entry above all
   /// numbered versions.
   static const unreleasedVersion = 'Unreleased';
 
-  /// A [ChangelogEntry] representing the `[Unreleased]` section.
+  /// A [ChangelogEntry] representing the Unreleased section.
   static const unreleased = ChangelogEntry(
     version: unreleasedVersion,
     content: '',
@@ -92,7 +92,7 @@ class ChangelogParser {
   /// Returns entries between [lastSeenVersion] (exclusive) and
   /// [currentVersion] (inclusive).
   ///
-  /// The `[Unreleased]` section is always included if the versions differ
+  /// The Unreleased section is always included if the versions differ
   /// and the user is not on a first install.
   List<ChangelogEntry> filterUnseen(
     List<ChangelogEntry> allEntries,

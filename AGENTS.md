@@ -5,7 +5,7 @@
 Run BEFORE every local commit. Fix ALL issues:
   git fetch
   flutter analyze --fatal-infos --fatal-warnings
-  flutter test --concurrency=8
+  flutter test --concurrency=2
   flutter build apk --debug
   dart doc .
 
@@ -30,7 +30,7 @@ Run BEFORE every local commit. Fix ALL issues:
 ## Post-commit gate
 
 Run AFTER every commit:
-  flutter test --coverage --concurrency=8
+  flutter test --coverage --concurrency=2
   lcov --remove coverage/lcov.info \
     '*.g.dart' '*.freezed.dart' '*.gr.dart' '*.config.dart' \
     '*app_localizations*.dart' 'test/*' \
@@ -58,34 +58,44 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 9. Audit every plan for pitfalls before writing code.
 10. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
 11. Never ! on SQL aggregate results. Use ?? fallback instead.
+12. Keep all markdown files ([README.md], [ARCHITECTURE.md], [CHANGELOG.md],
+    [TODO.md], `agents_docs/*.md`) and `///` doc comments in sync with the
+    codebase. After every feature, fix, or refactor, audit the affected docs
+    in the same PR. When asked to find stale information, first consult
+    `agents_docs/stale_info_checklist.md`.
+
+## Pre-push gate (run BEFORE every push)
+
+Run `scripts/install-hooks.sh` once after cloning the repo to install the
+client-side hooks. The stale-info check will then fire automatically on
+every `git push`. Use `git push --no-verify` to bypass.
+
+### Automatic (git hook)
+
+  - `scripts/check_stale_info.sh` runs on every `git push`, catching:
+    - Wrong concurrency flag (`--concurrency=8` vs `--concurrency=2`)
+    - Wrong retention-days in workflow files
+    - Non-existent provider names in docs
+    - Removed-dependency names (dio, connectivity_plus)
+    - Removed-feature references (CSV import/export, quality_gate.sh)
+  - Instant (< 1 s). Exit code 0 = pass, nonzero = fail.
+
+### Manual steps
+
+  1. Run smoke test: `scripts/run_smoke_test.sh`
+     (integration_test/smoke_test.dart — app startup + 4 main tabs)
+     Emulator-required. ~10 s on warm emulator, ~3 min first run.
+  2. Audit stale docs: if `agents_docs/stale_info_checklist.md` hot spots
+     are triggered by this branch, open the file and check the affected
+     sections.
 
 ## Development workflow
 
 - Branch from main: git checkout -b feat/description
-- Implement -> pre-commit gate -> smoke test -> push
+- Implement -> pre-commit gate -> pre-push gate -> push
 - Open draft PR -> wait for CI -> convert to ready -> merge
 - Never commit directly to main.
 - After merge: git checkout main && git pull
-
-## Smoke test (pre-push only, not pre-commit)
-
-The integration_test/smoke_test.dart suite verifies the app starts and
-all 4 main tabs render without crashes on a real Android emulator.
-
-Run ONCE before pushing the branch:
-
-    scripts/run_smoke_test.sh
-
-First run: ~3 min (AVD creation + boot + tests).
-Subsequent runs (emulator kept alive): ~10s (tests only).
-
-Keep the emulator running between iterations for fast feedback.
-Do NOT run before every commit — only once before push.
-
-The script requires:
-  - ANDROID_HOME set (or sdkmanager/avdmanager in PATH)
-  - KVM enabled (hardware acceleration)
-  - .env present in project root (your normal development .env)
 
 ## Code style
 

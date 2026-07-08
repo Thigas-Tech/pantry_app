@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PantryStats {
 
- int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List<WeeklyCount> get weeklyAdditions; Map<String, int> get itemsByLocation; List<CategoryCount> get categoriesTop; Map<String, int> get nutriscoreDistribution; Map<String, int> get itemsBySource; PhotoStats get localPhotos; PhotoStats get offPhotos;
+ int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List<WeeklyCount> get weeklyAdditions; Map<String, int> get itemsByLocation; List<CategoryCount> get categoriesTop; Map<String, int> get nutriscoreDistribution; Map<String, int> get itemsBySource; PhotoStats get localPhotos; PhotoStats get offPhotos; double get totalValue; double get averagePrice; int get pricedItemCount;
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PantryStatsCopyWith<PantryStats> get copyWith => _$PantryStatsCopyWithImpl<Pant
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other.weeklyAdditions, weeklyAdditions)&&const DeepCollectionEquality().equals(other.itemsByLocation, itemsByLocation)&&const DeepCollectionEquality().equals(other.categoriesTop, categoriesTop)&&const DeepCollectionEquality().equals(other.nutriscoreDistribution, nutriscoreDistribution)&&const DeepCollectionEquality().equals(other.itemsBySource, itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other.weeklyAdditions, weeklyAdditions)&&const DeepCollectionEquality().equals(other.itemsByLocation, itemsByLocation)&&const DeepCollectionEquality().equals(other.categoriesTop, categoriesTop)&&const DeepCollectionEquality().equals(other.nutriscoreDistribution, nutriscoreDistribution)&&const DeepCollectionEquality().equals(other.itemsBySource, itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos)&&(identical(other.totalValue, totalValue) || other.totalValue == totalValue)&&(identical(other.averagePrice, averagePrice) || other.averagePrice == averagePrice)&&(identical(other.pricedItemCount, pricedItemCount) || other.pricedItemCount == pricedItemCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(weeklyAdditions),const DeepCollectionEquality().hash(itemsByLocation),const DeepCollectionEquality().hash(categoriesTop),const DeepCollectionEquality().hash(nutriscoreDistribution),const DeepCollectionEquality().hash(itemsBySource),localPhotos,offPhotos);
+int get hashCode => Object.hash(runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(weeklyAdditions),const DeepCollectionEquality().hash(itemsByLocation),const DeepCollectionEquality().hash(categoriesTop),const DeepCollectionEquality().hash(nutriscoreDistribution),const DeepCollectionEquality().hash(itemsBySource),localPhotos,offPhotos,totalValue,averagePrice,pricedItemCount);
 
 @override
 String toString() {
-  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos)';
+  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos, totalValue: $totalValue, averagePrice: $averagePrice, pricedItemCount: $pricedItemCount)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PantryStatsCopyWith<$Res>  {
   factory $PantryStatsCopyWith(PantryStats value, $Res Function(PantryStats) _then) = _$PantryStatsCopyWithImpl;
 @useResult
 $Res call({
- int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos
+ int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos, double totalValue, double averagePrice, int pricedItemCount
 });
 
 
@@ -62,7 +62,7 @@ class _$PantryStatsCopyWithImpl<$Res>
 
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,Object? totalValue = null,Object? averagePrice = null,Object? pricedItemCount = null,}) {
   return _then(_self.copyWith(
 totalProducts: null == totalProducts ? _self.totalProducts : totalProducts // ignore: cast_nullable_to_non_nullable
 as int,totalItems: null == totalItems ? _self.totalItems : totalItems // ignore: cast_nullable_to_non_nullable
@@ -79,7 +79,10 @@ as List<CategoryCount>,nutriscoreDistribution: null == nutriscoreDistribution ? 
 as Map<String, int>,itemsBySource: null == itemsBySource ? _self.itemsBySource : itemsBySource // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,localPhotos: null == localPhotos ? _self.localPhotos : localPhotos // ignore: cast_nullable_to_non_nullable
 as PhotoStats,offPhotos: null == offPhotos ? _self.offPhotos : offPhotos // ignore: cast_nullable_to_non_nullable
-as PhotoStats,
+as PhotoStats,totalValue: null == totalValue ? _self.totalValue : totalValue // ignore: cast_nullable_to_non_nullable
+as double,averagePrice: null == averagePrice ? _self.averagePrice : averagePrice // ignore: cast_nullable_to_non_nullable
+as double,pricedItemCount: null == pricedItemCount ? _self.pricedItemCount : pricedItemCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 /// Create a copy of PantryStats
@@ -182,10 +185,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PantryStats() when $default != null:
-return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos);case _:
+return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount);case _:
   return orElse();
 
 }
@@ -203,10 +206,10 @@ return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNume
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount)  $default,) {final _that = this;
 switch (_that) {
 case _PantryStats():
-return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos);case _:
+return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -223,10 +226,10 @@ return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNume
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount)?  $default,) {final _that = this;
 switch (_that) {
 case _PantryStats() when $default != null:
-return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos);case _:
+return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount);case _:
   return null;
 
 }
@@ -238,7 +241,7 @@ return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNume
 
 
 class _PantryStats implements PantryStats {
-  const _PantryStats({required this.totalProducts, required this.totalItems, required this.averageNutriscoreNumeric, required this.expiredCount, required this.expiringSoonCount, required this.goodCount, required this.addedThisWeek, required this.addedThisMonth, required final  List<WeeklyCount> weeklyAdditions, required final  Map<String, int> itemsByLocation, required final  List<CategoryCount> categoriesTop, required final  Map<String, int> nutriscoreDistribution, required final  Map<String, int> itemsBySource, required this.localPhotos, required this.offPhotos}): _weeklyAdditions = weeklyAdditions,_itemsByLocation = itemsByLocation,_categoriesTop = categoriesTop,_nutriscoreDistribution = nutriscoreDistribution,_itemsBySource = itemsBySource;
+  const _PantryStats({required this.totalProducts, required this.totalItems, required this.averageNutriscoreNumeric, required this.expiredCount, required this.expiringSoonCount, required this.goodCount, required this.addedThisWeek, required this.addedThisMonth, required final  List<WeeklyCount> weeklyAdditions, required final  Map<String, int> itemsByLocation, required final  List<CategoryCount> categoriesTop, required final  Map<String, int> nutriscoreDistribution, required final  Map<String, int> itemsBySource, required this.localPhotos, required this.offPhotos, this.totalValue = 0, this.averagePrice = 0, this.pricedItemCount = 0}): _weeklyAdditions = weeklyAdditions,_itemsByLocation = itemsByLocation,_categoriesTop = categoriesTop,_nutriscoreDistribution = nutriscoreDistribution,_itemsBySource = itemsBySource;
   
 
 @override final  int totalProducts;
@@ -286,6 +289,9 @@ class _PantryStats implements PantryStats {
 
 @override final  PhotoStats localPhotos;
 @override final  PhotoStats offPhotos;
+@override@JsonKey() final  double totalValue;
+@override@JsonKey() final  double averagePrice;
+@override@JsonKey() final  int pricedItemCount;
 
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
@@ -297,16 +303,16 @@ _$PantryStatsCopyWith<_PantryStats> get copyWith => __$PantryStatsCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other._weeklyAdditions, _weeklyAdditions)&&const DeepCollectionEquality().equals(other._itemsByLocation, _itemsByLocation)&&const DeepCollectionEquality().equals(other._categoriesTop, _categoriesTop)&&const DeepCollectionEquality().equals(other._nutriscoreDistribution, _nutriscoreDistribution)&&const DeepCollectionEquality().equals(other._itemsBySource, _itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other._weeklyAdditions, _weeklyAdditions)&&const DeepCollectionEquality().equals(other._itemsByLocation, _itemsByLocation)&&const DeepCollectionEquality().equals(other._categoriesTop, _categoriesTop)&&const DeepCollectionEquality().equals(other._nutriscoreDistribution, _nutriscoreDistribution)&&const DeepCollectionEquality().equals(other._itemsBySource, _itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos)&&(identical(other.totalValue, totalValue) || other.totalValue == totalValue)&&(identical(other.averagePrice, averagePrice) || other.averagePrice == averagePrice)&&(identical(other.pricedItemCount, pricedItemCount) || other.pricedItemCount == pricedItemCount));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(_weeklyAdditions),const DeepCollectionEquality().hash(_itemsByLocation),const DeepCollectionEquality().hash(_categoriesTop),const DeepCollectionEquality().hash(_nutriscoreDistribution),const DeepCollectionEquality().hash(_itemsBySource),localPhotos,offPhotos);
+int get hashCode => Object.hash(runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(_weeklyAdditions),const DeepCollectionEquality().hash(_itemsByLocation),const DeepCollectionEquality().hash(_categoriesTop),const DeepCollectionEquality().hash(_nutriscoreDistribution),const DeepCollectionEquality().hash(_itemsBySource),localPhotos,offPhotos,totalValue,averagePrice,pricedItemCount);
 
 @override
 String toString() {
-  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos)';
+  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos, totalValue: $totalValue, averagePrice: $averagePrice, pricedItemCount: $pricedItemCount)';
 }
 
 
@@ -317,7 +323,7 @@ abstract mixin class _$PantryStatsCopyWith<$Res> implements $PantryStatsCopyWith
   factory _$PantryStatsCopyWith(_PantryStats value, $Res Function(_PantryStats) _then) = __$PantryStatsCopyWithImpl;
 @override @useResult
 $Res call({
- int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos
+ int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos, double totalValue, double averagePrice, int pricedItemCount
 });
 
 
@@ -334,7 +340,7 @@ class __$PantryStatsCopyWithImpl<$Res>
 
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,Object? totalValue = null,Object? averagePrice = null,Object? pricedItemCount = null,}) {
   return _then(_PantryStats(
 totalProducts: null == totalProducts ? _self.totalProducts : totalProducts // ignore: cast_nullable_to_non_nullable
 as int,totalItems: null == totalItems ? _self.totalItems : totalItems // ignore: cast_nullable_to_non_nullable
@@ -351,7 +357,10 @@ as List<CategoryCount>,nutriscoreDistribution: null == nutriscoreDistribution ? 
 as Map<String, int>,itemsBySource: null == itemsBySource ? _self._itemsBySource : itemsBySource // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,localPhotos: null == localPhotos ? _self.localPhotos : localPhotos // ignore: cast_nullable_to_non_nullable
 as PhotoStats,offPhotos: null == offPhotos ? _self.offPhotos : offPhotos // ignore: cast_nullable_to_non_nullable
-as PhotoStats,
+as PhotoStats,totalValue: null == totalValue ? _self.totalValue : totalValue // ignore: cast_nullable_to_non_nullable
+as double,averagePrice: null == averagePrice ? _self.averagePrice : averagePrice // ignore: cast_nullable_to_non_nullable
+as double,pricedItemCount: null == pricedItemCount ? _self.pricedItemCount : pricedItemCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

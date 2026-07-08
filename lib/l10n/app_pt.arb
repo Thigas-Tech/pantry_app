@@ -403,5 +403,6 @@
   "amoledNudgeDismiss": "Agora nao",
   "translationReport": "Relato de Traducao",
   "translationReportExplanation": "Relate um problema com a traducao de um produto ou sugira uma nova traducao.",
-  "feedbackRateLimit": "Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde."
+  "feedbackRateLimit": "Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.",
+  "navList": "Lista"
 }

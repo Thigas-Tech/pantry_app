@@ -43,14 +43,14 @@ This document describes the architecture, patterns, and design decisions.
 │  SQLite      │  │  Open Food Facts   │   │
 │  DAO pattern │  │  v3 REST (SDK) │   │
 └──────────────┘  └────────────────────┘   │
-                                           │
-                              ┌────────────▼─────────┐
-                              │  Firebase Services    │
-                              │  Auth (Google Sign-In)│
-                              │  Storage (cloud backup)│
-                              │  AdMob (ads)           │
-                              │  Play Billing (IAP)    │
-                              └────────────────────────┘
+                                            │
+                               ┌───────────────────────────────┐
+                               │  [Planned] Firebase Services   │
+                               │  Auth (Google Sign-In)        │
+                               │  Storage (cloud backup)       │
+                               │  AdMob (ads)                  │
+                               │  Play Billing (IAP)           │
+                               └───────────────────────────────┘
 ```
 
 ---
@@ -74,7 +74,7 @@ Each table has a dedicated Data Access Object:
 | DAO                    | Responsibility                            |
 |------------------------|-------------------------------------------|
 | `ProductDao`           | Upsert / lookup products, count, source‑aware queries |
-| `InventoryDao`         | CRUD items, joined queries, export data   |
+| `InventoryDao`         | CRUD items, joined queries                |
 | `InventoriesDao`       | CRUD named pantries, migrations           |
 
 Every DAO method receives a `Database` instance so it can be tested independently.
@@ -198,26 +198,33 @@ User scans barcode
 - All notification strings are passed in by callers (as function callbacks)
   so they can be localized via ARB.
 
-### 3.4 Ad service (AdMob)
+### 3.4 Ad service (AdMob) — [Planned]
 
-- Uses `google_mobile_ads` for banner and native ads across free tier screens.
+> **Not yet implemented.** See `agents_docs/monetization.md` for the full
+> deferred implementation plan.
+
+- Planned: `google_mobile_ads` for banner and native ads across free tier screens.
 - Consent managed via UMP SDK (GDPR/LGPD) on first launch.
 - Ad unit IDs read from `.env`, using test IDs in debug mode and production IDs in release.
-- Ad lifecycle logged: load success (`logInfo`), load failure (`logWarning`), init failure (`logError`).
 
-### 3.5 Donation and subscription service (Play Billing)
+### 3.5 Donation and subscription service (Play Billing) — [Planned]
 
-- Uses `in_app_purchase` plugin wrapping Google Play Billing.
+> **Not yet implemented.** See `agents_docs/monetization.md` for the full
+> deferred implementation plan.
+
+- Planned: `in_app_purchase` plugin wrapping Google Play Billing.
 - Donation products: three consumable tiers ($2.99, $4.99, $9.99).
 - Pro subscription: auto-renewing, monthly ($0.99) and yearly ($9.99).
 - `isPro` flag derived from `queryPastPurchases()` — checked before showing ads and enabling cloud backup.
-- Products are consumed (donations) or acknowledged (subscriptions) on purchase completion.
 
-### 3.6 Firebase integration
+### 3.6 Firebase integration — [Planned]
 
-- **FirebaseService** — initializes `firebase_core`, provides `FirebaseAuth` and `FirebaseStorage` instances.
-- **CloudBackupService** — exports SQLite database to a temp file, uploads to `users/{uid}/pantry_backup.db` in Firebase Storage. Restore downloads and replaces the local database file, then invalidates all Riverpod providers.
-- **Authentication** — Google Sign-In via `google_sign_in` + `firebase_auth`. Auth state stream drives the backup UI (sign-in prompt, backup button disabled when signed out).
+> **Not yet implemented.** See `agents_docs/monetization.md` for the full
+> deferred implementation plan.
+
+- Planned: `FirebaseService` initialising `firebase_core`, `FirebaseAuth` and `FirebaseStorage`.
+- Planned: `CloudBackupService` exporting SQLite to Firebase Storage at `users/{uid}/pantry_backup.db`.
+- Planned: Google Sign-In via `google_sign_in` + `firebase_auth`.
 
 ### 3.7 Feedback service (GitHub Issues)
 
@@ -256,14 +263,6 @@ User scans barcode
 | `hasConnectionProvider`         | `Provider`        | Cached connectivity boolean        |
 | `settingsProvider`              | `NotifierProvider`| Notifications, retention, threshold|
 | `themeModeProvider`             | `NotifierProvider`| Light / dark / system theme        |
-| `adServiceProvider`             | `Provider`        | AdMob SDK wrapper                  |
-| `isAdFreeProvider`              | `Provider`        | True when Pro subscription active  |
-| `donationServiceProvider`       | `Provider`        | IAP purchase wrapper               |
-| `donationProductsProvider`      | `FutureProvider`  | List of `ProductDetails` from Play Store |
-| `isProProvider`                 | `Provider`        | Pro subscription status            |
-| `firebaseServiceProvider`       | `Provider`        | Firebase Auth + Storage instances  |
-| `cloudBackupServiceProvider`    | `Provider`        | Backup/restore operations          |
-| `backupStatusProvider`          | `FutureProvider`  | Last backup timestamp + file size  |
 | `productSubmissionServiceProvider` | `Provider`     | OFF product submission             |
 | `githubIssueServiceProvider`    | `Provider`        | GitHub Issues API wrapper          |
 
@@ -405,17 +404,10 @@ A manual flush button is also available in the settings screen.
 10. **Quick quantity adjustment** — `+/−` buttons on inventory tiles call `_updateQuantity`, which persists the change and re-schedules notifications. Tap the quantity to type a number directly. Decrementing to 0 triggers delete.
 11. **Nutri-Score fallback** — when the API returns `nutriscore_grade: "not-applicable"` (e.g. for food additives), the badge renders a grey dash. A tooltip explains the reason using the category from `nutriscore_data.nutriscore_not_applicable_for_category` (e.g. `en:food-additives` → "food additives"). This is stored as `nutriscore_not_applicable_category` on the product and surfaced through the `InventoryWithProduct` join.
 12. **Source column protects manual products** — every row in the `products` table carries a `source` column (`'api'` for OFF‑fetched data, `'manual'` for user‑entered data). Cache flush (`clearCachedProducts`) deletes only API‑sourced products; manual products and all inventory items survive across app updates. The image cache is inherently separated (stores only downloaded OFF CDN images) and safe to clear.
-13. **Ads from day 1** — users see banner/native ads from first launch.
-    This sets expectations upfront and avoids the "betrayal" reaction
-    when ads appear post-launch. Ads are never shown on core workflow
-    screens (Scanner, Add Product) or paid features (Cloud Backup).
-14. **Pro removes ads + adds cloud backup** — the Pro subscription
-    ($0.99/mo or $9.99/yr) removes all ads and enables Firebase cloud
-    backup. The subscription price is tied to real infrastructure costs
-    (Firebase Storage). All on-device features remain free forever.
-15. **Donations via IAP** — three consumable IAP tiers let users
-    support development without a recurring commitment. Donations do
-    not remove ads or unlock features — they are purely voluntary.
+13. **Monetization (planned)** — AdMob, IAP donations, Pro subscription,
+    and Firebase cloud backup are deferred pending legal and accounting
+    review. See `agents_docs/monetization.md` for the full implementation
+    plan. All on-device features will remain free forever.
 
 ---
 
@@ -504,22 +496,20 @@ Workflows live in `.github/workflows/`:
 | Workflow | Trigger | Purpose |
 |---|---|---|---|
 | `ci.yml` | Pull request to `main` | Format check, `flutter analyze`, unit + widget tests, coverage report with PR comment |
-| `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB + release APK + AAB, uploads artifacts (7-day retention), and runs release-drafter (publish job) |
+| `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB + release APK + AAB, uploads artifacts (90-day retention), and creates a GitHub release via `gh release create` (publish job) |
 | `patrol-e2e.yml` | Weekly (Sun 03:00 UTC) | Patrol integration test suite on Android emulator |
 | `flashlight.yml` | Weekly (Sun 04:00 UTC) | Flashlight battery/CPU/GPU profiling on emulator |
 | `perfetto.yml` | Weekly (Sun 05:00 UTC) | Perfetto startup trace collection and frame-timing analysis |
-| `deploy-to-playstore.yml` | Tag push (`v*`)| Signed release AAB, upload to Play Console internal track via `r0adkll/upload-google-play` |
+| `deploy-to-playstore.yml` | Workflow dispatch (tag trigger disabled) | Signed release AAB, upload to Play Console internal track via `r0adkll/upload-google-play`. Tag push trigger is commented out pending Play Console document verification. |
 
-> **Note:** release-drafter is no longer a standalone workflow. It runs as the
-> `publish` job inside `build.yml` so it has access to build artifacts for
-> asset upload.
+> **Note:** The `publish` job in `build.yml` creates a GitHub release using
+> `gh release create` with artifacts attached.
 
 All workflows use SHA-pinned actions for supply-chain security. Dependabot
 updates GitHub Action versions monthly. Runner: `ubuntu-latest` for QA and
 build, `macos-latest` for emulator-based workloads (E2E, Flashlight, Perfetto).
 
-Helper scripts in `scripts/` are shared across workflows:
-- `quality_gate.sh` — `dart format` + `flutter analyze` + `flutter test --concurrency=2 --coverage`
+Helper script in `scripts/`:
 - `inject_env.sh` — creates `.env` from GitHub secrets for build-time config injection
 
 ### 11.9 Performance measurement
@@ -538,114 +528,39 @@ Reference: Flutter Heroes 2025 performance talk by Alexandre Moureaux (BAM)
 
 ---
 
-## 12. Monetization architecture
+## 12. Monetization architecture — [Planned]
 
-The app uses a hybrid model with three revenue streams.
+> **Not yet implemented.** All monetization features are deferred
+> pending legal and accounting review. See `agents_docs/monetization.md`
+> for the full deferred implementation plan.
 
-### 12.1 Ad strategy (AdMob)
+The planned model uses three revenue streams:
 
-Ads are present from day 1 on the free tier. This avoids the "why
-are there ads now?" backlash that occurs when ads are added post-launch.
-
-Placement rules:
-- Banners on Home, Product Detail, Settings, and Stats screens
-  (bottom of content, never obstructing core workflow).
-- Native ads in Search results (every 5th position, labeled "Sponsored").
-- No ads on Scanner, Add Product, or Cloud Backup screens
-  (core workflow and paid feature).
-- All ads hidden immediately when Pro subscription is active.
-
-Consent:
-- UMP SDK for GDPR/LGPD compliance on first launch.
-- User chooses personalized vs non-personalized ads.
-- Choice changeable at any time in Settings > Ad Preferences.
-- Non-personalized ads served if user opts out.
-
-Reference: `google_mobile_ads` package, UMP SDK for consent collection.
-
-### 12.2 In-App Purchases (Play Billing)
-
-Donation products (consumable — buy multiple times):
-- `donation_tier1` ($2.99)
-- `donation_tier2` ($4.99)
-- `donation_tier3` ($9.99)
-
-Subscription products (auto-renewing):
-- `pro_monthly` ($0.99/month) — removes all ads, enables cloud backup.
-- `pro_yearly` ($9.99/year) — same benefits, one annual payment.
-
-Pro status is tracked via `DonationService.isPro` backed by
-`InAppPurchase.instance.queryPastPurchases()`. Status is checked
-before showing ads and before enabling cloud backup features.
-
-Reference: `in_app_purchase` package, Google Play Billing Library.
-
-### 12.3 Revenue model
-
-| Tier | Revenue | User sees |
-|---|---|---|
-| Free | Ads | All on-device features, banner + native ads |
-| Donor | One-time IAP ($2.99-$9.99) | Same as free (ads still shown), warm feeling |
-| Pro | Subscription ($0.99/mo) | No ads, cloud backup, future server features |
-
-The Pro subscription covers real infrastructure costs (Firebase
-Storage at $0.026/GB stored) and ongoing feature development. All
-features that run entirely on-device remain free forever.
+- **AdMob** — banner and native ads on the free tier, hidden for Pro subscribers.
+- **In-App Purchases** — three consumable donation tiers ($2.99–$9.99).
+- **Pro subscription** — monthly ($0.99) and yearly ($9.99) auto-renewing, removes all ads and enables Firebase cloud backup.
 
 ---
 
-## 13. Cloud backup architecture
+## 13. Cloud backup architecture — [Planned]
 
-### 13.1 Authentication
+> **Not yet implemented.** See `agents_docs/monetization.md` for the full
+> deferred implementation plan.
 
-Users authenticate via Google Sign-In using Firebase Auth.
-Auth state is managed via `authStateChanges()` stream. Anonymous
-auth is used during the sign-in flow as a temporary fallback.
+Planned flow:
+1. Export SQLite DB to a temp file.
+2. Upload to Firebase Storage at `users/{uid}/pantry_backup.db`.
+3. Restore replaces the local DB and invalidates all Riverpod providers.
 
-### 13.2 Backup flow
-
-Backup:
-1. User taps "Backup Now" — checks auth state.
-2. If not signed in — prompt Google Sign-In.
-3. If not Pro — show subscription upsell.
-4. Export SQLite DB to temp file via `DatabaseHelper.exportDatabase()`.
-5. Upload temp file to `users/{uid}/pantry_backup.db` in Firebase Storage.
-6. Store metadata (timestamp, file size) locally.
-7. Delete temp file.
-
-Restore:
-1. User taps "Restore from Backup" — confirmation dialog.
-2. Download `users/{uid}/pantry_backup.db` from Firebase Storage.
-3. Verify file integrity (check file size, SQLite header magic bytes).
-4. Close current database connection.
-5. Replace local database file with downloaded file.
-6. Invalidate all Riverpod providers to force re-read from new DB.
-7. Show success snackbar.
-
-### 13.3 Storage rules
-
-Firebase Storage security rules restrict access to the user's own data:
-- Users can only read/write `users/{uid}/*` where `uid` matches
-  their auth token.
-- File size limit: 50 MB per upload (pantry DB is typically <10 MB).
-- No public read access.
-
-Reference: `firebase_storage` package, Firebase Auth Google Sign-In.
+Firebase Storage security rules will restrict access to the user's own data
+via `users/{uid}/*` matching the auth token.
 
 ---
 
-## 14. Ad placement reference
+## 14. Ad placement reference — [Planned]
 
-All ads are conditionally rendered — `SizedBox.shrink()` when Pro
-is active or ad fails to load. No placeholder while loading.
+> **Not yet implemented.** Reserved for when AdMob is integrated.
 
-| Screen | Format | Position | Condition |
-|---|---|---|---|
-| Home inventory list | Banner | Below ListView, above nav bar | Always (unless Pro) |
-| Search results | Native (every 5th) | Between result tiles | Always (unless Pro) |
-| Product detail | Banner | After nutrition, before inventory tiles | Always (unless Pro) |
-| Settings | Banner | Below settings list | Always (unless Pro) |
-| Stats | Banner | Below content | Always (unless Pro) |
-| Scanner | None | — | Never (core workflow) |
-| Add Product | None | — | Never (form completion) |
-| Cloud Backup | None | — | Never (paid feature) |
+Planned placements: banners on Home, Product Detail, Settings, Stats;
+native ads in Search (every 5th); no ads on Scanner, Add Product, or
+Cloud Backup screens.

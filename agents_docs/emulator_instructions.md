@@ -41,4 +41,4 @@ To kill the emulator manually:
 
 - `integration_test/smoke_test.dart` — smoke test implementation
 - `scripts/run_smoke_test.sh` — local runner script
-- Report issues at https://github.com/anomalyco/opencode/issues
+- Report issues at https://github.com/Thigas-Tech/pantry_app/issues

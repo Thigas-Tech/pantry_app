@@ -4,11 +4,11 @@ import 'package:pantry_app/screens/coming_soon_screen.dart';
 /// A reusable placeholder that indicates a feature is under development.
 ///
 /// Displays a configurable icon, a title, and an optional subtitle. Use
-/// inline inside an existing layout or wrap with `ComingSoonScreen` for a
+/// inline inside an existing layout or wrap with [ComingSoonScreen] for a
 /// full-screen placeholder with an [AppBar].
 ///
-/// See [ComingSoonView] for inline use inside a [Column] or [ListView],
-/// or [ComingSoonScreen] for a full-screen wrapper with an [AppBar].
+/// Use this widget to display a placeholder inside a [Column] or [ListView]
+/// for features that are not yet implemented.
 class ComingSoonView extends StatelessWidget {
   /// Creates a [ComingSoonView].
   const ComingSoonView({

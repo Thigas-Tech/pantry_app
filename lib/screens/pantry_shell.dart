@@ -11,6 +11,7 @@ import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
+import 'package:pantry_app/screens/shopping_list_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -25,10 +26,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// - **Home** — inventory dashboard with grouping by expiry status.
 /// - **Search** — product search by name or barcode.
 /// - **Stats** — inventory statistics.
+/// - **List** — shopping list of items to buy.
 /// - **Settings** — application preferences.
 ///
 /// Uses a [PageView] so that users can swipe horizontally between tabs.
-/// Each tab uses `AutomaticKeepAliveClientMixin` to preserve its state.
+/// Each tab uses [AutomaticKeepAliveClientMixin] to preserve its state.
 class PantryShell extends ConsumerStatefulWidget {
   /// Creates a [PantryShell] widget.
   const PantryShell({super.key});
@@ -207,6 +209,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
           HomeScreen(),
           SearchScreen(),
           StatsScreen(),
+          ShoppingListScreen(),
           SettingsScreen(),
         ],
       ),
@@ -237,6 +240,11 @@ class _PantryShellState extends ConsumerState<PantryShell> {
             icon: const Icon(Icons.bar_chart_outlined),
             selectedIcon: const Icon(Icons.bar_chart),
             label: l10n.navStats,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.shopping_cart_outlined),
+            selectedIcon: const Icon(Icons.shopping_cart),
+            label: l10n.navList,
           ),
           NavigationDestination(
             icon: const Icon(Icons.settings_outlined),

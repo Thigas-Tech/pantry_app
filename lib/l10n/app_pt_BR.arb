@@ -339,6 +339,7 @@
     }
   },
   "couldNotAttachImage": "Não foi possível anexar a imagem",
-  "appVersionLabel": "Versão do app",
-  "osLabel": "SO"
+  "appVersionLabel": "Versao do app",
+  "osLabel": "SO",
+  "navList": "Lista"
 }

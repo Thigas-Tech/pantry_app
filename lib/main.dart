@@ -91,7 +91,7 @@ Future<void> main() async {
 /// other schema change) get re-fetched from Open Food Facts with fresh data.
 ///
 /// The changelog detection is content-hash‑driven (compares the hash of
-/// `CHANGELOG.md`) so that new `[Unreleased]` entries surface even when the
+/// `CHANGELOG.md`) so that new `Unreleased` entries surface even when the
 /// app version string has not changed between development builds.
 Future<void> _handleAppUpdate() async {
   try {

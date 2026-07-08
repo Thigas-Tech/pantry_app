@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 /// that do not support ANSI colours the messages still print normally.
 ///
 /// `_verbose` is `kDebugMode` — `true` in debug builds, `false` in release
-/// and profile builds. This means `[logInfo]` and `[logDebug]` calls are
+/// and profile builds. This means [logInfo] and [logDebug] calls are
 /// tree-shaken from release binaries entirely.
 const bool _verbose = kDebugMode;
 

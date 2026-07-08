@@ -569,7 +569,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceTracking => 'Price Tracking';
 
   @override
-  String get priceTrackingDescription => 'Track how much you spend.';
+  String get priceTrackingDescription => 'Record purchase prices and track how much you spend.';
 
   @override
   String get receiptTracking => 'NFC-e Receipts';
@@ -793,4 +793,217 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedbackRateLimit => 'You can only submit one report per minute and up to 5 per day. Please try again later.';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get prices => 'Prices';
+
+  @override
+  String get addPrice => 'Add price';
+
+  @override
+  String get editPrice => 'Edit price';
+
+  @override
+  String get deletePrice => 'Delete price';
+
+  @override
+  String get priceAdded => 'Price added.';
+
+  @override
+  String get priceUpdated => 'Price updated.';
+
+  @override
+  String get priceDeleted => 'Price deleted.';
+
+  @override
+  String get priceHistory => 'Price history';
+
+  @override
+  String get noPrices => 'No prices recorded.';
+
+  @override
+  String get totalValue => 'Total value';
+
+  @override
+  String get averagePrice => 'Average item price';
+
+  @override
+  String get hidePrices => 'Hide prices for privacy';
+
+  @override
+  String get hidePricesDescription => 'Replace price values with masked text everywhere, including the stats screen.';
+
+  @override
+  String get pricesHidden => 'Prices hidden.';
+
+  @override
+  String get pricesVisible => 'Prices visible.';
+
+  @override
+  String get priceTrackingEnabled => 'Enable price tracking';
+
+  @override
+  String get priceRetentionDays => 'Price retention';
+
+  @override
+  String priceRetentionDaysValue(int days) {
+    return 'Keep prices for $days days (0 = keep forever)';
+  }
+
+  @override
+  String get currency => 'Currency';
+
+  @override
+  String get baseCurrency => 'Base currency';
+
+  @override
+  String get baseCurrencyDescription => 'All prices are shown in this currency.';
+
+  @override
+  String get store => 'Store';
+
+  @override
+  String get discounted => 'Discounted';
+
+  @override
+  String get regularPrice => 'Regular price';
+
+  @override
+  String get confirmDeletePrice => 'Delete this price entry?';
+
+  @override
+  String get syncToOpenPrices => 'Share with Open Prices';
+
+  @override
+  String get syncToOpenPricesDescription => 'Contribute your price data to the community food-price database.';
+
+  @override
+  String get openPricesToken => 'Open Prices API Token';
+
+  @override
+  String get openPricesTokenDescription => 'Token generated from your Open Food Facts account.';
+
+  @override
+  String get openPricesTokenSaved => 'Token saved.';
+
+  @override
+  String get openPricesSyncStarted => 'Syncing prices...';
+
+  @override
+  String openPricesSyncComplete(int count) {
+    return '$count prices synced.';
+  }
+
+  @override
+  String get priceSyncStatus => 'Synced';
+
+  @override
+  String get priceSyncPending => 'Pending sync';
+
+  @override
+  String get priceSyncFailed => 'Sync failed';
+
+  @override
+  String get priceTrendUp => 'Prices are rising';
+
+  @override
+  String get priceTrendDown => 'Prices are falling';
+
+  @override
+  String get priceTrendStable => 'Prices are stable';
+
+  @override
+  String get datePurchased => 'Purchase date';
+
+  @override
+  String get pricedItems => 'Items with prices';
+
+  @override
+  String itemWithPriceCount(int count, int total) {
+    return '$count of $total items have prices';
+  }
+
+  @override
+  String get openPricesProofExplanation => 'To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.';
+
+  @override
+  String get openPricesConsentTitle => 'Contribute to Open Prices';
+
+  @override
+  String get openPricesConsentBody => 'Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.';
+
+  @override
+  String get iUnderstand => 'I understand';
+
+  @override
+  String get notes => 'Notes';
+
+  @override
+  String get navList => 'List';
+
+  @override
+  String get shoppingList => 'Shopping List';
+
+  @override
+  String get addShoppingItem => 'Add item';
+
+  @override
+  String get itemName => 'Item name';
+
+  @override
+  String get markPurchased => 'Mark purchased';
+
+  @override
+  String get unmarkPurchased => 'Unmark purchased';
+
+  @override
+  String get moveToInventory => 'Move to pantry';
+
+  @override
+  String get addAgain => 'Add again';
+
+  @override
+  String get emptyShoppingList => 'Your shopping list is empty';
+
+  @override
+  String get emptyShoppingListSub => 'Add items from a product or tap + to add manually';
+
+  @override
+  String get deleteItem => 'Delete item';
+
+  @override
+  String get clearPurchased => 'Clear purchased';
+
+  @override
+  String get clearPurchasedConfirm => 'Remove all purchased items?';
+
+  @override
+  String get purchasedItems => 'Purchased';
+
+  @override
+  String get pendingItems => 'To buy';
+
+  @override
+  String get quickAddHint => 'Name, e.g. Milk';
+
+  @override
+  String get undoDeleteShoppingItem => 'Item deleted';
+
+  @override
+  String get undoClearPurchased => 'Purchased items cleared';
+
+  @override
+  String get shareShoppingList => 'Share shopping list';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get addToShoppingList => 'Add to shopping list';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// Top-level handler for background notification taps.
@@ -7,7 +8,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// that does NOT show the UI. This function cannot access Riverpod, the
 /// database, or navigation — it only logs that the event occurred.
 ///
-/// The main isolate checks `NotificationService.getLaunchDetails` on next
+/// The main isolate checks [NotificationService.getLaunchDetails] on next
 /// foreground to handle the actual deep-link.
 ///
 /// Must be a top-level function with [pragma('vm:entry-point')] so that

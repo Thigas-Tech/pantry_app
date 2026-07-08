@@ -5,22 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/price_provider.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
+import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/nutrition_table.dart';
+import 'package:pantry_app/widgets/price_entry_sheet.dart';
+import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Displays full product details and the associated inventory entries
@@ -246,6 +254,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ),
             const SizedBox(height: 24),
 
+            // Price section
+            _buildPriceSection(context, l10n),
+            const SizedBox(height: 16),
+
             // Inventory section header
             Text(
               l10n.yourInventory,
@@ -284,7 +296,175 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               icon: const Icon(Icons.add),
               label: Text(l10n.addToInventory),
             ),
+            const SizedBox(height: 8),
+
+            // Add to shopping list button
+            OutlinedButton.icon(
+              onPressed: () {
+                final item = ShoppingItem(
+                  name: widget.product.name,
+                  barcode: widget.product.barcode,
+                );
+                unawaited(addShoppingItem(ref, item));
+                SnackbarHelper.showInfo(
+                  context,
+                  l10n.addToShoppingList,
+                );
+              },
+              icon: const Icon(Icons.shopping_cart_outlined),
+              label: Text(l10n.addToShoppingList),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds the price section with latest price, add/edit, and history.
+  Widget _buildPriceSection(BuildContext context, AppLocalizations l10n) {
+    final barcode = widget.product.barcode;
+    final priceAsync = ref.watch(latestPriceProvider(barcode));
+
+    return priceAsync.when(
+      data: (price) {
+        if (price != null) {
+          return _buildPriceData(context, l10n, price);
+        }
+        return _buildNoPriceData(context, l10n);
+      },
+      loading: () => const SizedBox(height: 48),
+      error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildPriceData(
+    BuildContext context,
+    AppLocalizations l10n,
+    Price price,
+  ) {
+    final formattedPrice = ref
+        .read(priceRepositoryProvider)
+        .formatPrice(
+          price.price,
+          price.currency,
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.prices, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        PriceMask(
+          formattedPrice: formattedPrice,
+          child: Text(
+            formattedPrice,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+        if (price.store != null)
+          Text(
+            price.store!,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => _editPrice(context, price),
+              icon: const Icon(Icons.edit, size: 18),
+              label: Text(l10n.editPrice),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: () => _openPriceHistory(context),
+              icon: const Icon(Icons.history, size: 18),
+              label: Text(l10n.priceHistory),
+            ),
+          ],
+        ),
+        const Divider(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildNoPriceData(BuildContext context, AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.prices, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Text(
+          l10n.noPrices,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        FilledButton.icon(
+          onPressed: () => _addPrice(context),
+          icon: const Icon(Icons.add, size: 18),
+          label: Text(l10n.addPrice),
+        ),
+        const Divider(height: 24),
+      ],
+    );
+  }
+
+  Future<void> _addPrice(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final price = await PriceEntrySheet.show(
+      context,
+      barcode: widget.product.barcode,
+    );
+    if (price != null) {
+      try {
+        await ref.read(priceRepositoryProvider).addPrice(price);
+        if (context.mounted) {
+          SnackbarHelper.showInfo(context, l10n.priceAdded);
+          ref
+            ..invalidate(latestPriceProvider(widget.product.barcode))
+            ..invalidate(priceHistoryProvider(widget.product.barcode));
+        }
+      } on Exception catch (e) {
+        logError('Failed to add price: $e');
+        if (context.mounted) {
+          SnackbarHelper.showError(context, e.toString());
+        }
+      }
+    }
+  }
+
+  Future<void> _editPrice(BuildContext context, Price price) async {
+    final l10n = AppLocalizations.of(context)!;
+    final updated = await PriceEntrySheet.show(
+      context,
+      barcode: widget.product.barcode,
+      existingPrice: price,
+    );
+    if (updated != null) {
+      try {
+        await ref.read(priceRepositoryProvider).updatePrice(updated);
+        if (context.mounted) {
+          SnackbarHelper.showInfo(context, l10n.priceUpdated);
+          ref
+            ..invalidate(latestPriceProvider(widget.product.barcode))
+            ..invalidate(priceHistoryProvider(widget.product.barcode));
+        }
+      } on Exception catch (e) {
+        logError('Failed to update price: $e');
+        if (context.mounted) {
+          SnackbarHelper.showError(context, e.toString());
+        }
+      }
+    }
+  }
+
+  Future<void> _openPriceHistory(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PriceHistoryScreen(
+          barcode: widget.product.barcode,
+          productName: widget.product.name,
         ),
       ),
     );

@@ -1,9 +1,13 @@
 import 'package:pantry_app/database/feedback_queue_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
+import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
+import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,11 +25,13 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Four tables are created on first launch (version 11):
+/// Six tables are created on first launch (version 13):
 /// - `products` – product data fetched from Open Food Facts.
 /// - `inventories` – named pantries (e.g. "Home", "Work").
 /// - `inventory` – instances of products the user has added to a pantry.
 /// - `feedback_queue` – offline queue for GitHub issue reports.
+/// - `prices` – purchase price observations per barcode.
+/// - `shopping_list` – items the user intends to buy.
 ///
 /// ## Delegation
 ///
@@ -65,6 +71,12 @@ class DatabaseHelper {
   /// DAO for the `feedback_queue` table.
   final FeedbackQueueDao feedbackQueueDao = const FeedbackQueueDao();
 
+  /// DAO for the `prices` table.
+  final PriceDao priceDao = const PriceDao();
+
+  /// DAO for the `shopping_list` table.
+  final ShoppingListDao shoppingListDao = const ShoppingListDao();
+
   /// The lazily‑opened database instance.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -78,7 +90,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 11,
+        version: 13,
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
       );
@@ -157,9 +169,49 @@ class DatabaseHelper {
 
     await feedbackQueueDao.createTable(db);
 
+    await _createPricesTable(db);
+
+    await _createShoppingListTable(db);
+
     await inventoriesDao.seedDefault(db);
 
     logInfo('Database schema created successfully');
+  }
+
+  Future<void> _createPricesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE prices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        barcode TEXT NOT NULL,
+        price REAL NOT NULL,
+        currency TEXT NOT NULL,
+        store TEXT,
+        is_discounted INTEGER NOT NULL DEFAULT 0,
+        regular_price REAL,
+        date_purchased INTEGER,
+        sync_status TEXT NOT NULL DEFAULT 'local_only',
+        open_prices_id INTEGER,
+        location_osm_id TEXT,
+        location_osm_type TEXT,
+        receipt_series TEXT,
+        receipt_number TEXT,
+        receipt_item_index INTEGER,
+        notes TEXT,
+        date_added INTEGER NOT NULL,
+        FOREIGN KEY (barcode) REFERENCES products(barcode)
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_prices_barcode ON prices(barcode)');
+    await db.execute(
+      'CREATE INDEX idx_prices_date ON prices(date_purchased)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_prices_sync_status ON prices(sync_status)',
+    );
+  }
+
+  Future<void> _createShoppingListTable(Database db) async {
+    await shoppingListDao.createTable(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -256,6 +308,14 @@ class DatabaseHelper {
       await feedbackQueueDao.createTable(db);
       logInfo('Migration to version 11 completed');
     }
+    if (oldVersion < 12) {
+      await _createPricesTable(db);
+      logInfo('Migration to version 12 completed');
+    }
+    if (oldVersion < 13) {
+      await _createShoppingListTable(db);
+      logInfo('Migration to version 13 completed');
+    }
   }
 
   // --------------------- Product (delegating to ProductDao) -------
@@ -319,8 +379,14 @@ class DatabaseHelper {
     return productDao.clear(db);
   }
 
-  /// Removes stale inventory items and orphaned products.
-  Future<void> cleanupOldEntries({int retentionDays = 60}) async {
+  /// Removes stale inventory items, orphaned products, and old prices.
+  ///
+  /// [retentionDays] applies to inventory items only. Price rows use
+  /// [priceRetentionDays] (default 0 = keep forever).
+  Future<void> cleanupOldEntries({
+    int retentionDays = 60,
+    int priceRetentionDays = 0,
+  }) async {
     final db = await database;
     final cutoff = DateTime.now()
         .subtract(Duration(days: retentionDays))
@@ -344,6 +410,15 @@ class DatabaseHelper {
         WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
       ''');
       logInfo('Removed $deletedProducts orphaned products');
+
+      if (priceRetentionDays > 0) {
+        final deletedPrices = await priceDao.deleteStale(
+          db,
+          priceRetentionDays,
+        );
+        logInfo('Removed $deletedPrices old price rows');
+      }
+
       logInfo('Cleanup finished');
     } on Exception catch (e) {
       logError('Cleanup failed: $e');
@@ -498,5 +573,149 @@ class DatabaseHelper {
       db,
       olderThanDays: olderThanDays,
     );
+  }
+
+  // ---- Prices (delegating to PriceDao) ------------------------
+
+  /// Inserts a price observation. Returns the new row ID.
+  Future<int> insertPrice(Price price) async {
+    final db = await database;
+    return priceDao.insert(db, price);
+  }
+
+  /// Returns the price with the given [id], or `null` if not found.
+  Future<Price?> getPriceById(int id) async {
+    final db = await database;
+    return priceDao.getById(db, id);
+  }
+
+  /// Returns all price entries for the given [barcode], ordered by date
+  /// descending.
+  Future<List<Price>> getPricesByBarcode(
+    String barcode, {
+    int? limit,
+    int? offset,
+  }) async {
+    final db = await database;
+    return priceDao.listByBarcode(db, barcode, limit: limit, offset: offset);
+  }
+
+  /// Returns the most recent price for the given [barcode], or `null`.
+  Future<Price?> getLatestPrice(String barcode) async {
+    final db = await database;
+    return priceDao.getLatest(db, barcode);
+  }
+
+  /// Updates an existing price row.
+  Future<int> updatePrice(Price price) async {
+    final db = await database;
+    return priceDao.update(db, price);
+  }
+
+  /// Deletes the price with the given [id].
+  Future<int> deletePrice(int id) async {
+    final db = await database;
+    return priceDao.delete(db, id);
+  }
+
+  /// Returns the total number of prices for the given [barcode].
+  Future<int> getPriceCountByBarcode(String barcode) async {
+    final db = await database;
+    return priceDao.countByBarcode(db, barcode);
+  }
+
+  /// Returns the total number of prices on record.
+  Future<int> getPriceCount() async {
+    final db = await database;
+    return priceDao.count(db);
+  }
+
+  /// Returns the sum of the most recent price per distinct product in the
+  /// given inventory.
+  Future<double?> getTotalInventoryValue(int inventoryId) async {
+    final db = await database;
+    return priceDao.totalInventoryValue(db, inventoryId);
+  }
+
+  /// Returns the average of the most recent price per distinct product in
+  /// the given inventory.
+  Future<double?> getAverageItemPrice(int inventoryId) async {
+    final db = await database;
+    return priceDao.averageItemPrice(db, inventoryId);
+  }
+
+  /// Returns the count of distinct inventory items that have at least one
+  /// price.
+  Future<int> getPricedItemCount(int inventoryId) async {
+    final db = await database;
+    return priceDao.pricedItemCount(db, inventoryId);
+  }
+
+  /// Returns prices with the given [syncStatus] for Open Prices sync.
+  Future<List<Price>> getPricesBySyncStatus(String syncStatus) async {
+    final db = await database;
+    return priceDao.getBySyncStatus(db, syncStatus);
+  }
+
+  // ---- Shopping list (delegating to ShoppingListDao) ------------
+
+  /// Inserts a shopping list item. Returns the new row ID.
+  Future<int> insertShoppingItem(ShoppingItem item) async {
+    final db = await database;
+    return shoppingListDao.insert(db, item);
+  }
+
+  /// Returns all shopping list items, ordered by dateAdded desc.
+  Future<List<ShoppingItem>> getShoppingList() async {
+    final db = await database;
+    return shoppingListDao.listAll(db);
+  }
+
+  /// Returns only pending (not purchased) items.
+  Future<List<ShoppingItem>> getPendingShoppingItems() async {
+    final db = await database;
+    return shoppingListDao.listPending(db);
+  }
+
+  /// Returns only purchased items.
+  Future<List<ShoppingItem>> getPurchasedShoppingItems() async {
+    final db = await database;
+    return shoppingListDao.listPurchased(db);
+  }
+
+  /// Updates a shopping list item.
+  Future<int> updateShoppingItem(ShoppingItem item) async {
+    final db = await database;
+    return shoppingListDao.update(db, item);
+  }
+
+  /// Deletes a shopping list item by [id].
+  Future<int> deleteShoppingItem(int id) async {
+    final db = await database;
+    return shoppingListDao.delete(db, id);
+  }
+
+  /// Toggles the purchased state for the item with the given [id].
+  Future<void> toggleShoppingItemPurchased(int id) async {
+    final db = await database;
+    return shoppingListDao.togglePurchased(db, id);
+  }
+
+  /// Deletes all purchased shopping list items.
+  Future<int> clearPurchasedShoppingItems() async {
+    final db = await database;
+    return shoppingListDao.clearPurchased(db);
+  }
+
+  /// Marks items matching the given [barcode] as purchased.
+  Future<int> markShoppingItemsByBarcode(String barcode) async {
+    final db = await database;
+    return shoppingListDao.markPurchasedByBarcode(db, barcode);
+  }
+
+  /// Returns the count of pending (not purchased) shopping list items.
+  Future<int> getPendingShoppingCount() async {
+    final db = await database;
+    return shoppingListDao.pendingCount(db);
   }
 }

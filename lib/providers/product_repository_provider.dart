@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
@@ -19,7 +20,7 @@ import 'package:pantry_app/services/product_repository.dart';
 ///
 /// ## Lifetime
 ///
-/// Because this is a `Provider` (not a `FutureProvider` or `StateProvider`),
+/// Because this is a [Provider] (not a [FutureProvider] or [NotifierProvider]),
 /// the repository is created **once** and reused for the entire app session.
 /// The repository itself holds no mutable state; it delegates all storage to
 /// the database and all network requests to the SDK adapter.
@@ -28,7 +29,7 @@ import 'package:pantry_app/services/product_repository.dart';
 ///
 /// Typically accessed via `ref.read(productRepositoryProvider)` in async
 /// callbacks (like the scan flow) or via `ref.watch(productRepositoryProvider)`
-/// in widgets that need to call repository methods inside `FutureBuilder`s.
+/// in widgets that need to call repository methods inside [FutureBuilder]s.
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   final db = ref.read(databaseProvider);
   final api = ref.read(apiServiceProvider);

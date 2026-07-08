@@ -42,7 +42,7 @@ jobs:
         run: flutter analyze --fatal-infos --fatal-warnings
 
       - name: Run Flutter tests
-        run: flutter test --concurrency=8
+        run: flutter test --concurrency=2
 
       - name: Inject environment
         env:

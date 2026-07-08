@@ -18,8 +18,8 @@ const _inactivityReminderId = 999_999_001;
 ///
 /// ## Timezone handling
 ///
-/// Uses `flutter_timezone` to query the device's IANA timezone identifier
-/// and the `timezone` package for `TZDateTime` math. The combination
+/// Uses flutter_timezone to query the device's IANA timezone identifier
+/// and the timezone package for [tz.TZDateTime] math. The combination
 /// provides reliable timezone resolution on all platforms without the
 /// fragile `DateTime.now().timeZoneName` workaround.
 ///
@@ -524,7 +524,7 @@ class NotificationService {
     }
   }
 
-  /// Resolves the device's local timezone using `flutter_timezone`.
+  /// Resolves the device's local timezone using flutter_timezone.
   ///
   /// Falls back to [tz.UTC] if the plugin fails or the returned IANA
   /// identifier is not present in the bundled timezone database.

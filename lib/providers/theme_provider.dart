@@ -16,7 +16,7 @@ enum ThemeModeOption {
   dark,
 }
 
-/// A [Notifier] that holds the current `ThemeModeOption` and persists it to
+/// A [Notifier] that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the `theme_mode` key.
 ///
 /// Used by [themeModeProvider] so that any widget can read or change the
