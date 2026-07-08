@@ -9,6 +9,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
@@ -86,29 +87,39 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 
       var apiHadResults = false;
       if (query.length >= 2) {
-        try {
-          final api = ref.read(apiServiceProvider);
-          var apiResults = await api.searchProducts(normalizedQuery);
-          if (capturedRequestId != _requestId || !mounted) return;
-
-          if (apiResults.isEmpty && normalizedQuery != query) {
-            apiResults = await api.searchProducts(query);
+        final isOnline = ref.read(connectivityProvider).value;
+        if (isOnline == false) {
+          if (mounted) {
+            SnackbarHelper.showWarning(
+              context,
+              AppLocalizations.of(context)!.offlineWarning,
+            );
+          }
+        } else {
+          try {
+            final api = ref.read(apiServiceProvider);
+            var apiResults = await api.searchProducts(normalizedQuery);
             if (capturedRequestId != _requestId || !mounted) return;
-          }
 
-          apiHadResults = apiResults.isNotEmpty;
-          final existingBarcodes = results
-              .map((r) => r.product.barcode)
-              .toSet();
-          for (final p in apiResults) {
-            if (!existingBarcodes.contains(p.barcode)) {
-              results.add(
-                _SearchResult(product: p, source: _ResultSource.api),
-              );
+            if (apiResults.isEmpty && normalizedQuery != query) {
+              apiResults = await api.searchProducts(query);
+              if (capturedRequestId != _requestId || !mounted) return;
             }
+
+            apiHadResults = apiResults.isNotEmpty;
+            final existingBarcodes = results
+                .map((r) => r.product.barcode)
+                .toSet();
+            for (final p in apiResults) {
+              if (!existingBarcodes.contains(p.barcode)) {
+                results.add(
+                  _SearchResult(product: p, source: _ResultSource.api),
+                );
+              }
+            }
+          } on Exception catch (e) {
+            logWarning('API search failed: $e');
           }
-        } on Exception catch (e) {
-          logWarning('API search failed: $e');
         }
       }
 

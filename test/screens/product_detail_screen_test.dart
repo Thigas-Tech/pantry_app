@@ -507,6 +507,9 @@ void main() {
     when(
       () => mockRepo.addInventoryItem(any()),
     ).thenAnswer((_) => Future<int>.value(1));
+    when(
+      () => mockRepo.cacheProduct(any()),
+    ).thenAnswer((_) async {});
 
     await pumpApp(
       tester,
