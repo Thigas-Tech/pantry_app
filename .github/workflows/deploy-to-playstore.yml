@@ -8,6 +8,9 @@ on:
   #   tags:
   #     - 'v[0-9]+.[0-9]+.[0-9]+'
 
+permissions:
+  contents: read
+
 jobs:
   security_hardening:
     name: Check security hardening
@@ -22,8 +25,6 @@ jobs:
     name: Build and upload to Google Play
     needs: security_hardening
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - name: Clone the repository
@@ -64,7 +65,6 @@ jobs:
         run: |
           if [ -n "${ANDROID_KEYSTORE_BASE64}" ]; then
             echo "${ANDROID_KEYSTORE_BASE64}" | base64 -d > android/upload-keystore.jks
-            echo "Keystore decoded (${#ANDROID_KEYSTORE_BASE64} bytes base64)"
           else
             echo "ANDROID_KEYSTORE_BASE64 secret is empty — signing will fail"
             exit 1
@@ -76,7 +76,6 @@ jobs:
         run: |
           if [ -n "${KEY_PROPERTIES_BASE64}" ]; then
             echo "${KEY_PROPERTIES_BASE64}" | base64 -d > android/key.properties
-            echo "Key properties decoded"
           else
             echo "KEY_PROPERTIES_BASE64 secret is empty — signing will fail"
             exit 1
@@ -104,3 +103,4 @@ jobs:
             build/app/outputs/bundle/release/app-release.aab
             build/app/outputs/flutter-apk/app-release.apk
           retention-days: 90
+          if-no-files-found: error
