@@ -77,6 +77,87 @@ void main() {
         expect(url, 'https://github.com/owner/repo/issues/1');
       });
 
+      /// Verifies the request body includes both the type label and
+      /// [from-app] when a type label is provided.
+      test('includes type label and from-app label when type is set', () async {
+        final mockHttp2 = MockHttpClient();
+        final yesterday = DateTime.now()
+            .subtract(const Duration(hours: 24))
+            .millisecondsSinceEpoch;
+        SharedPreferences.setMockInitialValues({
+          'feedback_last_submit': yesterday,
+          'feedback_daily_count': 0,
+        });
+        await GithubIssueService.initPreferences();
+        final svc = GithubIssueService(httpClient: mockHttp2);
+        String? capturedBody;
+        when(
+          () => mockHttp2.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer((invocation) async {
+          capturedBody = invocation.namedArguments[#body] as String;
+          return http.Response(
+            jsonEncode({'html_url': 'https://github.com/owner/repo/issues/1'}),
+            201,
+          );
+        });
+
+        await svc.submitIssue(
+          title: 'Test',
+          body: 'Description',
+          label: 'bug',
+        );
+        final body = jsonDecode(capturedBody!) as Map<String, dynamic>;
+        final labels = body['labels'] as List<dynamic>;
+        expect(labels, contains('bug'));
+        expect(labels, contains('from-app'));
+
+        svc.dispose();
+      });
+
+      /// Verifies the request body includes only [from-app] when no
+      /// type label is provided (general feedback).
+      test('includes only from-app label when no type label', () async {
+        final mockHttp3 = MockHttpClient();
+        final yesterday = DateTime.now()
+            .subtract(const Duration(hours: 24))
+            .millisecondsSinceEpoch;
+        SharedPreferences.setMockInitialValues({
+          'feedback_last_submit': yesterday,
+          'feedback_daily_count': 0,
+        });
+        await GithubIssueService.initPreferences();
+        final svc = GithubIssueService(httpClient: mockHttp3);
+        String? capturedBody;
+        when(
+          () => mockHttp3.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer((invocation) async {
+          capturedBody = invocation.namedArguments[#body] as String;
+          return http.Response(
+            jsonEncode({'html_url': 'https://github.com/owner/repo/issues/1'}),
+            201,
+          );
+        });
+
+        await svc.submitIssue(
+          title: 'No label',
+          body: 'General feedback',
+        );
+        final body = jsonDecode(capturedBody!) as Map<String, dynamic>;
+        final labels = body['labels'] as List<dynamic>;
+        expect(labels, contains('from-app'));
+        expect(labels.length, 1);
+
+        svc.dispose();
+      });
+
       /// Verifies a timeout throws [IssueSubmissionException].
       test('throws on timeout', () {
         when(

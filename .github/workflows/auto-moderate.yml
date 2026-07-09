@@ -1,0 +1,68 @@
+name: Auto-moderate
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  moderate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const isPr = context.payload.pull_request !== undefined;
+            const item = isPr ? context.payload.pull_request : context.payload.issue;
+
+            const { data: collaborators } = await github.rest.repos.listCollaborators({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            if (collaborators.some(c => c.login === item.user.login)) {
+              console.log(`Collaborator ${item.user.login} — allowing`);
+              return;
+            }
+
+            if (!isPr && item.labels.some(l => l.name === 'from-app')) {
+              console.log(`Issue has from-app label — allowing`);
+              return;
+            }
+
+            console.log(`External ${isPr ? 'PR' : 'issue'} from ${item.user.login} — closing and locking`);
+
+            const body = [
+              'Thank you for your interest in Pantry App.',
+              '',
+              'This repository does not accept external issues or pull requests directly.',
+              'To report a bug or suggest a feature, please use the **in-app feedback button**',
+              '(Settings > Report an issue) inside the Pantry App.',
+              '',
+              'This has been automatically closed and locked.',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: item.number,
+              body: body,
+            });
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: item.number,
+              state: 'closed',
+              state_reason: 'not_planned',
+            });
+
+            await github.rest.issues.lock({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: item.number,
+              lock_reason: 'spam',
+            });
