@@ -13,6 +13,7 @@
   "emptyPantrySubtitle": "Toque no botão abaixo pra escanear seu primeiro produto",
   "scanFirstProduct": "Escanear um código",
   "barcodeLabel": "Código de barras",
+  "invalidBarcode": "Digite um código de barras valido (8-13 digitos).",
   "brandLabel": "Marca",
   "categoryLabel": "Categoria",
   "servingSize": "Porção",

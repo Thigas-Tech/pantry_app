@@ -174,6 +174,12 @@ abstract class AppLocalizations {
   /// **'Barcode'**
   String get barcodeLabel;
 
+  /// No description provided for @invalidBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid barcode (8-13 digits).'**
+  String get invalidBarcode;
+
   /// No description provided for @brandLabel.
   ///
   /// In en, this message translates to:

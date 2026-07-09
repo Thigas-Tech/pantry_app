@@ -29,7 +29,7 @@ class AddProductScreen extends ConsumerStatefulWidget {
 
 class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final ImagePicker _imagePicker;
+  final ImagePicker _imagePicker = ImagePicker();
 
   late String _name;
   String _brand = '';
@@ -49,7 +49,6 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   File? _productImage;
 
   Future<void> _pickImage(ImageField field) async {
-    _imagePicker = ImagePicker();
     final picked = await _imagePicker.pickImage(source: ImageSource.camera);
     if (picked != null) {
       setState(() {

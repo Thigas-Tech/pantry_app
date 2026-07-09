@@ -278,6 +278,8 @@ void main() {
           (ref) => Future<int>.value(0),
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+        connectivityProvider.overrideWith((ref) => const Stream.empty()),
         productRepositoryProvider.overrideWithValue(
           createMockProductRepository(),
         ),
@@ -427,7 +429,7 @@ void main() {
             (ref) => <Map<String, dynamic>>[],
           ),
           activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-          connectivityProvider.overrideWith((ref) => Stream.value(true)),
+          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
           productRepositoryProvider.overrideWithValue(mockRepo),
         ],
       );
@@ -461,7 +463,7 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        connectivityProvider.overrideWith((ref) => Stream.value(true)),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         productRepositoryProvider.overrideWithValue(
           createMockProductRepository(),
         ),
@@ -502,7 +504,7 @@ void main() {
           (ref) => <Map<String, dynamic>>[],
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        connectivityProvider.overrideWith((ref) => Stream.value(true)),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         productRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
@@ -534,7 +536,7 @@ void main() {
           (ref) => Future<int>.value(0),
         ),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        connectivityProvider.overrideWith((ref) => Stream.value(true)),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         productRepositoryProvider.overrideWithValue(
           createMockProductRepository(),
         ),

@@ -113,9 +113,14 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return null;
-                  final parsed = double.tryParse(v.trim());
-                  if (parsed == null || parsed <= 0) {
-                    return 'Enter a valid amount';
+                  final parsed = double.tryParse(
+                    v.trim().replaceAll(',', '.'),
+                  );
+                  if (parsed == null ||
+                      !parsed.isFinite ||
+                      parsed <= 0 ||
+                      parsed >= 1e9) {
+                    return l10n.invalidPriceAmount;
                   }
                   return null;
                 },
@@ -179,10 +184,10 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
 
-    final amountStr = _amountCtrl.text.trim();
+    final l10n = AppLocalizations.of(context)!;
+    final amountStr = _amountCtrl.text.trim().replaceAll(',', '.');
     final amount = double.tryParse(amountStr);
-    if (amount == null || amount <= 0) {
-      final l10n = AppLocalizations.of(context)!;
+    if (amount == null || !amount.isFinite || amount <= 0 || amount >= 1e9) {
       SnackbarHelper.showError(context, l10n.invalidPriceAmount);
       return;
     }
@@ -200,6 +205,10 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
       dateAdded:
           widget.existingPrice?.dateAdded ??
           DateTime.now().millisecondsSinceEpoch,
+      syncStatus: widget.existingPrice?.syncStatus ?? priceSyncLocalOnly,
+      openPricesId: widget.existingPrice?.openPricesId,
+      locationOsmId: widget.existingPrice?.locationOsmId,
+      locationOsmType: widget.existingPrice?.locationOsmType,
     );
 
     Navigator.of(context).pop(price);

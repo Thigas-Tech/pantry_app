@@ -64,12 +64,11 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         apiServiceProvider.overrideWithValue(mockApi),
-        connectivityProvider.overrideWith((ref) => Stream.value(true)),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         ...extraOverrides,
       ],
       settle: false,
     );
-    // Let the first frame render.
     await tester.pump();
   }
 
