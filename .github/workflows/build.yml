@@ -7,6 +7,14 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   security_hardening:
@@ -74,6 +82,7 @@ jobs:
         with:
           name: code-coverage-${{ matrix.category }}
           path: code/coverage/lcov.${{ matrix.category }}.info
+          if-no-files-found: error
 
   build:
     # TODO: Add Patrol E2E tests here once implemented
@@ -123,26 +132,29 @@ jobs:
           ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info' || '' }}
         working-directory: code
       - name: Upload APK
-        if: matrix.package-type == 'apk'
+        if: matrix.package-type == 'apk' && !cancelled()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ${{ matrix.build-type }}-apk
           path: code/build/app/outputs/flutter-apk/app-${{ matrix.build-type }}.apk
           retention-days: 90
+          if-no-files-found: error
       - name: Upload AAB
-        if: matrix.package-type == 'appbundle'
+        if: matrix.package-type == 'appbundle' && !cancelled()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ${{ matrix.build-type }}-aab
           path: code/build/app/outputs/bundle/${{ matrix.build-type }}/app-${{ matrix.build-type }}.aab
           retention-days: 90
+          if-no-files-found: error
       - name: Upload debug symbols
-        if: matrix.build-type == 'release' && matrix.package-type == 'apk'
+        if: matrix.build-type == 'release' && matrix.package-type == 'apk' && !cancelled()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: release-debug-info
           path: code/debug-info/
           retention-days: 90
+          if-no-files-found: warn
 
   publish:
     name: Publish release

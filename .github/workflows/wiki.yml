@@ -6,18 +6,23 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: wiki-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
 jobs:
   deploy:
     name: Deploy API docs to GitHub Pages
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Clone the repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2.23.0
         with:
           channel: stable
           cache: true
@@ -27,9 +32,6 @@ jobs:
 
       - name: Generate API documentation
         run: dart doc .
-
-      - name: Save generated docs to temp directory
-        run: cp -r doc/api /tmp/doc-api
 
       - name: Checkout gh-pages branch
         run: |
@@ -42,9 +44,8 @@ jobs:
       - name: Sync documentation
         run: |
           rm -rf api
-          cp -r /tmp/doc-api api
+          mv doc/api api
           git add -A
-          rm -rf /tmp/doc-api
 
       - name: Commit and push
         run: |

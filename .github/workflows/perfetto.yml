@@ -5,6 +5,9 @@ on:
     - cron: 0 5 * * 0
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   perfetto:
     name: Collect and analyze Perfetto traces
@@ -21,18 +24,18 @@ jobs:
       - name: Clone the repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - name: Setup Flutter
-        uses: subosito/flutter-action@e14214cc42435fc0c2609c5e614a5e63a2fcd6f5
+        uses: subosito/flutter-action@e14214cc42435fc0c2609c5e614a5e63a2fcd6f5  # v2.21.0
         with:
           channel: stable
           cache: true
       - name: Get Flutter packages
         run: flutter pub get
       - name: Setup Android SDK
-        uses: android-actions/setup-android@e14e7e5b6cea0b4e56862d4ef4b7a605e50a8cb6
+        uses: android-actions/setup-android@e14e7e5b6cea0b4e56862d4ef4b7a605e50a8cb6  # v2
       - name: Build APK (profile with startup trace)
         run: flutter build apk --profile --trace-startup
       - name: Run emulator and collect trace
-        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b29cabeeeb7cec4612ac
+        uses: reactivecircus/android-emulator-runner@62dbb605bba737720e10b29cabeeeb7cec4612ac  # v2
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
@@ -42,16 +45,17 @@ jobs:
           script: |
             adb wait-for-device
             adb install build/app/outputs/flutter-apk/app-profile.apk
-            adb shell perfetto -o /data/misc/perfetto-traces/trace.perfetto-track \
+            adb shell perfetto -o /data/misc/perfetto-traces/trace.perfetto-trace \
               -t 30s sched freq idle_at wakelock
-            adb pull /data/misc/perfetto-traces/trace.perfetto-track trace.perfetto-track
+            adb pull /data/misc/perfetto-traces/trace.perfetto-trace trace.perfetto-trace
       - name: Upload Perfetto trace
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: perfetto-trace
-          path: trace.perfetto-track
+          path: trace.perfetto-trace
           retention-days: 30
+          if-no-files-found: warn
       - name: Analyze trace frame timing
         if: success()
         run: |
