@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -38,6 +40,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// 6. App launched inside `ProviderScope`.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (kDebugMode) {
+    SemanticsBinding.instance.ensureSemantics();
+  }
 
   await dotenv.load();
   logInfo('Environment loaded');

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -411,7 +412,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     try {
       final label = _issueType.gitHubLabel();
       final effectiveLabel = label.isEmpty ? null : label;
-      final body = _buildBody(description, l10n);
+      final body = await _buildBody(description, l10n);
 
       final screenshotBytesList = <List<int>>[];
       for (final path in _screenshotPaths) {
@@ -478,15 +479,18 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     }
   }
 
-  String _buildBody(String description, AppLocalizations l10n) {
+  Future<String> _buildBody(String description, AppLocalizations l10n) async {
     final buffer = StringBuffer(description);
 
     if (_includeDeviceInfo) {
+      final info = await PackageInfo.fromPlatform();
       buffer
         ..writeln()
         ..writeln()
         ..writeln('```')
-        ..writeln('${l10n.appVersionLabel}: 1.0')
+        ..writeln(
+          '${l10n.appVersionLabel}: ${info.version}+${info.buildNumber}',
+        )
         ..writeln(
           '${l10n.osLabel}: '
           '${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
