@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
@@ -102,7 +103,7 @@ class GithubIssueService {
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final url = data['html_url'] as String;
-      unawaited(_recordSubmission(title, body));
+      await _recordSubmission(title, body);
       logInfo('Issue created: $url');
       return url;
     }
@@ -264,6 +265,10 @@ class GithubIssueService {
       final todayCount = prefs.getInt('feedback_daily_count') ?? 0;
       final todayStart = prefs.getInt('feedback_daily_start') ?? 0;
 
+      if (todayStart == 0) {
+        return todayCount < 5;
+      }
+
       if (_isSameDay(todayStart, now)) {
         if (todayCount >= 5) return false;
       }
@@ -285,7 +290,7 @@ class GithubIssueService {
 
       final todayStart = prefs.getInt('feedback_daily_start') ?? 0;
       final todayCount = prefs.getInt('feedback_daily_count') ?? 0;
-      if (_isSameDay(todayStart, now)) {
+      if (todayStart != 0 && _isSameDay(todayStart, now)) {
         await prefs.setInt('feedback_daily_count', todayCount + 1);
       } else {
         await prefs.setInt('feedback_daily_start', now);
@@ -294,6 +299,8 @@ class GithubIssueService {
 
       final hash = _hashIssue(title, body);
       await prefs.setString('feedback_hash_$hash', now.toString());
+
+      await _cleanupOldHashKeys(prefs, now);
     } on Exception {
       // best-effort
     }
@@ -363,12 +370,29 @@ class GithubIssueService {
     final buffer = StringBuffer()..writeln(description);
 
     for (final bytes in screenshotBytesList) {
-      if (bytes.isNotEmpty) {
-        final base64 = await encodeScreenshotBase64(Uint8List.fromList(bytes));
-        if (base64.isEmpty) continue;
+      if (bytes.isEmpty) continue;
+
+      final webpBytes = await compute(_encodeWebP, Uint8List.fromList(bytes));
+      if (webpBytes.isEmpty) continue;
+
+      final url = await _uploadToCatbox(webpBytes);
+      if (url != null) {
         buffer
           ..writeln()
-          ..writeln('![screenshot](data:image/png;base64,$base64)');
+          ..writeln('![screenshot]($url)');
+      } else {
+        logWarning('Screenshot upload failed, using base64 fallback');
+        final base64Str = base64Encode(webpBytes);
+        buffer
+          ..writeln()
+          ..writeln('<details>')
+          ..writeln('<summary>Screenshot (WebP base64)</summary>')
+          ..writeln()
+          ..writeln('```')
+          ..writeln(base64Str)
+          ..writeln('```')
+          ..writeln()
+          ..writeln('</details>');
       }
     }
 
@@ -376,11 +400,34 @@ class GithubIssueService {
   }
 
   String _parseGitHubError(http.Response response) {
+    final code = response.statusCode;
+    String apiMessage;
     try {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      return data['message'] as String? ?? 'Unknown error';
+      apiMessage = data['message'] as String? ?? '';
     } on Exception {
-      return 'HTTP ${response.statusCode}';
+      apiMessage = '';
+    }
+
+    switch (code) {
+      case 401:
+        return 'Feedback token is invalid or expired';
+      case 403:
+        return apiMessage.isNotEmpty
+            ? 'Permission denied: $apiMessage'
+            : 'Permission denied — token may lack Issues:write scope';
+      case 422:
+        return apiMessage.isNotEmpty
+            ? 'Validation error: $apiMessage'
+            : 'Validation error (HTTP 422)';
+      case 429:
+        return 'GitHub API rate limit reached. Try again later';
+      case 500:
+      case 502:
+      case 503:
+        return 'GitHub is temporarily unavailable. Try again later';
+      default:
+        return apiMessage.isNotEmpty ? apiMessage : 'HTTP $code';
     }
   }
 
@@ -391,20 +438,73 @@ class GithubIssueService {
       await feedbackDir.create(recursive: true);
     }
     final filename =
-        '${DateTime.now().millisecondsSinceEpoch}_${bytes.hashCode}.png';
+        '${DateTime.now().millisecondsSinceEpoch}_${bytes.hashCode}.webp';
     final file = File('${feedbackDir.path}/$filename');
     await file.writeAsBytes(bytes);
     return file.path;
   }
 
   String _hashIssue(String title, String body) {
-    return '${title.hashCode}_${body.hashCode}';
+    final bytes = utf8.encode('$title|$body');
+    return sha256.convert(bytes).toString();
   }
 
   bool _isSameDay(int timestamp1, int timestamp2) {
-    final d1 = DateTime.fromMillisecondsSinceEpoch(timestamp1, isUtc: true);
-    final d2 = DateTime.fromMillisecondsSinceEpoch(timestamp2, isUtc: true);
+    final d1 = DateTime.fromMillisecondsSinceEpoch(timestamp1);
+    final d2 = DateTime.fromMillisecondsSinceEpoch(timestamp2);
     return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
+  }
+
+  /// Uploads [webpBytes] to catbox.moe and returns the hosted URL.
+  ///
+  /// Returns `null` if the upload fails. Catbox.moe is a free, anonymous
+  /// file host that requires no API key. The uploaded URL is permanent.
+  Future<String?> _uploadToCatbox(Uint8List webpBytes) async {
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('https://catbox.moe/user/api.php'),
+      );
+      request.fields['reqType'] = 'fileupload';
+      request.fields['filename'] = 'screenshot.webp';
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'fileToUpload',
+          webpBytes,
+          filename: 'screenshot.webp',
+        ),
+      );
+
+      final streamedResponse = await _httpClient
+          .send(request)
+          .timeout(const Duration(seconds: 30));
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200 && response.body.startsWith('https://')) {
+        final url = response.body.trim();
+        logInfo('Screenshot uploaded to catbox.moe: $url');
+        return url;
+      }
+      logWarning('Catbox.moe upload failed: ${response.statusCode}');
+      return null;
+    } on Object catch (e) {
+      logWarning('Catbox.moe upload error: $e');
+      return null;
+    }
+  }
+
+  Future<void> _cleanupOldHashKeys(SharedPreferences prefs, int now) async {
+    const maxAge = Duration(hours: 24);
+    final keys = prefs.getKeys().where((k) => k.startsWith('feedback_hash_'));
+    for (final key in keys) {
+      final value = prefs.getString(key);
+      if (value == null) continue;
+      final ts = int.tryParse(value);
+      if (ts == null) continue;
+      if (now - ts > maxAge.inMilliseconds) {
+        await prefs.remove(key);
+      }
+    }
   }
 }
 
@@ -420,22 +520,20 @@ class IssueSubmissionException implements Exception {
   String toString() => 'IssueSubmissionException: $message';
 }
 
-/// Encodes raw bytes to a base64 data URI string.
+/// Encodes a screenshot to a resized WebP byte array.
 ///
-/// Runs in a background isolate via [compute].
-Future<String> encodeScreenshotBase64(Uint8List bytes) {
-  return compute(_encodeBase64, bytes);
-}
-
-String _encodeBase64(Uint8List bytes) {
-  final decoded = img.decodePng(bytes);
-  if (decoded == null) return '';
+/// Runs in a background isolate via [compute]. Decodes any supported
+/// image format (PNG, JPEG, WebP, etc.), resizes to a maximum width
+/// of 800 pixels, and re-encodes as WebP at quality 70 for compact
+/// file sizes suitable for upload.
+Uint8List _encodeWebP(Uint8List bytes) {
+  final decoded = img.decodeImage(bytes);
+  if (decoded == null) return Uint8List(0);
 
   var resized = decoded;
-  if (resized.width > 1024) {
-    resized = img.copyResize(resized, width: 1024);
+  if (resized.width > 800) {
+    resized = img.copyResize(resized, width: 800);
   }
 
-  final encoded = img.encodePng(resized);
-  return base64Encode(encoded);
+  return Uint8List.fromList(img.encodeWebP(resized));
 }

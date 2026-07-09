@@ -3,6 +3,16 @@
 ## [Unreleased]
 
 ### Fixed
+- **Feedback screenshot format**: Screenshots are now decoded with [img.decodeImage] (auto-detects JPEG/PNG/WebP) instead of [img.decodePng], which silently dropped all camera photos. (`lib/services/github_issue_service.dart`)
+- **Feedback screenshot upload**: Screenshots are encoded as WebP (800px max, compact) and uploaded to catbox.moe, producing rendered image URLs in GitHub issues. Falls back to a collapsible base64 block if the upload fails. Replaces the previous [data:] URI approach which GitHub does not render and which exceeded the 65536-char issue body limit. (`lib/services/github_issue_service.dart`)
+- **Feedback rate limit timezone**: The daily submission limit now resets at local midnight instead of UTC midnight. (`lib/services/github_issue_service.dart`)
+- **Feedback daily limit on first use**: The daily limit of 5 is now enforced even on the first-ever submission (when [feedback_daily_start] is 0). (`lib/services/github_issue_service.dart`)
+- **Feedback race condition**: [_recordSubmission] is now awaited instead of [unawaited], preventing the daily count from being stale during a queue flush. (`lib/services/github_issue_service.dart`)
+- **Feedback hash collision**: Duplicate detection now uses SHA-256 instead of 32-bit [String.hashCode]. Old hash keys are cleaned up after 24 hours. (`lib/services/github_issue_service.dart`)
+- **Feedback HTTP errors**: Differentiated error messages for 401 (invalid token), 403 (permission denied), 422 (validation), 429 (rate limit), and 5xx (unavailable). (`lib/services/github_issue_service.dart`)
+- **Feedback device info**: The app version in device info now uses [PackageInfo.fromPlatform] instead of a hardcoded "1.0". (`lib/screens/feedback_screen.dart`)
+- **Feedback screenshot file extension**: Saved screenshots use [.webp] extension to match the new encoding. (`lib/services/github_issue_service.dart`)
+- **Debug semantics enabled**: [SemanticsBinding.ensureSemantics] is called in debug builds so the Android accessibility tree is materialised for emulator-based UI testing. (`lib/main.dart`)
 - **Foreign key enforcement**: `PRAGMA foreign_keys = ON` is now set on every database connection. Deletion operations respect foreign key constraints, preventing orphaned rows in inventory, prices, and shopping_list tables. (`lib/database/database_helper.dart`)
 - **Database index**: Added `idx_inventory_date_added` on `inventory(date_added)` to speed up cleanup queries and `getLastAddDate` on large inventories. Migration v14. (`lib/database/database_helper.dart`)
 - **Shopping list loading flash**: Added a loading spinner during initial fetch so the empty state does not flash before data arrives. (`lib/screens/shopping_list_screen.dart`)

@@ -1,7 +1,8 @@
 /// @file GithubIssueService unit tests.
 ///
 /// Tests for issue submission, rate limiting, offline queue management,
-/// and duplicate detection.  HTTP calls are mocked with [MockHttpClient],
+/// screenshot processing (WebP encoding + catbox.moe upload), and
+/// duplicate detection. HTTP calls are mocked with [MockHttpClient],
 /// SharedPreferences with [SharedPreferences.setMockInitialValues].
 library;
 
@@ -126,53 +127,51 @@ void main() {
         );
       });
 
-      /// Regression test: verifies screenshot bytes are compressed via
-      /// [encodeScreenshotBase64] and not embedded raw (prevents dead code
-      /// regression where [base64Encode] was called directly instead).
-      test('compresses screenshots before sending', () async {
-        final image = img.Image(width: 2000, height: 2000);
-        final rawBytes = Uint8List.fromList(img.encodePng(image));
-        final rawBase64 = base64Encode(rawBytes);
-        final screenshots = <List<int>>[rawBytes];
+      /// Verifies screenshots are processed (decoded, resized, encoded
+      /// as WebP) and the raw bytes are not embedded directly in the
+      /// issue body. When the catbox.moe upload fails (as it does in
+      /// tests with a mock HTTP client), the fallback embeds the WebP
+      /// base64 in a collapsible details block.
+      test(
+        'processes screenshots to WebP with fallback on upload failure',
+        () async {
+          final image = img.Image(width: 2000, height: 2000);
+          final rawBytes = Uint8List.fromList(img.encodePng(image));
+          final screenshots = <List<int>>[rawBytes];
 
-        String? capturedBody;
-        when(
-          () => mockHttp.post(
-            any(),
-            headers: any(named: 'headers'),
-            body: any(named: 'body'),
-          ),
-        ).thenAnswer((invocation) async {
-          capturedBody = invocation.namedArguments[#body] as String;
-          return http.Response(
-            jsonEncode({
-              'html_url': 'https://github.com/owner/repo/issues/1',
-            }),
-            201,
+          String? capturedBody;
+          when(
+            () => mockHttp.post(
+              any(),
+              headers: any(named: 'headers'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer((invocation) async {
+            capturedBody = invocation.namedArguments[#body] as String;
+            return http.Response(
+              jsonEncode({
+                'html_url': 'https://github.com/owner/repo/issues/1',
+              }),
+              201,
+            );
+          });
+
+          await service.submitIssue(
+            title: 'Screenshot test',
+            body: 'Description',
+            label: 'bug',
+            screenshotBytesList: screenshots,
           );
-        });
 
-        await service.submitIssue(
-          title: 'Regression',
-          body: 'Description',
-          label: 'bug',
-          screenshotBytesList: screenshots,
-        );
+          expect(capturedBody, isNotNull);
+          expect(capturedBody, isNot(contains(base64Encode(rawBytes))));
+          expect(capturedBody, contains('<details>'));
+          expect(capturedBody, contains('Screenshot (WebP base64)'));
+        },
+      );
 
-        expect(capturedBody, isNot(contains(rawBase64)));
-        final match = RegExp(
-          'data:image/png;base64,([A-Za-z0-9+/=]+)',
-        ).firstMatch(capturedBody!);
-        expect(match, isNotNull);
-        final decoded = img.decodeImage(base64Decode(match!.group(1)!));
-        expect(decoded, isNotNull);
-        expect(decoded!.width, lessThanOrEqualTo(1024));
-        expect(decoded.height, lessThanOrEqualTo(1024));
-      });
-
-      /// Regression test: verifies body stays under GitHub API size limit
-      /// (~256 KB) even with large screenshots, ensuring that compression
-      /// is active.
+      /// Verifies body stays under GitHub API size limit even with
+      /// large screenshots, ensuring WebP compression is active.
       test(
         'body size is within GitHub API limits with large screenshots',
         () async {
@@ -209,7 +208,7 @@ void main() {
       );
 
       /// Verifies that when no screenshots are attached, the body does not
-      /// contain any image markdown.
+      /// contain any image markdown or details blocks.
       test('body has no image data when no screenshots provided', () async {
         String? capturedBody;
         when(
@@ -235,6 +234,7 @@ void main() {
         );
 
         expect(capturedBody, isNot(contains('data:image')));
+        expect(capturedBody, isNot(contains('<details>')));
         expect(capturedBody, contains('No screenshot test'));
         expect(capturedBody, contains('Plain description'));
       });
@@ -282,19 +282,168 @@ void main() {
         );
         svc.dispose();
       });
+
+      /// Verifies the daily limit of 5 is enforced even on the
+      /// first-ever submission (when [feedback_daily_start] is 0).
+      test('enforces daily limit on first submission', () async {
+        SharedPreferences.setMockInitialValues({
+          'feedback_daily_count': 5,
+          'feedback_daily_start': 0,
+        });
+        await GithubIssueService.initPreferences();
+
+        final svc = GithubIssueService(httpClient: mockHttp);
+        expect(
+          () => svc.submitIssue(title: 'First Day', body: 'Body'),
+          throwsA(isA<IssueSubmissionException>()),
+        );
+        svc.dispose();
+      });
+
+      /// Verifies the daily limit resets when the day changes
+      /// (using local time, not UTC).
+      test('daily limit resets on new local day', () async {
+        final yesterday = DateTime.now().subtract(const Duration(days: 1));
+        SharedPreferences.setMockInitialValues({
+          'feedback_daily_count': 5,
+          'feedback_daily_start': yesterday.millisecondsSinceEpoch,
+          'feedback_last_submit': DateTime.now()
+              .subtract(const Duration(seconds: 90))
+              .millisecondsSinceEpoch,
+        });
+        await GithubIssueService.initPreferences();
+
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({'html_url': 'https://github.com/owner/repo/issues/1'}),
+            201,
+          ),
+        );
+
+        final svc = GithubIssueService(httpClient: mockHttp);
+        final url = await svc.submitIssue(
+          title: 'New Day',
+          body: 'Body',
+        );
+        expect(url, 'https://github.com/owner/repo/issues/1');
+        svc.dispose();
+      });
     });
-  });
 
-  group('encodeScreenshotBase64', () {
-    /// Verifies that a valid PNG image is resized and base64-encoded.
-    test('encodes a small PNG to base64', () async {
-      final image = img.Image(width: 2, height: 2);
-      final pngBytes = Uint8List.fromList(img.encodePng(image));
-      expect(pngBytes, isNotEmpty);
+    group('submitIssue HTTP error handling', () {
+      /// Verifies a 401 response produces a token-specific error message.
+      test('401 produces token invalid message', () async {
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response('{"message":"Bad credentials"}', 401),
+        );
 
-      final result = await encodeScreenshotBase64(pngBytes);
-      expect(result, isNotEmpty);
-      expect(result, isA<String>());
+        try {
+          await service.submitIssue(title: 'Test', body: 'Body');
+          fail('Should have thrown');
+        } on IssueSubmissionException catch (e) {
+          expect(e.message, contains('invalid or expired'));
+        }
+      });
+
+      /// Verifies a 403 response produces a permission-specific message.
+      test('403 produces permission denied message', () async {
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response('{"message":"Forbidden"}', 403),
+        );
+
+        try {
+          await service.submitIssue(title: 'Test', body: 'Body');
+          fail('Should have thrown');
+        } on IssueSubmissionException catch (e) {
+          expect(e.message, contains('Permission denied'));
+        }
+      });
+
+      /// Verifies a 429 response produces a rate-limit-specific message.
+      test('429 produces rate limit message', () async {
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            '{"message":"API rate limit exceeded"}',
+            429,
+          ),
+        );
+
+        try {
+          await service.submitIssue(title: 'Test', body: 'Body');
+          fail('Should have thrown');
+        } on IssueSubmissionException catch (e) {
+          expect(e.message, contains('rate limit'));
+        }
+      });
+
+      /// Verifies a 503 response produces an unavailability message.
+      test('503 produces unavailable message', () async {
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response('{"message":"Server Error"}', 503),
+        );
+
+        try {
+          await service.submitIssue(title: 'Test', body: 'Body');
+          fail('Should have thrown');
+        } on IssueSubmissionException catch (e) {
+          expect(e.message, contains('temporarily unavailable'));
+        }
+      });
+    });
+
+    group('submitIssue _recordSubmission', () {
+      /// Verifies that [submitIssue] awaits [_recordSubmission] so the
+      /// daily count is updated before the next submission attempt.
+      test('records submission before returning', () async {
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            jsonEncode({'html_url': 'https://github.com/owner/repo/issues/1'}),
+            201,
+          ),
+        );
+
+        await service.submitIssue(title: 'Test', body: 'Body');
+
+        final prefs = await SharedPreferences.getInstance();
+        final count = prefs.getInt('feedback_daily_count') ?? 0;
+        expect(count, 1);
+      });
     });
   });
 }
