@@ -89,13 +89,13 @@ jobs:
       - name: Download code coverage from GitHub
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          path: coverage
+          path: .
           pattern: code-coverage-*
           merge-multiple: true
       - name: Report code coverage
         uses: zgosalvez/github-actions-report-lcov@0e97540271bfaece1ddff20e7fa8d9a6ab1abf67
         with:
-          coverage-files: coverage/lcov.*.info
+          coverage-files: '**/lcov.*.info'
           minimum-coverage: 0
-          artifact-name: code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          update-comment: false

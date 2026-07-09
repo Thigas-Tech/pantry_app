@@ -586,10 +586,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     logInfo('Barcode scanned: $barcode');
     if (barcode == null || !context.mounted) return;
 
-    // If offline, skip API and go directly to manual entry.
-    final isOnline = ref.read(connectivityProvider).value;
-    if (isOnline == false) {
-      logWarning('Offline — skipping API lookup for $barcode');
+    // If offline or connectivity unknown, check the cache first.
+    final hasConnection = await ref.read(hasConnectionProvider.future);
+    if (!hasConnection) {
+      final repo = ref.read(productRepositoryProvider);
+      final cached = await repo.getProductFromCache(barcode);
+      if (cached != null && context.mounted) {
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: cached),
+          ),
+        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryWithProductProvider);
+        });
+        return;
+      }
+      logWarning('Offline and not cached — showing manual entry for $barcode');
       if (context.mounted) {
         SnackbarHelper.showWarning(context, l10n.offlineWarning);
         final result = await Navigator.of(context).push<Product>(
@@ -598,7 +611,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         );
         if (result != null && context.mounted) {
-          final repo = ref.read(productRepositoryProvider);
           await repo.cacheProduct(result);
           if (context.mounted) {
             await Navigator.of(context).push<void>(

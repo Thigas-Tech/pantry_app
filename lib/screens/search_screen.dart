@@ -85,10 +85,44 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           _SearchResult(product: p, source: _ResultSource.local),
       ];
 
+      final isBarcodeQuery =
+          normalizedQuery.length >= 8 &&
+          RegExp(r'^\d+$').hasMatch(normalizedQuery);
+
       var apiHadResults = false;
-      if (query.length >= 2) {
-        final isOnline = ref.read(connectivityProvider).value;
-        if (isOnline == false) {
+      if (isBarcodeQuery) {
+        try {
+          final hasConnection = await ref.read(hasConnectionProvider.future);
+          if (!hasConnection) {
+            if (mounted) {
+              SnackbarHelper.showWarning(
+                context,
+                AppLocalizations.of(context)!.offlineWarning,
+              );
+            }
+          } else {
+            final repo = ref.read(productRepositoryProvider);
+            final product = await repo.getProduct(normalizedQuery);
+            if (capturedRequestId != _requestId || !mounted) return;
+            apiHadResults = true;
+            final existingBarcodes = results
+                .map((r) => r.product.barcode)
+                .toSet();
+            if (!existingBarcodes.contains(product.barcode)) {
+              results.add(
+                _SearchResult(
+                  product: product,
+                  source: _ResultSource.api,
+                ),
+              );
+            }
+          }
+        } on Exception catch (e) {
+          logWarning('Barcode lookup failed: $e');
+        }
+      } else if (query.length >= 2) {
+        final hasConnection = await ref.read(hasConnectionProvider.future);
+        if (!hasConnection) {
           if (mounted) {
             SnackbarHelper.showWarning(
               context,
@@ -164,6 +198,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     );
 
     try {
+      await repo.cacheProduct(product);
       final newId = await repo.addInventoryItem(item);
       if (!mounted) return;
       SnackbarHelper.showUndo(
@@ -178,6 +213,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       );
     } on Exception catch (e) {
       logError('Failed to add item from search: $e');
+      if (mounted) {
+        SnackbarHelper.showError(context, l10n.couldNotCreateInventory);
+      }
     }
   }
 
@@ -219,7 +257,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     name: product.name,
                     barcode: product.barcode,
                   );
-                  unawaited(addShoppingItem(ref, item));
+                  unawaited(
+                    ref
+                        .read(productRepositoryProvider)
+                        .cacheProduct(product)
+                        .then((_) => addShoppingItem(ref, item)),
+                  );
                   SnackbarHelper.showInfo(context, l10n.addToShoppingList);
                 },
               ),
@@ -254,10 +297,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                   IconButton(
                     icon: const Icon(Icons.clear),
                     onPressed: () {
+                      _debounce?.cancel();
+                      _graceTimer?.cancel();
                       _searchController.clear();
                       setState(() {
                         _results = [];
                         _hasSearched = false;
+                        _isSearching = false;
                       });
                     },
                   ),
@@ -343,7 +389,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           ),
           onDismissed: (_) {
             setState(() {
-              _results.removeAt(index);
+              _results.removeWhere((r) => r.product.barcode == product.barcode);
             });
             unawaited(_addToInventory(product));
           },

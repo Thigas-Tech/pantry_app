@@ -48,6 +48,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get barcodeLabel => 'Barcode';
 
   @override
+  String get invalidBarcode => 'Enter a valid barcode (8-13 digits).';
+
+  @override
   String get brandLabel => 'Brand';
 
   @override

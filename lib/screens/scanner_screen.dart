@@ -353,11 +353,14 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
 
   void _submit() {
     final text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      logInfo('Barcode entered manually: $text');
-      unawaited(HapticFeedback.mediumImpact());
-      Navigator.of(context).pop(text);
+    if (text.isEmpty || text.length < 8 || !RegExp(r'^\d+$').hasMatch(text)) {
+      final l10n = AppLocalizations.of(context)!;
+      SnackbarHelper.showWarning(context, l10n.invalidBarcode);
+      return;
     }
+    logInfo('Barcode entered manually: $text');
+    unawaited(HapticFeedback.mediumImpact());
+    Navigator.of(context).pop(text);
   }
 
   @override
@@ -396,6 +399,9 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
                 controller: _controller,
                 autofocus: true,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
                 decoration: InputDecoration(
                   labelText: l10n.barcodeLabel,
                   border: const OutlineInputBorder(),

@@ -13,6 +13,7 @@
   "emptyPantrySubtitle": "Tap the button below to scan your first product",
   "scanFirstProduct": "Scan a barcode",
   "barcodeLabel": "Barcode",
+  "invalidBarcode": "Enter a valid barcode (8-13 digits).",
   "brandLabel": "Brand",
   "categoryLabel": "Category",
   "servingSize": "Serving size",

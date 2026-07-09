@@ -48,6 +48,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get barcodeLabel => 'Código de barras';
 
   @override
+  String get invalidBarcode => 'Digite um código de barras valido (8-13 digitos).';
+
+  @override
   String get brandLabel => 'Marca';
 
   @override

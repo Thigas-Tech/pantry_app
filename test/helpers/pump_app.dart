@@ -27,6 +27,7 @@ MockProductRepository createMockProductRepository() {
   final repo = MockProductRepository();
   when(repo.isCacheOverdue).thenAnswer((_) async => false);
   when(repo.getLastRefreshTime).thenAnswer((_) async => null);
+  when(() => repo.getProductFromCache(any())).thenAnswer((_) async => null);
   return repo;
 }
 
@@ -63,8 +64,7 @@ Future<void> pumpApp(
       overrides: [
         // Default: provide a stubbed image cache.
         imageCacheProvider.overrideWithValue(effectiveImageCache),
-        // All other overrides (e.g., productRepositoryProvider) must be
-        // supplied by the test.
+        // All other overrides must be supplied by the test.
         ...overrides,
       ],
       child: MaterialApp(

@@ -4,16 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/shopping_item.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
-import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Displays the user's shopping list with pending and purchased sections.
 ///
 /// Items can be toggled as purchased, deleted, or cleared in bulk.
-/// A FAB opens the quick-add dialog. The share button exports the list
-/// as text to other apps.
+/// Formats a [quantity] for display, showing decimals only when needed.
+String _formatQuantity(double quantity) {
+  return quantity == quantity.toInt()
+      ? quantity.toInt().toString()
+      : quantity.toString();
+}
+
+/// The main shopping list screen.
+///
+/// Displays pending and purchased shopping items. A FAB opens the
+/// quick-add dialog. The share button exports the list as text to
+/// other apps.
 class ShoppingListScreen extends ConsumerStatefulWidget {
   /// Creates a [ShoppingListScreen] widget.
   const ShoppingListScreen({super.key});
@@ -145,14 +155,21 @@ class _ClearPurchasedButton extends ConsumerWidget {
           ),
         );
         if (confirm != true) return;
+        final db = ref.read(databaseProvider);
+        final purchasedItems = await db.getPurchasedShoppingItems();
         final deleted = await clearPurchasedShoppingItems(ref);
         if (!context.mounted) return;
         if (deleted > 0) {
           SnackbarHelper.showUndo(
             context,
             l10n.undoClearPurchased,
-            () {
-              logWarning('Undo clear purchased is not supported');
+            () async {
+              for (final item in purchasedItems) {
+                await addShoppingItem(
+                  ref,
+                  item.copyWith(isPurchased: false),
+                );
+              }
             },
           );
         }
@@ -186,7 +203,7 @@ class _ShareButton extends ConsumerWidget {
           buffer.writeln('${l10n.pendingItems}:');
           for (final item in pending) {
             buffer.writeln(
-              '- ${item.name} (${item.quantity.toInt()} ${item.unit})',
+              '- ${item.name} (${_formatQuantity(item.quantity)} ${item.unit})',
             );
           }
           buffer.writeln();
@@ -345,7 +362,7 @@ class _ShoppingItemTile extends ConsumerWidget {
               : null,
         ),
         subtitle: Text(
-          '${item.quantity.toInt()} ${item.unit}',
+          '${_formatQuantity(item.quantity)} ${item.unit}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),

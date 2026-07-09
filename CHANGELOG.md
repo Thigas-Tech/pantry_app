@@ -3,6 +3,19 @@
 ## [Unreleased]
 
 ### Fixed
+- **Crash: late final ImagePicker**: Changed to a regular final field, preventing LateInitializationError on second photo capture. (`lib/screens/add_product_screen.dart`, fixes #43)
+- **Data loss: API search result to inventory FK violation**: Now caches the product before inserting the inventory item, and shows a user-facing error on failure. (`lib/screens/search_screen.dart`, fixes #44)
+- **Data loss: API search result to shopping list FK violation**: Now caches the product before inserting the shopping item. (`lib/screens/search_screen.dart`, fixes #45)
+- **Data loss: Undo on Clear Purchased is a no-op**: Captures deleted items before clearing and restores them on undo. (`lib/screens/shopping_list_screen.dart`, fixes #48)
+- **Editing synced price wipes syncStatus and openPricesId**: Preserves all sync metadata when rebuilding the Price object on edit. (`lib/widgets/price_entry_sheet.dart`, fixes #46)
+- **NaN and Infinity prices accepted**: Validates parsed.isFinite and adds a sane upper bound (1e9). Comma decimal separator normalised for locale-aware input. (`lib/widgets/price_entry_sheet.dart`, fixes #47 and #52)
+- **Search by barcode returns no results**: Detects numeric queries of 8+ digits and performs a barcode lookup via [ProductRepository.getProduct] instead of text search. (`lib/screens/search_screen.dart`, fixes #49)
+- **Offline scan bypasses cache**: Now checks the local cache before falling back to manual entry when offline. Added [getProductFromCache] method to [ProductRepository]. (`lib/screens/home_screen.dart`, `lib/services/product_repository.dart`, fixes #51)
+- **Search clear button leaves pending debounce timer**: Cancels debounce and grace timers before clearing results. (`lib/screens/search_screen.dart`, fixes #54)
+- **Manual barcode entry accepts invalid input**: Added digits-only input formatter and length validation (min 8 digits). New ARB key [invalidBarcode]. (`lib/screens/scanner_screen.dart`, fixes #55)
+- **Shopping list quantity.toInt truncation**: Added [_formatQuantity] helper that shows decimals only when needed. (`lib/screens/shopping_list_screen.dart`, fixes #58)
+- **Dismissible removes by stale index**: Changed [removeAt(index)] to [removeWhere] by product barcode. (`lib/screens/search_screen.dart`, fixes #59)
+- **Hardcoded English validator string**: Replaced with [l10n.invalidPriceAmount] ARB key. (`lib/widgets/price_entry_sheet.dart`, fixes #64)
 - **Feedback screenshot format**: Screenshots are now decoded with [img.decodeImage] (auto-detects JPEG/PNG/WebP) instead of [img.decodePng], which silently dropped all camera photos. (`lib/services/github_issue_service.dart`)
 - **Feedback screenshot upload**: Screenshots are encoded as WebP (800px max, compact) and uploaded to catbox.moe, producing rendered image URLs in GitHub issues. Falls back to a collapsible base64 block if the upload fails. Replaces the previous [data:] URI approach which GitHub does not render and which exceeded the 65536-char issue body limit. (`lib/services/github_issue_service.dart`)
 - **Feedback rate limit timezone**: The daily submission limit now resets at local midnight instead of UTC midnight. (`lib/services/github_issue_service.dart`)

@@ -112,6 +112,15 @@ class ProductRepository {
     }
   }
 
+  /// Checks the local cache for a product with the given [barcode].
+  ///
+  /// Returns the cached [Product] or `null` if not found in the local
+  /// database. Unlike [getProduct], this method does not make any
+  /// network requests.
+  Future<Product?> getProductFromCache(String barcode) {
+    return _db.getProduct(barcode);
+  }
+
   // ---------- Named inventories ----------
 
   /// Creates a new inventory (pantry) with the given [name].
