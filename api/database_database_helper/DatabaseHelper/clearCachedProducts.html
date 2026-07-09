@@ -65,11 +65,6 @@
   <p>Deletes all API‑fetched products from the local cache.</p>
 <p>Products with <code>Product.source</code> <code>'manual'</code> are kept. Used during app
 update and manual cache flush so that user‑entered data is never lost.</p>
-<p>Foreign key enforcement is temporarily disabled because inventory rows
-and prices legitimately survive cache flushes (they are LEFT JOINed).
-Shopping list items have ON DELETE SET NULL which also requires FK
-enforcement to be active — after deletion, shopping list barcode
-references are explicitly cleaned up.</p>
 </section>
 
 
@@ -78,17 +73,7 @@ references are explicitly cleaned up.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; clearCachedProducts() async {
   final db = await database;
-  await db.execute(&#39;PRAGMA foreign_keys = OFF&#39;);
-  try {
-    &#47;&#47; Null out shopping list barcode refs to API products before deleting.
-    await db.rawUpdate(&#39;&#39;&#39;
-      UPDATE shopping_list SET barcode = NULL
-      WHERE barcode IN (SELECT barcode FROM products WHERE source = &#39;api&#39;)
-    &#39;&#39;&#39;);
-    return productDao.deleteBySource(db, &#39;api&#39;);
-  } finally {
-    await db.execute(&#39;PRAGMA foreign_keys = ON&#39;);
-  }
+  return productDao.deleteBySource(db, &#39;api&#39;);
 }</code></pre>
 </section>
 
@@ -117,7 +102,7 @@ references are explicitly cleaned up.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.5+1
+      0.0.4+1
   </span>
   
 </footer>

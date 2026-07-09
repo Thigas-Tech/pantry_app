@@ -85,13 +85,6 @@
     throw UnsupportedError(&#39;GitHub API submissions are not supported on web&#39;);
   }
 
-  if (AppConfig.feedbackToken.isEmpty) {
-    logError(&#39;FEEDBACK_TOKEN is empty — in-app feedback will fail&#39;);
-    throw const IssueSubmissionException(
-      &#39;Feedback token is not configured.&#39;,
-    );
-  }
-
   if (!_canSubmit()) {
     throw const IssueSubmissionException(
       &#39;Rate limit reached. Try again later.&#39;,
@@ -119,10 +112,7 @@
           body: jsonEncode({
             &#39;title&#39;: title,
             &#39;body&#39;: fullBody,
-            &#39;labels&#39;: [
-              ?label,
-              &#39;from-app&#39;,
-            ],
+            if (label != null) &#39;labels&#39;: [label],
           }),
         )
         .timeout(const Duration(seconds: 15));
@@ -135,7 +125,7 @@
   if (response.statusCode == 201) {
     final data = jsonDecode(response.body) as Map&lt;String, dynamic&gt;;
     final url = data[&#39;html_url&#39;] as String;
-    await _recordSubmission(title, body);
+    _recordSubmission(title, body);
     logInfo(&#39;Issue created: $url&#39;);
     return url;
   }
@@ -174,7 +164,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.5+1
+      0.0.4+1
   </span>
   
 </footer>

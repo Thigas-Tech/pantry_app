@@ -51,48 +51,21 @@ never waste food again.</p>
 <a href="https://github.com/Thigas-Tech/pantry_app/actions/workflows/build.yml"><img src="https://github.com/Thigas-Tech/pantry_app/actions/workflows/build.yml/badge.svg" alt="Build"></a></p>
 <h2 id="features">Features</h2>
 <ul>
-<li>
-<p><strong>Barcode scanning</strong> — camera-based via Google ML Kit (<code>mobile_scanner</code>) or manual text entry</p>
-</li>
-<li>
-<p><strong>Product lookup</strong> — fetches name, brand, nutrition, ingredients from Open Food Facts</p>
-</li>
-<li>
-<p><strong>Local database</strong> — products are cached locally in SQLite; works without internet for known items</p>
-</li>
-<li>
-<p><strong>Multiple pantries</strong> — create, rename, and delete named inventories (e.g. Home, Work)</p>
-</li>
-<li>
-<p><strong>Expiry tracking</strong> — items grouped into Expired / Expiring Soon / Good on the home screen</p>
-</li>
-<li>
-<p><strong>Local notifications</strong> — two reminders per item: one day before expiry and on expiry day</p>
-</li>
-<li>
-<p><strong>Custom units &amp; locations</strong> — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options</p>
-</li>
-<li>
-<p><strong>Nutrition table</strong> — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml</p>
-</li>
-<li>
-<p><strong>Material You</strong> — dynamic colours from your device wallpaper, light/dark/system theme</p>
-</li>
-<li>
-<p><strong>Undo delete</strong> — restore an accidentally deleted inventory item with a snackbar action</p>
-</li>
-<li>
-<p><strong>Offline-first</strong> — connectivity detection skips API when offline, warns the user, and uses cached data</p>
-</li>
-<li>
-<p><strong>Pull-to-refresh</strong> — updates cached product data from Open Food Facts when online</p>
-</li>
-<li>
-<p><strong>Nutri-Score</strong> — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products</p>
-</li>
-<li>
-<p><strong>Manual product entry</strong> — full form with nutrition table and camera capture when a barcode is unknown or you're offline</p>
-</li>
+<li><strong>Barcode scanning</strong> — camera-based via Google ML Kit (<code>mobile_scanner</code>) or manual text entry</li>
+<li><strong>Product lookup</strong> — fetches name, brand, nutrition, ingredients from Open Food Facts</li>
+<li><strong>Local database</strong> — products are cached locally in SQLite; works without internet for known items</li>
+<li><strong>Multiple pantries</strong> — create, rename, and delete named inventories (e.g. Home, Work)</li>
+<li><strong>Expiry tracking</strong> — items grouped into Expired / Expiring Soon / Good on the home screen</li>
+<li><strong>Local notifications</strong> — two reminders per item: one day before expiry and on expiry day</li>
+<li><strong>Custom units &amp; locations</strong> — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options</li>
+<li><strong>CSV import/export</strong> — backup your pantry or restore from a CSV file</li>
+<li><strong>Nutrition table</strong> — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml</li>
+<li><strong>Material You</strong> — dynamic colours from your device wallpaper, light/dark/system theme</li>
+<li><strong>Undo delete</strong> — restore an accidentally deleted inventory item with a snackbar action</li>
+<li><strong>Offline-first</strong> — connectivity detection skips API when offline, warns the user, and uses cached data</li>
+<li><strong>Pull-to-refresh</strong> — updates cached product data from Open Food Facts when online</li>
+<li><strong>Nutri-Score</strong> — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products</li>
+<li><strong>Manual product entry</strong> — full form with nutrition table and camera capture when a barcode is unknown or you're offline</li>
 </ul>
 <h2 id="screenshots">Screenshots</h2>
 <p>Add screenshots here: Home, Scanner, Product Detail, Settings.</p>
@@ -145,9 +118,8 @@ flutter build appbundle --debug
   database/
     database_helper.dart   # Singleton, schema, migrations
     product_dao.dart       # Product table CRUD
-    inventory_dao.dart       # Inventory items CRUD + joins
-    inventories_dao.dart     # Named pantries CRUD
-    feedback_queue_dao.dart  # Offline feedback submission queue
+    inventory_dao.dart     # Inventory items CRUD + joins
+    inventories_dao.dart   # Named pantries CRUD
   l10n/                # App translations (English ARB)
   models/              # Freezed data models
   providers/           # Riverpod state &amp; dependency injection
@@ -201,7 +173,7 @@ flutter test --concurrency=2 --coverage  # With coverage
 </tr>
 <tr>
 <td>HTTP client</td>
-<td>http</td>
+<td>Dio</td>
 </tr>
 <tr>
 <td>Code generation</td>
@@ -300,22 +272,8 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="price_dao">
-  <span class="name"><a href="database_price_dao/">database/price_dao</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="product_dao">
   <span class="name"><a href="database_product_dao/">database/product_dao</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="shopping_list_dao">
-  <span class="name"><a href="database_shopping_list_dao/">database/shopping_list_dao</a></span> 
 
 </dt>
 <dd>
@@ -370,22 +328,8 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="price">
-  <span class="name"><a href="models_price/">models/price</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="product">
   <span class="name"><a href="models_product/">models/product</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="shopping_item">
-  <span class="name"><a href="models_shopping_item/">models/shopping_item</a></span> 
 
 </dt>
 <dd>
@@ -407,13 +351,6 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="connectivity_provider">
   <span class="name"><a href="providers_connectivity_provider/">providers/connectivity_provider</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="currency_service_provider">
-  <span class="name"><a href="providers_currency_service_provider/">providers/currency_service_provider</a></span> 
 
 </dt>
 <dd>
@@ -454,27 +391,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="open_prices_provider">
-  <span class="name"><a href="providers_open_prices_provider/">providers/open_prices_provider</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="price_provider">
-  <span class="name"><a href="providers_price_provider/">providers/price_provider</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="price_repository_provider">
-  <span class="name"><a href="providers_price_repository_provider/">providers/price_repository_provider</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="product_repository_provider">
   <span class="name"><a href="providers_product_repository_provider/">providers/product_repository_provider</a></span> 
 
@@ -491,13 +407,6 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="settings_provider">
   <span class="name"><a href="providers_settings_provider/">providers/settings_provider</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="shopping_list_provider">
-  <span class="name"><a href="providers_shopping_list_provider/">providers/shopping_list_provider</a></span> 
 
 </dt>
 <dd>
@@ -566,13 +475,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="price_history_screen">
-  <span class="name"><a href="screens_price_history_screen/">screens/price_history_screen</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="product_detail_screen">
   <span class="name"><a href="screens_product_detail_screen/">screens/product_detail_screen</a></span> 
 
@@ -601,13 +503,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="shopping_list_screen">
-  <span class="name"><a href="screens_shopping_list_screen/">screens/shopping_list_screen</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="stats_screen">
   <span class="name"><a href="screens_stats_screen/">screens/stats_screen</a></span> 
 
@@ -617,13 +512,6 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="changelog_parser">
   <span class="name"><a href="services_changelog_parser/">services/changelog_parser</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="currency_service">
-  <span class="name"><a href="services_currency_service/">services/currency_service</a></span> 
 
 </dt>
 <dd>
@@ -673,20 +561,6 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="off_query">
   <span class="name"><a href="services_off_query/">services/off_query</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="open_prices_service">
-  <span class="name"><a href="services_open_prices_service/">services/open_prices_service</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="price_repository">
-  <span class="name"><a href="services_price_repository/">services/price_repository</a></span> 
 
 </dt>
 <dd>
@@ -783,20 +657,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="price_entry_sheet">
-  <span class="name"><a href="widgets_price_entry_sheet/">widgets/price_entry_sheet</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="price_mask">
-  <span class="name"><a href="widgets_price_mask/">widgets/price_mask</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="scanner_overlay_painter">
   <span class="name"><a href="widgets_scanner_overlay_painter/">widgets/scanner_overlay_painter</a></span> 
 
@@ -833,9 +693,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="database_feedback_queue_dao/">database/feedback_queue_dao</a></li>
       <li><a href="database_inventories_dao/">database/inventories_dao</a></li>
       <li><a href="database_inventory_dao/">database/inventory_dao</a></li>
-      <li><a href="database_price_dao/">database/price_dao</a></li>
       <li><a href="database_product_dao/">database/product_dao</a></li>
-      <li><a href="database_shopping_list_dao/">database/shopping_list_dao</a></li>
       <li><a href="l10n_app_localizations/">l10n/app_localizations</a></li>
       <li><a href="l10n_app_localizations_en/">l10n/app_localizations_en</a></li>
       <li><a href="l10n_app_localizations_pt/">l10n/app_localizations_pt</a></li>
@@ -843,25 +701,18 @@ dart pub global run dhttpd --path doc/api
       <li><a href="models_inventory_item/">models/inventory_item</a></li>
       <li><a href="models_inventory_with_product/">models/inventory_with_product</a></li>
       <li><a href="models_pantry_stats/">models/pantry_stats</a></li>
-      <li><a href="models_price/">models/price</a></li>
       <li><a href="models_product/">models/product</a></li>
-      <li><a href="models_shopping_item/">models/shopping_item</a></li>
       <li><a href="providers_active_inventory_provider/">providers/active_inventory_provider</a></li>
       <li><a href="providers_api_service_provider/">providers/api_service_provider</a></li>
       <li><a href="providers_connectivity_provider/">providers/connectivity_provider</a></li>
-      <li><a href="providers_currency_service_provider/">providers/currency_service_provider</a></li>
       <li><a href="providers_database_provider/">providers/database_provider</a></li>
       <li><a href="providers_github_issue_service_provider/">providers/github_issue_service_provider</a></li>
       <li><a href="providers_image_cache_provider/">providers/image_cache_provider</a></li>
       <li><a href="providers_inventory_provider/">providers/inventory_provider</a></li>
       <li><a href="providers_notification_service_provider/">providers/notification_service_provider</a></li>
-      <li><a href="providers_open_prices_provider/">providers/open_prices_provider</a></li>
-      <li><a href="providers_price_provider/">providers/price_provider</a></li>
-      <li><a href="providers_price_repository_provider/">providers/price_repository_provider</a></li>
       <li><a href="providers_product_repository_provider/">providers/product_repository_provider</a></li>
       <li><a href="providers_product_submission_provider/">providers/product_submission_provider</a></li>
       <li><a href="providers_settings_provider/">providers/settings_provider</a></li>
-      <li><a href="providers_shopping_list_provider/">providers/shopping_list_provider</a></li>
       <li><a href="providers_stats_provider/">providers/stats_provider</a></li>
       <li><a href="providers_theme_provider/">providers/theme_provider</a></li>
       <li><a href="screens_add_product_screen/">screens/add_product_screen</a></li>
@@ -871,15 +722,12 @@ dart pub global run dhttpd --path doc/api
       <li><a href="screens_home_screen/">screens/home_screen</a></li>
       <li><a href="screens_manage_inventories_screen/">screens/manage_inventories_screen</a></li>
       <li><a href="screens_pantry_shell/">screens/pantry_shell</a></li>
-      <li><a href="screens_price_history_screen/">screens/price_history_screen</a></li>
       <li><a href="screens_product_detail_screen/">screens/product_detail_screen</a></li>
       <li><a href="screens_scanner_screen/">screens/scanner_screen</a></li>
       <li><a href="screens_search_screen/">screens/search_screen</a></li>
       <li><a href="screens_settings_screen/">screens/settings_screen</a></li>
-      <li><a href="screens_shopping_list_screen/">screens/shopping_list_screen</a></li>
       <li><a href="screens_stats_screen/">screens/stats_screen</a></li>
       <li><a href="services_changelog_parser/">services/changelog_parser</a></li>
-      <li><a href="services_currency_service/">services/currency_service</a></li>
       <li><a href="services_exceptions/">services/exceptions</a></li>
       <li><a href="services_github_issue_service/">services/github_issue_service</a></li>
       <li><a href="services_image_cache_service/">services/image_cache_service</a></li>
@@ -887,8 +735,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="services_notification_service/">services/notification_service</a></li>
       <li><a href="services_off_adapter/">services/off_adapter</a></li>
       <li><a href="services_off_query/">services/off_query</a></li>
-      <li><a href="services_open_prices_service/">services/open_prices_service</a></li>
-      <li><a href="services_price_repository/">services/price_repository</a></li>
       <li><a href="services_product_repository/">services/product_repository</a></li>
       <li><a href="services_product_submission_service/">services/product_submission_service</a></li>
       <li><a href="utils_date_helpers/">utils/date_helpers</a></li>
@@ -902,8 +748,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="widgets_inventory_switcher_card/">widgets/inventory_switcher_card</a></li>
       <li><a href="widgets_nutriscore_badge/">widgets/nutriscore_badge</a></li>
       <li><a href="widgets_nutrition_table/">widgets/nutrition_table</a></li>
-      <li><a href="widgets_price_entry_sheet/">widgets/price_entry_sheet</a></li>
-      <li><a href="widgets_price_mask/">widgets/price_mask</a></li>
       <li><a href="widgets_scanner_overlay_painter/">widgets/scanner_overlay_painter</a></li>
       <li><a href="widgets_whats_new_sheet/">widgets/whats_new_sheet</a></li>
 </ol>
@@ -915,7 +759,7 @@ dart pub global run dhttpd --path doc/api
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.5+1
+      0.0.4+1
   </span>
   
 </footer>

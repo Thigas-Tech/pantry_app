@@ -88,8 +88,7 @@ expiry date.</li>
 <li><code>dateAdded</code> is an epoch timestamp (milliseconds since Unix epoch) set
 automatically when the item is first created. It is used by
 <a href="../database_database_helper/DatabaseHelper/cleanupOldEntries.html">DatabaseHelper.cleanupOldEntries</a> to remove items that haven't been
-re‑added for the configured retention period (see the retention days
-setting).</li>
+re‑added for the configured retention period (see <code>Settings.retentionDays</code>).</li>
 </ul>
 <h2 id="immutability">Immutability</h2>
 <p>This class uses the <code>freezed</code> package, making it <strong>immutable</strong>. All
@@ -496,7 +495,7 @@ was first added.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.5+1
+      0.0.4+1
   </span>
   
 </footer>
