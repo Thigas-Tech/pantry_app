@@ -119,7 +119,10 @@
           body: jsonEncode({
             &#39;title&#39;: title,
             &#39;body&#39;: fullBody,
-            if (label != null) &#39;labels&#39;: [label],
+            &#39;labels&#39;: [
+              ?label,
+              &#39;from-app&#39;,
+            ],
           }),
         )
         .timeout(const Duration(seconds: 15));
