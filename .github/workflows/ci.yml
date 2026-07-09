@@ -93,9 +93,9 @@ jobs:
           pattern: code-coverage-*
           merge-multiple: true
       - name: Report code coverage
-        uses: zgosalvez/github-actions-report-lcov@0e97540271bfaece1ddff20e7fa8d9a6ab1abf67
+        uses: zgosalvez/github-actions-report-lcov@v7
         with:
           coverage-files: '**/lcov.*.info'
           minimum-coverage: 0
-          artifact-name: code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          update-comment: false
