@@ -90,7 +90,10 @@ class GithubIssueService {
             body: jsonEncode({
               'title': title,
               'body': fullBody,
-              if (label != null) 'labels': [label],
+              'labels': [
+                ?label,
+                'from-app',
+              ],
             }),
           )
           .timeout(const Duration(seconds: 15));

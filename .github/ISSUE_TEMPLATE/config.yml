@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Pantry App In-App Feedback
+    url: https://github.com/Thigas-Tech/pantry_app/issues
+    about: >
+      Please use the in-app feedback button (Settings > Report an issue)
+      to submit bug reports and feature requests. External issues are
+      automatically closed and locked.
