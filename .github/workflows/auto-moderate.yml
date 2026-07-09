@@ -8,6 +8,7 @@ on:
 permissions:
   issues: write
   pull-requests: write
+  contents: read
 
 jobs:
   moderate:
@@ -18,22 +19,34 @@ jobs:
           script: |
             const isPr = context.payload.pull_request !== undefined;
             const item = isPr ? context.payload.pull_request : context.payload.issue;
+            const author = item.user.login;
 
-            const { data: collaborators } = await github.rest.repos.listCollaborators({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            });
-            if (collaborators.some(c => c.login === item.user.login)) {
-              console.log(`Collaborator ${item.user.login} — allowing`);
-              return;
-            }
-
+            // In-app feedback (via GithubIssueService) always carries the
+            // from-app label — allow it through without further checks.
             if (!isPr && item.labels.some(l => l.name === 'from-app')) {
               console.log(`Issue has from-app label — allowing`);
               return;
             }
 
-            console.log(`External ${isPr ? 'PR' : 'issue'} from ${item.user.login} — closing and locking`);
+            // Check if the author has admin/maintain/write access to the
+            // repository.  This works for both direct collaborators and
+            // organisation members on public repos (the GITHUB_TOKEN has
+            // sufficient scope for getCollaboratorPermissionLevel).
+            try {
+              const { data: perm } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: author,
+              });
+              if (['admin', 'maintain', 'write'].includes(perm.role_name)) {
+                console.log(`${author} has ${perm.role_name} access — allowing`);
+                return;
+              }
+            } catch (e) {
+              console.log(`Permission check for ${author} failed: ${e.message}`);
+            }
+
+            console.log(`External ${isPr ? 'PR' : 'issue'} from ${author} — closing and locking`);
 
             const body = [
               'Thank you for your interest in Pantry App.',
