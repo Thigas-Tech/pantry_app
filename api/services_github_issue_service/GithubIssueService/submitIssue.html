@@ -132,7 +132,7 @@
   if (response.statusCode == 201) {
     final data = jsonDecode(response.body) as Map&lt;String, dynamic&gt;;
     final url = data[&#39;html_url&#39;] as String;
-    unawaited(_recordSubmission(title, body));
+    await _recordSubmission(title, body);
     logInfo(&#39;Issue created: $url&#39;);
     return url;
   }

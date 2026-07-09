@@ -81,6 +81,10 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  if (kDebugMode) {
+    SemanticsBinding.instance.ensureSemantics();
+  }
+
   await dotenv.load();
   logInfo(&#39;Environment loaded&#39;);
 
