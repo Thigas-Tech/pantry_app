@@ -11,10 +11,12 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
+import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/string_helpers.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
+import 'package:pantry_app/widgets/inventory_card.dart';
 
 /// The main pantry inventory screen.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -226,8 +228,139 @@ class _InventoryList extends ConsumerStatefulWidget {
 }
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
+  List<InventoryWithProduct> get _filtered {
+    if (widget.searchQuery.isEmpty) return widget.items;
+    final q = removeDiacritics(widget.searchQuery.trim().toLowerCase());
+    return widget.items.where((item) {
+      final name = item.productName ?? item.barcode;
+      return removeDiacritics(name.toLowerCase()).contains(q) ||
+          removeDiacritics(item.barcode).contains(q);
+    }).toList();
+  }
+
+  List<InventoryWithProduct> get _expired =>
+      _filtered.where((i) => isExpired(i.expiryDate)).toList();
+
+  List<InventoryWithProduct> get _expiringSoon => _filtered
+      .where(
+        (i) => isExpiringSoon(i.expiryDate, widget.expiringSoonDays),
+      )
+      .toList();
+
+  List<InventoryWithProduct> get _good {
+    final threshold = DateTime.now().add(
+      Duration(days: widget.expiringSoonDays),
+    );
+    return _filtered.where((i) {
+      if (i.expiryDate == null) return true;
+      final date = parseExpiryDate(i.expiryDate);
+      if (date == null) return true;
+      return !date.isBefore(threshold);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    final l10n = AppLocalizations.of(context)!;
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        final repo = ref.read(productRepositoryProvider);
+        final activeId = ref.read(activeInventoryProvider);
+        repo.refreshInventoryProductsBackground(activeId);
+        await repo.setLastRefreshTime();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryWithProductProvider);
+        });
+      },
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                _countChip(
+                  l10n.totalItemsCount(widget.items.length),
+                  Icons.inventory_2_outlined,
+                ),
+                const SizedBox(width: 8),
+                _countChip(
+                  l10n.expiringSoonCount(_expiringSoon.length),
+                  Icons.warning_amber_outlined,
+                ),
+              ],
+            ),
+          ),
+          if (_expired.isNotEmpty) ...[
+            _sectionHeader(l10n.expired, Icons.error_outline),
+            ..._expired.map(_buildCard),
+          ],
+          if (_expiringSoon.isNotEmpty) ...[
+            _sectionHeader(l10n.expiringSoon, Icons.warning_amber),
+            ..._expiringSoon.map(_buildCard),
+          ],
+          if (_good.isNotEmpty) ...[
+            _sectionHeader(l10n.good, Icons.check_circle_outline),
+            ..._good.map(_buildCard),
+          ],
+          if (_filtered.isEmpty && widget.searchQuery.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(child: Text(l10n.noItemsMatch)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _countChip(String label, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withAlpha(25),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withAlpha(76),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionHeader(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard(InventoryWithProduct item) {
+    return RepaintBoundary(
+      child: InventoryCard(
+        key: ValueKey(item.id),
+        item: item,
+        showCheckbox: widget.selectionMode,
+        isSelected: widget.selectedIds.contains(item.id),
+        onToggleSelection: () => widget.onToggleSelection?.call(item.id!),
+        onLongPress: () => widget.onLongPressItem?.call(item.id!),
+      ),
+    );
   }
 }
