@@ -9,6 +9,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
@@ -17,6 +18,7 @@ import 'package:pantry_app/utils/string_helpers.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
+import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 
 /// The main pantry inventory screen.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -155,8 +157,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
     final settings = ref.watch(settingsProvider);
 
+    final inventories = ref.watch(inventoryListProvider);
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.myPantry)),
+      appBar: AppBar(
+        title: Text(l10n.myPantry),
+        actions: [
+          if (inventories.asData?.value != null) ...[
+            InventorySwitcherCard(
+              name:
+                  inventories.asData!.value
+                          .cast<Map<String, dynamic>>()
+                          .firstWhere(
+                            (inv) =>
+                                inv['id'] == ref.read(activeInventoryProvider),
+                            orElse: () => <String, dynamic>{
+                              'name': l10n.myPantry,
+                            },
+                          )['name']
+                      as String?,
+              nutriscoreGrade: inventoryAsync.asData?.value.isNotEmpty == true
+                  ? null
+                  : null,
+              onTap: () async {
+                final result = await Navigator.of(context).push<Object>(
+                  MaterialPageRoute(
+                    builder: (_) => const ManageInventoriesScreen(),
+                  ),
+                );
+                if (result == true && context.mounted) {
+                  ref.invalidate(inventoryWithProductProvider);
+                }
+              },
+            ),
+          ],
+        ],
+      ),
       body: Column(
         children: [
           _buildSearchAnchor(l10n, inventoryAsync.asData?.value ?? []),
@@ -262,6 +298,14 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+    final weekAgo = now
+        .subtract(const Duration(days: 7))
+        .millisecondsSinceEpoch;
+    final addedThisWeek = widget.items.where((i) {
+      if (i.dateAdded == null) return false;
+      return i.dateAdded! >= weekAgo;
+    }).length;
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -288,6 +332,11 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
                 _countChip(
                   l10n.expiringSoonCount(_expiringSoon.length),
                   Icons.warning_amber_outlined,
+                ),
+                const SizedBox(width: 8),
+                _countChip(
+                  l10n.addedThisWeek(addedThisWeek),
+                  Icons.add_circle_outline,
                 ),
               ],
             ),
