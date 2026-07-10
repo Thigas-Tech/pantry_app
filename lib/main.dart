@@ -106,9 +106,10 @@ Future<void> main() async {
   // This runs ~100ms after the first frame so the system dialog does not
   // overlap the initial UI setup.
   unawaited(
-    Future<void>.delayed(const Duration(milliseconds: 100), () {
-      _requestNotificationPermission();
-    }),
+    Future<void>.delayed(
+      const Duration(milliseconds: 100),
+      _requestNotificationPermission,
+    ),
   );
 }
 
@@ -175,7 +176,7 @@ Future<void> _requestNotificationPermission() async {
 /// other schema change) get re-fetched from Open Food Facts with fresh data.
 ///
 /// The changelog detection is content-hash‑driven (compares the hash of
-/// CHANGELOG.md) so that new Unreleased entries surface even when the
+/// CHANGELOG.md file) so that new Unreleased entries surface even when the
 /// app version string has not changed between development builds.
 Future<void> _handleAppUpdate() async {
   try {
