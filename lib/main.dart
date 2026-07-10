@@ -42,12 +42,12 @@ late final ProviderContainer appContainer;
 ///
 /// Startup sequence:
 /// 1. Flutter binding.
-/// 2. Environment variables loaded via `flutter_dotenv`.
+/// 2. Environment variables loaded via flutter_dotenv.
 /// 3. App version check — clears stale caches when the app was updated.
 /// 4. Notification service initialized (timezone, channel, plugin).
 /// 5. Notification permission requested (system dialog, after first frame).
 /// 6. Database cleanup, feedback flush, cache refresh (after first frame).
-/// 7. App launched inside `UncontrolledProviderScope` so all providers
+/// 7. App launched inside [UncontrolledProviderScope] so all providers
 ///    share the same [appContainer].
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -175,7 +175,7 @@ Future<void> _requestNotificationPermission() async {
 /// other schema change) get re-fetched from Open Food Facts with fresh data.
 ///
 /// The changelog detection is content-hash‑driven (compares the hash of
-/// `CHANGELOG.md`) so that new `Unreleased` entries surface even when the
+/// CHANGELOG.md) so that new Unreleased entries surface even when the
 /// app version string has not changed between development builds.
 Future<void> _handleAppUpdate() async {
   try {

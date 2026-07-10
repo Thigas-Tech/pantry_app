@@ -11,15 +11,15 @@ import 'package:pantry_app/utils/logger.dart';
 /// 1. Submit product metadata via the legacy API (`/cgi/product_jqm2.pl`).
 /// 2. Upload local photos (nutrition table, ingredients, front) via
 ///    `/cgi/product_image_upload.pl`.
-/// 3. Update the product's `submissionStatus` on success/failure and
+/// 3. Update the product's submission status on success/failure and
 ///    persist to the local database.
 /// 4. On network failure, queue the barcode in the
-///    `product_submission_queue` table for later retry.
+///    product_submission_queue table for later retry.
 ///
 /// ## Offline queue
 ///
 /// When a submission fails due to a network error (Exception), the barcode
-/// is persisted in the `product_submission_queue` table. The queue is
+/// is persisted in the product_submission_queue table. The queue is
 /// processed at startup and whenever connectivity is restored. Each entry
 /// uses exponential backoff (2^retry minutes, max 24h) up to 5 retries
 /// before being discarded.
@@ -35,7 +35,7 @@ class ProductSubmissionService {
 
   /// Submits [product] to Open Food Facts along with any local images.
   ///
-  /// Returns the updated [Product] with `submissionStatus` set to
+  /// Returns the updated [Product] with submission status set to
   /// [productSubmissionSubmitted] on success or
   /// [productSubmissionFailed] on failure. On network failure the barcode
   /// is queued for background retry.

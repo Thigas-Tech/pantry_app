@@ -1,7 +1,7 @@
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `product_submission_queue` table.
+/// Data-access layer for the product_submission_queue table.
 ///
 /// This table holds barcodes of products that the user attempted to submit
 /// to Open Food Facts while offline. Rows are inserted when a submission
@@ -11,7 +11,7 @@ class ProductSubmissionQueueDao {
   /// Creates a [ProductSubmissionQueueDao].
   const ProductSubmissionQueueDao();
 
-  /// Creates the `product_submission_queue` table.
+  /// Creates the product_submission_queue table.
   Future<void> createTable(Database db) async {
     await db.execute('''
       CREATE TABLE product_submission_queue (
