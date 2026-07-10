@@ -194,6 +194,43 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 ),
               ),
             _infoRow(l10n.barcodeLabel, widget.product.barcode),
+            if (widget.product.languageCode !=
+                Localizations.localeOf(context).languageCode)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: ActionChip(
+                  avatar: const Icon(Icons.language, size: 18),
+                  label: Text(
+                    l10n.showInLanguage(
+                      Localizations.localeOf(
+                        context,
+                      ).languageCode.toUpperCase(),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final currentLocale = Localizations.localeOf(
+                      context,
+                    ).languageCode;
+                    try {
+                      final product = await repo.getProduct(
+                        widget.product.barcode,
+                        languageCode: currentLocale,
+                      );
+                      if (context.mounted) {
+                        await repo.cacheProduct(product);
+                        if (!context.mounted) return;
+                        setState(() {});
+                        SnackbarHelper.showInfo(context, l10n.productUpdated);
+                      }
+                    } on Exception catch (e) {
+                      logError('Failed to switch product language: $e');
+                      if (context.mounted) {
+                        SnackbarHelper.showError(context, e.toString());
+                      }
+                    }
+                  },
+                ),
+              ),
             if (widget.product.nutriscoreGrade != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),

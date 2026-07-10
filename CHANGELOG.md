@@ -3,6 +3,12 @@
 ## [Unreleased]
 
 ### Fixed
+- **Notification init race condition**: Moved notification service initialization before `runApp()` using a shared `ProviderContainer` with `UncontrolledProviderScope`. Post-init tasks now run staggered after the first frame. Eliminated orphan `ProviderContainer` instances. (`lib/main.dart`, fixes #34)
+- **Connectivity null at startup treated as online**: `connectivityProvider` now yields the initial connectivity state within 3 seconds instead of staying in `AsyncLoading`. Timeout defaults to offline. (`lib/providers/connectivity_provider.dart`, fixes #50)
+- **Mixed-currency price aggregation**: `totalInventoryValue` and `averageItemPrice` now convert each price to the user's base currency before summing/averaging, using the existing `CurrencyService`. (`lib/database/price_dao.dart`, `lib/services/price_repository.dart`, `lib/providers/price_provider.dart`, `lib/providers/stats_provider.dart`, fixes #56)
+- **addShoppingItem duplicate entries**: New `insertOrMergeByBarcode` method merges quantities when a pending item with the same barcode and unit already exists. Uses a transaction to prevent double-tap race conditions. (`lib/database/shopping_list_dao.dart`, `lib/providers/shopping_list_provider.dart`, fixes #57)
+- **Manual product entry overwrites cached API data**: Added `mergeFromManual` extension and updated `cacheProduct` to merge manual entries with existing cached products, preserving API-only fields (Nutri-Score, OFF images). (`lib/models/product.dart`, `lib/services/product_repository.dart`, fixes #60)
+- **OFF submission lacks offline retry**: Added `product_submission_queue` table with exponential backoff (2^retry min, max 24h, 5 retries). Queue is flushed at startup and when connectivity is restored. (`lib/database/product_submission_queue_dao.dart`, `lib/database/database_helper.dart`, `lib/services/product_submission_service.dart`, `lib/main.dart`, `lib/screens/pantry_shell.dart`, fixes #61)
 - **Crash: late final ImagePicker**: Changed to a regular final field, preventing LateInitializationError on second photo capture. (`lib/screens/add_product_screen.dart`, fixes #43)
 - **Data loss: API search result to inventory FK violation**: Now caches the product before inserting the inventory item, and shows a user-facing error on failure. (`lib/screens/search_screen.dart`, fixes #44)
 - **Data loss: API search result to shopping list FK violation**: Now caches the product before inserting the shopping item. (`lib/screens/search_screen.dart`, fixes #45)

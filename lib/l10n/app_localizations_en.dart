@@ -194,6 +194,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemUpdated => 'Item updated.';
 
   @override
+  String get productUpdated => 'Product updated.';
+
+  @override
   String get itemAdded => 'Item added to pantry.';
 
   @override
@@ -489,7 +492,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submissionSubmitted => 'Submitted to Open Food Facts';
 
   @override
-  String get submissionFailed => 'Submission to Open Food Facts failed';
+  String get submissionFailed => 'Failed to submit product. Tap to retry.';
+
+  @override
+  String showInLanguage(String language) {
+    return 'Show in $language';
+  }
+
+  @override
+  String get ingredientsOriginal => 'Show original ingredients';
+
+  @override
+  String get ingredientsTranslated => 'Show translated ingredients';
 
   @override
   String get submissionNotSubmitted => 'Not submitted to Open Food Facts';

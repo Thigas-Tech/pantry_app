@@ -116,7 +116,7 @@ infrastructure or external server hosting are listed last.
 - [x] **Flutter widget catalog review** — audited Material 3 widgets. New
   candidates added below.
 - [x] **Performance optimization reference doc** — added section 11 to
-  `ARCHITECTURE.md` documenting: dark mode energy savings, image caching
+  `ARCHITECTURE/PERFORMANCE.md` documenting: dark mode energy savings, image caching
   rationale, offline-first, `RepaintBoundary` strategy, thread strategy,
   AAB/deferred components, eco-mode pattern, and performance measurement.
 
@@ -245,7 +245,7 @@ infrastructure or external server hosting are listed last.
     to react to DB changes.
   - **No inventories at all**: When the user has deleted all inventories,
     hide the switcher entirely and show a "Create pantry" button instead.
-- [ ] **Price tracking** — add `priceAmount` / `priceCurrency` fields to
+- [x] **Price tracking** — add `priceAmount` / `priceCurrency` fields to
   `InventoryItem`. Track spending per product, monthly totals, and price
   history over time. Stubbed with `ComingSoonView` on Stats screen.
 - [ ] **NFC-e receipt scanning** — parse Brazilian electronic tax receipts
@@ -260,12 +260,11 @@ infrastructure or external server hosting are listed last.
 
 ### Documentation
 
-- [x] `ARCHITECTURE.md` — add security section.
-- [x] `ARCHITECTURE.md` — add offline-first pattern diagram.
+- [x] `ARCHITECTURE/INDEX.md` — add security section.
+- [x] `ARCHITECTURE/INDEX.md` — add offline-first pattern diagram.
 - [x] `AGENTS.md` — add "always check TODO.md before starting new work".
-- [x] **Small-screen golden tests (partial)** — `HomeScreen` golden test at
-  360dp exists. Remaining screens (`ProductDetailScreen`, `SettingsScreen`,
-  `StatsScreen`) still pending.
+- [x] **Small-screen golden tests (partial)** — `HomeScreen`, `SettingsScreen`,
+  and `StatsScreen` have golden tests. `ProductDetailScreen` still pending.
 - [ ] **NFC‑e reference doc** — create `lib/docs/nfce_reference.md` with
   complete technical reference (QR code URL formats, state variations,
   v2 vs v3, parsing approach, open‑source tools).
@@ -355,7 +354,7 @@ infrastructure or external server hosting are listed last.
      egl.cc(56)] EGL Error: Success (12288) in display.cc:161`. These are
      harmless Impeller init noise. Research whether they indicate a
      misconfiguration or can be safely ignored. Document in
-     `ARCHITECTURE.md` section 11.7.
+      `ARCHITECTURE/PERFORMANCE.md` section 11.7.
   5. **OFF API "Page temporarily unavailable" errors**: Added retry loop
      in `OffAdapter.searchProducts()` (3 attempts, 1s/2s backoff). Added
      1s grace timer in `SearchScreen._search()` before showing "No results"
@@ -1238,7 +1237,7 @@ infrastructure or external server hosting are listed last.
 Items that require paid hosting, external server infrastructure, or cloud
 storage costs.
 
-- [ ] **Product prices + inventory total value** — new `prices` SQLite
+- [x] **Product prices + inventory total value** — new `prices` SQLite
   table, `PriceDao`, `Price` freezed model. Dual-source: local user‑entered
   prices and Open Prices API (`prices.openfoodfacts.org`). Price badge on
   `InventoryCard` (unit price), `InventoryTile` (price + store), total
@@ -1373,7 +1372,7 @@ storage costs.
 
 ### Documentation tied to paid features
 
-- [ ] **Price tracking doc** — add section to `ARCHITECTURE.md`
+- [ ] **Price tracking doc** — add section to `ARCHITECTURE/INDEX.md`
   documenting local + Open Prices API data flow, conflict resolution, and
   proof‑photo requirement.
 

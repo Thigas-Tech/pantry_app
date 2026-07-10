@@ -54,10 +54,14 @@ void invalidateShoppingList(WidgetRef ref) {
 }
 
 /// Adds an item to the shopping list, merging by barcode if a pending
-/// item with the same barcode already exists.
+/// item with the same barcode and unit already exists.
+///
+/// When an existing pending item has the same barcode and unit, the
+/// quantities are summed instead of creating a duplicate row.
 Future<void> addShoppingItem(WidgetRef ref, ShoppingItem item) async {
   final db = ref.read(databaseProvider);
-  await db.insertShoppingItem(item);
+  final database = await db.database;
+  await db.shoppingListDao.insertOrMergeByBarcode(database, item);
   invalidateShoppingList(ref);
 }
 

@@ -676,7 +676,10 @@ void main() {
       const ProductDetailScreen(product: failedManualProduct),
       overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
     );
-    expect(find.text('Submission to Open Food Facts failed'), findsOneWidget);
+    expect(
+      find.text('Failed to submit product. Tap to retry.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows pending chip for manual product', (tester) async {

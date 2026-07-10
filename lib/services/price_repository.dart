@@ -98,14 +98,62 @@ class PriceRepository {
   // ---------------------------------------------------------------------------
 
   /// Returns the sum of the most recent price per distinct product in
-  /// the given inventory, or `null` if no prices exist.
-  Future<double?> totalInventoryValue(int inventoryId) =>
-      _db.getTotalInventoryValue(inventoryId);
+  /// the given inventory, converted to [baseCurrency], or `null` if no
+  /// prices exist.
+  ///
+  /// When multiple currencies are present, each price is converted to
+  /// [baseCurrency] before summing. The [baseCurrency] defaults to the
+  /// user's configured base currency from Settings. If conversion fails
+  /// for a price (e.g. rates unavailable), the unconverted value is used
+  /// and a warning is logged.
+  Future<double?> totalInventoryValue(
+    int inventoryId, {
+    String baseCurrency = 'USD',
+  }) async {
+    final db = await _db.database;
+    final rows = await _db.priceDao.totalInventoryValueByCurrency(
+      db,
+      inventoryId,
+    );
+    if (rows.isEmpty) return null;
+
+    var total = 0.0;
+    for (final row in rows) {
+      final currency = row['currency'] as String;
+      final subtotal = (row['subtotal'] as num).toDouble();
+      total += await convertToBase(subtotal, currency, baseCurrency);
+    }
+    return double.tryParse(total.toStringAsFixed(2));
+  }
 
   /// Returns the average of the most recent price per distinct product in
-  /// the given inventory, or `null` if no prices exist.
-  Future<double?> averageItemPrice(int inventoryId) =>
-      _db.getAverageItemPrice(inventoryId);
+  /// the given inventory, converted to [baseCurrency], or `null` if no
+  /// prices exist.
+  ///
+  /// Each price is converted individually before averaging so that
+  /// mixed-currency inventories produce a meaningful average.
+  Future<double?> averageItemPrice(
+    int inventoryId, {
+    String baseCurrency = 'USD',
+  }) async {
+    final db = await _db.database;
+    final rows = await _db.priceDao.latestPricesWithCurrency(
+      db,
+      inventoryId,
+    );
+    if (rows.isEmpty) return null;
+
+    var sum = 0.0;
+    var count = 0;
+    for (final row in rows) {
+      final price = (row['price'] as num).toDouble();
+      final currency = row['currency'] as String;
+      sum += await convertToBase(price, currency, baseCurrency);
+      count++;
+    }
+    final avg = sum / count;
+    return double.tryParse(avg.toStringAsFixed(2));
+  }
 
   /// Returns the count of distinct items in the inventory that have at
   /// least one price.

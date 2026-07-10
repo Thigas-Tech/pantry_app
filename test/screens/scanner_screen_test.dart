@@ -107,6 +107,93 @@ void main() {
       expect(find.byIcon(Icons.edit), findsOneWidget);
     });
 
+    testWidgets('successful barcode scan pops the route with barcode value', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        const ScannerScreen(),
+        settle: false,
+      );
+      await tester.pump();
+
+      final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+
+      // Simulate a barcode detection
+      scanner.onDetect!(
+        const BarcodeCapture(
+          barcodes: [
+            Barcode(
+              rawValue: '1234567890123',
+              format: BarcodeFormat.ean13,
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ScannerScreen), findsNothing);
+    });
+
+    testWidgets('camera permission denied shows error view', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        const ScannerScreen(),
+        settle: false,
+      );
+      await tester.pump();
+
+      final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+
+      // Trigger the error builder manually
+      scanner.errorBuilder!(
+        tester.element(find.byType(MobileScanner)),
+        const MobileScannerException(
+          errorCode: MobileScannerErrorCode.permissionDenied,
+        ),
+      );
+
+      await tester.pump();
+
+      expect(
+        find.text('Camera permission denied. Grant access in Settings.'),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    });
+
+    testWidgets('retry button resets scanner state', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        const ScannerScreen(),
+        settle: false,
+      );
+      await tester.pump();
+
+      // Trigger error
+      final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+      scanner.errorBuilder!(
+        tester.element(find.byType(MobileScanner)),
+        const MobileScannerException(
+          errorCode: MobileScannerErrorCode.genericError,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Retry'), findsOneWidget);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+
+      expect(find.text('Retry'), findsNothing);
+      expect(find.byType(MobileScanner), findsOneWidget);
+    });
+
     testWidgets('back navigation shows confirmation dialog', (
       tester,
     ) async {

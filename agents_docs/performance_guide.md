@@ -118,3 +118,8 @@ When implementing features that consume significant device resources:
 | Minimize expensive rendering ops | Avoid multiple `ShaderMask`, `ClipPath` — group them |
 | Do not block the UI thread | Offload heavy computations to isolates (`compute`) |
 | Measure on real low-end devices | Profile mode, physical device, multiple iterations |
+
+## Impeller EGL warnings
+
+- **Impeller EGL warnings**: `[ERROR:flutter/impeller/toolkit/egl/egl.cc(56)] EGL Error: Success (12288) in display.cc:161`. These are harmless Impeller init noise, often occurring on specific Android emulator drivers or older devices. They do not indicate a functional issue and can be safely ignored.
+

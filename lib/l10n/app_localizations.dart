@@ -462,6 +462,12 @@ abstract class AppLocalizations {
   /// **'Item updated.'**
   String get itemUpdated;
 
+  /// No description provided for @productUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Product updated.'**
+  String get productUpdated;
+
   /// No description provided for @itemAdded.
   ///
   /// In en, this message translates to:
@@ -999,8 +1005,26 @@ abstract class AppLocalizations {
   /// No description provided for @submissionFailed.
   ///
   /// In en, this message translates to:
-  /// **'Submission to Open Food Facts failed'**
+  /// **'Failed to submit product. Tap to retry.'**
   String get submissionFailed;
+
+  /// Label for a chip that allows the user to re-fetch the product in a different language
+  ///
+  /// In en, this message translates to:
+  /// **'Show in {language}'**
+  String showInLanguage(String language);
+
+  /// No description provided for @ingredientsOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original ingredients'**
+  String get ingredientsOriginal;
+
+  /// No description provided for @ingredientsTranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Show translated ingredients'**
+  String get ingredientsTranslated;
 
   /// No description provided for @submissionNotSubmitted.
   ///

@@ -20,6 +20,7 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
@@ -29,15 +30,25 @@ import 'package:pantry_app/services/notification_background_handler.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// The single [ProviderContainer] shared by the entire app.
+///
+/// Created once before [runApp] and passed to [UncontrolledProviderScope] so
+/// that all providers share the same container and any pre-initialized
+/// services (e.g. notification service) are immediately available to the
+/// widget tree. Disposed when the platform sends [AppLifecycleState.detached].
+late final ProviderContainer appContainer;
+
 /// Entry point of the Pantry application.
 ///
 /// Startup sequence:
 /// 1. Flutter binding.
 /// 2. Environment variables loaded via `flutter_dotenv`.
 /// 3. App version check — clears stale caches when the app was updated.
-/// 4. Notification permission request and initialization.
-/// 5. Database cleanup (after first frame).
-/// 6. App launched inside `ProviderScope`.
+/// 4. Notification service initialized (timezone, channel, plugin).
+/// 5. Notification permission requested (system dialog, after first frame).
+/// 6. Database cleanup, feedback flush, cache refresh (after first frame).
+/// 7. App launched inside `UncontrolledProviderScope` so all providers
+///    share the same [appContainer].
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -61,34 +72,101 @@ Future<void> main() async {
 
   await _handleAppUpdate();
 
-  runApp(const ProviderScope(child: PantryApp()));
-  logInfo('App started');
-
-  unawaited(_scheduleCacheRefresh());
-
-  final container = ProviderContainer();
-  final notifService = container.read(notificationServiceProvider);
-
-  await notifService.initialize(
-    onDidReceiveResponse: (response) {
-      _handleNotificationTap(response, container);
-    },
-    onDidReceiveBackgroundResponse: notificationTapBackground,
-  );
-
-  final granted = await notifService.requestPermission();
-  if (granted != false) {
-    unawaited(_rescheduleNotifications(ProviderContainer()));
-  } else {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('notification_denied_warning', true);
-    logInfo('Notification permission denied — flagged warning for PantryShell');
+  // Create the shared container and init the notification service before
+  // runApp so that any widget reading notificationServiceProvider on the
+  // first frame sees an initialized (or gracefully-failed) service.
+  appContainer = ProviderContainer();
+  try {
+    final notifService = appContainer.read(notificationServiceProvider);
+    await notifService.initialize(
+      onDidReceiveResponse: _handleNotificationTap,
+      onDidReceiveBackgroundResponse: notificationTapBackground,
+    );
+    logInfo('Notification service initialized before runApp');
+  } on Exception catch (e) {
+    logWarning('Notification init before runApp failed: $e');
+    // Continue — the notification service will be unavailable on the first
+    // frame, but widgets already handle `!initialized` gracefully.
   }
 
-  unawaited(_scheduleInactivityReminder(ProviderContainer()));
-  unawaited(_runDatabaseCleanup(ProviderContainer()));
-  unawaited(_flushFeedbackQueue(ProviderContainer()));
-  container.dispose();
+  runApp(
+    UncontrolledProviderScope(
+      container: appContainer,
+      child: const PantryApp(),
+    ),
+  );
+  logInfo('App started');
+
+  // Post-first-frame tasks (do not block startup).
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _runPostInitTasks();
+  });
+
+  // Notification permission request — needs the Activity to be visible.
+  // This runs ~100ms after the first frame so the system dialog does not
+  // overlap the initial UI setup.
+  unawaited(
+    Future<void>.delayed(const Duration(milliseconds: 100), () {
+      _requestNotificationPermission();
+    }),
+  );
+}
+
+/// Runs non-critical post-init tasks sequentially with delays to avoid
+/// janking the first few frames.
+void _runPostInitTasks() {
+  unawaited(_scheduleCacheRefresh());
+  unawaited(
+    Future<void>.delayed(
+      const Duration(milliseconds: 200),
+      _runDatabaseCleanup,
+    ),
+  );
+  unawaited(
+    Future<void>.delayed(
+      const Duration(milliseconds: 400),
+      _flushFeedbackQueue,
+    ),
+  );
+  unawaited(
+    Future<void>.delayed(
+      const Duration(milliseconds: 600),
+      _schedulePostInitNotifications,
+    ),
+  );
+  unawaited(
+    Future<void>.delayed(
+      const Duration(milliseconds: 800),
+      _flushProductSubmissionQueue,
+    ),
+  );
+}
+
+/// Requests notification permission after the first frame.
+///
+/// On Android 13+ this shows a system dialog. On older Android the call
+/// is a no-op. Failure is silently logged — the user can grant permission
+/// later from Settings.
+Future<void> _requestNotificationPermission() async {
+  try {
+    final notifService = appContainer.read(notificationServiceProvider);
+    if (!notifService.initialized) {
+      logWarning('Cannot request permission — notification service not ready');
+      return;
+    }
+    final granted = await notifService.requestPermission();
+    if (granted != false) {
+      unawaited(_rescheduleNotifications());
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notification_denied_warning', true);
+      logInfo(
+        'Notification permission denied — flagged warning for PantryShell',
+      );
+    }
+  } on Exception catch (e) {
+    logWarning('Notification permission request failed: $e');
+  }
 }
 
 /// Clears the product database and image cache when the app version changes.
@@ -151,11 +229,9 @@ Future<void> _handleAppUpdate() async {
 /// silently logged but never propagated.
 Future<void> _scheduleCacheRefresh() async {
   try {
-    final container = ProviderContainer();
-    final repo = container.read(productRepositoryProvider);
+    final repo = appContainer.read(productRepositoryProvider);
     if (!await repo.isCacheOverdue()) {
       logInfo('Cache is fresh — skipping scheduled refresh');
-      container.dispose();
       return;
     }
     logInfo('Cache is overdue — scheduling background refresh');
@@ -163,7 +239,7 @@ Future<void> _scheduleCacheRefresh() async {
     // [HomeScreen._refreshIfOverdue] sees a non‑overdue cache and
     // does not duplicate the work.
     await repo.setLastRefreshTime();
-    final db = container.read(databaseProvider);
+    final db = appContainer.read(databaseProvider);
     final inventories = await db.getInventories();
     for (final inv in inventories) {
       repo.refreshInventoryProductsBackground(inv['id'] as int);
@@ -171,14 +247,17 @@ Future<void> _scheduleCacheRefresh() async {
     logInfo(
       'Background refresh scheduled for ${inventories.length} inventories',
     );
-    container.dispose();
   } on Exception catch (e) {
     logError('Scheduled cache refresh failed: $e');
   }
 }
 
 /// Removes stale inventory items and orphaned products.
-Future<void> _runDatabaseCleanup(ProviderContainer container) async {
+void _runDatabaseCleanup() {
+  unawaited(_runDatabaseCleanupAsync());
+}
+
+Future<void> _runDatabaseCleanupAsync() async {
   logInfo('Starting database cleanup');
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -188,17 +267,19 @@ Future<void> _runDatabaseCleanup(ProviderContainer container) async {
     logInfo('Database cleanup completed');
   } on Exception catch (e) {
     logError('Database cleanup failed: $e');
-  } finally {
-    container.dispose();
   }
 }
 
 /// Flushes any queued feedback issues at startup.
-Future<void> _flushFeedbackQueue(ProviderContainer container) async {
+void _flushFeedbackQueue() {
+  unawaited(_flushFeedbackQueueAsync());
+}
+
+Future<void> _flushFeedbackQueueAsync() async {
   logInfo('Checking for pending feedback issues');
   await GithubIssueService.initPreferences();
   try {
-    final service = container.read(githubIssueServiceProvider);
+    final service = appContainer.read(githubIssueServiceProvider);
     final result = await service.flushQueue();
     if (result.submitted > 0) {
       logInfo('Flushed ${result.submitted} queued feedback issues');
@@ -206,10 +287,28 @@ Future<void> _flushFeedbackQueue(ProviderContainer container) async {
     if (result.failed > 0) {
       logWarning('${result.failed} feedback issues failed to flush');
     }
-    container.dispose();
   } on Exception catch (e) {
     logWarning('Feedback queue flush skipped: $e');
-    container.dispose();
+  }
+}
+
+/// Reschedules expiry and inactivity reminders after startup.
+void _schedulePostInitNotifications() {
+  unawaited(_rescheduleNotifications());
+  unawaited(_scheduleInactivityReminder());
+}
+
+/// Flushes queued product submissions to Open Food Facts.
+Future<void> _flushProductSubmissionQueue() async {
+  logInfo('Checking for pending product submissions');
+  try {
+    final service = appContainer.read(productSubmissionServiceProvider);
+    final submitted = await service.flushQueue();
+    if (submitted > 0) {
+      logInfo('Flushed $submitted pending product submissions');
+    }
+  } on Exception catch (e) {
+    logWarning('Product submission queue flush failed: $e');
   }
 }
 
@@ -219,7 +318,6 @@ Future<void> _flushFeedbackQueue(ProviderContainer container) async {
 /// the product in the database.
 void _handleNotificationTap(
   NotificationResponse response,
-  ProviderContainer container,
 ) {
   final payload = response.payload;
   if (payload == null || payload.isEmpty) {
@@ -233,10 +331,10 @@ void _handleNotificationTap(
 }
 
 /// Reschedules all expiry reminders for items with future expiry dates.
-Future<void> _rescheduleNotifications(ProviderContainer container) async {
+Future<void> _rescheduleNotifications() async {
   logInfo('Rescheduling expiry notifications');
   try {
-    final notifService = container.read(notificationServiceProvider);
+    final notifService = appContainer.read(notificationServiceProvider);
     if (!notifService.initialized) {
       logWarning('Notification service not initialized, skipping reschedule');
       return;
@@ -272,18 +370,16 @@ Future<void> _rescheduleNotifications(ProviderContainer container) async {
     logInfo('Notification reschedule completed');
   } on Exception catch (e) {
     logError('Notification reschedule failed: $e');
-  } finally {
-    container.dispose();
   }
 }
 
 /// Checks the inactivity threshold and schedules a daily reminder if the user
 /// has not added any product for more than [Settings.inactivityThresholdDays]
 /// days.
-Future<void> _scheduleInactivityReminder(ProviderContainer container) async {
+Future<void> _scheduleInactivityReminder() async {
   logInfo('Scheduling inactivity reminder check');
   try {
-    final notifService = container.read(notificationServiceProvider);
+    final notifService = appContainer.read(notificationServiceProvider);
     if (!notifService.initialized) {
       logWarning(
         'Notification service not initialized, skipping inactivity reminder',
@@ -316,8 +412,6 @@ Future<void> _scheduleInactivityReminder(ProviderContainer container) async {
     logInfo('Inactivity reminder scheduling completed');
   } on Exception catch (e) {
     logError('Inactivity reminder scheduling failed: $e');
-  } finally {
-    container.dispose();
   }
 }
 

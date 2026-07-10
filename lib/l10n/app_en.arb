@@ -69,6 +69,7 @@
   "typeOrPasteBarcode": "Type or paste a barcode",
   "submit": "Submit",
   "itemUpdated": "Item updated.",
+  "productUpdated": "Product updated.",
   "itemAdded": "Item added to pantry.",
   "itemRemoved": "Item removed from pantry.",
   "saveFailed": "Failed to save inventory item.",
@@ -261,7 +262,18 @@
   "flushCacheFailed": "Failed to flush cache. Please try again.",
   "submissionPending": "Pending submission to Open Food Facts",
   "submissionSubmitted": "Submitted to Open Food Facts",
-  "submissionFailed": "Submission to Open Food Facts failed",
+  "submissionFailed": "Failed to submit product. Tap to retry.",
+  "showInLanguage": "Show in {language}",
+  "@showInLanguage": {
+    "description": "Label for a chip that allows the user to re-fetch the product in a different language",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "ingredientsOriginal": "Show original ingredients",
+  "ingredientsTranslated": "Show translated ingredients",
   "submissionNotSubmitted": "Not submitted to Open Food Facts",
   "submissionSuccess": "Product submitted to Open Food Facts.",
   "submissionError": "Failed to submit product. Tap to retry.",

@@ -121,6 +121,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
           logWarning('Barcode lookup failed: $e');
         }
       } else if (query.length >= 2) {
+        final appLocale = Localizations.localeOf(context).languageCode;
         final hasConnection = await ref.read(hasConnectionProvider.future);
         if (!hasConnection) {
           if (mounted) {
@@ -132,11 +133,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
         } else {
           try {
             final api = ref.read(apiServiceProvider);
-            var apiResults = await api.searchProducts(normalizedQuery);
+            var apiResults = await api.searchProducts(
+              normalizedQuery,
+              languageCode: appLocale,
+            );
             if (capturedRequestId != _requestId || !mounted) return;
 
             if (apiResults.isEmpty && normalizedQuery != query) {
-              apiResults = await api.searchProducts(query);
+              apiResults = await api.searchProducts(
+                query,
+                languageCode: appLocale,
+              );
               if (capturedRequestId != _requestId || !mounted) return;
             }
 

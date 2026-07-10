@@ -183,6 +183,18 @@ abstract class Product with _$Product {
     /// `'manual'`.
     @Default('api') String source,
 
+    /// The locale code of the language used when this product was fetched
+    /// from Open Food Facts (e.g. `'en'`, `'fr'`, `'pt'`).
+    ///
+    /// This represents the language *requested* by the client, not necessarily
+    /// the language *returned* — OFF silently falls back to English if the
+    /// requested language has no data for a given field. Storing the
+    /// requested code allows the "Show in language" ActionChip to display
+    /// meaningful options.
+    ///
+    /// Defaults to 'en' for legacy records and manually entered products.
+    @Default('en') String languageCode,
+
     /// Local file path to a photo of the nutrition facts table.
     ///
     /// Populated when the user captures a photo on the manual-entry screen.
@@ -216,7 +228,10 @@ abstract class Product with _$Product {
   /// model. Local-only fields ([source], [submissionStatus],
   /// [nutritionImagePath], etc.) are set to their defaults because the
   /// SDK does not carry them. The [lastSynced] timestamp is set to now.
-  factory Product.fromOffProduct(off.Product offProduct) {
+  factory Product.fromOffProduct(
+    off.Product offProduct, {
+    String languageCode = 'en',
+  }) {
     final n = offProduct.nutriments;
     return Product(
       barcode: offProduct.barcode ?? '',
@@ -244,6 +259,7 @@ abstract class Product with _$Product {
       saltG: n?.getValue(off.Nutrient.salt, off.PerSize.oneHundredGrams),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
       nutriscoreGrade: offProduct.nutriscore,
+      languageCode: languageCode,
     );
   }
 }
@@ -264,13 +280,14 @@ extension ProductToOff on Product {
   }
 }
 
-/// Extension that provides safe API merge semantics on [Product].
+/// Extension that provides safe merge semantics on [Product].
 ///
-/// [mergeFromApi] is defined as an extension rather than a method on the
-/// abstract class because freezed generates a concrete implementation
-/// ([_Product]) that `implements` (not `extends`) the abstract class.
+/// Both [mergeFromApi] and [mergeFromManual] are defined as extensions
+/// rather than methods on the abstract class because freezed generates a
+/// concrete implementation ([_Product]) that `implements` (not `extends`)
+/// the abstract class.
 ///
-/// ## Merge rules
+/// ## API merge rules ([mergeFromApi])
 ///
 /// - **API non-null wins** — if the API returned a value, it overwrites
 ///   the cached value.
@@ -283,9 +300,24 @@ extension ProductToOff on Product {
 /// - **Name sentinel** — if the API returns `'Unknown'` (the default when
 ///   the real name is missing), the cached name is kept.
 ///
-/// This is the **safe-update** primitive for pull-to-refresh and post-flush
-/// re-fetch operations. It guarantees that an incomplete API response can
-/// never degrade the cached data.
+/// ## Manual merge rules ([mergeFromManual])
+///
+/// - **Manual non-null wins** — the user explicitly entered these fields,
+///   so they override the cached API data.
+/// - **API-only fields are preserved** — [nutriscoreGrade],
+///   [nutriscoreNotApplicableCategory], [offNutritionImageUrl],
+///   [offIngredientsImageUrl], [offProductImageUrl], [categoriesHierarchy]
+///   from the cache are kept because the manual form does not provide them.
+/// - **Local-only fields are never touched** — [source] stays `'manual'`,
+///   [submissionStatus] is preserved from the existing cache if it was
+///   `submitted`.
+/// - **Empty/nulled user fields** — if the user left a field empty on the
+///   manual form but the cache has a value, the cache value is kept.
+///
+/// This is the **safe-update** primitive for manual entry over an existing
+/// cache record. It prevents a sparse manual entry from wiping out rich
+/// API data (Nutri-Score, nutrition facts, images) that the user did not
+/// explicitly override.
 extension ProductMerge on Product {
   /// Merges data from an API-fetched [api] product into this product,
   /// preserving local-only fields that the API does not return.
@@ -320,6 +352,56 @@ extension ProductMerge on Product {
           nonEmpty(api.nutriscoreNotApplicableCategory) ??
           nutriscoreNotApplicableCategory,
       lastSynced: api.lastSynced ?? lastSynced,
+    );
+  }
+
+  /// Merges data from a user-entered [manual] product into this cached
+  /// product, preserving API-only fields that the manual form does not
+  /// provide.
+  ///
+  /// Use when the user manually enters or edits a product whose barcode
+  /// already exists in the local cache (from a previous API fetch).
+  Product mergeFromManual(Product manual) {
+    T? nonEmpty<T extends String>(T? value) =>
+        (value != null && value.isNotEmpty) ? value : null;
+
+    return copyWith(
+      // User-entered fields override cache.
+      name: manual.name != 'Unknown' ? manual.name : name,
+      brand: nonEmpty(manual.brand) ?? brand,
+      category: nonEmpty(manual.category) ?? category,
+      ingredients: nonEmpty(manual.ingredients) ?? ingredients,
+      servingSize: nonEmpty(manual.servingSize) ?? servingSize,
+      imageUrl: nonEmpty(manual.imageUrl) ?? imageUrl,
+
+      // Nutrition: user values win, but preserve cache when user left empty.
+      energyKcal: manual.energyKcal ?? energyKcal,
+      proteinG: manual.proteinG ?? proteinG,
+      carbsG: manual.carbsG ?? carbsG,
+      fatG: manual.fatG ?? fatG,
+      fiberG: manual.fiberG ?? fiberG,
+      saltG: manual.saltG ?? saltG,
+
+      // Local image paths from the manual form.
+      nutritionImagePath: manual.nutritionImagePath ?? nutritionImagePath,
+      ingredientsImagePath: manual.ingredientsImagePath ?? ingredientsImagePath,
+      productImagePath: manual.productImagePath ?? productImagePath,
+
+      // Source and submission status from the manual entry.
+      source: manual.source,
+      submissionStatus: submissionStatus == productSubmissionSubmitted
+          ? productSubmissionSubmitted
+          : manual.submissionStatus,
+      lastSynced: manual.lastSynced ?? lastSynced,
+
+      // API-only fields that the manual form never touches.
+      // Preserve cache values so they are never wiped.
+      nutriscoreGrade: nutriscoreGrade,
+      nutriscoreNotApplicableCategory: nutriscoreNotApplicableCategory,
+      offNutritionImageUrl: offNutritionImageUrl,
+      offIngredientsImageUrl: offIngredientsImageUrl,
+      offProductImageUrl: offProductImageUrl,
+      categoriesHierarchy: categoriesHierarchy,
     );
   }
 }

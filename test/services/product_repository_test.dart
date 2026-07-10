@@ -196,10 +196,81 @@ void main() {
       expect(rows, 1);
     });
 
-    test('cacheProduct inserts product into DB', () async {
-      when(() => mockDb.insertProduct(testProduct)).thenAnswer((_) async => {});
-      await repository.cacheProduct(testProduct);
-      verify(() => mockDb.insertProduct(testProduct)).called(1);
+    test(
+      'cacheProduct inserts product into DB when no existing record',
+      () async {
+        when(
+          () => mockDb.getProduct(testBarcode),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockDb.insertProduct(testProduct),
+        ).thenAnswer((_) async => {});
+        await repository.cacheProduct(testProduct);
+        verify(() => mockDb.getProduct(testBarcode)).called(1);
+        verify(() => mockDb.insertProduct(testProduct)).called(1);
+      },
+    );
+
+    test(
+      'cacheProduct merges manual entry over existing API product',
+      () async {
+        final existingApi = testProduct.copyWith(
+          source: 'api',
+          nutriscoreGrade: 'a',
+          energyKcal: 200,
+        );
+        final manualEntry = testProduct.copyWith(
+          name: 'User Entered Name',
+          source: 'manual',
+          energyKcal: null, // user left empty
+        );
+        when(
+          () => mockDb.getProduct(testBarcode),
+        ).thenAnswer((_) async => existingApi);
+        when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
+
+        await repository.cacheProduct(manualEntry);
+
+        final captured =
+            verify(
+                  () => mockDb.insertProduct(captureAny()),
+                ).captured.single
+                as Product;
+        // Manual name wins
+        expect(captured.name, 'User Entered Name');
+        // API Nutri-Score preserved
+        expect(captured.nutriscoreGrade, 'a');
+        // API nutrition preserved when user left empty
+        expect(captured.energyKcal, 200);
+        // Source is manual
+        expect(captured.source, 'manual');
+      },
+    );
+
+    test('cacheProduct uses mergeFromApi for API entries', () async {
+      final existingManual = testProduct.copyWith(
+        source: 'manual',
+        nutritionImagePath: '/path/to/photo.jpg',
+      );
+      final apiEntry = testProduct.copyWith(
+        source: 'api',
+        nutriscoreGrade: 'b',
+      );
+      when(
+        () => mockDb.getProduct(testBarcode),
+      ).thenAnswer((_) async => existingManual);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
+
+      await repository.cacheProduct(apiEntry);
+
+      final captured =
+          verify(
+                () => mockDb.insertProduct(captureAny()),
+              ).captured.single
+              as Product;
+      // Local photo path preserved
+      expect(captured.nutriscoreGrade, 'b');
+      expect(captured.nutritionImagePath, '/path/to/photo.jpg');
     });
   });
 

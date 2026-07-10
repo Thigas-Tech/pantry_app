@@ -220,6 +220,61 @@ class PriceDao {
     return total;
   }
 
+  /// Returns the total inventory value broken down by currency, using the
+  /// most recent price per distinct product. Each row contains `currency`
+  /// and `subtotal` columns.
+  ///
+  /// When all prices use the same currency, this returns a single row.
+  /// When no items have prices, this returns an empty list.
+  Future<List<Map<String, dynamic>>> totalInventoryValueByCurrency(
+    Database db,
+    int inventoryId,
+  ) async {
+    final result = await db.rawQuery(
+      '''
+      SELECT p.currency, SUM(p.price) as subtotal
+      FROM prices p
+      INNER JOIN (
+        SELECT barcode, MAX(date_purchased) as max_date
+        FROM prices
+        GROUP BY barcode
+      ) latest ON p.barcode = latest.barcode
+        AND p.date_purchased = latest.max_date
+      INNER JOIN inventory i ON i.barcode = p.barcode
+      WHERE i.inventory_id = ?
+      GROUP BY p.currency
+    ''',
+      [inventoryId],
+    );
+    return result;
+  }
+
+  /// Returns the most recent price per distinct product in the inventory,
+  /// with currency, for currency-aware averaging by the caller.
+  ///
+  /// Returns a list of maps with `price`, `currency` keys.
+  Future<List<Map<String, dynamic>>> latestPricesWithCurrency(
+    Database db,
+    int inventoryId,
+  ) async {
+    final result = await db.rawQuery(
+      '''
+      SELECT p.price, p.currency
+      FROM prices p
+      INNER JOIN (
+        SELECT barcode, MAX(date_purchased) as max_date
+        FROM prices
+        GROUP BY barcode
+      ) latest ON p.barcode = latest.barcode
+        AND p.date_purchased = latest.max_date
+      INNER JOIN inventory i ON i.barcode = p.barcode
+      WHERE i.inventory_id = ?
+    ''',
+      [inventoryId],
+    );
+    return result;
+  }
+
   /// Returns the average of the most recent price for each distinct product
   /// in the given inventory.
   ///

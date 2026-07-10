@@ -88,8 +88,18 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     totalProducts: prodCount,
     totalItems: itemCount,
     averageNutriscoreNumeric: avgNutri,
-    totalValue: await priceRepo.totalInventoryValue(activeId) ?? 0,
-    averagePrice: await priceRepo.averageItemPrice(activeId) ?? 0,
+    totalValue:
+        await priceRepo.totalInventoryValue(
+          activeId,
+          baseCurrency: settings.baseCurrency,
+        ) ??
+        0,
+    averagePrice:
+        await priceRepo.averageItemPrice(
+          activeId,
+          baseCurrency: settings.baseCurrency,
+        ) ??
+        0,
     pricedItemCount: await priceRepo.pricedItemCount(activeId),
     expiredCount: expiryDist['expired'] ?? 0,
     expiringSoonCount: expiryDist['expiring'] ?? 0,
