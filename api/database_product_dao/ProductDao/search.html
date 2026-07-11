@@ -55,9 +55,10 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product/Product-class.html">Product</a></span>&gt;</span></span>&gt;</span></span>
-<span class="name ">search</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="search-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
-<li><span class="parameter" id="search-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span></span></li>
-</ol>)
+<span class="name ">search</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="search-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
+<li><span class="parameter" id="search-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span>, {</span></li>
+<li><span class="parameter" id="search-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">limit</span> = <span class="default-value">30</span>, </span></li>
+</ol>})
 
       
 
@@ -65,31 +66,40 @@
     
 <section class="desc markdown">
   <p>Searches the products table by name or barcode.</p>
-<p>The <code>query</code> is matched accent‑ and case‑insensitively against both <code>name</code>
-and <code>barcode</code> columns. Results are ordered by name ascending.</p>
-<p>Filtering is performed in Dart so that the normalisation from
-<a href="../../utils_string_helpers/removeDiacritics.html">removeDiacritics</a> is applied to both the query and the stored values.</p>
+<p>The search is accent- and case-insensitive because both the query
+and the stored <code>search_text</code> column are normalized identically.</p>
+<p><strong>Filtering</strong>: uses <code>LIKE '%escaped%'</code> on the indexed <code>search_text</code>
+column to quickly narrow candidates.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Product&gt;&gt; search(Database db, String query) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Product&gt;&gt; search(
+  Database db,
+  String query, {
+  int limit = 30,
+}) async {
+  final normalizedQuery = normalizeForSearch(query);
+  if (normalizedQuery.isEmpty) return &lt;Product&gt;[];
+
   try {
-    final normalizedQuery = removeDiacritics(query);
-    final result = await db.query(
+    &#47;&#47; Escape special SQLite LIKE characters.
+    final escaped = normalizedQuery
+        .replaceAll(&#39;%&#39;, r&#39;\%&#39;)
+        .replaceAll(&#39;_&#39;, r&#39;\_&#39;);
+
+    &#47;&#47; Fast substring filter.
+    final rows = await db.query(
       &#39;products&#39;,
+      where: r&quot;search_text LIKE ? ESCAPE &#39;\&#39;&quot;,
+      whereArgs: [&#39;%$escaped%&#39;],
       orderBy: &#39;name ASC&#39;,
+      limit: limit,
     );
-    final products = result
-        .map(fromMap)
-        .where(
-          (p) =&gt;
-              removeDiacritics(p.name).contains(normalizedQuery) ||
-              removeDiacritics(p.barcode).contains(normalizedQuery),
-        )
-        .toList();
+
+    final products = rows.map(fromMap).toList();
     logInfo(&#39;Search for &quot;$query&quot; returned ${products.length} results&#39;);
     return products;
   } on Exception catch (e) {

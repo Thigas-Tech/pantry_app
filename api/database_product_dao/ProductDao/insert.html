@@ -74,9 +74,11 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; insert(Database db, Product product) async {
   logInfo(&#39;Inserting product: ${product.barcode} — ${product.name}&#39;);
   try {
+    final map = toMap(product);
+    map[&#39;search_text&#39;] = buildSearchText(product);
     await db.insert(
       &#39;products&#39;,
-      toMap(product),
+      map,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     logInfo(&#39;Product ${product.barcode} inserted&#47;updated&#39;);

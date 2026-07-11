@@ -69,6 +69,7 @@
 <li><span class="parameter" id="param-nutriscoreGrade"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreGrade</span>, </span></li>
 <li><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span></li>
 <li><span class="parameter" id="param-productCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productCategory</span>, </span></li>
+<li><span class="parameter" id="param-productSearchText"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productSearchText</span>, </span></li>
 </ol>})
     </section>
     
@@ -137,6 +138,9 @@ the database row (e.g., a product may not have an image URL).</p>
   &#47;&#47;&#47; May be `null` if the product record was deleted or the category
   &#47;&#47;&#47; was not set. Used for category filter chips on the home screen.
   this.productCategory,
+
+  &#47;&#47;&#47; The normalized search text from the `products` table.
+  this.productSearchText,
 });</code></pre>
 </section>
 

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the removeDiacritics function from the string_helpers library, for the Dart programming language.">
-  <title>removeDiacritics function - string_helpers library - Dart API</title>
+  <meta name="description" content="API docs for the normalizeForSearch function from the search_utils library, for the Dart programming language.">
+  <title>normalizeForSearch function - search_utils library - Dart API</title>
 
 
   
@@ -25,10 +25,10 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">pantry_app</a></li>
-    <li><a href="../utils_string_helpers/">utils&#47;string_helpers.dart</a></li>
-    <li class="self-crumb">removeDiacritics function</li>
+    <li><a href="../utils_search_utils/">utils&#47;search_utils.dart</a></li>
+    <li class="self-crumb">normalizeForSearch function</li>
   </ol>
-  <div class="self-name">removeDiacritics</div>
+  <div class="self-name">normalizeForSearch</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,17 +45,17 @@
   <div
       id="dartdoc-main-content"
       class="main-content"
-      data-above-sidebar="utils_string_helpers&#47;utils_string_helpers-library-sidebar.html"
+      data-above-sidebar="utils_search_utils&#47;utils_search_utils-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">removeDiacritics</span> function 
+<h1><span class="kind-function">normalizeForSearch</span> function 
  
 </h1></div>
 
     <section class="multi-line-signature">
         
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-<span class="name ">removeDiacritics</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="removeDiacritics-param-input"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">input</span></span></li>
+<span class="name ">normalizeForSearch</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="normalizeForSearch-param-input"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">input</span></span></li>
 </ol>)
 
         
@@ -63,27 +63,24 @@
     </section>
     
 <section class="desc markdown">
-  <p>Removes common Latin diacritics from <code>input</code> and lowercases the result.</p>
-<p>Handles characters found in European languages: <code>à</code>, <code>é</code>, <code>ñ</code>, <code>ü</code>, <code>ç</code>,
-etc. ASCII characters and unmodified Latin letters pass through unchanged.
-This is deliberately <em>not</em> a full Unicode NFD decomposition — it covers the
-95th‑percentile case for food‑product names at a fraction of the complexity.</p>
-<p>Example:
-<code>removeDiacritics('Cafe creme')</code> returns <code>'cafe creme'</code>.
-<code>removeDiacritics('Musli')</code> returns <code>'musli'</code>.</p>
+  <p>Normalises <code>input</code> for search purposes.</p>
+<p>Steps:</p>
+<ol>
+<li>Remove diacritics using the <code>diacritic</code> package.</li>
+<li>Trim and collapse whitespace.</li>
+<li>Lower-case the result.</li>
+</ol>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">String removeDiacritics(String input) {
+  <pre class="language-dart"><code class="language-dart">String normalizeForSearch(String input) {
   if (input.isEmpty) return input;
-  final buffer = StringBuffer();
-  for (var i = 0; i &lt; input.length; i++) {
-    buffer.writeCharCode(_base(input.codeUnitAt(i)));
-  }
-  return buffer.toString().toLowerCase();
+  return removeDiacritics(
+    input,
+  ).trim().replaceAll(RegExp(r&#39;\s+&#39;), &#39; &#39;).toLowerCase();
 }</code></pre>
 </section>
 
@@ -98,11 +95,11 @@ This is deliberately <em>not</em> a full Unicode NFD decomposition — it covers
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">pantry_app</a></li>
-    <li><a href="../utils_string_helpers/">string_helpers</a></li>
-    <li class="self-crumb">removeDiacritics function</li>
+    <li><a href="../utils_search_utils/">search_utils</a></li>
+    <li class="self-crumb">normalizeForSearch function</li>
 </ol>
 
-    <h5>string_helpers library</h5>
+    <h5>search_utils library</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-left-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
