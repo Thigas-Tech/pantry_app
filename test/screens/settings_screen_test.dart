@@ -150,7 +150,7 @@ void main() {
     );
 
     // Scroll down to reveal the Data Management section.
-    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.drag(find.byType(ListView), const Offset(0, -1000));
     await tester.pumpAndSettle();
 
     // Expand the "Data Management" section.
@@ -184,20 +184,26 @@ void main() {
   testWidgets(
     'tapping manage inventories navigates to ManageInventoriesScreen',
     (tester) async {
+      final mockNotif = MockNotificationService();
+      when(mockNotif.requestPermission).thenAnswer((_) async => true);
+      when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
       await pumpApp(
         tester,
         const SettingsScreen(),
         overrides: [
           themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
           settingsProvider.overrideWith(FakeSettingsNotifier.new),
+          notificationServiceProvider.overrideWithValue(mockNotif),
         ],
       );
 
-      await tester.tap(find.byIcon(Icons.timer));
+      // Scroll down to reveal the Data Management section.
+      await tester.drag(find.byType(ListView), const Offset(0, -1000));
       await tester.pumpAndSettle();
-      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.tap(find.text('Data Management'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Manage Inventories'));
+
       await tester.pump();
       await tester.pump();
 
@@ -220,7 +226,7 @@ void main() {
     );
 
     // Scroll down to reveal the Data Management section.
-    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.drag(find.byType(ListView), const Offset(0, -500));
     await tester.pumpAndSettle();
 
     // Expand the "Data Management" section.

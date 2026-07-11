@@ -1056,6 +1056,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get scanFailed => 'Falha ao escanear codigo de barras.';
+
+  @override
+  String get testNotification => 'Send test notification';
+
+  @override
+  String get testScheduledNotification => 'Send scheduled test notification (2 min)';
+
+  @override
+  String get testNotificationScheduled => 'Test notification scheduled.';
+
+  @override
+  String get testNotificationSent => 'Test notification sent.';
+
+  @override
+  String get testNotificationFailed => 'Failed to send test notification.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).

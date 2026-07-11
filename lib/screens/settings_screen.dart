@@ -79,6 +79,29 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.expiryNotifications),
             initiallyExpanded: true,
             children: [
+              ListTile(
+                title: Text(l10n.testNotification),
+                onTap: () async {
+                  final notifService = ref.read(notificationServiceProvider);
+                  await notifService.showTestNotification();
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(context, l10n.testNotificationSent);
+                  }
+                },
+              ),
+              ListTile(
+                title: Text(l10n.testScheduledNotification),
+                onTap: () async {
+                  final notifService = ref.read(notificationServiceProvider);
+                  await notifService.scheduleTestNotification();
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      l10n.testNotificationScheduled,
+                    );
+                  }
+                },
+              ),
               SwitchListTile(
                 title: Text(l10n.remindBeforeExpiry),
                 value: settings.notificationsEnabled,
