@@ -10,6 +10,7 @@ import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/search_utils.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -95,7 +96,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 16,
+        version: 17,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -145,7 +146,8 @@ class DatabaseHelper {
         off_ingredients_image_url TEXT,
         off_product_image_url TEXT,
         categories_hierarchy TEXT,
-        language_code TEXT NOT NULL DEFAULT 'en'
+        language_code TEXT NOT NULL DEFAULT 'en',
+        search_text TEXT
       )
     ''');
 
@@ -168,6 +170,7 @@ class DatabaseHelper {
     ''');
 
     await db.execute('CREATE INDEX idx_barcode ON products(barcode)');
+    await db.execute('CREATE INDEX idx_search_text ON products(search_text)');
     await db.execute('CREATE INDEX idx_expiry ON inventory(expiry_date)');
     await db.execute(
       'CREATE INDEX idx_inventory_barcode ON inventory(barcode)',
@@ -358,6 +361,28 @@ class DatabaseHelper {
         logInfo('Migration to version 16 completed');
       } on Exception catch (e) {
         logWarning('Migration v16 failed: $e');
+      }
+    }
+    if (oldVersion < 17) {
+      try {
+        await db.execute('ALTER TABLE products ADD COLUMN search_text TEXT');
+        final allProducts = await productDao.all(db);
+        await db.transaction((txn) async {
+          for (final product in allProducts) {
+            await txn.update(
+              'products',
+              {'search_text': buildSearchText(product)},
+              where: 'barcode = ?',
+              whereArgs: [product.barcode],
+            );
+          }
+        });
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_search_text ON products(search_text)',
+        );
+        logInfo('Migration to version 17 (search_text column) completed');
+      } on Exception catch (e) {
+        logWarning('Migration v17 failed: $e');
       }
     }
   }

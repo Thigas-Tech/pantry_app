@@ -204,6 +204,7 @@ class InventoryDao {
           products.nutriscore_not_applicable_category
             AS nutriscore_not_applicable_category,
           products.category AS product_category,
+          products.search_text AS product_search_text,
           inventories.name AS inventory_name
         FROM inventory
         LEFT JOIN products ON inventory.barcode = products.barcode

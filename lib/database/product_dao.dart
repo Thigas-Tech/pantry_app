@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/string_helpers.dart';
+import 'package:pantry_app/utils/search_utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Data-access layer for the `products` table.
@@ -85,9 +85,11 @@ class ProductDao {
   Future<void> insert(Database db, Product product) async {
     logInfo('Inserting product: ${product.barcode} — ${product.name}');
     try {
+      final map = toMap(product);
+      map['search_text'] = buildSearchText(product);
       await db.insert(
         'products',
-        toMap(product),
+        map,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
       logInfo('Product ${product.barcode} inserted/updated');
@@ -135,26 +137,35 @@ class ProductDao {
 
   /// Searches the products table by name or barcode.
   ///
-  /// The [query] is matched accent‑ and case‑insensitively against both `name`
-  /// and `barcode` columns. Results are ordered by name ascending.
+  /// The search is accent- and case-insensitive because both the query
+  /// and the stored `search_text` column are normalized identically.
   ///
-  /// Filtering is performed in Dart so that the normalisation from
-  /// [removeDiacritics] is applied to both the query and the stored values.
-  Future<List<Product>> search(Database db, String query) async {
+  /// **Filtering**: uses `LIKE '%escaped%'` on the indexed `search_text`
+  /// column to quickly narrow candidates.
+  Future<List<Product>> search(
+    Database db,
+    String query, {
+    int limit = 30,
+  }) async {
+    final normalizedQuery = normalizeForSearch(query);
+    if (normalizedQuery.isEmpty) return <Product>[];
+
     try {
-      final normalizedQuery = removeDiacritics(query);
-      final result = await db.query(
+      // Escape special SQLite LIKE characters.
+      final escaped = normalizedQuery
+          .replaceAll('%', r'\%')
+          .replaceAll('_', r'\_');
+
+      // Fast substring filter.
+      final rows = await db.query(
         'products',
+        where: r"search_text LIKE ? ESCAPE '\'",
+        whereArgs: ['%$escaped%'],
         orderBy: 'name ASC',
+        limit: limit,
       );
-      final products = result
-          .map(fromMap)
-          .where(
-            (p) =>
-                removeDiacritics(p.name).contains(normalizedQuery) ||
-                removeDiacritics(p.barcode).contains(normalizedQuery),
-          )
-          .toList();
+
+      final products = rows.map(fromMap).toList();
       logInfo('Search for "$query" returned ${products.length} results');
       return products;
     } on Exception catch (e) {

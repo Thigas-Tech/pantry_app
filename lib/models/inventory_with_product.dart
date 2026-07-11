@@ -84,6 +84,9 @@ class InventoryWithProduct {
     /// May be `null` if the product record was deleted or the category
     /// was not set. Used for category filter chips on the home screen.
     this.productCategory,
+
+    /// The normalized search text from the `products` table.
+    this.productSearchText,
   });
 
   /// Constructs an [InventoryWithProduct] from a raw database row.
@@ -111,6 +114,7 @@ class InventoryWithProduct {
       nutriscoreNotApplicableCategory:
           map['nutriscore_not_applicable_category'] as String?,
       productCategory: map['product_category'] as String?,
+      productSearchText: map['product_search_text'] as String?,
     );
   }
 
@@ -163,4 +167,7 @@ class InventoryWithProduct {
   /// May be `null` if the product record was deleted or the category
   /// was not set. Used for category filter chips on the home screen.
   final String? productCategory;
+
+  /// The normalized search text from the `products` table.
+  final String? productSearchText;
 }
