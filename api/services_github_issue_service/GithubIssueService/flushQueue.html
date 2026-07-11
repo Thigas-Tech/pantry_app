@@ -102,50 +102,17 @@ Skips if a flush is already in progress.</p>
       final title = row[&#39;title&#39;] as String;
       final body = row[&#39;body&#39;] as String;
       final label = row[&#39;label&#39;] as String?;
-      final screenshotPathsJson = row[&#39;screenshot_path&#39;] as String?;
       final retryCount = row[&#39;retry_count&#39;] as int;
-
-      final screenshotBytesList = &lt;List&lt;int&gt;&gt;[];
-      if (screenshotPathsJson != null) {
-        try {
-          final paths = (jsonDecode(screenshotPathsJson) as List&lt;dynamic&gt;)
-              .cast&lt;String&gt;();
-          for (final path in paths) {
-            final file = File(path);
-            if (await file.exists()) {
-              screenshotBytesList.add(await file.readAsBytes());
-            }
-          }
-        } on Exception {
-          &#47;&#47; best-effort
-        }
-      }
 
       try {
         await submitIssue(
           title: title,
           body: body,
           label: label,
-          screenshotBytesList: screenshotBytesList,
           fromFlush: true,
         );
         await _queueDao.delete(dbInstance, id);
         await Future&lt;void&gt;.delayed(const Duration(milliseconds: 200));
-        if (screenshotPathsJson != null) {
-          try {
-            final paths = (jsonDecode(screenshotPathsJson) as List&lt;dynamic&gt;)
-                .cast&lt;String&gt;();
-            for (final path in paths) {
-              try {
-                await File(path).delete();
-              } on Exception {
-                &#47;&#47; best-effort cleanup
-              }
-            }
-          } on Exception {
-            &#47;&#47; best-effort cleanup
-          }
-        }
         submitted++;
       } on Exception {
         await _queueDao.incrementRetry(dbInstance, id);
