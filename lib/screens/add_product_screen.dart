@@ -9,7 +9,9 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// A form screen for manually entering product details.
 ///
@@ -49,6 +51,13 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   File? _productImage;
 
   Future<void> _pickImage(ImageField field) async {
+    final status = await Permission.camera.request();
+    if (!status.isGranted) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      SnackbarHelper.showError(context, l10n.cameraPermissionDenied);
+      return;
+    }
     final picked = await _imagePicker.pickImage(source: ImageSource.camera);
     if (picked != null) {
       setState(() {
@@ -124,25 +133,24 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     );
     logInfo('Manual product entry saved: ${product.name}');
 
-    // Fire-and-forget the local cache + OFF submission.
-    // Errors are logged but never block the pop.
-    unawaited(_cacheAndSubmit(product));
-
     if (!mounted) return;
     Navigator.of(context).pop(product);
+
+    // Background submit to OFF (fire-and-forget after local save).
+    unawaited(_cacheAndSubmit(product));
   }
 
   Future<void> _cacheAndSubmit(Product product) async {
     try {
       final repo = ref.read(productRepositoryProvider);
       await repo.cacheProduct(product);
-    } on Exception catch (e) {
+    } on Object catch (e) {
       logError('Failed to cache product locally: $e');
     }
     try {
       final service = ref.read(productSubmissionServiceProvider);
       await service.submitProduct(product);
-    } on Exception catch (e) {
+    } on Object catch (e) {
       logError('Failed to submit product to OFF: $e');
     }
   }
@@ -159,7 +167,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
           child: ListView(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: l10n.productNameLabel),
+                decoration: InputDecoration(
+                  labelText: l10n.productNameLabel,
+                ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? l10n.requiredField : null,
                 onSaved: (v) => _name = v!.trim(),
@@ -169,7 +179,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 onSaved: (v) => _brand = v ?? '',
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: l10n.categoryLabel),
+                decoration: InputDecoration(
+                  labelText: l10n.categoryLabel,
+                ),
                 onSaved: (v) => _category = v ?? '',
               ),
               TextFormField(
@@ -184,7 +196,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 l10n.nutritionInfo,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
-              _nutritionField(l10n.energy, (v) => _energyKcal = v, 'kcal'),
+              _nutritionField(
+                l10n.energy,
+                (v) => _energyKcal = v,
+                'kcal',
+              ),
               _nutritionField(l10n.protein, (v) => _proteinG = v, 'g'),
               _nutritionField(l10n.carbs, (v) => _carbsG = v, 'g'),
               _nutritionField(l10n.fat, (v) => _fatG = v, 'g'),

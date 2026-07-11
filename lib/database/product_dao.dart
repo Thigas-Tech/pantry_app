@@ -43,6 +43,7 @@ class ProductDao {
     'categories_hierarchy': p.categoriesHierarchy != null
         ? jsonEncode(p.categoriesHierarchy)
         : null,
+    'language_code': p.languageCode,
   };
 
   /// Converts a database row map into a [Product].
@@ -77,6 +78,7 @@ class ProductDao {
         ? (jsonDecode(map['categories_hierarchy'] as String) as List<dynamic>)
               .cast<String>()
         : null,
+    languageCode: (map['language_code'] as String?) ?? 'en',
   );
 
   /// Inserts a product into the local cache (upsert).

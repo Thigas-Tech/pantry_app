@@ -1,9 +1,18 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:pantry_app/utils/logger.dart';
 import 'package:path_provider/path_provider.dart';
+
+/// Decodes image [bytes] and re-encodes as WebP in a background isolate.
+Uint8List? _decodeAndEncodeWebp(Uint8List bytes) {
+  final originalImage = img.decodeImage(bytes);
+  if (originalImage == null) return null;
+  return Uint8List.fromList(img.encodeWebP(originalImage));
+}
 
 /// Caches product images locally in the WebP format.
 ///
@@ -42,10 +51,11 @@ class ImageCacheService {
       final response = await _httpClient.get(Uri.parse(imageUrl));
       if (response.statusCode != 200) return null;
 
-      final originalImage = img.decodeImage(response.bodyBytes);
-      if (originalImage == null) return null;
-
-      final webpBytes = img.encodeWebP(originalImage);
+      final webpBytes = await compute(
+        _decodeAndEncodeWebp,
+        Uint8List.fromList(response.bodyBytes),
+      );
+      if (webpBytes == null) return null;
       await cachedFile.writeAsBytes(webpBytes);
       logInfo('Image cached for $barcode');
       return cachedFile.path;

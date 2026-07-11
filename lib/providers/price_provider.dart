@@ -26,22 +26,32 @@ final pricesHiddenProvider = Provider<bool>(
   (ref) => ref.watch(settingsProvider).pricesHidden,
 );
 
-/// Provides the total value of the currently active inventory.
+/// Provides the total value of the currently active inventory, converted
+/// to the user's base currency.
 // ignore: specify_nonobvious_property_types
 final inventoryValueProvider = FutureProvider.autoDispose<double?>((ref) async {
   final repo = ref.watch(priceRepositoryProvider);
   final activeId = ref.watch(activeInventoryProvider);
-  final value = await repo.totalInventoryValue(activeId);
+  final settings = ref.watch(settingsProvider);
+  final value = await repo.totalInventoryValue(
+    activeId,
+    baseCurrency: settings.baseCurrency,
+  );
   if (value == null) return null;
   return double.tryParse(value.toStringAsFixed(2));
 });
 
-/// Provides the average item price in the currently active inventory.
+/// Provides the average item price in the currently active inventory,
+/// converted to the user's base currency.
 // ignore: specify_nonobvious_property_types
 final averagePriceProvider = FutureProvider.autoDispose<double?>((ref) async {
   final repo = ref.watch(priceRepositoryProvider);
   final activeId = ref.watch(activeInventoryProvider);
-  final avg = await repo.averageItemPrice(activeId);
+  final settings = ref.watch(settingsProvider);
+  final avg = await repo.averageItemPrice(
+    activeId,
+    baseCurrency: settings.baseCurrency,
+  );
   if (avg == null) return null;
   return double.tryParse(avg.toStringAsFixed(2));
 });

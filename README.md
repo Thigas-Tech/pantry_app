@@ -111,11 +111,11 @@ lib/
 test/                  # Unit and widget tests
 ```
 
-For a deep dive into the architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For a deep dive into the architecture, see [ARCHITECTURE/INDEX.md](ARCHITECTURE/INDEX.md).
 
 ## Contributing
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture overview.
+See [ARCHITECTURE/INDEX.md](ARCHITECTURE/INDEX.md) for the full architecture overview.
 
 ### Quick rules
 

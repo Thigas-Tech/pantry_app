@@ -129,14 +129,20 @@ class OffAdapter {
 
   /// Fetches a product by barcode from Open Food Facts.
   ///
+  /// [languageCode] is a two-letter code (e.g. `'en'`, `'fr'`, `'pt'`)
+  /// that requests product data in the user's preferred language.
+  ///
   /// Throws [ProductNotFoundException] if the barcode is unknown.
   /// Throws [FetchFailedException] on network or server errors that
   /// are not "not found" responses.
-  Future<Product> getByBarcode(String barcode) async {
+  Future<Product> getByBarcode(
+    String barcode, {
+    String languageCode = 'en',
+  }) async {
     logInfo('Fetching $barcode via SDK');
     try {
       final result = await _onGetProductV3(
-        OffQuery.barcodeConfig(barcode),
+        OffQuery.barcodeConfig(barcode, language: languageCode),
         user: readUser,
         uriHelper: _uriHelper,
       );
@@ -145,7 +151,10 @@ class OffAdapter {
         throw ProductNotFoundException(barcode);
       }
       logInfo('Fetched $barcode — ${result.product!.productName}');
-      return Product.fromOffProduct(result.product!);
+      return Product.fromOffProduct(
+        result.product!,
+        languageCode: languageCode,
+      );
     } on ProductNotFoundException {
       rethrow;
     } on Exception catch (e) {
@@ -158,12 +167,15 @@ class OffAdapter {
 
   /// Searches for products matching [query] by name or barcode prefix.
   ///
+  /// [languageCode] requests product data in the user's preferred language.
+  ///
   /// Returns an empty list on any error after exhausting retries
   /// (graceful degradation). Results are deduplicated by barcode and
   /// products with empty barcodes are filtered out.
   Future<List<Product>> searchProducts(
     String query, {
     int pageSize = 20,
+    String languageCode = 'en',
   }) async {
     const maxRetries = 2;
     for (var attempt = 0; attempt <= maxRetries; attempt++) {
@@ -171,14 +183,21 @@ class OffAdapter {
         logInfo('Searching "$query" via SDK (attempt ${attempt + 1})');
         final result = await _onSearchProducts(
           readUser,
-          OffQuery.searchConfig(query, pageSize: pageSize),
+          OffQuery.searchConfig(
+            query,
+            pageSize: pageSize,
+            language: languageCode,
+          ),
           uriHelper: _uriHelper,
         );
         if (result.products == null) return <Product>[];
         final products = <Product>[];
         final seen = <String>{};
         for (final offProduct in result.products!) {
-          final converted = Product.fromOffProduct(offProduct);
+          final converted = Product.fromOffProduct(
+            offProduct,
+            languageCode: languageCode,
+          );
           if (converted.barcode.isNotEmpty && seen.add(converted.barcode)) {
             products.add(converted);
           }
@@ -212,30 +231,47 @@ class OffAdapter {
       logWarning('Cannot submit — no OFF credentials configured');
       return false;
     }
-    try {
-      logInfo(
-        'Submitting product ${product.barcode} to OFF',
-      );
-      final offProduct = product.toOffProduct();
-      final status = await _onSaveProduct(
-        user,
-        offProduct,
-        uriHelper: _uriHelper,
-      );
-      final success = status.status == 1;
-      if (success) {
-        logInfo('Product ${product.barcode} submitted successfully');
-      } else {
+    const maxRetries = 2;
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        logInfo(
+          'Submitting product ${product.barcode} to OFF '
+          '(attempt ${attempt + 1})',
+        );
+        final offProduct = product.toOffProduct();
+        final status = await _onSaveProduct(
+          user,
+          offProduct,
+          uriHelper: _uriHelper,
+        );
+        final success = status.status == 1;
+        if (success) {
+          logInfo('Product ${product.barcode} submitted successfully');
+          return true;
+        }
         logWarning(
           'Product ${product.barcode} submission returned status '
           '${status.status}: ${status.statusVerbose}',
         );
+        return false;
+      } on Exception catch (e) {
+        if (attempt < maxRetries) {
+          final delay = Duration(seconds: attempt + 1);
+          logWarning(
+            'Submission failed for ${product.barcode} '
+            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e',
+          );
+          await Future<void>.delayed(delay);
+        } else {
+          logError(
+            'Submission failed for ${product.barcode} after '
+            'all retries: $e',
+          );
+          return false;
+        }
       }
-      return success;
-    } on Exception catch (e) {
-      logError('Submission failed for ${product.barcode}: $e');
-      return false;
     }
+    return false;
   }
 
   /// Uploads a product image to Open Food Facts.
@@ -258,40 +294,57 @@ class OffAdapter {
       logWarning('Image file not found: $imagePath');
       return false;
     }
-    try {
-      logInfo(
-        'Uploading $imageField image for $barcode',
-      );
-      final lang = languageCode != null
-          ? off.OpenFoodFactsLanguage.fromOffTag(languageCode)
-          : off.OpenFoodFactsLanguage.ENGLISH;
-      final image = off.SendImage(
-        lang: lang == off.OpenFoodFactsLanguage.UNDEFINED
-            ? off.OpenFoodFactsLanguage.ENGLISH
-            : lang,
-        barcode: barcode,
-        imageField: parseImageField(imageField),
-        imageUri: Uri.parse(imagePath),
-      );
-      final status = await _onAddProductImage(
-        user,
-        image,
-        uriHelper: _uriHelper,
-      );
-      final success = status.status == 1;
-      if (success) {
-        logInfo('$imageField image uploaded for $barcode');
-      } else {
+    const maxRetries = 2;
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        logInfo(
+          'Uploading $imageField image for $barcode '
+          '(attempt ${attempt + 1})',
+        );
+        final lang = languageCode != null
+            ? off.OpenFoodFactsLanguage.fromOffTag(languageCode)
+            : off.OpenFoodFactsLanguage.ENGLISH;
+        final image = off.SendImage(
+          lang: lang == off.OpenFoodFactsLanguage.UNDEFINED
+              ? off.OpenFoodFactsLanguage.ENGLISH
+              : lang,
+          barcode: barcode,
+          imageField: parseImageField(imageField),
+          imageUri: Uri.parse(imagePath),
+        );
+        final status = await _onAddProductImage(
+          user,
+          image,
+          uriHelper: _uriHelper,
+        );
+        final success = status.status == 1;
+        if (success) {
+          logInfo('$imageField image uploaded for $barcode');
+          return true;
+        }
         logWarning(
           '$imageField image upload for $barcode returned status '
           '${status.status}: ${status.statusVerbose}',
         );
+        return false;
+      } on Exception catch (e) {
+        if (attempt < maxRetries) {
+          final delay = Duration(seconds: attempt + 1);
+          logWarning(
+            '$imageField image upload failed for $barcode '
+            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e',
+          );
+          await Future<void>.delayed(delay);
+        } else {
+          logError(
+            'Image upload failed for $barcode after '
+            'all retries: $e',
+          );
+          return false;
+        }
       }
-      return success;
-    } on Exception catch (e) {
-      logError('Image upload failed for $barcode: $e');
-      return false;
     }
+    return false;
   }
 
   /// Parses an image field string into the SDK's [off.ImageField] enum.

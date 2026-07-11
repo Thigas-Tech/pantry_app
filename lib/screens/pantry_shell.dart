@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
@@ -124,8 +125,10 @@ class _PantryShellState extends ConsumerState<PantryShell> {
   ) {
     final online = next.asData?.value;
     if (online == true) {
-      final service = ref.read(githubIssueServiceProvider);
-      unawaited(service.flushQueue());
+      final feedbackService = ref.read(githubIssueServiceProvider);
+      unawaited(feedbackService.flushQueue());
+      final submissionService = ref.read(productSubmissionServiceProvider);
+      unawaited(submissionService.flushQueue());
     }
   }
 

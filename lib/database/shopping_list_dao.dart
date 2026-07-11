@@ -76,6 +76,51 @@ class ShoppingListDao {
     }
   }
 
+  /// Inserts a shopping list item, merging quantities with an existing
+  /// pending item that has the same barcode and unit.
+  ///
+  /// When a pending (not purchased) item with the same barcode and unit
+  /// already exists, the quantities are summed instead of creating a
+  /// duplicate row. Items with a null/empty barcode or different units
+  /// are always inserted as new rows. The operation runs inside a
+  /// SQLite transaction to prevent double-tap race conditions.
+  Future<int> insertOrMergeByBarcode(Database db, ShoppingItem item) async {
+    logInfo('Insert/merge shopping item: ${item.name}');
+    try {
+      return await db.transaction<int>((txn) async {
+        if (item.barcode != null && item.barcode!.isNotEmpty) {
+          final existing = await txn.query(
+            'shopping_list',
+            where: 'barcode = ? AND is_purchased = 0 AND unit = ?',
+            whereArgs: [item.barcode, item.unit],
+            limit: 1,
+          );
+          if (existing.isNotEmpty) {
+            final existingItem = fromMap(existing.first);
+            final mergedQty = existingItem.quantity + item.quantity;
+            await txn.update(
+              'shopping_list',
+              {'quantity': mergedQty},
+              where: 'id = ?',
+              whereArgs: [existingItem.id],
+            );
+            logInfo(
+              'Merged quantity for ${item.barcode}: '
+              '${existingItem.quantity} + ${item.quantity} = $mergedQty',
+            );
+            return existingItem.id!;
+          }
+        }
+        final id = await txn.insert('shopping_list', toMap(item));
+        logInfo('Shopping item inserted with id $id');
+        return id;
+      });
+    } on Exception catch (e) {
+      logError('Failed to insert/merge shopping item: $e');
+      rethrow;
+    }
+  }
+
   /// Returns all shopping list items, ordered by dateAdded descending.
   Future<List<ShoppingItem>> listAll(Database db) async {
     try {

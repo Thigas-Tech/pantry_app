@@ -29,28 +29,46 @@ class OffQuery {
     ProductField.QUANTITY,
   ];
 
-  /// Returns a [ProductQueryConfiguration] for fetching a product by barcode.
-  static ProductQueryConfiguration barcodeConfig(String barcode) {
+  /// Converts a two-letter language code to an [OpenFoodFactsLanguage].
+  ///
+  /// Returns [OpenFoodFactsLanguage.ENGLISH] for unknown or null codes.
+  static OpenFoodFactsLanguage _codeToLanguage(String? code) {
+    if (code == null || code.isEmpty) return OpenFoodFactsLanguage.ENGLISH;
+    try {
+      return OpenFoodFactsLanguage.fromOffTag(code) ??
+          OpenFoodFactsLanguage.ENGLISH;
+    } on Object catch (_) {
+      return OpenFoodFactsLanguage.ENGLISH;
+    }
+  }
+
+  /// Returns a [ProductQueryConfiguration] for fetching a product by barcode
+  /// in the given [language] (two-letter code like `'en'`, `'fr'`, `'pt'`).
+  static ProductQueryConfiguration barcodeConfig(
+    String barcode, {
+    String language = 'en',
+  }) {
     return ProductQueryConfiguration(
       barcode,
-      language: OpenFoodFactsLanguage.ENGLISH,
+      language: _codeToLanguage(language),
       fields: productFields,
       version: ProductQueryVersion.v3,
     );
   }
 
   /// Returns a [ProductSearchQueryConfiguration] for searching products
-  /// by name or barcode prefix.
+  /// by name or barcode prefix, in the given [language].
   static ProductSearchQueryConfiguration searchConfig(
     String query, {
     int pageSize = 20,
+    String language = 'en',
   }) {
     return ProductSearchQueryConfiguration(
       parametersList: [
         SearchTerms(terms: [query]),
         PageSize(size: pageSize),
       ],
-      language: OpenFoodFactsLanguage.ENGLISH,
+      language: _codeToLanguage(language),
       fields: productFields,
       version: ProductQueryVersion.v3,
     );

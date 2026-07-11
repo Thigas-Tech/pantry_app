@@ -85,6 +85,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     with SingleTickerProviderStateMixin {
   bool _hasScanned = false;
   bool _scannerErrorOccurred = false;
+  MobileScannerException? _currentException;
   int _scannerKey = 0;
 
   late final AnimationController _animationController;
@@ -97,6 +98,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
       duration: const Duration(seconds: 2),
     );
     unawaited(_animationController.repeat(reverse: true));
+    unawaited(_requestCameraPermission());
   }
 
   @override
@@ -105,11 +107,61 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     super.dispose();
   }
 
+  Future<void> _requestCameraPermission() async {
+    logInfo('Checking camera permissions');
+    try {
+      final status = await Permission.camera.status;
+      if (status.isGranted) {
+        logInfo('Camera permission already granted');
+        return;
+      }
+      if (status.isPermanentlyDenied) {
+        logWarning('Camera permission permanently denied');
+        _handleScannerError(
+          const MobileScannerException(
+            errorCode: MobileScannerErrorCode.permissionDenied,
+          ),
+        );
+        return;
+      }
+      final result = await Permission.camera.request();
+      if (result.isGranted) {
+        logInfo('Camera permission granted');
+      } else if (result.isPermanentlyDenied) {
+        logWarning('Camera permission permanently denied after request');
+        _handleScannerError(
+          const MobileScannerException(
+            errorCode: MobileScannerErrorCode.permissionDenied,
+          ),
+        );
+      } else {
+        logWarning('Camera permission denied');
+        _handleScannerError(
+          const MobileScannerException(
+            errorCode: MobileScannerErrorCode.permissionDenied,
+          ),
+        );
+      }
+    } on Exception catch (e) {
+      logWarning('Camera permission check failed (likely in test): $e');
+    }
+  }
+
+  void _handleScannerError(MobileScannerException exception) {
+    _scannerErrorOccurred = true;
+    _currentException = exception;
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void _retry() {
     logInfo('Retrying scanner');
     _hasScanned = false;
     _scannerErrorOccurred = false;
+    _currentException = null;
     setState(() => _scannerKey++);
+    unawaited(_requestCameraPermission());
   }
 
   Future<void> _openSettings() async {
@@ -184,9 +236,19 @@ class _MobileScannerViewState extends State<_MobileScannerView>
             onDetectError: (error, stackTrace) {
               logException('Barcode detection error', error, stackTrace);
             },
-            errorBuilder: _buildError,
+            errorBuilder: (context, exception) {
+              _handleScannerError(exception);
+              return _buildError(context, exception);
+            },
             placeholderBuilder: _buildPlaceholder,
           ),
+          if (_scannerErrorOccurred && _currentException != null)
+            ScannerErrorContent(
+              exception: _currentException!,
+              onRetry: _retry,
+              onSwitchToManual: widget.onSwitchToManual,
+              onOpenSettings: _openSettings,
+            ),
           if (!_scannerErrorOccurred)
             AnimatedBuilder(
               animation: _animationController,

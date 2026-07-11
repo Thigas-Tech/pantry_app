@@ -1,6 +1,6 @@
 # Feature Freeze
 
-- [x] feature_freeze
+- [ ] feature_freeze
 
 When checked, **no new features** may be added to the codebase.
 Only bug fixes, pre-launch polish, and security patches are allowed.

@@ -3,6 +3,7 @@ import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
+import 'package:pantry_app/database/product_submission_queue_dao.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
@@ -25,7 +26,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Six tables are created on first launch (version 14):
+/// Seven tables are created on first launch (version 16):
 /// - `products` – product data fetched from Open Food Facts.
 /// - `inventories` – named pantries (e.g. "Home", "Work").
 /// - `inventory` – instances of products the user has added to a pantry.
@@ -71,6 +72,10 @@ class DatabaseHelper {
   /// DAO for the `feedback_queue` table.
   final FeedbackQueueDao feedbackQueueDao = const FeedbackQueueDao();
 
+  /// DAO for the `product_submission_queue` table.
+  final ProductSubmissionQueueDao productSubmissionQueueDao =
+      const ProductSubmissionQueueDao();
+
   /// DAO for the `prices` table.
   final PriceDao priceDao = const PriceDao();
 
@@ -90,7 +95,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 14,
+        version: 16,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -139,7 +144,8 @@ class DatabaseHelper {
         off_nutrition_image_url TEXT,
         off_ingredients_image_url TEXT,
         off_product_image_url TEXT,
-        categories_hierarchy TEXT
+        categories_hierarchy TEXT,
+        language_code TEXT NOT NULL DEFAULT 'en'
       )
     ''');
 
@@ -174,6 +180,8 @@ class DatabaseHelper {
     );
 
     await feedbackQueueDao.createTable(db);
+
+    await productSubmissionQueueDao.createTable(db);
 
     await _createPricesTable(db);
 
@@ -331,6 +339,25 @@ class DatabaseHelper {
         logInfo('Migration to version 14 completed');
       } on Exception catch (e) {
         logWarning('Migration v14 failed (table may not exist): $e');
+      }
+    }
+    if (oldVersion < 15) {
+      try {
+        await db.execute(
+          'ALTER TABLE products ADD COLUMN language_code TEXT'
+          " NOT NULL DEFAULT 'en'",
+        );
+        logInfo('Migration to version 15 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v15 failed (column may already exist): $e');
+      }
+    }
+    if (oldVersion < 16) {
+      try {
+        await productSubmissionQueueDao.createTable(db);
+        logInfo('Migration to version 16 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v16 failed: $e');
       }
     }
   }

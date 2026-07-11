@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
@@ -60,14 +61,25 @@ class ProductRepository {
   static const _lastRefreshKey = 'last_product_refresh';
   static const _cacheOverdueDays = 5;
 
+  /// Returns the current application locale as a two-letter language code.
+  ///
+  /// Falls back to `'en'` when the platform locale cannot be determined.
+  String _currentLanguageCode() {
+    final locale = PlatformDispatcher.instance.locale;
+    final code = locale.languageCode;
+    if (code.isEmpty || code == 'und') return 'en';
+    return code;
+  }
+
   /// Returns a [Product] for the given [barcode], either from cache or from
   /// the remote API.
   ///
   /// Throws [ProductNotFoundException] if the barcode is unknown to all
   /// sources. Throws [FetchFailedException] on network errors when no
   /// cache exists.
-  Future<Product> getProduct(String barcode) async {
+  Future<Product> getProduct(String barcode, {String? languageCode}) async {
     logInfo('Looking up $barcode');
+    final lang = languageCode ?? _currentLanguageCode();
 
     // 1. Local cache
     final cached = await _db.getProduct(barcode);
@@ -79,7 +91,7 @@ class ProductRepository {
     // 2. Try primary API
     try {
       logInfo('Fetching $barcode from primary API');
-      final remote = await _api.getByBarcode(barcode);
+      final remote = await _api.getByBarcode(barcode, languageCode: lang);
       await _db.insertProduct(remote);
       logInfo('Fetched and cached $barcode');
       return remote;
@@ -88,7 +100,10 @@ class ProductRepository {
       if (_fallbackApi != null) {
         logInfo('Trying fallback API for $barcode');
         try {
-          final remote = await _fallbackApi.getByBarcode(barcode);
+          final remote = await _fallbackApi.getByBarcode(
+            barcode,
+            languageCode: lang,
+          );
           await _db.insertProduct(remote);
           logInfo('Fetched $barcode from fallback API');
           return remote;
@@ -203,14 +218,34 @@ class ProductRepository {
     return _db.getInventoryCount(inventoryId: inventoryId);
   }
 
-  /// Inserts a product directly into the local cache.
+  /// Inserts a product directly into the local cache, merging with any
+  /// existing cached product for the same barcode.
   ///
   /// Used when the user manually creates a product (e.g., via the
   /// add‑product screen) or when the product is submitted to Open Food Facts
   /// and should be cached immediately.
-  Future<void> cacheProduct(Product product) async {
-    logInfo('Caching product: ${product.barcode} — ${product.name}');
-    await _db.insertProduct(product);
+  ///
+  /// ## Merge strategy
+  ///
+  /// - Manual entries merge via [ProductMerge.mergeFromManual] so that rich
+  ///   API data (Nutri-Score, nutrition facts, OFF image URLs) is preserved
+  ///   when the user only entered a subset of fields.
+  /// - API entries merge via [ProductMerge.mergeFromApi] so that local-only
+  ///   fields (image paths, submission status) are never overwritten by an
+  ///   incomplete API response.
+  /// - When no existing cache record exists, the product is inserted as-is.
+  Future<void> cacheProduct(Product incoming) async {
+    logInfo('Caching product: ${incoming.barcode} — ${incoming.name}');
+    var toInsert = incoming;
+    final existing = await _db.getProduct(incoming.barcode);
+    if (existing != null) {
+      if (incoming.source == 'manual') {
+        toInsert = existing.mergeFromManual(incoming);
+      } else {
+        toInsert = existing.mergeFromApi(incoming);
+      }
+    }
+    await _db.insertProduct(toInsert);
   }
 
   /// Re‑fetches all products referenced by inventory items in [inventoryId].
@@ -285,7 +320,10 @@ class ProductRepository {
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
       try {
-        final fetched = await _api.getByBarcode(barcode);
+        final fetched = await _api.getByBarcode(
+          barcode,
+          languageCode: _currentLanguageCode(),
+        );
         final cached = await _db.getProduct(barcode);
         final merged = cached != null ? cached.mergeFromApi(fetched) : fetched;
         await _db.insertProduct(merged);
