@@ -25,8 +25,11 @@ Run BEFORE every local commit. Fix ALL issues:
   5. Convert draft PR -> Ready for Review.
    6. Merge via GitHub UI (Squash and merge).
       BEFORE clicking merge, paste `Fixes #<issue>` lines into the
-      **commit message** (not just PR body). GitHub only auto-closes
-      from squash merge commit messages, not PR bodies.
+      **commit message** (not just PR body). Use one line per issue
+      with a separate `Fixes` keyword (e.g. `Fixes #1\nFixes #2`).
+      Comma-separated lists like `Fixes #1, #2` do NOT auto-close.
+      GitHub only auto-closes from squash merge commit messages,
+      not PR bodies.
    7. Delete remote branch; git checkout main && git pull
 
   Notes:
