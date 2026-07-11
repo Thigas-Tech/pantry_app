@@ -112,13 +112,14 @@ and</li>
 Widget build(BuildContext context, WidgetRef ref) {
   final hidden = ref.watch(pricesHiddenProvider);
   if (hidden) {
-    final mask = String.fromCharCodes(
-      List.filled(formattedPrice.length, 0x2022),
-    );
-    return Text(
-      mask,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return Semantics(
+      label: AppLocalizations.of(context)!.priceHidden,
+      excludeSemantics: true,
+      child: Text(
+        String.fromCharCodes(List.filled(8, 0x2022)),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }
