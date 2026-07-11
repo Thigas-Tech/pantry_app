@@ -119,7 +119,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).thenAnswer((_) async => 'https://github.com/owner/repo/issues/1');
 
@@ -169,7 +168,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).called(1);
     });
@@ -185,7 +183,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).thenAnswer((_) async {});
 
@@ -228,7 +225,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).called(1);
     });
@@ -325,7 +321,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).thenThrow(const IssueSubmissionException('Network error'));
       when(() => mockService.isDuplicate(any(), any())).thenReturn(false);
@@ -334,7 +329,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).thenAnswer((_) async {});
 
@@ -377,7 +371,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).called(1);
       verify(
@@ -385,7 +378,6 @@ void main() {
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
-          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
       ).called(1);
     });
