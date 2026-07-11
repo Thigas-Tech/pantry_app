@@ -110,6 +110,7 @@ void main() {
           body: 'Description',
           label: 'bug',
         );
+
         final body = jsonDecode(capturedBody!) as Map<String, dynamic>;
         final labels = body['labels'] as List<dynamic>;
         expect(labels, contains('bug'));
@@ -217,7 +218,6 @@ void main() {
         () async {
           final image = img.Image(width: 2000, height: 2000);
           final rawBytes = Uint8List.fromList(img.encodePng(image));
-          final screenshots = <List<int>>[rawBytes];
 
           String? capturedBody;
           when(
@@ -240,7 +240,6 @@ void main() {
             title: 'Screenshot test',
             body: 'Description',
             label: 'bug',
-            screenshotBytesList: screenshots,
           );
 
           expect(capturedBody, isNotNull);
@@ -256,10 +255,6 @@ void main() {
       test(
         'body size is within GitHub API limits with large screenshots',
         () async {
-          final image = img.Image(width: 2000, height: 2000);
-          final rawBytes = Uint8List.fromList(img.encodePng(image));
-          final screenshots = <List<int>>[rawBytes];
-
           String? capturedBody;
           when(
             () => mockHttp.post(
@@ -281,7 +276,6 @@ void main() {
             title: 'Large',
             body: 'Description',
             label: 'bug',
-            screenshotBytesList: screenshots,
           );
 
           expect(capturedBody!.length, lessThan(256 * 1024));

@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
@@ -83,32 +81,18 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   bool _includeDeviceInfo = false;
   bool _includeLogs = false;
   bool _isSubmitting = false;
-  final List<String> _screenshotPaths = [];
   String? _submittedIssueUrl;
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _cleanupAllScreenshots();
     super.dispose();
-  }
-
-  void _cleanupAllScreenshots() {
-    for (final path in _screenshotPaths) {
-      try {
-        unawaited(File(path).delete());
-      } on Exception {
-        // best-effort cleanup
-      }
-    }
-    _screenshotPaths.clear();
   }
 
   void _resetForm() {
     _titleController.clear();
     _descriptionController.clear();
-    _cleanupAllScreenshots();
     _formKey.currentState?.reset();
     setState(() {
       _issueType = IssueType.bug;
@@ -153,8 +137,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               _buildTitleField(l10n),
               const SizedBox(height: 16),
               _buildDescriptionField(l10n),
-              const SizedBox(height: 16),
-              _buildScreenshotSection(l10n),
               const SizedBox(height: 16),
               _buildDeviceInfoToggle(l10n),
               const SizedBox(height: 8),
@@ -243,78 +225,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         }
         return null;
       },
-    );
-  }
-
-  Widget _buildScreenshotSection(AppLocalizations l10n) {
-    if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(l10n.attachScreenshot, style: _labelStyle()),
-        const SizedBox(height: 8),
-        if (_screenshotPaths.isNotEmpty) ...[
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: List.generate(_screenshotPaths.length, (i) {
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Stack(
-                  children: [
-                    Image.file(
-                      File(_screenshotPaths[i]),
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () => _removeScreenshot(i),
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(8),
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 8),
-        ],
-        Wrap(
-          spacing: 8,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () => _pickImage(ImageSource.camera),
-              icon: const Icon(Icons.camera_alt, size: 18),
-              label: Text(l10n.takePhoto),
-            ),
-            OutlinedButton.icon(
-              onPressed: () => _pickImage(ImageSource.gallery),
-              icon: const Icon(Icons.photo_library, size: 18),
-              label: Text(l10n.chooseFromGallery),
-            ),
-          ],
-        ),
-      ],
     );
   }
 
@@ -413,37 +323,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     );
   }
 
-  TextStyle? _labelStyle() {
-    return Theme.of(context).inputDecorationTheme.labelStyle;
-  }
-
-  Future<void> _pickImage(ImageSource source) async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(source: source, imageQuality: 80);
-      if (!mounted) return;
-      if (picked != null) {
-        setState(() => _screenshotPaths.add(picked.path));
-      }
-    } on Exception catch (e) {
-      logWarning('Image pick failed: $e');
-      if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        SnackbarHelper.showWarning(context, l10n.couldNotAttachImage);
-      }
-    }
-  }
-
-  void _removeScreenshot(int index) {
-    final path = _screenshotPaths.removeAt(index);
-    try {
-      unawaited(File(path).delete());
-    } on Exception {
-      // best-effort cleanup
-    }
-    setState(() {});
-  }
-
   Future<void> _submit(AppLocalizations l10n) async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -465,19 +344,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       final effectiveLabel = label.isEmpty ? null : label;
       final body = await _buildBody(description, l10n);
 
-      final screenshotBytesList = <List<int>>[];
-      for (final path in _screenshotPaths) {
-        final file = File(path);
-        if (await file.exists()) {
-          screenshotBytesList.add(await file.readAsBytes());
-        }
-      }
-
       final isOnline = ref.read(connectivityProvider).value ?? false;
 
       logInfo(
         'Feedback _submit: isOnline=$isOnline '
-        'screenshotCount=${screenshotBytesList.length} '
         'titleLength=${title.length}',
       );
 
@@ -487,7 +357,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             title: title,
             body: body,
             label: effectiveLabel,
-            screenshotBytesList: screenshotBytesList,
           );
           if (mounted) {
             setState(() => _submittedIssueUrl = url);
@@ -503,7 +372,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             title: title,
             body: body,
             label: effectiveLabel,
-            screenshotBytesList: screenshotBytesList,
           );
           if (mounted) {
             SnackbarHelper.showWarning(context, l10n.issueQueuedOffline);
@@ -516,7 +384,6 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           title: title,
           body: body,
           label: effectiveLabel,
-          screenshotBytesList: screenshotBytesList,
         );
         if (mounted) {
           SnackbarHelper.showWarning(context, l10n.issueQueuedOffline);

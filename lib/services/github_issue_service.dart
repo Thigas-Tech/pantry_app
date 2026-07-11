@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:image/image.dart' as img;
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/feedback_queue_dao.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -50,7 +47,6 @@ class GithubIssueService {
     required String title,
     required String body,
     String? label,
-    List<List<int>> screenshotBytesList = const [],
     bool fromFlush = false,
   }) async {
     if (kIsWeb) {
@@ -73,11 +69,8 @@ class GithubIssueService {
     final tokenLength = AppConfig.feedbackToken.length;
     logInfo(
       'submitIssue: title="$title" tokenLength=$tokenLength '
-      'repo=${AppConfig.githubOwner}/${AppConfig.githubRepo} '
-      'screenshots=${screenshotBytesList.length}',
+      'repo=${AppConfig.githubOwner}/${AppConfig.githubRepo}',
     );
-
-    final fullBody = await _buildBody(body, screenshotBytesList);
 
     late final http.Response response;
     try {
@@ -90,7 +83,7 @@ class GithubIssueService {
             headers: _headers(),
             body: jsonEncode({
               'title': title,
-              'body': fullBody,
+              'body': body,
               'labels': [
                 ?label,
                 'from-app',
@@ -124,25 +117,13 @@ class GithubIssueService {
 
   /// Queues an issue for offline submission.
   ///
-  /// Each set of screenshot bytes is saved to a separate temporary file.
-  /// Paths are stored as a JSON-encoded list in the queue row.
   /// On web this is a no-op.
   Future<void> queueOffline({
     required String title,
     required String body,
     String? label,
-    List<List<int>> screenshotBytesList = const [],
   }) async {
     if (kIsWeb) return;
-
-    String? screenshotPathsJson;
-    if (screenshotBytesList.isNotEmpty) {
-      final paths = <String>[];
-      for (final bytes in screenshotBytesList) {
-        paths.add(await _saveScreenshot(bytes));
-      }
-      screenshotPathsJson = jsonEncode(paths);
-    }
 
     final dbInstance = await _dbHelper.database;
     await _queueDao.insert(
@@ -150,7 +131,6 @@ class GithubIssueService {
       title: title,
       body: body,
       label: label,
-      screenshotPath: screenshotPathsJson,
     );
     logInfo('Issue queued for offline submission: $title');
   }
@@ -190,50 +170,17 @@ class GithubIssueService {
         final title = row['title'] as String;
         final body = row['body'] as String;
         final label = row['label'] as String?;
-        final screenshotPathsJson = row['screenshot_path'] as String?;
         final retryCount = row['retry_count'] as int;
-
-        final screenshotBytesList = <List<int>>[];
-        if (screenshotPathsJson != null) {
-          try {
-            final paths = (jsonDecode(screenshotPathsJson) as List<dynamic>)
-                .cast<String>();
-            for (final path in paths) {
-              final file = File(path);
-              if (await file.exists()) {
-                screenshotBytesList.add(await file.readAsBytes());
-              }
-            }
-          } on Exception {
-            // best-effort
-          }
-        }
 
         try {
           await submitIssue(
             title: title,
             body: body,
             label: label,
-            screenshotBytesList: screenshotBytesList,
             fromFlush: true,
           );
           await _queueDao.delete(dbInstance, id);
           await Future<void>.delayed(const Duration(milliseconds: 200));
-          if (screenshotPathsJson != null) {
-            try {
-              final paths = (jsonDecode(screenshotPathsJson) as List<dynamic>)
-                  .cast<String>();
-              for (final path in paths) {
-                try {
-                  await File(path).delete();
-                } on Exception {
-                  // best-effort cleanup
-                }
-              }
-            } on Exception {
-              // best-effort cleanup
-            }
-          }
           submitted++;
         } on Exception {
           await _queueDao.incrementRetry(dbInstance, id);
@@ -371,50 +318,6 @@ class GithubIssueService {
     };
   }
 
-  /// Builds the issue body by appending markdown for each screenshot.
-  ///
-  /// Each screenshot is encoded as WebP in an isolate via [compute] with
-  /// an 800 px max width, uploaded to Imgur (anonymous), and embedded as
-  /// a markdown image. Screenshots that fail to encode or upload are
-  /// silently skipped and the issue is still submitted without them.
-  Future<String> _buildBody(
-    String description,
-    List<List<int>> screenshotBytesList,
-  ) async {
-    final buffer = StringBuffer()..writeln(description);
-
-    for (var i = 0; i < screenshotBytesList.length; i++) {
-      final bytes = screenshotBytesList[i];
-      if (bytes.isEmpty) continue;
-
-      Uint8List webpBytes;
-      try {
-        webpBytes = await compute(
-          _encodeWebP,
-          Uint8List.fromList(bytes),
-        ).timeout(const Duration(seconds: 15));
-      } on TimeoutException {
-        logWarning('Screenshot ${i + 1} encoding timed out');
-        continue;
-      } on Exception {
-        logWarning('Screenshot ${i + 1} encoding failed');
-        continue;
-      }
-      if (webpBytes.isEmpty) continue;
-
-      final url = await _uploadToImgur(webpBytes);
-      if (url != null) {
-        buffer
-          ..writeln()
-          ..writeln('![screenshot]($url)');
-      } else {
-        logWarning('Screenshot ${i + 1} upload failed — skipping');
-      }
-    }
-
-    return buffer.toString();
-  }
-
   String _parseGitHubError(http.Response response) {
     final code = response.statusCode;
     String apiMessage;
@@ -447,19 +350,6 @@ class GithubIssueService {
     }
   }
 
-  Future<String> _saveScreenshot(List<int> bytes) async {
-    final dir = await getApplicationDocumentsDirectory();
-    final feedbackDir = Directory('${dir.path}/feedback_queue');
-    if (!await feedbackDir.exists()) {
-      await feedbackDir.create(recursive: true);
-    }
-    final filename =
-        '${DateTime.now().millisecondsSinceEpoch}_${bytes.hashCode}.webp';
-    final file = File('${feedbackDir.path}/$filename');
-    await file.writeAsBytes(bytes);
-    return file.path;
-  }
-
   String _hashIssue(String title, String body) {
     final bytes = utf8.encode('$title|$body');
     return sha256.convert(bytes).toString();
@@ -469,49 +359,6 @@ class GithubIssueService {
     final d1 = DateTime.fromMillisecondsSinceEpoch(timestamp1);
     final d2 = DateTime.fromMillisecondsSinceEpoch(timestamp2);
     return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
-  }
-
-  /// Uploads [webpBytes] to Imgur (anonymous) and returns the hosted URL.
-  ///
-  /// Returns `null` if the upload fails. Requires `IMGUR_CLIENT_ID` in
-  /// the `.env` file. When unset or empty, the upload is skipped without
-  /// error. Imgur anonymous uploads are rate-limited to ~50/hour per
-  /// Client-ID.
-  Future<String?> _uploadToImgur(Uint8List webpBytes) async {
-    final clientId = AppConfig.imgurClientId;
-    if (clientId.isEmpty) {
-      logWarning('IMGUR_CLIENT_ID not configured — skipping image upload');
-      return null;
-    }
-
-    try {
-      final response = await _httpClient
-          .post(
-            Uri.parse('https://api.imgur.com/3/image'),
-            headers: {'Authorization': 'Client-ID $clientId'},
-            body: {
-              'image': base64Encode(webpBytes),
-              'type': 'base64',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final link =
-            (data['data'] as Map<String, dynamic>?)?['link'] as String?;
-        if (link != null) {
-          logInfo('Screenshot uploaded to Imgur: $link');
-          return link;
-        }
-      }
-      logWarning('Imgur upload failed: ${response.statusCode}');
-    } on TimeoutException {
-      logWarning('Imgur upload timed out');
-    } on Object catch (e) {
-      logWarning('Imgur upload error: $e');
-    }
-    return null;
   }
 
   Future<void> _cleanupOldHashKeys(SharedPreferences prefs, int now) async {
@@ -539,22 +386,4 @@ class IssueSubmissionException implements Exception {
 
   @override
   String toString() => 'IssueSubmissionException: $message';
-}
-
-/// Encodes a screenshot to a resized WebP byte array.
-///
-/// Runs in a background isolate via [compute]. Decodes any supported
-/// image format (PNG, JPEG, WebP, etc.), resizes to a maximum width
-/// of 800 pixels, and re-encodes as WebP at quality 70 for compact
-/// file sizes suitable for upload.
-Uint8List _encodeWebP(Uint8List bytes) {
-  final decoded = img.decodeImage(bytes);
-  if (decoded == null) return Uint8List(0);
-
-  var resized = decoded;
-  if (resized.width > 800) {
-    resized = img.copyResize(resized, width: 800);
-  }
-
-  return Uint8List.fromList(img.encodeWebP(resized));
 }
