@@ -12,7 +12,6 @@ import 'package:permission_handler/permission_handler.dart';
 /// A barcode input screen.
 ///
 /// Offers two modes: camera scanner via [MobileScanner] and manual text entry.
-///
 /// The user is prompted for confirmation before navigating away with no result.
 class ScannerScreen extends StatefulWidget {
   /// Creates a [ScannerScreen] widget.
@@ -72,9 +71,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
 // ---------- Camera scanner ----------
 
+/// The camera scanner view that uses [MobileScanner] to scan barcodes.
+///
+/// Displays a camera preview with an animated overlay and handles
+/// permission requests, errors, and torch control.
 class _MobileScannerView extends StatefulWidget {
   const _MobileScannerView({required this.onSwitchToManual});
 
+  /// Callback to switch to manual barcode entry.
   final VoidCallback onSwitchToManual;
 
   @override
@@ -123,9 +127,29 @@ class _MobileScannerViewState extends State<_MobileScannerView>
         _animationController.stop();
       case AppLifecycleState.resumed:
         unawaited(_animationController.repeat(reverse: true));
+        // If the user left to Settings, granted permission, and returned,
+        // we retry the scanner automatically.
+        unawaited(_checkPermissionAndRetry());
     }
   }
 
+  /// Checks if camera permission is now granted and we were previously
+  /// showing a permission-denied error. If so, retries the scanner.
+  ///
+  /// This handles the scenario where the user leaves the app, grants
+  /// permission in system settings, and then returns.
+  Future<void> _checkPermissionAndRetry() async {
+    final status = await Permission.camera.status;
+    if (status.isGranted &&
+        _currentException?.errorCode ==
+            MobileScannerErrorCode.permissionDenied) {
+      logInfo('Permission granted upon resume — retrying scanner');
+      _retry();
+    }
+  }
+
+  /// Listens for errors from the [MobileScannerController] and updates
+  /// the UI accordingly.
   void _onScannerStateChanged() {
     final error = _scannerController.value.error;
     if (error != null && _currentException == null) {
@@ -135,6 +159,11 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
+  /// Requests camera permission and handles the result.
+  ///
+  /// If permission is granted for the first time (via the system dialog),
+  /// it automatically clears any existing error and retries the scanner,
+  /// eliminating the need for the user to leave and re-enter the screen.
   Future<void> _requestCameraPermission() async {
     logInfo('Checking camera permissions');
     try {
@@ -155,6 +184,11 @@ class _MobileScannerViewState extends State<_MobileScannerView>
       final result = await Permission.camera.request();
       if (result.isGranted) {
         logInfo('Camera permission granted');
+        // If we were previously showing an error (e.g. permissionDenied),
+        // clear it and restart the scanner immediately.
+        if (_currentException != null) {
+          _retry();
+        }
       } else if (result.isPermanentlyDenied) {
         logWarning('Camera permission permanently denied after request');
         _setError(
@@ -175,12 +209,15 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
+  /// Sets the current scanner error, but only if no error is already set.
   void _setError(MobileScannerException exception) {
     if (_currentException != null) return;
     _currentException = exception;
     if (mounted) setState(() {});
   }
 
+  /// Resets the scanner state and rebuilds the widget with a new key,
+  /// forcing [MobileScanner] to reinitialize.
   void _retry() {
     logInfo('Retrying scanner');
     _hasScanned = false;
@@ -189,6 +226,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     unawaited(_requestCameraPermission());
   }
 
+  /// Opens the app's system settings so the user can grant camera permission.
   Future<void> _openSettings() async {
     logInfo('Opening app settings for camera permission');
     final l10n = AppLocalizations.of(context)!;
@@ -198,10 +236,15 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
+  /// Toggles the device torch (flashlight) on or off.
   void _toggleTorch() {
     unawaited(_scannerController.toggleTorch());
   }
 
+  /// Called when a barcode is detected by the scanner.
+  ///
+  /// Ignores duplicate scans, validates the barcode data, and pops the
+  /// screen with the scanned value.
   void _onBarcodeDetected(BarcodeCapture capture) {
     if (_hasScanned) {
       logInfo('Scan already captured -- ignoring duplicate');
@@ -221,10 +264,16 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
+  /// Called when an error occurs during barcode detection (e.g. ML Kit).
   void _onDetectionError(Object error, StackTrace stackTrace) {
     logException('Barcode detection error', error, stackTrace);
   }
 
+  /// Builds the error widget from the [Image.errorBuilder]
+  /// callback of [MobileScanner].
+  ///
+  /// Ensures the error state is recorded so it can be displayed even if the
+  /// callback fires before the first frame.
   Widget _onScannerError(
     BuildContext context,
     MobileScannerException exception,
@@ -238,6 +287,8 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     return _buildErrorContent(exception);
   }
 
+  /// Constructs the full error screen with appropriate actions based on
+  /// the error code.
   Widget _buildErrorContent(MobileScannerException exception) {
     logError('Scanner error: ${exception.errorCode.name}');
     return ScannerErrorContent(
@@ -248,6 +299,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     );
   }
 
+  /// Placeholder shown while the camera preview is loading.
   Widget _buildPlaceholder(BuildContext context) {
     return const ColoredBox(
       color: Colors.black87,
@@ -261,6 +313,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // If an error is set, show the error screen instead of the camera.
     if (_currentException != null) {
       return Scaffold(
         appBar: AppBar(
@@ -277,6 +330,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
       );
     }
 
+    // Normal scanner UI.
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.scanBarcode),
@@ -313,12 +367,16 @@ class _MobileScannerViewState extends State<_MobileScannerView>
             placeholderBuilder: _buildPlaceholder,
             tapToFocus: true,
           ),
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (_, _) => CustomPaint(
-              painter: ScannerOverlayPainter(
-                animationValue: _animationController.value,
-                hintText: l10n.scanHint,
+          // Positioned.fill ensures the overlay is centered and covers the
+          // entire camera preview area, fixing misalignment issues.
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (_, _) => CustomPaint(
+                painter: ScannerOverlayPainter(
+                  animationValue: _animationController.value,
+                  hintText: l10n.scanHint,
+                ),
               ),
             ),
           ),
@@ -461,9 +519,14 @@ class ScannerErrorContent extends StatelessWidget {
 
 // ---------- Manual entry ----------
 
+/// A widget that allows the user to type or paste a barcode number.
+///
+/// Validates that the input is numeric and of sufficient length before
+/// popping the screen with the barcode string.
 class _ManualEntryView extends StatefulWidget {
   const _ManualEntryView({required this.onSwitchToCamera});
 
+  /// Callback to switch back to the camera scanner.
   final VoidCallback onSwitchToCamera;
 
   @override
@@ -473,6 +536,7 @@ class _ManualEntryView extends StatefulWidget {
 class _ManualEntryViewState extends State<_ManualEntryView> {
   final _controller = TextEditingController();
 
+  /// Validates the entered barcode and returns it to the caller.
   void _submit() {
     final text = _controller.text.trim();
     if (text.isEmpty || text.length < 8 || !RegExp(r'^\d+$').hasMatch(text)) {

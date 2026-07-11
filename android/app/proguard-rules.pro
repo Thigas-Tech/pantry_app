@@ -1,3 +1,11 @@
 -keep class com.thigas_tech.pantry_app.** { *; }
 -keep class com.dexterous.** { *; }
 -keep class com.journeyapps.** { *; }
+
+-keep class androidx.camera.** { *; }
+-dontwarn androidx.camera.**
+-keep class com.google.mlkit.** { *; }
+-dontwarn com.google.mlkit.**
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+-keep class dev.steenbakker.mobile_scanner.** { *; }
