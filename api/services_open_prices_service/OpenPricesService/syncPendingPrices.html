@@ -63,15 +63,8 @@
     
 <section class="desc markdown">
   <p>Syncs all pending prices to Open Prices.</p>
-<p>In the current MVP, this marks pending prices as synced locally and
-logs the result. No HTTP requests are made.</p>
-<p>When proof capture is implemented, this will:</p>
-<ol>
-<li>Skip prices with <a href="../../models_price/priceSyncLocalOnly-constant.html">priceSyncLocalOnly</a> status.</li>
-<li>Upload proof image for <a href="../../models_price/priceSyncPending-constant.html">priceSyncPending</a> prices.</li>
-<li>Create price on the Open Prices API.</li>
-<li>Update syncStatus and openPricesId on success.</li>
-</ol>
+<p>Proof photo upload is still a TODO — this method marks prices as
+synced locally without making HTTP requests.</p>
 </section>
 
 
@@ -96,17 +89,10 @@ logs the result. No HTTP requests are made.</p>
 
   for (final price in pending) {
     try {
-      &#47;&#47; TODO(capture-proof): implement proof upload and price creation
-      &#47;&#47; via OpenPricesAPIClient when receipt capture is available.
-      &#47;&#47; For now, mark as synced locally as a placeholder.
-      final updated = price.copyWith(
-        syncStatus: priceSyncSynced,
-      );
+      final updated = price.copyWith(syncStatus: priceSyncSynced);
       await _db.updatePrice(updated);
       synced++;
-      logInfo(
-        &#39;Price ${price.id} marked as synced (placeholder)&#39;,
-      );
+      logInfo(&#39;Price ${price.id} marked as synced (placeholder)&#39;);
     } on Exception catch (e) {
       logError(&#39;Failed to sync price ${price.id}: $e&#39;);
       try {

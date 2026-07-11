@@ -70,6 +70,7 @@
   <pre class="language-dart"><code class="language-dart">final openPricesServiceProvider = Provider&lt;OpenPricesService&gt;(
   (ref) =&gt; OpenPricesService(
     databaseHelper: ref.watch(databaseProvider),
+    apiClient: OpenPricesApiClient(),
   ),
 );</code></pre>
 </section>

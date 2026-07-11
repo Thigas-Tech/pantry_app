@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the OpenPricesApiClient class from the open_prices_api_client library, for the Dart programming language.">
+  <title>OpenPricesApiClient class - open_prices_api_client library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_open_prices_api_client/">services&#47;open_prices_api_client.dart</a></li>
+    <li class="self-crumb">OpenPricesApiClient class</li>
+  </ol>
+  <div class="self-name">OpenPricesApiClient</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_open_prices_api_client&#47;services_open_prices_api_client-library-sidebar.html"
+    data-below-sidebar="services_open_prices_api_client&#47;OpenPricesApiClient-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">OpenPricesApiClient</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>HTTP client for the Open Prices community API.</p>
+<h2 id="base-url">Base URL</h2>
+<p>Production: <code>https://prices.openfoodfacts.org/api/v1</code>
+Pre-production: <code>https://prices.openfoodfacts.net/api/v1</code></p>
+<h2 id="authentication">Authentication</h2>
+<p>Most read endpoints are public. Write endpoints require a Bearer token
+generated from an Open Food Facts account. The token is read from
+<a href="../config/AppConfig/openPricesToken.html">AppConfig.openPricesToken</a> by default, or overridden via the
+<a href="../services_open_prices_api_client/OpenPricesApiClient/token.html">token</a> constructor parameter.</p>
+<p><strong>How to get a token:</strong></p>
+<ol>
+<li>Create/Log in at <a href="https://world.openfoodfacts.org">https://world.openfoodfacts.org</a></li>
+<li>Post to <code>https://prices.openfoodfacts.org/api/v1/auth/token</code> with
+your OFF credentials to generate an Open Prices token.</li>
+</ol>
+<h2 id="error-handling">Error handling</h2>
+<p>Network errors and non-2xx responses are caught and returned as
+<a href="../services_open_prices_api_client/FetchPricesResult-class.html">FetchPricesResult</a> with an empty list, or <a href="../services_open_prices_api_client/SubmitPriceResult-class.html">SubmitPriceResult</a> with
+<code>success = false</code>. No exceptions are thrown.</p>
+<p>Reference: <a href="https://openfoodfacts.github.io/open-prices/guides/API/">https://openfoodfacts.github.io/open-prices/guides/API/</a></p>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="OpenPricesApiClient.new" class="callable">
+          <span class="name"><a href="../services_open_prices_api_client/OpenPricesApiClient/OpenPricesApiClient.html">OpenPricesApiClient</a></span><span class="signature">({<span class="parameter" id="param-client"><span class="type-annotation"><a href="https://pub.dev/documentation/http/1.6.0/http/Client-class.html">Client</a>?</span> <span class="parameter-name">client</span>, </span><span class="parameter" id="param-baseUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">baseUrl</span>, </span><span class="parameter" id="param-token"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">token</span>, </span><span class="parameter" id="param-contactEmail"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">contactEmail</span></span>})</span>
+        </dt>
+        <dd>
+          Creates an <a href="../services_open_prices_api_client/OpenPricesApiClient-class.html">OpenPricesApiClient</a>.
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hasToken" class="property">
+  <span class="name"><a href="../services_open_prices_api_client/OpenPricesApiClient/hasToken.html">hasToken</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd>
+  Whether a non-empty token is configured.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="token" class="property">
+  <span class="name"><a href="../services_open_prices_api_client/OpenPricesApiClient/token.html">token</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd>
+  Optional Bearer token override. When null, falls back to
+<a href="../config/AppConfig/openPricesToken.html">AppConfig.openPricesToken</a>.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="dispose" class="callable">
+  <span class="name"><a href="../services_open_prices_api_client/OpenPricesApiClient/dispose.html">dispose</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Disposes the underlying HTTP client.
+  
+
+</dd>
+
+        <dt id="fetchPricesByBarcode" class="callable">
+  <span class="name"><a href="../services_open_prices_api_client/OpenPricesApiClient/fetchPricesByBarcode.html">fetchPricesByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="fetchPricesByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="fetchPricesByBarcode-param-page"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">page</span> = <span class="default-value">1</span>, </span><span class="parameter" id="fetchPricesByBarcode-param-pageSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">pageSize</span> = <span class="default-value">25</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_open_prices_api_client/FetchPricesResult-class.html">FetchPricesResult</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Fetches prices for the given <code>barcode</code> from the Open Prices API.
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="submitPrice" class="callable">
+  <span class="name"><a href="../services_open_prices_api_client/OpenPricesApiClient/submitPrice.html">submitPrice</a></span><span class="signature">(<wbr>{<span class="parameter" id="submitPrice-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="submitPrice-param-price"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">price</span>, </span><span class="parameter" id="submitPrice-param-currency"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">currency</span>, </span><span class="parameter" id="submitPrice-param-proofId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">proofId</span>, </span><span class="parameter" id="submitPrice-param-locationOsmId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">locationOsmId</span>, </span><span class="parameter" id="submitPrice-param-locationOsmType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">locationOsmType</span>, </span><span class="parameter" id="submitPrice-param-date"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">date</span>, </span><span class="parameter" id="submitPrice-param-store"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">store</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_open_prices_api_client/SubmitPriceResult-class.html">SubmitPriceResult</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Submits a new price to the Open Prices API.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="validateToken" class="callable">
+  <span class="name"><a href="../services_open_prices_api_client/OpenPricesApiClient/validateToken.html">validateToken</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Validates the configured Bearer token against the Open Prices API.
+  
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_open_prices_api_client/">open_prices_api_client</a></li>
+    <li class="self-crumb">OpenPricesApiClient class</li>
+</ol>
+
+    <h5>open_prices_api_client library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.5+1
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

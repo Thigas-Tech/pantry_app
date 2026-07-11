@@ -71,7 +71,10 @@
   (ref) =&gt; PriceRepository(
     ref.watch(databaseProvider),
     ref.watch(currencyServiceProvider),
-    OpenPricesService(databaseHelper: ref.watch(databaseProvider)),
+    OpenPricesService(
+      databaseHelper: ref.watch(databaseProvider),
+      apiClient: OpenPricesApiClient(),
+    ),
   ),
 );</code></pre>
 </section>

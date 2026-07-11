@@ -56,16 +56,14 @@
 <section class="desc markdown">
   <p>Service for synchronising local prices with the Open Prices community
 database.</p>
-<h2 id="current-limitations">Current limitations</h2>
-<p>The Open Prices API requires a proof photo (receipt or shelf label) for
-every price write. Until the app supports receipt capture (via NFC-e or
-manual camera), the service marks prices as <code>synced</code> locally without
-making HTTP requests. This is a placeholder for the future full
-implementation.</p>
-<h2 id="future-implementation">Future implementation</h2>
-<p>When proof upload is available, the sync flow will be:</p>
+<h2 id="token-based-auth">Token-based auth</h2>
+<p>The service reads the Bearer token from <a href="../services_open_prices_api_client/OpenPricesApiClient-class.html">OpenPricesApiClient</a> which
+defaults to the configured token (from <code>.env</code> or <code>SharedPreferences</code>).
+If the token is empty, all API operations return empty/error results
+and the app works in local-only mode.</p>
+<h2 id="sync-flow">Sync flow</h2>
 <ol>
-<li>Upload the proof photo → get <code>proof_id</code>.</li>
+<li>Upload the proof photo (TODO — blocked by receipt capture).</li>
 <li>Create the price with <code>proof_id</code>.</li>
 <li>Store the returned <code>open_prices_id</code>.</li>
 <li>Mark as <code>synced</code>.</li>
@@ -79,7 +77,7 @@ implementation.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="OpenPricesService.new" class="callable">
-          <span class="name"><a href="../services_open_prices_service/OpenPricesService/OpenPricesService.html">OpenPricesService</a></span><span class="signature">({<span class="parameter" id="param-databaseHelper"><span>required</span> <span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">databaseHelper</span></span>})</span>
+          <span class="name"><a href="../services_open_prices_service/OpenPricesService/OpenPricesService.html">OpenPricesService</a></span><span class="signature">({<span class="parameter" id="param-databaseHelper"><span>required</span> <span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">databaseHelper</span>, </span><span class="parameter" id="param-apiClient"><span class="type-annotation"><a href="../services_open_prices_api_client/OpenPricesApiClient-class.html">OpenPricesApiClient</a>?</span> <span class="parameter-name">apiClient</span></span>})</span>
         </dt>
         <dd>
           Creates an <a href="../services_open_prices_service/OpenPricesService-class.html">OpenPricesService</a>.
@@ -125,6 +123,32 @@ implementation.</p>
       id="instance-methods">
     <h2>Methods</h2>
     <dl class="callables">
+        <dt id="dispose" class="callable">
+  <span class="name"><a href="../services_open_prices_service/OpenPricesService/dispose.html">dispose</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Disposes the underlying HTTP client.
+  
+
+</dd>
+
+        <dt id="fetchPricesByBarcode" class="callable">
+  <span class="name"><a href="../services_open_prices_service/OpenPricesService/fetchPricesByBarcode.html">fetchPricesByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="fetchPricesByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_open_prices_api_client/FetchPricesResult-class.html">FetchPricesResult</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Fetches prices for the given <code>barcode</code> from the Open Prices API.
+  
+
+</dd>
+
         <dt id="noSuchMethod" class="callable inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
     <span class="returntype parameter">&#8594; dynamic</span>
@@ -165,14 +189,14 @@ implementation.</p>
 </dd>
 
         <dt id="validateToken" class="callable">
-  <span class="name"><a href="../services_open_prices_service/OpenPricesService/validateToken.html">validateToken</a></span><span class="signature">(<wbr><span class="parameter" id="validateToken-param-token"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">token</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  <span class="name"><a href="../services_open_prices_service/OpenPricesService/validateToken.html">validateToken</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Validates that <code>token</code> is a non-empty string.
+  Validates the configured token against the Open Prices API.
   
 
 </dd>

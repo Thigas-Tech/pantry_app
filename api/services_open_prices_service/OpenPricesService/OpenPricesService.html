@@ -55,6 +55,7 @@
     <section class="multi-line-signature">
       
       <span class="name ">OpenPricesService</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-databaseHelper"><span>required</span> <span class="type-annotation"><a href="../../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">databaseHelper</span>, </span></li>
+<li><span class="parameter" id="param-apiClient"><span class="type-annotation"><a href="../../services_open_prices_api_client/OpenPricesApiClient-class.html">OpenPricesApiClient</a>?</span> <span class="parameter-name">apiClient</span>, </span></li>
 </ol>})
     </section>
     
@@ -68,7 +69,9 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">OpenPricesService({
   required DatabaseHelper databaseHelper,
-}) : _db = databaseHelper;</code></pre>
+  OpenPricesApiClient? apiClient,
+}) : _db = databaseHelper,
+     _api = apiClient ?? OpenPricesApiClient();</code></pre>
 </section>
 
 
