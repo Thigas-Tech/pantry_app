@@ -83,7 +83,9 @@ executions of <a href="../../providers_settings_provider/SettingsNotifier/build.
   <pre class="language-dart"><code class="language-dart">@override
 Settings build() {
   unawaited(_loadFromPrefs());
-  return const Settings();
+  return Settings(
+    baseCurrency: _detectLocaleCurrency(),
+  );
 }</code></pre>
 </section>
 
@@ -112,7 +114,7 @@ Settings build() {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

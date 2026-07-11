@@ -61,7 +61,8 @@
         </section>
         
 <section class="desc markdown">
-  <p>Provides the total value of the currently active inventory.</p>
+  <p>Provides the total value of the currently active inventory, converted
+to the user's base currency.</p>
 </section>
 
         
@@ -71,7 +72,11 @@
 final inventoryValueProvider = FutureProvider.autoDispose&lt;double?&gt;((ref) async {
   final repo = ref.watch(priceRepositoryProvider);
   final activeId = ref.watch(activeInventoryProvider);
-  final value = await repo.totalInventoryValue(activeId);
+  final settings = ref.watch(settingsProvider);
+  final value = await repo.totalInventoryValue(
+    activeId,
+    baseCurrency: settings.baseCurrency,
+  );
   if (value == null) return null;
   return double.tryParse(value.toStringAsFixed(2));
 });</code></pre>
@@ -102,7 +107,7 @@ final inventoryValueProvider = FutureProvider.autoDispose&lt;double?&gt;((ref) a
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

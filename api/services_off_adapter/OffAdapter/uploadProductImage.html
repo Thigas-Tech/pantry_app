@@ -91,40 +91,57 @@ success, <code>false</code> if credentials are missing or the upload fails.</p>
     logWarning(&#39;Image file not found: $imagePath&#39;);
     return false;
   }
-  try {
-    logInfo(
-      &#39;Uploading $imageField image for $barcode&#39;,
-    );
-    final lang = languageCode != null
-        ? off.OpenFoodFactsLanguage.fromOffTag(languageCode)
-        : off.OpenFoodFactsLanguage.ENGLISH;
-    final image = off.SendImage(
-      lang: lang == off.OpenFoodFactsLanguage.UNDEFINED
-          ? off.OpenFoodFactsLanguage.ENGLISH
-          : lang,
-      barcode: barcode,
-      imageField: parseImageField(imageField),
-      imageUri: Uri.parse(imagePath),
-    );
-    final status = await _onAddProductImage(
-      user,
-      image,
-      uriHelper: _uriHelper,
-    );
-    final success = status.status == 1;
-    if (success) {
-      logInfo(&#39;$imageField image uploaded for $barcode&#39;);
-    } else {
+  const maxRetries = 2;
+  for (var attempt = 0; attempt &lt;= maxRetries; attempt++) {
+    try {
+      logInfo(
+        &#39;Uploading $imageField image for $barcode &#39;
+        &#39;(attempt ${attempt + 1})&#39;,
+      );
+      final lang = languageCode != null
+          ? off.OpenFoodFactsLanguage.fromOffTag(languageCode)
+          : off.OpenFoodFactsLanguage.ENGLISH;
+      final image = off.SendImage(
+        lang: lang == off.OpenFoodFactsLanguage.UNDEFINED
+            ? off.OpenFoodFactsLanguage.ENGLISH
+            : lang,
+        barcode: barcode,
+        imageField: parseImageField(imageField),
+        imageUri: Uri.parse(imagePath),
+      );
+      final status = await _onAddProductImage(
+        user,
+        image,
+        uriHelper: _uriHelper,
+      );
+      final success = status.status == 1;
+      if (success) {
+        logInfo(&#39;$imageField image uploaded for $barcode&#39;);
+        return true;
+      }
       logWarning(
         &#39;$imageField image upload for $barcode returned status &#39;
         &#39;${status.status}: ${status.statusVerbose}&#39;,
       );
+      return false;
+    } on Exception catch (e) {
+      if (attempt &lt; maxRetries) {
+        final delay = Duration(seconds: attempt + 1);
+        logWarning(
+          &#39;$imageField image upload failed for $barcode &#39;
+          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e&#39;,
+        );
+        await Future&lt;void&gt;.delayed(delay);
+      } else {
+        logError(
+          &#39;Image upload failed for $barcode after &#39;
+          &#39;all retries: $e&#39;,
+        );
+        return false;
+      }
     }
-    return success;
-  } on Exception catch (e) {
-    logError(&#39;Image upload failed for $barcode: $e&#39;);
-    return false;
   }
+  return false;
 }</code></pre>
 </section>
 
@@ -153,7 +170,7 @@ success, <code>false</code> if credentials are missing or the upload fails.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

@@ -55,7 +55,7 @@
     
 <section class="desc markdown">
   <p>Centralized query configuration for Open Food Facts SDK calls.</p>
-<p>Inspired by smooth-app's <code>ProductQuery</code> class. Provides pre-configured
+<p>Inspired by smooth-app's ProductQuery class. Provides pre-configured
 <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductQueryConfiguration-class.html">ProductQueryConfiguration</a>, <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductSearchQueryConfiguration-class.html">ProductSearchQueryConfiguration</a>, and
 field lists that limit fetched data to only what we need — reducing
 payload size and parse time.</p>
@@ -158,20 +158,21 @@ payload size and parse time.</p>
     <h2>Static Methods</h2>
     <dl class="callables">
         <dt id="barcodeConfig" class="callable">
-  <span class="name"><a href="../services_off_query/OffQuery/barcodeConfig.html">barcodeConfig</a></span><span class="signature">(<wbr><span class="parameter" id="barcodeConfig-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+  <span class="name"><a href="../services_off_query/OffQuery/barcodeConfig.html">barcodeConfig</a></span><span class="signature">(<wbr><span class="parameter" id="barcodeConfig-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="barcodeConfig-param-language"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">language</span> = <span class="default-value">&#39;en&#39;</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductQueryConfiguration-class.html">ProductQueryConfiguration</a></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns a <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductQueryConfiguration-class.html">ProductQueryConfiguration</a> for fetching a product by barcode.
+  Returns a <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductQueryConfiguration-class.html">ProductQueryConfiguration</a> for fetching a product by barcode
+in the given <code>language</code> (two-letter code like <code>'en'</code>, <code>'fr'</code>, <code>'pt'</code>).
   
 
 </dd>
 
         <dt id="searchConfig" class="callable">
-  <span class="name"><a href="../services_off_query/OffQuery/searchConfig.html">searchConfig</a></span><span class="signature">(<wbr><span class="parameter" id="searchConfig-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span>, {</span><span class="parameter" id="searchConfig-param-pageSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">pageSize</span> = <span class="default-value">20</span></span>})
+  <span class="name"><a href="../services_off_query/OffQuery/searchConfig.html">searchConfig</a></span><span class="signature">(<wbr><span class="parameter" id="searchConfig-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span>, {</span><span class="parameter" id="searchConfig-param-pageSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">pageSize</span> = <span class="default-value">20</span>, </span><span class="parameter" id="searchConfig-param-language"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">language</span> = <span class="default-value">&#39;en&#39;</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductSearchQueryConfiguration-class.html">ProductSearchQueryConfiguration</a></span>
   </span>
   
@@ -179,7 +180,7 @@ payload size and parse time.</p>
 </dt>
 <dd>
   Returns a <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductSearchQueryConfiguration-class.html">ProductSearchQueryConfiguration</a> for searching products
-by name or barcode prefix.
+by name or barcode prefix, in the given <code>language</code>.
   
 
 </dd>
@@ -228,7 +229,7 @@ by name or barcode prefix.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

@@ -55,8 +55,9 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product/Product-class.html">Product</a></span>&gt;</span></span>
-<span class="name ">getProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="getProduct-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
-</ol>)
+<span class="name ">getProduct</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="getProduct-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
+<li><span class="parameter" id="getProduct-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">languageCode</span>, </span></li>
+</ol>})
 
       
 
@@ -74,8 +75,9 @@ cache exists.</p>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; getProduct(String barcode) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; getProduct(String barcode, {String? languageCode}) async {
   logInfo(&#39;Looking up $barcode&#39;);
+  final lang = languageCode ?? _currentLanguageCode();
 
   &#47;&#47; 1. Local cache
   final cached = await _db.getProduct(barcode);
@@ -87,7 +89,7 @@ cache exists.</p>
   &#47;&#47; 2. Try primary API
   try {
     logInfo(&#39;Fetching $barcode from primary API&#39;);
-    final remote = await _api.getByBarcode(barcode);
+    final remote = await _api.getByBarcode(barcode, languageCode: lang);
     await _db.insertProduct(remote);
     logInfo(&#39;Fetched and cached $barcode&#39;);
     return remote;
@@ -96,7 +98,10 @@ cache exists.</p>
     if (_fallbackApi != null) {
       logInfo(&#39;Trying fallback API for $barcode&#39;);
       try {
-        final remote = await _fallbackApi.getByBarcode(barcode);
+        final remote = await _fallbackApi.getByBarcode(
+          barcode,
+          languageCode: lang,
+        );
         await _db.insertProduct(remote);
         logInfo(&#39;Fetched $barcode from fallback API&#39;);
         return remote;
@@ -146,7 +151,7 @@ cache exists.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

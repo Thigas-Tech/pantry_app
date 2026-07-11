@@ -61,6 +61,12 @@
 <li><span class="parameter" id="copyWith-param-inactivityReminderEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">inactivityReminderEnabled</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-inactivityThresholdDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inactivityThresholdDays</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-amoledDarkMode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">amoledDarkMode</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-priceTrackingEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">priceTrackingEnabled</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-priceRetentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">priceRetentionDays</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-pricesHidden"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">pricesHidden</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-baseCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">baseCurrency</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-openPricesSyncEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">openPricesSyncEnabled</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-openPricesToken"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">openPricesToken</span>, </span></li>
 </ol>})
 
       
@@ -82,6 +88,12 @@
   bool? inactivityReminderEnabled,
   int? inactivityThresholdDays,
   bool? amoledDarkMode,
+  bool? priceTrackingEnabled,
+  int? priceRetentionDays,
+  bool? pricesHidden,
+  String? baseCurrency,
+  bool? openPricesSyncEnabled,
+  String? openPricesToken,
 }) {
   return Settings(
     notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -92,6 +104,13 @@
     inactivityThresholdDays:
         inactivityThresholdDays ?? this.inactivityThresholdDays,
     amoledDarkMode: amoledDarkMode ?? this.amoledDarkMode,
+    priceTrackingEnabled: priceTrackingEnabled ?? this.priceTrackingEnabled,
+    priceRetentionDays: priceRetentionDays ?? this.priceRetentionDays,
+    pricesHidden: pricesHidden ?? this.pricesHidden,
+    baseCurrency: baseCurrency ?? this.baseCurrency,
+    openPricesSyncEnabled:
+        openPricesSyncEnabled ?? this.openPricesSyncEnabled,
+    openPricesToken: openPricesToken ?? this.openPricesToken,
   );
 }</code></pre>
 </section>
@@ -121,7 +140,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

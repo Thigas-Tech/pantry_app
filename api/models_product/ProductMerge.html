@@ -54,11 +54,12 @@
 
     
 <section class="desc markdown">
-  <p>Extension that provides safe API merge semantics on <a href="../models_product/Product-class.html">Product</a>.</p>
-<p><code>mergeFromApi</code> is defined as an extension rather than a method on the
-abstract class because freezed generates a concrete implementation
-(<code>_Product</code>) that <code>implements</code> (not <code>extends</code>) the abstract class.</p>
-<h2 id="merge-rules">Merge rules</h2>
+  <p>Extension that provides safe merge semantics on <a href="../models_product/Product-class.html">Product</a>.</p>
+<p>Both <a href="../models_product/ProductMerge/mergeFromApi.html">mergeFromApi</a> and <a href="../models_product/ProductMerge/mergeFromManual.html">mergeFromManual</a> are defined as extensions
+rather than methods on the abstract class because freezed generates a
+concrete implementation (<code>_Product</code>) that <code>implements</code> (not <code>extends</code>)
+the abstract class.</p>
+<h2 id="api-merge-rules-mergefromapi">API merge rules (<a href="../models_product/ProductMerge/mergeFromApi.html">mergeFromApi</a>)</h2>
 <ul>
 <li><strong>API non-null wins</strong> — if the API returned a value, it overwrites
 the cached value.</li>
@@ -71,9 +72,24 @@ is kept. This prevents pull-to-refresh from silently wiping data.</li>
 <li><strong>Name sentinel</strong> — if the API returns <code>'Unknown'</code> (the default when
 the real name is missing), the cached name is kept.</li>
 </ul>
-<p>This is the <strong>safe-update</strong> primitive for pull-to-refresh and post-flush
-re-fetch operations. It guarantees that an incomplete API response can
-never degrade the cached data.</p>
+<h2 id="manual-merge-rules-mergefrommanual">Manual merge rules (<a href="../models_product/ProductMerge/mergeFromManual.html">mergeFromManual</a>)</h2>
+<ul>
+<li><strong>Manual non-null wins</strong> — the user explicitly entered these fields,
+so they override the cached API data.</li>
+<li><strong>API-only fields are preserved</strong> — <code>nutriscoreGrade</code>,
+<code>nutriscoreNotApplicableCategory</code>, <code>offNutritionImageUrl</code>,
+<code>offIngredientsImageUrl</code>, <code>offProductImageUrl</code>, <code>categoriesHierarchy</code>
+from the cache are kept because the manual form does not provide them.</li>
+<li><strong>Local-only fields are never touched</strong> — <code>source</code> stays <code>'manual'</code>,
+<code>submissionStatus</code> is preserved from the existing cache if it was
+<code>submitted</code>.</li>
+<li><strong>Empty/nulled user fields</strong> — if the user left a field empty on the
+manual form but the cache has a value, the cache value is kept.</li>
+</ul>
+<p>This is the <strong>safe-update</strong> primitive for manual entry over an existing
+cache record. It prevents a sparse manual entry from wiping out rich
+API data (Nutri-Score, nutrition facts, images) that the user did not
+explicitly override.</p>
 </section>
 
     <section>
@@ -115,6 +131,25 @@ preserving local-only fields that the API does not return.
 
 </dd>
 
+        <dt id="mergeFromManual" class="callable">
+  <span class="name"><a href="../models_product/ProductMerge/mergeFromManual.html">mergeFromManual</a></span><span class="signature">(<wbr><span class="parameter" id="mergeFromManual-param-manual"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">manual</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../models_product/Product-class.html">Product</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_product/Product-class.html">Product</a>,
+        provided by the <a href="../models_product/ProductMerge.html">ProductMerge</a> extension</span>
+      </p>
+  Merges data from a user-entered <code>manual</code> product into this cached
+product, preserving API-only fields that the manual form does not
+provide.
+  
+
+</dd>
+
     </dl>
   </section>
     
@@ -145,7 +180,7 @@ preserving local-only fields that the API does not return.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

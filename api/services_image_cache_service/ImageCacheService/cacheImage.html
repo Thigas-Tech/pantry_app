@@ -87,10 +87,11 @@ converts it to WebP, and saves it to the local file system.</p>
     final response = await _httpClient.get(Uri.parse(imageUrl));
     if (response.statusCode != 200) return null;
 
-    final originalImage = img.decodeImage(response.bodyBytes);
-    if (originalImage == null) return null;
-
-    final webpBytes = img.encodeWebP(originalImage);
+    final webpBytes = await compute(
+      _decodeAndEncodeWebp,
+      Uint8List.fromList(response.bodyBytes),
+    );
+    if (webpBytes == null) return null;
     await cachedFile.writeAsBytes(webpBytes);
     logInfo(&#39;Image cached for $barcode&#39;);
     return cachedFile.path;
@@ -126,7 +127,7 @@ converts it to WebP, and saves it to the local file system.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

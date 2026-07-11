@@ -76,6 +76,7 @@ final statsProvider = FutureProvider.autoDispose&lt;PantryStats&gt;((ref) async 
   final activeId = ref.watch(activeInventoryProvider);
   final db = ref.watch(databaseProvider);
   final settings = ref.watch(settingsProvider);
+  final priceRepo = ref.read(priceRepositoryProvider);
   final database = await db.database;
 
   final results = await Future.wait([
@@ -142,6 +143,19 @@ final statsProvider = FutureProvider.autoDispose&lt;PantryStats&gt;((ref) async 
     totalProducts: prodCount,
     totalItems: itemCount,
     averageNutriscoreNumeric: avgNutri,
+    totalValue:
+        await priceRepo.totalInventoryValue(
+          activeId,
+          baseCurrency: settings.baseCurrency,
+        ) ??
+        0,
+    averagePrice:
+        await priceRepo.averageItemPrice(
+          activeId,
+          baseCurrency: settings.baseCurrency,
+        ) ??
+        0,
+    pricedItemCount: await priceRepo.pricedItemCount(activeId),
     expiredCount: expiryDist[&#39;expired&#39;] ?? 0,
     expiringSoonCount: expiryDist[&#39;expiring&#39;] ?? 0,
     goodCount: expiryDist[&#39;good&#39;] ?? 0,
@@ -205,7 +219,7 @@ final statsProvider = FutureProvider.autoDispose&lt;PantryStats&gt;((ref) async 
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

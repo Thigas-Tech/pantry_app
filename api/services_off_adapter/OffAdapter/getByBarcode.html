@@ -55,8 +55,9 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product/Product-class.html">Product</a></span>&gt;</span></span>
-<span class="name ">getByBarcode</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="getByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
-</ol>)
+<span class="name ">getByBarcode</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="getByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
+<li><span class="parameter" id="getByBarcode-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span> = <span class="default-value">&#39;en&#39;</span>, </span></li>
+</ol>})
 
       
 
@@ -64,6 +65,8 @@
     
 <section class="desc markdown">
   <p>Fetches a product by barcode from Open Food Facts.</p>
+<p><code>languageCode</code> is a two-letter code (e.g. <code>'en'</code>, <code>'fr'</code>, <code>'pt'</code>)
+that requests product data in the user's preferred language.</p>
 <p>Throws <a href="../../services_exceptions/ProductNotFoundException-class.html">ProductNotFoundException</a> if the barcode is unknown.
 Throws <a href="../../services_exceptions/FetchFailedException-class.html">FetchFailedException</a> on network or server errors that
 are not "not found" responses.</p>
@@ -73,11 +76,14 @@ are not "not found" responses.</p>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; getByBarcode(String barcode) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; getByBarcode(
+  String barcode, {
+  String languageCode = &#39;en&#39;,
+}) async {
   logInfo(&#39;Fetching $barcode via SDK&#39;);
   try {
     final result = await _onGetProductV3(
-      OffQuery.barcodeConfig(barcode),
+      OffQuery.barcodeConfig(barcode, language: languageCode),
       user: readUser,
       uriHelper: _uriHelper,
     );
@@ -86,7 +92,10 @@ are not "not found" responses.</p>
       throw ProductNotFoundException(barcode);
     }
     logInfo(&#39;Fetched $barcode — ${result.product!.productName}&#39;);
-    return Product.fromOffProduct(result.product!);
+    return Product.fromOffProduct(
+      result.product!,
+      languageCode: languageCode,
+    );
   } on ProductNotFoundException {
     rethrow;
   } on Exception catch (e) {
@@ -123,7 +132,7 @@ are not "not found" responses.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

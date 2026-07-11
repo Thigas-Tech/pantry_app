@@ -64,10 +64,10 @@
     
 <section class="desc markdown">
   <p>Submits <code>product</code> to Open Food Facts along with any local images.</p>
-<p>Returns the updated <a href="../../models_product/Product-class.html">Product</a> with <code>submissionStatus</code> set to
+<p>Returns the updated <a href="../../models_product/Product-class.html">Product</a> with submission status set to
 <a href="../../models_product/productSubmissionSubmitted-constant.html">productSubmissionSubmitted</a> on success or
-<a href="../../models_product/productSubmissionFailed-constant.html">productSubmissionFailed</a> on failure. The updated product is also
-persisted to the local database.</p>
+<a href="../../models_product/productSubmissionFailed-constant.html">productSubmissionFailed</a> on failure. On network failure the barcode
+is queued for background retry.</p>
 </section>
 
 
@@ -116,6 +116,16 @@ persisted to the local database.</p>
           : productSubmissionFailed,
     );
     await _db.insertProduct(updated);
+
+    &#47;&#47; On success, remove any pending queue entries for this barcode.
+    if (imagesOk) {
+      final database = await _db.database;
+      await _db.productSubmissionQueueDao.deleteByBarcode(
+        database,
+        product.barcode,
+      );
+    }
+
     return updated;
   } on Exception catch (e) {
     logError(&#39;Submission failed for ${product.barcode}: $e&#39;);
@@ -123,6 +133,10 @@ persisted to the local database.</p>
       submissionStatus: productSubmissionFailed,
     );
     await _db.insertProduct(updated);
+
+    &#47;&#47; Queue for background retry on network failure.
+    await _queueForRetry(product.barcode);
+
     return updated;
   }
 }</code></pre>
@@ -153,7 +167,7 @@ persisted to the local database.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

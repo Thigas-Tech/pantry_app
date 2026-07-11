@@ -60,9 +60,17 @@
 <li>Submit product metadata via the legacy API (<code>/cgi/product_jqm2.pl</code>).</li>
 <li>Upload local photos (nutrition table, ingredients, front) via
 <code>/cgi/product_image_upload.pl</code>.</li>
-<li>Update the product's <code>submissionStatus</code> on success/failure and
+<li>Update the product's submission status on success/failure and
 persist to the local database.</li>
+<li>On network failure, queue the barcode in the
+product_submission_queue table for later retry.</li>
 </ol>
+<h2 id="offline-queue">Offline queue</h2>
+<p>When a submission fails due to a network error (Exception), the barcode
+is persisted in the product_submission_queue table. The queue is
+processed at startup and whenever connectivity is restored. Each entry
+uses exponential backoff (2^retry minutes, max 24h) up to 5 retries
+before being discarded.</p>
 </section>
 
 
@@ -118,6 +126,20 @@ persist to the local database.</li>
       id="instance-methods">
     <h2>Methods</h2>
     <dl class="callables">
+        <dt id="flushQueue" class="callable">
+  <span class="name"><a href="../services_product_submission_service/ProductSubmissionService/flushQueue.html">flushQueue</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Processes the product submission queue: retries pending submissions
+and removes entries that succeed or exhaust retries.
+  
+
+</dd>
+
         <dt id="noSuchMethod" class="callable inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
     <span class="returntype parameter">&#8594; dynamic</span>
@@ -207,7 +229,7 @@ persist to the local database.</li>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

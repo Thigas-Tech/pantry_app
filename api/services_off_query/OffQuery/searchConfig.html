@@ -57,6 +57,7 @@
 <span class="returntype"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductSearchQueryConfiguration-class.html">ProductSearchQueryConfiguration</a></span>
 <span class="name ">searchConfig</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="searchConfig-param-query"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">query</span>, {</span></li>
 <li><span class="parameter" id="searchConfig-param-pageSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">pageSize</span> = <span class="default-value">20</span>, </span></li>
+<li><span class="parameter" id="searchConfig-param-language"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">language</span> = <span class="default-value">&#39;en&#39;</span>, </span></li>
 </ol>})
 
       
@@ -65,7 +66,7 @@
     
 <section class="desc markdown">
   <p>Returns a <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ProductSearchQueryConfiguration-class.html">ProductSearchQueryConfiguration</a> for searching products
-by name or barcode prefix.</p>
+by name or barcode prefix, in the given <code>language</code>.</p>
 </section>
 
 
@@ -75,13 +76,14 @@ by name or barcode prefix.</p>
   <pre class="language-dart"><code class="language-dart">static ProductSearchQueryConfiguration searchConfig(
   String query, {
   int pageSize = 20,
+  String language = &#39;en&#39;,
 }) {
   return ProductSearchQueryConfiguration(
     parametersList: [
       SearchTerms(terms: [query]),
       PageSize(size: pageSize),
     ],
-    language: OpenFoodFactsLanguage.ENGLISH,
+    language: _codeToLanguage(language),
     fields: productFields,
     version: ProductQueryVersion.v3,
   );
@@ -113,7 +115,7 @@ by name or barcode prefix.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

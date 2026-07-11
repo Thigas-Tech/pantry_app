@@ -246,6 +246,20 @@ if none exist.
 
 </dd>
 
+        <dt id="latestPricesWithCurrency" class="callable">
+  <span class="name"><a href="../database_price_dao/PriceDao/latestPricesWithCurrency.html">latestPricesWithCurrency</a></span><span class="signature">(<wbr><span class="parameter" id="latestPricesWithCurrency-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="latestPricesWithCurrency-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the most recent price per distinct product in the inventory,
+with currency, for currency-aware averaging by the caller.
+  
+
+</dd>
+
         <dt id="listAll" class="callable">
   <span class="name"><a href="../database_price_dao/PriceDao/listAll.html">listAll</a></span><span class="signature">(<wbr><span class="parameter" id="listAll-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="listAll-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">limit</span>, </span><span class="parameter" id="listAll-param-offset"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">offset</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>&gt;</span></span>
@@ -341,6 +355,21 @@ is not applied here — the caller should convert via CurrencyService.
 
 </dd>
 
+        <dt id="totalInventoryValueByCurrency" class="callable">
+  <span class="name"><a href="../database_price_dao/PriceDao/totalInventoryValueByCurrency.html">totalInventoryValueByCurrency</a></span><span class="signature">(<wbr><span class="parameter" id="totalInventoryValueByCurrency-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="totalInventoryValueByCurrency-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total inventory value broken down by currency, using the
+most recent price per distinct product. Each row contains <code>currency</code>
+and <code>subtotal</code> columns.
+  
+
+</dd>
+
         <dt id="update" class="callable">
   <span class="name"><a href="../database_price_dao/PriceDao/update.html">update</a></span><span class="signature">(<wbr><span class="parameter" id="update-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="update-param-price"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a></span> <span class="parameter-name">price</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -404,7 +433,7 @@ is not applied here — the caller should convert via CurrencyService.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

@@ -56,6 +56,7 @@
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
 <span class="name ">cleanupOldEntries</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="cleanupOldEntries-param-retentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">retentionDays</span> = <span class="default-value">60</span>, </span></li>
+<li><span class="parameter" id="cleanupOldEntries-param-priceRetentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">priceRetentionDays</span> = <span class="default-value">0</span>, </span></li>
 </ol>})
 
       
@@ -63,14 +64,19 @@
     </section>
     
 <section class="desc markdown">
-  <p>Removes stale inventory items and orphaned products.</p>
+  <p>Removes stale inventory items, orphaned products, and old prices.</p>
+<p><code>retentionDays</code> applies to inventory items only. Price rows use
+<code>priceRetentionDays</code> (default 0 = keep forever).</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; cleanupOldEntries({int retentionDays = 60}) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; cleanupOldEntries({
+  int retentionDays = 60,
+  int priceRetentionDays = 0,
+}) async {
   final db = await database;
   final cutoff = DateTime.now()
       .subtract(Duration(days: retentionDays))
@@ -94,6 +100,15 @@
       WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
     &#39;&#39;&#39;);
     logInfo(&#39;Removed $deletedProducts orphaned products&#39;);
+
+    if (priceRetentionDays &gt; 0) {
+      final deletedPrices = await priceDao.deleteStale(
+        db,
+        priceRetentionDays,
+      );
+      logInfo(&#39;Removed $deletedPrices old price rows&#39;);
+    }
+
     logInfo(&#39;Cleanup finished&#39;);
   } on Exception catch (e) {
     logError(&#39;Cleanup failed: $e&#39;);
@@ -127,7 +142,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

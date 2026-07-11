@@ -67,7 +67,7 @@
 <p>Runs in a separate Dart isolate when the user taps a notification action
 that does NOT show the UI. This function cannot access Riverpod, the
 database, or navigation — it only logs that the event occurred.</p>
-<p>The main isolate checks <code>NotificationService.getLaunchDetails</code> on next
+<p>The main isolate checks <a href="../services_notification_service/NotificationService/getLaunchDetails.html">NotificationService.getLaunchDetails</a> on next
 foreground to handle the actual deep-link.</p>
 <p>Must be a top-level function with <a href="https://api.flutter.dev/flutter/dart-core/pragma-class.html">pragma('vm:entry-point')</a> so that
 tree-shaking does not remove it when it is called from native code.</p>
@@ -110,7 +110,7 @@ void notificationTapBackground(NotificationResponse response) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

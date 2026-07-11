@@ -75,6 +75,7 @@
 <li><span class="parameter" id="param-nutriscoreGrade"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreGrade</span>, </span></li>
 <li><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span></li>
 <li><span class="parameter" id="param-source"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(&#39;api&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">source</span>, </span></li>
+<li><span class="parameter" id="param-languageCode"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(&#39;en&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span>, </span></li>
 <li><span class="parameter" id="param-nutritionImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutritionImagePath</span>, </span></li>
 <li><span class="parameter" id="param-ingredientsImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredientsImagePath</span>, </span></li>
 <li><span class="parameter" id="param-productImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productImagePath</span>, </span></li>
@@ -211,6 +212,18 @@ and may not be present for every product.</p>
   &#47;&#47;&#47; `&#39;manual&#39;`.
   @Default(&#39;api&#39;) String source,
 
+  &#47;&#47;&#47; The locale code of the language used when this product was fetched
+  &#47;&#47;&#47; from Open Food Facts (e.g. `&#39;en&#39;`, `&#39;fr&#39;`, `&#39;pt&#39;`).
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; This represents the language *requested* by the client, not necessarily
+  &#47;&#47;&#47; the language *returned* — OFF silently falls back to English if the
+  &#47;&#47;&#47; requested language has no data for a given field. Storing the
+  &#47;&#47;&#47; requested code allows the &quot;Show in language&quot; ActionChip to display
+  &#47;&#47;&#47; meaningful options.
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; Defaults to &#39;en&#39; for legacy records and manually entered products.
+  @Default(&#39;en&#39;) String languageCode,
+
   &#47;&#47;&#47; Local file path to a photo of the nutrition facts table.
   &#47;&#47;&#47;
   &#47;&#47;&#47; Populated when the user captures a photo on the manual-entry screen.
@@ -264,7 +277,7 @@ and may not be present for every product.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

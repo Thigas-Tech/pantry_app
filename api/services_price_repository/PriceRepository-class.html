@@ -130,7 +130,7 @@ user's base currency for display.</p>
 </dd>
 
         <dt id="averageItemPrice" class="callable">
-  <span class="name"><a href="../services_price_repository/PriceRepository/averageItemPrice.html">averageItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="averageItemPrice-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+  <span class="name"><a href="../services_price_repository/PriceRepository/averageItemPrice.html">averageItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="averageItemPrice-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, {</span><span class="parameter" id="averageItemPrice-param-baseCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseCurrency</span> = <span class="default-value">&#39;USD&#39;</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
   </span>
   
@@ -138,7 +138,8 @@ user's base currency for display.</p>
 </dt>
 <dd>
   Returns the average of the most recent price per distinct product in
-the given inventory, or <code>null</code> if no prices exist.
+the given inventory, converted to <code>baseCurrency</code>, or <code>null</code> if no
+prices exist.
   
 
 </dd>
@@ -302,7 +303,7 @@ least one price.
 </dd>
 
         <dt id="totalInventoryValue" class="callable">
-  <span class="name"><a href="../services_price_repository/PriceRepository/totalInventoryValue.html">totalInventoryValue</a></span><span class="signature">(<wbr><span class="parameter" id="totalInventoryValue-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+  <span class="name"><a href="../services_price_repository/PriceRepository/totalInventoryValue.html">totalInventoryValue</a></span><span class="signature">(<wbr><span class="parameter" id="totalInventoryValue-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, {</span><span class="parameter" id="totalInventoryValue-param-baseCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseCurrency</span> = <span class="default-value">&#39;USD&#39;</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
   </span>
   
@@ -310,7 +311,8 @@ least one price.
 </dt>
 <dd>
   Returns the sum of the most recent price per distinct product in
-the given inventory, or <code>null</code> if no prices exist.
+the given inventory, converted to <code>baseCurrency</code>, or <code>null</code> if no
+prices exist.
   
 
 </dd>
@@ -378,7 +380,7 @@ the given inventory, or <code>null</code> if no prices exist.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

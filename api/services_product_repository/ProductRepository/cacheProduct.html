@@ -55,7 +55,7 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">cacheProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="cacheProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span></li>
+<span class="name ">cacheProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="cacheProduct-param-incoming"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">incoming</span></span></li>
 </ol>)
 
       
@@ -63,19 +63,39 @@
     </section>
     
 <section class="desc markdown">
-  <p>Inserts a product directly into the local cache.</p>
+  <p>Inserts a product directly into the local cache, merging with any
+existing cached product for the same barcode.</p>
 <p>Used when the user manually creates a product (e.g., via the
 add‑product screen) or when the product is submitted to Open Food Facts
 and should be cached immediately.</p>
+<h2 id="merge-strategy">Merge strategy</h2>
+<ul>
+<li>Manual entries merge via <a href="../../models_product/ProductMerge/mergeFromManual.html">ProductMerge.mergeFromManual</a> so that rich
+API data (Nutri-Score, nutrition facts, OFF image URLs) is preserved
+when the user only entered a subset of fields.</li>
+<li>API entries merge via <a href="../../models_product/ProductMerge/mergeFromApi.html">ProductMerge.mergeFromApi</a> so that local-only
+fields (image paths, submission status) are never overwritten by an
+incomplete API response.</li>
+<li>When no existing cache record exists, the product is inserted as-is.</li>
+</ul>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; cacheProduct(Product product) async {
-  logInfo(&#39;Caching product: ${product.barcode} — ${product.name}&#39;);
-  await _db.insertProduct(product);
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; cacheProduct(Product incoming) async {
+  logInfo(&#39;Caching product: ${incoming.barcode} — ${incoming.name}&#39;);
+  var toInsert = incoming;
+  final existing = await _db.getProduct(incoming.barcode);
+  if (existing != null) {
+    if (incoming.source == &#39;manual&#39;) {
+      toInsert = existing.mergeFromManual(incoming);
+    } else {
+      toInsert = existing.mergeFromApi(incoming);
+    }
+  }
+  await _db.insertProduct(toInsert);
 }</code></pre>
 </section>
 
@@ -104,7 +124,7 @@ and should be cached immediately.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

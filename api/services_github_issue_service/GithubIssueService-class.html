@@ -59,8 +59,8 @@
 posted to the GitHub Issues API with the developer's PAT. When the
 device is offline the issue is stored in the <code>feedback_queue</code> SQLite
 table and flushed automatically when connectivity is restored.</p>
-<p>On web the service falls back to a <code>mailto:</code> URI because sqflite and
-direct HTTP calls to authenticated GitHub endpoints are not practical.</p>
+<p>On web, issue submissions are not supported;
+<a href="../services_github_issue_service/GithubIssueService/submitIssue.html">GithubIssueService.submitIssue</a> throws <a href="https://api.flutter.dev/flutter/dart-core/UnsupportedError-class.html">UnsupportedError</a>.</p>
 </section>
 
 
@@ -288,7 +288,7 @@ direct HTTP calls to authenticated GitHub endpoints are not practical.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

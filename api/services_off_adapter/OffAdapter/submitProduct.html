@@ -78,30 +78,47 @@ the server rejected the submission.</p>
     logWarning(&#39;Cannot submit — no OFF credentials configured&#39;);
     return false;
   }
-  try {
-    logInfo(
-      &#39;Submitting product ${product.barcode} to OFF&#39;,
-    );
-    final offProduct = product.toOffProduct();
-    final status = await _onSaveProduct(
-      user,
-      offProduct,
-      uriHelper: _uriHelper,
-    );
-    final success = status.status == 1;
-    if (success) {
-      logInfo(&#39;Product ${product.barcode} submitted successfully&#39;);
-    } else {
+  const maxRetries = 2;
+  for (var attempt = 0; attempt &lt;= maxRetries; attempt++) {
+    try {
+      logInfo(
+        &#39;Submitting product ${product.barcode} to OFF &#39;
+        &#39;(attempt ${attempt + 1})&#39;,
+      );
+      final offProduct = product.toOffProduct();
+      final status = await _onSaveProduct(
+        user,
+        offProduct,
+        uriHelper: _uriHelper,
+      );
+      final success = status.status == 1;
+      if (success) {
+        logInfo(&#39;Product ${product.barcode} submitted successfully&#39;);
+        return true;
+      }
       logWarning(
         &#39;Product ${product.barcode} submission returned status &#39;
         &#39;${status.status}: ${status.statusVerbose}&#39;,
       );
+      return false;
+    } on Exception catch (e) {
+      if (attempt &lt; maxRetries) {
+        final delay = Duration(seconds: attempt + 1);
+        logWarning(
+          &#39;Submission failed for ${product.barcode} &#39;
+          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e&#39;,
+        );
+        await Future&lt;void&gt;.delayed(delay);
+      } else {
+        logError(
+          &#39;Submission failed for ${product.barcode} after &#39;
+          &#39;all retries: $e&#39;,
+        );
+        return false;
+      }
     }
-    return success;
-  } on Exception catch (e) {
-    logError(&#39;Submission failed for ${product.barcode}: $e&#39;);
-    return false;
   }
+  return false;
 }</code></pre>
 </section>
 
@@ -130,7 +147,7 @@ the server rejected the submission.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

@@ -73,14 +73,14 @@ caching and inventory operations.</li>
 fetching product data from the internet.</li>
 </ul>
 <h2 id="lifetime">Lifetime</h2>
-<p>Because this is a <code>Provider</code> (not a <code>FutureProvider</code> or <code>StateProvider</code>),
+<p>Because this is a <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a> (not a <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a> or <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a>),
 the repository is created <strong>once</strong> and reused for the entire app session.
 The repository itself holds no mutable state; it delegates all storage to
 the database and all network requests to the SDK adapter.</p>
 <h2 id="usage">Usage</h2>
 <p>Typically accessed via <code>ref.read(productRepositoryProvider)</code> in async
 callbacks (like the scan flow) or via <code>ref.watch(productRepositoryProvider)</code>
-in widgets that need to call repository methods inside <code>FutureBuilder</code>s.</p>
+in widgets that need to call repository methods inside <a href="https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html">FutureBuilder</a>s.</p>
 </section>
 
         
@@ -118,7 +118,7 @@ in widgets that need to call repository methods inside <code>FutureBuilder</code
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

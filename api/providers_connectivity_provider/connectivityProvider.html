@@ -62,16 +62,29 @@
         
 <section class="desc markdown">
   <p>Provides a reactive stream of internet connectivity status.</p>
-<p>Uses <code>InternetConnectionChecker.instance</code> to monitor whether the
+<p>Uses <a href="https://pub.dev/documentation/internet_connection_checker/3.0.1/internet_connection_checker/InternetConnectionChecker/instance.html">InternetConnectionChecker.instance</a> to monitor whether the
 device has internet access. Emits <code>true</code> when connected, <code>false</code>
-when offline, and <code>null</code> during initial loading.</p>
+when offline.</p>
+<p>Unlike the default <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/StreamProvider-class.html">StreamProvider</a> which starts as <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncLoading-class.html">AsyncLoading</a>,
+this implementation yields the initial connectivity state as the
+first event so that downstream code never sees a null/loading state.
+A 3-second timeout prevents slow DNS lookups from blocking the
+initial emission.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final connectivityProvider = StreamProvider&lt;bool&gt;((ref) {
-  return InternetConnectionChecker.instance.onStatusChange.map((status) {
+  <pre class="language-dart"><code class="language-dart">final connectivityProvider = StreamProvider&lt;bool&gt;((ref) async* {
+  try {
+    final initial = await InternetConnectionChecker.instance.hasConnection
+        .timeout(const Duration(seconds: 3));
+    yield initial;
+  } on TimeoutException {
+    logWarning(&#39;Initial connectivity check timed out — defaulting to offline&#39;);
+    yield false;
+  }
+  yield* InternetConnectionChecker.instance.onStatusChange.map((status) {
     final online = status == InternetConnectionStatus.connected;
     if (online) {
       logInfo(&#39;Connectivity restored — device is online&#39;);
@@ -108,7 +121,7 @@ when offline, and <code>null</code> during initial loading.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

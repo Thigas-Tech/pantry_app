@@ -54,8 +54,9 @@
 
     <section class="multi-line-signature">
       
-      <span class="name ">Product.fromOffProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="fromOffProduct-param-offProduct"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Product-class.html">Product</a></span> <span class="parameter-name">offProduct</span></span></li>
-</ol>)
+      <span class="name ">Product.fromOffProduct</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="fromOffProduct-param-offProduct"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Product-class.html">Product</a></span> <span class="parameter-name">offProduct</span>, {</span></li>
+<li><span class="parameter" id="fromOffProduct-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span> = <span class="default-value">&#39;en&#39;</span>, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
@@ -70,7 +71,10 @@ SDK does not carry them. The <code>lastSynced</code> timestamp is set to now.</p
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">factory Product.fromOffProduct(off.Product offProduct) {
+  <pre class="language-dart"><code class="language-dart">factory Product.fromOffProduct(
+  off.Product offProduct, {
+  String languageCode = &#39;en&#39;,
+}) {
   final n = offProduct.nutriments;
   return Product(
     barcode: offProduct.barcode ?? &#39;&#39;,
@@ -98,6 +102,7 @@ SDK does not carry them. The <code>lastSynced</code> timestamp is set to now.</p
     saltG: n?.getValue(off.Nutrient.salt, off.PerSize.oneHundredGrams),
     lastSynced: DateTime.now().millisecondsSinceEpoch,
     nutriscoreGrade: offProduct.nutriscore,
+    languageCode: languageCode,
   );
 }</code></pre>
 </section>
@@ -127,7 +132,7 @@ SDK does not carry them. The <code>lastSynced</code> timestamp is set to now.</p
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>

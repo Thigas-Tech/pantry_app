@@ -66,11 +66,13 @@
 <p>Startup sequence:</p>
 <ol>
 <li>Flutter binding.</li>
-<li>Environment variables loaded via <code>flutter_dotenv</code>.</li>
+<li>Environment variables loaded via flutter_dotenv.</li>
 <li>App version check — clears stale caches when the app was updated.</li>
-<li>Notification permission request and initialization.</li>
-<li>Database cleanup (after first frame).</li>
-<li>App launched inside <code>ProviderScope</code>.</li>
+<li>Notification service initialized (timezone, channel, plugin).</li>
+<li>Notification permission requested (system dialog, after first frame).</li>
+<li>Database cleanup, feedback flush, cache refresh (after first frame).</li>
+<li>App launched inside <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/UncontrolledProviderScope-class.html">UncontrolledProviderScope</a> so all providers
+share the same <a href="../main/appContainer.html">appContainer</a>.</li>
 </ol>
 </section>
 
@@ -80,6 +82,10 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (kDebugMode) {
+    SemanticsBinding.instance.ensureSemantics();
+  }
 
   await dotenv.load();
   logInfo(&#39;Environment loaded&#39;);
@@ -97,34 +103,45 @@
 
   await _handleAppUpdate();
 
-  runApp(const ProviderScope(child: PantryApp()));
-  logInfo(&#39;App started&#39;);
-
-  unawaited(_scheduleCacheRefresh());
-
-  final container = ProviderContainer();
-  final notifService = container.read(notificationServiceProvider);
-
-  await notifService.initialize(
-    onDidReceiveResponse: (response) {
-      _handleNotificationTap(response, container);
-    },
-    onDidReceiveBackgroundResponse: notificationTapBackground,
-  );
-
-  final granted = await notifService.requestPermission();
-  if (granted != false) {
-    unawaited(_rescheduleNotifications(ProviderContainer()));
-  } else {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(&#39;notification_denied_warning&#39;, true);
-    logInfo(&#39;Notification permission denied — flagged warning for PantryShell&#39;);
+  &#47;&#47; Create the shared container and init the notification service before
+  &#47;&#47; runApp so that any widget reading notificationServiceProvider on the
+  &#47;&#47; first frame sees an initialized (or gracefully-failed) service.
+  appContainer = ProviderContainer();
+  try {
+    final notifService = appContainer.read(notificationServiceProvider);
+    await notifService.initialize(
+      onDidReceiveResponse: _handleNotificationTap,
+      onDidReceiveBackgroundResponse: notificationTapBackground,
+    );
+    logInfo(&#39;Notification service initialized before runApp&#39;);
+  } on Exception catch (e) {
+    logWarning(&#39;Notification init before runApp failed: $e&#39;);
+    &#47;&#47; Continue — the notification service will be unavailable on the first
+    &#47;&#47; frame, but widgets already handle `!initialized` gracefully.
   }
 
-  unawaited(_scheduleInactivityReminder(ProviderContainer()));
-  unawaited(_runDatabaseCleanup(ProviderContainer()));
-  unawaited(_flushFeedbackQueue(ProviderContainer()));
-  container.dispose();
+  runApp(
+    UncontrolledProviderScope(
+      container: appContainer,
+      child: const PantryApp(),
+    ),
+  );
+  logInfo(&#39;App started&#39;);
+
+  &#47;&#47; Post-first-frame tasks (do not block startup).
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _runPostInitTasks();
+  });
+
+  &#47;&#47; Notification permission request — needs the Activity to be visible.
+  &#47;&#47; This runs ~100ms after the first frame so the system dialog does not
+  &#47;&#47; overlap the initial UI setup.
+  unawaited(
+    Future&lt;void&gt;.delayed(
+      const Duration(milliseconds: 100),
+      _requestNotificationPermission,
+    ),
+  );
 }</code></pre>
 </section>
 
@@ -152,7 +169,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.4+1
+      0.0.5+1
   </span>
   
 </footer>
