@@ -1041,4 +1041,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidPriceAmount => 'Enter a valid price amount';
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
+  String get priceHidden => 'Price hidden';
 }

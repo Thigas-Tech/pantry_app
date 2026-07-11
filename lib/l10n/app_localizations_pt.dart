@@ -736,19 +736,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get osLabel => 'SO';
 
   @override
-  String get cameraPermissionDenied => 'Camera permission denied. Grant access in Settings.';
+  String get cameraPermissionDenied => 'Permissao da camera negada. Conceda acesso nas Configuracoes.';
 
   @override
-  String get cameraNotAvailable => 'Camera not available on this device.';
+  String get cameraNotAvailable => 'Camera nao disponivel neste dispositivo.';
 
   @override
-  String get scannerGenericError => 'An unexpected error occurred while starting the camera.';
+  String get scannerGenericError => 'Ocorreu um erro inesperado ao iniciar a camera.';
 
   @override
-  String get switchToManualEntry => 'Enter barcode manually';
+  String get switchToManualEntry => 'Digitar codigo manualmente';
 
   @override
-  String get retryScan => 'Retry';
+  String get retryScan => 'Tentar de novo';
 
   @override
   String get inactivityReminderTitle => 'Hora de reabastecer sua despensa?';
@@ -1041,6 +1041,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get invalidPriceAmount => 'Enter a valid price amount';
+
+  @override
+  String get dismiss => 'Dispensar';
+
+  @override
+  String get priceHidden => 'Preco oculto';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1085,6 +1091,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get barcodeLabel => 'Código de barras';
+
+  @override
+  String get invalidBarcode => 'Digite um código de barras valido (8-13 digitos).';
 
   @override
   String get brandLabel => 'Marca';
@@ -1230,6 +1239,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get itemUpdated => 'Item atualizado.';
 
   @override
+  String get productUpdated => 'Produto atualizado.';
+
+  @override
   String get itemAdded => 'Item adicionado à despensa.';
 
   @override
@@ -1307,6 +1319,15 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get notificationsDisabled => 'Notificações desativadas.';
+
+  @override
+  String get notificationPermissionTitle => 'Permissao de Notificacao Necessaria';
+
+  @override
+  String get notificationPermissionBody => 'Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.';
+
+  @override
+  String get openSettings => 'Abrir Configuracoes';
 
   @override
   String themeChanged(String theme) {
@@ -1519,6 +1540,17 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get submissionFailed => 'Falha no envio pro Open Food Facts';
 
   @override
+  String showInLanguage(String language) {
+    return 'Mostrar em $language';
+  }
+
+  @override
+  String get ingredientsOriginal => 'Show original ingredients';
+
+  @override
+  String get ingredientsTranslated => 'Show translated ingredients';
+
+  @override
   String get submissionNotSubmitted => 'Não enviado pro Open Food Facts';
 
   @override
@@ -1622,6 +1654,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get noCategories => 'Nenhuma categoria';
 
   @override
+  String get statsEmptyTitle => 'Nenhum item para analisar';
+
+  @override
+  String get statsEmptySubtitle => 'Adicione produtos à sua despensa para ver estatísticas aqui.';
+
+  @override
   String get addedThisWeekLabel => 'Esta semana';
 
   @override
@@ -1641,6 +1679,84 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get productPhoto => 'Produto';
+
+  @override
+  String get sendFeedback => 'Enviar Feedback';
+
+  @override
+  String get issueType => 'Tipo de problema';
+
+  @override
+  String get bugReport => 'Relato de Bug';
+
+  @override
+  String get featureRequest => 'Sugestão de Funcionalidade';
+
+  @override
+  String get generalFeedback => 'Feedback Geral';
+
+  @override
+  String get regressionReport => 'Regressao';
+
+  @override
+  String get bugReportExplanation => 'Algo esta quebrado ou nao funciona como esperado.';
+
+  @override
+  String get featureRequestExplanation => 'Sugira uma nova funcionalidade ou melhoria.';
+
+  @override
+  String get generalFeedbackExplanation => 'Outros comentarios, duvidas ou sugestoes.';
+
+  @override
+  String get regressionReportExplanation => 'Uma funcionalidade que funcionava antes mas nao funciona mais.';
+
+  @override
+  String get issueTitle => 'Título';
+
+  @override
+  String get issueTitleRequired => 'Título obrigatório (mín. 5 caracteres)';
+
+  @override
+  String get issueDescription => 'Descrição';
+
+  @override
+  String get issueDescriptionRequired => 'Descrição obrigatória (mín. 10 caracteres)';
+
+  @override
+  String get attachScreenshot => 'Anexar captura de tela';
+
+  @override
+  String get takePhoto => 'Tirar foto';
+
+  @override
+  String get chooseFromGallery => 'Escolher da galeria';
+
+  @override
+  String get includeDeviceInfo => 'Incluir informações do dispositivo';
+
+  @override
+  String get sending => 'Enviando...';
+
+  @override
+  String get issueCreate => 'Criar issue';
+
+  @override
+  String get issueSubmitted => 'Obrigado! Seu relato foi enviado.';
+
+  @override
+  String get issueQueuedOffline => 'Você está offline. Seu relato será enviado quando você estiver online.';
+
+  @override
+  String get issueSubmissionFailed => 'Falha ao enviar. Tente novamente.';
+
+  @override
+  String get viewOnGitHub => 'Ver no GitHub';
+
+  @override
+  String get issueDuplicate => 'Você enviou um relato similar recentemente.';
+
+  @override
+  String get removeScreenshot => 'Remover';
 
   @override
   String get nutriScore => 'Nutri-Score';
@@ -1665,6 +1781,82 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get osLabel => 'SO';
 
   @override
+  String get cameraPermissionDenied => 'Permissao da camera negada. Conceda acesso nas Configuracoes.';
+
+  @override
+  String get cameraNotAvailable => 'Camera nao disponivel neste dispositivo.';
+
+  @override
+  String get scannerGenericError => 'Ocorreu um erro inesperado ao iniciar a camera.';
+
+  @override
+  String get switchToManualEntry => 'Digitar codigo manualmente';
+
+  @override
+  String get retryScan => 'Tentar de novo';
+
+  @override
+  String get inactivityReminderTitle => 'Hora de reabastecer sua despensa?';
+
+  @override
+  String inactivityReminderBody(int days) {
+    return 'Voce nao adicionou nenhum produto em $days dias.';
+  }
+
+  @override
+  String get inactivityReminderEnabled => 'Lembrar de adicionar produtos regularmente';
+
+  @override
+  String get inactivityThresholdDays => 'Limite de inatividade (dias)';
+
+  @override
+  String get inactivityReminderChannelName => 'Lembretes de inatividade';
+
+  @override
+  String get inactivityReminderChannelDescription => 'Lembra voce de adicionar produtos regularmente';
+
+  @override
+  String get notificationDeniedWarning => 'Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.';
+
+  @override
+  String inactivityThresholdSet(int days) {
+    return 'Limite de inatividade definido para $days dias.';
+  }
+
+  @override
+  String get amoledDarkMode => 'Modo escuro AMOLED';
+
+  @override
+  String get amoledDarkModeExplanation => 'Usar fundo preto no modo escuro para economizar bateria em telas AMOLED';
+
+  @override
+  String get amoledDarkModeEnabled => 'Modo escuro AMOLED ativado.';
+
+  @override
+  String get amoledDarkModeDisabled => 'Modo escuro AMOLED desativado.';
+
+  @override
+  String get amoledNudgeTitle => 'Trocar para o modo escuro?';
+
+  @override
+  String get amoledNudgeBody => 'O modo escuro pode economizar bateria no seu dispositivo, especialmente se a tela for AMOLED. Voce tambem pode ativar o fundo preto puro nas Configuracoes para economia maxima de energia.';
+
+  @override
+  String get amoledNudgeEnable => 'Ativar modo escuro';
+
+  @override
+  String get amoledNudgeDismiss => 'Agora nao';
+
+  @override
+  String get translationReport => 'Relato de Traducao';
+
+  @override
+  String get translationReportExplanation => 'Relate um problema com a traducao de um produto ou sugira uma nova traducao.';
+
+  @override
+  String get feedbackRateLimit => 'Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.';
+
+  @override
   String get couldNotOpenLinkFallback => 'URL copiada para a area de transferencia.';
 
   @override
@@ -1677,5 +1869,227 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get logsPrivacyNote => 'Os registros podem conter nomes de produtos e horarios.';
 
   @override
+  String get price => 'Preco';
+
+  @override
+  String get prices => 'Precos';
+
+  @override
+  String get addPrice => 'Adicionar preco';
+
+  @override
+  String get editPrice => 'Editar preco';
+
+  @override
+  String get deletePrice => 'Excluir preco';
+
+  @override
+  String get priceAdded => 'Preco adicionado.';
+
+  @override
+  String get priceUpdated => 'Preco atualizado.';
+
+  @override
+  String get priceDeleted => 'Preco excluido.';
+
+  @override
+  String get priceHistory => 'Historico de precos';
+
+  @override
+  String get noPrices => 'Nenhum preco registrado.';
+
+  @override
+  String get totalValue => 'Valor total';
+
+  @override
+  String get averagePrice => 'Preco medio';
+
+  @override
+  String get hidePrices => 'Ocultar precos por privacidade';
+
+  @override
+  String get hidePricesDescription => 'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
+
+  @override
+  String get pricesHidden => 'Precos ocultos.';
+
+  @override
+  String get pricesVisible => 'Precos visiveis.';
+
+  @override
+  String get priceTrackingEnabled => 'Ativar controle de precos';
+
+  @override
+  String get priceRetentionDays => 'Retencao de precos';
+
+  @override
+  String priceRetentionDaysValue(int days) {
+    return 'Manter precos por $days dias (0 = manter para sempre)';
+  }
+
+  @override
+  String get currency => 'Moeda';
+
+  @override
+  String get baseCurrency => 'Moeda base';
+
+  @override
+  String get baseCurrencyDescription => 'Todos os precos sao exibidos nesta moeda.';
+
+  @override
+  String get store => 'Loja';
+
+  @override
+  String get discounted => 'Com desconto';
+
+  @override
+  String get regularPrice => 'Preco normal';
+
+  @override
+  String get confirmDeletePrice => 'Excluir esta entrada de preco?';
+
+  @override
+  String get syncToOpenPrices => 'Compartilhar com Open Prices';
+
+  @override
+  String get syncToOpenPricesDescription => 'Contribua com seus dados de preco para o banco de dados comunitario.';
+
+  @override
+  String get openPricesToken => 'Token da API Open Prices';
+
+  @override
+  String get openPricesTokenDescription => 'Token gerado da sua conta do Open Food Facts.';
+
+  @override
+  String get openPricesTokenSaved => 'Token salvo.';
+
+  @override
+  String get openPricesSyncStarted => 'Sincronizando precos...';
+
+  @override
+  String openPricesSyncComplete(int count) {
+    return '$count precos sincronizados.';
+  }
+
+  @override
+  String get priceSyncStatus => 'Sincronizado';
+
+  @override
+  String get priceSyncPending => 'Sincronizacao pendente';
+
+  @override
+  String get priceSyncFailed => 'Falha na sincronizacao';
+
+  @override
+  String get priceTrendUp => 'Precos estao subindo';
+
+  @override
+  String get priceTrendDown => 'Precos estao caindo';
+
+  @override
+  String get priceTrendStable => 'Precos estaveis';
+
+  @override
+  String get datePurchased => 'Data da compra';
+
+  @override
+  String get pricedItems => 'Itens com precos';
+
+  @override
+  String itemWithPriceCount(int count, int total) {
+    return '$count de $total itens tem precos';
+  }
+
+  @override
+  String get openPricesProofExplanation => 'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
+
+  @override
+  String get openPricesConsentTitle => 'Contribuir com Open Prices';
+
+  @override
+  String get openPricesConsentBody => 'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
+
+  @override
+  String get iUnderstand => 'Entendi';
+
+  @override
+  String get notes => 'Observacoes';
+
+  @override
   String get navList => 'Lista';
+
+  @override
+  String get shoppingList => 'Lista de Compras';
+
+  @override
+  String get addShoppingItem => 'Adicionar item';
+
+  @override
+  String get itemName => 'Nome do item';
+
+  @override
+  String get markPurchased => 'Marcar como comprado';
+
+  @override
+  String get unmarkPurchased => 'Desmarcar comprado';
+
+  @override
+  String get moveToInventory => 'Mover para despensa';
+
+  @override
+  String get addAgain => 'Adicionar de novo';
+
+  @override
+  String get emptyShoppingList => 'Sua lista de compras esta vazia';
+
+  @override
+  String get emptyShoppingListSub => 'Adicione itens de um produto ou toque em + para adicionar manualmente';
+
+  @override
+  String get deleteItem => 'Excluir item';
+
+  @override
+  String get clearPurchased => 'Limpar comprados';
+
+  @override
+  String get clearPurchasedConfirm => 'Remover todos os itens comprados?';
+
+  @override
+  String get purchasedItems => 'Comprados';
+
+  @override
+  String get pendingItems => 'Para comprar';
+
+  @override
+  String get quickAddHint => 'Nome, ex: Leite';
+
+  @override
+  String get undoDeleteShoppingItem => 'Item excluido';
+
+  @override
+  String get undoClearPurchased => 'Itens comprados limpos';
+
+  @override
+  String get shareShoppingList => 'Compartilhar lista';
+
+  @override
+  String get add => 'Adicionar';
+
+  @override
+  String get quantity => 'Quantidade';
+
+  @override
+  String get addToShoppingList => 'Adicionar a lista de compras';
+
+  @override
+  String get addToShoppingListTooltip => 'Lista de compras';
+
+  @override
+  String get invalidPriceAmount => 'Digite um valor de preco valido';
+
+  @override
+  String get dismiss => 'Dispensar';
+
+  @override
+  String get priceHidden => 'Preco oculto';
 }

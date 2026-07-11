@@ -124,7 +124,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             // Product image wrapped in Hero, loaded from cache when possible.
             if (widget.product.imageUrl != null)
               Hero(
-                tag: widget.product.barcode,
+                tag: 'detail_${widget.product.barcode}',
                 child: Consumer(
                   builder: (context, ref, _) {
                     final imageCache = ref.read(imageCacheProvider);

@@ -367,15 +367,37 @@ class _ShoppingItemTile extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
-        trailing: item.isPurchased
-            ? TextButton.icon(
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (item.isPurchased)
+              TextButton.icon(
                 icon: const Icon(Icons.add_shopping_cart, size: 18),
                 label: Text(l10n.addAgain),
                 onPressed: () async {
                   await toggleShoppingItem(ref, item.id!);
                 },
-              )
-            : null,
+              ),
+            IconButton(
+              icon: const Icon(Icons.delete, size: 20),
+              onPressed: () {
+                unawaited(
+                  deleteShoppingItem(ref, item.id!).then((_) {
+                    if (!context.mounted) return;
+                    SnackbarHelper.showUndo(
+                      context,
+                      l10n.undoDeleteShoppingItem,
+                      () async {
+                        await addShoppingItem(ref, item);
+                      },
+                    );
+                  }),
+                );
+              },
+              tooltip: l10n.deleteItem,
+            ),
+          ],
+        ),
       ),
     );
   }

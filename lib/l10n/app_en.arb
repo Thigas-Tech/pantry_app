@@ -530,5 +530,7 @@
   "quantity": "Quantity",
   "addToShoppingList": "Add to shopping list",
   "addToShoppingListTooltip": "Shopping list",
-  "invalidPriceAmount": "Enter a valid price amount"
+  "invalidPriceAmount": "Enter a valid price amount",
+  "dismiss": "Dismiss",
+  "priceHidden": "Price hidden"
 }

@@ -23,8 +23,11 @@ Run BEFORE every local commit. Fix ALL issues:
      - CI / Run widget testing
      - Build / Build debug apk       (from build.yml on PR)
   5. Convert draft PR -> Ready for Review.
-  6. Merge via GitHub UI (Squash and merge).
-  7. Delete remote branch; git checkout main && git pull
+   6. Merge via GitHub UI (Squash and merge).
+      BEFORE clicking merge, paste `Fixes #<issue>` lines into the
+      **commit message** (not just PR body). GitHub only auto-closes
+      from squash merge commit messages, not PR bodies.
+   7. Delete remote branch; git checkout main && git pull
 
   Notes:
     - Feedback -> GitHub requires FEEDBACK_TOKEN in .env

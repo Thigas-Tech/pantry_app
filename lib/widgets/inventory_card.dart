@@ -109,7 +109,7 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                 )
               : widget.item.productImageUrl != null
               ? Hero(
-                  tag: widget.item.barcode,
+                  tag: 'card_${widget.item.barcode}',
                   child: Semantics(
                     label: widget.item.productName,
                     child: _buildLeadingImage(),

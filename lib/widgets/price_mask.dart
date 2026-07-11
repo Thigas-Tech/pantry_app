@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 
 /// Wraps a formatted price string and masks it when the user has enabled
 /// price hiding for privacy.
 ///
-/// When pricesHidden is true, the [child] is replaced with a string of
-/// asterisks of the same visible length. When false, the [child] is shown
-/// as-is.
-///
-/// Usage:
-/// ```dart
-/// PriceMask(
-///   formattedPrice: repo.formatPrice(price, currency),
-///   child: Text(formattedPrice, style: ...),
-/// )
-/// ```
+/// When pricesHidden is true, the [child] is replaced with a fixed-width
+/// bullet mask to avoid leaking the actual price length. When false, the
+/// [child] is shown as-is.
 class PriceMask extends ConsumerWidget {
   /// Creates a [PriceMask].
   const PriceMask({
@@ -34,13 +27,14 @@ class PriceMask extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hidden = ref.watch(pricesHiddenProvider);
     if (hidden) {
-      final mask = String.fromCharCodes(
-        List.filled(formattedPrice.length, 0x2022),
-      );
-      return Text(
-        mask,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+      return Semantics(
+        label: AppLocalizations.of(context)!.priceHidden,
+        excludeSemantics: true,
+        child: Text(
+          String.fromCharCodes(List.filled(8, 0x2022)),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }

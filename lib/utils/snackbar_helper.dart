@@ -74,8 +74,9 @@ class SnackbarHelper {
   /// Internal helper that builds and shows the snackbar.
   ///
   /// When [onUndo] and [undoLabel] are both provided, a [SnackBarAction] is
-  /// added to the snackbar. The [duration] defaults to 3 seconds; undo
-  /// snackbars typically use 5 seconds.
+  /// added to the snackbar. When neither is provided, a dismiss action is
+  /// added instead. The [duration] defaults to 3 seconds; undo snackbars
+  /// typically use 5 seconds.
   static void _show(
     BuildContext context, {
     required String message,
@@ -96,7 +97,11 @@ class SnackbarHelper {
       ),
       action: onUndo != null
           ? SnackBarAction(label: undoLabel!, onPressed: onUndo)
-          : null,
+          : SnackBarAction(
+              label: AppLocalizations.of(context)!.dismiss,
+              onPressed: () =>
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            ),
       backgroundColor: backgroundColor,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
