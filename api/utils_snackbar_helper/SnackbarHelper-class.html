@@ -55,10 +55,16 @@
     
 <section class="desc markdown">
   <p>A thin wrapper around <a href="https://api.flutter.dev/flutter/material/ScaffoldMessenger-class.html">ScaffoldMessenger</a> that shows styled snackbars.</p>
-<p>Every method shows a floating snackbar with a short duration, rounded
-corners, and a leading icon that matches the severity level.</p>
-<p>See <a href="../utils_snackbar_helper/SnackbarHelper/showInfo.html">SnackbarHelper.showInfo</a>, <a href="../utils_snackbar_helper/SnackbarHelper/showWarning.html">SnackbarHelper.showWarning</a>,
-<a href="../utils_snackbar_helper/SnackbarHelper/showError.html">SnackbarHelper.showError</a>, and <a href="../utils_snackbar_helper/SnackbarHelper/showUndo.html">SnackbarHelper.showUndo</a>.</p>
+<p>Every method displays a floating snackbar with rounded corners, a leading
+icon that matches the severity level, and a <strong>short auto‑dismiss duration</strong>.
+Info, warning, and error snackbars disappear after 3 seconds <strong>without any
+user interaction</strong>. The undo snackbar stays for 5 seconds to give the user
+time to tap the undo action, and then dismisses automatically.</p>
+<p>To ensure snackbars survive route transitions (e.g., when shown right
+before popping a page), assign a <a href="https://api.flutter.dev/flutter/widgets/GlobalKey-class.html">GlobalKey&lt;ScaffoldMessengerState&gt;</a> to
+<a href="../utils_snackbar_helper/SnackbarHelper/messengerKey.html">messengerKey</a> and pass the same key to
+<a href="https://api.flutter.dev/flutter/material/MaterialApp/scaffoldMessengerKey.html">MaterialApp.scaffoldMessengerKey</a>. The helper will then use the root
+messenger rather than the current route's messenger.</p>
 </section>
 
 
@@ -153,6 +159,23 @@ corners, and a leading icon that matches the severity level.</p>
     </dl>
   </section>
     
+  <section class="summary offset-anchor" id="static-properties">
+    <h2>Static Properties</h2>
+    <dl class="properties">
+        <dt id="messengerKey" class="property">
+  <span class="name"><a href="../utils_snackbar_helper/SnackbarHelper/messengerKey.html">messengerKey</a></span>
+  <span class="signature">&#8596; <a href="https://api.flutter.dev/flutter/widgets/GlobalKey-class.html">GlobalKey</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/material/ScaffoldMessengerState-class.html">ScaffoldMessengerState</a></span>&gt;</span>?</span>
+  
+
+</dt>
+<dd>
+  A global key for the root scaffold messenger.
+  <div class="features"><span class="feature">getter/setter pair</span></div>
+
+</dd>
+
+    </dl>
+  </section>
     
   <section class="summary offset-anchor" id="static-methods">
     <h2>Static Methods</h2>
@@ -165,7 +188,7 @@ corners, and a leading icon that matches the severity level.</p>
 
 </dt>
 <dd>
-  Shows an error snackbar (red).
+  Shows an error snackbar (red) that auto-dismisses after 3 seconds.
   
 
 </dd>
@@ -178,7 +201,7 @@ corners, and a leading icon that matches the severity level.</p>
 
 </dt>
 <dd>
-  Shows an informational snackbar (blue).
+  Shows an informational snackbar (blue) that auto-dismisses after 3 seconds
   
 
 </dd>
@@ -191,7 +214,8 @@ corners, and a leading icon that matches the severity level.</p>
 
 </dt>
 <dd>
-  Shows an info snackbar with an undo action.
+  Shows an info snackbar with an <strong>undo</strong> action, auto-dismissing after
+5 seconds.
   
 
 </dd>
@@ -204,7 +228,7 @@ corners, and a leading icon that matches the severity level.</p>
 
 </dt>
 <dd>
-  Shows a warning snackbar (amber).
+  Shows a warning snackbar (amber) that auto-dismisses after 3 seconds.
   
 
 </dd>
