@@ -58,4 +58,11 @@ class AppConfig {
   /// Generate at https://prices.openfoodfacts.org/settings/tokens
   /// Leave empty to disable all Open Prices API features (local-only mode).
   static String get openPricesToken => dotenv.env['OPEN_PRICES_TOKEN'] ?? '';
+
+  /// The Imgur Client-ID used for anonymous image uploads.
+  ///
+  /// Register at https://api.imgur.com/oauth2/addclient to obtain one.
+  /// Leave empty to skip screenshot upload (issue still submits without
+  /// images).
+  static String get imgurClientId => dotenv.env['IMGUR_CLIENT_ID'] ?? '';
 }

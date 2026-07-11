@@ -4,8 +4,10 @@
 ///   - The screen renders without crashing.
 ///   - The form fields (title, description) are present.
 ///   - [IssueType] enum extension maps to correct GitHub labels.
-///   - Online submit flow calls [GithubIssueService.submitIssue] and
-///     shows a success snackbar.
+///   - Online submit flow calls [GithubIssueService.submitIssue], then
+///     resets the form and pops the screen.
+///   - Offline submit queues the issue and pops.
+///   - Online submit falling back to queue also pops.
 ///
 /// Uses the shared `pumpApp` helper.  Providers are overridden to isolate
 /// the screen from real network, storage, and service dependencies.
@@ -24,6 +26,27 @@ import 'package:pantry_app/services/github_issue_service.dart';
 import '../helpers/pump_app.dart';
 
 class MockGithubIssueService extends Mock implements GithubIssueService {}
+
+/// Pushes [screen] as a route so that popping it can be verified.
+class _SubmitShell extends StatelessWidget {
+  const _SubmitShell({required this.screen});
+  final Widget screen;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(builder: (_) => screen),
+          ),
+          child: const Text('Open feedback'),
+        ),
+      ),
+    );
+  }
+}
 
 void main() {
   group('IssueType', () {
@@ -86,9 +109,9 @@ void main() {
       expect(find.text('Description'), findsOneWidget);
     });
 
-    /// Verifies the online submit flow calls [GithubIssueService.submitIssue]
-    /// and shows a success snackbar when the submission succeeds.
-    testWidgets('online submit shows success snackbar', (tester) async {
+    /// Verifies the online submit flow calls [GithubIssueService.submitIssue],
+    /// then resets the form and pops the screen.
+    testWidgets('online submit pops the screen', (tester) async {
       final mockService = MockGithubIssueService();
 
       when(
@@ -104,7 +127,7 @@ void main() {
 
       await pumpApp(
         tester,
-        const FeedbackScreen(),
+        const _SubmitShell(screen: FeedbackScreen()),
         settle: false,
         overrides: [
           connectivityProvider.overrideWith(
@@ -114,6 +137,10 @@ void main() {
         ],
       );
       await tester.pump();
+
+      // Navigate to the feedback screen.
+      await tester.tap(find.text('Open feedback'));
+      await tester.pumpAndSettle();
 
       // Fill in the title field.
       await tester.enterText(
@@ -135,26 +162,22 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      // The success snackbar appears.
-      expect(
-        find.text('Thanks! Your report has been submitted.'),
-        findsAtLeast(1),
-      );
-    });
-
-    /// Verifies the offline submit calls [GithubIssueService.queueOffline]
-    /// when connectivity is false.
-    testWidgets('offline submit queues the issue', (tester) async {
-      final mockService = MockGithubIssueService();
-
-      when(
+      // The screen is popped after successful submission.
+      expect(find.byType(FeedbackScreen), findsNothing);
+      verify(
         () => mockService.submitIssue(
           title: any(named: 'title'),
           body: any(named: 'body'),
           label: any(named: 'label'),
           screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
-      ).thenAnswer((_) async => '');
+      ).called(1);
+    });
+
+    /// Verifies the offline submit calls [GithubIssueService.queueOffline]
+    /// when connectivity is false, then pops the screen.
+    testWidgets('offline submit queues and pops', (tester) async {
+      final mockService = MockGithubIssueService();
 
       when(() => mockService.isDuplicate(any(), any())).thenReturn(false);
       when(
@@ -168,7 +191,7 @@ void main() {
 
       await pumpApp(
         tester,
-        const FeedbackScreen(),
+        const _SubmitShell(screen: FeedbackScreen()),
         settle: false,
         overrides: [
           connectivityProvider.overrideWith(
@@ -178,6 +201,10 @@ void main() {
         ],
       );
       await tester.pump();
+
+      // Navigate to the feedback screen.
+      await tester.tap(find.text('Open feedback'));
+      await tester.pumpAndSettle();
 
       await tester.enterText(
         find.widgetWithText(TextField, 'Title'),
@@ -194,13 +221,16 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(
-        find.text(
-          'You are offline. Your report will be submitted when you are '
-          'back online.',
+      // The screen is popped after queuing offline.
+      expect(find.byType(FeedbackScreen), findsNothing);
+      verify(
+        () => mockService.queueOffline(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          label: any(named: 'label'),
+          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
-        findsAtLeast(1),
-      );
+      ).called(1);
     });
 
     /// Verifies the submit button displays validation errors when
@@ -284,8 +314,8 @@ void main() {
 
     /// Verifies that when [GithubIssueService.submitIssue] throws
     /// [IssueSubmissionException], the form falls back to
-    /// [GithubIssueService.queueOffline] and shows the queued message.
-    testWidgets('online submit falls back to queue on failure', (
+    /// [GithubIssueService.queueOffline] and pops the screen.
+    testWidgets('online submit falls back to queue and pops', (
       tester,
     ) async {
       final mockService = MockGithubIssueService();
@@ -310,7 +340,7 @@ void main() {
 
       await pumpApp(
         tester,
-        const FeedbackScreen(),
+        const _SubmitShell(screen: FeedbackScreen()),
         settle: false,
         overrides: [
           connectivityProvider.overrideWith(
@@ -320,6 +350,10 @@ void main() {
         ],
       );
       await tester.pump();
+
+      // Navigate to the feedback screen.
+      await tester.tap(find.text('Open feedback'));
+      await tester.pumpAndSettle();
 
       await tester.enterText(
         find.widgetWithText(TextField, 'Title'),
@@ -336,19 +370,24 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.ensureVisible(
-        find.text(
-          'You are offline. Your report will be submitted when you are '
-          'back online.',
+      // The screen is popped after falling back to queue.
+      expect(find.byType(FeedbackScreen), findsNothing);
+      verify(
+        () => mockService.submitIssue(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          label: any(named: 'label'),
+          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
-      );
-      expect(
-        find.text(
-          'You are offline. Your report will be submitted when you are '
-          'back online.',
+      ).called(1);
+      verify(
+        () => mockService.queueOffline(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          label: any(named: 'label'),
+          screenshotBytesList: any(named: 'screenshotBytesList'),
         ),
-        findsAtLeast(1),
-      );
+      ).called(1);
     });
   });
 }
