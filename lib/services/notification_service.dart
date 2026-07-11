@@ -318,49 +318,42 @@ class NotificationService {
     }
   }
 
-  /// Sends an immediate test notification.
-  Future<void> showTestNotification() async {
-    const androidDetails = AndroidNotificationDetails(
-      'expiry_channel',
-      'Expiry reminders',
-      importance: Importance.high,
-      priority: Priority.high,
-      category: AndroidNotificationCategory.reminder,
-    );
-    const details = NotificationDetails(android: androidDetails);
-
-    await _plugin.zonedSchedule(
-      id: 999999998,
-      title: 'Test Notification',
-      body: 'This is a test notification.',
-      scheduledDate: tz.TZDateTime.now(
-        tz.local,
-      ).add(const Duration(seconds: 1)),
-      notificationDetails: details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  /// The standard notification channel details
+  NotificationDetails _getChannelDetails() {
+    return const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'pantry_general_channel', // ID
+        'General Notifications', // Name
+        channelDescription: 'Standard app notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: 'ic_notification',
+      ),
     );
   }
 
-  /// Schedules a test notification for 2 minutes from now.
-  Future<void> scheduleTestNotification() async {
-    const androidDetails = AndroidNotificationDetails(
-      'expiry_channel',
-      'Expiry reminders',
-      importance: Importance.high,
-      priority: Priority.high,
-      category: AndroidNotificationCategory.reminder,
+  /// Sends an immediate test notification.
+  Future<void> showTestNotification() async {
+    await _plugin.show(
+      id: 0,
+      title: 'Test Successful',
+      body: 'Immediate notifications are working!',
+      notificationDetails: _getChannelDetails(),
     );
-    const details = NotificationDetails(android: androidDetails);
-    final scheduledDate = tz.TZDateTime.now(
+  }
+
+  /// Schedules a test notification for 5 seconds from now.
+  Future<void> scheduleTestNotification() async {
+    final scheduledTime = tz.TZDateTime.now(
       tz.local,
-    ).add(const Duration(minutes: 2));
+    ).add(const Duration(seconds: 5));
 
     await _plugin.zonedSchedule(
-      id: 999999999,
-      title: 'Scheduled Test Notification',
-      body: 'This is a test notification 2 minutes later.',
-      scheduledDate: scheduledDate,
-      notificationDetails: details,
+      id: 1,
+      title: 'Scheduled Test',
+      body: 'This fired 5 seconds later.',
+      scheduledDate: scheduledTime,
+      notificationDetails: _getChannelDetails(),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
@@ -536,6 +529,7 @@ class NotificationService {
     }
 
     final granted = await androidPlugin.requestNotificationsPermission();
+    await androidPlugin.requestExactAlarmsPermission();
     logInfo('Notification permission request result: $granted');
     return granted;
   }

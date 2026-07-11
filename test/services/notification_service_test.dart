@@ -229,6 +229,9 @@ void main() {
       when(
         mockAndroidPlugin.requestNotificationsPermission,
       ).thenAnswer((_) => Future.value(true));
+      when(
+        mockAndroidPlugin.requestExactAlarmsPermission,
+      ).thenAnswer((_) => Future.value(true));
 
       final result = await service.requestPermission();
       expect(result, isTrue);
@@ -237,6 +240,9 @@ void main() {
     test('returns false when denied', () async {
       when(
         mockAndroidPlugin.requestNotificationsPermission,
+      ).thenAnswer((_) => Future.value(false));
+      when(
+        mockAndroidPlugin.requestExactAlarmsPermission,
       ).thenAnswer((_) => Future.value(false));
 
       final result = await service.requestPermission();
