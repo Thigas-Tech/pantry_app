@@ -70,24 +70,11 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; showTestNotification() async {
-  const androidDetails = AndroidNotificationDetails(
-    &#39;expiry_channel&#39;,
-    &#39;Expiry reminders&#39;,
-    importance: Importance.high,
-    priority: Priority.high,
-    category: AndroidNotificationCategory.reminder,
-  );
-  const details = NotificationDetails(android: androidDetails);
-
-  await _plugin.zonedSchedule(
-    id: 999999998,
-    title: &#39;Test Notification&#39;,
-    body: &#39;This is a test notification.&#39;,
-    scheduledDate: tz.TZDateTime.now(
-      tz.local,
-    ).add(const Duration(seconds: 1)),
-    notificationDetails: details,
-    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+  await _plugin.show(
+    id: 0,
+    title: &#39;Test Successful&#39;,
+    body: &#39;Immediate notifications are working!&#39;,
+    notificationDetails: _getChannelDetails(),
   );
 }</code></pre>
 </section>

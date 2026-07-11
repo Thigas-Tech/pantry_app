@@ -84,6 +84,7 @@ and <code>null</code> if the platform does not require permission handling
   }
 
   final granted = await androidPlugin.requestNotificationsPermission();
+  await androidPlugin.requestExactAlarmsPermission();
   logInfo(&#39;Notification permission request result: $granted&#39;);
   return granted;
 }</code></pre>
