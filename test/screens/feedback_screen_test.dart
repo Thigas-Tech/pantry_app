@@ -130,6 +130,7 @@ void main() {
       await tester.pump();
 
       // Tap the submit button.
+      await tester.ensureVisible(find.text('Create issue'));
       await tester.tap(find.text('Create issue'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -188,6 +189,7 @@ void main() {
         'Test description with enough chars.',
       );
       await tester.pump();
+      await tester.ensureVisible(find.text('Create issue'));
       await tester.tap(find.text('Create issue'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -218,10 +220,15 @@ void main() {
       );
       await tester.pump();
 
+      await tester.ensureVisible(find.text('Create issue'));
       await tester.tap(find.text('Create issue'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
+      // Ensure error messages are visible.
+      await tester.ensureVisible(
+        find.text('Title is required (min 5 characters)'),
+      );
       expect(find.text('Title is required (min 5 characters)'), findsOneWidget);
       expect(
         find.text('Description is required (min 10 characters)'),
@@ -261,10 +268,14 @@ void main() {
         'Test description with enough chars for validation.',
       );
       await tester.pump();
+      await tester.ensureVisible(find.text('Create issue'));
       await tester.tap(find.text('Create issue'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
+      await tester.ensureVisible(
+        find.text('You recently submitted a similar report.'),
+      );
       expect(
         find.text('You recently submitted a similar report.'),
         findsOneWidget,
@@ -320,10 +331,17 @@ void main() {
         'Test description with enough characters.',
       );
       await tester.pump();
+      await tester.ensureVisible(find.text('Create issue'));
       await tester.tap(find.text('Create issue'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
+      await tester.ensureVisible(
+        find.text(
+          'You are offline. Your report will be submitted when you are '
+          'back online.',
+        ),
+      );
       expect(
         find.text(
           'You are offline. Your report will be submitted when you are '

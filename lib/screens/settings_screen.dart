@@ -8,6 +8,7 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -330,6 +331,36 @@ class SettingsScreen extends ConsumerWidget {
                   leading: const Icon(Icons.bug_report_outlined),
                   title: Text(l10n.sendFeedback),
                   onTap: () => _sendFeedback(context),
+                ),
+              if (AppConfig.feedbackEnabled)
+                Consumer(
+                  builder: (context, ref, _) {
+                    final service = ref.watch(githubIssueServiceProvider);
+                    return FutureBuilder<int>(
+                      future: service.pendingCount(),
+                      builder: (context, snapshot) {
+                        final count = snapshot.data ?? 0;
+                        if (count == 0) return const SizedBox.shrink();
+                        return ListTile(
+                          leading: const Icon(Icons.cloud_upload_outlined),
+                          title: Text('Pending feedback: $count'),
+                          trailing: TextButton(
+                            onPressed: () async {
+                              final result = await service.flushQueue();
+                              if (context.mounted) {
+                                SnackbarHelper.showInfo(
+                                  context,
+                                  'Submitted ${result.submitted}, '
+                                  '${result.failed} failed',
+                                );
+                              }
+                            },
+                            child: const Text('Retry now'),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
             ],
           ),
