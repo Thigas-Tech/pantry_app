@@ -3,6 +3,7 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/config.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -139,7 +140,8 @@ class SettingsNotifier extends Notifier<Settings> {
         baseCurrency:
             prefs.getString('baseCurrency') ?? _detectLocaleCurrency(),
         openPricesSyncEnabled: prefs.getBool('openPricesSyncEnabled') ?? false,
-        openPricesToken: prefs.getString('openPricesToken') ?? '',
+        openPricesToken:
+            prefs.getString('openPricesToken') ?? AppConfig.openPricesToken,
       );
     } on Exception catch (e) {
       logWarning('Failed to load settings from SharedPreferences: $e');

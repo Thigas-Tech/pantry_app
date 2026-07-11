@@ -52,4 +52,10 @@ class AppConfig {
   /// Whether in-app feedback submission is enabled.
   static bool get feedbackEnabled =>
       (dotenv.env['FEEDBACK_ENABLED'] ?? 'true').toLowerCase() == 'true';
+
+  /// The Bearer token for the Open Prices API.
+  ///
+  /// Generate at https://prices.openfoodfacts.org/settings/tokens
+  /// Leave empty to disable all Open Prices API features (local-only mode).
+  static String get openPricesToken => dotenv.env['OPEN_PRICES_TOKEN'] ?? '';
 }
