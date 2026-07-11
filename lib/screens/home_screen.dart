@@ -6,6 +6,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -70,6 +71,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         _selectedIds.add(id);
       });
     }
+  }
+
+  void _exitSelectionMode() {
+    setState(() {
+      _selectionMode = false;
+      _selectedIds.clear();
+    });
+  }
+
+  Future<void> _deleteSelected() async {
+    if (_selectedIds.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteItemTitle),
+        content: Text(l10n.deleteCountSub(_selectedIds.length)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final db = ref.read(databaseProvider);
+    for (final id in _selectedIds) {
+      await db.deleteInventoryItem(id);
+    }
+    ref.invalidate(inventoryWithProductProvider);
+    _exitSelectionMode();
+  }
+
+  Future<void> _moveSelected() async {
+    if (_selectedIds.isEmpty) return;
+    final inventories = ref.read(inventoryListProvider).asData?.value ?? [];
+    final activeId = ref.read(activeInventoryProvider);
+    final targetInventories = inventories
+        .where((inv) => inv['id'] != activeId)
+        .toList();
+
+    final l10n = AppLocalizations.of(context)!;
+    if (targetInventories.isEmpty) {
+      SnackbarHelper.showInfo(context, l10n.noOtherInventories);
+      return;
+    }
+
+    final targetId = await showModalBottomSheet<int>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                l10n.moveToPantry,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            ...targetInventories.map(
+              (inv) => ListTile(
+                leading: const Icon(Icons.inventory_2),
+                title: Text(inv['name'] as String),
+                onTap: () => Navigator.pop(ctx, inv['id'] as int),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (targetId == null || !mounted) return;
+
+    final db = ref.read(databaseProvider);
+    await db.moveItemsToInventory(_selectedIds.toList(), targetId);
+    ref.invalidate(inventoryWithProductProvider);
+    _exitSelectionMode();
   }
 
   Future<void> _scanBarcode(BuildContext context, WidgetRef ref) async {
@@ -170,41 +255,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.myPantry),
+        leading: _selectionMode
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: _exitSelectionMode,
+              )
+            : null,
+        title: _selectionMode
+            ? Text(l10n.selectedCount(_selectedIds.length))
+            : Text(l10n.myPantry),
         actions: [
-          if (inventories.asData?.value != null) ...[
-            InventorySwitcherCard(
-              name:
-                  inventories.asData!.value
-                          .cast<Map<String, dynamic>>()
-                          .firstWhere(
-                            (inv) =>
-                                inv['id'] == ref.read(activeInventoryProvider),
-                            orElse: () => <String, dynamic>{
-                              'name': l10n.myPantry,
-                            },
-                          )['name']
-                      as String?,
-              nutriscoreGrade: inventoryAsync.asData?.value.isNotEmpty == true
-                  ? null
-                  : null,
-              onTap: () async {
-                final result = await Navigator.of(context).push<Object>(
-                  MaterialPageRoute(
-                    builder: (_) => const ManageInventoriesScreen(),
-                  ),
-                );
-                if (result == true && context.mounted) {
-                  ref.invalidate(inventoryWithProductProvider);
-                }
-              },
-            ),
+          if (_selectionMode) ...[
+            if (_selectedIds.isNotEmpty) ...[
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: _deleteSelected,
+                tooltip: l10n.delete,
+              ),
+              IconButton(
+                icon: const Icon(Icons.drive_file_move_outline),
+                onPressed: _moveSelected,
+                tooltip: l10n.moveToPantry,
+              ),
+            ],
+          ] else ...[
+            if (inventories.asData?.value != null) ...[
+              InventorySwitcherCard(
+                name:
+                    inventories.asData!.value
+                            .cast<Map<String, dynamic>>()
+                            .firstWhere(
+                              (inv) =>
+                                  inv['id'] ==
+                                  ref.read(activeInventoryProvider),
+                              orElse: () => <String, dynamic>{
+                                'name': l10n.myPantry,
+                              },
+                            )['name']
+                        as String?,
+                nutriscoreGrade: inventoryAsync.asData?.value.isNotEmpty == true
+                    ? null
+                    : null,
+                onTap: () async {
+                  final result = await Navigator.of(context).push<Object>(
+                    MaterialPageRoute(
+                      builder: (_) => const ManageInventoriesScreen(),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    ref.invalidate(inventoryWithProductProvider);
+                  }
+                },
+              ),
+            ],
           ],
         ],
       ),
       body: Column(
         children: [
-          _buildSearchAnchor(l10n, inventoryAsync.asData?.value ?? []),
+          if (!_selectionMode)
+            _buildSearchAnchor(l10n, inventoryAsync.asData?.value ?? []),
           Expanded(
             child: inventoryAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -213,7 +323,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 onRetry: () => ref.invalidate(inventoryWithProductProvider),
               ),
               data: (items) {
-                if (items.isEmpty) {
+                if (items.isEmpty && !_selectionMode) {
                   return EmptyPantry(onScan: () => _scanBarcode(context, ref));
                 }
                 return _InventoryList(

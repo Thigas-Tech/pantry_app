@@ -542,4 +542,12 @@
   "testNotificationScheduled": "Test notification scheduled.",
   "testNotificationSent": "Test notification sent.",
   "testNotificationFailed": "Failed to send test notification."
+  ,"selectedCount": "{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "moveButton": "Move",
+  "noOtherInventories": "No other pantries available."
 }

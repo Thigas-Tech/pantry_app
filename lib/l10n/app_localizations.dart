@@ -2111,6 +2111,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to send test notification.'**
   String get testNotificationFailed;
+
+  /// No description provided for @selectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}'**
+  String selectedCount(num count);
+
+  /// No description provided for @moveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get moveButton;
+
+  /// No description provided for @noOtherInventories.
+  ///
+  /// In en, this message translates to:
+  /// **'No other pantries available.'**
+  String get noOtherInventories;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

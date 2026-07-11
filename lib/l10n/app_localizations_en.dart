@@ -1071,4 +1071,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get testNotificationFailed => 'Failed to send test notification.';
+
+  @override
+  String selectedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items selected',
+      one: '1 item selected',
+      zero: 'No items selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get moveButton => 'Move';
+
+  @override
+  String get noOtherInventories => 'No other pantries available.';
 }
