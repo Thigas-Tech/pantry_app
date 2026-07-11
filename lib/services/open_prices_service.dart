@@ -1,6 +1,10 @@
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/services/open_prices_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
+
+export 'open_prices_api_client.dart'
+    show FetchPricesResult, RemotePrice, SubmitPriceResult;
 
 /// Result of a single sync attempt.
 class SyncResult {
@@ -27,18 +31,16 @@ class SyncResult {
 /// Service for synchronising local prices with the Open Prices community
 /// database.
 ///
-/// ## Current limitations
+/// ## Token-based auth
 ///
-/// The Open Prices API requires a proof photo (receipt or shelf label) for
-/// every price write. Until the app supports receipt capture (via NFC-e or
-/// manual camera), the service marks prices as `synced` locally without
-/// making HTTP requests. This is a placeholder for the future full
-/// implementation.
+/// The service reads the Bearer token from [OpenPricesApiClient] which
+/// defaults to the configured token (from `.env` or `SharedPreferences`).
+/// If the token is empty, all API operations return empty/error results
+/// and the app works in local-only mode.
 ///
-/// ## Future implementation
+/// ## Sync flow
 ///
-/// When proof upload is available, the sync flow will be:
-/// 1. Upload the proof photo → get `proof_id`.
+/// 1. Upload the proof photo (TODO — blocked by receipt capture).
 /// 2. Create the price with `proof_id`.
 /// 3. Store the returned `open_prices_id`.
 /// 4. Mark as `synced`.
@@ -46,20 +48,28 @@ class OpenPricesService {
   /// Creates an [OpenPricesService].
   OpenPricesService({
     required DatabaseHelper databaseHelper,
-  }) : _db = databaseHelper;
+    OpenPricesApiClient? apiClient,
+  }) : _db = databaseHelper,
+       _api = apiClient ?? OpenPricesApiClient();
 
   final DatabaseHelper _db;
+  final OpenPricesApiClient _api;
+
+  /// Fetches prices for the given [barcode] from the Open Prices API.
+  ///
+  /// Returns the API result, or an empty result on error or when no
+  /// token is configured.
+  Future<FetchPricesResult> fetchPricesByBarcode(String barcode) async {
+    if (!_api.hasToken) {
+      return const FetchPricesResult(prices: [], total: 0);
+    }
+    return _api.fetchPricesByBarcode(barcode);
+  }
 
   /// Syncs all pending prices to Open Prices.
   ///
-  /// In the current MVP, this marks pending prices as synced locally and
-  /// logs the result. No HTTP requests are made.
-  ///
-  /// When proof capture is implemented, this will:
-  /// 1. Skip prices with [priceSyncLocalOnly] status.
-  /// 2. Upload proof image for [priceSyncPending] prices.
-  /// 3. Create price on the Open Prices API.
-  /// 4. Update syncStatus and openPricesId on success.
+  /// Proof photo upload is still a TODO — this method marks prices as
+  /// synced locally without making HTTP requests.
   Future<SyncResult> syncPendingPrices() async {
     final pending = await _db.getPricesBySyncStatus(priceSyncPending);
 
@@ -78,17 +88,10 @@ class OpenPricesService {
 
     for (final price in pending) {
       try {
-        // TODO(capture-proof): implement proof upload and price creation
-        // via OpenPricesAPIClient when receipt capture is available.
-        // For now, mark as synced locally as a placeholder.
-        final updated = price.copyWith(
-          syncStatus: priceSyncSynced,
-        );
+        final updated = price.copyWith(syncStatus: priceSyncSynced);
         await _db.updatePrice(updated);
         synced++;
-        logInfo(
-          'Price ${price.id} marked as synced (placeholder)',
-        );
+        logInfo('Price ${price.id} marked as synced (placeholder)');
       } on Exception catch (e) {
         logError('Failed to sync price ${price.id}: $e');
         try {
@@ -106,12 +109,14 @@ class OpenPricesService {
     return SyncResult(synced: synced, failed: failed);
   }
 
-  /// Validates that [token] is a non-empty string.
+  /// Validates the configured token against the Open Prices API.
   ///
-  /// Full validation against the Open Prices API requires a network call
-  /// (e.g. calling `GET /v1/session` with the token). That will be added
-  /// when the actual API integration is implemented.
-  bool validateToken(String token) {
-    return token.trim().isNotEmpty;
+  /// Returns `true` if the token is non-empty and the API responds with
+  /// a success status. Returns `false` on network error.
+  Future<bool> validateToken() => _api.validateToken();
+
+  /// Disposes the underlying HTTP client.
+  void dispose() {
+    _api.dispose();
   }
 }
