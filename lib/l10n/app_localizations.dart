@@ -2051,6 +2051,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid price amount'**
   String get invalidPriceAmount;
+
+  /// No description provided for @dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// No description provided for @priceHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Price hidden'**
+  String get priceHidden;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

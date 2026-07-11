@@ -67,23 +67,7 @@ class PriceHistoryScreen extends ConsumerWidget {
     Price price,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.confirmDeletePrice),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.deletePrice),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && price.id != null) {
+    if (price.id != null) {
       try {
         await ref.read(priceRepositoryProvider).deletePrice(price.id!);
         if (context.mounted) {
@@ -148,25 +132,6 @@ class _PriceHistoryTile extends StatelessWidget {
         color: Colors.red,
         child: const Icon(Icons.delete, color: Colors.white),
       ),
-      confirmDismiss: (_) async {
-        final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(l10n.confirmDeletePrice),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(l10n.cancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(l10n.deletePrice),
-              ),
-            ],
-          ),
-        );
-        return confirmed ?? false;
-      },
       onDismissed: (_) => onDelete(),
       child: Card(
         margin: const EdgeInsets.only(bottom: 8),
@@ -183,16 +148,25 @@ class _PriceHistoryTile extends StatelessWidget {
             ),
           ),
           subtitle: price.store != null ? Text(price.store!) : null,
-          trailing: syncLabel != null
-              ? Text(
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (syncLabel != null)
+                Text(
                   syncLabel,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: price.syncStatus == 'synced'
                         ? Colors.green
                         : Colors.orange,
                   ),
-                )
-              : null,
+                ),
+              IconButton(
+                icon: const Icon(Icons.delete, size: 20),
+                onPressed: onDelete,
+                tooltip: l10n.deletePrice,
+              ),
+            ],
+          ),
         ),
       ),
     );

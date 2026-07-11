@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// A helper that pumps a minimal app with a [Scaffold] and a callback
@@ -10,6 +11,8 @@ Future<void> pumpTestApp(
 ) async {
   await tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(
         builder: (context) => Scaffold(
           body: Center(
