@@ -391,6 +391,8 @@
   "scannerGenericError": "An unexpected error occurred while starting the camera.",
   "switchToManualEntry": "Enter barcode manually",
   "retryScan": "Retry",
+  "couldNotOpenSettings": "Could not open Settings.",
+  "toggleTorch": "Toggle flashlight",
   "inactivityReminderTitle": "Time to restock your pantry?",
   "inactivityReminderBody": "You haven't added any products in {days} days.",
   "@inactivityReminderBody": {
@@ -532,5 +534,7 @@
   "addToShoppingListTooltip": "Shopping list",
   "invalidPriceAmount": "Enter a valid price amount",
   "dismiss": "Dismiss",
-  "priceHidden": "Price hidden"
+  "priceHidden": "Price hidden",
+  "scanFailed": "Barcode scan failed.",
+  "productNotFound": "Product not found in database."
 }

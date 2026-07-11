@@ -518,6 +518,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.text('Product not found in database.'), findsOneWidget);
   });
 
   testWidgets('NavigationBar displays all tab labels', (tester) async {

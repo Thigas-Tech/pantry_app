@@ -482,6 +482,8 @@
   "quickAddHint": "Name, e.g. Milk",
   "regularPrice": "Regular price",
   "retryScan": "Tentar de novo",
+  "couldNotOpenSettings": "Nao foi possivel abrir as Configuracoes.",
+  "toggleTorch": "Alternar lanterna",
   "scannerGenericError": "Ocorreu um erro inesperado ao iniciar a camera.",
   "shareShoppingList": "Share shopping list",
   "shoppingList": "Shopping List",
@@ -493,6 +495,8 @@
   "totalValue": "Total value",
   "undoClearPurchased": "Purchased items cleared",
   "undoDeleteShoppingItem": "Item deleted",
-  "unmarkPurchased": "Unmark purchased"
+  "unmarkPurchased": "Unmark purchased",
+  "scanFailed": "Falha ao escanear codigo de barras.",
+  "productNotFound": "Produto nao encontrado no banco de dados."
 }
 

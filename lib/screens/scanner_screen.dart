@@ -82,29 +82,57 @@ class _MobileScannerView extends StatefulWidget {
 }
 
 class _MobileScannerViewState extends State<_MobileScannerView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   bool _hasScanned = false;
-  bool _scannerErrorOccurred = false;
   MobileScannerException? _currentException;
   int _scannerKey = 0;
 
   late final AnimationController _animationController;
+  late final MobileScannerController _scannerController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
     unawaited(_animationController.repeat(reverse: true));
+    _scannerController = MobileScannerController(autoZoom: true);
+    _scannerController.addListener(_onScannerStateChanged);
     unawaited(_requestCameraPermission());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _scannerController.removeListener(_onScannerStateChanged);
     _animationController.dispose();
+    unawaited(_scannerController.dispose());
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        _animationController.stop();
+      case AppLifecycleState.resumed:
+        unawaited(_animationController.repeat(reverse: true));
+    }
+  }
+
+  void _onScannerStateChanged() {
+    final error = _scannerController.value.error;
+    if (error != null && _currentException == null) {
+      logError('Scanner controller error: ${error.errorCode.name}');
+      _currentException = error;
+      if (mounted) setState(() {});
+    }
   }
 
   Future<void> _requestCameraPermission() async {
@@ -117,7 +145,7 @@ class _MobileScannerViewState extends State<_MobileScannerView>
       }
       if (status.isPermanentlyDenied) {
         logWarning('Camera permission permanently denied');
-        _handleScannerError(
+        _setError(
           const MobileScannerException(
             errorCode: MobileScannerErrorCode.permissionDenied,
           ),
@@ -129,14 +157,14 @@ class _MobileScannerViewState extends State<_MobileScannerView>
         logInfo('Camera permission granted');
       } else if (result.isPermanentlyDenied) {
         logWarning('Camera permission permanently denied after request');
-        _handleScannerError(
+        _setError(
           const MobileScannerException(
             errorCode: MobileScannerErrorCode.permissionDenied,
           ),
         );
       } else {
         logWarning('Camera permission denied');
-        _handleScannerError(
+        _setError(
           const MobileScannerException(
             errorCode: MobileScannerErrorCode.permissionDenied,
           ),
@@ -147,18 +175,15 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
-  void _handleScannerError(MobileScannerException exception) {
-    _scannerErrorOccurred = true;
+  void _setError(MobileScannerException exception) {
+    if (_currentException != null) return;
     _currentException = exception;
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   void _retry() {
     logInfo('Retrying scanner');
     _hasScanned = false;
-    _scannerErrorOccurred = false;
     _currentException = null;
     setState(() => _scannerKey++);
     unawaited(_requestCameraPermission());
@@ -169,18 +194,52 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     final l10n = AppLocalizations.of(context)!;
     final opened = await openAppSettings();
     if (!opened && mounted) {
-      SnackbarHelper.showError(context, l10n.couldNotOpenPlayStore);
+      SnackbarHelper.showError(context, l10n.couldNotOpenSettings);
     }
   }
 
-  Widget _buildError(BuildContext context, MobileScannerException exception) {
-    logError('Scanner error: ${exception.errorCode.name}');
-    if (!_scannerErrorOccurred) {
-      _scannerErrorOccurred = true;
+  void _toggleTorch() {
+    unawaited(_scannerController.toggleTorch());
+  }
+
+  void _onBarcodeDetected(BarcodeCapture capture) {
+    if (_hasScanned) {
+      logInfo('Scan already captured -- ignoring duplicate');
+      return;
+    }
+    if (capture.barcodes.isEmpty) {
+      logWarning('Barcode capture received with empty barcodes list');
+      return;
+    }
+    final barcode = capture.barcodes.first;
+    if (barcode.rawValue == null) return;
+    _hasScanned = true;
+    logInfo('Barcode scanned via camera: ${barcode.rawValue}');
+    unawaited(HapticFeedback.mediumImpact());
+    if (context.mounted) {
+      Navigator.of(context).pop(barcode.rawValue);
+    }
+  }
+
+  void _onDetectionError(Object error, StackTrace stackTrace) {
+    logException('Barcode detection error', error, stackTrace);
+  }
+
+  Widget _onScannerError(
+    BuildContext context,
+    MobileScannerException exception,
+  ) {
+    if (_currentException == null) {
+      _currentException = exception;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) setState(() {});
       });
     }
+    return _buildErrorContent(exception);
+  }
+
+  Widget _buildErrorContent(MobileScannerException exception) {
+    logError('Scanner error: ${exception.errorCode.name}');
     return ScannerErrorContent(
       exception: exception,
       onRetry: _retry,
@@ -202,10 +261,40 @@ class _MobileScannerViewState extends State<_MobileScannerView>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    if (_currentException != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.scanBarcode),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              tooltip: l10n.manualEntryTooltip,
+              onPressed: widget.onSwitchToManual,
+            ),
+          ],
+        ),
+        body: _buildErrorContent(_currentException!),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.scanBarcode),
         actions: [
+          AnimatedBuilder(
+            animation: _scannerController,
+            builder: (_, _) {
+              final torch = _scannerController.value.torchState;
+              final available = torch != TorchState.unavailable;
+              return IconButton(
+                icon: Icon(
+                  torch == TorchState.on ? Icons.flash_on : Icons.flash_off,
+                ),
+                tooltip: l10n.toggleTorch,
+                onPressed: available ? _toggleTorch : null,
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: l10n.manualEntryTooltip,
@@ -217,51 +306,22 @@ class _MobileScannerViewState extends State<_MobileScannerView>
         children: [
           MobileScanner(
             key: ValueKey(_scannerKey),
-            onDetect: (capture) {
-              if (_hasScanned) {
-                logInfo('Scan already captured — ignoring duplicate');
-                return;
-              }
-              if (capture.barcodes.isEmpty) {
-                logWarning('Barcode capture received with empty barcodes list');
-                return;
-              }
-              final barcode = capture.barcodes.first;
-              if (barcode.rawValue == null) return;
-              _hasScanned = true;
-              logInfo('Barcode scanned via camera: ${barcode.rawValue}');
-              unawaited(HapticFeedback.mediumImpact());
-              Navigator.of(context).pop(barcode.rawValue);
-            },
-            onDetectError: (error, stackTrace) {
-              logException('Barcode detection error', error, stackTrace);
-            },
-            errorBuilder: (context, exception) {
-              _handleScannerError(exception);
-              return _buildError(context, exception);
-            },
+            controller: _scannerController,
+            onDetect: _onBarcodeDetected,
+            onDetectError: _onDetectionError,
+            errorBuilder: _onScannerError,
             placeholderBuilder: _buildPlaceholder,
+            tapToFocus: true,
           ),
-          if (_scannerErrorOccurred && _currentException != null)
-            ScannerErrorContent(
-              exception: _currentException!,
-              onRetry: _retry,
-              onSwitchToManual: widget.onSwitchToManual,
-              onOpenSettings: _openSettings,
+          AnimatedBuilder(
+            animation: _animationController,
+            builder: (_, _) => CustomPaint(
+              painter: ScannerOverlayPainter(
+                animationValue: _animationController.value,
+                hintText: l10n.scanHint,
+              ),
             ),
-          if (!_scannerErrorOccurred)
-            AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, _) {
-                return CustomPaint(
-                  size: MediaQuery.of(context).size,
-                  painter: ScannerOverlayPainter(
-                    animationValue: _animationController.value,
-                    hintText: l10n.scanHint,
-                  ),
-                );
-              },
-            ),
+          ),
         ],
       ),
     );
@@ -270,8 +330,8 @@ class _MobileScannerViewState extends State<_MobileScannerView>
 
 /// Displays scanner error content based on the error code.
 ///
-/// Used as the [MobileScanner.errorBuilder] content. Extracted as a separate
-/// widget so it can be tested with specific error codes.
+/// Extracted as a separate widget so it can be tested with specific error
+/// codes.
 @visibleForTesting
 class ScannerErrorContent extends StatelessWidget {
   /// Creates a [ScannerErrorContent] widget.

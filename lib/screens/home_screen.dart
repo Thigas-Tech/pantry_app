@@ -12,8 +12,10 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/string_helpers.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
@@ -91,6 +93,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
     } on Exception catch (e) {
       logWarning('Scan failed for $barcode: $e');
+      if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      if (e is ProductNotFoundException) {
+        SnackbarHelper.showWarning(context, l10n.productNotFound);
+      } else {
+        SnackbarHelper.showError(context, l10n.scanFailed);
+      }
     }
   }
 

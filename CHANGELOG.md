@@ -3,6 +3,22 @@
 ## [Unreleased]
 
 ### Fixed
+- **Camera scanner error loop**: Controller listener catches errors from the `MobileScannerController` state before the widget's `ValueListenableBuilder` fires, preventing the overlay from flashing over the error message. `errorBuilder` is kept as a safety net with a post-frame callback to avoid mid-build `setState`. Duplicate `ScannerErrorContent` removed from `Stack` children. (`lib/screens/scanner_screen.dart`, fixes #76)
+- **Camera scanner `genericError` overwriting `permissionDenied`**: The controller listener's `_setError` guard (`if (_currentException != null) return`) prevents a later error from overwriting the first one, fixing the retry loop. (`lib/screens/scanner_screen.dart`, fixes #76)
+- **Missing `context.mounted` guard on `Navigator.pop`**: Added guard before `Navigator.of(context).pop()` in `onDetect` callback to prevent calling pop on a stale context. (`lib/screens/scanner_screen.dart`)
+- **Mismatched ARB string in `_openSettings`**: Changed from `couldNotOpenPlayStore` to new `couldNotOpenSettings` key. (`lib/screens/scanner_screen.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
+- **No user feedback on barcode scan failure**: `HomeScreen._scanBarcode` now shows a snackbar (`productNotFound` or `scanFailed`) instead of silently logging the error. (`lib/screens/home_screen.dart`, fixes #76)
+
+### Added
+- **Torch/flashlight toggle**: New `Icons.flash_on`/`Icons.flash_off` button in the scanner AppBar, wired to `MobileScannerController.toggleTorch()`. Hidden when the controller reports `TorchState.unavailable`. (`lib/screens/scanner_screen.dart`, `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
+- **Lifecycle-aware scanner overlay**: `_MobileScannerViewState` now mixes in `WidgetsBindingObserver`. The scanning-line animation is paused on `paused`/`inactive`/`hidden`/`detached` and resumed on `resumed`, saving battery. (`lib/screens/scanner_screen.dart`)
+- **Tap-to-focus**: Enabled via `tapToFocus: true` on `MobileScanner`, allowing users to tap the preview to focus on a specific area. (`lib/screens/scanner_screen.dart`)
+- **Auto-zoom**: Enabled via `autoZoom: true` on `MobileScannerController`, which automatically zooms when the detected barcode is far from the camera (Android only). (`lib/screens/scanner_screen.dart`)
+- **Advanced controller API**: Switched from simple `MobileScanner(onDetect:)` usage to a `MobileScannerController` instance, enabling all advanced features (torch, zoom, tap-to-focus, state monitoring). (`lib/screens/scanner_screen.dart`)
+- **`couldNotOpenSettings` ARB key**: New localised string for when `openAppSettings()` fails. Added to `en`, `pt`, and `pt_BR`. (`lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
+- **`scanFailed` and `productNotFound` ARB keys**: New localised strings for barcode scan failure snackbars in `HomeScreen`. (`lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
+
+### Changed
 - **Notification init race condition**: Moved notification service initialization before `runApp()` using a shared `ProviderContainer` with `UncontrolledProviderScope`. Post-init tasks now run staggered after the first frame. Eliminated orphan `ProviderContainer` instances. (`lib/main.dart`, fixes #34)
 - **Connectivity null at startup treated as online**: `connectivityProvider` now yields the initial connectivity state within 3 seconds instead of staying in `AsyncLoading`. Timeout defaults to offline. (`lib/providers/connectivity_provider.dart`, fixes #50)
 - **Mixed-currency price aggregation**: `totalInventoryValue` and `averageItemPrice` now convert each price to the user's base currency before summing/averaging, using the existing `CurrencyService`. (`lib/database/price_dao.dart`, `lib/services/price_repository.dart`, `lib/providers/price_provider.dart`, `lib/providers/stats_provider.dart`, fixes #56)
