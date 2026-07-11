@@ -105,10 +105,22 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     _screenshotPaths.clear();
   }
 
+  void _resetForm() {
+    _titleController.clear();
+    _descriptionController.clear();
+    _cleanupAllScreenshots();
+    _formKey.currentState?.reset();
+    setState(() {
+      _issueType = IssueType.bug;
+      _includeDeviceInfo = false;
+      _includeLogs = false;
+      _submittedIssueUrl = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isOnline = ref.watch(connectivityProvider).value ?? false;
     final enabled = AppConfig.feedbackEnabled;
 
     if (!enabled) {
@@ -149,10 +161,20 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               _buildLogsToggle(l10n),
               const SizedBox(height: 24),
               _buildSubmitButton(l10n),
-              if (!isOnline) ...[
-                const SizedBox(height: 12),
-                _buildOfflineInfo(l10n),
-              ],
+              Consumer(
+                builder: (context, ref, _) {
+                  final isOnline =
+                      ref.watch(connectivityProvider).value ?? false;
+                  return isOnline
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            const SizedBox(height: 12),
+                            _buildOfflineInfo(l10n),
+                          ],
+                        );
+                },
+              ),
               if (_submittedIssueUrl != null) ...[
                 const SizedBox(height: 16),
                 _buildSuccessCard(l10n),
@@ -470,6 +492,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           if (mounted) {
             setState(() => _submittedIssueUrl = url);
             SnackbarHelper.showInfo(context, l10n.issueSubmitted);
+            _resetForm();
+            if (mounted) Navigator.of(context).pop();
           }
         } on IssueSubmissionException {
           logError(
@@ -483,6 +507,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           );
           if (mounted) {
             SnackbarHelper.showWarning(context, l10n.issueQueuedOffline);
+            _resetForm();
+            if (mounted) Navigator.of(context).pop();
           }
         }
       } else {
@@ -494,6 +520,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         );
         if (mounted) {
           SnackbarHelper.showWarning(context, l10n.issueQueuedOffline);
+          _resetForm();
+          if (mounted) Navigator.of(context).pop();
         }
       }
     } on Exception catch (e) {

@@ -371,11 +371,16 @@ class GithubIssueService {
     };
   }
 
+  /// Builds the issue body by appending markdown for each screenshot.
+  ///
+  /// Each screenshot is encoded as WebP in an isolate via [compute] with
+  /// an 800 px max width, uploaded to Imgur (anonymous), and embedded as
+  /// a markdown image. Screenshots that fail to encode or upload are
+  /// silently skipped and the issue is still submitted without them.
   Future<String> _buildBody(
     String description,
     List<List<int>> screenshotBytesList,
   ) async {
-    const maxBody = 200 * 1024;
     final buffer = StringBuffer()..writeln(description);
 
     for (var i = 0; i < screenshotBytesList.length; i++) {
@@ -397,25 +402,13 @@ class GithubIssueService {
       }
       if (webpBytes.isEmpty) continue;
 
-      final url = await _uploadToCatbox(webpBytes);
+      final url = await _uploadToImgur(webpBytes);
       if (url != null) {
         buffer
           ..writeln()
           ..writeln('![screenshot]($url)');
       } else {
-        logWarning('Screenshot upload failed, using base64 fallback');
-        final base64Str = base64Encode(webpBytes);
-        final pendingBlock =
-            '\n<details>\n<summary>Screenshot (WebP base64)</summary>\n\n'
-            '```\n$base64Str\n```\n\n</details>\n';
-        if (buffer.length + pendingBlock.length > maxBody) {
-          logWarning(
-            'Skipping screenshot ${i + 1} base64: body would exceed '
-            'size limit',
-          );
-          continue;
-        }
-        buffer.write(pendingBlock);
+        logWarning('Screenshot ${i + 1} upload failed — skipping');
       }
     }
 
@@ -478,50 +471,45 @@ class GithubIssueService {
     return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
   }
 
-  /// Uploads [webpBytes] to catbox.moe and returns the hosted URL.
+  /// Uploads [webpBytes] to Imgur (anonymous) and returns the hosted URL.
   ///
-  /// Returns `null` if the upload fails. Catbox.moe is a free, anonymous
-  /// file host that requires no API key. The uploaded URL is permanent.
-  Future<String?> _uploadToCatbox(Uint8List webpBytes) async {
-    for (var attempt = 0; attempt < 2; attempt++) {
-      if (attempt > 0) {
-        await Future<void>.delayed(const Duration(seconds: 2));
-      }
-      try {
-        final request = http.MultipartRequest(
-          'POST',
-          Uri.parse('https://catbox.moe/user/api.php'),
-        );
-        request.fields['reqType'] = 'fileupload';
-        request.fields['filename'] = 'screenshot.webp';
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            'fileToUpload',
-            webpBytes,
-            filename: 'screenshot.webp',
-          ),
-        );
+  /// Returns `null` if the upload fails. Requires `IMGUR_CLIENT_ID` in
+  /// the `.env` file. When unset or empty, the upload is skipped without
+  /// error. Imgur anonymous uploads are rate-limited to ~50/hour per
+  /// Client-ID.
+  Future<String?> _uploadToImgur(Uint8List webpBytes) async {
+    final clientId = AppConfig.imgurClientId;
+    if (clientId.isEmpty) {
+      logWarning('IMGUR_CLIENT_ID not configured — skipping image upload');
+      return null;
+    }
 
-        final streamedResponse = await _httpClient
-            .send(request)
-            .timeout(const Duration(seconds: 30));
-        final response = await http.Response.fromStream(streamedResponse);
+    try {
+      final response = await _httpClient
+          .post(
+            Uri.parse('https://api.imgur.com/3/image'),
+            headers: {'Authorization': 'Client-ID $clientId'},
+            body: {
+              'image': base64Encode(webpBytes),
+              'type': 'base64',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
 
-        if (response.statusCode == 200 &&
-            response.body.startsWith('https://')) {
-          final url = response.body.trim();
-          logInfo('Screenshot uploaded to catbox.moe: $url');
-          return url;
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final link =
+            (data['data'] as Map<String, dynamic>?)?['link'] as String?;
+        if (link != null) {
+          logInfo('Screenshot uploaded to Imgur: $link');
+          return link;
         }
-        logWarning(
-          'Catbox.moe upload failed: ${response.statusCode} '
-          '(attempt ${attempt + 1})',
-        );
-      } on Object catch (e) {
-        logWarning(
-          'Catbox.moe upload error: $e (attempt ${attempt + 1})',
-        );
       }
+      logWarning('Imgur upload failed: ${response.statusCode}');
+    } on TimeoutException {
+      logWarning('Imgur upload timed out');
+    } on Object catch (e) {
+      logWarning('Imgur upload error: $e');
     }
     return null;
   }

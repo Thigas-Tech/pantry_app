@@ -1,8 +1,8 @@
 /// @file GithubIssueService unit tests.
 ///
 /// Tests for issue submission, rate limiting, offline queue management,
-/// screenshot processing (WebP encoding + catbox.moe upload), and
-/// duplicate detection. HTTP calls are mocked with [MockHttpClient],
+/// screenshot processing (WebP encoding + Imgur upload), and duplicate
+/// detection. HTTP calls are mocked with [MockHttpClient],
 /// SharedPreferences with [SharedPreferences.setMockInitialValues].
 library;
 
@@ -209,12 +209,11 @@ void main() {
       });
 
       /// Verifies screenshots are processed (decoded, resized, encoded
-      /// as WebP) and the raw bytes are not embedded directly in the
-      /// issue body. When the catbox.moe upload fails (as it does in
-      /// tests with a mock HTTP client), the fallback embeds the WebP
-      /// base64 in a collapsible details block.
+      /// as WebP) and when no [IMGUR_CLIENT_ID] is configured the
+      /// image is silently skipped without embedding raw bytes in the
+      /// issue body.
       test(
-        'processes screenshots to WebP with fallback on upload failure',
+        'processes screenshots to WebP and skips on missing Imgur client',
         () async {
           final image = img.Image(width: 2000, height: 2000);
           final rawBytes = Uint8List.fromList(img.encodePng(image));
@@ -246,13 +245,14 @@ void main() {
 
           expect(capturedBody, isNotNull);
           expect(capturedBody, isNot(contains(base64Encode(rawBytes))));
-          expect(capturedBody, contains('<details>'));
-          expect(capturedBody, contains('Screenshot (WebP base64)'));
+          expect(capturedBody, isNot(contains('<details>')));
+          expect(capturedBody, isNot(contains('![screenshot]')));
+          expect(capturedBody, contains('Description'));
         },
       );
 
       /// Verifies body stays under GitHub API size limit even with
-      /// large screenshots, ensuring WebP compression is active.
+      /// large screenshots.
       test(
         'body size is within GitHub API limits with large screenshots',
         () async {
