@@ -15,8 +15,8 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/search_utils.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
-import 'package:pantry_app/utils/string_helpers.dart';
 
 /// A search‑focused tab that lets the user find products by name or
 /// barcode, querying both the local cache and the Open Food Facts API.
@@ -75,7 +75,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     setState(() => _isSearching = true);
 
     try {
-      final normalizedQuery = removeDiacritics(query.trim());
+      final normalizedQuery = normalizeForSearch(query.trim());
       final db = ref.read(databaseProvider);
       final localResults = await db.searchProducts(normalizedQuery);
       if (capturedRequestId != _requestId || !mounted) return;
