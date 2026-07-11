@@ -741,7 +741,7 @@ abstract class AppLocalizations {
   /// No description provided for @productNotFound.
   ///
   /// In en, this message translates to:
-  /// **'Product not found'**
+  /// **'Product not found in database.'**
   String get productNotFound;
 
   /// No description provided for @productNotFoundHint.
@@ -1488,6 +1488,18 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retryScan;
 
+  /// No description provided for @couldNotOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open Settings.'**
+  String get couldNotOpenSettings;
+
+  /// No description provided for @toggleTorch.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle flashlight'**
+  String get toggleTorch;
+
   /// No description provided for @inactivityReminderTitle.
   ///
   /// In en, this message translates to:
@@ -2063,6 +2075,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Price hidden'**
   String get priceHidden;
+
+  /// No description provided for @scanFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode scan failed.'**
+  String get scanFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

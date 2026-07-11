@@ -350,7 +350,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get networkError => 'Erro de rede. Verifique sua conexão.';
 
   @override
-  String get productNotFound => 'Produto não encontrado';
+  String get productNotFound => 'Produto nao encontrado no banco de dados.';
 
   @override
   String get productNotFoundHint => 'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
@@ -751,6 +751,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get retryScan => 'Tentar de novo';
 
   @override
+  String get couldNotOpenSettings => 'Nao foi possivel abrir as Configuracoes.';
+
+  @override
+  String get toggleTorch => 'Alternar lanterna';
+
+  @override
   String get inactivityReminderTitle => 'Hora de reabastecer sua despensa?';
 
   @override
@@ -1047,6 +1053,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get priceHidden => 'Preco oculto';
+
+  @override
+  String get scanFailed => 'Falha ao escanear codigo de barras.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1395,7 +1404,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get networkError => 'Erro de rede. Verifique sua conexão.';
 
   @override
-  String get productNotFound => 'Produto não encontrado';
+  String get productNotFound => 'Produto nao encontrado no banco de dados.';
 
   @override
   String get productNotFoundHint => 'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
@@ -1796,6 +1805,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get retryScan => 'Tentar de novo';
 
   @override
+  String get couldNotOpenSettings => 'Nao foi possivel abrir as Configuracoes.';
+
+  @override
+  String get toggleTorch => 'Alternar lanterna';
+
+  @override
   String get inactivityReminderTitle => 'Hora de reabastecer sua despensa?';
 
   @override
@@ -2092,4 +2107,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get priceHidden => 'Preco oculto';
+
+  @override
+  String get scanFailed => 'Falha ao escanear codigo de barras.';
 }

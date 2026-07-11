@@ -350,7 +350,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networkError => 'Network error. Please check your connection.';
 
   @override
-  String get productNotFound => 'Product not found';
+  String get productNotFound => 'Product not found in database.';
 
   @override
   String get productNotFoundHint => 'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
@@ -751,6 +751,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retryScan => 'Retry';
 
   @override
+  String get couldNotOpenSettings => 'Could not open Settings.';
+
+  @override
+  String get toggleTorch => 'Toggle flashlight';
+
+  @override
   String get inactivityReminderTitle => 'Time to restock your pantry?';
 
   @override
@@ -1047,4 +1053,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceHidden => 'Price hidden';
+
+  @override
+  String get scanFailed => 'Barcode scan failed.';
 }

@@ -458,6 +458,8 @@
   "regularPrice": "Preco normal",
   "removeScreenshot": "Remover",
   "retryScan": "Tentar de novo",
+  "couldNotOpenSettings": "Nao foi possivel abrir as Configuracoes.",
+  "toggleTorch": "Alternar lanterna",
   "scannerGenericError": "Ocorreu um erro inesperado ao iniciar a camera.",
   "sendFeedback": "Enviar Feedback",
   "sending": "Enviando...",
@@ -477,5 +479,7 @@
   "undoClearPurchased": "Itens comprados limpos",
   "undoDeleteShoppingItem": "Item excluido",
   "unmarkPurchased": "Desmarcar comprado",
-  "viewOnGitHub": "Ver no GitHub"
+  "viewOnGitHub": "Ver no GitHub",
+  "scanFailed": "Falha ao escanear codigo de barras.",
+  "productNotFound": "Produto nao encontrado no banco de dados."
 }
