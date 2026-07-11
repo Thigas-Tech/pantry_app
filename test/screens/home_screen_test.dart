@@ -1339,14 +1339,14 @@ void main() {
     // Both items visible initially.
     expect(find.byType(InventoryCard), findsNWidgets(2));
 
-    // Type "cafe" — should match "Café crème" via removeDiacritics.
+    // Type "cafe" — should match "Café crème" via normalizeForSearch.
     await tester.enterText(find.byType(TextField), 'cafe');
     await tester.pumpAndSettle();
 
     expect(find.byType(InventoryCard), findsOneWidget);
     expect(find.text('222222'), findsNothing);
 
-    // Clear, then type "musli" — should match "Müsli" via removeDiacritics.
+    // Clear, then type "musli" — should match "Müsli" via normalizeForSearch.
     await tester.tap(find.byIcon(Icons.clear));
     await tester.pumpAndSettle();
 

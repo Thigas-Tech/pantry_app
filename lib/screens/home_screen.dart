@@ -16,8 +16,8 @@ import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/search_utils.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
-import 'package:pantry_app/utils/string_helpers.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
@@ -220,12 +220,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           final query = controller.text;
           if (query.isEmpty) return [];
 
-          final q = removeDiacritics(query.trim().toLowerCase());
+          final q = normalizeForSearch(query);
           final matched = <InventoryWithProduct>{};
           for (final item in items) {
-            final name = item.productName ?? item.barcode;
-            if (removeDiacritics(name.toLowerCase()).contains(q) ||
-                removeDiacritics(item.barcode).contains(q)) {
+            final searchText =
+                item.productSearchText ??
+                normalizeForSearch(
+                  [
+                    item.productName,
+                    item.barcode,
+                    item.productCategory,
+                  ].whereType<String>().join(' '),
+                );
+            if (searchText.contains(q)) {
               matched.add(item);
             }
           }
@@ -385,11 +392,18 @@ class _InventoryList extends ConsumerStatefulWidget {
 class _InventoryListState extends ConsumerState<_InventoryList> {
   List<InventoryWithProduct> get _filtered {
     if (widget.searchQuery.isEmpty) return widget.items;
-    final q = removeDiacritics(widget.searchQuery.trim().toLowerCase());
+    final q = normalizeForSearch(widget.searchQuery);
     return widget.items.where((item) {
-      final name = item.productName ?? item.barcode;
-      return removeDiacritics(name.toLowerCase()).contains(q) ||
-          removeDiacritics(item.barcode).contains(q);
+      final searchText =
+          item.productSearchText ??
+          normalizeForSearch(
+            [
+              item.productName,
+              item.barcode,
+              item.productCategory,
+            ].whereType<String>().join(' '),
+          );
+      return searchText.contains(q);
     }).toList();
   }
 
