@@ -320,25 +320,29 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              children: [
-                _countChip(
-                  l10n.totalItemsCount(widget.items.length),
-                  Icons.inventory_2_outlined,
-                ),
-                const SizedBox(width: 8),
-                _countChip(
-                  l10n.expiringSoonCount(_expiringSoon.length),
-                  Icons.warning_amber_outlined,
-                ),
-                const SizedBox(width: 8),
-                _countChip(
-                  l10n.addedThisWeek(addedThisWeek),
-                  Icons.add_circle_outline,
-                ),
-              ],
+          SizedBox(
+            height: 32,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _countChip(
+                    l10n.totalItemsCount(widget.items.length),
+                    Icons.inventory_2_outlined,
+                  ),
+                  const SizedBox(width: 8),
+                  _countChip(
+                    l10n.expiringSoonCount(_expiringSoon.length),
+                    Icons.warning_amber_outlined,
+                  ),
+                  const SizedBox(width: 8),
+                  _countChip(
+                    l10n.addedThisWeek(addedThisWeek),
+                    Icons.add_circle_outline,
+                  ),
+                ],
+              ),
             ),
           ),
           if (_expired.isNotEmpty) ...[
