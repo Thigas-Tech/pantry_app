@@ -318,6 +318,53 @@ class NotificationService {
     }
   }
 
+  /// Sends an immediate test notification.
+  Future<void> showTestNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      'expiry_channel',
+      'Expiry reminders',
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    );
+    const details = NotificationDetails(android: androidDetails);
+
+    await _plugin.zonedSchedule(
+      id: 999999998,
+      title: 'Test Notification',
+      body: 'This is a test notification.',
+      scheduledDate: tz.TZDateTime.now(
+        tz.local,
+      ).add(const Duration(seconds: 1)),
+      notificationDetails: details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
+  /// Schedules a test notification for 2 minutes from now.
+  Future<void> scheduleTestNotification() async {
+    const androidDetails = AndroidNotificationDetails(
+      'expiry_channel',
+      'Expiry reminders',
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    );
+    const details = NotificationDetails(android: androidDetails);
+    final scheduledDate = tz.TZDateTime.now(
+      tz.local,
+    ).add(const Duration(minutes: 2));
+
+    await _plugin.zonedSchedule(
+      id: 999999999,
+      title: 'Scheduled Test Notification',
+      body: 'This is a test notification 2 minutes later.',
+      scheduledDate: scheduledDate,
+      notificationDetails: details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+  }
+
   /// Schedules a one-shot inactivity reminder for tomorrow at 9 AM if the
   /// user has not added any product for [thresholdDays] or more.
   ///

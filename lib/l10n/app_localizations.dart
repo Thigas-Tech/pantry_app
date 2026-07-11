@@ -2081,6 +2081,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Barcode scan failed.'**
   String get scanFailed;
+
+  /// No description provided for @testNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send test notification'**
+  String get testNotification;
+
+  /// No description provided for @testScheduledNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send scheduled test notification (2 min)'**
+  String get testScheduledNotification;
+
+  /// No description provided for @testNotificationScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notification scheduled.'**
+  String get testNotificationScheduled;
+
+  /// No description provided for @testNotificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notification sent.'**
+  String get testNotificationSent;
+
+  /// No description provided for @testNotificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send test notification.'**
+  String get testNotificationFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

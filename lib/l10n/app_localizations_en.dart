@@ -1056,4 +1056,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanFailed => 'Barcode scan failed.';
+
+  @override
+  String get testNotification => 'Send test notification';
+
+  @override
+  String get testScheduledNotification => 'Send scheduled test notification (2 min)';
+
+  @override
+  String get testNotificationScheduled => 'Test notification scheduled.';
+
+  @override
+  String get testNotificationSent => 'Test notification sent.';
+
+  @override
+  String get testNotificationFailed => 'Failed to send test notification.';
 }

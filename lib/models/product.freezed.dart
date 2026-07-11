@@ -96,10 +96,10 @@ mixin _$Product {
 /// This represents the language *requested* by the client, not necessarily
 /// the language *returned* — OFF silently falls back to English if the
 /// requested language has no data for a given field. Storing the
-/// requested code allows the "Show in [lang]" ActionChip to display
+/// requested code allows the "Show in language" ActionChip to display
 /// meaningful options.
 ///
-/// Defaults to `'en'` for legacy records and manually entered products.
+/// Defaults to 'en' for legacy records and manually entered products.
  String get languageCode;/// Local file path to a photo of the nutrition facts table.
 ///
 /// Populated when the user captures a photo on the manual-entry screen.
@@ -455,10 +455,10 @@ class _Product implements Product {
 /// This represents the language *requested* by the client, not necessarily
 /// the language *returned* — OFF silently falls back to English if the
 /// requested language has no data for a given field. Storing the
-/// requested code allows the "Show in [lang]" ActionChip to display
+/// requested code allows the "Show in language" ActionChip to display
 /// meaningful options.
 ///
-/// Defaults to `'en'` for legacy records and manually entered products.
+/// Defaults to 'en' for legacy records and manually entered products.
 @override@JsonKey() final  String languageCode;
 /// Local file path to a photo of the nutrition facts table.
 ///

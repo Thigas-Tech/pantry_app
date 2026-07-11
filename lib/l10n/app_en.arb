@@ -536,5 +536,10 @@
   "dismiss": "Dismiss",
   "priceHidden": "Price hidden",
   "scanFailed": "Barcode scan failed.",
-  "productNotFound": "Product not found in database."
+  "productNotFound": "Product not found in database.",
+  "testNotification": "Send test notification",
+  "testScheduledNotification": "Send scheduled test notification (2 min)",
+  "testNotificationScheduled": "Test notification scheduled.",
+  "testNotificationSent": "Test notification sent.",
+  "testNotificationFailed": "Failed to send test notification."
 }
