@@ -28,7 +28,15 @@ import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/services/notification_background_handler.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// Global key for the root scaffold messenger.
+///
+/// Used by [SnackbarHelper] to show snackbars that survive route
+/// transitions, and passed to [MaterialApp.scaffoldMessengerKey].
+final GlobalKey<ScaffoldMessengerState> rootMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 /// The single [ProviderContainer] shared by the entire app.
 ///
@@ -51,6 +59,7 @@ late final ProviderContainer appContainer;
 ///    share the same [appContainer].
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SnackbarHelper.messengerKey = rootMessengerKey;
 
   if (kDebugMode) {
     SemanticsBinding.instance.ensureSemantics();
@@ -454,6 +463,7 @@ class PantryApp extends ConsumerWidget {
 
         return MaterialApp(
           title: 'Pantry',
+          scaffoldMessengerKey: rootMessengerKey,
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),
           themeMode: themeMode,
