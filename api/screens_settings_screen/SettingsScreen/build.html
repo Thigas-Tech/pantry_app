@@ -409,6 +409,36 @@ Widget build(BuildContext context, WidgetRef ref) {
                 title: Text(l10n.sendFeedback),
                 onTap: () =&gt; _sendFeedback(context),
               ),
+            if (AppConfig.feedbackEnabled)
+              Consumer(
+                builder: (context, ref, _) {
+                  final service = ref.watch(githubIssueServiceProvider);
+                  return FutureBuilder&lt;int&gt;(
+                    future: service.pendingCount(),
+                    builder: (context, snapshot) {
+                      final count = snapshot.data ?? 0;
+                      if (count == 0) return const SizedBox.shrink();
+                      return ListTile(
+                        leading: const Icon(Icons.cloud_upload_outlined),
+                        title: Text(&#39;Pending feedback: $count&#39;),
+                        trailing: TextButton(
+                          onPressed: () async {
+                            final result = await service.flushQueue();
+                            if (context.mounted) {
+                              SnackbarHelper.showInfo(
+                                context,
+                                &#39;Submitted ${result.submitted}, &#39;
+                                &#39;${result.failed} failed&#39;,
+                              );
+                            }
+                          },
+                          child: const Text(&#39;Retry now&#39;),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
           ],
         ),
       ],

@@ -80,10 +80,14 @@ trace on subsequent lines. Always printed regardless of build mode.</p>
   StackTrace? stackTrace,
 ) {
   final trace = stackTrace != null ? &#39;\n$stackTrace&#39; : &#39;&#39;;
+  final line =
+      &#39;${_timestamp()} [ERR]  $message&#39;
+      &#39;\n${exception.runtimeType}: $exception$trace&#39;;
   debugPrint(
     &#39;${_timestamp()} $_red[ERR]  $_reset$message&#39;
     &#39;\n${exception.runtimeType}: $exception$trace&#39;,
   );
+  _append(line);
 }</code></pre>
 </section>
 

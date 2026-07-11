@@ -72,7 +72,11 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void logInfo(String message) {
-  if (_verbose) debugPrint(&#39;${_timestamp()} $_blue[INFO] $_reset$message&#39;);
+  if (_verbose) {
+    final line = &#39;${_timestamp()} [INFO] $message&#39;;
+    debugPrint(&#39;${_timestamp()} $_blue[INFO] $_reset$message&#39;);
+    _append(line);
+  }
 }</code></pre>
 </section>
 

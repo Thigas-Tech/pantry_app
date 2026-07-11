@@ -59,6 +59,7 @@
 <li><span class="parameter" id="submitIssue-param-body"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span>, </span></li>
 <li><span class="parameter" id="submitIssue-param-label"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">label</span>, </span></li>
 <li><span class="parameter" id="submitIssue-param-screenshotBytesList"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>&gt;</span></span> <span class="parameter-name">screenshotBytesList</span> = <span class="default-value">const []</span>, </span></li>
+<li><span class="parameter" id="submitIssue-param-fromFlush"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">fromFlush</span> = <span class="default-value">false</span>, </span></li>
 </ol>})
 
       
@@ -80,6 +81,7 @@
   required String body,
   String? label,
   List&lt;List&lt;int&gt;&gt; screenshotBytesList = const [],
+  bool fromFlush = false,
 }) async {
   if (kIsWeb) {
     throw UnsupportedError(&#39;GitHub API submissions are not supported on web&#39;);
@@ -92,7 +94,7 @@
     );
   }
 
-  if (!_canSubmit()) {
+  if (!fromFlush &amp;&amp; !_canSubmit()) {
     throw const IssueSubmissionException(
       &#39;Rate limit reached. Try again later.&#39;,
     );
@@ -135,7 +137,9 @@
   if (response.statusCode == 201) {
     final data = jsonDecode(response.body) as Map&lt;String, dynamic&gt;;
     final url = data[&#39;html_url&#39;] as String;
-    await _recordSubmission(title, body);
+    if (!fromFlush) {
+      await _recordSubmission(title, body);
+    }
     logInfo(&#39;Issue created: $url&#39;);
     return url;
   }

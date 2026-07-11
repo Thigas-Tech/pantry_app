@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the logDebug function from the logger library, for the Dart programming language.">
-  <title>logDebug function - logger library - Dart API</title>
+  <meta name="description" content="API docs for the recentLogs property from the logger library, for the Dart programming language.">
+  <title>recentLogs property - logger library - Dart API</title>
 
 
   
@@ -26,9 +26,9 @@
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">pantry_app</a></li>
     <li><a href="../utils_logger/">utils&#47;logger.dart</a></li>
-    <li class="self-crumb">logDebug function</li>
+    <li class="self-crumb">recentLogs property</li>
   </ol>
-  <div class="self-name">logDebug</div>
+  <div class="self-name">recentLogs</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -48,37 +48,33 @@
       data-above-sidebar="utils_logger&#47;utils_logger-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">logDebug</span> function 
+<h1><span class="kind-top-level-property">recentLogs</span> top-level property 
  
 </h1></div>
 
-    <section class="multi-line-signature">
-        
-<span class="returntype">void</span>
-<span class="name ">logDebug</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="logDebug-param-message"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">message</span></span></li>
-</ol>)
 
         
+  <section id="getter">
+    <section class="multi-line-signature">
+      
+      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+      get
+      <span class="name ">recentLogs</span>
+      
 
     </section>
     
 <section class="desc markdown">
-  <p>Logs a debug-level message (no colour, verbose-only).</p>
-<p>Only printed when <code>_verbose</code> is <code>true</code> (debug builds).</p>
+  <p>Returns recent log lines joined by newlines, oldest first.</p>
 </section>
-
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void logDebug(String message) {
-  if (_verbose) {
-    final line = &#39;${_timestamp()} [DEBUG] $message&#39;;
-    debugPrint(line);
-    _append(line);
-  }
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">String get recentLogs =&gt; _logBuffer.join(&#39;\n&#39;);</code></pre>
 </section>
+
+  </section>
 
 
   </div> <!-- /.main-content -->
@@ -92,7 +88,7 @@
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">pantry_app</a></li>
     <li><a href="../utils_logger/">logger</a></li>
-    <li class="self-crumb">logDebug function</li>
+    <li class="self-crumb">recentLogs property</li>
 </ol>
 
     <h5>logger library</h5>

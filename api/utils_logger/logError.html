@@ -71,7 +71,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void logError(String message) {
+  final line = &#39;${_timestamp()} [ERR]  $message&#39;;
   debugPrint(&#39;${_timestamp()} $_red[ERR]  $_reset$message&#39;);
+  _append(line);
 }</code></pre>
 </section>
 

@@ -76,7 +76,7 @@ Skips if a flush is already in progress.</p>
 
   if (_lastFlushTime != null &amp;&amp;
       DateTime.now().difference(_lastFlushTime!) &lt;
-          const Duration(seconds: 60)) {
+          const Duration(seconds: 5)) {
     return (submitted: 0, failed: 0);
   }
 
@@ -127,8 +127,10 @@ Skips if a flush is already in progress.</p>
           body: body,
           label: label,
           screenshotBytesList: screenshotBytesList,
+          fromFlush: true,
         );
         await _queueDao.delete(dbInstance, id);
+        await Future&lt;void&gt;.delayed(const Duration(milliseconds: 200));
         if (screenshotPathsJson != null) {
           try {
             final paths = (jsonDecode(screenshotPathsJson) as List&lt;dynamic&gt;)
