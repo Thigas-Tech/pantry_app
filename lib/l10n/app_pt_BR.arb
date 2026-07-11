@@ -338,6 +338,10 @@
       "off": {}
     }
   },
+  "couldNotOpenLinkFallback": "URL copiada para a area de transferencia.",
+  "includeLogs": "Incluir registros do app",
+  "includeLogsExplanation": "Avisos e erros recentes desta sessao",
+  "logsPrivacyNote": "Os registros podem conter nomes de produtos e horarios.",
   "couldNotAttachImage": "Não foi possível anexar a imagem",
   "appVersionLabel": "Versao do app",
   "osLabel": "SO",

@@ -1602,6 +1602,30 @@ abstract class AppLocalizations {
   /// **'You can only submit one report per minute and up to 5 per day. Please try again later.'**
   String get feedbackRateLimit;
 
+  /// No description provided for @couldNotOpenLinkFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'URL copied to clipboard.'**
+  String get couldNotOpenLinkFallback;
+
+  /// No description provided for @includeLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Include app logs'**
+  String get includeLogs;
+
+  /// No description provided for @includeLogsExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent warnings and errors from this session'**
+  String get includeLogsExplanation;
+
+  /// No description provided for @logsPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs may contain product names and timestamps.'**
+  String get logsPrivacyNote;
+
   /// No description provided for @price.
   ///
   /// In en, this message translates to:

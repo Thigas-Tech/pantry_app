@@ -812,6 +812,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedbackRateLimit => 'You can only submit one report per minute and up to 5 per day. Please try again later.';
 
   @override
+  String get couldNotOpenLinkFallback => 'URL copied to clipboard.';
+
+  @override
+  String get includeLogs => 'Include app logs';
+
+  @override
+  String get includeLogsExplanation => 'Recent warnings and errors from this session';
+
+  @override
+  String get logsPrivacyNote => 'Logs may contain product names and timestamps.';
+
+  @override
   String get price => 'Price';
 
   @override

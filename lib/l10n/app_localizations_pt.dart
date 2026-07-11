@@ -812,6 +812,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get feedbackRateLimit => 'Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.';
 
   @override
+  String get couldNotOpenLinkFallback => 'URL copiada para a area de transferencia.';
+
+  @override
+  String get includeLogs => 'Incluir registros do app';
+
+  @override
+  String get includeLogsExplanation => 'Avisos e erros recentes desta sessao';
+
+  @override
+  String get logsPrivacyNote => 'Os registros podem conter nomes de produtos e horarios.';
+
+  @override
   String get price => 'Price';
 
   @override
@@ -1651,6 +1663,18 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get osLabel => 'SO';
+
+  @override
+  String get couldNotOpenLinkFallback => 'URL copiada para a area de transferencia.';
+
+  @override
+  String get includeLogs => 'Incluir registros do app';
+
+  @override
+  String get includeLogsExplanation => 'Avisos e erros recentes desta sessao';
+
+  @override
+  String get logsPrivacyNote => 'Os registros podem conter nomes de produtos e horarios.';
 
   @override
   String get navList => 'Lista';

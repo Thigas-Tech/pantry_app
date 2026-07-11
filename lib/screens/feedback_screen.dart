@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -80,6 +81,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   final _formKey = GlobalKey<FormState>();
   IssueType _issueType = IssueType.bug;
   bool _includeDeviceInfo = false;
+  bool _includeLogs = false;
   bool _isSubmitting = false;
   final List<String> _screenshotPaths = [];
   String? _submittedIssueUrl;
@@ -143,6 +145,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               _buildScreenshotSection(l10n),
               const SizedBox(height: 16),
               _buildDeviceInfoToggle(l10n),
+              const SizedBox(height: 8),
+              _buildLogsToggle(l10n),
               const SizedBox(height: 24),
               _buildSubmitButton(l10n),
               if (!isOnline) ...[
@@ -298,6 +302,31 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       value: _includeDeviceInfo,
       onChanged: (value) => setState(() => _includeDeviceInfo = value),
       contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  Widget _buildLogsToggle(AppLocalizations l10n) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SwitchListTile(
+          title: Text(l10n.includeLogs),
+          subtitle: Text(l10n.includeLogsExplanation),
+          value: _includeLogs,
+          onChanged: (v) => setState(() => _includeLogs = v),
+          contentPadding: EdgeInsets.zero,
+        ),
+        if (_includeLogs)
+          Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Text(
+              l10n.logsPrivacyNote,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -498,6 +527,19 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         ..writeln('```');
     }
 
+    if (_includeLogs) {
+      final logs = recentLogs;
+      if (logs.isNotEmpty) {
+        buffer
+          ..writeln()
+          ..writeln()
+          ..writeln('```')
+          ..write(logs)
+          ..writeln()
+          ..writeln('```');
+      }
+    }
+
     return buffer.toString();
   }
 
@@ -505,13 +547,17 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     if (_submittedIssueUrl == null) return;
     final url = Uri.parse(_submittedIssueUrl!);
     final l10n = AppLocalizations.of(context)!;
-    if (await launcher.canLaunchUrl(url) && mounted) {
+    try {
       await launcher.launchUrl(
         url,
         mode: launcher.LaunchMode.externalApplication,
       );
-    } else if (mounted) {
-      SnackbarHelper.showError(context, l10n.couldNotOpenLink);
+    } on Exception {
+      unawaited(
+        Clipboard.setData(ClipboardData(text: _submittedIssueUrl!)),
+      );
+      if (!mounted) return;
+      SnackbarHelper.showInfo(context, l10n.couldNotOpenLinkFallback);
     }
   }
 }

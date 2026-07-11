@@ -51,6 +51,7 @@ class GithubIssueService {
     required String body,
     String? label,
     List<List<int>> screenshotBytesList = const [],
+    bool fromFlush = false,
   }) async {
     if (kIsWeb) {
       throw UnsupportedError('GitHub API submissions are not supported on web');
@@ -63,7 +64,7 @@ class GithubIssueService {
       );
     }
 
-    if (!_canSubmit()) {
+    if (!fromFlush && !_canSubmit()) {
       throw const IssueSubmissionException(
         'Rate limit reached. Try again later.',
       );
@@ -106,7 +107,9 @@ class GithubIssueService {
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final url = data['html_url'] as String;
-      await _recordSubmission(title, body);
+      if (!fromFlush) {
+        await _recordSubmission(title, body);
+      }
       logInfo('Issue created: $url');
       return url;
     }
@@ -161,7 +164,7 @@ class GithubIssueService {
 
     if (_lastFlushTime != null &&
         DateTime.now().difference(_lastFlushTime!) <
-            const Duration(seconds: 60)) {
+            const Duration(seconds: 5)) {
       return (submitted: 0, failed: 0);
     }
 
@@ -212,8 +215,10 @@ class GithubIssueService {
             body: body,
             label: label,
             screenshotBytesList: screenshotBytesList,
+            fromFlush: true,
           );
           await _queueDao.delete(dbInstance, id);
+          await Future<void>.delayed(const Duration(milliseconds: 200));
           if (screenshotPathsJson != null) {
             try {
               final paths = (jsonDecode(screenshotPathsJson) as List<dynamic>)
@@ -370,12 +375,26 @@ class GithubIssueService {
     String description,
     List<List<int>> screenshotBytesList,
   ) async {
+    const maxBody = 200 * 1024;
     final buffer = StringBuffer()..writeln(description);
 
-    for (final bytes in screenshotBytesList) {
+    for (var i = 0; i < screenshotBytesList.length; i++) {
+      final bytes = screenshotBytesList[i];
       if (bytes.isEmpty) continue;
 
-      final webpBytes = await compute(_encodeWebP, Uint8List.fromList(bytes));
+      Uint8List webpBytes;
+      try {
+        webpBytes = await compute(
+          _encodeWebP,
+          Uint8List.fromList(bytes),
+        ).timeout(const Duration(seconds: 15));
+      } on TimeoutException {
+        logWarning('Screenshot ${i + 1} encoding timed out');
+        continue;
+      } on Exception {
+        logWarning('Screenshot ${i + 1} encoding failed');
+        continue;
+      }
       if (webpBytes.isEmpty) continue;
 
       final url = await _uploadToCatbox(webpBytes);
@@ -386,16 +405,17 @@ class GithubIssueService {
       } else {
         logWarning('Screenshot upload failed, using base64 fallback');
         final base64Str = base64Encode(webpBytes);
-        buffer
-          ..writeln()
-          ..writeln('<details>')
-          ..writeln('<summary>Screenshot (WebP base64)</summary>')
-          ..writeln()
-          ..writeln('```')
-          ..writeln(base64Str)
-          ..writeln('```')
-          ..writeln()
-          ..writeln('</details>');
+        final pendingBlock =
+            '\n<details>\n<summary>Screenshot (WebP base64)</summary>\n\n'
+            '```\n$base64Str\n```\n\n</details>\n';
+        if (buffer.length + pendingBlock.length > maxBody) {
+          logWarning(
+            'Skipping screenshot ${i + 1} base64: body would exceed '
+            'size limit',
+          );
+          continue;
+        }
+        buffer.write(pendingBlock);
       }
     }
 
@@ -463,37 +483,47 @@ class GithubIssueService {
   /// Returns `null` if the upload fails. Catbox.moe is a free, anonymous
   /// file host that requires no API key. The uploaded URL is permanent.
   Future<String?> _uploadToCatbox(Uint8List webpBytes) async {
-    try {
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse('https://catbox.moe/user/api.php'),
-      );
-      request.fields['reqType'] = 'fileupload';
-      request.fields['filename'] = 'screenshot.webp';
-      request.files.add(
-        http.MultipartFile.fromBytes(
-          'fileToUpload',
-          webpBytes,
-          filename: 'screenshot.webp',
-        ),
-      );
-
-      final streamedResponse = await _httpClient
-          .send(request)
-          .timeout(const Duration(seconds: 30));
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode == 200 && response.body.startsWith('https://')) {
-        final url = response.body.trim();
-        logInfo('Screenshot uploaded to catbox.moe: $url');
-        return url;
+    for (var attempt = 0; attempt < 2; attempt++) {
+      if (attempt > 0) {
+        await Future<void>.delayed(const Duration(seconds: 2));
       }
-      logWarning('Catbox.moe upload failed: ${response.statusCode}');
-      return null;
-    } on Object catch (e) {
-      logWarning('Catbox.moe upload error: $e');
-      return null;
+      try {
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse('https://catbox.moe/user/api.php'),
+        );
+        request.fields['reqType'] = 'fileupload';
+        request.fields['filename'] = 'screenshot.webp';
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'fileToUpload',
+            webpBytes,
+            filename: 'screenshot.webp',
+          ),
+        );
+
+        final streamedResponse = await _httpClient
+            .send(request)
+            .timeout(const Duration(seconds: 30));
+        final response = await http.Response.fromStream(streamedResponse);
+
+        if (response.statusCode == 200 &&
+            response.body.startsWith('https://')) {
+          final url = response.body.trim();
+          logInfo('Screenshot uploaded to catbox.moe: $url');
+          return url;
+        }
+        logWarning(
+          'Catbox.moe upload failed: ${response.statusCode} '
+          '(attempt ${attempt + 1})',
+        );
+      } on Object catch (e) {
+        logWarning(
+          'Catbox.moe upload error: $e (attempt ${attempt + 1})',
+        );
+      }
     }
+    return null;
   }
 
   Future<void> _cleanupOldHashKeys(SharedPreferences prefs, int now) async {
