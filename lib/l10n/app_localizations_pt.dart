@@ -1071,6 +1071,24 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get testNotificationFailed => 'Failed to send test notification.';
+
+  @override
+  String selectedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count itens selecionados',
+      one: '1 item selecionado',
+      zero: 'Nenhum item selecionado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get moveButton => 'Mover';
+
+  @override
+  String get noOtherInventories => 'Nenhuma outra despensa disponível.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2125,4 +2143,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get scanFailed => 'Falha ao escanear codigo de barras.';
+
+  @override
+  String selectedCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count itens selecionados',
+      one: '1 item selecionado',
+      zero: 'Nenhum item selecionado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get moveButton => 'Mover';
+
+  @override
+  String get noOtherInventories => 'Nenhuma outra despensa disponível.';
 }
