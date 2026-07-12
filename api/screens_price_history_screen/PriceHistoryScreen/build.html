@@ -113,9 +113,16 @@ Widget build(BuildContext context, WidgetRef ref) {
   final l10n = AppLocalizations.of(context)!;
   final historyAsync = ref.watch(priceHistoryProvider(barcode));
 
+  final priceTrackingEnabled = ref.watch(
+    settingsProvider.select((s) =&gt; s.priceTrackingEnabled),
+  );
+
   return Scaffold(
     appBar: AppBar(
       title: Text(&#39;${l10n.priceHistory} — $productName&#39;),
+      actions: [
+        if (priceTrackingEnabled) const PriceVisibilityToggle(),
+      ],
     ),
     body: historyAsync.when(
       data: (prices) {

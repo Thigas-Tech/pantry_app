@@ -57,6 +57,8 @@
   <p>A bottom sheet for entering or editing a price observation.</p>
 <p>Opens via <a href="https://api.flutter.dev/flutter/material/showModalBottomSheet.html">showModalBottomSheet</a>. Returns a <a href="../models_price/Price-class.html">Price</a> object with the
 entered data, or <code>null</code> if the user cancels.</p>
+<p>The amount field uses a locale-aware decimal separator
+(<a href="../services_currency_service/decimalSeparatorFor.html">decimalSeparatorFor</a>).</p>
 <p>Example:</p>
 <pre class="language-dart"><code class="language-dart">final price = await PriceEntrySheet.show(context, barcode: barcode);
 </code></pre>

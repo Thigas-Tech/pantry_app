@@ -95,6 +95,11 @@
     );
     logInfo(&#39;Removed $deletedItems old inventory items&#39;);
 
+    await db.rawDelete(&#39;&#39;&#39;
+      DELETE FROM prices
+      WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
+    &#39;&#39;&#39;);
+
     final deletedProducts = await db.rawDelete(&#39;&#39;&#39;
       DELETE FROM products
       WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
