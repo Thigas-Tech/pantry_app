@@ -12,7 +12,6 @@ import 'package:pantry_app/screens/coming_soon_screen.dart';
 import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
-import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 
 /// Displays aggregated statistics for the active pantry.
 ///
@@ -45,17 +44,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     final statsAsync = ref.watch(statsProvider);
     final previousStats = statsAsync.asData?.value;
 
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.pantryStats),
-        actions: [
-          if (priceTrackingEnabled) const PriceVisibilityToggle(),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.pantryStats)),
       body: previousStats != null
           ? _buildBody(context, l10n, previousStats, ref)
           : statsAsync.when(
@@ -143,7 +133,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               );
             case 6:
               return RepaintBoundary(
-                child: _PricingSection(l10n: l10n, stats: stats),
+                child: _buildPriceSection(context, l10n, stats),
               );
             case 7:
               return RepaintBoundary(
@@ -166,29 +156,40 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     AppLocalizations l10n,
     PantryStats stats,
   ) {
-    final cards = [
-      _SummaryCard(
-        label: l10n.totalProducts,
-        value: stats.totalProducts.toString(),
-        icon: Icons.category,
-      ),
-      _SummaryCard(
-        label: l10n.inventoryItems,
-        value: stats.totalItems.toString(),
-        icon: Icons.inventory_2,
-      ),
-    ];
-
     return SizedBox(
-      height: 100,
-      child: ListView.separated(
+      height: 120,
+      child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: cards.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemCount: 4,
         itemBuilder: (context, index) {
+          final cards = [
+            _SummaryCard(
+              label: l10n.totalProducts,
+              value: stats.totalProducts.toString(),
+              icon: Icons.inventory_2,
+            ),
+            _SummaryCard(
+              label: l10n.inventoryItems,
+              value: stats.totalItems.toString(),
+              icon: Icons.shopping_basket,
+            ),
+            _SummaryCard(
+              label: l10n.addedThisWeekLabel,
+              value: stats.addedThisWeek.toString(),
+              icon: Icons.calendar_today,
+            ),
+            _SummaryCard(
+              label: l10n.addedThisMonthLabel,
+              value: stats.addedThisMonth.toString(),
+              icon: Icons.date_range,
+            ),
+          ];
           return SizedBox(
-            width: 160,
-            child: cards[index],
+            width: 140,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: cards[index],
+            ),
           );
         },
       ),
@@ -202,10 +203,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   ) {
     final total =
         stats.expiredCount + stats.expiringSoonCount + stats.goodCount;
+
     if (total == 0) {
       return const SizedBox.shrink();
     }
 
+    final theme = Theme.of(context);
     final sections = [
       PieChartSectionData(
         value: stats.expiredCount.toDouble(),
@@ -238,60 +241,89 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         _buildSectionTitle(context, l10n.expired),
         const SizedBox(height: 8),
         SizedBox(
-          height: 160,
-          child: Row(
+          height: 180,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Expanded(
-                child: PieChart(
-                  PieChartData(
-                    sections: sections,
-                    centerSpaceRadius: 32,
-                    sectionsSpace: 2,
-                    pieTouchData: PieTouchData(
-                      touchCallback: (event, response) {
-                        if (event is! FlTapUpEvent) return;
-                        if (!mounted) return;
-                        setState(
-                          () => _touchedExpiryIndex =
-                              response?.touchedSection?.touchedSectionIndex ??
-                              -1,
-                        );
-                      },
-                    ),
+              PieChart(
+                PieChartData(
+                  sections: sections,
+                  centerSpaceRadius: 36,
+                  sectionsSpace: 2,
+                  pieTouchData: PieTouchData(
+                    touchCallback: (event, response) {
+                      if (event is! FlTapUpEvent) return;
+                      if (!mounted) return;
+                      setState(
+                        () => _touchedExpiryIndex =
+                            response?.touchedSection?.touchedSectionIndex ?? -1,
+                      );
+                    },
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _legendItem(Colors.red.shade400, l10n.expired),
-                  const SizedBox(height: 4),
-                  _legendItem(Colors.orange.shade400, l10n.expiringSoon),
-                  const SizedBox(height: 4),
-                  _legendItem(Colors.green.shade400, l10n.good),
-                ],
+              Text(
+                '$total',
+                style: theme.textTheme.headlineMedium,
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            for (var i = 0; i < 3; i++) ...[
+              GestureDetector(
+                onTap: () => setState(
+                  () => _touchedExpiryIndex = _touchedExpiryIndex == i ? -1 : i,
+                ),
+                child: _legendDot(
+                  [
+                    Colors.red.shade400,
+                    Colors.orange.shade400,
+                    Colors.green.shade400,
+                  ][i],
+                  [l10n.expired, l10n.expiringSoon, l10n.good][i],
+                  selected: _touchedExpiryIndex == i,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _legendDot(Color color, String label, {bool selected = false}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: selected ? 14 : 10,
+          height: selected ? 14 : 10,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ],
     );
   }
 
-  Widget _legendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 8),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
-      ],
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, bottom: 12),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
     );
   }
 
@@ -483,32 +515,58 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           var i = 0;
           i < stats.categoriesTop.length && i < colors.length;
           i++
-        )
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: colors[i],
-                    shape: BoxShape.circle,
+        ) ...[
+          GestureDetector(
+            onTap: () => setState(
+              () => _touchedCategoryIndex = _touchedCategoryIndex == i ? -1 : i,
+            ),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: _touchedCategoryIndex == i
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : null,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: colors[i],
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${stats.categoriesTop[i].category} '
-                    '(${stats.categoriesTop[i].count})',
-                    style: theme.textTheme.bodySmall,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _truncatedLabel(stats.categoriesTop[i].category),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: _touchedCategoryIndex == i
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  Text(
+                    '${stats.categoriesTop[i].count}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
             ),
           ),
+        ],
       ],
     );
+  }
+
+  String _truncatedLabel(String label) {
+    if (label.length <= 25) return label;
+    return '${label.substring(0, 25)}\u2026';
   }
 
   Widget _buildLocationChart(BuildContext context, PantryStats stats) {
@@ -567,11 +625,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 ),
                 const SizedBox(width: 8),
                 SizedBox(
-                  width: 32,
+                  width: 30,
                   child: Text(
                     '${entry.value}',
-                    style: theme.textTheme.bodySmall,
                     textAlign: TextAlign.right,
+                    style: theme.textTheme.bodyMedium,
                   ),
                 ),
               ],
@@ -653,43 +711,17 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       ],
     );
   }
-}
 
-/// A generic section title rendered in the stats screen.
-Widget _buildSectionTitle(BuildContext context, String title) {
-  return Padding(
-    padding: const EdgeInsets.only(top: 20, bottom: 8),
-    child: Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium,
-    ),
-  );
-}
-
-/// The price-tracking section on the stats screen.
-///
-/// Extracted as a standalone [ConsumerWidget] so its [WidgetRef] is scoped
-/// independently from the parent [_StatsScreenState]. When pricesHidden
-/// changes via the eye toggle, only this widget rebuilds — the parent
-/// [ListView] scroll position is preserved.
-class _PricingSection extends ConsumerWidget {
-  const _PricingSection({
-    required this.l10n,
-    required this.stats,
-  });
-
-  final AppLocalizations l10n;
-  final PantryStats stats;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
-    if (!priceTrackingEnabled) return const SizedBox.shrink();
+  Widget _buildPriceSection(
+    BuildContext context,
+    AppLocalizations l10n,
+    PantryStats stats,
+  ) {
+    final settings = ref.watch(settingsProvider);
+    if (!settings.priceTrackingEnabled) return const SizedBox.shrink();
 
     final repo = ref.read(priceRepositoryProvider);
-    final baseCurrency = ref.read(settingsProvider).baseCurrency;
+    final baseCurrency = settings.baseCurrency;
     final totalFormatted = repo.formatPrice(stats.totalValue, baseCurrency);
     final avgFormatted = repo.formatPrice(stats.averagePrice, baseCurrency);
 
@@ -788,17 +820,16 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.all(8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 2),
+            Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 4),
             Text(
               value,
               style: Theme.of(context).textTheme.titleLarge,
-              maxLines: 1,
             ),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
           ],

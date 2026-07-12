@@ -490,11 +490,6 @@ class DatabaseHelper {
       );
       logInfo('Removed $deletedItems old inventory items');
 
-      await db.rawDelete('''
-        DELETE FROM prices
-        WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
-      ''');
-
       final deletedProducts = await db.rawDelete('''
         DELETE FROM products
         WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)

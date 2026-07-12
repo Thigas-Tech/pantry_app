@@ -22,7 +22,6 @@ import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
-import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 
 /// The main pantry inventory screen.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -257,12 +256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     super.build(context);
     final l10n = AppLocalizations.of(context)!;
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
-    final expiringSoonDays = ref.watch(
-      settingsProvider.select((s) => s.expiringSoonDays),
-    );
+    final settings = ref.watch(settingsProvider);
 
     final inventories = ref.watch(inventoryListProvider);
 
@@ -292,7 +286,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ],
           ] else ...[
-            if (priceTrackingEnabled) const PriceVisibilityToggle(),
             if (inventories.asData?.value != null) ...[
               InventorySwitcherCard(
                 name:
@@ -343,7 +336,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 return _InventoryList(
                   items: items,
                   onScan: () => _scanBarcode(context, ref),
-                  expiringSoonDays: expiringSoonDays,
+                  expiringSoonDays: settings.expiringSoonDays,
                   selectionMode: _selectionMode,
                   selectedIds: _selectedIds,
                   searchQuery: _searchQuery,

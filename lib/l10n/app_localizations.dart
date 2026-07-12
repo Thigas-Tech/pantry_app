@@ -1710,12 +1710,6 @@ abstract class AppLocalizations {
   /// **'Average item price'**
   String get averagePrice;
 
-  /// No description provided for @showPrices.
-  ///
-  /// In en, this message translates to:
-  /// **'Show prices'**
-  String get showPrices;
-
   /// No description provided for @hidePrices.
   ///
   /// In en, this message translates to:
@@ -2063,36 +2057,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shopping list'**
   String get addToShoppingListTooltip;
-
-  /// No description provided for @addToPantryAfterPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to your pantry?'**
-  String get addToPantryAfterPrice;
-
-  /// No description provided for @addToPantryAfterPriceDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Record the amount you bought to track it in your inventory.'**
-  String get addToPantryAfterPriceDesc;
-
-  /// No description provided for @howManyBought.
-  ///
-  /// In en, this message translates to:
-  /// **'How many did you buy?'**
-  String get howManyBought;
-
-  /// No description provided for @choosePantry.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a pantry'**
-  String get choosePantry;
-
-  /// No description provided for @addToPantrySkipped.
-  ///
-  /// In en, this message translates to:
-  /// **'Price saved. Add from product page to track inventory.'**
-  String get addToPantrySkipped;
 
   /// No description provided for @invalidPriceAmount.
   ///

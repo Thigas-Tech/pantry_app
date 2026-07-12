@@ -866,9 +866,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get averagePrice => 'Average item price';
 
   @override
-  String get showPrices => 'Show prices';
-
-  @override
   String get hidePrices => 'Hide prices for privacy';
 
   @override
@@ -1047,21 +1044,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addToShoppingListTooltip => 'Shopping list';
-
-  @override
-  String get addToPantryAfterPrice => 'Add to your pantry?';
-
-  @override
-  String get addToPantryAfterPriceDesc => 'Record the amount you bought to track it in your inventory.';
-
-  @override
-  String get howManyBought => 'How many did you buy?';
-
-  @override
-  String get choosePantry => 'Choose a pantry';
-
-  @override
-  String get addToPantrySkipped => 'Price saved. Add from product page to track inventory.';
 
   @override
   String get invalidPriceAmount => 'Enter a valid price amount';
