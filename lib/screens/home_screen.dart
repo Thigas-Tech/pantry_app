@@ -257,7 +257,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     super.build(context);
     final l10n = AppLocalizations.of(context)!;
     final inventoryAsync = ref.watch(inventoryWithProductProvider);
-    final settings = ref.watch(settingsProvider);
+    final priceTrackingEnabled = ref.watch(
+      settingsProvider.select((s) => s.priceTrackingEnabled),
+    );
+    final expiringSoonDays = ref.watch(
+      settingsProvider.select((s) => s.expiringSoonDays),
+    );
 
     final inventories = ref.watch(inventoryListProvider);
 
@@ -287,7 +292,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ],
           ] else ...[
-            if (settings.priceTrackingEnabled) const PriceVisibilityToggle(),
+            if (priceTrackingEnabled) const PriceVisibilityToggle(),
             if (inventories.asData?.value != null) ...[
               InventorySwitcherCard(
                 name:
@@ -338,7 +343,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 return _InventoryList(
                   items: items,
                   onScan: () => _scanBarcode(context, ref),
-                  expiringSoonDays: settings.expiringSoonDays,
+                  expiringSoonDays: expiringSoonDays,
                   selectionMode: _selectionMode,
                   selectedIds: _selectedIds,
                   searchQuery: _searchQuery,

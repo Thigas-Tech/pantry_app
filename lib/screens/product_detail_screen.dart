@@ -96,13 +96,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       inventoryId: activeId,
     );
 
-    final settings = ref.watch(settingsProvider);
+    final priceTrackingEnabled = ref.watch(
+      settingsProvider.select((s) => s.priceTrackingEnabled),
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product.name),
         actions: [
-          if (settings.priceTrackingEnabled) const PriceVisibilityToggle(),
+          if (priceTrackingEnabled) const PriceVisibilityToggle(),
           IconButton(
             icon: const Icon(Icons.open_in_browser),
             tooltip: l10n.viewOnOpenFoodFacts,

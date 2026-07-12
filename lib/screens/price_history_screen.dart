@@ -35,13 +35,15 @@ class PriceHistoryScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final historyAsync = ref.watch(priceHistoryProvider(barcode));
 
-    final settings = ref.watch(settingsProvider);
+    final priceTrackingEnabled = ref.watch(
+      settingsProvider.select((s) => s.priceTrackingEnabled),
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: Text('${l10n.priceHistory} — $productName'),
         actions: [
-          if (settings.priceTrackingEnabled) const PriceVisibilityToggle(),
+          if (priceTrackingEnabled) const PriceVisibilityToggle(),
         ],
       ),
       body: historyAsync.when(
