@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// A bottom sheet for entering or editing a price observation.
 ///
 /// Opens via [showModalBottomSheet]. Returns a [Price] object with the
 /// entered data, or `null` if the user cancels.
+///
+/// The amount field uses a locale-aware decimal separator
+/// ([decimalSeparatorFor]).
 ///
 /// Example:
 /// ```dart
@@ -55,6 +60,7 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
   String _currency = 'USD';
   DateTime _date = DateTime.now();
   bool _isDiscounted = false;
+  late String _decimalSep;
 
   bool get _isEditing => widget.existingPrice != null;
 
@@ -64,15 +70,25 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     final existing = widget.existingPrice;
     final base = ref.read(settingsProvider).baseCurrency;
     _currency = existing?.currency ?? base;
+    _decimalSep = decimalSeparatorFor(_currency);
     _date = existing?.datePurchased != null
         ? DateTime.fromMillisecondsSinceEpoch(existing!.datePurchased!)
         : DateTime.now();
     _isDiscounted = existing?.isDiscounted ?? false;
-    _amountCtrl = TextEditingController(
-      text: existing != null ? existing.price.toStringAsFixed(2) : '',
-    );
+    final initialText = existing != null
+        ? _formatForDisplay(existing.price)
+        : '0$_decimalSep'
+              '00';
+    _amountCtrl = TextEditingController(text: initialText);
     _storeCtrl = TextEditingController(text: existing?.store ?? '');
     _notesCtrl = TextEditingController(text: existing?.notes ?? '');
+  }
+
+  /// Formats [value] with exactly 2 decimal places using the locale separator.
+  String _formatForDisplay(double value) {
+    final fixed = value.toStringAsFixed(2);
+    if (_decimalSep == ',') return fixed.replaceAll('.', ',');
+    return fixed;
   }
 
   @override
@@ -111,6 +127,12 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                inputFormatters: [
+                  if (!_isEditing)
+                    _PriceCalculatorFormatter(_decimalSep)
+                  else
+                    _EditPriceFormatter(_decimalSep),
+                ],
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return null;
                   final parsed = double.tryParse(
@@ -212,5 +234,75 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     );
 
     Navigator.of(context).pop(price);
+  }
+}
+
+/// A [TextInputFormatter] that implements a POS-style price calculator.
+///
+/// Always displays the amount with 2 decimal places. Each typed digit shifts
+/// the value left (cents), and backspace shifts right.
+///
+/// Example with comma separator:
+///   Initial: `0,00`
+///   Type `1` => `0,01`
+///   Type `5` => `0,15`
+///   Type `0` => `1,50`
+///   Backspace => `0,15`
+class _PriceCalculatorFormatter extends TextInputFormatter {
+  _PriceCalculatorFormatter(this._sep);
+
+  final String _sep;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Extract all digits.
+    final digits = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.isEmpty) {
+      return TextEditingValue(
+        text:
+            '0$_sep'
+            '00',
+        selection: const TextSelection.collapsed(offset: 4),
+      );
+    }
+    // Pad to at least 3 digits (1 integer + 2 fraction).
+    final padded = digits.padLeft(3, '0');
+    final intPart = padded.substring(0, padded.length - 2);
+    final fracPart = padded.substring(padded.length - 2);
+    final formatted = '$intPart$_sep$fracPart';
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+/// A [TextInputFormatter] for editing an existing price.
+///
+/// Allows digits and the locale separator. Prevents multiple separators.
+class _EditPriceFormatter extends TextInputFormatter {
+  _EditPriceFormatter(this._sep);
+
+  final String _sep;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Allow only digits + separator character.
+    final clean = newValue.text.replaceAll(RegExp('[^\\d$_sep]'), '');
+    // Prevent multiple separators.
+    if ('.,'.contains(_sep)) {
+      final count = _sep.allMatches(clean).length;
+      if (count > 1) return oldValue;
+    }
+    return TextEditingValue(
+      text: clean,
+      selection: TextSelection.collapsed(offset: clean.length),
+    );
   }
 }

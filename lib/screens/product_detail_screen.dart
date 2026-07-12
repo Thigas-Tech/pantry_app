@@ -29,6 +29,8 @@ import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/nutrition_table.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
+import 'package:pantry_app/widgets/price_visibility_toggle.dart';
+import 'package:pantry_app/widgets/quantity_and_pantry_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Displays full product details and the associated inventory entries
@@ -94,10 +96,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       inventoryId: activeId,
     );
 
+    final priceTrackingEnabled = ref.watch(
+      settingsProvider.select((s) => s.priceTrackingEnabled),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.product.name),
         actions: [
+          if (priceTrackingEnabled) const PriceVisibilityToggle(),
           IconButton(
             icon: const Icon(Icons.open_in_browser),
             tooltip: l10n.viewOnOpenFoodFacts,
@@ -457,11 +464,55 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       try {
         await ref.read(productRepositoryProvider).cacheProduct(widget.product);
         await ref.read(priceRepositoryProvider).addPrice(price);
-        if (context.mounted) {
+        if (!context.mounted) return;
+        ref
+          ..invalidate(latestPriceProvider(widget.product.barcode))
+          ..invalidate(priceHistoryProvider(widget.product.barcode));
+
+        if (price.datePurchased != null &&
+            price.store != null &&
+            price.store!.isNotEmpty) {
+          final repo = ref.read(productRepositoryProvider);
+          final activeId = ref.read(activeInventoryProvider);
+          final existingItems = await repo.getInventoryForBarcode(
+            widget.product.barcode,
+            inventoryId: activeId,
+          );
+          if (context.mounted && existingItems.isEmpty) {
+            final result = await QuantityAndPantrySheet.show(context);
+            if (result != null && context.mounted) {
+              final item = InventoryItem(
+                barcode: widget.product.barcode,
+                inventoryId: result.inventoryId,
+                quantity: result.quantity,
+              );
+              await repo.cacheProduct(widget.product);
+              await repo.addInventoryItem(item);
+              final notificationService = ref.read(
+                notificationServiceProvider,
+              );
+              await notificationService.scheduleExpiryReminders(
+                item,
+                expiringSoonTitle: l10n.expiringSoon,
+                buildExpiringSoonBody: l10n.expiresTomorrow,
+                expiringTodayTitle: l10n.expiringToday,
+                buildExpiringTodayBody: l10n.expiresToday,
+                channelName: l10n.expiryChannelName,
+                channelDescription: l10n.expiryChannelDescription,
+              );
+              await _rescheduleInactivityReminder();
+              ref.invalidate(inventoryWithProductProvider);
+              if (context.mounted) {
+                SnackbarHelper.showInfo(context, l10n.itemAdded);
+              }
+            } else if (context.mounted) {
+              SnackbarHelper.showInfo(context, l10n.addToPantrySkipped);
+            }
+          } else if (context.mounted) {
+            SnackbarHelper.showInfo(context, l10n.priceAdded);
+          }
+        } else if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.priceAdded);
-          ref
-            ..invalidate(latestPriceProvider(widget.product.barcode))
-            ..invalidate(priceHistoryProvider(widget.product.barcode));
         }
       } on Exception catch (e) {
         logError('Failed to add price: $e');

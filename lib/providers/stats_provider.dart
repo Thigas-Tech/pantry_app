@@ -20,7 +20,12 @@ import 'package:pantry_app/providers/settings_provider.dart';
 final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
   final activeId = ref.watch(activeInventoryProvider);
   final db = ref.watch(databaseProvider);
-  final settings = ref.watch(settingsProvider);
+  final expiringSoonDays = ref.watch(
+    settingsProvider.select((s) => s.expiringSoonDays),
+  );
+  final baseCurrency = ref.watch(
+    settingsProvider.select((s) => s.baseCurrency),
+  );
   final priceRepo = ref.read(priceRepositoryProvider);
   final database = await db.database;
 
@@ -36,7 +41,7 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     db.inventoryDao.expiryDistribution(
       database,
       inventoryId: activeId,
-      expiringSoonDays: settings.expiringSoonDays,
+      expiringSoonDays: expiringSoonDays,
     ),
     db.inventoryDao.weeklyAdditions(database, inventoryId: activeId),
     db.productDao.productsWithCategories(database),
@@ -91,13 +96,13 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     totalValue:
         await priceRepo.totalInventoryValue(
           activeId,
-          baseCurrency: settings.baseCurrency,
+          baseCurrency: baseCurrency,
         ) ??
         0,
     averagePrice:
         await priceRepo.averageItemPrice(
           activeId,
-          baseCurrency: settings.baseCurrency,
+          baseCurrency: baseCurrency,
         ) ??
         0,
     pricedItemCount: await priceRepo.pricedItemCount(activeId),

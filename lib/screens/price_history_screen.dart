@@ -4,9 +4,12 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
+import 'package:pantry_app/widgets/price_visibility_toggle.dart'
+    show PriceVisibilityToggle;
 
 /// Displays the price history for a single product.
 ///
@@ -32,9 +35,16 @@ class PriceHistoryScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final historyAsync = ref.watch(priceHistoryProvider(barcode));
 
+    final priceTrackingEnabled = ref.watch(
+      settingsProvider.select((s) => s.priceTrackingEnabled),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text('${l10n.priceHistory} — $productName'),
+        actions: [
+          if (priceTrackingEnabled) const PriceVisibilityToggle(),
+        ],
       ),
       body: historyAsync.when(
         data: (prices) {

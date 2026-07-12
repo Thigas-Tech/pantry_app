@@ -239,3 +239,14 @@ class CurrencyService {
     return {};
   }
 }
+
+/// Returns the decimal separator character for [currencyCode].
+///
+/// Currencies using comma as decimal separator: BRL, ARS, CLP, COP.
+/// All others default to dot.
+String decimalSeparatorFor(String currencyCode) {
+  return switch (currencyCode.toUpperCase()) {
+    'BRL' || 'ARS' || 'CLP' || 'COP' => ',',
+    _ => '.',
+  };
+}
