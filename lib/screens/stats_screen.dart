@@ -12,6 +12,7 @@ import 'package:pantry_app/screens/coming_soon_screen.dart';
 import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
+import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 
 /// Displays aggregated statistics for the active pantry.
 ///
@@ -44,8 +45,15 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     final statsAsync = ref.watch(statsProvider);
     final previousStats = statsAsync.asData?.value;
 
+    final settings = ref.watch(settingsProvider);
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.pantryStats)),
+      appBar: AppBar(
+        title: Text(l10n.pantryStats),
+        actions: [
+          if (settings.priceTrackingEnabled) const PriceVisibilityToggle(),
+        ],
+      ),
       body: previousStats != null
           ? _buildBody(context, l10n, previousStats, ref)
           : statsAsync.when(

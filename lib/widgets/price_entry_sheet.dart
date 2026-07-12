@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// A bottom sheet for entering or editing a price observation.
 ///
 /// Opens via [showModalBottomSheet]. Returns a [Price] object with the
 /// entered data, or `null` if the user cancels.
+///
+/// The amount field uses a locale-aware decimal separator
+/// ([decimalSeparatorFor]).
 ///
 /// Example:
 /// ```dart
@@ -55,6 +60,7 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
   String _currency = 'USD';
   DateTime _date = DateTime.now();
   bool _isDiscounted = false;
+  late String _decimalSep;
 
   bool get _isEditing => widget.existingPrice != null;
 
@@ -64,15 +70,24 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     final existing = widget.existingPrice;
     final base = ref.read(settingsProvider).baseCurrency;
     _currency = existing?.currency ?? base;
+    _decimalSep = decimalSeparatorFor(_currency);
     _date = existing?.datePurchased != null
         ? DateTime.fromMillisecondsSinceEpoch(existing!.datePurchased!)
         : DateTime.now();
     _isDiscounted = existing?.isDiscounted ?? false;
-    _amountCtrl = TextEditingController(
-      text: existing != null ? existing.price.toStringAsFixed(2) : '',
-    );
+    final initialText = existing != null
+        ? _formatForDisplay(existing.price)
+        : '';
+    _amountCtrl = TextEditingController(text: initialText);
     _storeCtrl = TextEditingController(text: existing?.store ?? '');
     _notesCtrl = TextEditingController(text: existing?.notes ?? '');
+  }
+
+  /// Formats [value] with exactly 2 decimal places using the locale separator.
+  String _formatForDisplay(double value) {
+    final fixed = value.toStringAsFixed(2);
+    if (_decimalSep == ',') return fixed.replaceAll('.', ',');
+    return fixed;
   }
 
   @override
@@ -111,6 +126,15 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                    RegExp(
+                      r'[\d'
+                      '$_decimalSep]',
+                    ),
+                  ),
+                  _DecimalSeparatorFilter(_decimalSep),
+                ],
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return null;
                   final parsed = double.tryParse(
@@ -212,5 +236,24 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     );
 
     Navigator.of(context).pop(price);
+  }
+}
+
+/// An [TextInputFormatter] that prevents more than one decimal separator.
+class _DecimalSeparatorFilter extends TextInputFormatter {
+  _DecimalSeparatorFilter(this._separator);
+
+  final String _separator;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if ('.,'.contains(_separator)) {
+      final count = _separator.allMatches(newValue.text).length;
+      if (count > 1) return oldValue;
+    }
+    return newValue;
   }
 }

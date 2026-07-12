@@ -22,6 +22,7 @@ import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
+import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 
 /// The main pantry inventory screen.
 class HomeScreen extends ConsumerStatefulWidget {
@@ -286,6 +287,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ],
           ] else ...[
+            if (settings.priceTrackingEnabled) const PriceVisibilityToggle(),
             if (inventories.asData?.value != null) ...[
               InventorySwitcherCard(
                 name:
