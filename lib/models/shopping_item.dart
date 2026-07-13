@@ -10,6 +10,12 @@ part 'shopping_item.freezed.dart';
 /// they mark it as [isPurchased] and may optionally move it to a pantry
 /// ([inventoryId]).
 ///
+/// ## Price tracking
+///
+/// [priceAmount], [priceCurrency], [priceStore], and [pricePhotoPath]
+/// store price data entered while shopping. When the item is moved to
+/// inventory, the price is saved to the canonical price table.
+///
 /// ## NFC-e integration
 ///
 /// When the receipt scanning feature parses an NFC-e QR code, items in
@@ -20,6 +26,7 @@ part 'shopping_item.freezed.dart';
 /// See also:
 /// - ShoppingListDao — data-access layer for this model.
 /// - Product — the static product catalogue this item may reference.
+/// - Price model — the canonical price-history model.
 @freezed
 abstract class ShoppingItem with _$ShoppingItem {
   /// Creates a [ShoppingItem].
@@ -55,5 +62,17 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// Epoch timestamp (milliseconds since Unix epoch) of when the item
     /// was marked as purchased.
     int? datePurchased,
+
+    /// Price entered while shopping, or `null` if no price was set.
+    double? priceAmount,
+
+    /// ISO 4217 currency code for [priceAmount] (e.g. `'USD'`, `'BRL'`).
+    String? priceCurrency,
+
+    /// Store where the item was or will be purchased.
+    String? priceStore,
+
+    /// Local file path to a photo of the price tag, or `null` if none.
+    String? pricePhotoPath,
   }) = _ShoppingItem;
 }

@@ -347,6 +347,44 @@
   "addShoppingItem": "Adicionar item",
   "addToShoppingList": "Adicionar a lista de compras",
   "addToShoppingListTooltip": "Lista de compras",
+  "productSearchHint": "Buscar produtos por nome",
+  "addCustomItem": "Adicionar item personalizado",
+  "noProductsFound": "Nenhum produto encontrado. Tente um item personalizado.",
+  "backToSearch": "Voltar a busca",
+  "addPrice": "Preco salvo",
+  "removePrice": "Preco removido",
+  "shoppingTotal": "Total: {total}",
+  "@shoppingTotal": {
+    "placeholders": {
+      "total": {"type": "String"}
+    }
+  },
+  "shoppingMixedCurrency": "{total}",
+  "@shoppingMixedCurrency": {
+    "placeholders": {
+      "total": {"type": "String"}
+    }
+  },
+  "addToInventoryFromList": "Adicionar a despensa",
+  "addToInventoryConfirm": "Adicionar {count} itens a sua despensa? Os precos serao salvos.{skipped, plural, =0{} =1{ 1 item sem codigo de barras ficara na lista.} other{ {skipped} itens sem codigo de barras ficarao na lista.}}",
+  "@addToInventoryConfirm": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "skipped": {"type": "int"}
+    }
+  },
+  "itemsMovedToInventory": "{count, plural, =1{1 item adicionado a despensa} other{{count} itens adicionados a despensa}}",
+  "@itemsMovedToInventory": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "itemsSkippedNoBarcode": "{count, plural, =1{1 item restante — adicione um codigo de barras ou crie um produto} other{{count} itens restantes — adicione um codigo de barras ou crie um produto}}",
+  "@itemsSkippedNoBarcode": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "amoledDarkMode": "Modo escuro AMOLED",
   "amoledDarkModeDisabled": "Modo escuro AMOLED desativado.",
   "amoledDarkModeEnabled": "Modo escuro AMOLED ativado.",

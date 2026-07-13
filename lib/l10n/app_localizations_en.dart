@@ -834,7 +834,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prices => 'Prices';
 
   @override
-  String get addPrice => 'Add price';
+  String get addPrice => 'Price saved';
 
   @override
   String get editPrice => 'Edit price';
@@ -1042,6 +1042,68 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addToShoppingListTooltip => 'Shopping list';
+
+  @override
+  String get productSearchHint => 'Search products by name';
+
+  @override
+  String get addCustomItem => 'Add custom item';
+
+  @override
+  String get noProductsFound => 'No products found. Try a custom item.';
+
+  @override
+  String get backToSearch => 'Back to search';
+
+  @override
+  String get removePrice => 'Price removed';
+
+  @override
+  String shoppingTotal(String total) {
+    return 'Total: $total';
+  }
+
+  @override
+  String shoppingMixedCurrency(String total) {
+    return '$total';
+  }
+
+  @override
+  String get addToInventoryFromList => 'Add to pantry';
+
+  @override
+  String addToInventoryConfirm(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: ' $skipped items without a barcode will stay in your list.',
+      one: ' 1 item without a barcode will stay in your list.',
+      zero: '',
+    );
+    return 'Add $count items to your pantry? Prices will be saved.$_temp0';
+  }
+
+  @override
+  String itemsMovedToInventory(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items added to pantry',
+      one: '1 item added to pantry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String itemsSkippedNoBarcode(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items left — add a barcode or create a product to move them',
+      one: '1 item left — add a barcode or create a product to move it',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get addToPantryAfterPrice => 'Add to your pantry?';

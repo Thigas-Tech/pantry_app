@@ -1641,7 +1641,7 @@ abstract class AppLocalizations {
   /// No description provided for @addPrice.
   ///
   /// In en, this message translates to:
-  /// **'Add price'**
+  /// **'Price saved'**
   String get addPrice;
 
   /// No description provided for @editPrice.
@@ -2045,6 +2045,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shopping list'**
   String get addToShoppingListTooltip;
+
+  /// No description provided for @productSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search products by name'**
+  String get productSearchHint;
+
+  /// No description provided for @addCustomItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add custom item'**
+  String get addCustomItem;
+
+  /// No description provided for @noProductsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No products found. Try a custom item.'**
+  String get noProductsFound;
+
+  /// No description provided for @backToSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to search'**
+  String get backToSearch;
+
+  /// No description provided for @removePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price removed'**
+  String get removePrice;
+
+  /// No description provided for @shoppingTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {total}'**
+  String shoppingTotal(String total);
+
+  /// No description provided for @shoppingMixedCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'{total}'**
+  String shoppingMixedCurrency(String total);
+
+  /// No description provided for @addToInventoryFromList.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to pantry'**
+  String get addToInventoryFromList;
+
+  /// No description provided for @addToInventoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {count} items to your pantry? Prices will be saved.{skipped, plural, =0{} =1{ 1 item without a barcode will stay in your list.} other{ {skipped} items without a barcode will stay in your list.}}'**
+  String addToInventoryConfirm(int count, int skipped);
+
+  /// No description provided for @itemsMovedToInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item added to pantry} other{{count} items added to pantry}}'**
+  String itemsMovedToInventory(int count);
+
+  /// No description provided for @itemsSkippedNoBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item left — add a barcode or create a product to move it} other{{count} items left — add a barcode or create a product to move them}}'**
+  String itemsSkippedNoBarcode(int count);
 
   /// No description provided for @addToPantryAfterPrice.
   ///

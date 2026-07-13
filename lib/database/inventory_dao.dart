@@ -53,6 +53,48 @@ class InventoryDao {
     }
   }
 
+  /// Inserts an inventory item, merging quantities with an existing item
+  /// that has the same barcode and inventoryId.
+  ///
+  /// When an item with the same barcode AND inventory_id already exists,
+  /// the quantities are summed instead of creating a duplicate row.
+  /// The operation runs inside a SQLite transaction to prevent race
+  /// conditions.
+  Future<int> insertOrMergeByBarcode(Database db, InventoryItem item) async {
+    logInfo('Insert/merge inventory item: ${item.barcode}');
+    try {
+      return await db.transaction<int>((txn) async {
+        final existing = await txn.query(
+          'inventory',
+          where: 'barcode = ? AND inventory_id = ?',
+          whereArgs: [item.barcode, item.inventoryId],
+          limit: 1,
+        );
+        if (existing.isNotEmpty) {
+          final existingItem = fromMap(existing.first);
+          final mergedQty = existingItem.quantity + item.quantity;
+          await txn.update(
+            'inventory',
+            {'quantity': mergedQty},
+            where: 'id = ?',
+            whereArgs: [existingItem.id],
+          );
+          logInfo(
+            'Merged inventory quantity for ${item.barcode}: '
+            '${existingItem.quantity} + ${item.quantity} = $mergedQty',
+          );
+          return existingItem.id!;
+        }
+        final id = await txn.insert('inventory', toMap(item));
+        logInfo('Inventory item inserted with id $id');
+        return id;
+      });
+    } on Exception catch (e) {
+      logError('Failed to insert/merge inventory item: $e');
+      rethrow;
+    }
+  }
+
   /// Retrieves all inventory items for a specific [inventoryId],
   /// optionally filtered by location.
   Future<List<InventoryItem>> list(

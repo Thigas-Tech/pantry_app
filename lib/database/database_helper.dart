@@ -96,7 +96,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 17,
+        version: 18,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -385,6 +385,29 @@ class DatabaseHelper {
         logWarning('Migration v17 failed: $e');
       }
     }
+    if (oldVersion < 18) {
+      try {
+        await db.execute(
+          'ALTER TABLE shopping_list ADD COLUMN price_amount REAL',
+        );
+        await db.execute(
+          'ALTER TABLE shopping_list ADD COLUMN price_currency TEXT',
+        );
+        await db.execute(
+          'ALTER TABLE shopping_list ADD COLUMN price_store TEXT',
+        );
+        await db.execute(
+          'ALTER TABLE shopping_list ADD COLUMN price_photo_path TEXT',
+        );
+        await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_shopping_inventory_id'
+          ' ON shopping_list(inventory_id)',
+        );
+        logInfo('Migration to version 18 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v18 failed (columns may already exist): $e');
+      }
+    }
   }
 
   // --------------------- Product (delegating to ProductDao) -------
@@ -548,6 +571,13 @@ class DatabaseHelper {
   Future<int> insertInventoryItem(InventoryItem item) async {
     final db = await database;
     return inventoryDao.insert(db, item);
+  }
+
+  /// Inserts an inventory item, merging quantities with an existing item
+  /// that has the same barcode and inventoryId.
+  Future<int> insertOrMergeInventoryItem(InventoryItem item) async {
+    final db = await database;
+    return inventoryDao.insertOrMergeByBarcode(db, item);
   }
 
   /// Retrieves all inventory items for a specific [inventoryId],
@@ -756,27 +786,49 @@ class DatabaseHelper {
   }
 
   /// Returns all shopping list items, ordered by dateAdded desc.
-  Future<List<ShoppingItem>> getShoppingList() async {
+  Future<List<ShoppingItem>> getShoppingList({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.listAll(db);
+    return shoppingListDao.listAll(db, inventoryId: inventoryId);
   }
 
   /// Returns only pending (not purchased) items.
-  Future<List<ShoppingItem>> getPendingShoppingItems() async {
+  Future<List<ShoppingItem>> getPendingShoppingItems({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.listPending(db);
+    return shoppingListDao.listPending(db, inventoryId: inventoryId);
   }
 
   /// Returns only purchased items.
-  Future<List<ShoppingItem>> getPurchasedShoppingItems() async {
+  Future<List<ShoppingItem>> getPurchasedShoppingItems({
+    int? inventoryId,
+  }) async {
     final db = await database;
-    return shoppingListDao.listPurchased(db);
+    return shoppingListDao.listPurchased(db, inventoryId: inventoryId);
   }
 
   /// Updates a shopping list item.
   Future<int> updateShoppingItem(ShoppingItem item) async {
     final db = await database;
     return shoppingListDao.update(db, item);
+  }
+
+  /// Updates only the price-related columns for the shopping item
+  /// with the given [id].
+  Future<int> updateShoppingItemPriceFields(
+    int id, {
+    double? priceAmount,
+    String? priceCurrency,
+    String? priceStore,
+    String? pricePhotoPath,
+  }) async {
+    final db = await database;
+    return shoppingListDao.updatePriceFields(
+      db,
+      id,
+      priceAmount: priceAmount,
+      priceCurrency: priceCurrency,
+      priceStore: priceStore,
+      pricePhotoPath: pricePhotoPath,
+    );
   }
 
   /// Deletes a shopping list item by [id].
@@ -804,8 +856,8 @@ class DatabaseHelper {
   }
 
   /// Returns the count of pending (not purchased) shopping list items.
-  Future<int> getPendingShoppingCount() async {
+  Future<int> getPendingShoppingCount({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.pendingCount(db);
+    return shoppingListDao.pendingCount(db, inventoryId: inventoryId);
   }
 }

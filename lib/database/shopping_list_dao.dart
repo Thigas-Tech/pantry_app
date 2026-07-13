@@ -24,6 +24,10 @@ class ShoppingListDao {
         inventory_id INTEGER,
         date_added INTEGER NOT NULL,
         date_purchased INTEGER,
+        price_amount REAL,
+        price_currency TEXT,
+        price_store TEXT,
+        price_photo_path TEXT,
         FOREIGN KEY (barcode) REFERENCES products(barcode)
           ON DELETE SET NULL,
         FOREIGN KEY (inventory_id) REFERENCES inventories(id)
@@ -35,6 +39,9 @@ class ShoppingListDao {
     );
     await db.execute(
       'CREATE INDEX idx_shopping_purchased ON shopping_list(is_purchased)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_shopping_inventory_id ON shopping_list(inventory_id)',
     );
   }
 
@@ -48,6 +55,10 @@ class ShoppingListDao {
     'inventory_id': item.inventoryId,
     'date_added': item.dateAdded ?? DateTime.now().millisecondsSinceEpoch,
     'date_purchased': item.datePurchased,
+    'price_amount': item.priceAmount,
+    'price_currency': item.priceCurrency,
+    'price_store': item.priceStore,
+    'price_photo_path': item.pricePhotoPath,
   };
 
   /// Converts a database row map into a [ShoppingItem].
@@ -61,6 +72,10 @@ class ShoppingListDao {
     inventoryId: map['inventory_id'] as int?,
     dateAdded: map['date_added'] as int?,
     datePurchased: map['date_purchased'] as int?,
+    priceAmount: (map['price_amount'] as num?)?.toDouble(),
+    priceCurrency: map['price_currency'] as String?,
+    priceStore: map['price_store'] as String?,
+    pricePhotoPath: map['price_photo_path'] as String?,
   );
 
   /// Inserts a shopping list item and returns its row ID.
@@ -121,11 +136,16 @@ class ShoppingListDao {
     }
   }
 
-  /// Returns all shopping list items, ordered by dateAdded descending.
-  Future<List<ShoppingItem>> listAll(Database db) async {
+  /// Returns all shopping list items, optionally scoped to an inventory.
+  ///
+  /// When [inventoryId] is non-null, only items for that inventory are
+  /// returned. Ordered by dateAdded descending.
+  Future<List<ShoppingItem>> listAll(Database db, {int? inventoryId}) async {
     try {
       final result = await db.query(
         'shopping_list',
+        where: inventoryId != null ? 'inventory_id = ?' : null,
+        whereArgs: inventoryId != null ? [inventoryId] : null,
         orderBy: 'date_added DESC',
       );
       return result.map(fromMap).toList();
@@ -135,12 +155,21 @@ class ShoppingListDao {
     }
   }
 
-  /// Returns only pending (not purchased) items, ordered by dateAdded desc.
-  Future<List<ShoppingItem>> listPending(Database db) async {
+  /// Returns only pending (not purchased) items, optionally scoped to an
+  /// inventory. Ordered by dateAdded desc.
+  Future<List<ShoppingItem>> listPending(
+    Database db, {
+    int? inventoryId,
+  }) async {
     try {
+      final where = inventoryId != null
+          ? 'is_purchased = 0 AND inventory_id = ?'
+          : 'is_purchased = 0';
+      final whereArgs = inventoryId != null ? [inventoryId] : null;
       final result = await db.query(
         'shopping_list',
-        where: 'is_purchased = 0',
+        where: where,
+        whereArgs: whereArgs,
         orderBy: 'date_added DESC',
       );
       return result.map(fromMap).toList();
@@ -150,12 +179,21 @@ class ShoppingListDao {
     }
   }
 
-  /// Returns only purchased items, ordered by datePurchased desc.
-  Future<List<ShoppingItem>> listPurchased(Database db) async {
+  /// Returns only purchased items, optionally scoped to an inventory.
+  /// Ordered by datePurchased desc.
+  Future<List<ShoppingItem>> listPurchased(
+    Database db, {
+    int? inventoryId,
+  }) async {
     try {
+      final where = inventoryId != null
+          ? 'is_purchased = 1 AND inventory_id = ?'
+          : 'is_purchased = 1';
+      final whereArgs = inventoryId != null ? [inventoryId] : null;
       final result = await db.query(
         'shopping_list',
-        where: 'is_purchased = 1',
+        where: where,
+        whereArgs: whereArgs,
         orderBy: 'date_purchased DESC',
       );
       return result.map(fromMap).toList();
@@ -179,6 +217,37 @@ class ShoppingListDao {
       return affected;
     } on Exception catch (e) {
       logError('Failed to update shopping item ${item.id}: $e');
+      rethrow;
+    }
+  }
+
+  /// Updates only the price-related columns for the shopping item
+  /// with the given [id]. Leaves all other columns unchanged.
+  Future<int> updatePriceFields(
+    Database db,
+    int id, {
+    double? priceAmount,
+    String? priceCurrency,
+    String? priceStore,
+    String? pricePhotoPath,
+  }) async {
+    logInfo('Updating price fields for shopping item $id');
+    try {
+      final affected = await db.update(
+        'shopping_list',
+        {
+          'price_amount': priceAmount,
+          'price_currency': priceCurrency,
+          'price_store': priceStore,
+          'price_photo_path': pricePhotoPath,
+        },
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      logInfo('Price fields updated for shopping item $id');
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to update price fields for item $id: $e');
       rethrow;
     }
   }
@@ -285,13 +354,13 @@ class ShoppingListDao {
     }
   }
 
-  /// Returns the count of pending items.
-  Future<int> pendingCount(Database db) async {
-    return Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM shopping_list WHERE is_purchased = 0',
-          ),
-        ) ??
-        0;
+  /// Returns the count of pending items, optionally scoped to an inventory.
+  Future<int> pendingCount(Database db, {int? inventoryId}) async {
+    final query = inventoryId != null
+        ? 'SELECT COUNT(*) FROM shopping_list '
+              'WHERE is_purchased = 0 AND inventory_id = ?'
+        : 'SELECT COUNT(*) FROM shopping_list WHERE is_purchased = 0';
+    final args = inventoryId != null ? [inventoryId] : null;
+    return Sqflite.firstIntValue(await db.rawQuery(query, args)) ?? 0;
   }
 }

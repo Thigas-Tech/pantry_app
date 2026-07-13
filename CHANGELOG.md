@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+- **Per-inventory shopping list**: Shopping list items are now scoped to the active inventory. The `ShoppingListDao`, `DatabaseHelper`, and providers filter by `inventory_id`. `addShoppingItem` automatically assigns the active inventory ID to new items. (`lib/database/shopping_list_dao.dart`, `lib/database/database_helper.dart`, `lib/providers/shopping_list_provider.dart`, fixes #111)
+- **Product search in add-to-shopping-list sheet**: The FAB on the shopping list screen now opens a `AddToShoppingListSheet` bottom sheet that searches cached products (local DB + OFF API) by name. Results show product avatar, name, brand, and barcode. Tapping a product adds it to the shopping list with its barcode. A free-text fallback ("Add custom item") is available for items not in any product database. (`lib/widgets/add_to_shopping_list_sheet.dart` new, `lib/screens/shopping_list_screen.dart`, fixes #68)
+- **New ARB keys**: `productSearchHint`, `addCustomItem`, `noProductsFound`, `backToSearch` in `en`, `pt`, and `pt_BR`. (`lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
+
+### Fixed
+- **Shopping list items were global instead of per-inventory**: Fixed by scoping all shopping list queries to the active inventory via the `inventory_id` column, which was already present in the database schema but not wired through. (fixes #111)
+- **Shopping list FAB created free-text items without product association**: Replaced the name+quantity AlertDialog with a product search sheet that links items to barcodes by default, with free-text as an explicit fallback. (fixes #68)
+
 ### Fixed
 - **Translation leak on product detail page**: Debug strings showing instead of translated text near the edit-quantity area. Added `AppLocalizationsX` extension with `formatQuantityUnit`, `localizeUnit`, `localizeLocation`, `displayInventoryName`, and `localizeThemeMode`. Duplicate `productNotFound` key removed from `app_pt_BR.arb`. Hardcoded raw unit/location/theme strings replaced with localized lookups across 10+ files. (`lib/l10n/l10n_extensions.dart` new, `lib/l10n/app_*.arb` updated, fixes #87)
 
