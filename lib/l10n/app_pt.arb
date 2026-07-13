@@ -594,5 +594,8 @@
   "categorySnacks": "Lanches",
   "categorySpreads": "Pastas",
   "categorySweetSpreads": "Pastas doces",
-  "categoryVegetables": "Vegetais"
+  "categoryVegetables": "Vegetais",
+  "categoryBiscuitsAndCrackers": "Bolachas e biscoitos",
+  "categoryLegumeOils": "Oleos de leguminosas",
+  "categoryUhtMilks": "Leites UHT"
 }

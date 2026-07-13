@@ -194,6 +194,12 @@ extension AppLocalizationsX on AppLocalizations {
         return categorySweetSpreads;
       case 'Vegetables':
         return categoryVegetables;
+      case 'Biscuits and crackers':
+        return categoryBiscuitsAndCrackers;
+      case 'Legume oils':
+        return categoryLegumeOils;
+      case 'Uht milks':
+        return categoryUhtMilks;
       default:
         return category;
     }

@@ -1373,4 +1373,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryVegetables => 'Vegetables';
+
+  @override
+  String get categoryBiscuitsAndCrackers => 'Biscuits and crackers';
+
+  @override
+  String get categoryLegumeOils => 'Legume oils';
+
+  @override
+  String get categoryUhtMilks => 'UHT milks';
 }

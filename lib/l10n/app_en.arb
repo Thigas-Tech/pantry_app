@@ -630,5 +630,8 @@
   "categorySnacks": "Snacks",
   "categorySpreads": "Spreads",
   "categorySweetSpreads": "Sweet spreads",
-  "categoryVegetables": "Vegetables"
+  "categoryVegetables": "Vegetables",
+  "categoryBiscuitsAndCrackers": "Biscuits and crackers",
+  "categoryLegumeOils": "Legume oils",
+  "categoryUhtMilks": "UHT milks"
 }

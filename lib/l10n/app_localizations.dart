@@ -2669,6 +2669,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vegetables'**
   String get categoryVegetables;
+
+  /// No description provided for @categoryBiscuitsAndCrackers.
+  ///
+  /// In en, this message translates to:
+  /// **'Biscuits and crackers'**
+  String get categoryBiscuitsAndCrackers;
+
+  /// No description provided for @categoryLegumeOils.
+  ///
+  /// In en, this message translates to:
+  /// **'Legume oils'**
+  String get categoryLegumeOils;
+
+  /// No description provided for @categoryUhtMilks.
+  ///
+  /// In en, this message translates to:
+  /// **'UHT milks'**
+  String get categoryUhtMilks;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
