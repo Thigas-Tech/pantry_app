@@ -1382,4 +1382,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryUhtMilks => 'UHT milks';
+
+  @override
+  String get categoryCannedSardines => 'Canned sardines';
+
+  @override
+  String get categoryCerealFlours => 'Cereal flours';
+
+  @override
+  String get categoryCerealStarches => 'Cereal starches';
+
+  @override
+  String get categoryCerealsAndProducts => 'Cereals and their products';
+
+  @override
+  String get categoryDairies => 'Dairies';
+
+  @override
+  String get categoryInstantBeverages => 'Instant beverages';
+
+  @override
+  String get categoryMilkfat => 'Milkfat';
+
+  @override
+  String get categoryStarches => 'Starches';
 }

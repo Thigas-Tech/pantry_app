@@ -633,5 +633,13 @@
   "categoryVegetables": "Vegetables",
   "categoryBiscuitsAndCrackers": "Biscuits and crackers",
   "categoryLegumeOils": "Legume oils",
-  "categoryUhtMilks": "UHT milks"
+  "categoryUhtMilks": "UHT milks",
+  "categoryCannedSardines": "Canned sardines",
+  "categoryCerealFlours": "Cereal flours",
+  "categoryCerealStarches": "Cereal starches",
+  "categoryCerealsAndProducts": "Cereals and their products",
+  "categoryDairies": "Dairies",
+  "categoryInstantBeverages": "Instant beverages",
+  "categoryMilkfat": "Milkfat",
+  "categoryStarches": "Starches"
 }

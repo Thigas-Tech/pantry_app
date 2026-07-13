@@ -2687,6 +2687,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'UHT milks'**
   String get categoryUhtMilks;
+
+  /// No description provided for @categoryCannedSardines.
+  ///
+  /// In en, this message translates to:
+  /// **'Canned sardines'**
+  String get categoryCannedSardines;
+
+  /// No description provided for @categoryCerealFlours.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereal flours'**
+  String get categoryCerealFlours;
+
+  /// No description provided for @categoryCerealStarches.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereal starches'**
+  String get categoryCerealStarches;
+
+  /// No description provided for @categoryCerealsAndProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereals and their products'**
+  String get categoryCerealsAndProducts;
+
+  /// No description provided for @categoryDairies.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairies'**
+  String get categoryDairies;
+
+  /// No description provided for @categoryInstantBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant beverages'**
+  String get categoryInstantBeverages;
+
+  /// No description provided for @categoryMilkfat.
+  ///
+  /// In en, this message translates to:
+  /// **'Milkfat'**
+  String get categoryMilkfat;
+
+  /// No description provided for @categoryStarches.
+  ///
+  /// In en, this message translates to:
+  /// **'Starches'**
+  String get categoryStarches;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

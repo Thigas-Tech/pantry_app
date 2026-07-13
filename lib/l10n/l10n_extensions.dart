@@ -200,6 +200,22 @@ extension AppLocalizationsX on AppLocalizations {
         return categoryLegumeOils;
       case 'Uht milks':
         return categoryUhtMilks;
+      case 'Canned sardines':
+        return categoryCannedSardines;
+      case 'Cereal flours':
+        return categoryCerealFlours;
+      case 'Cereal starches':
+        return categoryCerealStarches;
+      case 'Cereals and their products':
+        return categoryCerealsAndProducts;
+      case 'Dairies':
+        return categoryDairies;
+      case 'Instant beverages':
+        return categoryInstantBeverages;
+      case 'Milkfat':
+        return categoryMilkfat;
+      case 'Starches':
+        return categoryStarches;
       default:
         return category;
     }

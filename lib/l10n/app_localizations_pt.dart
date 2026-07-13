@@ -1382,6 +1382,30 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get categoryUhtMilks => 'Leites UHT';
+
+  @override
+  String get categoryCannedSardines => 'Sardinhas enlatadas';
+
+  @override
+  String get categoryCerealFlours => 'Farinhas de cereais';
+
+  @override
+  String get categoryCerealStarches => 'Amidos de cereais';
+
+  @override
+  String get categoryCerealsAndProducts => 'Cereais e seus produtos';
+
+  @override
+  String get categoryDairies => 'Laticinios';
+
+  @override
+  String get categoryInstantBeverages => 'Bebidas instantaneas';
+
+  @override
+  String get categoryMilkfat => 'Gordura do leite';
+
+  @override
+  String get categoryStarches => 'Amidos';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2762,4 +2786,28 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get categoryUhtMilks => 'Leites UHT';
+
+  @override
+  String get categoryCannedSardines => 'Sardinhas enlatadas';
+
+  @override
+  String get categoryCerealFlours => 'Farinhas de cereais';
+
+  @override
+  String get categoryCerealStarches => 'Amidos de cereais';
+
+  @override
+  String get categoryCerealsAndProducts => 'Cereais e seus produtos';
+
+  @override
+  String get categoryDairies => 'Laticínios';
+
+  @override
+  String get categoryInstantBeverages => 'Bebidas instantâneas';
+
+  @override
+  String get categoryMilkfat => 'Gordura do leite';
+
+  @override
+  String get categoryStarches => 'Amidos';
 }

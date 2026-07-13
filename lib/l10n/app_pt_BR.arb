@@ -581,5 +581,13 @@
   "categoryVegetables": "Vegetais",
   "categoryBiscuitsAndCrackers": "Biscoitos e bolachas",
   "categoryLegumeOils": "\u00D3leos de leguminosas",
-  "categoryUhtMilks": "Leites UHT"
+  "categoryUhtMilks": "Leites UHT",
+  "categoryCannedSardines": "Sardinhas enlatadas",
+  "categoryCerealFlours": "Farinhas de cereais",
+  "categoryCerealStarches": "Amidos de cereais",
+  "categoryCerealsAndProducts": "Cereais e seus produtos",
+  "categoryDairies": "Latic\u00EDnios",
+  "categoryInstantBeverages": "Bebidas instant\u00E2neas",
+  "categoryMilkfat": "Gordura do leite",
+  "categoryStarches": "Amidos"
 }
