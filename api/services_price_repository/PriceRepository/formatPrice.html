@@ -77,11 +77,12 @@
   try {
     return NumberFormat.currency(
       name: currencyCode,
-      decimalDigits: 2,
+      symbol: currencySymbolFor(currencyCode),
+      decimalDigits: decimalDigitsFor(currencyCode),
     ).format(amount);
   } on Exception catch (e) {
     logWarning(&#39;Currency format error for $currencyCode: $e&#39;);
-    return &#39;$currencyCode ${amount.toStringAsFixed(2)}&#39;;
+    return &#39;${currencySymbolFor(currencyCode)} ${amount.toStringAsFixed(2)}&#39;;
   }
 }</code></pre>
 </section>
