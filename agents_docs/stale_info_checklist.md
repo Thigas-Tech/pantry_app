@@ -14,19 +14,18 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | Project structure tree (lines 94-111) | File created or deleted under `lib/` |
 | Build commands (lines 78-90) | Flags changed or new build variants added |
 
-## 2. `ARCHITECTURE.md`
+## 2. `ARCHITECTURE/INDEX.md`
 
 | Location | Staleness trigger |
 |---|---|
-| Architecture diagram (lines 10-54) | Any layer added, removed, or renamed |
-| DB schema version (line 60) | Schema bumped in `_onUpgrade` |
-| Migration table (lines 99-111) | New migration added |
-| Service sections 3.x | Service added, removed, or rewritten |
-| Provider table (lines 242-268) | Provider added, removed, or renamed |
-| Screen/widget structure (lines 273-333) | Screen widget tree changes |
-| CI/CD pipeline table (lines 504-519) | Workflow added, renamed, or trigger changed |
-| Design decisions (lines 394-418) | New pattern adopted or old one abandoned |
-| Monetization / cloud / ads sections | Any of those features implemented or deferred |
+| `ARCHITECTURE/OVERVIEW.md` — architecture diagram | Any layer added, removed, or renamed |
+| `ARCHITECTURE/DATABASE.md` — schema version & migration table | Schema bumped in `_onUpgrade` or new migration added |
+| `ARCHITECTURE/SERVICES.md` — each service subsection | Service added, removed, or rewritten |
+| `ARCHITECTURE/PROVIDERS.md` — provider table | Provider added, removed, or renamed |
+| `ARCHITECTURE/UI_STRUCTURE.md` — screen/widget tree | Screen widget tree changes |
+| `ARCHITECTURE/PERFORMANCE.md` — CI/CD pipeline table (section 11.8) | Workflow added, renamed, or trigger changed |
+| `ARCHITECTURE/INDEX.md` — design decisions | New pattern adopted or old one abandoned |
+| `agents_docs/monetization.md` | Any monetization features implemented or deferred |
 
 ## 3. `TODO.md`
 
@@ -89,3 +88,4 @@ These patterns reappear frequently. Search for them when auditing:
 - **Wrong concurrency flag**: `--concurrency=8` vs `--concurrency=2`
 - **Wrong artifact retention**: 7 days vs 90 days
 - **Deploy workflow described as active**: Tag trigger may be commented out
+- **ARCHITECTURE.md referenced as flat file**: Was restructured to `ARCHITECTURE/INDEX.md` directory. Search for bare `ARCHITECTURE.md` references across all `.md` files

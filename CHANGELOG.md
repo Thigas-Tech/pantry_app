@@ -241,8 +241,8 @@
 - `@JsonKey` annotations and `Product.fromJson` factory
 
 ### Documentation
-- `ARCHITECTURE.md` section 5: updated tree diagrams to reflect `ListView.builder` with `RepaintBoundary`, SearchScreen images, StatsScreen placeholder, and Settings changelog button.
-- `ARCHITECTURE.md` section 11.2 and 11.4: updated with actual `cacheWidth`/`cacheHeight` and `RepaintBoundary` implementations.
+- `ARCHITECTURE/UI_STRUCTURE.md`: updated tree diagrams to reflect `ListView.builder` with `RepaintBoundary`, SearchScreen images, StatsScreen placeholder, and Settings changelog button.
+- `ARCHITECTURE/PERFORMANCE.md`: updated with actual `cacheWidth`/`cacheHeight` and `RepaintBoundary` implementations.
 - `AGENTS.md` code style: added `ComingSoonView` / `ComingSoonScreen` stub pattern.
 - `TODO.md` marked Autocomplete, InteractiveViewer, ExpansionTile, Changelog at startup as done.
 
@@ -295,7 +295,7 @@
 - **AGENTS.md performance audit checklist**: 6-item checklist for new dependencies, screens, DB queries, providers, models, and rebuild scope.
 - **TODO.md**: 3 new items (price tracking, NFC-e, photo contribution).
 - Removed CSV import/export: deleted `csv_service.dart`, `csv_service_provider.dart`, `filegate_provider.dart`, and all related test files. Removed `getExportData()` / `exportData()` from `DatabaseHelper`, `InventoryDao`, and `ProductRepository`.
-- Removed `csv`, `filegate`, `share_plus` dependencies from `pubspec.yaml`. Ran `flutter pub upgrade` (picked up `equatable` 2.1.0 transitively).
+- Removed `csv`, `filegate` dependencies from `pubspec.yaml`. `share_plus` was removed temporarily and re-added later for the shopping list feature. Ran `flutter pub upgrade` (picked up `equatable` 2.1.0 transitively).
 - Removed 19 unused ARB translation keys from all 3 locales (en, pt, pt_BR). Verified zero stale references with regex before removal.
 - Added 2 new ARB keys: `settingsAbout`, `comingSoonDescription` — translated in en, pt, pt_BR.
 - 340 tests passing, 0 analyze issues.

@@ -106,7 +106,7 @@ pending Play Console document verification).
 Steps:
 1. Checkout + Flutter setup
 2. `flutter analyze --fatal-infos --fatal-warnings`
-3. `flutter test --concurrency=8`
+3. `flutter test --concurrency=2`
 4. Inject `.env` from secrets
 5. Decode `ANDROID_KEYSTORE_BASE64` → `android/upload-keystore.jks`
 6. Decode `KEY_PROPERTIES_BASE64` → `android/key.properties`

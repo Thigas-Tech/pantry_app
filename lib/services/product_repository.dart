@@ -253,7 +253,7 @@ class ProductRepository {
   /// The method runs **two passes**. The first pass iterates every barcode
   /// sequentially with a **500 ms delay** between calls. A second pass retries
   /// only the barcodes that failed on the first pass (timeout, 5xx, 429, or
-  /// any other `Exception`), again with 500 ms spacing. This two‑pass strategy
+  /// any other [Exception]), again with 500 ms spacing. This two‑pass strategy
   /// absorbs transient rate‑limiting or server hiccups without blocking the
   /// UI for longer than necessary.
   ///
@@ -261,7 +261,8 @@ class ProductRepository {
   /// strategy absorbs rate-limiting and server hiccups.
   ///
   /// Freshly fetched data is **merged** with any cached product via
-  /// `Product.mergeFromApi`, ensuring that fields the API doesn't return
+  /// a merge-from-API helper on [Product], ensuring that fields the API
+  /// doesn't return
   /// (e.g. Nutri-Score on staging) are preserved from the cache.
   ///
   /// ## Returns

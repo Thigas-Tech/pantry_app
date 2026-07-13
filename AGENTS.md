@@ -71,7 +71,7 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 10. Audit every plan for pitfalls before writing code.
 11. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
 12. Never ! on SQL aggregate results. Use ?? fallback instead.
-13. Keep all markdown files ([README.md], [ARCHITECTURE.md], [CHANGELOG.md],
+13. Keep all markdown files ([README.md], [ARCHITECTURE/INDEX.md], [CHANGELOG.md],
     [TODO.md], `agents_docs/*.md`) and `///` doc comments in sync with the
     codebase. After every feature, fix, or refactor, audit the affected docs
     in the same PR. When asked to find stale information, first consult
@@ -138,7 +138,7 @@ Read these when implementing specific features:
 - Firebase / FlutterFire -> ~/.config/opencode/instructions/firebase_refs.md
 - OFF API / SDK -> ~/.config/opencode/instructions/off_refs.md
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
-- Project architecture -> ARCHITECTURE.md
+- Project architecture -> ARCHITECTURE/INDEX.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
 - Project-specific guides and testing procedures -> agents_docs/ directory
   (read the relevant file for each task)
