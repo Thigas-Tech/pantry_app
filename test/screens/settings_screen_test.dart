@@ -62,8 +62,7 @@ void main() {
       ],
     );
 
-    // The subtitle is the theme mode name (in English).
-    expect(find.text('system'), findsOneWidget);
+    expect(find.text('System'), findsOneWidget);
   });
 
   /// Verifies tapping the theme tile opens a dialog with radio buttons,
@@ -89,14 +88,14 @@ void main() {
     expect(find.text('Choose theme'), findsOneWidget);
 
     // Select "dark".
-    await tester.tap(find.text('dark'));
+    await tester.tap(find.text('Dark'));
     await tester.pumpAndSettle();
 
     // Dialog closed.
     expect(find.byType(SimpleDialog), findsNothing);
 
-    // Snackbar shows the exact localised message (from log: "Theme: dark").
-    expect(find.text('Theme: dark'), findsOneWidget);
+    // Snackbar shows the exact localised message (from log: "Theme: Dark").
+    expect(find.text('Theme: Dark'), findsOneWidget);
   });
 
   /// Verifies the notification switch toggles between enabled/disabled

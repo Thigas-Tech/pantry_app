@@ -57,7 +57,7 @@ void main() {
 
     expect(find.text('Milk'), findsOneWidget);
     expect(find.textContaining('3.0 L'), findsOneWidget);
-    expect(find.textContaining('pantry'), findsOneWidget);
+    expect(find.textContaining('Pantry'), findsOneWidget);
   });
 
   testWidgets('shows expiry prefix when date is present', (tester) async {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/utils/logger.dart';
 
@@ -154,12 +155,12 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     final isEditing = widget.existingItem != null;
     final unitItems = <DropdownMenuItem<String>>[
       for (final u in _units.where((u) => _presetUnits.contains(u)))
-        DropdownMenuItem(value: u, child: Text(u)),
+        DropdownMenuItem(value: u, child: Text(l10n.localizeUnit(u))),
       const DropdownMenuItem(value: '__custom__', child: Text('...')),
     ];
     final locationItems = <DropdownMenuItem<String>>[
       for (final l in _locations.where((l) => _presetLocations.contains(l)))
-        DropdownMenuItem(value: l, child: Text(l)),
+        DropdownMenuItem(value: l, child: Text(l10n.localizeLocation(l))),
       const DropdownMenuItem(value: '__custom__', child: Text('...')),
     ];
 

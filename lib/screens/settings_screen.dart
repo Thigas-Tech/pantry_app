@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -49,7 +50,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               ListTile(
                 title: Text(l10n.theme),
-                subtitle: Text(themeMode.name),
+                subtitle: Text(l10n.localizeThemeMode(themeMode.name)),
                 onTap: () => _showThemeDialog(context, ref),
               ),
               SwitchListTile(
@@ -333,7 +334,7 @@ class SettingsScreen extends ConsumerWidget {
                           return const SizedBox.shrink();
                         }
                         return Text(
-                          _formatBytes(snapshot.data!),
+                          _formatBytes(snapshot.data!, l10n),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: Theme.of(
@@ -375,19 +376,21 @@ class SettingsScreen extends ConsumerWidget {
                         if (count == 0) return const SizedBox.shrink();
                         return ListTile(
                           leading: const Icon(Icons.cloud_upload_outlined),
-                          title: Text('Pending feedback: $count'),
+                          title: Text(l10n.pendingFeedback(count)),
                           trailing: TextButton(
                             onPressed: () async {
                               final result = await service.flushQueue();
                               if (context.mounted) {
                                 SnackbarHelper.showInfo(
                                   context,
-                                  'Submitted ${result.submitted}, '
-                                  '${result.failed} failed',
+                                  l10n.submissionResult(
+                                    result.failed,
+                                    result.submitted,
+                                  ),
                                 );
                               }
                             },
-                            child: const Text('Retry now'),
+                            child: Text(l10n.retryNow),
                           ),
                         );
                       },
@@ -450,7 +453,7 @@ class SettingsScreen extends ConsumerWidget {
               children: ThemeModeOption.values.map((option) {
                 return RadioListTile<ThemeModeOption>(
                   value: option,
-                  title: Text(option.name),
+                  title: Text(l10n.localizeThemeMode(option.name)),
                 );
               }).toList(),
             ),
@@ -462,7 +465,10 @@ class SettingsScreen extends ConsumerWidget {
       logInfo('Theme changed to ${selected.name}');
       ref.read(themeModeProvider.notifier).value = selected;
       if (context.mounted) {
-        SnackbarHelper.showInfo(context, l10n.themeChanged(selected.name));
+        SnackbarHelper.showInfo(
+          context,
+          l10n.themeChanged(l10n.localizeThemeMode(selected.name)),
+        );
       }
     }
   }
@@ -644,8 +650,8 @@ class SettingsScreen extends ConsumerWidget {
         title: Text(l10n.openPricesToken),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Bearer token',
+          decoration: InputDecoration(
+            hintText: l10n.bearerTokenLabel,
           ),
           obscureText: true,
         ),
@@ -824,10 +830,10 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-String _formatBytes(int bytes) {
-  if (bytes < 1024) return '$bytes B';
+String _formatBytes(int bytes, AppLocalizations l10n) {
+  if (bytes < 1024) return l10n.bytesUnit(bytes);
   if (bytes < 1024 * 1024) {
-    return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return l10n.kbUnit((bytes / 1024).toStringAsFixed(1));
   }
-  return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  return l10n.mbUnit((bytes / (1024 * 1024)).toStringAsFixed(1));
 }

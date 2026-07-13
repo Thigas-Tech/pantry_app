@@ -51,7 +51,7 @@ void main() {
     testWidgets('shows brand and category fields', (tester) async {
       await pumpApp(tester, const AddProductScreen(barcode: '123'));
       expect(find.text('Brand'), findsOneWidget);
-      expect(find.text('Category'), findsOneWidget);
+      expect(find.text('Categories'), findsOneWidget);
     });
 
     testWidgets('shows serving size field', (tester) async {
@@ -131,7 +131,7 @@ void main() {
         'Test Brand',
       );
       await tester.enterText(
-        find.widgetWithText(TextFormField, 'Category'),
+        find.widgetWithText(TextFormField, 'Categories'),
         'Test Category',
       );
       await tester.enterText(

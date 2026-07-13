@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -141,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ...targetInventories.map(
               (inv) => ListTile(
                 leading: const Icon(Icons.inventory_2),
-                title: Text(inv['name'] as String),
+                title: Text(l10n.displayInventoryName(inv['name'] as String)),
                 onTap: () => Navigator.pop(ctx, inv['id'] as int),
               ),
             ),
@@ -295,18 +296,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             if (priceTrackingEnabled) const PriceVisibilityToggle(),
             if (inventories.asData?.value != null) ...[
               InventorySwitcherCard(
-                name:
-                    inventories.asData!.value
-                            .cast<Map<String, dynamic>>()
-                            .firstWhere(
-                              (inv) =>
-                                  inv['id'] ==
-                                  ref.read(activeInventoryProvider),
-                              orElse: () => <String, dynamic>{
-                                'name': l10n.myPantry,
-                              },
-                            )['name']
-                        as String?,
+                name: l10n.displayInventoryName(
+                  (inventories.asData!.value
+                              .cast<Map<String, dynamic>>()
+                              .firstWhere(
+                                (inv) =>
+                                    inv['id'] ==
+                                    ref.read(activeInventoryProvider),
+                                orElse: () => <String, dynamic>{
+                                  'name': l10n.myPantry,
+                                },
+                              )['name']
+                          as String?) ??
+                      l10n.myPantry,
+                ),
                 nutriscoreGrade: inventoryAsync.asData?.value.isNotEmpty == true
                     ? null
                     : null,

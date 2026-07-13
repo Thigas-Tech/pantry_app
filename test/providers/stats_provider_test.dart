@@ -163,6 +163,59 @@ void main() {
       final result = parentCategory(null, hierarchy);
       expect(result, 'Sweet spreads');
     });
+
+    /// Verifies that pt: tags are preferred over en: tags.
+    test('prefers pt: tags over en: tags', () {
+      final hierarchy = jsonEncode([
+        'en:products',
+        'en:dairy',
+        'en:milk',
+        'en:whole-milk',
+        'pt:produtos',
+        'pt:laticinios',
+        'pt:leite',
+        'pt:leite-integral',
+      ]);
+      final result = parentCategory(null, hierarchy);
+      expect(result, 'Leite');
+    });
+
+    /// Verifies pt: tags work without any en: tags present.
+    test('uses pt: tags when no en: tags exist', () {
+      final hierarchy = jsonEncode([
+        'fr:produits',
+        'pt:laticinios',
+        'pt:leites',
+        'pt:leite-gordo',
+      ]);
+      final result = parentCategory('Milk', hierarchy);
+      expect(result, 'Leites');
+    });
+
+    /// Verifies fallback to en: when no pt: tags exist.
+    test('falls back to en: when no pt: tags', () {
+      final hierarchy = jsonEncode([
+        'en:products',
+        'en:dairy',
+        'en:cheeses',
+        'en:cheddar',
+      ]);
+      final result = parentCategory(null, hierarchy);
+      expect(result, 'Cheeses');
+    });
+
+    /// Verifies pt: tags with hyphens are converted correctly.
+    test('handles pt: tags with hyphens', () {
+      final hierarchy = jsonEncode([
+        'en:products',
+        'en:snacks',
+        'pt:produtos',
+        'pt:salgadinhos',
+        'pt:batata-frita',
+      ]);
+      final result = parentCategory(null, hierarchy);
+      expect(result, 'Salgadinhos');
+    });
   });
 
   group('statsProvider', () {

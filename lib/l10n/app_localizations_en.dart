@@ -54,7 +54,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brandLabel => 'Brand';
 
   @override
-  String get categoryLabel => 'Category';
+  String get categoryLabel => 'Categories';
 
   @override
   String get servingSize => 'Serving size';
@@ -209,13 +209,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteInventoryItem => 'Delete items?';
 
   @override
-  String deleteCountSub(Object count) {
-    return 'Delete $count selected items?';
-  }
-
-  @override
-  String itemsDeleted(Object count) {
-    return '$count deleted.';
+  String deleteCountSub(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Delete $count selected items?',
+      one: 'Delete 1 selected item?',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -252,7 +253,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotOpenLink => 'Could not open the link.';
 
   @override
-  String get nutrient => 'Nutrient';
+  String get nutrient => 'Nutrients';
 
   @override
   String get deleteItemTitle => 'Delete item?';
@@ -554,9 +555,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAll => 'All';
 
   @override
-  String get filterByCategory => 'Category';
-
-  @override
   String get settingsAppearance => 'Appearance';
 
   @override
@@ -624,7 +622,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productDataUnavailable => 'Product data unavailable — pull to refresh when online';
 
   @override
-  String get locationStats => 'Location';
+  String get locationStats => 'Locations';
 
   @override
   String get nutritionPhoto => 'Nutrition';
@@ -957,9 +955,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get datePurchased => 'Purchase date';
 
   @override
-  String get pricedItems => 'Items with prices';
-
-  @override
   String itemWithPriceCount(int count, int total) {
     return '$count of $total items have prices';
   }
@@ -1107,4 +1102,308 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noOtherInventories => 'No other pantries available.';
+
+  @override
+  String get themeModeSystem => 'System';
+
+  @override
+  String get themeModeLight => 'Light';
+
+  @override
+  String get themeModeDark => 'Dark';
+
+  @override
+  String get defaultInventoryName => 'Home';
+
+  @override
+  String get locationPantry => 'Pantry';
+
+  @override
+  String get locationFridge => 'Fridge';
+
+  @override
+  String get locationFreezer => 'Freezer';
+
+  @override
+  String get unitPieces => 'pieces';
+
+  @override
+  String get unitGrams => 'g';
+
+  @override
+  String get unitKg => 'kg';
+
+  @override
+  String get unitMl => 'ml';
+
+  @override
+  String get unitLiter => 'L';
+
+  @override
+  String get generalNotificationChannelName => 'General Notifications';
+
+  @override
+  String get generalNotificationChannelDescription => 'Standard app notifications';
+
+  @override
+  String get testNotificationTitle => 'Test Successful';
+
+  @override
+  String get testNotificationBody => 'Immediate notifications are working!';
+
+  @override
+  String get testScheduledTitle => 'Scheduled Test';
+
+  @override
+  String get testScheduledBody => 'This fired 5 seconds later.';
+
+  @override
+  String get retryNow => 'Retry now';
+
+  @override
+  String get bearerTokenLabel => 'Bearer token';
+
+  @override
+  String pendingFeedback(Object count) {
+    return 'Pending feedback: $count';
+  }
+
+  @override
+  String submissionResult(Object failed, Object submitted) {
+    return 'Submitted $submitted, $failed failed';
+  }
+
+  @override
+  String bytesUnit(Object bytes) {
+    return '$bytes B';
+  }
+
+  @override
+  String kbUnit(Object size) {
+    return '$size KB';
+  }
+
+  @override
+  String mbUnit(Object size) {
+    return '$size MB';
+  }
+
+  @override
+  String get unreleasedVersion => 'Unreleased';
+
+  @override
+  String get categoryDairy => 'Dairy';
+
+  @override
+  String get categoryMilks => 'Milks';
+
+  @override
+  String get categoryMilk => 'Milk';
+
+  @override
+  String get categoryYogurts => 'Yogurts';
+
+  @override
+  String get categoryCheeses => 'Cheeses';
+
+  @override
+  String get categoryEggsAndProducts => 'Eggs and their products';
+
+  @override
+  String get categoryMeats => 'Meats';
+
+  @override
+  String get categoryFishesAndSeafoods => 'Fishes and seafoods';
+
+  @override
+  String get categoryBeverages => 'Beverages';
+
+  @override
+  String get categoryAlcoholicBeverages => 'Alcoholic beverages';
+
+  @override
+  String get categoryBreads => 'Breads';
+
+  @override
+  String get categoryCerealsAndPotatoes => 'Cereals and potatoes';
+
+  @override
+  String get categoryFruitsAndVegetables => 'Fruits and vegetables based foods';
+
+  @override
+  String get categoryConfectioneries => 'Confectioneries';
+
+  @override
+  String get categorySugarySnacks => 'Sugary snacks';
+
+  @override
+  String get categorySaltySnacks => 'Salty snacks';
+
+  @override
+  String get categoryFats => 'Fats';
+
+  @override
+  String get categorySauces => 'Sauces';
+
+  @override
+  String get categorySoups => 'Soups';
+
+  @override
+  String get categoryPreparedMeals => 'Prepared meals';
+
+  @override
+  String get categoryFrozenFoods => 'Frozen foods';
+
+  @override
+  String get categoryDesserts => 'Desserts';
+
+  @override
+  String get categoryPastries => 'Pastries';
+
+  @override
+  String get categoryBiscuitsAndCakes => 'Biscuits and cakes';
+
+  @override
+  String get categoryPizzas => 'Pizzas';
+
+  @override
+  String get categorySandwiches => 'Sandwiches';
+
+  @override
+  String get categoryBabyFoods => 'Baby foods';
+
+  @override
+  String get categoryDietaryFoods => 'Dietary foods';
+
+  @override
+  String get categorySpicesAndHerbs => 'Spices and herbs';
+
+  @override
+  String get categoryNutsAndProducts => 'Nuts and their products';
+
+  @override
+  String get categoryPlantBasedFoods => 'Plant based foods';
+
+  @override
+  String get categoryLegumesAndProducts => 'Legumes and their products';
+
+  @override
+  String get categoryCoffees => 'Coffees';
+
+  @override
+  String get categoryTeas => 'Teas';
+
+  @override
+  String get categoryChocolateProducts => 'Chocolate products';
+
+  @override
+  String get categoryIceCreams => 'Ice creams';
+
+  @override
+  String get categoryFruitJuices => 'Fruit juices';
+
+  @override
+  String get categorySodas => 'Sodas';
+
+  @override
+  String get categoryWaters => 'Waters';
+
+  @override
+  String get categoryMeatAndProducts => 'Meat and their products';
+
+  @override
+  String get categoryBreakfasts => 'Breakfasts';
+
+  @override
+  String get categoryBread => 'Bread';
+
+  @override
+  String get categoryCakes => 'Cakes';
+
+  @override
+  String get categoryCereals => 'Cereals';
+
+  @override
+  String get categoryChocolate => 'Chocolate';
+
+  @override
+  String get categoryCondiments => 'Condiments';
+
+  @override
+  String get categoryEggs => 'Eggs';
+
+  @override
+  String get categoryFish => 'Fish';
+
+  @override
+  String get categoryFruit => 'Fruit';
+
+  @override
+  String get categoryFruits => 'Fruits';
+
+  @override
+  String get categoryGrains => 'Grains';
+
+  @override
+  String get categoryHotBeverages => 'Hot beverages';
+
+  @override
+  String get categoryLegumes => 'Legumes';
+
+  @override
+  String get categoryOils => 'Oils';
+
+  @override
+  String get categoryPasta => 'Pasta';
+
+  @override
+  String get categoryPoultry => 'Poultry';
+
+  @override
+  String get categorySeeds => 'Seeds';
+
+  @override
+  String get categorySnacks => 'Snacks';
+
+  @override
+  String get categorySpreads => 'Spreads';
+
+  @override
+  String get categorySweetSpreads => 'Sweet spreads';
+
+  @override
+  String get categoryVegetables => 'Vegetables';
+
+  @override
+  String get categoryBiscuitsAndCrackers => 'Biscuits and crackers';
+
+  @override
+  String get categoryLegumeOils => 'Legume oils';
+
+  @override
+  String get categoryUhtMilks => 'UHT milks';
+
+  @override
+  String get categoryCannedSardines => 'Canned sardines';
+
+  @override
+  String get categoryCerealFlours => 'Cereal flours';
+
+  @override
+  String get categoryCerealStarches => 'Cereal starches';
+
+  @override
+  String get categoryCerealsAndProducts => 'Cereals and their products';
+
+  @override
+  String get categoryDairies => 'Dairies';
+
+  @override
+  String get categoryInstantBeverages => 'Instant beverages';
+
+  @override
+  String get categoryMilkfat => 'Milkfat';
+
+  @override
+  String get categoryStarches => 'Starches';
 }

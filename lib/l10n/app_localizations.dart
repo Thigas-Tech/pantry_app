@@ -189,7 +189,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryLabel.
   ///
   /// In en, this message translates to:
-  /// **'Category'**
+  /// **'Categories'**
   String get categoryLabel;
 
   /// No description provided for @servingSize.
@@ -495,14 +495,8 @@ abstract class AppLocalizations {
   /// No description provided for @deleteCountSub.
   ///
   /// In en, this message translates to:
-  /// **'Delete {count} selected items?'**
-  String deleteCountSub(Object count);
-
-  /// No description provided for @itemsDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} deleted.'**
-  String itemsDeleted(Object count);
+  /// **'{count, plural, =1{Delete 1 selected item?} other{Delete {count} selected items?}}'**
+  String deleteCountSub(num count);
 
   /// No description provided for @itemsRestored.
   ///
@@ -573,7 +567,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrient.
   ///
   /// In en, this message translates to:
-  /// **'Nutrient'**
+  /// **'Nutrients'**
   String get nutrient;
 
   /// No description provided for @deleteItemTitle.
@@ -1110,12 +1104,6 @@ abstract class AppLocalizations {
   /// **'All'**
   String get filterAll;
 
-  /// No description provided for @filterByCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get filterByCategory;
-
   /// No description provided for @settingsAppearance.
   ///
   /// In en, this message translates to:
@@ -1245,7 +1233,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationStats.
   ///
   /// In en, this message translates to:
-  /// **'Location'**
+  /// **'Locations'**
   String get locationStats;
 
   /// No description provided for @nutritionPhoto.
@@ -1884,12 +1872,6 @@ abstract class AppLocalizations {
   /// **'Purchase date'**
   String get datePurchased;
 
-  /// No description provided for @pricedItems.
-  ///
-  /// In en, this message translates to:
-  /// **'Items with prices'**
-  String get pricedItems;
-
   /// No description provided for @itemWithPriceCount.
   ///
   /// In en, this message translates to:
@@ -2165,6 +2147,594 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No other pantries available.'**
   String get noOtherInventories;
+
+  /// No description provided for @themeModeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeModeSystem;
+
+  /// No description provided for @themeModeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeModeLight;
+
+  /// No description provided for @themeModeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeModeDark;
+
+  /// No description provided for @defaultInventoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get defaultInventoryName;
+
+  /// No description provided for @locationPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get locationPantry;
+
+  /// No description provided for @locationFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fridge'**
+  String get locationFridge;
+
+  /// No description provided for @locationFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezer'**
+  String get locationFreezer;
+
+  /// No description provided for @unitPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'pieces'**
+  String get unitPieces;
+
+  /// No description provided for @unitGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get unitGrams;
+
+  /// No description provided for @unitKg.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get unitKg;
+
+  /// No description provided for @unitMl.
+  ///
+  /// In en, this message translates to:
+  /// **'ml'**
+  String get unitMl;
+
+  /// No description provided for @unitLiter.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get unitLiter;
+
+  /// No description provided for @generalNotificationChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'General Notifications'**
+  String get generalNotificationChannelName;
+
+  /// No description provided for @generalNotificationChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard app notifications'**
+  String get generalNotificationChannelDescription;
+
+  /// No description provided for @testNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Successful'**
+  String get testNotificationTitle;
+
+  /// No description provided for @testNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediate notifications are working!'**
+  String get testNotificationBody;
+
+  /// No description provided for @testScheduledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Test'**
+  String get testScheduledTitle;
+
+  /// No description provided for @testScheduledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This fired 5 seconds later.'**
+  String get testScheduledBody;
+
+  /// No description provided for @retryNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry now'**
+  String get retryNow;
+
+  /// No description provided for @bearerTokenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearer token'**
+  String get bearerTokenLabel;
+
+  /// No description provided for @pendingFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending feedback: {count}'**
+  String pendingFeedback(Object count);
+
+  /// No description provided for @submissionResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {submitted}, {failed} failed'**
+  String submissionResult(Object failed, Object submitted);
+
+  /// No description provided for @bytesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} B'**
+  String bytesUnit(Object bytes);
+
+  /// No description provided for @kbUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String kbUnit(Object size);
+
+  /// No description provided for @mbUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String mbUnit(Object size);
+
+  /// No description provided for @unreleasedVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreleased'**
+  String get unreleasedVersion;
+
+  /// No description provided for @categoryDairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get categoryDairy;
+
+  /// No description provided for @categoryMilks.
+  ///
+  /// In en, this message translates to:
+  /// **'Milks'**
+  String get categoryMilks;
+
+  /// No description provided for @categoryMilk.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk'**
+  String get categoryMilk;
+
+  /// No description provided for @categoryYogurts.
+  ///
+  /// In en, this message translates to:
+  /// **'Yogurts'**
+  String get categoryYogurts;
+
+  /// No description provided for @categoryCheeses.
+  ///
+  /// In en, this message translates to:
+  /// **'Cheeses'**
+  String get categoryCheeses;
+
+  /// No description provided for @categoryEggsAndProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs and their products'**
+  String get categoryEggsAndProducts;
+
+  /// No description provided for @categoryMeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Meats'**
+  String get categoryMeats;
+
+  /// No description provided for @categoryFishesAndSeafoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Fishes and seafoods'**
+  String get categoryFishesAndSeafoods;
+
+  /// No description provided for @categoryBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Beverages'**
+  String get categoryBeverages;
+
+  /// No description provided for @categoryAlcoholicBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Alcoholic beverages'**
+  String get categoryAlcoholicBeverages;
+
+  /// No description provided for @categoryBreads.
+  ///
+  /// In en, this message translates to:
+  /// **'Breads'**
+  String get categoryBreads;
+
+  /// No description provided for @categoryCerealsAndPotatoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereals and potatoes'**
+  String get categoryCerealsAndPotatoes;
+
+  /// No description provided for @categoryFruitsAndVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits and vegetables based foods'**
+  String get categoryFruitsAndVegetables;
+
+  /// No description provided for @categoryConfectioneries.
+  ///
+  /// In en, this message translates to:
+  /// **'Confectioneries'**
+  String get categoryConfectioneries;
+
+  /// No description provided for @categorySugarySnacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Sugary snacks'**
+  String get categorySugarySnacks;
+
+  /// No description provided for @categorySaltySnacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Salty snacks'**
+  String get categorySaltySnacks;
+
+  /// No description provided for @categoryFats.
+  ///
+  /// In en, this message translates to:
+  /// **'Fats'**
+  String get categoryFats;
+
+  /// No description provided for @categorySauces.
+  ///
+  /// In en, this message translates to:
+  /// **'Sauces'**
+  String get categorySauces;
+
+  /// No description provided for @categorySoups.
+  ///
+  /// In en, this message translates to:
+  /// **'Soups'**
+  String get categorySoups;
+
+  /// No description provided for @categoryPreparedMeals.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepared meals'**
+  String get categoryPreparedMeals;
+
+  /// No description provided for @categoryFrozenFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen foods'**
+  String get categoryFrozenFoods;
+
+  /// No description provided for @categoryDesserts.
+  ///
+  /// In en, this message translates to:
+  /// **'Desserts'**
+  String get categoryDesserts;
+
+  /// No description provided for @categoryPastries.
+  ///
+  /// In en, this message translates to:
+  /// **'Pastries'**
+  String get categoryPastries;
+
+  /// No description provided for @categoryBiscuitsAndCakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Biscuits and cakes'**
+  String get categoryBiscuitsAndCakes;
+
+  /// No description provided for @categoryPizzas.
+  ///
+  /// In en, this message translates to:
+  /// **'Pizzas'**
+  String get categoryPizzas;
+
+  /// No description provided for @categorySandwiches.
+  ///
+  /// In en, this message translates to:
+  /// **'Sandwiches'**
+  String get categorySandwiches;
+
+  /// No description provided for @categoryBabyFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Baby foods'**
+  String get categoryBabyFoods;
+
+  /// No description provided for @categoryDietaryFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Dietary foods'**
+  String get categoryDietaryFoods;
+
+  /// No description provided for @categorySpicesAndHerbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Spices and herbs'**
+  String get categorySpicesAndHerbs;
+
+  /// No description provided for @categoryNutsAndProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Nuts and their products'**
+  String get categoryNutsAndProducts;
+
+  /// No description provided for @categoryPlantBasedFoods.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant based foods'**
+  String get categoryPlantBasedFoods;
+
+  /// No description provided for @categoryLegumesAndProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Legumes and their products'**
+  String get categoryLegumesAndProducts;
+
+  /// No description provided for @categoryCoffees.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffees'**
+  String get categoryCoffees;
+
+  /// No description provided for @categoryTeas.
+  ///
+  /// In en, this message translates to:
+  /// **'Teas'**
+  String get categoryTeas;
+
+  /// No description provided for @categoryChocolateProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Chocolate products'**
+  String get categoryChocolateProducts;
+
+  /// No description provided for @categoryIceCreams.
+  ///
+  /// In en, this message translates to:
+  /// **'Ice creams'**
+  String get categoryIceCreams;
+
+  /// No description provided for @categoryFruitJuices.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruit juices'**
+  String get categoryFruitJuices;
+
+  /// No description provided for @categorySodas.
+  ///
+  /// In en, this message translates to:
+  /// **'Sodas'**
+  String get categorySodas;
+
+  /// No description provided for @categoryWaters.
+  ///
+  /// In en, this message translates to:
+  /// **'Waters'**
+  String get categoryWaters;
+
+  /// No description provided for @categoryMeatAndProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Meat and their products'**
+  String get categoryMeatAndProducts;
+
+  /// No description provided for @categoryBreakfasts.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfasts'**
+  String get categoryBreakfasts;
+
+  /// No description provided for @categoryBread.
+  ///
+  /// In en, this message translates to:
+  /// **'Bread'**
+  String get categoryBread;
+
+  /// No description provided for @categoryCakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cakes'**
+  String get categoryCakes;
+
+  /// No description provided for @categoryCereals.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereals'**
+  String get categoryCereals;
+
+  /// No description provided for @categoryChocolate.
+  ///
+  /// In en, this message translates to:
+  /// **'Chocolate'**
+  String get categoryChocolate;
+
+  /// No description provided for @categoryCondiments.
+  ///
+  /// In en, this message translates to:
+  /// **'Condiments'**
+  String get categoryCondiments;
+
+  /// No description provided for @categoryEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs'**
+  String get categoryEggs;
+
+  /// No description provided for @categoryFish.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish'**
+  String get categoryFish;
+
+  /// No description provided for @categoryFruit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruit'**
+  String get categoryFruit;
+
+  /// No description provided for @categoryFruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits'**
+  String get categoryFruits;
+
+  /// No description provided for @categoryGrains.
+  ///
+  /// In en, this message translates to:
+  /// **'Grains'**
+  String get categoryGrains;
+
+  /// No description provided for @categoryHotBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot beverages'**
+  String get categoryHotBeverages;
+
+  /// No description provided for @categoryLegumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Legumes'**
+  String get categoryLegumes;
+
+  /// No description provided for @categoryOils.
+  ///
+  /// In en, this message translates to:
+  /// **'Oils'**
+  String get categoryOils;
+
+  /// No description provided for @categoryPasta.
+  ///
+  /// In en, this message translates to:
+  /// **'Pasta'**
+  String get categoryPasta;
+
+  /// No description provided for @categoryPoultry.
+  ///
+  /// In en, this message translates to:
+  /// **'Poultry'**
+  String get categoryPoultry;
+
+  /// No description provided for @categorySeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeds'**
+  String get categorySeeds;
+
+  /// No description provided for @categorySnacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get categorySnacks;
+
+  /// No description provided for @categorySpreads.
+  ///
+  /// In en, this message translates to:
+  /// **'Spreads'**
+  String get categorySpreads;
+
+  /// No description provided for @categorySweetSpreads.
+  ///
+  /// In en, this message translates to:
+  /// **'Sweet spreads'**
+  String get categorySweetSpreads;
+
+  /// No description provided for @categoryVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables'**
+  String get categoryVegetables;
+
+  /// No description provided for @categoryBiscuitsAndCrackers.
+  ///
+  /// In en, this message translates to:
+  /// **'Biscuits and crackers'**
+  String get categoryBiscuitsAndCrackers;
+
+  /// No description provided for @categoryLegumeOils.
+  ///
+  /// In en, this message translates to:
+  /// **'Legume oils'**
+  String get categoryLegumeOils;
+
+  /// No description provided for @categoryUhtMilks.
+  ///
+  /// In en, this message translates to:
+  /// **'UHT milks'**
+  String get categoryUhtMilks;
+
+  /// No description provided for @categoryCannedSardines.
+  ///
+  /// In en, this message translates to:
+  /// **'Canned sardines'**
+  String get categoryCannedSardines;
+
+  /// No description provided for @categoryCerealFlours.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereal flours'**
+  String get categoryCerealFlours;
+
+  /// No description provided for @categoryCerealStarches.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereal starches'**
+  String get categoryCerealStarches;
+
+  /// No description provided for @categoryCerealsAndProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereals and their products'**
+  String get categoryCerealsAndProducts;
+
+  /// No description provided for @categoryDairies.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairies'**
+  String get categoryDairies;
+
+  /// No description provided for @categoryInstantBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant beverages'**
+  String get categoryInstantBeverages;
+
+  /// No description provided for @categoryMilkfat.
+  ///
+  /// In en, this message translates to:
+  /// **'Milkfat'**
+  String get categoryMilkfat;
+
+  /// No description provided for @categoryStarches.
+  ///
+  /// In en, this message translates to:
+  /// **'Starches'**
+  String get categoryStarches;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

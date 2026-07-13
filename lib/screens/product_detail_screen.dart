@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
@@ -913,7 +914,10 @@ class _InventoryTile extends StatelessWidget {
           GestureDetector(
             onTap: () => _showQuantityDialog(context),
             child: Text(
-              '${item.quantity} ${item.unit}',
+              l10n.formatQuantityUnit(
+                item.quantity,
+                l10n.localizeUnit(item.unit),
+              ),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -925,9 +929,9 @@ class _InventoryTile extends StatelessWidget {
       ),
       subtitle: (() {
         final expirySuffix = item.expiryDate != null
-            ? '  ·  $l10n.expiryPrefix: ${item.expiryDate}'
+            ? '  ·  ${l10n.expiryPrefix}: ${item.expiryDate}'
             : '';
-        return Text('${item.location}$expirySuffix');
+        return Text('${l10n.localizeLocation(item.location)}$expirySuffix');
       })(),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

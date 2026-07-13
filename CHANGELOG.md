@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Fixed
+- **Translation leak on product detail page**: Debug strings showing instead of translated text near the edit-quantity area. Added `AppLocalizationsX` extension with `formatQuantityUnit`, `localizeUnit`, `localizeLocation`, `displayInventoryName`, and `localizeThemeMode`. Duplicate `productNotFound` key removed from `app_pt_BR.arb`. Hardcoded raw unit/location/theme strings replaced with localized lookups across 10+ files. (`lib/l10n/l10n_extensions.dart` new, `lib/l10n/app_*.arb` updated, fixes #87)
+
+### Fixed
 - **Camera scanner error loop**: Controller listener catches errors from the `MobileScannerController` state before the widget's `ValueListenableBuilder` fires, preventing the overlay from flashing over the error message. `errorBuilder` is kept as a safety net with a post-frame callback to avoid mid-build `setState`. Duplicate `ScannerErrorContent` removed from `Stack` children. (`lib/screens/scanner_screen.dart`, fixes #76)
 - **Camera scanner `genericError` overwriting `permissionDenied`**: The controller listener's `_setError` guard (`if (_currentException != null) return`) prevents a later error from overwriting the first one, fixing the retry loop. (`lib/screens/scanner_screen.dart`, fixes #76)
 - **Missing `context.mounted` guard on `Navigator.pop`**: Added guard before `Navigator.of(context).pop()` in `onDetect` callback to prevent calling pop on a stale context. (`lib/screens/scanner_screen.dart`)
