@@ -237,7 +237,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get inventoryLoadFailed => 'Não foi possível carregar o estoque.';
 
   @override
-  String get expiryPrefix => 'Val';
+  String get expiryPrefix => 'Exp';
 
   @override
   String get switchPantry => 'Trocar despensa';
@@ -1195,6 +1195,126 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get unreleasedVersion => 'Nao lancado';
+
+  @override
+  String get categoryDairy => 'Laticinios';
+
+  @override
+  String get categoryMilks => 'Leites';
+
+  @override
+  String get categoryMilk => 'Leite';
+
+  @override
+  String get categoryYogurts => 'Iogurtes';
+
+  @override
+  String get categoryCheeses => 'Queijos';
+
+  @override
+  String get categoryEggsAndProducts => 'Ovos e derivados';
+
+  @override
+  String get categoryMeats => 'Carnes';
+
+  @override
+  String get categoryFishesAndSeafoods => 'Peixes e frutos do mar';
+
+  @override
+  String get categoryBeverages => 'Bebidas';
+
+  @override
+  String get categoryAlcoholicBeverages => 'Bebidas alcoolicas';
+
+  @override
+  String get categoryBreads => 'Paes';
+
+  @override
+  String get categoryCerealsAndPotatoes => 'Cereais e batatas';
+
+  @override
+  String get categoryFruitsAndVegetables => 'Alimentos a base de frutas e vegetais';
+
+  @override
+  String get categoryConfectioneries => 'Confeitaria';
+
+  @override
+  String get categorySugarySnacks => 'Lanches doces';
+
+  @override
+  String get categorySaltySnacks => 'Lanches salgados';
+
+  @override
+  String get categoryFats => 'Gorduras';
+
+  @override
+  String get categorySauces => 'Molhos';
+
+  @override
+  String get categorySoups => 'Sopas';
+
+  @override
+  String get categoryPreparedMeals => 'Pratos prontos';
+
+  @override
+  String get categoryFrozenFoods => 'Alimentos congelados';
+
+  @override
+  String get categoryDesserts => 'Sobremesas';
+
+  @override
+  String get categoryPastries => 'Pasteis';
+
+  @override
+  String get categoryBiscuitsAndCakes => 'Biscoitos e bolos';
+
+  @override
+  String get categoryPizzas => 'Pizzas';
+
+  @override
+  String get categorySandwiches => 'Sanduiches';
+
+  @override
+  String get categoryBabyFoods => 'Alimentos infantis';
+
+  @override
+  String get categoryDietaryFoods => 'Alimentos dieteticos';
+
+  @override
+  String get categorySpicesAndHerbs => 'Especiarias e ervas';
+
+  @override
+  String get categoryNutsAndProducts => 'Nozes e castanhas';
+
+  @override
+  String get categoryPlantBasedFoods => 'Alimentos vegetais';
+
+  @override
+  String get categoryLegumesAndProducts => 'Leguminosas e derivados';
+
+  @override
+  String get categoryCoffees => 'Cafes';
+
+  @override
+  String get categoryTeas => 'Chas';
+
+  @override
+  String get categoryChocolateProducts => 'Produtos de chocolate';
+
+  @override
+  String get categoryIceCreams => 'Sorvetes';
+
+  @override
+  String get categoryFruitJuices => 'Sucos de fruta';
+
+  @override
+  String get categorySodas => 'Refrigerantes';
+
+  @override
+  String get categoryWaters => 'Aguas';
+
+  @override
+  String get categoryMeatAndProducts => 'Carnes e derivados';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1430,7 +1550,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get inventoryLoadFailed => 'Não foi possível carregar o estoque.';
 
   @override
-  String get expiryPrefix => 'Val';
+  String get expiryPrefix => 'Exp';
 
   @override
   String get switchPantry => 'Trocar despensa';
@@ -2388,4 +2508,124 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get unreleasedVersion => 'Não lançado';
+
+  @override
+  String get categoryDairy => 'Laticínios';
+
+  @override
+  String get categoryMilks => 'Leites';
+
+  @override
+  String get categoryMilk => 'Leite';
+
+  @override
+  String get categoryYogurts => 'Iogurtes';
+
+  @override
+  String get categoryCheeses => 'Queijos';
+
+  @override
+  String get categoryEggsAndProducts => 'Ovos e derivados';
+
+  @override
+  String get categoryMeats => 'Carnes';
+
+  @override
+  String get categoryFishesAndSeafoods => 'Peixes e frutos do mar';
+
+  @override
+  String get categoryBeverages => 'Bebidas';
+
+  @override
+  String get categoryAlcoholicBeverages => 'Bebidas alcoólicas';
+
+  @override
+  String get categoryBreads => 'Pães';
+
+  @override
+  String get categoryCerealsAndPotatoes => 'Cereais e batatas';
+
+  @override
+  String get categoryFruitsAndVegetables => 'Alimentos à base de frutas e vegetais';
+
+  @override
+  String get categoryConfectioneries => 'Confeitaria';
+
+  @override
+  String get categorySugarySnacks => 'Lanches doces';
+
+  @override
+  String get categorySaltySnacks => 'Lanches salgados';
+
+  @override
+  String get categoryFats => 'Gorduras';
+
+  @override
+  String get categorySauces => 'Molhos';
+
+  @override
+  String get categorySoups => 'Sopas';
+
+  @override
+  String get categoryPreparedMeals => 'Pratos prontos';
+
+  @override
+  String get categoryFrozenFoods => 'Alimentos congelados';
+
+  @override
+  String get categoryDesserts => 'Sobremesas';
+
+  @override
+  String get categoryPastries => 'Pastéis';
+
+  @override
+  String get categoryBiscuitsAndCakes => 'Biscoitos e bolos';
+
+  @override
+  String get categoryPizzas => 'Pizzas';
+
+  @override
+  String get categorySandwiches => 'Sanduíches';
+
+  @override
+  String get categoryBabyFoods => 'Alimentos infantis';
+
+  @override
+  String get categoryDietaryFoods => 'Alimentos dietéticos';
+
+  @override
+  String get categorySpicesAndHerbs => 'Especiarias e ervas';
+
+  @override
+  String get categoryNutsAndProducts => 'Nozes e castanhas';
+
+  @override
+  String get categoryPlantBasedFoods => 'Alimentos vegetais';
+
+  @override
+  String get categoryLegumesAndProducts => 'Leguminosas e derivados';
+
+  @override
+  String get categoryCoffees => 'Cafés';
+
+  @override
+  String get categoryTeas => 'Chás';
+
+  @override
+  String get categoryChocolateProducts => 'Produtos de chocolate';
+
+  @override
+  String get categoryIceCreams => 'Sorvetes';
+
+  @override
+  String get categoryFruitJuices => 'Sucos de fruta';
+
+  @override
+  String get categorySodas => 'Refrigerantes';
+
+  @override
+  String get categoryWaters => 'Águas';
+
+  @override
+  String get categoryMeatAndProducts => 'Carnes e derivados';
 }

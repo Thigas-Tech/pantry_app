@@ -500,7 +500,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${stats.categoriesTop[i].category} '
+                    '${l10n.localizeCategory(stats.categoriesTop[i].category)} '
                     '(${stats.categoriesTop[i].count})',
                     style: theme.textTheme.bodySmall,
                   ),

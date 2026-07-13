@@ -1195,4 +1195,124 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unreleasedVersion => 'Unreleased';
+
+  @override
+  String get categoryDairy => 'Dairy';
+
+  @override
+  String get categoryMilks => 'Milks';
+
+  @override
+  String get categoryMilk => 'Milk';
+
+  @override
+  String get categoryYogurts => 'Yogurts';
+
+  @override
+  String get categoryCheeses => 'Cheeses';
+
+  @override
+  String get categoryEggsAndProducts => 'Eggs and their products';
+
+  @override
+  String get categoryMeats => 'Meats';
+
+  @override
+  String get categoryFishesAndSeafoods => 'Fishes and seafoods';
+
+  @override
+  String get categoryBeverages => 'Beverages';
+
+  @override
+  String get categoryAlcoholicBeverages => 'Alcoholic beverages';
+
+  @override
+  String get categoryBreads => 'Breads';
+
+  @override
+  String get categoryCerealsAndPotatoes => 'Cereals and potatoes';
+
+  @override
+  String get categoryFruitsAndVegetables => 'Fruits and vegetables based foods';
+
+  @override
+  String get categoryConfectioneries => 'Confectioneries';
+
+  @override
+  String get categorySugarySnacks => 'Sugary snacks';
+
+  @override
+  String get categorySaltySnacks => 'Salty snacks';
+
+  @override
+  String get categoryFats => 'Fats';
+
+  @override
+  String get categorySauces => 'Sauces';
+
+  @override
+  String get categorySoups => 'Soups';
+
+  @override
+  String get categoryPreparedMeals => 'Prepared meals';
+
+  @override
+  String get categoryFrozenFoods => 'Frozen foods';
+
+  @override
+  String get categoryDesserts => 'Desserts';
+
+  @override
+  String get categoryPastries => 'Pastries';
+
+  @override
+  String get categoryBiscuitsAndCakes => 'Biscuits and cakes';
+
+  @override
+  String get categoryPizzas => 'Pizzas';
+
+  @override
+  String get categorySandwiches => 'Sandwiches';
+
+  @override
+  String get categoryBabyFoods => 'Baby foods';
+
+  @override
+  String get categoryDietaryFoods => 'Dietary foods';
+
+  @override
+  String get categorySpicesAndHerbs => 'Spices and herbs';
+
+  @override
+  String get categoryNutsAndProducts => 'Nuts and their products';
+
+  @override
+  String get categoryPlantBasedFoods => 'Plant based foods';
+
+  @override
+  String get categoryLegumesAndProducts => 'Legumes and their products';
+
+  @override
+  String get categoryCoffees => 'Coffees';
+
+  @override
+  String get categoryTeas => 'Teas';
+
+  @override
+  String get categoryChocolateProducts => 'Chocolate products';
+
+  @override
+  String get categoryIceCreams => 'Ice creams';
+
+  @override
+  String get categoryFruitJuices => 'Fruit juices';
+
+  @override
+  String get categorySodas => 'Sodas';
+
+  @override
+  String get categoryWaters => 'Waters';
+
+  @override
+  String get categoryMeatAndProducts => 'Meat and their products';
 }

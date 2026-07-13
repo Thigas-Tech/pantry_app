@@ -68,4 +68,92 @@ extension AppLocalizationsX on AppLocalizations {
         return modeName;
     }
   }
+
+  /// Returns the localized name for a product category.
+  String localizeCategory(String category) {
+    switch (category) {
+      case 'Dairy':
+        return categoryDairy;
+      case 'Milks':
+        return categoryMilks;
+      case 'Milk':
+        return categoryMilk;
+      case 'Yogurts':
+        return categoryYogurts;
+      case 'Cheeses':
+        return categoryCheeses;
+      case 'Eggs and their products':
+        return categoryEggsAndProducts;
+      case 'Meats':
+        return categoryMeats;
+      case 'Fishes and seafoods':
+        return categoryFishesAndSeafoods;
+      case 'Beverages':
+        return categoryBeverages;
+      case 'Alcoholic beverages':
+        return categoryAlcoholicBeverages;
+      case 'Breads':
+        return categoryBreads;
+      case 'Cereals and potatoes':
+        return categoryCerealsAndPotatoes;
+      case 'Fruits and vegetables based foods':
+        return categoryFruitsAndVegetables;
+      case 'Confectioneries':
+        return categoryConfectioneries;
+      case 'Sugary snacks':
+        return categorySugarySnacks;
+      case 'Salty snacks':
+        return categorySaltySnacks;
+      case 'Fats':
+        return categoryFats;
+      case 'Sauces':
+        return categorySauces;
+      case 'Soups':
+        return categorySoups;
+      case 'Prepared meals':
+        return categoryPreparedMeals;
+      case 'Frozen foods':
+        return categoryFrozenFoods;
+      case 'Desserts':
+        return categoryDesserts;
+      case 'Pastries':
+        return categoryPastries;
+      case 'Biscuits and cakes':
+        return categoryBiscuitsAndCakes;
+      case 'Pizzas':
+        return categoryPizzas;
+      case 'Sandwiches':
+        return categorySandwiches;
+      case 'Baby foods':
+        return categoryBabyFoods;
+      case 'Dietary foods':
+        return categoryDietaryFoods;
+      case 'Spices and herbs':
+        return categorySpicesAndHerbs;
+      case 'Nuts and their products':
+        return categoryNutsAndProducts;
+      case 'Plant based foods':
+        return categoryPlantBasedFoods;
+      case 'Legumes and their products':
+        return categoryLegumesAndProducts;
+      case 'Coffees':
+        return categoryCoffees;
+      case 'Teas':
+        return categoryTeas;
+      case 'Chocolate products':
+        return categoryChocolateProducts;
+      case 'Ice creams':
+        return categoryIceCreams;
+      case 'Fruit juices':
+        return categoryFruitJuices;
+      case 'Sodas':
+        return categorySodas;
+      case 'Waters':
+        return categoryWaters;
+      case 'Meat and their products':
+        return categoryMeatAndProducts;
+      default:
+        return category;
+    }
+  }
 }
