@@ -18,11 +18,14 @@ class InventoriesDao {
     });
   }
 
-  /// Returns all inventories, ordered by creation time.
+  /// Returns all inventories with their item count, ordered by creation time.
   Future<List<Map<String, dynamic>>> list(Database db) {
     return db.rawQuery(
-      'SELECT id, name, created_at FROM inventories '
-      'ORDER BY created_at ASC',
+      'SELECT i.id, i.name, i.created_at, '
+      '(SELECT COUNT(*) FROM inventory '
+      '   WHERE inventory_id = i.id) AS item_count '
+      'FROM inventories i '
+      'ORDER BY i.created_at ASC',
     );
   }
 
