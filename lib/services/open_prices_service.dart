@@ -34,7 +34,7 @@ class SyncResult {
 /// ## Token-based auth
 ///
 /// The service reads the Bearer token from [OpenPricesApiClient] which
-/// defaults to the configured token (from `.env` or `SharedPreferences`).
+/// defaults to the configured token (from `.env` or shared preferences).
 /// If the token is empty, all API operations return empty/error results
 /// and the app works in local-only mode.
 ///

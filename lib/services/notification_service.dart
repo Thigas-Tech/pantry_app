@@ -21,7 +21,7 @@ const _inactivityReminderId = 999_999_001;
 /// Uses flutter_timezone to query the device's IANA timezone identifier
 /// and the timezone package for [tz.TZDateTime] math. The combination
 /// provides reliable timezone resolution on all platforms without the
-/// fragile `DateTime.now().timeZoneName` workaround.
+/// fragile [DateTime.timeZoneName] workaround.
 ///
 /// ## Notification IDs
 ///
@@ -29,7 +29,7 @@ const _inactivityReminderId = 999_999_001;
 /// - ID = `itemId * 2`      -> "Expiring soon" (1 day before)
 /// - ID = `itemId * 2 + 1`  -> "Expiring today" (on the expiry day)
 ///
-/// The ID scheme uses `itemId * 2` instead of `hashCode` to guarantee
+/// The ID scheme uses `itemId * 2` instead of [hashCode] to guarantee
 /// positivity (required by Android) and avoid collisions between items
 /// that share a barcode.
 ///

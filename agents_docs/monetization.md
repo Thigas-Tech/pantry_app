@@ -18,10 +18,10 @@ free-tier screens. Pro subscribers see no ads.
 
 ### Architecture
 
-See ARCHITECTURE.md 3.4 for the full architecture. Summary:
+See ARCHITECTURE/SERVICES.md for the full service architecture. Summary:
 
 - Package: `google_mobile_ads`
-- Provider: `adServiceProvider` (Riverpod)
+- Provider: planned `AdService` Riverpod provider
 - Widgets: `AdBanner` (banner), `SearchNativeAd` (native in Search)
 - Screens: Home, Product Detail, Settings, Stats (banner); Search (native, every 5th item)
 - Ad unit IDs: from `.env`, test IDs in debug, production IDs in release
@@ -160,4 +160,4 @@ Storage and restore it on a new device.
 - [Play Billing subscriptions](https://developer.android.com/google/play/billing/subscriptions)
 - [Firebase Flutter setup](https://firebase.flutter.dev/docs/overview)
 - [Firebase Storage](https://firebase.google.com/docs/storage)
-- [ARCHITECTURE.md 3.4–3.6](../../ARCHITECTURE.md)
+- [ARCHITECTURE/SERVICES.md](../../ARCHITECTURE/SERVICES.md)

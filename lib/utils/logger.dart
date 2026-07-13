@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 /// Colours use ANSI escape codes which work in most terminals. On platforms
 /// that do not support ANSI colours the messages still print normally.
 ///
-/// `_verbose` is `kDebugMode` — `true` in debug builds, `false` in release
+/// `_verbose` is [kDebugMode] — `true` in debug builds, `false` in release
 /// and profile builds. This means [logInfo] and [logDebug] calls are
 /// tree-shaken from release binaries entirely.
 const bool _verbose = kDebugMode;

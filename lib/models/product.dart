@@ -48,7 +48,7 @@ const String productSubmissionFailed = 'failed';
 /// ## Immutability
 ///
 /// This class uses the `freezed` package, making it **immutable**. Any
-/// modification must be done via the generated `copyWith` method, which
+/// modification must be done via the generated [copyWith] method, which
 /// returns a new instance.
 ///
 /// See also:
@@ -56,8 +56,8 @@ const String productSubmissionFailed = 'failed';
 ///   — the official Open Food Facts API client used to fetch and submit
 ///   product data.
 /// - [freezed](https://pub.dev/packages/freezed)
-///   — the code‑generation package that provides immutability, `copyWith`,
-///   `==`, `hashCode`, and JSON serialisation.
+///   — the code‑generation package that provides immutability, [copyWith],
+///   `==`, [hashCode], and JSON serialisation.
 @freezed
 abstract class Product with _$Product {
   /// Constructs a [Product].
