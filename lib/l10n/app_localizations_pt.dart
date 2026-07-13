@@ -194,7 +194,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get itemUpdated => 'Item atualizado.';
 
   @override
-  String get productUpdated => 'Product updated.';
+  String get productUpdated => 'Produto atualizado.';
 
   @override
   String get itemAdded => 'Item adicionado à despensa.';
@@ -276,13 +276,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notificationsDisabled => 'Notificações desativadas.';
 
   @override
-  String get notificationPermissionTitle => 'Notification Permission Required';
+  String get notificationPermissionTitle => 'Permissao de Notificacao Necessaria';
 
   @override
-  String get notificationPermissionBody => 'To receive expiry reminders, grant notification permission in your device settings.';
+  String get notificationPermissionBody => 'Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.';
 
   @override
-  String get openSettings => 'Open Settings';
+  String get openSettings => 'Abrir Configuracoes';
 
   @override
   String themeChanged(String theme) {
@@ -496,7 +496,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String showInLanguage(String language) {
-    return 'Show in $language';
+    return 'Mostrar em $language';
   }
 
   @override
@@ -830,241 +830,241 @@ class AppLocalizationsPt extends AppLocalizations {
   String get logsPrivacyNote => 'Os registros podem conter nomes de produtos e horarios.';
 
   @override
-  String get price => 'Price';
+  String get price => 'Preco';
 
   @override
-  String get prices => 'Prices';
+  String get prices => 'Precos';
 
   @override
-  String get addPrice => 'Add price';
+  String get addPrice => 'Adicionar preco';
 
   @override
-  String get editPrice => 'Edit price';
+  String get editPrice => 'Editar preco';
 
   @override
-  String get deletePrice => 'Delete price';
+  String get deletePrice => 'Excluir preco';
 
   @override
-  String get priceAdded => 'Price added.';
+  String get priceAdded => 'Preco adicionado.';
 
   @override
-  String get priceUpdated => 'Price updated.';
+  String get priceUpdated => 'Preco atualizado.';
 
   @override
-  String get priceDeleted => 'Price deleted.';
+  String get priceDeleted => 'Preco excluido.';
 
   @override
-  String get priceHistory => 'Price history';
+  String get priceHistory => 'Historico de precos';
 
   @override
-  String get noPrices => 'No prices recorded.';
+  String get noPrices => 'Nenhum preco registrado.';
 
   @override
-  String get totalValue => 'Total value';
+  String get totalValue => 'Valor total';
 
   @override
-  String get averagePrice => 'Average item price';
+  String get averagePrice => 'Preco medio';
 
   @override
-  String get showPrices => 'Show prices';
+  String get showPrices => 'Mostrar precos';
 
   @override
-  String get hidePrices => 'Hide prices for privacy';
+  String get hidePrices => 'Ocultar precos por privacidade';
 
   @override
-  String get hidePricesDescription => 'Replace price values with masked text everywhere, including the stats screen.';
+  String get hidePricesDescription => 'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
 
   @override
-  String get pricesHidden => 'Prices hidden.';
+  String get pricesHidden => 'Precos ocultos.';
 
   @override
-  String get pricesVisible => 'Prices visible.';
+  String get pricesVisible => 'Precos visiveis.';
 
   @override
-  String get priceTrackingEnabled => 'Enable price tracking';
+  String get priceTrackingEnabled => 'Ativar controle de precos';
 
   @override
-  String get priceRetentionDays => 'Price retention';
+  String get priceRetentionDays => 'Retencao de precos';
 
   @override
   String priceRetentionDaysValue(int days) {
-    return 'Keep prices for $days days (0 = keep forever)';
+    return 'Manter precos por $days dias (0 = manter para sempre)';
   }
 
   @override
-  String get currency => 'Currency';
+  String get currency => 'Moeda';
 
   @override
-  String get baseCurrency => 'Base currency';
+  String get baseCurrency => 'Moeda base';
 
   @override
-  String get baseCurrencyDescription => 'All prices are shown in this currency.';
+  String get baseCurrencyDescription => 'Todos os precos sao exibidos nesta moeda.';
 
   @override
-  String get store => 'Store';
+  String get store => 'Loja';
 
   @override
-  String get discounted => 'Discounted';
+  String get discounted => 'Com desconto';
 
   @override
-  String get regularPrice => 'Regular price';
+  String get regularPrice => 'Preco normal';
 
   @override
-  String get confirmDeletePrice => 'Delete this price entry?';
+  String get confirmDeletePrice => 'Excluir esta entrada de preco?';
 
   @override
-  String get syncToOpenPrices => 'Share with Open Prices';
+  String get syncToOpenPrices => 'Compartilhar com Open Prices';
 
   @override
-  String get syncToOpenPricesDescription => 'Contribute your price data to the community food-price database.';
+  String get syncToOpenPricesDescription => 'Contribua com seus dados de preco para o banco de dados comunitario.';
 
   @override
-  String get openPricesToken => 'Open Prices API Token';
+  String get openPricesToken => 'Token da API Open Prices';
 
   @override
-  String get openPricesTokenDescription => 'Token generated from your Open Food Facts account.';
+  String get openPricesTokenDescription => 'Token gerado da sua conta do Open Food Facts.';
 
   @override
-  String get openPricesTokenSaved => 'Token saved.';
+  String get openPricesTokenSaved => 'Token salvo.';
 
   @override
-  String get openPricesSyncStarted => 'Syncing prices...';
+  String get openPricesSyncStarted => 'Sincronizando precos...';
 
   @override
   String openPricesSyncComplete(int count) {
-    return '$count prices synced.';
+    return '$count precos sincronizados.';
   }
 
   @override
-  String get priceSyncStatus => 'Synced';
+  String get priceSyncStatus => 'Sincronizado';
 
   @override
-  String get priceSyncPending => 'Pending sync';
+  String get priceSyncPending => 'Sincronizacao pendente';
 
   @override
-  String get priceSyncFailed => 'Sync failed';
+  String get priceSyncFailed => 'Falha na sincronizacao';
 
   @override
-  String get priceTrendUp => 'Prices are rising';
+  String get priceTrendUp => 'Precos estao subindo';
 
   @override
-  String get priceTrendDown => 'Prices are falling';
+  String get priceTrendDown => 'Precos estao caindo';
 
   @override
-  String get priceTrendStable => 'Prices are stable';
+  String get priceTrendStable => 'Precos estaveis';
 
   @override
-  String get datePurchased => 'Purchase date';
+  String get datePurchased => 'Data da compra';
 
   @override
-  String get pricedItems => 'Items with prices';
+  String get pricedItems => 'Itens com precos';
 
   @override
   String itemWithPriceCount(int count, int total) {
-    return '$count of $total items have prices';
+    return '$count de $total itens tem precos';
   }
 
   @override
-  String get openPricesProofExplanation => 'To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.';
+  String get openPricesProofExplanation => 'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
 
   @override
-  String get openPricesConsentTitle => 'Contribute to Open Prices';
+  String get openPricesConsentTitle => 'Contribuir com Open Prices';
 
   @override
-  String get openPricesConsentBody => 'Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.';
+  String get openPricesConsentBody => 'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
 
   @override
-  String get iUnderstand => 'I understand';
+  String get iUnderstand => 'Entendi';
 
   @override
-  String get notes => 'Notes';
+  String get notes => 'Observacoes';
 
   @override
   String get navList => 'Lista';
 
   @override
-  String get shoppingList => 'Shopping List';
+  String get shoppingList => 'Lista de Compras';
 
   @override
-  String get addShoppingItem => 'Add item';
+  String get addShoppingItem => 'Adicionar item';
 
   @override
-  String get itemName => 'Item name';
+  String get itemName => 'Nome do item';
 
   @override
-  String get markPurchased => 'Mark purchased';
+  String get markPurchased => 'Marcar como comprado';
 
   @override
-  String get unmarkPurchased => 'Unmark purchased';
+  String get unmarkPurchased => 'Desmarcar comprado';
 
   @override
-  String get moveToInventory => 'Move to pantry';
+  String get moveToInventory => 'Mover para despensa';
 
   @override
-  String get addAgain => 'Add again';
+  String get addAgain => 'Adicionar de novo';
 
   @override
-  String get emptyShoppingList => 'Your shopping list is empty';
+  String get emptyShoppingList => 'Sua lista de compras esta vazia';
 
   @override
-  String get emptyShoppingListSub => 'Add items from a product or tap + to add manually';
+  String get emptyShoppingListSub => 'Adicione itens de um produto ou toque em + para adicionar manualmente';
 
   @override
-  String get deleteItem => 'Delete item';
+  String get deleteItem => 'Excluir item';
 
   @override
-  String get clearPurchased => 'Clear purchased';
+  String get clearPurchased => 'Limpar comprados';
 
   @override
-  String get clearPurchasedConfirm => 'Remove all purchased items?';
+  String get clearPurchasedConfirm => 'Remover todos os itens comprados?';
 
   @override
-  String get purchasedItems => 'Purchased';
+  String get purchasedItems => 'Comprados';
 
   @override
-  String get pendingItems => 'To buy';
+  String get pendingItems => 'Para comprar';
 
   @override
-  String get quickAddHint => 'Name, e.g. Milk';
+  String get quickAddHint => 'Nome, ex: Leite';
 
   @override
-  String get undoDeleteShoppingItem => 'Item deleted';
+  String get undoDeleteShoppingItem => 'Item excluido';
 
   @override
-  String get undoClearPurchased => 'Purchased items cleared';
+  String get undoClearPurchased => 'Itens comprados limpos';
 
   @override
-  String get shareShoppingList => 'Share shopping list';
+  String get shareShoppingList => 'Compartilhar lista';
 
   @override
-  String get add => 'Add';
+  String get add => 'Adicionar';
 
   @override
-  String get quantity => 'Quantity';
+  String get quantity => 'Quantidade';
 
   @override
-  String get addToShoppingList => 'Add to shopping list';
+  String get addToShoppingList => 'Adicionar a lista de compras';
 
   @override
-  String get addToShoppingListTooltip => 'Shopping list';
+  String get addToShoppingListTooltip => 'Lista de compras';
 
   @override
-  String get addToPantryAfterPrice => 'Add to your pantry?';
+  String get addToPantryAfterPrice => 'Adicionar a sua despensa?';
 
   @override
-  String get addToPantryAfterPriceDesc => 'Record the amount you bought to track it in your inventory.';
+  String get addToPantryAfterPriceDesc => 'Registre a quantidade comprada para acompanhar no seu estoque.';
 
   @override
-  String get howManyBought => 'How many did you buy?';
+  String get howManyBought => 'Quantas unidades voce comprou?';
 
   @override
-  String get choosePantry => 'Choose a pantry';
+  String get choosePantry => 'Escolher despensa';
 
   @override
-  String get addToPantrySkipped => 'Price saved. Add from product page to track inventory.';
+  String get addToPantrySkipped => 'Preco salvo. Adicione pela pagina do produto para acompanhar.';
 
   @override
-  String get invalidPriceAmount => 'Enter a valid price amount';
+  String get invalidPriceAmount => 'Digite um valor de preco valido';
 
   @override
   String get dismiss => 'Dispensar';
@@ -1076,19 +1076,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get scanFailed => 'Falha ao escanear codigo de barras.';
 
   @override
-  String get testNotification => 'Send test notification';
+  String get testNotification => 'Enviar notificacao de teste';
 
   @override
-  String get testScheduledNotification => 'Send scheduled test notification (2 min)';
+  String get testScheduledNotification => 'Enviar notificacao de teste agendada (2 min)';
 
   @override
-  String get testNotificationScheduled => 'Test notification scheduled.';
+  String get testNotificationScheduled => 'Notificacao de teste agendada.';
 
   @override
-  String get testNotificationSent => 'Test notification sent.';
+  String get testNotificationSent => 'Notificacao de teste enviada.';
 
   @override
-  String get testNotificationFailed => 'Failed to send test notification.';
+  String get testNotificationFailed => 'Falha ao enviar notificacao de teste.';
 
   @override
   String selectedCount(num count) {
@@ -1107,6 +1107,94 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noOtherInventories => 'Nenhuma outra despensa disponível.';
+
+  @override
+  String get themeModeSystem => 'Sistema';
+
+  @override
+  String get themeModeLight => 'Claro';
+
+  @override
+  String get themeModeDark => 'Escuro';
+
+  @override
+  String get defaultInventoryName => 'Casa';
+
+  @override
+  String get locationPantry => 'Despensa';
+
+  @override
+  String get locationFridge => 'Geladeira';
+
+  @override
+  String get locationFreezer => 'Freezer';
+
+  @override
+  String get unitPieces => 'unidades';
+
+  @override
+  String get unitGrams => 'g';
+
+  @override
+  String get unitKg => 'kg';
+
+  @override
+  String get unitMl => 'ml';
+
+  @override
+  String get unitLiter => 'L';
+
+  @override
+  String get generalNotificationChannelName => 'Notificacoes Gerais';
+
+  @override
+  String get generalNotificationChannelDescription => 'Notificacoes padrao do app';
+
+  @override
+  String get testNotificationTitle => 'Teste bem-sucedido';
+
+  @override
+  String get testNotificationBody => 'Notificacoes imediatas estao funcionando!';
+
+  @override
+  String get testScheduledTitle => 'Teste Agendado';
+
+  @override
+  String get testScheduledBody => 'Isso foi disparado 5 segundos depois.';
+
+  @override
+  String get retryNow => 'Tentar de novo agora';
+
+  @override
+  String get bearerTokenLabel => 'Token Bearer';
+
+  @override
+  String pendingFeedback(Object count) {
+    return 'Feedback pendente: $count';
+  }
+
+  @override
+  String submissionResult(Object failed, Object submitted) {
+    return 'Enviados $submitted, $failed falharam';
+  }
+
+  @override
+  String bytesUnit(Object bytes) {
+    return '$bytes B';
+  }
+
+  @override
+  String kbUnit(Object size) {
+    return '$size KB';
+  }
+
+  @override
+  String mbUnit(Object size) {
+    return '$size MB';
+  }
+
+  @override
+  String get unreleasedVersion => 'Nao lancado';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2181,6 +2269,21 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get scanFailed => 'Falha ao escanear codigo de barras.';
 
   @override
+  String get testNotification => 'Enviar notificação de teste';
+
+  @override
+  String get testScheduledNotification => 'Enviar notificação de teste agendada (2 min)';
+
+  @override
+  String get testNotificationScheduled => 'Notificação de teste agendada.';
+
+  @override
+  String get testNotificationSent => 'Notificação de teste enviada.';
+
+  @override
+  String get testNotificationFailed => 'Falha ao enviar notificação de teste.';
+
+  @override
   String selectedCount(num count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -2197,4 +2300,92 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get noOtherInventories => 'Nenhuma outra despensa disponível.';
+
+  @override
+  String get themeModeSystem => 'Sistema';
+
+  @override
+  String get themeModeLight => 'Claro';
+
+  @override
+  String get themeModeDark => 'Escuro';
+
+  @override
+  String get defaultInventoryName => 'Casa';
+
+  @override
+  String get locationPantry => 'Despensa';
+
+  @override
+  String get locationFridge => 'Geladeira';
+
+  @override
+  String get locationFreezer => 'Freezer';
+
+  @override
+  String get unitPieces => 'unidades';
+
+  @override
+  String get unitGrams => 'g';
+
+  @override
+  String get unitKg => 'kg';
+
+  @override
+  String get unitMl => 'ml';
+
+  @override
+  String get unitLiter => 'L';
+
+  @override
+  String get generalNotificationChannelName => 'Notificações Gerais';
+
+  @override
+  String get generalNotificationChannelDescription => 'Notificações padrão do app';
+
+  @override
+  String get testNotificationTitle => 'Teste bem-sucedido';
+
+  @override
+  String get testNotificationBody => 'Notificações imediatas estão funcionando!';
+
+  @override
+  String get testScheduledTitle => 'Teste Agendado';
+
+  @override
+  String get testScheduledBody => 'Isso foi disparado 5 segundos depois.';
+
+  @override
+  String get retryNow => 'Tentar de novo agora';
+
+  @override
+  String get bearerTokenLabel => 'Token Bearer';
+
+  @override
+  String pendingFeedback(Object count) {
+    return 'Feedback pendente: $count';
+  }
+
+  @override
+  String submissionResult(Object failed, Object submitted) {
+    return 'Enviados $submitted, $failed falharam';
+  }
+
+  @override
+  String bytesUnit(Object bytes) {
+    return '$bytes B';
+  }
+
+  @override
+  String kbUnit(Object size) {
+    return '$size KB';
+  }
+
+  @override
+  String mbUnit(Object size) {
+    return '$size MB';
+  }
+
+  @override
+  String get unreleasedVersion => 'Não lançado';
 }

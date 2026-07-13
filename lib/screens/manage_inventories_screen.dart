@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -59,7 +60,9 @@ class ManageInventoriesScreen extends ConsumerWidget {
                     inv['name'] as String,
                   ),
                   child: ListTile(
-                    title: Text(inv['name'] as String),
+                    title: Text(
+                      l10n.displayInventoryName(inv['name'] as String),
+                    ),
                     subtitle: Text(
                       l10n.itemsCount((inv['item_count'] as int?) ?? 0),
                     ),

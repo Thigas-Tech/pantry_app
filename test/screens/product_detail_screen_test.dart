@@ -485,11 +485,10 @@ void main() {
       overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
     );
 
-    // quantity is double, so 3 becomes "3.0"
-    expect(find.textContaining('3.0 L'), findsOneWidget);
-    expect(find.textContaining('fridge'), findsOneWidget);
-    expect(find.textContaining('1.0 pcs'), findsOneWidget);
-    expect(find.textContaining('pantry'), findsWidgets);
+    expect(find.textContaining('3 L'), findsOneWidget);
+    expect(find.textContaining('Fridge'), findsOneWidget);
+    expect(find.textContaining('1 pcs'), findsOneWidget);
+    expect(find.textContaining('Pantry'), findsWidgets);
   });
 
   // --------------------------------------------------------------------------
@@ -727,7 +726,7 @@ void main() {
       overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
     );
 
-    await tester.tap(find.textContaining('5.0'));
+    await tester.tap(find.textContaining('5 pcs'));
     await tester.pumpAndSettle();
 
     expect(find.byType(AlertDialog), findsOneWidget);
@@ -760,9 +759,8 @@ void main() {
       overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
     );
 
-    await tester.tap(find.textContaining('5.0'));
+    await tester.tap(find.textContaining('5 pcs'));
     await tester.pumpAndSettle();
-
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
     await tester.pumpAndSettle();
 

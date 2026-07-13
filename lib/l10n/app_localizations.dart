@@ -2165,6 +2165,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No other pantries available.'**
   String get noOtherInventories;
+
+  /// No description provided for @themeModeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeModeSystem;
+
+  /// No description provided for @themeModeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeModeLight;
+
+  /// No description provided for @themeModeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeModeDark;
+
+  /// No description provided for @defaultInventoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get defaultInventoryName;
+
+  /// No description provided for @locationPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get locationPantry;
+
+  /// No description provided for @locationFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fridge'**
+  String get locationFridge;
+
+  /// No description provided for @locationFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezer'**
+  String get locationFreezer;
+
+  /// No description provided for @unitPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'pieces'**
+  String get unitPieces;
+
+  /// No description provided for @unitGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get unitGrams;
+
+  /// No description provided for @unitKg.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get unitKg;
+
+  /// No description provided for @unitMl.
+  ///
+  /// In en, this message translates to:
+  /// **'ml'**
+  String get unitMl;
+
+  /// No description provided for @unitLiter.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get unitLiter;
+
+  /// No description provided for @generalNotificationChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'General Notifications'**
+  String get generalNotificationChannelName;
+
+  /// No description provided for @generalNotificationChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard app notifications'**
+  String get generalNotificationChannelDescription;
+
+  /// No description provided for @testNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Successful'**
+  String get testNotificationTitle;
+
+  /// No description provided for @testNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediate notifications are working!'**
+  String get testNotificationBody;
+
+  /// No description provided for @testScheduledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled Test'**
+  String get testScheduledTitle;
+
+  /// No description provided for @testScheduledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This fired 5 seconds later.'**
+  String get testScheduledBody;
+
+  /// No description provided for @retryNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry now'**
+  String get retryNow;
+
+  /// No description provided for @bearerTokenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bearer token'**
+  String get bearerTokenLabel;
+
+  /// No description provided for @pendingFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending feedback: {count}'**
+  String pendingFeedback(Object count);
+
+  /// No description provided for @submissionResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {submitted}, {failed} failed'**
+  String submissionResult(Object failed, Object submitted);
+
+  /// No description provided for @bytesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} B'**
+  String bytesUnit(Object bytes);
+
+  /// No description provided for @kbUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String kbUnit(Object size);
+
+  /// No description provided for @mbUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String mbUnit(Object size);
+
+  /// No description provided for @unreleasedVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreleased'**
+  String get unreleasedVersion;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

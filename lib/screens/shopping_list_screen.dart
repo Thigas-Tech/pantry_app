@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
@@ -203,7 +204,8 @@ class _ShareButton extends ConsumerWidget {
           buffer.writeln('${l10n.pendingItems}:');
           for (final item in pending) {
             buffer.writeln(
-              '- ${item.name} (${_formatQuantity(item.quantity)} ${item.unit})',
+              '- ${item.name} (${_formatQuantity(item.quantity)} '
+              '${l10n.localizeUnit(item.unit)})',
             );
           }
           buffer.writeln();
@@ -362,7 +364,7 @@ class _ShoppingItemTile extends ConsumerWidget {
               : null,
         ),
         subtitle: Text(
-          '${_formatQuantity(item.quantity)} ${item.unit}',
+          '${_formatQuantity(item.quantity)} ${l10n.localizeUnit(item.unit)}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 
 /// Holds the result of [QuantityAndPantrySheet].
@@ -117,7 +118,11 @@ class _QuantityAndPantrySheetState
                       .map(
                         (inv) => DropdownMenuItem<int>(
                           value: inv['id'] as int,
-                          child: Text(inv['name'] as String? ?? ''),
+                          child: Text(
+                            l10n.displayInventoryName(
+                              inv['name'] as String? ?? '',
+                            ),
+                          ),
                         ),
                       )
                       .toList(),

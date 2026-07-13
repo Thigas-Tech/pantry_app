@@ -138,7 +138,7 @@ class _VersionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final displayVersion = entry.version == ChangelogParser.unreleasedVersion
-        ? 'Unreleased'
+        ? l10n.unreleasedVersion
         : entry.version;
 
     return Text(

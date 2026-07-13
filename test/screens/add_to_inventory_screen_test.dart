@@ -32,7 +32,7 @@ void main() {
       final quantityField = find.widgetWithText(TextFormField, '1.0');
       expect(quantityField, findsOneWidget);
       expect(find.text('pieces'), findsOneWidget);
-      expect(find.text('pantry'), findsOneWidget);
+      expect(find.text('Pantry'), findsOneWidget);
       expect(find.text('Expiry date (optional)'), findsOneWidget);
       expect(
         find.widgetWithText(ElevatedButton, 'Add to Pantry'),
@@ -97,12 +97,12 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(0), '3');
       await tester.tap(find.byType(DropdownButtonFormField<String>).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('kg').last);
+      await tester.tap(find.textContaining('kg').last);
       await tester.pumpAndSettle();
 
       await tester.tap(find.byType(DropdownButtonFormField<String>).last);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('freezer').last);
+      await tester.tap(find.text('Freezer').last);
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextFormField).last, 'Keep frozen');
@@ -212,7 +212,7 @@ void main() {
 
       expect(find.widgetWithText(TextFormField, '2.0'), findsOneWidget);
       expect(find.text('L'), findsOneWidget);
-      expect(find.text('fridge'), findsOneWidget);
+      expect(find.text('Fridge'), findsOneWidget);
       expect(find.textContaining('Exp: 2027-06-15'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'some notes'), findsOneWidget);
       expect(

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
@@ -211,8 +212,8 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
 
   Widget _buildSubtitle(AppLocalizations l10n) {
     final sb = StringBuffer()
-      ..write('${widget.item.quantity} ${widget.item.unit}')
-      ..write(' · ${widget.item.location}');
+      ..write('${widget.item.quantity} ${l10n.localizeUnit(widget.item.unit)}')
+      ..write(' · ${l10n.localizeLocation(widget.item.location)}');
     if (widget.item.expiryDate != null) {
       sb.write(' · ${l10n.expiryPrefix}: ${widget.item.expiryDate}');
     }

@@ -1107,4 +1107,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noOtherInventories => 'No other pantries available.';
+
+  @override
+  String get themeModeSystem => 'System';
+
+  @override
+  String get themeModeLight => 'Light';
+
+  @override
+  String get themeModeDark => 'Dark';
+
+  @override
+  String get defaultInventoryName => 'Home';
+
+  @override
+  String get locationPantry => 'Pantry';
+
+  @override
+  String get locationFridge => 'Fridge';
+
+  @override
+  String get locationFreezer => 'Freezer';
+
+  @override
+  String get unitPieces => 'pieces';
+
+  @override
+  String get unitGrams => 'g';
+
+  @override
+  String get unitKg => 'kg';
+
+  @override
+  String get unitMl => 'ml';
+
+  @override
+  String get unitLiter => 'L';
+
+  @override
+  String get generalNotificationChannelName => 'General Notifications';
+
+  @override
+  String get generalNotificationChannelDescription => 'Standard app notifications';
+
+  @override
+  String get testNotificationTitle => 'Test Successful';
+
+  @override
+  String get testNotificationBody => 'Immediate notifications are working!';
+
+  @override
+  String get testScheduledTitle => 'Scheduled Test';
+
+  @override
+  String get testScheduledBody => 'This fired 5 seconds later.';
+
+  @override
+  String get retryNow => 'Retry now';
+
+  @override
+  String get bearerTokenLabel => 'Bearer token';
+
+  @override
+  String pendingFeedback(Object count) {
+    return 'Pending feedback: $count';
+  }
+
+  @override
+  String submissionResult(Object failed, Object submitted) {
+    return 'Submitted $submitted, $failed failed';
+  }
+
+  @override
+  String bytesUnit(Object bytes) {
+    return '$bytes B';
+  }
+
+  @override
+  String kbUnit(Object size) {
+    return '$size KB';
+  }
+
+  @override
+  String mbUnit(Object size) {
+    return '$size MB';
+  }
+
+  @override
+  String get unreleasedVersion => 'Unreleased';
 }

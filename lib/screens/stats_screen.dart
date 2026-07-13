@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -547,7 +548,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 SizedBox(
                   width: 80,
                   child: Text(
-                    entry.key,
+                    l10n.localizeLocation(entry.key),
                     style: theme.textTheme.bodyMedium,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
