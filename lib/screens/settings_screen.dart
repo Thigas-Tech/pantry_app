@@ -86,7 +86,13 @@ class SettingsScreen extends ConsumerWidget {
                   final notifService = ref.read(notificationServiceProvider);
                   final granted = await notifService.requestPermission();
                   if (granted != false) {
-                    await notifService.showTestNotification();
+                    await notifService.showTestNotification(
+                      title: l10n.testNotificationTitle,
+                      body: l10n.testNotificationBody,
+                      channelName: l10n.generalNotificationChannelName,
+                      channelDescription:
+                          l10n.generalNotificationChannelDescription,
+                    );
                     if (context.mounted) {
                       SnackbarHelper.showInfo(
                         context,
@@ -102,7 +108,13 @@ class SettingsScreen extends ConsumerWidget {
                   final notifService = ref.read(notificationServiceProvider);
                   final granted = await notifService.requestPermission();
                   if (granted != false) {
-                    await notifService.scheduleTestNotification();
+                    await notifService.scheduleTestNotification(
+                      title: l10n.testScheduledTitle,
+                      body: l10n.testScheduledBody,
+                      channelName: l10n.generalNotificationChannelName,
+                      channelDescription:
+                          l10n.generalNotificationChannelDescription,
+                    );
                     if (context.mounted) {
                       SnackbarHelper.showInfo(
                         context,

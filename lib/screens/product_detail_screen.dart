@@ -657,6 +657,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// latest product-add date from the database.
   Future<void> _rescheduleInactivityReminder() async {
     try {
+      final l10n = AppLocalizations.of(context)!;
       final notificationService = ref.read(notificationServiceProvider);
       await notificationService.cancelInactivityReminder();
       final db = ref.read(databaseProvider);
@@ -665,10 +666,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       await notificationService.scheduleInactivityReminder(
         lastAddDateEpoch: lastAddDateEpoch,
         thresholdDays: settings.inactivityThresholdDays,
-        title: 'Time to restock your pantry?',
-        buildBody: (days) => 'You have not added any products in $days days.',
-        channelName: 'Inactivity reminders',
-        channelDescription: 'Reminds you to add products regularly',
+        title: l10n.inactivityReminderTitle,
+        buildBody: l10n.inactivityReminderBody,
+        channelName: l10n.inactivityReminderChannelName,
+        channelDescription: l10n.inactivityReminderChannelDescription,
         notificationsEnabled: settings.notificationsEnabled,
       );
     } on Exception catch (e) {

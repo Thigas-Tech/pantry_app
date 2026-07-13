@@ -368,13 +368,18 @@ Future<void> _rescheduleNotifications() async {
       return;
     }
 
-    // TODO(thiago): localize these strings once l10n is available at startup
+    final locale = PlatformDispatcher.instance.locale;
+    final l10n = lookupAppLocalizations(
+      <String>{'en', 'pt'}.contains(locale.languageCode)
+          ? locale
+          : const Locale('en'),
+    );
     await notifService.rescheduleAllItems(
       items,
-      expiringSoonTitle: 'Expiring soon',
-      expiringTodayTitle: 'Food expiring today',
-      buildExpiringSoonBody: (barcode) => '$barcode expires tomorrow',
-      buildExpiringTodayBody: (barcode) => '$barcode expires today!',
+      expiringSoonTitle: l10n.expiringSoon,
+      expiringTodayTitle: l10n.expiringToday,
+      buildExpiringSoonBody: l10n.expiresTomorrow,
+      buildExpiringTodayBody: l10n.expiresToday,
       notificationsEnabled: notificationsEnabled,
     );
     logInfo('Notification reschedule completed');
@@ -410,13 +415,19 @@ Future<void> _scheduleInactivityReminder() async {
       return;
     }
 
+    final locale = PlatformDispatcher.instance.locale;
+    final l10n = lookupAppLocalizations(
+      <String>{'en', 'pt'}.contains(locale.languageCode)
+          ? locale
+          : const Locale('en'),
+    );
     await notifService.scheduleInactivityReminder(
       lastAddDateEpoch: lastAddDateEpoch,
       thresholdDays: inactivityThresholdDays,
-      title: 'Time to restock your pantry?',
-      buildBody: (days) => 'You have not added any products in $days days.',
-      channelName: 'Inactivity reminders',
-      channelDescription: 'Reminds you to add products regularly',
+      title: l10n.inactivityReminderTitle,
+      buildBody: l10n.inactivityReminderBody,
+      channelName: l10n.inactivityReminderChannelName,
+      channelDescription: l10n.inactivityReminderChannelDescription,
       notificationsEnabled: notificationsEnabled,
     );
     logInfo('Inactivity reminder scheduling completed');

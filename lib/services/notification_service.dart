@@ -84,6 +84,8 @@ class NotificationService {
     DidReceiveNotificationResponseCallback? onDidReceiveResponse,
     DidReceiveBackgroundNotificationResponseCallback?
     onDidReceiveBackgroundResponse,
+    String channelName = 'Expiry reminders',
+    String channelDescription = 'Warns about expiring food',
   }) async {
     if (_initialized) {
       logInfo('Notification service already initialised');
@@ -99,7 +101,10 @@ class NotificationService {
     logInfo('Timezone set to ${location.name}');
 
     try {
-      await ensureNotificationChannel();
+      await ensureNotificationChannel(
+        channelName: channelName,
+        channelDescription: channelDescription,
+      );
     } on Exception catch (e) {
       logWarning('Failed to create notification channel: $e');
       return;
@@ -130,11 +135,14 @@ class NotificationService {
   ///
   /// Uses [AndroidNotificationChannelAction.createIfNotExists] so existing
   /// user-configured channel settings are never overwritten.
-  Future<void> ensureInactivityChannel() async {
-    const channel = AndroidNotificationChannel(
+  Future<void> ensureInactivityChannel({
+    String channelName = 'Inactivity reminders',
+    String channelDescription = 'Reminds you to add products regularly',
+  }) async {
+    final channel = AndroidNotificationChannel(
       'inactivity_channel',
-      'Inactivity reminders',
-      description: 'Reminds you to add products regularly',
+      channelName,
+      description: channelDescription,
       importance: Importance.low,
     );
 
@@ -158,11 +166,14 @@ class NotificationService {
   /// existing user-configured channel settings are never overwritten.
   /// Should be called during [initialize] before any notification is
   /// scheduled.
-  Future<void> ensureNotificationChannel() async {
-    const channel = AndroidNotificationChannel(
+  Future<void> ensureNotificationChannel({
+    String channelName = 'Expiry reminders',
+    String channelDescription = 'Warns about expiring food',
+  }) async {
+    final channel = AndroidNotificationChannel(
       'expiry_channel',
-      'Expiry reminders',
-      description: 'Warns about expiring food',
+      channelName,
+      description: channelDescription,
       importance: Importance.high,
     );
 
@@ -319,12 +330,15 @@ class NotificationService {
   }
 
   /// The standard notification channel details
-  NotificationDetails _getChannelDetails() {
-    return const NotificationDetails(
+  NotificationDetails _getChannelDetails({
+    String channelName = 'General Notifications',
+    String channelDescription = 'Standard app notifications',
+  }) {
+    return NotificationDetails(
       android: AndroidNotificationDetails(
-        'pantry_general_channel', // ID
-        'General Notifications', // Name
-        channelDescription: 'Standard app notifications',
+        'pantry_general_channel',
+        channelName,
+        channelDescription: channelDescription,
         importance: Importance.max,
         priority: Priority.high,
         icon: 'ic_notification',
@@ -333,27 +347,43 @@ class NotificationService {
   }
 
   /// Sends an immediate test notification.
-  Future<void> showTestNotification() async {
+  Future<void> showTestNotification({
+    String title = 'Test Successful',
+    String body = 'Immediate notifications are working!',
+    String channelName = 'General Notifications',
+    String channelDescription = 'Standard app notifications',
+  }) async {
     await _plugin.show(
       id: 0,
-      title: 'Test Successful',
-      body: 'Immediate notifications are working!',
-      notificationDetails: _getChannelDetails(),
+      title: title,
+      body: body,
+      notificationDetails: _getChannelDetails(
+        channelName: channelName,
+        channelDescription: channelDescription,
+      ),
     );
   }
 
   /// Schedules a test notification for 5 seconds from now.
-  Future<void> scheduleTestNotification() async {
+  Future<void> scheduleTestNotification({
+    String title = 'Scheduled Test',
+    String body = 'This fired 5 seconds later.',
+    String channelName = 'General Notifications',
+    String channelDescription = 'Standard app notifications',
+  }) async {
     final scheduledTime = tz.TZDateTime.now(
       tz.local,
     ).add(const Duration(seconds: 5));
 
     await _plugin.zonedSchedule(
       id: 1,
-      title: 'Scheduled Test',
-      body: 'This fired 5 seconds later.',
+      title: title,
+      body: body,
       scheduledDate: scheduledTime,
-      notificationDetails: _getChannelDetails(),
+      notificationDetails: _getChannelDetails(
+        channelName: channelName,
+        channelDescription: channelDescription,
+      ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
@@ -398,7 +428,10 @@ class NotificationService {
       return;
     }
 
-    await ensureInactivityChannel();
+    await ensureInactivityChannel(
+      channelName: channelName,
+      channelDescription: channelDescription,
+    );
 
     final lastAddDate = DateTime.fromMillisecondsSinceEpoch(lastAddDateEpoch);
     final now = DateTime.now();
