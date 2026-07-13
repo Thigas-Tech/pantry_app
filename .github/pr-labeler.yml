@@ -1,37 +1,31 @@
-# PR labeler config for release-drafter/release-drafter.
-#
-# Labels are applied based on which files are changed in a PR.
-# Order matters: the last matching rule wins for each label.
+documentation:
+- changed-files:
+  - any-glob-to-any-file:
+    - '*.md'
+    - '*.mdx'
 
-labels:
-  - label: documentation
-    files:
-      - "*.md"
-      - "*.mdx"
+translation:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'lib/l10n/*.arb'
 
-  - label: translation
-    files:
-      - "lib/l10n/*.arb"
+dependencies:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'pubspec.yaml'
+    - 'pubspec.lock'
 
-  - label: dependencies
-    files:
-      - "pubspec.yaml"
-      - "pubspec.lock"
+github_actions:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.github/workflows/*'
 
-  - label: github_actions
-    files:
-      - ".github/workflows/*"
+bug:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'lib/**/*.dart'
 
-  - label: bug
-    files:
-      - "lib/**/*.dart"
-    title:
-      - "fix:"
-      - "bug:"
-
-  - label: enhancement
-    files:
-      - "lib/**/*.dart"
-    title:
-      - "feat:"
-      - "feature:"
+enhancement:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'lib/**/*.dart'
