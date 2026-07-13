@@ -122,7 +122,7 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
                 controller: _amountCtrl,
                 decoration: InputDecoration(
                   labelText: l10n.price,
-                  prefixText: '$_currency ',
+                  prefixText: '${currencySymbolFor(_currency)} ',
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,

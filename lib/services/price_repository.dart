@@ -76,11 +76,12 @@ class PriceRepository {
     try {
       return NumberFormat.currency(
         name: currencyCode,
-        decimalDigits: 2,
+        symbol: currencySymbolFor(currencyCode),
+        decimalDigits: decimalDigitsFor(currencyCode),
       ).format(amount);
     } on Exception catch (e) {
       logWarning('Currency format error for $currencyCode: $e');
-      return '$currencyCode ${amount.toStringAsFixed(2)}';
+      return '${currencySymbolFor(currencyCode)} ${amount.toStringAsFixed(2)}';
     }
   }
 

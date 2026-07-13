@@ -74,7 +74,7 @@ void main() {
 
     expect(find.text('Store A'), findsOneWidget);
     expect(find.text('Store B'), findsOneWidget);
-    expect(find.text('USD 10.50'), findsOneWidget);
-    expect(find.text('USD 5.00'), findsOneWidget);
+    expect(find.text(r'$10.50'), findsOneWidget);
+    expect(find.text(r'$5.00'), findsOneWidget);
   });
 }
