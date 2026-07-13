@@ -7,24 +7,19 @@ import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
+import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// Displays the user's shopping list with pending and purchased sections.
-///
-/// Items can be toggled as purchased, deleted, or cleared in bulk.
-/// Formats a [quantity] for display, showing decimals only when needed.
 String _formatQuantity(double quantity) {
   return quantity == quantity.toInt()
       ? quantity.toInt().toString()
       : quantity.toString();
 }
 
-/// The main shopping list screen.
-///
-/// Displays pending and purchased shopping items. A FAB opens the
-/// quick-add dialog. The share button exports the list as text to
-/// other apps.
+/// The main shopping list screen with price tracking and move-to-inventory.
 class ShoppingListScreen extends ConsumerStatefulWidget {
   /// Creates a [ShoppingListScreen] widget.
   const ShoppingListScreen({super.key});
@@ -47,83 +42,95 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen>
       appBar: AppBar(
         title: Text(l10n.shoppingList),
         actions: [
+          _MoveToInventoryButton(),
           _ClearPurchasedButton(),
           _ShareButton(),
         ],
       ),
       body: _ShoppingListBody(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddDialog(context, l10n),
+        onPressed: () => unawaited(_showAddSheet(context)),
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  Future<void> _showAddDialog(BuildContext context, AppLocalizations l10n) {
-    final nameController = TextEditingController();
-    final quantityController = TextEditingController(text: '1');
-    final formKey = GlobalKey<FormState>();
+  Future<void> _showAddSheet(BuildContext context) async {
+    final item = await AddToShoppingListSheet.show(context);
+    if (item != null && context.mounted) {
+      await addShoppingItem(ref, item);
+    }
+  }
+}
 
-    return showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.addShoppingItem),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: l10n.quickAddHint,
-                  labelText: l10n.itemName,
-                ),
-                autofocus: true,
-                validator: (v) =>
-                    (v?.trim().isEmpty ?? true) ? l10n.requiredField : null,
+/// Button that moves purchased items (with barcodes) to the active inventory.
+class _MoveToInventoryButton extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final purchasedAsync = ref.watch(purchasedShoppingListProvider);
+    final purchased = purchasedAsync.asData?.value ?? [];
+
+    final movableItems = purchased.where(
+      (i) => i.barcode != null && i.barcode!.isNotEmpty,
+    );
+    if (movableItems.isEmpty) return const SizedBox.shrink();
+
+    final barcodeCount = movableItems.length;
+    final skipped = purchased.length - barcodeCount;
+
+    return IconButton(
+      icon: const Icon(Icons.move_to_inbox),
+      tooltip: l10n.addToInventoryFromList,
+      onPressed: () async {
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l10n.addToInventoryFromList),
+            content: Text(
+              l10n.addToInventoryConfirm(barcodeCount, skipped),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.cancel),
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: quantityController,
-                decoration: InputDecoration(
-                  labelText: l10n.quantity,
-                ),
-                keyboardType: TextInputType.number,
-                validator: (v) {
-                  final qty = double.tryParse(v ?? '');
-                  if (qty == null || qty < 1) return l10n.requiredField;
-                  return null;
-                },
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.addToInventoryFromList),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final item = ShoppingItem(
-                name: nameController.text.trim(),
-                quantity: double.parse(quantityController.text.trim()),
-              );
-              await addShoppingItem(ref, item);
-              if (!ctx.mounted) return;
-              Navigator.pop(ctx);
-            },
-            child: Text(l10n.add),
-          ),
-        ],
-      ),
+        );
+        if (confirm != true) return;
+
+        try {
+          final result = await movePurchasedToInventory(ref);
+          if (!context.mounted) return;
+          SnackbarHelper.showUndo(
+            context,
+            l10n.itemsMovedToInventory(result.movedCount),
+            () {},
+          );
+          if (result.skippedCount > 0) {
+            SnackbarHelper.showInfo(
+              context,
+              l10n.itemsSkippedNoBarcode(result.skippedCount),
+            );
+          }
+        } on Exception {
+          if (context.mounted) {
+            SnackbarHelper.showError(
+              context,
+              l10n.couldNotCreateInventory,
+            );
+          }
+        }
+      },
     );
   }
 }
 
-/// Button that clears all purchased items with an undo snackbar.
 class _ClearPurchasedButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -179,7 +186,6 @@ class _ClearPurchasedButton extends ConsumerWidget {
   }
 }
 
-/// Button that shares the shopping list as plain text via share_plus.
 class _ShareButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -227,10 +233,6 @@ class _ShareButton extends ConsumerWidget {
   }
 }
 
-/// The main body of the shopping list screen.
-///
-/// Shows pending items first, then purchased items. Both sections are
-/// wrapped with headers. An empty state is shown when the list has no items.
 class _ShoppingListBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -277,34 +279,91 @@ class _ShoppingListBody extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 80),
       children: [
         if (pending.isNotEmpty) ...[
-          _SectionHeader(title: l10n.pendingItems, itemCount: pending.length),
+          _SectionHeader(
+            title: l10n.pendingItems,
+            itemCount: pending.length,
+            totalText: _buildTotalText(context, pending),
+          ),
           ...pending.map((item) => _ShoppingItemTile(item: item)),
         ],
         if (purchased.isNotEmpty) ...[
           _SectionHeader(
             title: l10n.purchasedItems,
             itemCount: purchased.length,
+            totalText: _buildTotalText(context, purchased),
           ),
           ...purchased.map((item) => _ShoppingItemTile(item: item)),
         ],
       ],
     );
   }
+
+  String? _buildTotalText(BuildContext context, List<ShoppingItem> items) {
+    final l10n = AppLocalizations.of(context)!;
+    final priced = items
+        .where(
+          (i) =>
+              i.priceAmount != null &&
+              i.priceAmount! > 0 &&
+              i.priceCurrency != null,
+        )
+        .toList();
+
+    if (priced.isEmpty) return null;
+    if (priced.length == 1) {
+      final item = priced.first;
+      final symbol = currencySymbolFor(item.priceCurrency!);
+      return l10n.shoppingTotal(
+        '$symbol${item.priceAmount!.toStringAsFixed(2)}',
+      );
+    }
+
+    final groups = <String, double>{};
+    for (final item in priced) {
+      groups.update(
+        item.priceCurrency!,
+        (v) => v + item.priceAmount!,
+        ifAbsent: () => item.priceAmount!,
+      );
+    }
+
+    if (groups.length == 1) {
+      final entry = groups.entries.first;
+      final symbol = currencySymbolFor(entry.key);
+      return l10n.shoppingTotal(
+        '$symbol${entry.value.toStringAsFixed(2)}',
+      );
+    }
+
+    final parts = groups.entries.map((e) {
+      final symbol = currencySymbolFor(e.key);
+      return '$symbol${e.value.toStringAsFixed(2)}';
+    });
+    return l10n.shoppingMixedCurrency(parts.join(' + '));
+  }
 }
 
-/// Header label for a section (pending / purchased).
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.itemCount});
+  const _SectionHeader({
+    required this.title,
+    required this.itemCount,
+    this.totalText,
+  });
 
   final String title;
   final int itemCount;
+  final String? totalText;
 
   @override
   Widget build(BuildContext context) {
+    final label = totalText != null
+        ? '$title ($itemCount) — $totalText'
+        : '$title ($itemCount)';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
       child: Text(
-        '$title ($itemCount)',
+        label,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
           color: Theme.of(context).colorScheme.primary,
         ),
@@ -313,8 +372,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// A single shopping list item row with checkbox, name, quantity, and
-/// swipe-to-delete.
 class _ShoppingItemTile extends ConsumerWidget {
   const _ShoppingItemTile({required this.item});
 
@@ -363,15 +420,23 @@ class _ShoppingItemTile extends ConsumerWidget {
                 )
               : null,
         ),
-        subtitle: Text(
-          '${_formatQuantity(item.quantity)} ${l10n.localizeUnit(item.unit)}',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
+        subtitle: _buildSubtitle(context, l10n),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (!item.isPurchased)
+              IconButton(
+                icon: Icon(
+                  item.priceAmount != null
+                      ? Icons.attach_money
+                      : Icons.attach_money_outlined,
+                  size: 20,
+                ),
+                tooltip: item.priceAmount != null
+                    ? l10n.removePrice
+                    : l10n.addPrice,
+                onPressed: () => _showPriceEntry(context, ref),
+              ),
             if (item.isPurchased)
               TextButton.icon(
                 icon: const Icon(Icons.add_shopping_cart, size: 18),
@@ -402,5 +467,96 @@ class _ShoppingItemTile extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildSubtitle(BuildContext context, AppLocalizations l10n) {
+    final quantityText =
+        '${_formatQuantity(item.quantity)} ${l10n.localizeUnit(item.unit)}';
+
+    if (item.priceAmount != null) {
+      final symbol = currencySymbolFor(item.priceCurrency ?? 'USD');
+      final priceText = '$symbol${item.priceAmount!.toStringAsFixed(2)}';
+      final store = item.priceStore;
+      final priceStr = store != null ? '$priceText — $store' : priceText;
+      return Text(
+        '$quantityText — $priceStr',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      );
+    }
+
+    return Text(
+      quantityText,
+      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+
+  Future<void> _showPriceEntry(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (item.priceAmount != null) {
+      final action = await showModalBottomSheet<String>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: Text(l10n.addPrice),
+                onTap: () => Navigator.pop(ctx, 'edit'),
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.remove_circle_outline,
+                  color: Colors.red,
+                ),
+                title: Text(l10n.removePrice),
+                onTap: () => Navigator.pop(ctx, 'remove'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (action == 'remove') {
+        await updateShoppingItemPrice(ref, item.id!);
+        if (context.mounted) {
+          SnackbarHelper.showInfo(context, l10n.removePrice);
+        }
+        return;
+      }
+      if (action != 'edit') return;
+    }
+
+    if (!context.mounted) return;
+
+    final price = await PriceEntrySheet.show(
+      context,
+      barcode: item.barcode ?? '',
+      existingAmount: item.priceAmount,
+      existingCurrency: item.priceCurrency,
+      existingStore: item.priceStore,
+    );
+
+    if (price == null) return;
+
+    await updateShoppingItemPrice(
+      ref,
+      item.id!,
+      priceAmount: price.price,
+      priceCurrency: price.currency,
+      priceStore: price.store,
+    );
+
+    if (context.mounted) {
+      SnackbarHelper.showInfo(context, l10n.addPrice);
+    }
   }
 }

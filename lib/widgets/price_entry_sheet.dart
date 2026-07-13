@@ -17,12 +17,15 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 ///
 /// Example:
 /// ```dart
-/// final price = await PriceEntrySheet.show(context, barcode: barcode);
+/// final price = await PriceEntrySheet.show(context, barcode: '123');
 /// ```
 class PriceEntrySheet extends ConsumerStatefulWidget {
   const PriceEntrySheet._({
     required this.barcode,
     this.existingPrice,
+    this.existingAmount,
+    this.existingCurrency,
+    this.existingStore,
   });
 
   /// The product barcode this price is for.
@@ -31,12 +34,24 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
   /// When set, the sheet is in edit mode for this existing price.
   final Price? existingPrice;
 
+  /// Pre-fills the amount field when not using an existingPrice.
+  final double? existingAmount;
+
+  /// Pre-fills the currency when not using an existingPrice.
+  final String? existingCurrency;
+
+  /// Pre-fills the store field when not using an existingPrice.
+  final String? existingStore;
+
   /// Shows the price entry bottom sheet and returns the entered [Price],
   /// or `null` if cancelled.
   static Future<Price?> show(
     BuildContext context, {
-    required String barcode,
+    String barcode = '',
     Price? existingPrice,
+    double? existingAmount,
+    String? existingCurrency,
+    String? existingStore,
   }) {
     return showModalBottomSheet<Price>(
       context: context,
@@ -44,6 +59,9 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
       builder: (_) => PriceEntrySheet._(
         barcode: barcode,
         existingPrice: existingPrice,
+        existingAmount: existingAmount,
+        existingCurrency: existingCurrency,
+        existingStore: existingStore,
       ),
     );
   }
@@ -69,18 +87,21 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     super.initState();
     final existing = widget.existingPrice;
     final base = ref.read(settingsProvider).baseCurrency;
-    _currency = existing?.currency ?? base;
+    _currency = existing?.currency ?? widget.existingCurrency ?? base;
     _decimalSep = decimalSeparatorFor(_currency);
     _date = existing?.datePurchased != null
         ? DateTime.fromMillisecondsSinceEpoch(existing!.datePurchased!)
         : DateTime.now();
     _isDiscounted = existing?.isDiscounted ?? false;
-    final initialText = existing != null
-        ? _formatForDisplay(existing.price)
+    final initialAmount = existing?.price ?? widget.existingAmount;
+    final initialText = initialAmount != null
+        ? _formatForDisplay(initialAmount)
         : '0$_decimalSep'
               '00';
     _amountCtrl = TextEditingController(text: initialText);
-    _storeCtrl = TextEditingController(text: existing?.store ?? '');
+    _storeCtrl = TextEditingController(
+      text: existing?.store ?? widget.existingStore ?? '',
+    );
     _notesCtrl = TextEditingController(text: existing?.notes ?? '');
   }
 

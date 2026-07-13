@@ -834,7 +834,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get prices => 'Precos';
 
   @override
-  String get addPrice => 'Adicionar preco';
+  String get addPrice => 'Preco salvo';
 
   @override
   String get editPrice => 'Editar preco';
@@ -1042,6 +1042,68 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addToShoppingListTooltip => 'Lista de compras';
+
+  @override
+  String get productSearchHint => 'Buscar produtos por nome';
+
+  @override
+  String get addCustomItem => 'Adicionar item personalizado';
+
+  @override
+  String get noProductsFound => 'Nenhum produto encontrado. Tente um item personalizado.';
+
+  @override
+  String get backToSearch => 'Voltar a busca';
+
+  @override
+  String get removePrice => 'Preco removido';
+
+  @override
+  String shoppingTotal(String total) {
+    return 'Total: $total';
+  }
+
+  @override
+  String shoppingMixedCurrency(String total) {
+    return '$total';
+  }
+
+  @override
+  String get addToInventoryFromList => 'Adicionar a despensa';
+
+  @override
+  String addToInventoryConfirm(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: ' $skipped itens sem codigo de barras ficarao na lista.',
+      one: ' 1 item sem codigo de barras ficara na lista.',
+      zero: '',
+    );
+    return 'Adicionar $count itens a sua despensa? Os precos serao salvos.$_temp0';
+  }
+
+  @override
+  String itemsMovedToInventory(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count itens adicionados a despensa',
+      one: '1 item adicionado a despensa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String itemsSkippedNoBarcode(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count itens restantes — adicione um codigo de barras ou crie um produto',
+      one: '1 item restante — adicione um codigo de barras ou crie um produto',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get addToPantryAfterPrice => 'Adicionar a sua despensa?';
@@ -2238,7 +2300,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get prices => 'Precos';
 
   @override
-  String get addPrice => 'Adicionar preco';
+  String get addPrice => 'Preco salvo';
 
   @override
   String get editPrice => 'Editar preco';
@@ -2446,6 +2508,68 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get addToShoppingListTooltip => 'Lista de compras';
+
+  @override
+  String get productSearchHint => 'Buscar produtos por nome';
+
+  @override
+  String get addCustomItem => 'Adicionar item personalizado';
+
+  @override
+  String get noProductsFound => 'Nenhum produto encontrado. Tente um item personalizado.';
+
+  @override
+  String get backToSearch => 'Voltar a busca';
+
+  @override
+  String get removePrice => 'Preco removido';
+
+  @override
+  String shoppingTotal(String total) {
+    return 'Total: $total';
+  }
+
+  @override
+  String shoppingMixedCurrency(String total) {
+    return '$total';
+  }
+
+  @override
+  String get addToInventoryFromList => 'Adicionar a despensa';
+
+  @override
+  String addToInventoryConfirm(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: ' $skipped itens sem codigo de barras ficarao na lista.',
+      one: ' 1 item sem codigo de barras ficara na lista.',
+      zero: '',
+    );
+    return 'Adicionar $count itens a sua despensa? Os precos serao salvos.$_temp0';
+  }
+
+  @override
+  String itemsMovedToInventory(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count itens adicionados a despensa',
+      one: '1 item adicionado a despensa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String itemsSkippedNoBarcode(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count itens restantes — adicione um codigo de barras ou crie um produto',
+      one: '1 item restante — adicione um codigo de barras ou crie um produto',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get addToPantryAfterPrice => 'Adicionar a sua despensa?';

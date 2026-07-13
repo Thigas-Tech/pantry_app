@@ -25,7 +25,11 @@ mixin _$ShoppingItem {
 /// was added to the shopping list.
  int? get dateAdded;/// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was marked as purchased.
- int? get datePurchased;
+ int? get datePurchased;/// Price entered while shopping, or `null` if no price was set.
+ double? get priceAmount;/// ISO 4217 currency code for [priceAmount] (e.g. `'USD'`, `'BRL'`).
+ String? get priceCurrency;/// Store where the item was or will be purchased.
+ String? get priceStore;/// Local file path to a photo of the price tag, or `null` if none.
+ String? get pricePhotoPath;
 /// Create a copy of ShoppingItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -36,16 +40,16 @@ $ShoppingItemCopyWith<ShoppingItem> get copyWith => _$ShoppingItemCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShoppingItem&&(identical(other.name, name) || other.name == name)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.isPurchased, isPurchased) || other.isPurchased == isPurchased)&&(identical(other.id, id) || other.id == id)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ShoppingItem&&(identical(other.name, name) || other.name == name)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.isPurchased, isPurchased) || other.isPurchased == isPurchased)&&(identical(other.id, id) || other.id == id)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased)&&(identical(other.priceAmount, priceAmount) || other.priceAmount == priceAmount)&&(identical(other.priceCurrency, priceCurrency) || other.priceCurrency == priceCurrency)&&(identical(other.priceStore, priceStore) || other.priceStore == priceStore)&&(identical(other.pricePhotoPath, pricePhotoPath) || other.pricePhotoPath == pricePhotoPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,barcode,quantity,unit,isPurchased,id,inventoryId,dateAdded,datePurchased);
+int get hashCode => Object.hash(runtimeType,name,barcode,quantity,unit,isPurchased,id,inventoryId,dateAdded,datePurchased,priceAmount,priceCurrency,priceStore,pricePhotoPath);
 
 @override
 String toString() {
-  return 'ShoppingItem(name: $name, barcode: $barcode, quantity: $quantity, unit: $unit, isPurchased: $isPurchased, id: $id, inventoryId: $inventoryId, dateAdded: $dateAdded, datePurchased: $datePurchased)';
+  return 'ShoppingItem(name: $name, barcode: $barcode, quantity: $quantity, unit: $unit, isPurchased: $isPurchased, id: $id, inventoryId: $inventoryId, dateAdded: $dateAdded, datePurchased: $datePurchased, priceAmount: $priceAmount, priceCurrency: $priceCurrency, priceStore: $priceStore, pricePhotoPath: $pricePhotoPath)';
 }
 
 
@@ -56,7 +60,7 @@ abstract mixin class $ShoppingItemCopyWith<$Res>  {
   factory $ShoppingItemCopyWith(ShoppingItem value, $Res Function(ShoppingItem) _then) = _$ShoppingItemCopyWithImpl;
 @useResult
 $Res call({
- String name, String? barcode, double quantity, String unit, bool isPurchased, int? id, int? inventoryId, int? dateAdded, int? datePurchased
+ String name, String? barcode, double quantity, String unit, bool isPurchased, int? id, int? inventoryId, int? dateAdded, int? datePurchased, double? priceAmount, String? priceCurrency, String? priceStore, String? pricePhotoPath
 });
 
 
@@ -73,7 +77,7 @@ class _$ShoppingItemCopyWithImpl<$Res>
 
 /// Create a copy of ShoppingItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? barcode = freezed,Object? quantity = null,Object? unit = null,Object? isPurchased = null,Object? id = freezed,Object? inventoryId = freezed,Object? dateAdded = freezed,Object? datePurchased = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? barcode = freezed,Object? quantity = null,Object? unit = null,Object? isPurchased = null,Object? id = freezed,Object? inventoryId = freezed,Object? dateAdded = freezed,Object? datePurchased = freezed,Object? priceAmount = freezed,Object? priceCurrency = freezed,Object? priceStore = freezed,Object? pricePhotoPath = freezed,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,barcode: freezed == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
@@ -84,7 +88,11 @@ as bool,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullab
 as int?,inventoryId: freezed == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
 as int?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
 as int?,datePurchased: freezed == datePurchased ? _self.datePurchased : datePurchased // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,priceAmount: freezed == priceAmount ? _self.priceAmount : priceAmount // ignore: cast_nullable_to_non_nullable
+as double?,priceCurrency: freezed == priceCurrency ? _self.priceCurrency : priceCurrency // ignore: cast_nullable_to_non_nullable
+as String?,priceStore: freezed == priceStore ? _self.priceStore : priceStore // ignore: cast_nullable_to_non_nullable
+as String?,pricePhotoPath: freezed == pricePhotoPath ? _self.pricePhotoPath : pricePhotoPath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -169,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased,  double? priceAmount,  String? priceCurrency,  String? priceStore,  String? pricePhotoPath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ShoppingItem() when $default != null:
-return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased);case _:
+return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased,_that.priceAmount,_that.priceCurrency,_that.priceStore,_that.pricePhotoPath);case _:
   return orElse();
 
 }
@@ -190,10 +198,10 @@ return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurch
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased,  double? priceAmount,  String? priceCurrency,  String? priceStore,  String? pricePhotoPath)  $default,) {final _that = this;
 switch (_that) {
 case _ShoppingItem():
-return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased);case _:
+return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased,_that.priceAmount,_that.priceCurrency,_that.priceStore,_that.pricePhotoPath);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +218,10 @@ return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurch
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased,  double? priceAmount,  String? priceCurrency,  String? priceStore,  String? pricePhotoPath)?  $default,) {final _that = this;
 switch (_that) {
 case _ShoppingItem() when $default != null:
-return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased);case _:
+return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased,_that.priceAmount,_that.priceCurrency,_that.priceStore,_that.pricePhotoPath);case _:
   return null;
 
 }
@@ -225,7 +233,7 @@ return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurch
 
 
 class _ShoppingItem implements ShoppingItem {
-  const _ShoppingItem({required this.name, this.barcode, this.quantity = 1.0, this.unit = 'pieces', this.isPurchased = false, this.id, this.inventoryId, this.dateAdded, this.datePurchased});
+  const _ShoppingItem({required this.name, this.barcode, this.quantity = 1.0, this.unit = 'pieces', this.isPurchased = false, this.id, this.inventoryId, this.dateAdded, this.datePurchased, this.priceAmount, this.priceCurrency, this.priceStore, this.pricePhotoPath});
   
 
 /// Free-form product name or the linked product's name.
@@ -248,6 +256,14 @@ class _ShoppingItem implements ShoppingItem {
 /// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was marked as purchased.
 @override final  int? datePurchased;
+/// Price entered while shopping, or `null` if no price was set.
+@override final  double? priceAmount;
+/// ISO 4217 currency code for [priceAmount] (e.g. `'USD'`, `'BRL'`).
+@override final  String? priceCurrency;
+/// Store where the item was or will be purchased.
+@override final  String? priceStore;
+/// Local file path to a photo of the price tag, or `null` if none.
+@override final  String? pricePhotoPath;
 
 /// Create a copy of ShoppingItem
 /// with the given fields replaced by the non-null parameter values.
@@ -259,16 +275,16 @@ _$ShoppingItemCopyWith<_ShoppingItem> get copyWith => __$ShoppingItemCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShoppingItem&&(identical(other.name, name) || other.name == name)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.isPurchased, isPurchased) || other.isPurchased == isPurchased)&&(identical(other.id, id) || other.id == id)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ShoppingItem&&(identical(other.name, name) || other.name == name)&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.isPurchased, isPurchased) || other.isPurchased == isPurchased)&&(identical(other.id, id) || other.id == id)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased)&&(identical(other.priceAmount, priceAmount) || other.priceAmount == priceAmount)&&(identical(other.priceCurrency, priceCurrency) || other.priceCurrency == priceCurrency)&&(identical(other.priceStore, priceStore) || other.priceStore == priceStore)&&(identical(other.pricePhotoPath, pricePhotoPath) || other.pricePhotoPath == pricePhotoPath));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,barcode,quantity,unit,isPurchased,id,inventoryId,dateAdded,datePurchased);
+int get hashCode => Object.hash(runtimeType,name,barcode,quantity,unit,isPurchased,id,inventoryId,dateAdded,datePurchased,priceAmount,priceCurrency,priceStore,pricePhotoPath);
 
 @override
 String toString() {
-  return 'ShoppingItem(name: $name, barcode: $barcode, quantity: $quantity, unit: $unit, isPurchased: $isPurchased, id: $id, inventoryId: $inventoryId, dateAdded: $dateAdded, datePurchased: $datePurchased)';
+  return 'ShoppingItem(name: $name, barcode: $barcode, quantity: $quantity, unit: $unit, isPurchased: $isPurchased, id: $id, inventoryId: $inventoryId, dateAdded: $dateAdded, datePurchased: $datePurchased, priceAmount: $priceAmount, priceCurrency: $priceCurrency, priceStore: $priceStore, pricePhotoPath: $pricePhotoPath)';
 }
 
 
@@ -279,7 +295,7 @@ abstract mixin class _$ShoppingItemCopyWith<$Res> implements $ShoppingItemCopyWi
   factory _$ShoppingItemCopyWith(_ShoppingItem value, $Res Function(_ShoppingItem) _then) = __$ShoppingItemCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String? barcode, double quantity, String unit, bool isPurchased, int? id, int? inventoryId, int? dateAdded, int? datePurchased
+ String name, String? barcode, double quantity, String unit, bool isPurchased, int? id, int? inventoryId, int? dateAdded, int? datePurchased, double? priceAmount, String? priceCurrency, String? priceStore, String? pricePhotoPath
 });
 
 
@@ -296,7 +312,7 @@ class __$ShoppingItemCopyWithImpl<$Res>
 
 /// Create a copy of ShoppingItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? barcode = freezed,Object? quantity = null,Object? unit = null,Object? isPurchased = null,Object? id = freezed,Object? inventoryId = freezed,Object? dateAdded = freezed,Object? datePurchased = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? barcode = freezed,Object? quantity = null,Object? unit = null,Object? isPurchased = null,Object? id = freezed,Object? inventoryId = freezed,Object? dateAdded = freezed,Object? datePurchased = freezed,Object? priceAmount = freezed,Object? priceCurrency = freezed,Object? priceStore = freezed,Object? pricePhotoPath = freezed,}) {
   return _then(_ShoppingItem(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,barcode: freezed == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
@@ -307,7 +323,11 @@ as bool,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullab
 as int?,inventoryId: freezed == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
 as int?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
 as int?,datePurchased: freezed == datePurchased ? _self.datePurchased : datePurchased // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,priceAmount: freezed == priceAmount ? _self.priceAmount : priceAmount // ignore: cast_nullable_to_non_nullable
+as double?,priceCurrency: freezed == priceCurrency ? _self.priceCurrency : priceCurrency // ignore: cast_nullable_to_non_nullable
+as String?,priceStore: freezed == priceStore ? _self.priceStore : priceStore // ignore: cast_nullable_to_non_nullable
+as String?,pricePhotoPath: freezed == pricePhotoPath ? _self.pricePhotoPath : pricePhotoPath // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

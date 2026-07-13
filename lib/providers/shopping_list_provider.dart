@@ -3,43 +3,56 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/models/shopping_item.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/services/photo_service.dart';
 
 /// Provides a singleton [ShoppingListDao] instance.
 final shoppingListDaoProvider = Provider<ShoppingListDao>((ref) {
   return const ShoppingListDao();
 });
 
-/// Provides all shopping list items, ordered by dateAdded descending.
+/// Provides a singleton [PhotoService] instance.
+final photoServiceProvider = Provider<PhotoService>((ref) {
+  return PhotoService();
+});
+
+/// Provides all shopping list items, scoped to the active inventory.
 // ignore: specify_nonobvious_property_types
 final shoppingListProvider = FutureProvider.autoDispose<List<ShoppingItem>>((
   ref,
 ) {
   final db = ref.watch(databaseProvider);
-  return db.getShoppingList();
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getShoppingList(inventoryId: inventoryId);
 });
 
-/// Provides only pending (not purchased) shopping list items.
+/// Provides only pending (not purchased) shopping list items, scoped to the
+/// active inventory.
 // ignore: specify_nonobvious_property_types
 final pendingShoppingListProvider =
     FutureProvider.autoDispose<List<ShoppingItem>>((ref) {
       final db = ref.watch(databaseProvider);
-      return db.getPendingShoppingItems();
+      final inventoryId = ref.watch(activeInventoryProvider);
+      return db.getPendingShoppingItems(inventoryId: inventoryId);
     });
 
-/// Provides only purchased shopping list items.
+/// Provides only purchased shopping list items, scoped to the active inventory.
 // ignore: specify_nonobvious_property_types
 final purchasedShoppingListProvider =
     FutureProvider.autoDispose<List<ShoppingItem>>((ref) {
       final db = ref.watch(databaseProvider);
-      return db.getPurchasedShoppingItems();
+      final inventoryId = ref.watch(activeInventoryProvider);
+      return db.getPurchasedShoppingItems(inventoryId: inventoryId);
     });
 
-/// Provides the count of pending (not purchased) items.
+/// Provides the count of pending (not purchased) items, scoped to the active
+/// inventory.
 // ignore: specify_nonobvious_property_types
 final pendingShoppingCountProvider = FutureProvider.autoDispose<int>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.getPendingShoppingCount();
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getPendingShoppingCount(inventoryId: inventoryId);
 });
 
 /// Invalidates all shopping list providers.
@@ -58,10 +71,15 @@ void invalidateShoppingList(WidgetRef ref) {
 ///
 /// When an existing pending item has the same barcode and unit, the
 /// quantities are summed instead of creating a duplicate row.
+/// The item's inventoryId defaults to the active inventory if not set.
 Future<void> addShoppingItem(WidgetRef ref, ShoppingItem item) async {
   final db = ref.read(databaseProvider);
   final database = await db.database;
-  await db.shoppingListDao.insertOrMergeByBarcode(database, item);
+  final activeInventoryId = ref.read(activeInventoryProvider);
+  final scopedItem = item.inventoryId == null
+      ? item.copyWith(inventoryId: activeInventoryId)
+      : item;
+  await db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
   invalidateShoppingList(ref);
 }
 
@@ -75,6 +93,8 @@ Future<void> toggleShoppingItem(WidgetRef ref, int id) async {
 /// Deletes a shopping list item by [id].
 Future<void> deleteShoppingItem(WidgetRef ref, int id) async {
   final db = ref.read(databaseProvider);
+  final photoService = ref.read(photoServiceProvider);
+  await photoService.deletePhotoForItem(id);
   await db.deleteShoppingItem(id);
   invalidateShoppingList(ref);
 }
@@ -85,4 +105,140 @@ Future<int> clearPurchasedShoppingItems(WidgetRef ref) async {
   final deleted = await db.clearPurchasedShoppingItems();
   invalidateShoppingList(ref);
   return deleted;
+}
+
+/// Updates only the price fields for the shopping item with the given [id].
+Future<void> updateShoppingItemPrice(
+  WidgetRef ref,
+  int id, {
+  double? priceAmount,
+  String? priceCurrency,
+  String? priceStore,
+  String? pricePhotoPath,
+}) async {
+  final db = ref.read(databaseProvider);
+  await db.updateShoppingItemPriceFields(
+    id,
+    priceAmount: priceAmount,
+    priceCurrency: priceCurrency,
+    priceStore: priceStore,
+    pricePhotoPath: pricePhotoPath,
+  );
+  invalidateShoppingList(ref);
+}
+
+/// Holds the result of a move-to-inventory operation.
+class MoveToInventoryResult {
+  /// Creates a [MoveToInventoryResult].
+  const MoveToInventoryResult({
+    required this.movedCount,
+    required this.skippedCount,
+  });
+
+  /// Number of items successfully moved to inventory.
+  final int movedCount;
+
+  /// Number of items skipped (no barcode or no product in cache).
+  final int skippedCount;
+}
+
+/// Moves purchased items (with barcodes) to the active inventory.
+///
+/// For each purchased item with a barcode, the product is ensured to exist
+/// in the cache, and an inventory item is created (or merged if the same
+/// barcode already exists in the target inventory). Price data on the
+/// shopping item is saved to the prices table. The shopping item is then
+/// deleted.
+///
+/// Items without a barcode or with no matching product in the cache are
+/// skipped.
+///
+/// Returns a [MoveToInventoryResult] with counts of moved and skipped items.
+/// Runs inside a SQLite transaction — all-or-nothing.
+Future<MoveToInventoryResult> movePurchasedToInventory(
+  WidgetRef ref,
+) async {
+  final db = ref.read(databaseProvider);
+  final inventoryId = ref.read(activeInventoryProvider);
+  final database = await db.database;
+
+  var movedCount = 0;
+  var skippedCount = 0;
+
+  final allPurchased = await db.getPurchasedShoppingItems(
+    inventoryId: inventoryId,
+  );
+
+  await database.transaction((txn) async {
+    for (final item in allPurchased) {
+      if (item.barcode == null || item.barcode!.isEmpty) {
+        skippedCount++;
+        continue;
+      }
+
+      final existingProduct = await txn.query(
+        'products',
+        where: 'barcode = ?',
+        whereArgs: [item.barcode],
+        limit: 1,
+      );
+      if (existingProduct.isEmpty) {
+        skippedCount++;
+        continue;
+      }
+
+      final existingInv = await txn.query(
+        'inventory',
+        where: 'barcode = ? AND inventory_id = ?',
+        whereArgs: [item.barcode, inventoryId],
+        limit: 1,
+      );
+      if (existingInv.isNotEmpty) {
+        final existingQty =
+            (existingInv.first['quantity'] as num?)?.toDouble() ?? 1;
+        await txn.update(
+          'inventory',
+          {'quantity': existingQty + item.quantity},
+          where: 'id = ?',
+          whereArgs: [existingInv.first['id']],
+        );
+      } else {
+        await txn.insert('inventory', {
+          'barcode': item.barcode,
+          'quantity': item.quantity,
+          'unit': item.unit,
+          'location': 'pantry',
+          'inventory_id': inventoryId,
+          'date_added': DateTime.now().millisecondsSinceEpoch,
+        });
+      }
+
+      if (item.priceAmount != null) {
+        await txn.insert('prices', {
+          'barcode': item.barcode,
+          'price': item.priceAmount,
+          'currency': item.priceCurrency ?? 'USD',
+          'store': item.priceStore,
+          'date_purchased': DateTime.now().millisecondsSinceEpoch,
+          'date_added': DateTime.now().millisecondsSinceEpoch,
+          'sync_status': 'local_only',
+          'is_discounted': 0,
+        });
+      }
+
+      await txn.delete(
+        'shopping_list',
+        where: 'id = ?',
+        whereArgs: [item.id],
+      );
+
+      movedCount++;
+    }
+  });
+
+  invalidateShoppingList(ref);
+  return MoveToInventoryResult(
+    movedCount: movedCount,
+    skippedCount: skippedCount,
+  );
 }

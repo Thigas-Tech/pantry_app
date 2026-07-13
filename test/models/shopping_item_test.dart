@@ -57,5 +57,39 @@ void main() {
       expect(item.unit, 'pieces');
       expect(item.isPurchased, false);
     });
+
+    test('price fields default to null', () {
+      const item = ShoppingItem(name: 'Milk');
+      expect(item.priceAmount, isNull);
+      expect(item.priceCurrency, isNull);
+      expect(item.priceStore, isNull);
+      expect(item.pricePhotoPath, isNull);
+    });
+
+    test('creates with price fields', () {
+      const item = ShoppingItem(
+        name: 'Cheese',
+        priceAmount: 3.99,
+        priceCurrency: 'USD',
+        priceStore: 'Whole Foods',
+        pricePhotoPath: '/photos/1.jpg',
+      );
+      expect(item.priceAmount, 3.99);
+      expect(item.priceCurrency, 'USD');
+      expect(item.priceStore, 'Whole Foods');
+      expect(item.pricePhotoPath, '/photos/1.jpg');
+    });
+
+    test('copyWith preserves price fields', () {
+      const item = ShoppingItem(
+        name: 'Milk',
+        priceAmount: 2.50,
+        priceCurrency: 'USD',
+      );
+      final copied = item.copyWith(quantity: 3);
+      expect(copied.priceAmount, 2.50);
+      expect(copied.priceCurrency, 'USD');
+      expect(copied.quantity, 3.0);
+    });
   });
 }

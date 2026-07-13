@@ -522,6 +522,44 @@
   "quantity": "Quantity",
   "addToShoppingList": "Add to shopping list",
   "addToShoppingListTooltip": "Shopping list",
+  "productSearchHint": "Search products by name",
+  "addCustomItem": "Add custom item",
+  "noProductsFound": "No products found. Try a custom item.",
+  "backToSearch": "Back to search",
+  "addPrice": "Price saved",
+  "removePrice": "Price removed",
+  "shoppingTotal": "Total: {total}",
+  "@shoppingTotal": {
+    "placeholders": {
+      "total": {"type": "String"}
+    }
+  },
+  "shoppingMixedCurrency": "{total}",
+  "@shoppingMixedCurrency": {
+    "placeholders": {
+      "total": {"type": "String"}
+    }
+  },
+  "addToInventoryFromList": "Add to pantry",
+  "addToInventoryConfirm": "Add {count} items to your pantry? Prices will be saved.{skipped, plural, =0{} =1{ 1 item without a barcode will stay in your list.} other{ {skipped} items without a barcode will stay in your list.}}",
+  "@addToInventoryConfirm": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "skipped": {"type": "int"}
+    }
+  },
+  "itemsMovedToInventory": "{count, plural, =1{1 item added to pantry} other{{count} items added to pantry}}",
+  "@itemsMovedToInventory": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "itemsSkippedNoBarcode": "{count, plural, =1{1 item left — add a barcode or create a product to move it} other{{count} items left — add a barcode or create a product to move them}}",
+  "@itemsSkippedNoBarcode": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
   "addToPantryAfterPrice": "Add to your pantry?",
   "addToPantryAfterPriceDesc": "Record the amount you bought to track it in your inventory.",
   "howManyBought": "How many did you buy?",
