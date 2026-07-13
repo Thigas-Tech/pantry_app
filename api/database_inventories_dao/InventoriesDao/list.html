@@ -63,7 +63,7 @@
     </section>
     
 <section class="desc markdown">
-  <p>Returns all inventories, ordered by creation time.</p>
+  <p>Returns all inventories with their item count, ordered by creation time.</p>
 </section>
 
 
@@ -72,8 +72,11 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Map&lt;String, dynamic&gt;&gt;&gt; list(Database db) {
   return db.rawQuery(
-    &#39;SELECT id, name, created_at FROM inventories &#39;
-    &#39;ORDER BY created_at ASC&#39;,
+    &#39;SELECT i.id, i.name, i.created_at, &#39;
+    &#39;(SELECT COUNT(*) FROM inventory &#39;
+    &#39;   WHERE inventory_id = i.id) AS item_count &#39;
+    &#39;FROM inventories i &#39;
+    &#39;ORDER BY i.created_at ASC&#39;,
   );
 }</code></pre>
 </section>
