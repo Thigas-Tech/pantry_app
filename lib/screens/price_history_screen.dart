@@ -105,7 +105,7 @@ class PriceHistoryScreen extends ConsumerWidget {
   }
 }
 
-class _PriceHistoryTile extends StatelessWidget {
+class _PriceHistoryTile extends ConsumerWidget {
   const _PriceHistoryTile({
     required this.price,
     required this.onDelete,
@@ -115,8 +115,9 @@ class _PriceHistoryTile extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final repo = ref.read(priceRepositoryProvider);
     final dateStr = price.datePurchased != null
         ? DateTime.fromMillisecondsSinceEpoch(price.datePurchased!)
         : null;
@@ -124,9 +125,8 @@ class _PriceHistoryTile extends StatelessWidget {
         ? '${dateStr.day.toString().padLeft(2, '0')}/'
               '${dateStr.month.toString().padLeft(2, '0')}/'
               '${dateStr.year}'
-        : '—';
-    final formattedPrice =
-        '${price.currency} ${price.price.toStringAsFixed(2)}';
+        : '\u2014';
+    final formattedPrice = repo.formatPrice(price.price, price.currency);
     final syncLabel = switch (price.syncStatus) {
       'synced' => l10n.priceSyncStatus,
       'pending' => l10n.priceSyncPending,

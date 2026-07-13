@@ -250,3 +250,32 @@ String decimalSeparatorFor(String currencyCode) {
     _ => '.',
   };
 }
+
+/// Returns the currency symbol for [currencyCode].
+///
+/// Common symbols: `R$` (BRL), `$` (USD/ARS/CLP/COP), `EUR` (EUR),
+/// `GBP` (GBP), `JPY` (JPY), `CNY` (CNY), `CA$` (CAD), `AU$` (AUD).
+/// Falls back to the uppercase ISO code for unknown currencies.
+String currencySymbolFor(String currencyCode) {
+  return switch (currencyCode.toUpperCase()) {
+    'BRL' => r'R$',
+    'USD' || 'ARS' || 'CLP' || 'COP' => r'$',
+    'EUR' => '\u20AC',
+    'GBP' => '\u00A3',
+    'JPY' || 'CNY' => '\u00A5',
+    'CAD' => r'CA$',
+    'AUD' => r'AU$',
+    _ => currencyCode.toUpperCase(),
+  };
+}
+
+/// Returns the number of decimal digits for [currencyCode].
+///
+/// Zero-decimal currencies (no sub-units): JPY, KRW.
+/// All others return 2.
+int decimalDigitsFor(String currencyCode) {
+  return switch (currencyCode.toUpperCase()) {
+    'JPY' || 'KRW' => 0,
+    _ => 2,
+  };
+}
