@@ -80,6 +80,10 @@
   inventoryId: map[&#39;inventory_id&#39;] as int?,
   dateAdded: map[&#39;date_added&#39;] as int?,
   datePurchased: map[&#39;date_purchased&#39;] as int?,
+  priceAmount: (map[&#39;price_amount&#39;] as num?)?.toDouble(),
+  priceCurrency: map[&#39;price_currency&#39;] as String?,
+  priceStore: map[&#39;price_store&#39;] as String?,
+  pricePhotoPath: map[&#39;price_photo_path&#39;] as String?,
 );</code></pre>
 </section>
 

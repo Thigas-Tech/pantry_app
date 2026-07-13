@@ -61,7 +61,7 @@
         </section>
         
 <section class="desc markdown">
-  <p>Provides all shopping list items, ordered by dateAdded descending.</p>
+  <p>Provides all shopping list items, scoped to the active inventory.</p>
 </section>
 
         
@@ -72,7 +72,8 @@ final shoppingListProvider = FutureProvider.autoDispose&lt;List&lt;ShoppingItem&
   ref,
 ) {
   final db = ref.watch(databaseProvider);
-  return db.getShoppingList();
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getShoppingList(inventoryId: inventoryId);
 });</code></pre>
 </section>
 

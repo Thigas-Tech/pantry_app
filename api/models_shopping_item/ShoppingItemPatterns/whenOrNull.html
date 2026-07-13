@@ -69,6 +69,10 @@
 <li><span class="parameter" id="param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span>, </span></li>
 <li><span class="parameter" id="param-dateAdded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">dateAdded</span>, </span></li>
 <li><span class="parameter" id="param-datePurchased"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">datePurchased</span>, </span></li>
+<li><span class="parameter" id="param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span></li>
+<li><span class="parameter" id="param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span></li>
+<li><span class="parameter" id="param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span>, </span></li>
+<li><span class="parameter" id="param-pricePhotoPath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">pricePhotoPath</span>, </span></li>
 </ol>)?</span></li>
 </ol>)
 
@@ -92,10 +96,10 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult? whenOrNull&lt;TResult extends Object?&gt;(TResult? Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased)?  $default,) {final _that = this;
+  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult? whenOrNull&lt;TResult extends Object?&gt;(TResult? Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased,  double? priceAmount,  String? priceCurrency,  String? priceStore,  String? pricePhotoPath)?  $default,) {final _that = this;
 switch (_that) {
 case _ShoppingItem() when $default != null:
-return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased);case _:
+return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased,_that.priceAmount,_that.priceCurrency,_that.priceStore,_that.pricePhotoPath);case _:
   return null;
 
 }

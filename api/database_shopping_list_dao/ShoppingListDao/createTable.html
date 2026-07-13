@@ -82,6 +82,10 @@
       inventory_id INTEGER,
       date_added INTEGER NOT NULL,
       date_purchased INTEGER,
+      price_amount REAL,
+      price_currency TEXT,
+      price_store TEXT,
+      price_photo_path TEXT,
       FOREIGN KEY (barcode) REFERENCES products(barcode)
         ON DELETE SET NULL,
       FOREIGN KEY (inventory_id) REFERENCES inventories(id)
@@ -93,6 +97,9 @@
   );
   await db.execute(
     &#39;CREATE INDEX idx_shopping_purchased ON shopping_list(is_purchased)&#39;,
+  );
+  await db.execute(
+    &#39;CREATE INDEX idx_shopping_inventory_id ON shopping_list(inventory_id)&#39;,
   );
 }</code></pre>
 </section>

@@ -61,7 +61,8 @@
         </section>
         
 <section class="desc markdown">
-  <p>Provides only pending (not purchased) shopping list items.</p>
+  <p>Provides only pending (not purchased) shopping list items, scoped to the
+active inventory.</p>
 </section>
 
         
@@ -71,7 +72,8 @@
 final pendingShoppingListProvider =
     FutureProvider.autoDispose&lt;List&lt;ShoppingItem&gt;&gt;((ref) {
       final db = ref.watch(databaseProvider);
-      return db.getPendingShoppingItems();
+      final inventoryId = ref.watch(activeInventoryProvider);
+      return db.getPendingShoppingItems(inventoryId: inventoryId);
     });</code></pre>
 </section>
 

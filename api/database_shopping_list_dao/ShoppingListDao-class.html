@@ -206,40 +206,42 @@ pending item that has the same barcode and unit.
 </dd>
 
         <dt id="listAll" class="callable">
-  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/listAll.html">listAll</a></span><span class="signature">(<wbr><span class="parameter" id="listAll-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/listAll.html">listAll</a></span><span class="signature">(<wbr><span class="parameter" id="listAll-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="listAll-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns all shopping list items, ordered by dateAdded descending.
+  Returns all shopping list items, optionally scoped to an inventory.
   
 
 </dd>
 
         <dt id="listPending" class="callable">
-  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/listPending.html">listPending</a></span><span class="signature">(<wbr><span class="parameter" id="listPending-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/listPending.html">listPending</a></span><span class="signature">(<wbr><span class="parameter" id="listPending-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="listPending-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns only pending (not purchased) items, ordered by dateAdded desc.
+  Returns only pending (not purchased) items, optionally scoped to an
+inventory. Ordered by dateAdded desc.
   
 
 </dd>
 
         <dt id="listPurchased" class="callable">
-  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/listPurchased.html">listPurchased</a></span><span class="signature">(<wbr><span class="parameter" id="listPurchased-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/listPurchased.html">listPurchased</a></span><span class="signature">(<wbr><span class="parameter" id="listPurchased-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="listPurchased-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns only purchased items, ordered by datePurchased desc.
+  Returns only purchased items, optionally scoped to an inventory.
+Ordered by datePurchased desc.
   
 
 </dd>
@@ -271,14 +273,14 @@ pending item that has the same barcode and unit.
 </dd>
 
         <dt id="pendingCount" class="callable">
-  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/pendingCount.html">pendingCount</a></span><span class="signature">(<wbr><span class="parameter" id="pendingCount-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/pendingCount.html">pendingCount</a></span><span class="signature">(<wbr><span class="parameter" id="pendingCount-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="pendingCount-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns the count of pending items.
+  Returns the count of pending items, optionally scoped to an inventory.
   
 
 </dd>
@@ -331,6 +333,20 @@ pending item that has the same barcode and unit.
 </dt>
 <dd>
   Updates an existing shopping list item. Returns rows affected.
+  
+
+</dd>
+
+        <dt id="updatePriceFields" class="callable">
+  <span class="name"><a href="../database_shopping_list_dao/ShoppingListDao/updatePriceFields.html">updatePriceFields</a></span><span class="signature">(<wbr><span class="parameter" id="updatePriceFields-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="updatePriceFields-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span>, {</span><span class="parameter" id="updatePriceFields-param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span><span class="parameter" id="updatePriceFields-param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span><span class="parameter" id="updatePriceFields-param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span>, </span><span class="parameter" id="updatePriceFields-param-pricePhotoPath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">pricePhotoPath</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates only the price-related columns for the shopping item
+with the given <code>id</code>. Leaves all other columns unchanged.
   
 
 </dd>

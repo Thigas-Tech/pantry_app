@@ -61,7 +61,7 @@
         </section>
         
 <section class="desc markdown">
-  <p>Provides only purchased shopping list items.</p>
+  <p>Provides only purchased shopping list items, scoped to the active inventory.</p>
 </section>
 
         
@@ -71,7 +71,8 @@
 final purchasedShoppingListProvider =
     FutureProvider.autoDispose&lt;List&lt;ShoppingItem&gt;&gt;((ref) {
       final db = ref.watch(databaseProvider);
-      return db.getPurchasedShoppingItems();
+      final inventoryId = ref.watch(activeInventoryProvider);
+      return db.getPurchasedShoppingItems(inventoryId: inventoryId);
     });</code></pre>
 </section>
 

@@ -67,7 +67,8 @@
   <p>Adds an item to the shopping list, merging by barcode if a pending
 item with the same barcode and unit already exists.</p>
 <p>When an existing pending item has the same barcode and unit, the
-quantities are summed instead of creating a duplicate row.</p>
+quantities are summed instead of creating a duplicate row.
+The item's inventoryId defaults to the active inventory if not set.</p>
 </section>
 
 
@@ -77,7 +78,11 @@ quantities are summed instead of creating a duplicate row.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; addShoppingItem(WidgetRef ref, ShoppingItem item) async {
   final db = ref.read(databaseProvider);
   final database = await db.database;
-  await db.shoppingListDao.insertOrMergeByBarcode(database, item);
+  final activeInventoryId = ref.read(activeInventoryProvider);
+  final scopedItem = item.inventoryId == null
+      ? item.copyWith(inventoryId: activeInventoryId)
+      : item;
+  await db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
   invalidateShoppingList(ref);
 }</code></pre>
 </section>

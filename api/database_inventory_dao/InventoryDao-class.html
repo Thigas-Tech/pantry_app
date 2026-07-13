@@ -191,6 +191,20 @@ independently of <a href="../database_database_helper/DatabaseHelper-class.html"
 
 </dd>
 
+        <dt id="insertOrMergeByBarcode" class="callable">
+  <span class="name"><a href="../database_inventory_dao/InventoryDao/insertOrMergeByBarcode.html">insertOrMergeByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="insertOrMergeByBarcode-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="insertOrMergeByBarcode-param-item"><span class="type-annotation"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts an inventory item, merging quantities with an existing item
+that has the same barcode and inventoryId.
+  
+
+</dd>
+
         <dt id="list" class="callable">
   <span class="name"><a href="../database_inventory_dao/InventoryDao/list.html">list</a></span><span class="signature">(<wbr><span class="parameter" id="list-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="list-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="list-param-location"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">location</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span>&gt;</span></span>&gt;</span></span>

@@ -60,7 +60,7 @@ entered data, or <code>null</code> if the user cancels.</p>
 <p>The amount field uses a locale-aware decimal separator
 (<a href="../services_currency_service/decimalSeparatorFor.html">decimalSeparatorFor</a>).</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">final price = await PriceEntrySheet.show(context, barcode: barcode);
+<pre class="language-dart"><code class="language-dart">final price = await PriceEntrySheet.show(context, barcode: '123');
 </code></pre>
 </section>
 
@@ -110,6 +110,30 @@ entered data, or <code>null</code> if the user cancels.</p>
 
 </dd>
 
+        <dt id="existingAmount" class="property">
+  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/existingAmount.html">existingAmount</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>
+  
+
+</dt>
+<dd>
+  Pre-fills the amount field when not using an existingPrice.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="existingCurrency" class="property">
+  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/existingCurrency.html">existingCurrency</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd>
+  Pre-fills the currency when not using an existingPrice.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="existingPrice" class="property">
   <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/existingPrice.html">existingPrice</a></span>
   <span class="signature">&#8594; <a href="../models_price/Price-class.html">Price</a>?</span>
@@ -118,6 +142,18 @@ entered data, or <code>null</code> if the user cancels.</p>
 </dt>
 <dd>
   When set, the sheet is in edit mode for this existing price.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="existingStore" class="property">
+  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/existingStore.html">existingStore</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd>
+  Pre-fills the store field when not using an existingPrice.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -328,7 +364,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
     <h2>Static Methods</h2>
     <dl class="callables">
         <dt id="show" class="callable">
-  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/show.html">show</a></span><span class="signature">(<wbr><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, {</span><span class="parameter" id="show-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="show-param-existingPrice"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a>?</span> <span class="parameter-name">existingPrice</span></span>})
+  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/show.html">show</a></span><span class="signature">(<wbr><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, {</span><span class="parameter" id="show-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span> = <span class="default-value">&#39;&#39;</span>, </span><span class="parameter" id="show-param-existingPrice"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a>?</span> <span class="parameter-name">existingPrice</span>, </span><span class="parameter" id="show-param-existingAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">existingAmount</span>, </span><span class="parameter" id="show-param-existingCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingCurrency</span>, </span><span class="parameter" id="show-param-existingStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingStore</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
   </span>
   

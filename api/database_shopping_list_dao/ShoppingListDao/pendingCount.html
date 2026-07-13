@@ -55,28 +55,29 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-<span class="name ">pendingCount</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="pendingCount-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span></li>
-</ol>)
+<span class="name ">pendingCount</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="pendingCount-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span></li>
+<li><span class="parameter" id="pendingCount-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Returns the count of pending items.</p>
+  <p>Returns the count of pending items, optionally scoped to an inventory.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; pendingCount(Database db) async {
-  return Sqflite.firstIntValue(
-        await db.rawQuery(
-          &#39;SELECT COUNT(*) FROM shopping_list WHERE is_purchased = 0&#39;,
-        ),
-      ) ??
-      0;
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; pendingCount(Database db, {int? inventoryId}) async {
+  final query = inventoryId != null
+      ? &#39;SELECT COUNT(*) FROM shopping_list &#39;
+            &#39;WHERE is_purchased = 0 AND inventory_id = ?&#39;
+      : &#39;SELECT COUNT(*) FROM shopping_list WHERE is_purchased = 0&#39;;
+  final args = inventoryId != null ? [inventoryId] : null;
+  return Sqflite.firstIntValue(await db.rawQuery(query, args)) ?? 0;
 }</code></pre>
 </section>
 

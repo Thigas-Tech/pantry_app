@@ -61,7 +61,8 @@
         </section>
         
 <section class="desc markdown">
-  <p>Provides the count of pending (not purchased) items.</p>
+  <p>Provides the count of pending (not purchased) items, scoped to the active
+inventory.</p>
 </section>
 
         
@@ -70,7 +71,8 @@
   <pre class="language-dart"><code class="language-dart">&#47;&#47; ignore: specify_nonobvious_property_types
 final pendingShoppingCountProvider = FutureProvider.autoDispose&lt;int&gt;((ref) {
   final db = ref.watch(databaseProvider);
-  return db.getPendingShoppingCount();
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getPendingShoppingCount(inventoryId: inventoryId);
 });</code></pre>
 </section>
 

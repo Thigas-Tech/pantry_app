@@ -56,8 +56,11 @@
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
 <span class="name ">show</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, {</span></li>
-<li><span class="parameter" id="show-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span></li>
+<li><span class="parameter" id="show-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span> = <span class="default-value">&#39;&#39;</span>, </span></li>
 <li><span class="parameter" id="show-param-existingPrice"><span class="type-annotation"><a href="../../models_price/Price-class.html">Price</a>?</span> <span class="parameter-name">existingPrice</span>, </span></li>
+<li><span class="parameter" id="show-param-existingAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">existingAmount</span>, </span></li>
+<li><span class="parameter" id="show-param-existingCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingCurrency</span>, </span></li>
+<li><span class="parameter" id="show-param-existingStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingStore</span>, </span></li>
 </ol>})
 
       
@@ -75,8 +78,11 @@ or <code>null</code> if cancelled.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">static Future&lt;Price?&gt; show(
   BuildContext context, {
-  required String barcode,
+  String barcode = &#39;&#39;,
   Price? existingPrice,
+  double? existingAmount,
+  String? existingCurrency,
+  String? existingStore,
 }) {
   return showModalBottomSheet&lt;Price&gt;(
     context: context,
@@ -84,6 +90,9 @@ or <code>null</code> if cancelled.</p>
     builder: (_) =&gt; PriceEntrySheet._(
       barcode: barcode,
       existingPrice: existingPrice,
+      existingAmount: existingAmount,
+      existingCurrency: existingCurrency,
+      existingStore: existingStore,
     ),
   );
 }</code></pre>
