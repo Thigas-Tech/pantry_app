@@ -37,12 +37,6 @@ jobs:
       - name: Get Flutter packages
         run: flutter pub get
 
-      - name: Analyze Flutter
-        run: flutter analyze --fatal-infos --fatal-warnings
-
-      - name: Run Flutter tests
-        run: flutter test --concurrency=2
-
       - name: Inject environment
         env:
           OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
@@ -56,6 +50,12 @@ jobs:
             "${CONTACT_EMAIL:-pantry-app@example.com}" \
             "false" \
             "${FEEDBACK_TOKEN:-}"
+
+      - name: Analyze Flutter
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Run Flutter tests
+        run: flutter test --concurrency=2
 
       - name: Decode upload keystore
         env:
