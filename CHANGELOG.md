@@ -1,15 +1,23 @@
 # Changelog
 
-## [Unreleased]
+## [0.0.6]
 
 ### Added
+- **Price tracking on shopping list**: New `priceAmount`, `priceCurrency`, `priceStore`, `pricePhotoPath` fields on `ShoppingItem`. DB migration v18 adds 4 price columns + `idx_shopping_inventory_id` index. Price entry via `PriceEntrySheet` (reused) with edit/remove flow. Running total in section headers with per-currency subtotals. `PhotoService` for price tag camera/gallery capture/cleanup. (`lib/models/shopping_item.dart`, `lib/database/shopping_list_dao.dart`, `lib/database/database_helper.dart`, `lib/screens/shopping_list_screen.dart`, `lib/widgets/price_entry_sheet.dart`, `lib/services/photo_service.dart` new, fixes #36)
+- **Move-to-inventory flow**: "Add to pantry" button in shopping list AppBar batch-moves purchased items (with barcodes) to the active inventory. Transaction-based: caches product, merges/creates inventory item, saves price to `prices` table, deletes shopping item. `InventoryDao.insertOrMergeByBarcode` prevents duplicate inventory entries. Barcodeless items skipped with snackbar. (`lib/database/inventory_dao.dart`, `lib/providers/shopping_list_provider.dart`, `lib/screens/shopping_list_screen.dart`, fixes #38)
 - **Per-inventory shopping list**: Shopping list items are now scoped to the active inventory. The `ShoppingListDao`, `DatabaseHelper`, and providers filter by `inventory_id`. `addShoppingItem` automatically assigns the active inventory ID to new items. (`lib/database/shopping_list_dao.dart`, `lib/database/database_helper.dart`, `lib/providers/shopping_list_provider.dart`, fixes #111)
 - **Product search in add-to-shopping-list sheet**: The FAB on the shopping list screen now opens a `AddToShoppingListSheet` bottom sheet that searches cached products (local DB + OFF API) by name. Results show product avatar, name, brand, and barcode. Tapping a product adds it to the shopping list with its barcode. A free-text fallback ("Add custom item") is available for items not in any product database. (`lib/widgets/add_to_shopping_list_sheet.dart` new, `lib/screens/shopping_list_screen.dart`, fixes #68)
-- **New ARB keys**: `productSearchHint`, `addCustomItem`, `noProductsFound`, `backToSearch` in `en`, `pt`, and `pt_BR`. (`lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
+- **New ARB keys**: `productSearchHint`, `addCustomItem`, `noProductsFound`, `backToSearch`, `addPrice`, `removePrice`, `shoppingTotal`, `shoppingMixedCurrency`, `addToInventoryFromList`, `addToInventoryConfirm`, `itemsMovedToInventory`, `itemsSkippedNoBarcode` in `en`, `pt`, and `pt_BR`. (`lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`)
 
 ### Fixed
-- **Shopping list items were global instead of per-inventory**: Fixed by scoping all shopping list queries to the active inventory via the `inventory_id` column, which was already present in the database schema but not wired through. (fixes #111)
+- **Shopping list items were global instead of per-inventory**: Scoped all shopping list queries to the active inventory via the `inventory_id` column. (fixes #111)
 - **Shopping list FAB created free-text items without product association**: Replaced the name+quantity AlertDialog with a product search sheet that links items to barcodes by default, with free-text as an explicit fallback. (fixes #68)
+- **Duplicate inventory entries on move-to-inventory**: Added `InventoryDao.insertOrMergeByBarcode` that merges quantities when the same barcode already exists in the target inventory. (fixes #38)
+
+### Changed
+- **PriceEntrySheet accepts standalone values**: `barcode` is now optional; accepts `existingAmount`, `existingCurrency`, `existingStore` for use outside the full-price-edit flow (e.g. shopping list). (`lib/widgets/price_entry_sheet.dart`)
+
+## [0.0.5]
 
 ### Fixed
 - **Translation leak on product detail page**: Debug strings showing instead of translated text near the edit-quantity area. Added `AppLocalizationsX` extension with `formatQuantityUnit`, `localizeUnit`, `localizeLocation`, `displayInventoryName`, and `localizeThemeMode`. Duplicate `productNotFound` key removed from `app_pt_BR.arb`. Hardcoded raw unit/location/theme strings replaced with localized lookups across 10+ files. (`lib/l10n/l10n_extensions.dart` new, `lib/l10n/app_*.arb` updated, fixes #87)
