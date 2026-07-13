@@ -126,7 +126,7 @@ Widget build(BuildContext context, WidgetRef ref) {
           children: [
             ListTile(
               title: Text(l10n.theme),
-              subtitle: Text(themeMode.name),
+              subtitle: Text(l10n.localizeThemeMode(themeMode.name)),
               onTap: () =&gt; _showThemeDialog(context, ref),
             ),
             SwitchListTile(
@@ -410,7 +410,7 @@ Widget build(BuildContext context, WidgetRef ref) {
                         return const SizedBox.shrink();
                       }
                       return Text(
-                        _formatBytes(snapshot.data!),
+                        _formatBytes(snapshot.data!, l10n),
                         style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(
                               color: Theme.of(
@@ -452,19 +452,21 @@ Widget build(BuildContext context, WidgetRef ref) {
                       if (count == 0) return const SizedBox.shrink();
                       return ListTile(
                         leading: const Icon(Icons.cloud_upload_outlined),
-                        title: Text(&#39;Pending feedback: $count&#39;),
+                        title: Text(l10n.pendingFeedback(count)),
                         trailing: TextButton(
                           onPressed: () async {
                             final result = await service.flushQueue();
                             if (context.mounted) {
                               SnackbarHelper.showInfo(
                                 context,
-                                &#39;Submitted ${result.submitted}, &#39;
-                                &#39;${result.failed} failed&#39;,
+                                l10n.submissionResult(
+                                  result.failed,
+                                  result.submitted,
+                                ),
                               );
                             }
                           },
-                          child: const Text(&#39;Retry now&#39;),
+                          child: Text(l10n.retryNow),
                         ),
                       );
                     },

@@ -150,7 +150,9 @@ Widget build(BuildContext context, WidgetRef ref) {
                   inv[&#39;name&#39;] as String,
                 ),
                 child: ListTile(
-                  title: Text(inv[&#39;name&#39;] as String),
+                  title: Text(
+                    l10n.displayInventoryName(inv[&#39;name&#39;] as String),
+                  ),
                   subtitle: Text(
                     l10n.itemsCount((inv[&#39;item_count&#39;] as int?) ?? 0),
                   ),

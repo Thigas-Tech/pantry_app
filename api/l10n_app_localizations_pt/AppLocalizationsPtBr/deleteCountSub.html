@@ -60,7 +60,7 @@
     </ol>
   </div>
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-<span class="name ">deleteCountSub</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="deleteCountSub-param-count"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">count</span></span></li>
+<span class="name ">deleteCountSub</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="deleteCountSub-param-count"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/num-class.html">num</a></span> <span class="parameter-name">count</span></span></li>
 </ol>)
 
       <div class="features"><span class="feature">override</span></div>
@@ -70,7 +70,7 @@
 <section class="desc markdown">
   <p>No description provided for @deleteCountSub.</p>
 <p>In en, this message translates to:
-<strong>'Delete {count} selected items?'</strong></p>
+<strong>'{count, plural, =1{Delete 1 selected item?} other{Delete {count} selected items?}}'</strong></p>
 </section>
 
 
@@ -78,8 +78,14 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-String deleteCountSub(Object count) {
-  return &#39;Excluir $count itens selecionados?&#39;;
+String deleteCountSub(num count) {
+  String _temp0 = intl.Intl.pluralLogic(
+    count,
+    locale: localeName,
+    other: &#39;Excluir $count itens selecionados?&#39;,
+    one: &#39;Excluir 1 item selecionado?&#39;,
+  );
+  return &#39;$_temp0&#39;;
 }</code></pre>
 </section>
 

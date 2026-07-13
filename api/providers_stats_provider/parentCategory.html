@@ -65,10 +65,12 @@
     
 <section class="desc markdown">
   <p>Returns a broad parent category from OFF hierarchy data.</p>
-<p>When <code>hierarchyJson</code> is available, picks the 3rd-level English entry
-(e.g. <code>en:eggs</code> from <code>[en:products, en:eggs-and-their-products, en:eggs, en:chicken-eggs]</code>). When not available, falls back to the
-first non‑language‑tagged word of <code>rawCategory</code>. Returns <code>null</code> when
-both inputs are unavailable.</p>
+<p>When <code>hierarchyJson</code> is available, prefers Portuguese tags (<code>pt:</code>) over
+English (<code>en:</code>) so that users get locale‑appropriate names when OFF data
+includes them. For each language group, picks the second‑to‑last entry
+(e.g. <code>en:eggs</code> from <code>[en:products, en:eggs-and-their-products, en:eggs, en:chicken-eggs]</code>). When no hierarchy is available, falls back
+to the first non‑language‑tagged word of <code>rawCategory</code>. Returns <code>null</code>
+when both inputs are unavailable.</p>
 </section>
 
 
@@ -80,10 +82,20 @@ both inputs are unavailable.</p>
     try {
       final hierarchy = (jsonDecode(hierarchyJson) as List).cast&lt;String&gt;();
       if (hierarchy.isNotEmpty) {
-        final enEntries = hierarchy.where((t) =&gt; t.startsWith(&#39;en:&#39;)).toList();
-        if (enEntries.isNotEmpty) {
-          final idx = (enEntries.length - 2).clamp(0, enEntries.length - 1);
-          var name = enEntries[idx].substring(3);
+        var matchedEntries = hierarchy
+            .where((t) =&gt; t.startsWith(&#39;pt:&#39;))
+            .toList();
+        var prefixLength = 3;
+        if (matchedEntries.isEmpty) {
+          matchedEntries = hierarchy.where((t) =&gt; t.startsWith(&#39;en:&#39;)).toList();
+          prefixLength = 3;
+        }
+        if (matchedEntries.isNotEmpty) {
+          final idx = (matchedEntries.length - 2).clamp(
+            0,
+            matchedEntries.length - 1,
+          );
+          var name = matchedEntries[idx].substring(prefixLength);
           name = name.replaceAll(&#39;-&#39;, &#39; &#39;);
           return name[0].toUpperCase() + name.substring(1);
         }
