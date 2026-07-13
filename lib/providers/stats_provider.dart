@@ -145,20 +145,32 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
 
 /// Returns a broad parent category from OFF hierarchy data.
 ///
-/// When [hierarchyJson] is available, picks the 3rd-level English entry
+/// When [hierarchyJson] is available, prefers Portuguese tags (`pt:`) over
+/// English (`en:`) so that users get locale‑appropriate names when OFF data
+/// includes them. For each language group, picks the second‑to‑last entry
 /// (e.g. `en:eggs` from `[en:products, en:eggs-and-their-products,
-/// en:eggs, en:chicken-eggs]`). When not available, falls back to the
-/// first non‑language‑tagged word of [rawCategory]. Returns `null` when
-/// both inputs are unavailable.
+/// en:eggs, en:chicken-eggs]`). When no hierarchy is available, falls back
+/// to the first non‑language‑tagged word of [rawCategory]. Returns `null`
+/// when both inputs are unavailable.
 String? parentCategory(String? rawCategory, String? hierarchyJson) {
   if (hierarchyJson != null && hierarchyJson.isNotEmpty) {
     try {
       final hierarchy = (jsonDecode(hierarchyJson) as List).cast<String>();
       if (hierarchy.isNotEmpty) {
-        final enEntries = hierarchy.where((t) => t.startsWith('en:')).toList();
-        if (enEntries.isNotEmpty) {
-          final idx = (enEntries.length - 2).clamp(0, enEntries.length - 1);
-          var name = enEntries[idx].substring(3);
+        var matchedEntries = hierarchy
+            .where((t) => t.startsWith('pt:'))
+            .toList();
+        var prefixLength = 3;
+        if (matchedEntries.isEmpty) {
+          matchedEntries = hierarchy.where((t) => t.startsWith('en:')).toList();
+          prefixLength = 3;
+        }
+        if (matchedEntries.isNotEmpty) {
+          final idx = (matchedEntries.length - 2).clamp(
+            0,
+            matchedEntries.length - 1,
+          );
+          var name = matchedEntries[idx].substring(prefixLength);
           name = name.replaceAll('-', ' ');
           return name[0].toUpperCase() + name.substring(1);
         }
