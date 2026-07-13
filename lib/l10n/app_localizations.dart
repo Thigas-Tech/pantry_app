@@ -189,7 +189,7 @@ abstract class AppLocalizations {
   /// No description provided for @categoryLabel.
   ///
   /// In en, this message translates to:
-  /// **'Category'**
+  /// **'Categories'**
   String get categoryLabel;
 
   /// No description provided for @servingSize.
@@ -495,14 +495,8 @@ abstract class AppLocalizations {
   /// No description provided for @deleteCountSub.
   ///
   /// In en, this message translates to:
-  /// **'Delete {count} selected items?'**
-  String deleteCountSub(Object count);
-
-  /// No description provided for @itemsDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} deleted.'**
-  String itemsDeleted(Object count);
+  /// **'{count, plural, =1{Delete 1 selected item?} other{Delete {count} selected items?}}'**
+  String deleteCountSub(num count);
 
   /// No description provided for @itemsRestored.
   ///
@@ -573,7 +567,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutrient.
   ///
   /// In en, this message translates to:
-  /// **'Nutrient'**
+  /// **'Nutrients'**
   String get nutrient;
 
   /// No description provided for @deleteItemTitle.
@@ -1110,12 +1104,6 @@ abstract class AppLocalizations {
   /// **'All'**
   String get filterAll;
 
-  /// No description provided for @filterByCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get filterByCategory;
-
   /// No description provided for @settingsAppearance.
   ///
   /// In en, this message translates to:
@@ -1245,7 +1233,7 @@ abstract class AppLocalizations {
   /// No description provided for @locationStats.
   ///
   /// In en, this message translates to:
-  /// **'Location'**
+  /// **'Locations'**
   String get locationStats;
 
   /// No description provided for @nutritionPhoto.
@@ -1883,12 +1871,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Purchase date'**
   String get datePurchased;
-
-  /// No description provided for @pricedItems.
-  ///
-  /// In en, this message translates to:
-  /// **'Items with prices'**
-  String get pricedItems;
 
   /// No description provided for @itemWithPriceCount.
   ///

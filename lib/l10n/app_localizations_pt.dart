@@ -48,13 +48,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get barcodeLabel => 'Código de barras';
 
   @override
-  String get invalidBarcode => 'Digite um código de barras valido (8-13 digitos).';
+  String get invalidBarcode => 'Digite um código de barras válido (8-13 dígitos).';
 
   @override
   String get brandLabel => 'Marca';
 
   @override
-  String get categoryLabel => 'Categoria';
+  String get categoryLabel => 'Categorias';
 
   @override
   String get servingSize => 'Porção';
@@ -209,13 +209,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get deleteInventoryItem => 'Excluir itens?';
 
   @override
-  String deleteCountSub(Object count) {
-    return 'Excluir $count itens selecionados?';
-  }
-
-  @override
-  String itemsDeleted(Object count) {
-    return '$count excluído(s).';
+  String deleteCountSub(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Excluir $count itens selecionados?',
+      one: 'Excluir 1 item selecionado?',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -252,7 +253,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get couldNotOpenLink => 'Não foi possível abrir o link.';
 
   @override
-  String get nutrient => 'Nutriente';
+  String get nutrient => 'Nutrientes';
 
   @override
   String get deleteItemTitle => 'Excluir item?';
@@ -554,9 +555,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get filterAll => 'Todos';
 
   @override
-  String get filterByCategory => 'Categoria';
-
-  @override
   String get settingsAppearance => 'Aparência';
 
   @override
@@ -624,7 +622,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
 
   @override
-  String get locationStats => 'Local';
+  String get locationStats => 'Locais';
 
   @override
   String get nutritionPhoto => 'Nutrição';
@@ -957,9 +955,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get datePurchased => 'Data da compra';
 
   @override
-  String get pricedItems => 'Itens com precos';
-
-  @override
   String itemWithPriceCount(int count, int total) {
     return '$count de $total itens tem precos';
   }
@@ -977,7 +972,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get iUnderstand => 'Entendi';
 
   @override
-  String get notes => 'Observacoes';
+  String get notes => 'Observações';
 
   @override
   String get navList => 'Lista';
@@ -1064,7 +1059,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addToPantrySkipped => 'Preco salvo. Adicione pela pagina do produto para acompanhar.';
 
   @override
-  String get invalidPriceAmount => 'Digite um valor de preco valido';
+  String get invalidPriceAmount => 'Digite um valor de preço válido';
 
   @override
   String get dismiss => 'Dispensar';
@@ -1317,10 +1312,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryMeatAndProducts => 'Carnes e derivados';
 
   @override
-  String get categoryBreakfasts => 'Cafes da manha';
+  String get categoryBreakfasts => 'Cafés da manhã';
 
   @override
-  String get categoryBread => 'Pao';
+  String get categoryBread => 'Pão';
 
   @override
   String get categoryCakes => 'Bolos';
@@ -1347,7 +1342,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryFruits => 'Frutas';
 
   @override
-  String get categoryGrains => 'Graos';
+  String get categoryGrains => 'Grãos';
 
   @override
   String get categoryHotBeverages => 'Bebidas quentes';
@@ -1356,7 +1351,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryLegumes => 'Leguminosas';
 
   @override
-  String get categoryOils => 'Oleos';
+  String get categoryOils => 'Óleos';
 
   @override
   String get categoryPasta => 'Massas';
@@ -1424,13 +1419,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get barcodeLabel => 'Código de barras';
 
   @override
-  String get invalidBarcode => 'Digite um código de barras valido (8-13 digitos).';
+  String get invalidBarcode => 'Digite um código de barras válido (8-13 dígitos).';
 
   @override
   String get brandLabel => 'Marca';
 
   @override
-  String get categoryLabel => 'Categoria';
+  String get categoryLabel => 'Categorias';
 
   @override
   String get servingSize => 'Porção';
@@ -1585,13 +1580,14 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get deleteInventoryItem => 'Excluir itens?';
 
   @override
-  String deleteCountSub(Object count) {
-    return 'Excluir $count itens selecionados?';
-  }
-
-  @override
-  String itemsDeleted(Object count) {
-    return '$count excluído(s).';
+  String deleteCountSub(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Excluir $count itens selecionados?',
+      one: 'Excluir 1 item selecionado?',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1628,7 +1624,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get couldNotOpenLink => 'Não foi possível abrir o link.';
 
   @override
-  String get nutrient => 'Nutriente';
+  String get nutrient => 'Nutrientes';
 
   @override
   String get deleteItemTitle => 'Excluir item?';
@@ -1930,9 +1926,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get filterAll => 'Todos';
 
   @override
-  String get filterByCategory => 'Categoria';
-
-  @override
   String get settingsAppearance => 'Aparência';
 
   @override
@@ -2000,7 +1993,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
 
   @override
-  String get locationStats => 'Local';
+  String get locationStats => 'Locais';
 
   @override
   String get nutritionPhoto => 'Nutrição';
@@ -2333,9 +2326,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get datePurchased => 'Data da compra';
 
   @override
-  String get pricedItems => 'Itens com precos';
-
-  @override
   String itemWithPriceCount(int count, int total) {
     return '$count de $total itens tem precos';
   }
@@ -2353,7 +2343,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get iUnderstand => 'Entendi';
 
   @override
-  String get notes => 'Observacoes';
+  String get notes => 'Observações';
 
   @override
   String get navList => 'Lista';
@@ -2440,7 +2430,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get addToPantrySkipped => 'Preco salvo. Adicione pela pagina do produto para acompanhar.';
 
   @override
-  String get invalidPriceAmount => 'Digite um valor de preco valido';
+  String get invalidPriceAmount => 'Digite um valor de preço válido';
 
   @override
   String get dismiss => 'Dispensar';

@@ -15,7 +15,7 @@
   "barcodeLabel": "Barcode",
   "invalidBarcode": "Enter a valid barcode (8-13 digits).",
   "brandLabel": "Brand",
-  "categoryLabel": "Category",
+  "categoryLabel": "Categories",
   "servingSize": "Serving size",
   "energy": "Energy",
   "protein": "Protein",
@@ -74,14 +74,8 @@
   "itemRemoved": "Item removed from pantry.",
   "saveFailed": "Failed to save inventory item.",
   "deleteInventoryItem": "Delete items?",
-  "deleteCountSub": "Delete {count} selected items?",
+  "deleteCountSub": "{count, plural, =1{Delete 1 selected item?} other{Delete {count} selected items?}}",
   "@deleteCountSub": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "itemsDeleted": "{count} deleted.",
-  "@itemsDeleted": {
     "placeholders": {
       "count": {}
     }
@@ -97,7 +91,7 @@
   "couldNotOpenPlayStore": "Could not open the Play Store.",
   "viewOnOpenFoodFacts": "View on Open Food Facts",
   "couldNotOpenLink": "Could not open the link.",
-  "nutrient": "Nutrient",
+  "nutrient": "Nutrients",
   "deleteItemTitle": "Delete item?",
   "deleteItemContent": "This cannot be undone.",
   "delete": "Delete",
@@ -303,7 +297,6 @@
     }
   },
   "filterAll": "All",
-  "filterByCategory": "Category",
   "settingsAppearance": "Appearance",
   "settingsDataManagement": "Data Management",
   "settingsMaintenance": "Maintenance",
@@ -338,7 +331,7 @@
   "addedThisWeekLabel": "This week",
   "addedThisMonthLabel": "This month",
   "productDataUnavailable": "Product data unavailable — pull to refresh when online",
-  "locationStats": "Location",
+  "locationStats": "Locations",
   "nutritionPhoto": "Nutrition",
   "ingredientsPhoto": "Ingredients",
   "productPhoto": "Product",
@@ -488,7 +481,6 @@
   "priceTrendDown": "Prices are falling",
   "priceTrendStable": "Prices are stable",
   "datePurchased": "Purchase date",
-  "pricedItems": "Items with prices",
   "itemWithPriceCount": "{count} of {total} items have prices",
   "@itemWithPriceCount": {
     "placeholders": {

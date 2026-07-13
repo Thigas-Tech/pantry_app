@@ -14,7 +14,7 @@
   "scanFirstProduct": "Escanear um código",
   "barcodeLabel": "Código de barras",
   "brandLabel": "Marca",
-  "categoryLabel": "Categoria",
+  "categoryLabel": "Categorias",
   "servingSize": "Porção",
   "energy": "Energia",
   "protein": "Proteína",
@@ -72,14 +72,8 @@
   "itemRemoved": "Item removido da despensa.",
   "saveFailed": "Não foi possível salvar o item.",
   "deleteInventoryItem": "Excluir itens?",
-  "deleteCountSub": "Excluir {count} itens selecionados?",
+  "deleteCountSub": "{count, plural, =1{Excluir 1 item selecionado?} other{Excluir {count} itens selecionados?}}",
   "@deleteCountSub": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "itemsDeleted": "{count} excluído(s).",
-  "@itemsDeleted": {
     "placeholders": {
       "count": {}
     }
@@ -95,7 +89,7 @@
   "couldNotOpenPlayStore": "Não foi possível abrir a Play Store.",
   "viewOnOpenFoodFacts": "Ver no Open Food Facts",
   "couldNotOpenLink": "Não foi possível abrir o link.",
-  "nutrient": "Nutriente",
+  "nutrient": "Nutrientes",
   "deleteItemTitle": "Excluir item?",
   "deleteItemContent": "Isso não pode ser desfeito.",
   "delete": "Excluir",
@@ -287,7 +281,6 @@
     }
   },
   "filterAll": "Todos",
-  "filterByCategory": "Categoria",
   "settingsAppearance": "Aparência",
   "settingsDataManagement": "Gerenciamento de Dados",
   "settingsMaintenance": "Manutenção",
@@ -320,7 +313,7 @@
   "addedThisWeekLabel": "Esta semana",
   "addedThisMonthLabel": "Este mês",
   "productDataUnavailable": "Dados do produto indisponíveis — atualize para baixar",
-  "locationStats": "Local",
+  "locationStats": "Locais",
   "nutritionPhoto": "Nutrição",
   "ingredientsPhoto": "Ingredientes",
   "productPhoto": "Produto",
@@ -401,8 +394,8 @@
   "includeDeviceInfo": "Incluir informações do dispositivo",
   "ingredientsOriginal": "Show original ingredients",
   "ingredientsTranslated": "Show translated ingredients",
-  "invalidBarcode": "Digite um código de barras valido (8-13 digitos).",
-  "invalidPriceAmount": "Digite um valor de preco valido",
+  "invalidBarcode": "Digite um c\u00F3digo de barras v\u00E1lido (8-13 d\u00EDgitos).",
+  "invalidPriceAmount": "Digite um valor de pre\u00E7o v\u00E1lido",
   "issueCreate": "Criar issue",
   "issueDescription": "Descrição",
   "issueDescriptionRequired": "Descrição obrigatória (mín. 10 caracteres)",
@@ -418,7 +411,7 @@
   "markPurchased": "Marcar como comprado",
   "moveToInventory": "Mover para despensa",
   "noPrices": "Nenhum preco registrado.",
-  "notes": "Observacoes",
+  "notes": "Observa\u00E7\u00F5es",
   "notificationDeniedWarning": "Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.",
   "notificationPermissionBody": "Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.",
   "notificationPermissionTitle": "Permissao de Notificacao Necessaria",
@@ -446,7 +439,6 @@
   "priceTrendStable": "Precos estaveis",
   "priceTrendUp": "Precos estao subindo",
   "priceUpdated": "Preco atualizado.",
-  "pricedItems": "Itens com precos",
   "prices": "Precos",
   "pricesHidden": "Precos ocultos.",
   "pricesVisible": "Precos visiveis.",

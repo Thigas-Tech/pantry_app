@@ -54,7 +54,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brandLabel => 'Brand';
 
   @override
-  String get categoryLabel => 'Category';
+  String get categoryLabel => 'Categories';
 
   @override
   String get servingSize => 'Serving size';
@@ -209,13 +209,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteInventoryItem => 'Delete items?';
 
   @override
-  String deleteCountSub(Object count) {
-    return 'Delete $count selected items?';
-  }
-
-  @override
-  String itemsDeleted(Object count) {
-    return '$count deleted.';
+  String deleteCountSub(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Delete $count selected items?',
+      one: 'Delete 1 selected item?',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -252,7 +253,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotOpenLink => 'Could not open the link.';
 
   @override
-  String get nutrient => 'Nutrient';
+  String get nutrient => 'Nutrients';
 
   @override
   String get deleteItemTitle => 'Delete item?';
@@ -554,9 +555,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAll => 'All';
 
   @override
-  String get filterByCategory => 'Category';
-
-  @override
   String get settingsAppearance => 'Appearance';
 
   @override
@@ -624,7 +622,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productDataUnavailable => 'Product data unavailable — pull to refresh when online';
 
   @override
-  String get locationStats => 'Location';
+  String get locationStats => 'Locations';
 
   @override
   String get nutritionPhoto => 'Nutrition';
@@ -955,9 +953,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get datePurchased => 'Purchase date';
-
-  @override
-  String get pricedItems => 'Items with prices';
 
   @override
   String itemWithPriceCount(int count, int total) {
