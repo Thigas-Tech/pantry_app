@@ -55,7 +55,11 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">scheduleTestNotification</span>(<wbr>)
+<span class="name ">scheduleTestNotification</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="scheduleTestNotification-param-title"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span> = <span class="default-value">&#39;Scheduled Test&#39;</span>, </span></li>
+<li><span class="parameter" id="scheduleTestNotification-param-body"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span> = <span class="default-value">&#39;This fired 5 seconds later.&#39;</span>, </span></li>
+<li><span class="parameter" id="scheduleTestNotification-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;General Notifications&#39;</span>, </span></li>
+<li><span class="parameter" id="scheduleTestNotification-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Standard app notifications&#39;</span>, </span></li>
+</ol>})
 
       
 
@@ -69,17 +73,25 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; scheduleTestNotification() async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; scheduleTestNotification({
+  String title = &#39;Scheduled Test&#39;,
+  String body = &#39;This fired 5 seconds later.&#39;,
+  String channelName = &#39;General Notifications&#39;,
+  String channelDescription = &#39;Standard app notifications&#39;,
+}) async {
   final scheduledTime = tz.TZDateTime.now(
     tz.local,
   ).add(const Duration(seconds: 5));
 
   await _plugin.zonedSchedule(
     id: 1,
-    title: &#39;Scheduled Test&#39;,
-    body: &#39;This fired 5 seconds later.&#39;,
+    title: title,
+    body: body,
     scheduledDate: scheduledTime,
-    notificationDetails: _getChannelDetails(),
+    notificationDetails: _getChannelDetails(
+      channelName: channelName,
+      channelDescription: channelDescription,
+    ),
     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
   );
 }</code></pre>

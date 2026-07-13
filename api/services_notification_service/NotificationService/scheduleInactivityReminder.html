@@ -115,7 +115,10 @@ any previously scheduled inactivity reminder.</p>
     return;
   }
 
-  await ensureInactivityChannel();
+  await ensureInactivityChannel(
+    channelName: channelName,
+    channelDescription: channelDescription,
+  );
 
   final lastAddDate = DateTime.fromMillisecondsSinceEpoch(lastAddDateEpoch);
   final now = DateTime.now();
