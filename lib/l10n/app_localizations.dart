@@ -2561,6 +2561,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Meat and their products'**
   String get categoryMeatAndProducts;
+
+  /// No description provided for @categoryBreakfasts.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakfasts'**
+  String get categoryBreakfasts;
+
+  /// No description provided for @categoryBread.
+  ///
+  /// In en, this message translates to:
+  /// **'Bread'**
+  String get categoryBread;
+
+  /// No description provided for @categoryCakes.
+  ///
+  /// In en, this message translates to:
+  /// **'Cakes'**
+  String get categoryCakes;
+
+  /// No description provided for @categoryCereals.
+  ///
+  /// In en, this message translates to:
+  /// **'Cereals'**
+  String get categoryCereals;
+
+  /// No description provided for @categoryChocolate.
+  ///
+  /// In en, this message translates to:
+  /// **'Chocolate'**
+  String get categoryChocolate;
+
+  /// No description provided for @categoryCondiments.
+  ///
+  /// In en, this message translates to:
+  /// **'Condiments'**
+  String get categoryCondiments;
+
+  /// No description provided for @categoryEggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs'**
+  String get categoryEggs;
+
+  /// No description provided for @categoryFish.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish'**
+  String get categoryFish;
+
+  /// No description provided for @categoryFruit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruit'**
+  String get categoryFruit;
+
+  /// No description provided for @categoryFruits.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruits'**
+  String get categoryFruits;
+
+  /// No description provided for @categoryGrains.
+  ///
+  /// In en, this message translates to:
+  /// **'Grains'**
+  String get categoryGrains;
+
+  /// No description provided for @categoryHotBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot beverages'**
+  String get categoryHotBeverages;
+
+  /// No description provided for @categoryLegumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Legumes'**
+  String get categoryLegumes;
+
+  /// No description provided for @categoryOils.
+  ///
+  /// In en, this message translates to:
+  /// **'Oils'**
+  String get categoryOils;
+
+  /// No description provided for @categoryPasta.
+  ///
+  /// In en, this message translates to:
+  /// **'Pasta'**
+  String get categoryPasta;
+
+  /// No description provided for @categoryPoultry.
+  ///
+  /// In en, this message translates to:
+  /// **'Poultry'**
+  String get categoryPoultry;
+
+  /// No description provided for @categorySeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Seeds'**
+  String get categorySeeds;
+
+  /// No description provided for @categorySnacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Snacks'**
+  String get categorySnacks;
+
+  /// No description provided for @categorySpreads.
+  ///
+  /// In en, this message translates to:
+  /// **'Spreads'**
+  String get categorySpreads;
+
+  /// No description provided for @categorySweetSpreads.
+  ///
+  /// In en, this message translates to:
+  /// **'Sweet spreads'**
+  String get categorySweetSpreads;
+
+  /// No description provided for @categoryVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables'**
+  String get categoryVegetables;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

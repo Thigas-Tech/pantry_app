@@ -152,6 +152,48 @@ extension AppLocalizationsX on AppLocalizations {
         return categoryWaters;
       case 'Meat and their products':
         return categoryMeatAndProducts;
+      case 'Breakfasts':
+        return categoryBreakfasts;
+      case 'Bread':
+        return categoryBread;
+      case 'Cakes':
+        return categoryCakes;
+      case 'Cereals':
+        return categoryCereals;
+      case 'Chocolate':
+        return categoryChocolate;
+      case 'Condiments':
+        return categoryCondiments;
+      case 'Eggs':
+        return categoryEggs;
+      case 'Fish':
+        return categoryFish;
+      case 'Fruit':
+        return categoryFruit;
+      case 'Fruits':
+        return categoryFruits;
+      case 'Grains':
+        return categoryGrains;
+      case 'Hot beverages':
+        return categoryHotBeverages;
+      case 'Legumes':
+        return categoryLegumes;
+      case 'Oils':
+        return categoryOils;
+      case 'Pasta':
+        return categoryPasta;
+      case 'Poultry':
+        return categoryPoultry;
+      case 'Seeds':
+        return categorySeeds;
+      case 'Snacks':
+        return categorySnacks;
+      case 'Spreads':
+        return categorySpreads;
+      case 'Sweet spreads':
+        return categorySweetSpreads;
+      case 'Vegetables':
+        return categoryVegetables;
       default:
         return category;
     }

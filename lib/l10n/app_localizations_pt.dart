@@ -1315,6 +1315,69 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get categoryMeatAndProducts => 'Carnes e derivados';
+
+  @override
+  String get categoryBreakfasts => 'Cafes da manha';
+
+  @override
+  String get categoryBread => 'Pao';
+
+  @override
+  String get categoryCakes => 'Bolos';
+
+  @override
+  String get categoryCereals => 'Cereais';
+
+  @override
+  String get categoryChocolate => 'Chocolate';
+
+  @override
+  String get categoryCondiments => 'Condimentos';
+
+  @override
+  String get categoryEggs => 'Ovos';
+
+  @override
+  String get categoryFish => 'Peixe';
+
+  @override
+  String get categoryFruit => 'Fruta';
+
+  @override
+  String get categoryFruits => 'Frutas';
+
+  @override
+  String get categoryGrains => 'Graos';
+
+  @override
+  String get categoryHotBeverages => 'Bebidas quentes';
+
+  @override
+  String get categoryLegumes => 'Leguminosas';
+
+  @override
+  String get categoryOils => 'Oleos';
+
+  @override
+  String get categoryPasta => 'Massas';
+
+  @override
+  String get categoryPoultry => 'Aves';
+
+  @override
+  String get categorySeeds => 'Sementes';
+
+  @override
+  String get categorySnacks => 'Lanches';
+
+  @override
+  String get categorySpreads => 'Pastas';
+
+  @override
+  String get categorySweetSpreads => 'Pastas doces';
+
+  @override
+  String get categoryVegetables => 'Vegetais';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2628,4 +2691,67 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get categoryMeatAndProducts => 'Carnes e derivados';
+
+  @override
+  String get categoryBreakfasts => 'Cafés da manhã';
+
+  @override
+  String get categoryBread => 'Pão';
+
+  @override
+  String get categoryCakes => 'Bolos';
+
+  @override
+  String get categoryCereals => 'Cereais';
+
+  @override
+  String get categoryChocolate => 'Chocolate';
+
+  @override
+  String get categoryCondiments => 'Condimentos';
+
+  @override
+  String get categoryEggs => 'Ovos';
+
+  @override
+  String get categoryFish => 'Peixe';
+
+  @override
+  String get categoryFruit => 'Fruta';
+
+  @override
+  String get categoryFruits => 'Frutas';
+
+  @override
+  String get categoryGrains => 'Grãos';
+
+  @override
+  String get categoryHotBeverages => 'Bebidas quentes';
+
+  @override
+  String get categoryLegumes => 'Leguminosas';
+
+  @override
+  String get categoryOils => 'Óleos';
+
+  @override
+  String get categoryPasta => 'Massas';
+
+  @override
+  String get categoryPoultry => 'Aves';
+
+  @override
+  String get categorySeeds => 'Sementes';
+
+  @override
+  String get categorySnacks => 'Lanches';
+
+  @override
+  String get categorySpreads => 'Pastas';
+
+  @override
+  String get categorySweetSpreads => 'Pastas doces';
+
+  @override
+  String get categoryVegetables => 'Vegetais';
 }
