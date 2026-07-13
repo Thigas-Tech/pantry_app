@@ -67,13 +67,14 @@
 <p>The method runs <strong>two passes</strong>. The first pass iterates every barcode
 sequentially with a <strong>500 ms delay</strong> between calls. A second pass retries
 only the barcodes that failed on the first pass (timeout, 5xx, 429, or
-any other <code>Exception</code>), again with 500 ms spacing. This two‑pass strategy
+any other <a href="https://api.flutter.dev/flutter/dart-core/Exception-class.html">Exception</a>), again with 500 ms spacing. This two‑pass strategy
 absorbs transient rate‑limiting or server hiccups without blocking the
 UI for longer than necessary.</p>
 <p>Each individual API call may fail transiently; the two-pass
 strategy absorbs rate-limiting and server hiccups.</p>
 <p>Freshly fetched data is <strong>merged</strong> with any cached product via
-<code>Product.mergeFromApi</code>, ensuring that fields the API doesn't return
+a merge-from-API helper on <a href="../../models_product/Product-class.html">Product</a>, ensuring that fields the API
+doesn't return
 (e.g. Nutri-Score on staging) are preserved from the cache.</p>
 <h2 id="returns">Returns</h2>
 <p>The number of successfully refreshed products. Individual failures are

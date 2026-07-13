@@ -61,14 +61,14 @@ Desktop and web are not supported for scheduled notifications.</p>
 <p>Uses flutter_timezone to query the device's IANA timezone identifier
 and the timezone package for <a href="https://pub.dev/documentation/timezone/0.11.1/timezone/TZDateTime-class.html">tz.TZDateTime</a> math. The combination
 provides reliable timezone resolution on all platforms without the
-fragile <code>DateTime.now().timeZoneName</code> workaround.</p>
+fragile <a href="https://api.flutter.dev/flutter/dart-core/DateTime/timeZoneName.html">DateTime.timeZoneName</a> workaround.</p>
 <h2 id="notification-ids">Notification IDs</h2>
 <p>Each inventory item can have up to two scheduled notifications:</p>
 <ul>
 <li>ID = <code>itemId * 2</code>      -&gt; "Expiring soon" (1 day before)</li>
 <li>ID = <code>itemId * 2 + 1</code>  -&gt; "Expiring today" (on the expiry day)</li>
 </ul>
-<p>The ID scheme uses <code>itemId * 2</code> instead of <code>hashCode</code> to guarantee
+<p>The ID scheme uses <code>itemId * 2</code> instead of <a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a> to guarantee
 positivity (required by Android) and avoid collisions between items
 that share a barcode.</p>
 <h2 id="channel">Channel</h2>
