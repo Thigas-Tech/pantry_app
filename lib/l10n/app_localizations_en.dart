@@ -1199,7 +1199,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationFreezer => 'Freezer';
 
   @override
-  String get unitPieces => 'pieces';
+  String get unitSingular => 'unit';
+
+  @override
+  String get unitPlural => 'units';
+
+  @override
+  String get weightModeLabel => 'Weight (g)';
+
+  @override
+  String get unitModeLabel => 'Unit';
+
+  @override
+  String get servingSmall => 'Small';
+
+  @override
+  String get servingMedium => 'Medium';
+
+  @override
+  String get servingLarge => 'Large';
 
   @override
   String get unitGrams => 'g';
@@ -1480,4 +1498,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get categoryStarches => 'Starches';
+
+  @override
+  String get pluEntryTooltip => 'Enter PLU code (produce)';
+
+  @override
+  String get enterPluCode => 'Enter PLU Code';
+
+  @override
+  String get pluCodeNotFound => 'PLU code not recognized';
+
+  @override
+  String get digitLabel => 'Digit';
+
+  @override
+  String get deleteDigit => 'Delete digit';
 }

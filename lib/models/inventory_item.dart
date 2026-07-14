@@ -113,6 +113,13 @@ abstract class InventoryItem with _$InventoryItem {
     /// This is a foreign key referencing the `inventories` table.
     /// Defaults to `1` (the default "Home" inventory).
     @JsonKey(name: 'inventory_id') @Default(1) int inventoryId,
+
+    /// The weight in grams of one serving unit.
+    ///
+    /// Only meaningful for produce items added in unit mode (e.g. `182` for
+    /// "1 medium apple"). `null` for weight-mode items, non-produce items,
+    /// and legacy items without serving data.
+    @JsonKey(name: 'serving_weight_g') double? servingWeightG,
   }) = _InventoryItem;
 
   /// Creates an [InventoryItem] from a JSON map.

@@ -40,6 +40,7 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import '../helpers/pump_app.dart';
@@ -441,7 +442,7 @@ void main() {
 
       // Pop the scanner with a barcode
       final navigator = tester.state<NavigatorState>(find.byType(Navigator))
-        ..pop('123');
+        ..pop(const BarcodeResult('123'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -513,7 +514,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     final navigator = tester.state<NavigatorState>(find.byType(Navigator))
-      ..pop('123');
+      ..pop(const BarcodeResult('123'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 

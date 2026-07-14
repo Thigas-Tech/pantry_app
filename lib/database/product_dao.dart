@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:sqflite/sqflite.dart';
@@ -44,6 +45,8 @@ class ProductDao {
         ? jsonEncode(p.categoriesHierarchy)
         : null,
     'language_code': p.languageCode,
+    'plu_code': p.pluCode,
+    'product_type': p.productType.name,
   };
 
   /// Converts a database row map into a [Product].
@@ -79,6 +82,13 @@ class ProductDao {
               .cast<String>()
         : null,
     languageCode: (map['language_code'] as String?) ?? 'en',
+    pluCode: map['plu_code'] as String?,
+    productType: map['product_type'] != null
+        ? ProductType.values.firstWhere(
+            (t) => t.name == map['product_type'],
+            orElse: () => ProductType.barcoded,
+          )
+        : ProductType.barcoded,
   );
 
   /// Inserts a product into the local cache (upsert).

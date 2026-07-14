@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -274,6 +275,36 @@ void main() {
       expect(res['nutrition'], 1);
       expect(res['ingredients'], 1);
       expect(res['product'], 1);
+    });
+  });
+
+  group('ProductDao pluCode and productType', () {
+    const produceProduct = Product(
+      barcode: 'produce-banana-4011',
+      name: 'Banana',
+      productType: ProductType.produce,
+      pluCode: '4011',
+    );
+
+    test('insert and get produce product with pluCode', () async {
+      final db = await dbHelper.database;
+      await dao.insert(db, produceProduct);
+      final fetched = await dao.get(db, produceProduct.barcode);
+      expect(fetched, isNotNull);
+      expect(fetched!.pluCode, '4011');
+      expect(fetched.productType, ProductType.produce);
+    });
+
+    test('default productType is barcoded', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        const Product(barcode: 'basic', name: 'Basic'),
+      );
+      final fetched = await dao.get(db, 'basic');
+      expect(fetched, isNotNull);
+      expect(fetched!.productType, ProductType.barcoded);
+      expect(fetched.pluCode, isNull);
     });
   });
 }

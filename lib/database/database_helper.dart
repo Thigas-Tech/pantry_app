@@ -102,7 +102,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 20,
+        version: 22,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -153,7 +153,9 @@ class DatabaseHelper {
         off_product_image_url TEXT,
         categories_hierarchy TEXT,
         language_code TEXT NOT NULL DEFAULT 'en',
-        search_text TEXT
+        search_text TEXT,
+        plu_code TEXT,
+        product_type TEXT NOT NULL DEFAULT 'barcoded'
       )
     ''');
 
@@ -170,6 +172,7 @@ class DatabaseHelper {
         notes TEXT,
         date_added INTEGER,
         inventory_id INTEGER NOT NULL,
+        serving_weight_g REAL,
         FOREIGN KEY(barcode) REFERENCES products(barcode),
         FOREIGN KEY(inventory_id) REFERENCES inventories(id)
       )
@@ -460,6 +463,30 @@ class DatabaseHelper {
         );
       } on Exception catch (e) {
         logWarning('Migration v20 failed: $e');
+      }
+    }
+    if (oldVersion < 21) {
+      try {
+        await db.execute('ALTER TABLE products ADD COLUMN plu_code TEXT');
+        await db.execute(
+          'ALTER TABLE products ADD COLUMN product_type TEXT'
+          " NOT NULL DEFAULT 'barcoded'",
+        );
+        logInfo('Migration to version 21 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v21 failed (columns may already exist): $e');
+      }
+    }
+    if (oldVersion < 22) {
+      try {
+        await db.execute(
+          'ALTER TABLE inventory ADD COLUMN serving_weight_g REAL',
+        );
+        logInfo('Migration to version 22 completed');
+      } on Exception catch (e) {
+        logWarning(
+          'Migration v22 failed (column may already exist): $e',
+        );
       }
     }
   }

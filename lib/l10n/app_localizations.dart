@@ -2280,11 +2280,47 @@ abstract class AppLocalizations {
   /// **'Freezer'**
   String get locationFreezer;
 
-  /// No description provided for @unitPieces.
+  /// No description provided for @unitSingular.
   ///
   /// In en, this message translates to:
-  /// **'pieces'**
-  String get unitPieces;
+  /// **'unit'**
+  String get unitSingular;
+
+  /// No description provided for @unitPlural.
+  ///
+  /// In en, this message translates to:
+  /// **'units'**
+  String get unitPlural;
+
+  /// No description provided for @weightModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (g)'**
+  String get weightModeLabel;
+
+  /// No description provided for @unitModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unitModeLabel;
+
+  /// No description provided for @servingSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get servingSmall;
+
+  /// No description provided for @servingMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get servingMedium;
+
+  /// No description provided for @servingLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get servingLarge;
 
   /// No description provided for @unitGrams.
   ///
@@ -2825,6 +2861,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Starches'**
   String get categoryStarches;
+
+  /// No description provided for @pluEntryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PLU code (produce)'**
+  String get pluEntryTooltip;
+
+  /// No description provided for @enterPluCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PLU Code'**
+  String get enterPluCode;
+
+  /// No description provided for @pluCodeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'PLU code not recognized'**
+  String get pluCodeNotFound;
+
+  /// No description provided for @digitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Digit'**
+  String get digitLabel;
+
+  /// No description provided for @deleteDigit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete digit'**
+  String get deleteDigit;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

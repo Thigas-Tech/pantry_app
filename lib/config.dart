@@ -65,4 +65,10 @@ class AppConfig {
   /// Leave empty to skip screenshot upload (issue still submits without
   /// images).
   static String get imgurClientId => dotenv.env['IMGUR_CLIENT_ID'] ?? '';
+
+  /// The USDA FoodData Central API key.
+  ///
+  /// Register for free at https://fdc.nal.usda.gov/api-key-signup.html.
+  /// Leave empty to disable USDA API fallback for produce searches.
+  static String get usdaApiKey => dotenv.env['USDA_API_KEY'] ?? '';
 }
