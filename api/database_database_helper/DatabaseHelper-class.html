@@ -62,7 +62,7 @@ database operations use the same connection.</p>
 constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
 or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
-<p>Seven tables are created on first launch (version 16):</p>
+<p>Eight tables are created on first launch (version 19):</p>
 <ul>
 <li><code>products</code> – product data fetched from Open Food Facts.</li>
 <li><code>inventories</code> – named pantries (e.g. "Home", "Work").</li>
@@ -70,6 +70,7 @@ or a temporary file.</p>
 <li><code>feedback_queue</code> – offline queue for GitHub issue reports.</li>
 <li><code>prices</code> – purchase price observations per barcode.</li>
 <li><code>shopping_list</code> – items the user intends to buy.</li>
+<li><code>stores</code> – saved store names for autocomplete.</li>
 </ul>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
@@ -227,6 +228,18 @@ used for local storage.</li>
 </dt>
 <dd>
   DAO for the <code>shopping_list</code> table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="storeDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/storeDao.html">storeDao</a></span>
+  <span class="signature">&#8594; <a href="../database_store_dao/StoreDao-class.html">StoreDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the <code>stores</code> table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -392,6 +405,19 @@ used for local storage.</li>
 </dt>
 <dd>
   Returns all cached products.
+  
+
+</dd>
+
+        <dt id="getAllStores" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getAllStores.html">getAllStores</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_store/Store-class.html">Store</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all saved stores, ordered alphabetically.
   
 
 </dd>

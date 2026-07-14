@@ -93,6 +93,15 @@ never waste food again.</p>
 <li>
 <p><strong>Manual product entry</strong> — full form with nutrition table and camera capture when a barcode is unknown or you're offline</p>
 </li>
+<li>
+<p><strong>Price tracking</strong> — record purchase prices with store, date, and currency; view price history and total inventory value</p>
+</li>
+<li>
+<p><strong>Shopping list</strong> — add items from cached products or free-text, mark as purchased, batch-move to pantry</p>
+</li>
+<li>
+<p><strong>Store autocomplete</strong> — saved store names persist across uses, suggested in the price entry sheet</p>
+</li>
 </ul>
 <h2 id="screenshots">Screenshots</h2>
 <p>Add screenshots here: Home, Scanner, Product Detail, Settings.</p>
@@ -148,6 +157,10 @@ flutter build appbundle --debug
     inventory_dao.dart       # Inventory items CRUD + joins
     inventories_dao.dart     # Named pantries CRUD
     feedback_queue_dao.dart  # Offline feedback submission queue
+    price_dao.dart           # Price observations CRUD + aggregation
+    shopping_list_dao.dart   # Shopping list CRUD (per-inventory)
+    store_dao.dart           # Saved store names CRUD
+    product_submission_queue_dao.dart  # OFF submission queue
   l10n/                # App translations (English ARB)
   models/              # Freezed data models
   providers/           # Riverpod state &amp; dependency injection
@@ -202,6 +215,10 @@ flutter test --concurrency=2 --coverage  # With coverage
 <tr>
 <td>HTTP client</td>
 <td>http</td>
+</tr>
+<tr>
+<td>OFF SDK</td>
+<td>openfoodfacts</td>
 </tr>
 <tr>
 <td>Code generation</td>
@@ -328,6 +345,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="store_dao">
+  <span class="name"><a href="database_store_dao/">database/store_dao</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="app_localizations">
   <span class="name"><a href="l10n_app_localizations/">l10n/app_localizations</a></span> 
 
@@ -400,6 +424,13 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="shopping_item">
   <span class="name"><a href="models_shopping_item/">models/shopping_item</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="store">
+  <span class="name"><a href="models_store/">models/store</a></span> 
 
 </dt>
 <dd>
@@ -886,6 +917,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="database_product_dao/">database/product_dao</a></li>
       <li><a href="database_product_submission_queue_dao/">database/product_submission_queue_dao</a></li>
       <li><a href="database_shopping_list_dao/">database/shopping_list_dao</a></li>
+      <li><a href="database_store_dao/">database/store_dao</a></li>
       <li><a href="l10n_app_localizations/">l10n/app_localizations</a></li>
       <li><a href="l10n_app_localizations_en/">l10n/app_localizations_en</a></li>
       <li><a href="l10n_app_localizations_pt/">l10n/app_localizations_pt</a></li>
@@ -897,6 +929,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="models_price/">models/price</a></li>
       <li><a href="models_product/">models/product</a></li>
       <li><a href="models_shopping_item/">models/shopping_item</a></li>
+      <li><a href="models_store/">models/store</a></li>
       <li><a href="providers_active_inventory_provider/">providers/active_inventory_provider</a></li>
       <li><a href="providers_api_service_provider/">providers/api_service_provider</a></li>
       <li><a href="providers_connectivity_provider/">providers/connectivity_provider</a></li>
