@@ -1513,4 +1513,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteDigit => 'Delete digit';
+
+  @override
+  String get quickAddProduceTitle => 'Quick Add';
+
+  @override
+  String get quickAddProduceTooltip => 'Based on your purchases and seasonal availability';
+
+  @override
+  String get quickAddProduceEmpty => 'Start adding produce to see quick picks here!';
 }

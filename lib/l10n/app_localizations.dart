@@ -2891,6 +2891,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete digit'**
   String get deleteDigit;
+
+  /// No description provided for @quickAddProduceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get quickAddProduceTitle;
+
+  /// No description provided for @quickAddProduceTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on your purchases and seasonal availability'**
+  String get quickAddProduceTooltip;
+
+  /// No description provided for @quickAddProduceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Start adding produce to see quick picks here!'**
+  String get quickAddProduceEmpty;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

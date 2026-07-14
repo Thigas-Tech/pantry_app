@@ -694,5 +694,8 @@
   "enterPluCode": "Enter PLU Code",
   "pluCodeNotFound": "PLU code not recognized",
   "digitLabel": "Digit",
-  "deleteDigit": "Delete digit"
+  "deleteDigit": "Delete digit",
+  "quickAddProduceTitle": "Quick Add",
+  "quickAddProduceTooltip": "Based on your purchases and seasonal availability",
+  "quickAddProduceEmpty": "Start adding produce to see quick picks here!"
 }

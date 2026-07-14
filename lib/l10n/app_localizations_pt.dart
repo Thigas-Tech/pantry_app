@@ -1513,6 +1513,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deleteDigit => 'Delete digit';
+
+  @override
+  String get quickAddProduceTitle => 'Adicao Rapida';
+
+  @override
+  String get quickAddProduceTooltip => 'Baseado nas suas compras e disponibilidade sazonal';
+
+  @override
+  String get quickAddProduceEmpty => 'Comece a adicionar produtos para ver sugestoes aqui!';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2994,4 +3003,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get categoryStarches => 'Amidos';
+
+  @override
+  String get quickAddProduceTitle => 'Adicao Rapida';
+
+  @override
+  String get quickAddProduceTooltip => 'Baseado nas suas compras e disponibilidade sazonal';
+
+  @override
+  String get quickAddProduceEmpty => 'Comece a adicionar produtos para ver sugestoes aqui!';
 }

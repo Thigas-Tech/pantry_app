@@ -632,5 +632,8 @@
   "categoryDairies": "Latic\u00EDnios",
   "categoryInstantBeverages": "Bebidas instant\u00E2neas",
   "categoryMilkfat": "Gordura do leite",
-  "categoryStarches": "Amidos"
+  "categoryStarches": "Amidos",
+  "quickAddProduceTitle": "Adicao Rapida",
+  "quickAddProduceTooltip": "Baseado nas suas compras e disponibilidade sazonal",
+  "quickAddProduceEmpty": "Comece a adicionar produtos para ver sugestoes aqui!"
 }

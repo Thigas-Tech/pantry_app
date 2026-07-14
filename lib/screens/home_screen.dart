@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/models/hemisphere.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/produce_quick_add_item.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
@@ -18,7 +20,9 @@ import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
+import 'package:pantry_app/services/carousel_composition_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/hemisphere_service.dart';
 import 'package:pantry_app/services/produce_purchase_tracker.dart';
 import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
@@ -47,7 +51,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   final Set<int> _selectedIds = {};
   bool _hasCheckedOverdue = false;
   String _searchQuery = '';
-  List<String> _quickAddItems = [];
+  List<ProduceQuickAddItem> _quickAddItems = [];
+  bool _quickAddLoading = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -62,47 +67,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _loadQuickAddItems() async {
+    if (_quickAddLoading) return;
+    setState(() => _quickAddLoading = true);
     try {
-      final tracker = ProducePurchaseTracker();
-      final items = await tracker.getTopPurchases();
-      if (mounted) setState(() => _quickAddItems = items);
+      final dbHelper = ref.read(databaseProvider);
+      final tracker = ProducePurchaseTracker(dbHelper: dbHelper);
+      final service = CarouselCompositionService(purchaseTracker: tracker);
+      final settings = ref.read(settingsProvider);
+      final locale = Localizations.localeOf(context);
+      final hemisphere = HemisphereService.resolveEffectiveHemisphere(
+        settings.hemisphereOverride,
+        locale.countryCode,
+      );
+      final items = await service.buildCarousel(
+        date: DateTime.now(),
+        hemisphere: hemisphere,
+      );
+      if (mounted) {
+        setState(() {
+          _quickAddItems = items;
+          _quickAddLoading = false;
+        });
+      }
     } on Exception catch (e) {
       logWarning('Failed to load quick-add items: $e');
       if (mounted) {
-        setState(
-          () => _quickAddItems = ProducePurchaseTracker.getDefaultList(),
-        );
+        setState(() {
+          _quickAddItems = [];
+          _quickAddLoading = false;
+        });
       }
     }
   }
 
-  Future<void> _handleQuickProduceAdd(String produceName) async {
+  Future<void> _handleQuickProduceAdd(ProduceQuickAddItem item) async {
     final repo = ref.read(productRepositoryProvider);
     final activeId = ref.read(activeInventoryProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    final item = InventoryItem(
-      barcode: 'produce-$produceName',
+    final weight = item.weightHintG ?? 150.0;
+    final itemBarcode = 'produce-${item.name}';
+
+    final inventoryItem = InventoryItem(
+      barcode: itemBarcode,
       unit: 'g',
-      quantity: 150,
+      quantity: weight,
       inventoryId: activeId,
+      servingWeightG: item.weightHintG,
     );
 
     try {
-      final newId = await repo.addInventoryItem(item);
+      final newId = await repo.addInventoryItem(inventoryItem);
       if (!mounted) return;
       SnackbarHelper.showUndo(
         context,
         l10n.addToPantry,
         () async {
           await repo.deleteInventoryItem(newId);
+          final dbHelper = ref.read(databaseProvider);
+          await ProducePurchaseTracker(
+            dbHelper: dbHelper,
+          ).undoPurchase(item.name);
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.removedFromPantry);
           }
         },
       );
       ref.invalidate(inventoryWithProductProvider);
-      await ProducePurchaseTracker().recordPurchase(produceName);
+      final dbHelper = ref.read(databaseProvider);
+      await ProducePurchaseTracker(
+        dbHelper: dbHelper,
+      ).recordPurchase(item.name);
+      if (mounted) await _loadQuickAddItems();
     } on Exception catch (e) {
       logError('Failed to quick-add produce: $e');
       if (mounted) {
@@ -462,10 +498,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         children: [
           if (!_selectionMode)
             _buildSearchAnchor(l10n, inventoryAsync.asData?.value ?? []),
-          if (!_selectionMode && _quickAddItems.isNotEmpty)
+          if (!_selectionMode)
             QuickAddProduce(
-              items: _quickAddItems,
+              items: _quickAddLoading ? [] : _quickAddItems,
               onProduceSelected: _handleQuickProduceAdd,
+              sectionTitle: l10n.quickAddProduceTitle,
+              infoTooltip: l10n.quickAddProduceTooltip,
+              emptyMessage: _quickAddLoading
+                  ? '...'
+                  : l10n.quickAddProduceEmpty,
             ),
           Expanded(
             child: inventoryAsync.when(
