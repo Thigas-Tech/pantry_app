@@ -103,7 +103,7 @@ void main() {
   });
 
   group('toggleShoppingItem', () {
-    test('calls toggle on DB and invalidates providers', () async {
+    test('calls toggle on DB and invalidates providers', () {
       when(
         () => mockDb.toggleShoppingItemPurchased(42),
       ).thenAnswer((_) async => 1);
@@ -129,7 +129,7 @@ void main() {
   });
 
   group('deleteShoppingItem', () {
-    test('calls delete on DB and photo service', () async {
+    test('calls delete on DB and photo service', () {
       when(() => mockPhoto.deletePhotoForItem(99)).thenAnswer((_) async {});
       when(() => mockDb.deleteShoppingItem(99)).thenAnswer((_) async => 1);
 
@@ -139,7 +139,7 @@ void main() {
   });
 
   group('clearPurchasedShoppingItems', () {
-    test('calls clear on DB', () async {
+    test('calls clear on DB', () {
       when(() => mockDb.clearPurchasedShoppingItems()).thenAnswer(
         (_) async => 3,
       );
@@ -149,14 +149,13 @@ void main() {
   });
 
   group('updateShoppingItemPrice', () {
-    test('calls update on DB', () async {
+    test('calls update on DB', () {
       when(
         () => mockDb.updateShoppingItemPriceFields(
           1,
           priceAmount: 5.99,
           priceCurrency: 'USD',
           priceStore: 'Walmart',
-          pricePhotoPath: null,
         ),
       ).thenAnswer((_) async => 1);
 

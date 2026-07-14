@@ -42,7 +42,7 @@ void main() {
 
   group('priceHistoryProvider', () {
     test('delegates to repository.getPriceHistory', () async {
-      final prices = [Price(barcode: '123', price: 5.99)];
+      final prices = [const Price(barcode: '123', price: 5.99)];
       when(() => mockRepo.getPriceHistory('123')).thenAnswer(
         (_) async => prices,
       );
@@ -56,7 +56,7 @@ void main() {
 
   group('latestPriceProvider', () {
     test('delegates to repository.getLatestPrice', () async {
-      final price = Price(barcode: '123', price: 5.99);
+      const price = Price(barcode: '123', price: 5.99);
       when(() => mockRepo.getLatestPrice('123')).thenAnswer(
         (_) async => price,
       );
@@ -82,7 +82,7 @@ void main() {
   group('inventoryValueProvider', () {
     test('delegates to repository.totalInventoryValue', () async {
       when(
-        () => mockRepo.totalInventoryValue(1, baseCurrency: 'USD'),
+        () => mockRepo.totalInventoryValue(1),
       ).thenAnswer((_) async => 42.50);
 
       final result = await container.read(
@@ -93,7 +93,7 @@ void main() {
 
     test('returns null when value is null', () async {
       when(
-        () => mockRepo.totalInventoryValue(1, baseCurrency: 'USD'),
+        () => mockRepo.totalInventoryValue(1),
       ).thenAnswer((_) async => null);
 
       final result = await container.read(inventoryValueProvider.future);
@@ -104,7 +104,7 @@ void main() {
   group('averagePriceProvider', () {
     test('delegates to repository.averageItemPrice', () async {
       when(
-        () => mockRepo.averageItemPrice(1, baseCurrency: 'USD'),
+        () => mockRepo.averageItemPrice(1),
       ).thenAnswer((_) async => 3.33);
 
       final result = await container.read(averagePriceProvider.future);
@@ -113,7 +113,7 @@ void main() {
 
     test('returns null when avg is null', () async {
       when(
-        () => mockRepo.averageItemPrice(1, baseCurrency: 'USD'),
+        () => mockRepo.averageItemPrice(1),
       ).thenAnswer((_) async => null);
 
       final result = await container.read(averagePriceProvider.future);
@@ -133,8 +133,8 @@ void main() {
   group('pendingSyncCountProvider', () {
     test('delegates to repository.getPendingSyncPrices', () async {
       final pending = [
-        Price(barcode: '1', price: 1.0, syncStatus: 'pending'),
-        Price(barcode: '2', price: 2.0, syncStatus: 'pending'),
+        const Price(barcode: '1', price: 1, syncStatus: 'pending'),
+        const Price(barcode: '2', price: 2, syncStatus: 'pending'),
       ];
       when(() => mockRepo.getPendingSyncPrices()).thenAnswer(
         (_) async => pending,

@@ -144,7 +144,7 @@ void main() {
 
   group('convert', () {
     test('returns same amount when currencies match', () async {
-      final result = await service.convert(10.0, 'USD', 'USD');
+      final result = await service.convert(10, 'USD', 'USD');
       expect(result, 10.0);
     });
 
@@ -163,7 +163,7 @@ void main() {
         ),
       ).thenAnswer((_) async => response);
 
-      final result = await service.convert(10.0, 'USD', 'BRL');
+      final result = await service.convert(10, 'USD', 'BRL');
       expect(result, 50.0);
     });
 
@@ -182,7 +182,7 @@ void main() {
         ),
       ).thenAnswer((_) async => response);
 
-      final result = await service.convert(10.0, 'USD', 'XYZ');
+      final result = await service.convert(10, 'USD', 'XYZ');
       expect(result, 10.0);
     });
 
@@ -193,7 +193,7 @@ void main() {
         ),
       ).thenThrow(Exception('Offline'));
 
-      final result = await service.convert(10.0, 'USD', 'BRL');
+      final result = await service.convert(10, 'USD', 'BRL');
       expect(result, 10.0);
     });
   });

@@ -27,7 +27,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  List<Override> _priceSheetOverrides() => [
+  List<Override> priceSheetOverrides() => [
     settingsProvider.overrideWith(_defaultSettings),
     storesProvider.overrideWith((ref) => const <Store>[]),
   ];
@@ -161,7 +161,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -179,7 +179,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -197,7 +197,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -214,7 +214,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -231,7 +231,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -260,7 +260,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -288,7 +288,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -308,7 +308,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);
@@ -336,7 +336,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _priceSheetOverrides(),
+        overrides: priceSheetOverrides(),
       );
 
       await openSheet(tester);

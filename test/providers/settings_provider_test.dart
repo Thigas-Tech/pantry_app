@@ -12,14 +12,14 @@ void main() {
 
   group('Settings', () {
     test('copyWith preserves unchanged fields', () {
-      const original = Settings(notificationsEnabled: true);
+      const original = Settings();
       final copy = original.copyWith(notificationsEnabled: false);
       expect(copy.notificationsEnabled, false);
       expect(copy.retentionDays, original.retentionDays);
     });
 
     test('copyWith changes multiple fields', () {
-      const original = Settings(notificationsEnabled: true, retentionDays: 60);
+      const original = Settings();
       final copy = original.copyWith(
         notificationsEnabled: false,
         retentionDays: 30,
@@ -32,9 +32,9 @@ void main() {
   group('SettingsNotifier', () {
     test('value setter updates state immediately', () {
       final container = ProviderContainer();
-      final notifier = container.read(settingsProvider.notifier);
-
-      notifier.value = const Settings(notificationsEnabled: false);
+      container.read(settingsProvider.notifier).value = const Settings(
+        notificationsEnabled: false,
+      );
       expect(container.read(settingsProvider).notificationsEnabled, false);
 
       container.dispose();
@@ -43,9 +43,7 @@ void main() {
     test('value setter persists to SharedPreferences', () async {
       SharedPreferences.setMockInitialValues({});
       final container = ProviderContainer();
-      final notifier = container.read(settingsProvider.notifier);
-
-      notifier.value = const Settings(
+      container.read(settingsProvider.notifier).value = const Settings(
         notificationsEnabled: false,
         retentionDays: 90,
         amoledDarkMode: true,
@@ -66,9 +64,7 @@ void main() {
     test('persists all settings fields', () async {
       SharedPreferences.setMockInitialValues({});
       final container = ProviderContainer();
-      final notifier = container.read(settingsProvider.notifier);
-
-      notifier.value = const Settings(
+      container.read(settingsProvider.notifier).value = const Settings(
         notificationsEnabled: false,
         retentionDays: 45,
         expiringSoonDays: 7,

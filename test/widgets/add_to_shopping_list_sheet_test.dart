@@ -28,7 +28,7 @@ void main() {
     );
   });
 
-  List<Override> _sheetOverrides() => [
+  List<Override> sheetOverrides() => [
     databaseProvider.overrideWithValue(mockDb),
     apiServiceProvider.overrideWithValue(mockOff),
     hasConnectionProvider.overrideWith((ref) => Future.value(false)),
@@ -44,7 +44,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _sheetOverrides(),
+        overrides: sheetOverrides(),
       );
 
       await tester.tap(find.text('Open'));
@@ -63,7 +63,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _sheetOverrides(),
+        overrides: sheetOverrides(),
       );
 
       await tester.tap(find.text('Open'));
@@ -84,7 +84,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _sheetOverrides(),
+        overrides: sheetOverrides(),
       );
 
       await tester.tap(find.text('Open'));
@@ -106,7 +106,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _sheetOverrides(),
+        overrides: sheetOverrides(),
       );
 
       await tester.tap(find.text('Open'));
@@ -124,7 +124,7 @@ void main() {
     testWidgets('searches and shows results', (tester) async {
       when(() => mockDb.searchProducts('milk')).thenAnswer(
         (_) async => [
-          Product(barcode: '123', name: 'Milk', brand: 'Brand', source: 'api'),
+          const Product(barcode: '123', name: 'Milk', brand: 'Brand'),
         ],
       );
 
@@ -136,7 +136,7 @@ void main() {
             child: const Text('Open'),
           ),
         ),
-        overrides: _sheetOverrides(),
+        overrides: sheetOverrides(),
         settle: false,
       );
 
