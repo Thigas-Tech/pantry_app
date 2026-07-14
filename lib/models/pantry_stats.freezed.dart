@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PantryStats {
 
- int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List<WeeklyCount> get weeklyAdditions; Map<String, int> get itemsByLocation; List<CategoryCount> get categoriesTop; Map<String, int> get nutriscoreDistribution; Map<String, int> get itemsBySource; PhotoStats get localPhotos; PhotoStats get offPhotos; double get totalValue; double get averagePrice; int get pricedItemCount;
+ int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List<WeeklyCount> get weeklyAdditions; Map<String, int> get itemsByLocation; List<CategoryCount> get categoriesTop; Map<String, int> get nutriscoreDistribution; Map<String, int> get itemsBySource; PhotoStats get localPhotos; PhotoStats get offPhotos; double get totalValue; double get averagePrice; int get pricedItemCount; List<MonthlySpending> get monthlySpending; List<StoreSpending> get storeSpending; List<StoreNutriscore> get nutriscoreByStore;
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PantryStatsCopyWith<PantryStats> get copyWith => _$PantryStatsCopyWithImpl<Pant
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other.weeklyAdditions, weeklyAdditions)&&const DeepCollectionEquality().equals(other.itemsByLocation, itemsByLocation)&&const DeepCollectionEquality().equals(other.categoriesTop, categoriesTop)&&const DeepCollectionEquality().equals(other.nutriscoreDistribution, nutriscoreDistribution)&&const DeepCollectionEquality().equals(other.itemsBySource, itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos)&&(identical(other.totalValue, totalValue) || other.totalValue == totalValue)&&(identical(other.averagePrice, averagePrice) || other.averagePrice == averagePrice)&&(identical(other.pricedItemCount, pricedItemCount) || other.pricedItemCount == pricedItemCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other.weeklyAdditions, weeklyAdditions)&&const DeepCollectionEquality().equals(other.itemsByLocation, itemsByLocation)&&const DeepCollectionEquality().equals(other.categoriesTop, categoriesTop)&&const DeepCollectionEquality().equals(other.nutriscoreDistribution, nutriscoreDistribution)&&const DeepCollectionEquality().equals(other.itemsBySource, itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos)&&(identical(other.totalValue, totalValue) || other.totalValue == totalValue)&&(identical(other.averagePrice, averagePrice) || other.averagePrice == averagePrice)&&(identical(other.pricedItemCount, pricedItemCount) || other.pricedItemCount == pricedItemCount)&&const DeepCollectionEquality().equals(other.monthlySpending, monthlySpending)&&const DeepCollectionEquality().equals(other.storeSpending, storeSpending)&&const DeepCollectionEquality().equals(other.nutriscoreByStore, nutriscoreByStore));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(weeklyAdditions),const DeepCollectionEquality().hash(itemsByLocation),const DeepCollectionEquality().hash(categoriesTop),const DeepCollectionEquality().hash(nutriscoreDistribution),const DeepCollectionEquality().hash(itemsBySource),localPhotos,offPhotos,totalValue,averagePrice,pricedItemCount);
+int get hashCode => Object.hashAll([runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(weeklyAdditions),const DeepCollectionEquality().hash(itemsByLocation),const DeepCollectionEquality().hash(categoriesTop),const DeepCollectionEquality().hash(nutriscoreDistribution),const DeepCollectionEquality().hash(itemsBySource),localPhotos,offPhotos,totalValue,averagePrice,pricedItemCount,const DeepCollectionEquality().hash(monthlySpending),const DeepCollectionEquality().hash(storeSpending),const DeepCollectionEquality().hash(nutriscoreByStore)]);
 
 @override
 String toString() {
-  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos, totalValue: $totalValue, averagePrice: $averagePrice, pricedItemCount: $pricedItemCount)';
+  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos, totalValue: $totalValue, averagePrice: $averagePrice, pricedItemCount: $pricedItemCount, monthlySpending: $monthlySpending, storeSpending: $storeSpending, nutriscoreByStore: $nutriscoreByStore)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PantryStatsCopyWith<$Res>  {
   factory $PantryStatsCopyWith(PantryStats value, $Res Function(PantryStats) _then) = _$PantryStatsCopyWithImpl;
 @useResult
 $Res call({
- int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos, double totalValue, double averagePrice, int pricedItemCount
+ int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos, double totalValue, double averagePrice, int pricedItemCount, List<MonthlySpending> monthlySpending, List<StoreSpending> storeSpending, List<StoreNutriscore> nutriscoreByStore
 });
 
 
@@ -62,7 +62,7 @@ class _$PantryStatsCopyWithImpl<$Res>
 
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,Object? totalValue = null,Object? averagePrice = null,Object? pricedItemCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,Object? totalValue = null,Object? averagePrice = null,Object? pricedItemCount = null,Object? monthlySpending = null,Object? storeSpending = null,Object? nutriscoreByStore = null,}) {
   return _then(_self.copyWith(
 totalProducts: null == totalProducts ? _self.totalProducts : totalProducts // ignore: cast_nullable_to_non_nullable
 as int,totalItems: null == totalItems ? _self.totalItems : totalItems // ignore: cast_nullable_to_non_nullable
@@ -82,7 +82,10 @@ as PhotoStats,offPhotos: null == offPhotos ? _self.offPhotos : offPhotos // igno
 as PhotoStats,totalValue: null == totalValue ? _self.totalValue : totalValue // ignore: cast_nullable_to_non_nullable
 as double,averagePrice: null == averagePrice ? _self.averagePrice : averagePrice // ignore: cast_nullable_to_non_nullable
 as double,pricedItemCount: null == pricedItemCount ? _self.pricedItemCount : pricedItemCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,monthlySpending: null == monthlySpending ? _self.monthlySpending : monthlySpending // ignore: cast_nullable_to_non_nullable
+as List<MonthlySpending>,storeSpending: null == storeSpending ? _self.storeSpending : storeSpending // ignore: cast_nullable_to_non_nullable
+as List<StoreSpending>,nutriscoreByStore: null == nutriscoreByStore ? _self.nutriscoreByStore : nutriscoreByStore // ignore: cast_nullable_to_non_nullable
+as List<StoreNutriscore>,
   ));
 }
 /// Create a copy of PantryStats
@@ -185,10 +188,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount,  List<MonthlySpending> monthlySpending,  List<StoreSpending> storeSpending,  List<StoreNutriscore> nutriscoreByStore)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PantryStats() when $default != null:
-return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount);case _:
+return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount,_that.monthlySpending,_that.storeSpending,_that.nutriscoreByStore);case _:
   return orElse();
 
 }
@@ -206,10 +209,10 @@ return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNume
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount,  List<MonthlySpending> monthlySpending,  List<StoreSpending> storeSpending,  List<StoreNutriscore> nutriscoreByStore)  $default,) {final _that = this;
 switch (_that) {
 case _PantryStats():
-return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount);case _:
+return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount,_that.monthlySpending,_that.storeSpending,_that.nutriscoreByStore);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -226,10 +229,10 @@ return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNume
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int totalProducts,  int totalItems,  double averageNutriscoreNumeric,  int expiredCount,  int expiringSoonCount,  int goodCount,  int addedThisWeek,  int addedThisMonth,  List<WeeklyCount> weeklyAdditions,  Map<String, int> itemsByLocation,  List<CategoryCount> categoriesTop,  Map<String, int> nutriscoreDistribution,  Map<String, int> itemsBySource,  PhotoStats localPhotos,  PhotoStats offPhotos,  double totalValue,  double averagePrice,  int pricedItemCount,  List<MonthlySpending> monthlySpending,  List<StoreSpending> storeSpending,  List<StoreNutriscore> nutriscoreByStore)?  $default,) {final _that = this;
 switch (_that) {
 case _PantryStats() when $default != null:
-return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount);case _:
+return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNumeric,_that.expiredCount,_that.expiringSoonCount,_that.goodCount,_that.addedThisWeek,_that.addedThisMonth,_that.weeklyAdditions,_that.itemsByLocation,_that.categoriesTop,_that.nutriscoreDistribution,_that.itemsBySource,_that.localPhotos,_that.offPhotos,_that.totalValue,_that.averagePrice,_that.pricedItemCount,_that.monthlySpending,_that.storeSpending,_that.nutriscoreByStore);case _:
   return null;
 
 }
@@ -241,7 +244,7 @@ return $default(_that.totalProducts,_that.totalItems,_that.averageNutriscoreNume
 
 
 class _PantryStats implements PantryStats {
-  const _PantryStats({required this.totalProducts, required this.totalItems, required this.averageNutriscoreNumeric, required this.expiredCount, required this.expiringSoonCount, required this.goodCount, required this.addedThisWeek, required this.addedThisMonth, required final  List<WeeklyCount> weeklyAdditions, required final  Map<String, int> itemsByLocation, required final  List<CategoryCount> categoriesTop, required final  Map<String, int> nutriscoreDistribution, required final  Map<String, int> itemsBySource, required this.localPhotos, required this.offPhotos, this.totalValue = 0, this.averagePrice = 0, this.pricedItemCount = 0}): _weeklyAdditions = weeklyAdditions,_itemsByLocation = itemsByLocation,_categoriesTop = categoriesTop,_nutriscoreDistribution = nutriscoreDistribution,_itemsBySource = itemsBySource;
+  const _PantryStats({required this.totalProducts, required this.totalItems, required this.averageNutriscoreNumeric, required this.expiredCount, required this.expiringSoonCount, required this.goodCount, required this.addedThisWeek, required this.addedThisMonth, required final  List<WeeklyCount> weeklyAdditions, required final  Map<String, int> itemsByLocation, required final  List<CategoryCount> categoriesTop, required final  Map<String, int> nutriscoreDistribution, required final  Map<String, int> itemsBySource, required this.localPhotos, required this.offPhotos, this.totalValue = 0, this.averagePrice = 0, this.pricedItemCount = 0, final  List<MonthlySpending> monthlySpending = const [], final  List<StoreSpending> storeSpending = const [], final  List<StoreNutriscore> nutriscoreByStore = const []}): _weeklyAdditions = weeklyAdditions,_itemsByLocation = itemsByLocation,_categoriesTop = categoriesTop,_nutriscoreDistribution = nutriscoreDistribution,_itemsBySource = itemsBySource,_monthlySpending = monthlySpending,_storeSpending = storeSpending,_nutriscoreByStore = nutriscoreByStore;
   
 
 @override final  int totalProducts;
@@ -292,6 +295,27 @@ class _PantryStats implements PantryStats {
 @override@JsonKey() final  double totalValue;
 @override@JsonKey() final  double averagePrice;
 @override@JsonKey() final  int pricedItemCount;
+ final  List<MonthlySpending> _monthlySpending;
+@override@JsonKey() List<MonthlySpending> get monthlySpending {
+  if (_monthlySpending is EqualUnmodifiableListView) return _monthlySpending;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_monthlySpending);
+}
+
+ final  List<StoreSpending> _storeSpending;
+@override@JsonKey() List<StoreSpending> get storeSpending {
+  if (_storeSpending is EqualUnmodifiableListView) return _storeSpending;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_storeSpending);
+}
+
+ final  List<StoreNutriscore> _nutriscoreByStore;
+@override@JsonKey() List<StoreNutriscore> get nutriscoreByStore {
+  if (_nutriscoreByStore is EqualUnmodifiableListView) return _nutriscoreByStore;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_nutriscoreByStore);
+}
+
 
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
@@ -303,16 +327,16 @@ _$PantryStatsCopyWith<_PantryStats> get copyWith => __$PantryStatsCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other._weeklyAdditions, _weeklyAdditions)&&const DeepCollectionEquality().equals(other._itemsByLocation, _itemsByLocation)&&const DeepCollectionEquality().equals(other._categoriesTop, _categoriesTop)&&const DeepCollectionEquality().equals(other._nutriscoreDistribution, _nutriscoreDistribution)&&const DeepCollectionEquality().equals(other._itemsBySource, _itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos)&&(identical(other.totalValue, totalValue) || other.totalValue == totalValue)&&(identical(other.averagePrice, averagePrice) || other.averagePrice == averagePrice)&&(identical(other.pricedItemCount, pricedItemCount) || other.pricedItemCount == pricedItemCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PantryStats&&(identical(other.totalProducts, totalProducts) || other.totalProducts == totalProducts)&&(identical(other.totalItems, totalItems) || other.totalItems == totalItems)&&(identical(other.averageNutriscoreNumeric, averageNutriscoreNumeric) || other.averageNutriscoreNumeric == averageNutriscoreNumeric)&&(identical(other.expiredCount, expiredCount) || other.expiredCount == expiredCount)&&(identical(other.expiringSoonCount, expiringSoonCount) || other.expiringSoonCount == expiringSoonCount)&&(identical(other.goodCount, goodCount) || other.goodCount == goodCount)&&(identical(other.addedThisWeek, addedThisWeek) || other.addedThisWeek == addedThisWeek)&&(identical(other.addedThisMonth, addedThisMonth) || other.addedThisMonth == addedThisMonth)&&const DeepCollectionEquality().equals(other._weeklyAdditions, _weeklyAdditions)&&const DeepCollectionEquality().equals(other._itemsByLocation, _itemsByLocation)&&const DeepCollectionEquality().equals(other._categoriesTop, _categoriesTop)&&const DeepCollectionEquality().equals(other._nutriscoreDistribution, _nutriscoreDistribution)&&const DeepCollectionEquality().equals(other._itemsBySource, _itemsBySource)&&(identical(other.localPhotos, localPhotos) || other.localPhotos == localPhotos)&&(identical(other.offPhotos, offPhotos) || other.offPhotos == offPhotos)&&(identical(other.totalValue, totalValue) || other.totalValue == totalValue)&&(identical(other.averagePrice, averagePrice) || other.averagePrice == averagePrice)&&(identical(other.pricedItemCount, pricedItemCount) || other.pricedItemCount == pricedItemCount)&&const DeepCollectionEquality().equals(other._monthlySpending, _monthlySpending)&&const DeepCollectionEquality().equals(other._storeSpending, _storeSpending)&&const DeepCollectionEquality().equals(other._nutriscoreByStore, _nutriscoreByStore));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(_weeklyAdditions),const DeepCollectionEquality().hash(_itemsByLocation),const DeepCollectionEquality().hash(_categoriesTop),const DeepCollectionEquality().hash(_nutriscoreDistribution),const DeepCollectionEquality().hash(_itemsBySource),localPhotos,offPhotos,totalValue,averagePrice,pricedItemCount);
+int get hashCode => Object.hashAll([runtimeType,totalProducts,totalItems,averageNutriscoreNumeric,expiredCount,expiringSoonCount,goodCount,addedThisWeek,addedThisMonth,const DeepCollectionEquality().hash(_weeklyAdditions),const DeepCollectionEquality().hash(_itemsByLocation),const DeepCollectionEquality().hash(_categoriesTop),const DeepCollectionEquality().hash(_nutriscoreDistribution),const DeepCollectionEquality().hash(_itemsBySource),localPhotos,offPhotos,totalValue,averagePrice,pricedItemCount,const DeepCollectionEquality().hash(_monthlySpending),const DeepCollectionEquality().hash(_storeSpending),const DeepCollectionEquality().hash(_nutriscoreByStore)]);
 
 @override
 String toString() {
-  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos, totalValue: $totalValue, averagePrice: $averagePrice, pricedItemCount: $pricedItemCount)';
+  return 'PantryStats(totalProducts: $totalProducts, totalItems: $totalItems, averageNutriscoreNumeric: $averageNutriscoreNumeric, expiredCount: $expiredCount, expiringSoonCount: $expiringSoonCount, goodCount: $goodCount, addedThisWeek: $addedThisWeek, addedThisMonth: $addedThisMonth, weeklyAdditions: $weeklyAdditions, itemsByLocation: $itemsByLocation, categoriesTop: $categoriesTop, nutriscoreDistribution: $nutriscoreDistribution, itemsBySource: $itemsBySource, localPhotos: $localPhotos, offPhotos: $offPhotos, totalValue: $totalValue, averagePrice: $averagePrice, pricedItemCount: $pricedItemCount, monthlySpending: $monthlySpending, storeSpending: $storeSpending, nutriscoreByStore: $nutriscoreByStore)';
 }
 
 
@@ -323,7 +347,7 @@ abstract mixin class _$PantryStatsCopyWith<$Res> implements $PantryStatsCopyWith
   factory _$PantryStatsCopyWith(_PantryStats value, $Res Function(_PantryStats) _then) = __$PantryStatsCopyWithImpl;
 @override @useResult
 $Res call({
- int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos, double totalValue, double averagePrice, int pricedItemCount
+ int totalProducts, int totalItems, double averageNutriscoreNumeric, int expiredCount, int expiringSoonCount, int goodCount, int addedThisWeek, int addedThisMonth, List<WeeklyCount> weeklyAdditions, Map<String, int> itemsByLocation, List<CategoryCount> categoriesTop, Map<String, int> nutriscoreDistribution, Map<String, int> itemsBySource, PhotoStats localPhotos, PhotoStats offPhotos, double totalValue, double averagePrice, int pricedItemCount, List<MonthlySpending> monthlySpending, List<StoreSpending> storeSpending, List<StoreNutriscore> nutriscoreByStore
 });
 
 
@@ -340,7 +364,7 @@ class __$PantryStatsCopyWithImpl<$Res>
 
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,Object? totalValue = null,Object? averagePrice = null,Object? pricedItemCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? totalProducts = null,Object? totalItems = null,Object? averageNutriscoreNumeric = null,Object? expiredCount = null,Object? expiringSoonCount = null,Object? goodCount = null,Object? addedThisWeek = null,Object? addedThisMonth = null,Object? weeklyAdditions = null,Object? itemsByLocation = null,Object? categoriesTop = null,Object? nutriscoreDistribution = null,Object? itemsBySource = null,Object? localPhotos = null,Object? offPhotos = null,Object? totalValue = null,Object? averagePrice = null,Object? pricedItemCount = null,Object? monthlySpending = null,Object? storeSpending = null,Object? nutriscoreByStore = null,}) {
   return _then(_PantryStats(
 totalProducts: null == totalProducts ? _self.totalProducts : totalProducts // ignore: cast_nullable_to_non_nullable
 as int,totalItems: null == totalItems ? _self.totalItems : totalItems // ignore: cast_nullable_to_non_nullable
@@ -360,7 +384,10 @@ as PhotoStats,offPhotos: null == offPhotos ? _self.offPhotos : offPhotos // igno
 as PhotoStats,totalValue: null == totalValue ? _self.totalValue : totalValue // ignore: cast_nullable_to_non_nullable
 as double,averagePrice: null == averagePrice ? _self.averagePrice : averagePrice // ignore: cast_nullable_to_non_nullable
 as double,pricedItemCount: null == pricedItemCount ? _self.pricedItemCount : pricedItemCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,monthlySpending: null == monthlySpending ? _self._monthlySpending : monthlySpending // ignore: cast_nullable_to_non_nullable
+as List<MonthlySpending>,storeSpending: null == storeSpending ? _self._storeSpending : storeSpending // ignore: cast_nullable_to_non_nullable
+as List<StoreSpending>,nutriscoreByStore: null == nutriscoreByStore ? _self._nutriscoreByStore : nutriscoreByStore // ignore: cast_nullable_to_non_nullable
+as List<StoreNutriscore>,
   ));
 }
 
@@ -1165,6 +1192,803 @@ as int,withNutrition: null == withNutrition ? _self.withNutrition : withNutritio
 as int,withIngredients: null == withIngredients ? _self.withIngredients : withIngredients // ignore: cast_nullable_to_non_nullable
 as int,withProduct: null == withProduct ? _self.withProduct : withProduct // ignore: cast_nullable_to_non_nullable
 as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$MonthlySpending {
+
+/// ISO year-month label, e.g. "2026-07".
+ String get month;/// Total spending in base currency for this month.
+ double get total;
+/// Create a copy of MonthlySpending
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MonthlySpendingCopyWith<MonthlySpending> get copyWith => _$MonthlySpendingCopyWithImpl<MonthlySpending>(this as MonthlySpending, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MonthlySpending&&(identical(other.month, month) || other.month == month)&&(identical(other.total, total) || other.total == total));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,month,total);
+
+@override
+String toString() {
+  return 'MonthlySpending(month: $month, total: $total)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MonthlySpendingCopyWith<$Res>  {
+  factory $MonthlySpendingCopyWith(MonthlySpending value, $Res Function(MonthlySpending) _then) = _$MonthlySpendingCopyWithImpl;
+@useResult
+$Res call({
+ String month, double total
+});
+
+
+
+
+}
+/// @nodoc
+class _$MonthlySpendingCopyWithImpl<$Res>
+    implements $MonthlySpendingCopyWith<$Res> {
+  _$MonthlySpendingCopyWithImpl(this._self, this._then);
+
+  final MonthlySpending _self;
+  final $Res Function(MonthlySpending) _then;
+
+/// Create a copy of MonthlySpending
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? month = null,Object? total = null,}) {
+  return _then(_self.copyWith(
+month: null == month ? _self.month : month // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [MonthlySpending].
+extension MonthlySpendingPatterns on MonthlySpending {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MonthlySpending value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MonthlySpending() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MonthlySpending value)  $default,){
+final _that = this;
+switch (_that) {
+case _MonthlySpending():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MonthlySpending value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MonthlySpending() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String month,  double total)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MonthlySpending() when $default != null:
+return $default(_that.month,_that.total);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String month,  double total)  $default,) {final _that = this;
+switch (_that) {
+case _MonthlySpending():
+return $default(_that.month,_that.total);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String month,  double total)?  $default,) {final _that = this;
+switch (_that) {
+case _MonthlySpending() when $default != null:
+return $default(_that.month,_that.total);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _MonthlySpending implements MonthlySpending {
+  const _MonthlySpending({required this.month, required this.total});
+  
+
+/// ISO year-month label, e.g. "2026-07".
+@override final  String month;
+/// Total spending in base currency for this month.
+@override final  double total;
+
+/// Create a copy of MonthlySpending
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MonthlySpendingCopyWith<_MonthlySpending> get copyWith => __$MonthlySpendingCopyWithImpl<_MonthlySpending>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MonthlySpending&&(identical(other.month, month) || other.month == month)&&(identical(other.total, total) || other.total == total));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,month,total);
+
+@override
+String toString() {
+  return 'MonthlySpending(month: $month, total: $total)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MonthlySpendingCopyWith<$Res> implements $MonthlySpendingCopyWith<$Res> {
+  factory _$MonthlySpendingCopyWith(_MonthlySpending value, $Res Function(_MonthlySpending) _then) = __$MonthlySpendingCopyWithImpl;
+@override @useResult
+$Res call({
+ String month, double total
+});
+
+
+
+
+}
+/// @nodoc
+class __$MonthlySpendingCopyWithImpl<$Res>
+    implements _$MonthlySpendingCopyWith<$Res> {
+  __$MonthlySpendingCopyWithImpl(this._self, this._then);
+
+  final _MonthlySpending _self;
+  final $Res Function(_MonthlySpending) _then;
+
+/// Create a copy of MonthlySpending
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? month = null,Object? total = null,}) {
+  return _then(_MonthlySpending(
+month: null == month ? _self.month : month // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$StoreSpending {
+
+/// Store name.
+ String get store;/// Total spending at this store in base currency.
+ double get total;/// Number of priced items purchased at this store.
+ int get itemCount;
+/// Create a copy of StoreSpending
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$StoreSpendingCopyWith<StoreSpending> get copyWith => _$StoreSpendingCopyWithImpl<StoreSpending>(this as StoreSpending, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoreSpending&&(identical(other.store, store) || other.store == store)&&(identical(other.total, total) || other.total == total)&&(identical(other.itemCount, itemCount) || other.itemCount == itemCount));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,store,total,itemCount);
+
+@override
+String toString() {
+  return 'StoreSpending(store: $store, total: $total, itemCount: $itemCount)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $StoreSpendingCopyWith<$Res>  {
+  factory $StoreSpendingCopyWith(StoreSpending value, $Res Function(StoreSpending) _then) = _$StoreSpendingCopyWithImpl;
+@useResult
+$Res call({
+ String store, double total, int itemCount
+});
+
+
+
+
+}
+/// @nodoc
+class _$StoreSpendingCopyWithImpl<$Res>
+    implements $StoreSpendingCopyWith<$Res> {
+  _$StoreSpendingCopyWithImpl(this._self, this._then);
+
+  final StoreSpending _self;
+  final $Res Function(StoreSpending) _then;
+
+/// Create a copy of StoreSpending
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? store = null,Object? total = null,Object? itemCount = null,}) {
+  return _then(_self.copyWith(
+store: null == store ? _self.store : store // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as double,itemCount: null == itemCount ? _self.itemCount : itemCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [StoreSpending].
+extension StoreSpendingPatterns on StoreSpending {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _StoreSpending value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _StoreSpending() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _StoreSpending value)  $default,){
+final _that = this;
+switch (_that) {
+case _StoreSpending():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _StoreSpending value)?  $default,){
+final _that = this;
+switch (_that) {
+case _StoreSpending() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String store,  double total,  int itemCount)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _StoreSpending() when $default != null:
+return $default(_that.store,_that.total,_that.itemCount);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String store,  double total,  int itemCount)  $default,) {final _that = this;
+switch (_that) {
+case _StoreSpending():
+return $default(_that.store,_that.total,_that.itemCount);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String store,  double total,  int itemCount)?  $default,) {final _that = this;
+switch (_that) {
+case _StoreSpending() when $default != null:
+return $default(_that.store,_that.total,_that.itemCount);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _StoreSpending implements StoreSpending {
+  const _StoreSpending({required this.store, required this.total, required this.itemCount});
+  
+
+/// Store name.
+@override final  String store;
+/// Total spending at this store in base currency.
+@override final  double total;
+/// Number of priced items purchased at this store.
+@override final  int itemCount;
+
+/// Create a copy of StoreSpending
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StoreSpendingCopyWith<_StoreSpending> get copyWith => __$StoreSpendingCopyWithImpl<_StoreSpending>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoreSpending&&(identical(other.store, store) || other.store == store)&&(identical(other.total, total) || other.total == total)&&(identical(other.itemCount, itemCount) || other.itemCount == itemCount));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,store,total,itemCount);
+
+@override
+String toString() {
+  return 'StoreSpending(store: $store, total: $total, itemCount: $itemCount)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$StoreSpendingCopyWith<$Res> implements $StoreSpendingCopyWith<$Res> {
+  factory _$StoreSpendingCopyWith(_StoreSpending value, $Res Function(_StoreSpending) _then) = __$StoreSpendingCopyWithImpl;
+@override @useResult
+$Res call({
+ String store, double total, int itemCount
+});
+
+
+
+
+}
+/// @nodoc
+class __$StoreSpendingCopyWithImpl<$Res>
+    implements _$StoreSpendingCopyWith<$Res> {
+  __$StoreSpendingCopyWithImpl(this._self, this._then);
+
+  final _StoreSpending _self;
+  final $Res Function(_StoreSpending) _then;
+
+/// Create a copy of StoreSpending
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? store = null,Object? total = null,Object? itemCount = null,}) {
+  return _then(_StoreSpending(
+store: null == store ? _self.store : store // ignore: cast_nullable_to_non_nullable
+as String,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as double,itemCount: null == itemCount ? _self.itemCount : itemCount // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$StoreNutriscore {
+
+/// Store name.
+ String get store;/// Average numeric Nutri-Score (5 = A, 4 = B, ... 1 = E).
+ double get averageScore;
+/// Create a copy of StoreNutriscore
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$StoreNutriscoreCopyWith<StoreNutriscore> get copyWith => _$StoreNutriscoreCopyWithImpl<StoreNutriscore>(this as StoreNutriscore, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoreNutriscore&&(identical(other.store, store) || other.store == store)&&(identical(other.averageScore, averageScore) || other.averageScore == averageScore));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,store,averageScore);
+
+@override
+String toString() {
+  return 'StoreNutriscore(store: $store, averageScore: $averageScore)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $StoreNutriscoreCopyWith<$Res>  {
+  factory $StoreNutriscoreCopyWith(StoreNutriscore value, $Res Function(StoreNutriscore) _then) = _$StoreNutriscoreCopyWithImpl;
+@useResult
+$Res call({
+ String store, double averageScore
+});
+
+
+
+
+}
+/// @nodoc
+class _$StoreNutriscoreCopyWithImpl<$Res>
+    implements $StoreNutriscoreCopyWith<$Res> {
+  _$StoreNutriscoreCopyWithImpl(this._self, this._then);
+
+  final StoreNutriscore _self;
+  final $Res Function(StoreNutriscore) _then;
+
+/// Create a copy of StoreNutriscore
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? store = null,Object? averageScore = null,}) {
+  return _then(_self.copyWith(
+store: null == store ? _self.store : store // ignore: cast_nullable_to_non_nullable
+as String,averageScore: null == averageScore ? _self.averageScore : averageScore // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [StoreNutriscore].
+extension StoreNutriscorePatterns on StoreNutriscore {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _StoreNutriscore value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _StoreNutriscore() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _StoreNutriscore value)  $default,){
+final _that = this;
+switch (_that) {
+case _StoreNutriscore():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _StoreNutriscore value)?  $default,){
+final _that = this;
+switch (_that) {
+case _StoreNutriscore() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String store,  double averageScore)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _StoreNutriscore() when $default != null:
+return $default(_that.store,_that.averageScore);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String store,  double averageScore)  $default,) {final _that = this;
+switch (_that) {
+case _StoreNutriscore():
+return $default(_that.store,_that.averageScore);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String store,  double averageScore)?  $default,) {final _that = this;
+switch (_that) {
+case _StoreNutriscore() when $default != null:
+return $default(_that.store,_that.averageScore);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _StoreNutriscore implements StoreNutriscore {
+  const _StoreNutriscore({required this.store, required this.averageScore});
+  
+
+/// Store name.
+@override final  String store;
+/// Average numeric Nutri-Score (5 = A, 4 = B, ... 1 = E).
+@override final  double averageScore;
+
+/// Create a copy of StoreNutriscore
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$StoreNutriscoreCopyWith<_StoreNutriscore> get copyWith => __$StoreNutriscoreCopyWithImpl<_StoreNutriscore>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoreNutriscore&&(identical(other.store, store) || other.store == store)&&(identical(other.averageScore, averageScore) || other.averageScore == averageScore));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,store,averageScore);
+
+@override
+String toString() {
+  return 'StoreNutriscore(store: $store, averageScore: $averageScore)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$StoreNutriscoreCopyWith<$Res> implements $StoreNutriscoreCopyWith<$Res> {
+  factory _$StoreNutriscoreCopyWith(_StoreNutriscore value, $Res Function(_StoreNutriscore) _then) = __$StoreNutriscoreCopyWithImpl;
+@override @useResult
+$Res call({
+ String store, double averageScore
+});
+
+
+
+
+}
+/// @nodoc
+class __$StoreNutriscoreCopyWithImpl<$Res>
+    implements _$StoreNutriscoreCopyWith<$Res> {
+  __$StoreNutriscoreCopyWithImpl(this._self, this._then);
+
+  final _StoreNutriscore _self;
+  final $Res Function(_StoreNutriscore) _then;
+
+/// Create a copy of StoreNutriscore
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? store = null,Object? averageScore = null,}) {
+  return _then(_StoreNutriscore(
+store: null == store ? _self.store : store // ignore: cast_nullable_to_non_nullable
+as String,averageScore: null == averageScore ? _self.averageScore : averageScore // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

@@ -201,21 +201,21 @@
     }
   },
   "expiringToday": "Food expiring today",
-  "expiresTomorrow": "{barcode} expires tomorrow",
+  "expiresTomorrow": "{name} expires tomorrow",
   "@expiresTomorrow": {
     "placeholders": {
-      "barcode": {
+      "name": {
         "type": "String",
-        "example": "5901234123457"
+        "example": "Milk"
       }
     }
   },
-  "expiresToday": "{barcode} expires today!",
+  "expiresToday": "{name} expires today!",
   "@expiresToday": {
     "placeholders": {
-      "barcode": {
+      "name": {
         "type": "String",
-        "example": "5901234123457"
+        "example": "Milk"
       }
     }
   },
@@ -694,5 +694,14 @@
   "enterPluCode": "Enter PLU Code",
   "pluCodeNotFound": "PLU code not recognized",
   "digitLabel": "Digit",
-  "deleteDigit": "Delete digit"
+  "deleteDigit": "Delete digit",
+  "fromYourPantry": "From your pantry",
+  "inYourPantry": "In your pantry",
+  "monthlySpendingTitle": "Monthly spending",
+  "storeSpendingTitle": "Spending by store",
+  "nutriscoreByStoreTitle": "Nutri-Score by store",
+  "noStoreData": "No purchase data yet",
+  "noSpendingData": "Add prices to see spending trends",
+  "monthLabel": "Month",
+  "averageScore": "Avg. score"
 }

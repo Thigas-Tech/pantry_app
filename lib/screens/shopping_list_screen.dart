@@ -50,6 +50,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen>
       ),
       body: _ShoppingListBody(),
       floatingActionButton: FloatingActionButton(
+        heroTag: null,
         onPressed: () => unawaited(_showAddSheet(context)),
         child: const Icon(Icons.add),
       ),

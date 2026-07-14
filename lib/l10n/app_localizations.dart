@@ -795,14 +795,14 @@ abstract class AppLocalizations {
   /// No description provided for @expiresTomorrow.
   ///
   /// In en, this message translates to:
-  /// **'{barcode} expires tomorrow'**
-  String expiresTomorrow(String barcode);
+  /// **'{name} expires tomorrow'**
+  String expiresTomorrow(String name);
 
   /// No description provided for @expiresToday.
   ///
   /// In en, this message translates to:
-  /// **'{barcode} expires today!'**
-  String expiresToday(String barcode);
+  /// **'{name} expires today!'**
+  String expiresToday(String name);
 
   /// No description provided for @expiryChannelName.
   ///
@@ -2891,6 +2891,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete digit'**
   String get deleteDigit;
+
+  /// No description provided for @fromYourPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'From your pantry'**
+  String get fromYourPantry;
+
+  /// No description provided for @inYourPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'In your pantry'**
+  String get inYourPantry;
+
+  /// No description provided for @monthlySpendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly spending'**
+  String get monthlySpendingTitle;
+
+  /// No description provided for @storeSpendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending by store'**
+  String get storeSpendingTitle;
+
+  /// No description provided for @nutriscoreByStoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutri-Score by store'**
+  String get nutriscoreByStoreTitle;
+
+  /// No description provided for @noStoreData.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchase data yet'**
+  String get noStoreData;
+
+  /// No description provided for @noSpendingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Add prices to see spending trends'**
+  String get noSpendingData;
+
+  /// No description provided for @monthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get monthLabel;
+
+  /// No description provided for @averageScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. score'**
+  String get averageScore;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -385,13 +385,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get expiringToday => 'Comida vencendo hoje';
 
   @override
-  String expiresTomorrow(String barcode) {
-    return '$barcode vence amanhã';
+  String expiresTomorrow(String name) {
+    return '$name vence amanhã';
   }
 
   @override
-  String expiresToday(String barcode) {
-    return '$barcode vence hoje!';
+  String expiresToday(String name) {
+    return '$name vence hoje!';
   }
 
   @override
@@ -1513,6 +1513,33 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deleteDigit => 'Delete digit';
+
+  @override
+  String get fromYourPantry => 'Da sua despensa';
+
+  @override
+  String get inYourPantry => 'Na sua despensa';
+
+  @override
+  String get monthlySpendingTitle => 'Gastos mensais';
+
+  @override
+  String get storeSpendingTitle => 'Gastos por loja';
+
+  @override
+  String get nutriscoreByStoreTitle => 'Nutri-Score por loja';
+
+  @override
+  String get noStoreData => 'Sem dados de compra';
+
+  @override
+  String get noSpendingData => 'Adicione precos para ver tendencias';
+
+  @override
+  String get monthLabel => 'Mes';
+
+  @override
+  String get averageScore => 'Nota media';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1896,13 +1923,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get expiringToday => 'Comida vencendo hoje';
 
   @override
-  String expiresTomorrow(String barcode) {
-    return '$barcode vence amanhã';
+  String expiresTomorrow(String name) {
+    return '$name vence amanhã';
   }
 
   @override
-  String expiresToday(String barcode) {
-    return '$barcode vence hoje!';
+  String expiresToday(String name) {
+    return '$name vence hoje!';
   }
 
   @override
@@ -2994,4 +3021,31 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get categoryStarches => 'Amidos';
+
+  @override
+  String get fromYourPantry => 'Da sua despensa';
+
+  @override
+  String get inYourPantry => 'Na sua despensa';
+
+  @override
+  String get monthlySpendingTitle => 'Gastos mensais';
+
+  @override
+  String get storeSpendingTitle => 'Gastos por loja';
+
+  @override
+  String get nutriscoreByStoreTitle => 'Nutri-Score por loja';
+
+  @override
+  String get noStoreData => 'Sem dados de compra';
+
+  @override
+  String get noSpendingData => 'Adicione precos para ver tendencias';
+
+  @override
+  String get monthLabel => 'Mes';
+
+  @override
+  String get averageScore => 'Nota media';
 }

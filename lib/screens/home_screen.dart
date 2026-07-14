@@ -502,6 +502,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       floatingActionButton: _selectionMode
           ? null
           : FloatingActionButton(
+              heroTag: null,
               onPressed: () => _scanBarcode(context, ref),
               child: const Icon(Icons.qr_code_scanner),
             ),

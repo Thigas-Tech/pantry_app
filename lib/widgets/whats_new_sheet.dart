@@ -58,7 +58,9 @@ class _WhatsNewSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.8;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final maxHeight = (screenHeight - bottomPadding) * 0.8;
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -78,9 +80,8 @@ class _WhatsNewSheet extends StatelessWidget {
               ],
             ),
           ),
-          Flexible(
+          Expanded(
             child: ListView.builder(
-              shrinkWrap: true,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: entries.isEmpty ? 1 : entries.length,
               itemBuilder: (context, index) {
@@ -111,7 +112,12 @@ class _WhatsNewSheet extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              16 + MediaQuery.of(context).padding.bottom,
+            ),
             child: SizedBox(
               width: double.infinity,
               child: FilledButton(

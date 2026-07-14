@@ -374,4 +374,36 @@ class InventoryDao {
       [inventoryId, weeks],
     );
   }
+
+  /// Returns distinct product barcodes and names from the inventory
+  /// for a given [inventoryId], limited to [limit] most recent entries.
+  ///
+  /// Useful for suggesting "from your pantry" items when adding to a
+  /// shopping list.
+  Future<List<Map<String, dynamic>>> distinctProductsFromInventory(
+    Database db, {
+    required int inventoryId,
+    int limit = 20,
+  }) async {
+    try {
+      final result = await db.rawQuery(
+        '''
+        SELECT DISTINCT products.barcode, products.name
+        FROM inventory
+        INNER JOIN products ON inventory.barcode = products.barcode
+        WHERE inventory.inventory_id = ?
+        ORDER BY inventory.date_added DESC
+        LIMIT ?
+      ''',
+        [inventoryId, limit],
+      );
+      logInfo(
+        'Fetched ${result.length} distinct products from inventory',
+      );
+      return result;
+    } on Exception catch (e) {
+      logError('Error fetching distinct products from inventory: $e');
+      rethrow;
+    }
+  }
 }

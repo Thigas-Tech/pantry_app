@@ -32,6 +32,7 @@ class QuantityAndPantrySheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<QuantityAndPantryResult>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (_) => const QuantityAndPantrySheet._(),
     );
   }
@@ -62,7 +63,6 @@ class _QuantityAndPantrySheetState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final inventoriesAsync = ref.watch(inventoryListProvider);
     final inventories =
         inventoriesAsync.asData?.value ?? <Map<String, dynamic>>[];
@@ -71,8 +71,10 @@ class _QuantityAndPantrySheetState
       _selectedInventoryId = inventories.first['id'] as int;
     }
 
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + keyboardHeight),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(

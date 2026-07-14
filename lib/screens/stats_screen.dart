@@ -115,7 +115,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: 8,
+        itemCount: 11,
         itemBuilder: (context, index) {
           switch (index) {
             case 0:
@@ -153,6 +153,18 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   subtitle: l10n.receiptTrackingDescription,
                   icon: Icons.receipt_long,
                 ),
+              );
+            case 8:
+              return RepaintBoundary(
+                child: _buildMonthlySpending(context, l10n, stats, ref),
+              );
+            case 9:
+              return RepaintBoundary(
+                child: _buildStoreSpending(context, l10n, stats, ref),
+              );
+            case 10:
+              return RepaintBoundary(
+                child: _buildNutriscoreByStore(context, l10n, stats),
               );
             default:
               return const SizedBox.shrink();
@@ -664,6 +676,267 @@ Widget _buildSectionTitle(BuildContext context, String title) {
       title,
       style: Theme.of(context).textTheme.titleMedium,
     ),
+  );
+}
+
+Widget _buildMonthlySpending(
+  BuildContext context,
+  AppLocalizations l10n,
+  PantryStats stats,
+  WidgetRef ref,
+) {
+  final theme = Theme.of(context);
+  final priceTrackingEnabled = ref.read(
+    settingsProvider.select((s) => s.priceTrackingEnabled),
+  );
+  if (!priceTrackingEnabled || stats.monthlySpending.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  final spots = <FlSpot>[];
+  for (var i = 0; i < stats.monthlySpending.length; i++) {
+    final entry = stats.monthlySpending[i];
+    spots.add(FlSpot(i.toDouble(), entry.total));
+  }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildSectionTitle(context, l10n.monthlySpendingTitle),
+      const SizedBox(height: 8),
+      SizedBox(
+        height: 200,
+        child: spots.length < 2
+            ? Center(
+                child: Text(
+                  l10n.noSpendingData,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              )
+            : LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (_) => FlLine(
+                      color: theme.colorScheme.outlineVariant,
+                      strokeWidth: 1,
+                    ),
+                  ),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 32,
+                        getTitlesWidget: (value, _) {
+                          final i = value.toInt();
+                          if (i < 0 || i >= stats.monthlySpending.length) {
+                            return const SizedBox.shrink();
+                          }
+                          final m = stats.monthlySpending[i].month;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              m.substring(5),
+                              style: theme.textTheme.labelSmall,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 48,
+                        getTitlesWidget: (value, _) {
+                          return Text(
+                            value.toStringAsFixed(0),
+                            style: theme.textTheme.labelSmall,
+                          );
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(),
+                    rightTitles: const AxisTitles(),
+                  ),
+                  borderData: FlBorderData(),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: true,
+                      color: theme.colorScheme.primary,
+                      barWidth: 3,
+                      belowBarData: BarAreaData(
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.15,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    ],
+  );
+}
+
+Widget _buildStoreSpending(
+  BuildContext context,
+  AppLocalizations l10n,
+  PantryStats stats,
+  WidgetRef ref,
+) {
+  final theme = Theme.of(context);
+  final priceTrackingEnabled = ref.read(
+    settingsProvider.select((s) => s.priceTrackingEnabled),
+  );
+  if (!priceTrackingEnabled || stats.storeSpending.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  final topStores = stats.storeSpending.take(10).toList();
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildSectionTitle(context, l10n.storeSpendingTitle),
+      const SizedBox(height: 8),
+      SizedBox(
+        height: 200,
+        child: BarChart(
+          BarChartData(
+            alignment: BarChartAlignment.spaceAround,
+            gridData: FlGridData(
+              drawVerticalLine: false,
+              getDrawingHorizontalLine: (_) => FlLine(
+                color: theme.colorScheme.outlineVariant,
+                strokeWidth: 1,
+              ),
+            ),
+            titlesData: FlTitlesData(
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 32,
+                  getTitlesWidget: (value, _) {
+                    final i = value.toInt();
+                    if (i < 0 || i >= topStores.length) {
+                      return const SizedBox.shrink();
+                    }
+                    var name = topStores[i].store;
+                    if (name.length > 10) {
+                      name = '${name.substring(0, 10)}...';
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        name,
+                        style: theme.textTheme.labelSmall,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 48,
+                  getTitlesWidget: (value, _) {
+                    return Text(
+                      value.toStringAsFixed(0),
+                      style: theme.textTheme.labelSmall,
+                    );
+                  },
+                ),
+              ),
+              topTitles: const AxisTitles(),
+              rightTitles: const AxisTitles(),
+            ),
+            borderData: FlBorderData(),
+            barGroups: topStores.asMap().entries.map((e) {
+              return BarChartGroupData(
+                x: e.key,
+                barRods: [
+                  BarChartRodData(
+                    toY: e.value.total,
+                    color: theme.colorScheme.primary,
+                    width: 20,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(4),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildNutriscoreByStore(
+  BuildContext context,
+  AppLocalizations l10n,
+  PantryStats stats,
+) {
+  final theme = Theme.of(context);
+  if (stats.nutriscoreByStore.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildSectionTitle(context, l10n.nutriscoreByStoreTitle),
+      const SizedBox(height: 8),
+      ...stats.nutriscoreByStore.map((entry) {
+        final ratio = (entry.averageScore / 5.0).clamp(0.0, 1.0);
+        final color = Color.lerp(
+          Colors.red,
+          Colors.green,
+          ratio,
+        )!;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Text(
+                  entry.store,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: ratio,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    color: color,
+                    minHeight: 12,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 64,
+                child: Text(
+                  entry.averageScore.toStringAsFixed(1),
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    ],
   );
 }
 

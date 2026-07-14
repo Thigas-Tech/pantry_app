@@ -368,6 +368,14 @@ Future<void> _rescheduleNotifications() async {
       return;
     }
 
+    final barcodeToName = <String, String>{};
+    final products = await db.getAllProducts();
+    for (final p in products) {
+      if (p.name.isNotEmpty && p.name != 'Unknown') {
+        barcodeToName[p.barcode] = p.name;
+      }
+    }
+
     final locale = PlatformDispatcher.instance.locale;
     final l10n = lookupAppLocalizations(
       <String>{'en', 'pt'}.contains(locale.languageCode)
@@ -376,6 +384,7 @@ Future<void> _rescheduleNotifications() async {
     );
     await notifService.rescheduleAllItems(
       items,
+      barcodeToName: barcodeToName,
       expiringSoonTitle: l10n.expiringSoon,
       expiringTodayTitle: l10n.expiringToday,
       buildExpiringSoonBody: l10n.expiresTomorrow,

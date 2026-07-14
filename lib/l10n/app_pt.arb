@@ -197,21 +197,21 @@
     }
   },
   "expiringToday": "Comida vencendo hoje",
-  "expiresTomorrow": "{barcode} vence amanhã",
+  "expiresTomorrow": "{name} vence amanhã",
   "@expiresTomorrow": {
     "placeholders": {
-      "barcode": {
+      "name": {
         "type": "String",
-        "example": "5901234123457"
+        "example": "Leite"
       }
     }
   },
-  "expiresToday": "{barcode} vence hoje!",
+  "expiresToday": "{name} vence hoje!",
   "@expiresToday": {
     "placeholders": {
-      "barcode": {
+      "name": {
         "type": "String",
-        "example": "5901234123457"
+        "example": "Leite"
       }
     }
   },
@@ -648,5 +648,14 @@
   "categoryDairies": "Laticinios",
   "categoryInstantBeverages": "Bebidas instantaneas",
   "categoryMilkfat": "Gordura do leite",
-  "categoryStarches": "Amidos"
+  "categoryStarches": "Amidos",
+  "fromYourPantry": "Da sua despensa",
+  "inYourPantry": "Na sua despensa",
+  "monthlySpendingTitle": "Gastos mensais",
+  "storeSpendingTitle": "Gastos por loja",
+  "nutriscoreByStoreTitle": "Nutri-Score por loja",
+  "noStoreData": "Sem dados de compra",
+  "noSpendingData": "Adicione precos para ver tendencias",
+  "monthLabel": "Mes",
+  "averageScore": "Nota media"
 }

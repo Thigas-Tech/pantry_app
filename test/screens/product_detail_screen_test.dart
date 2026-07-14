@@ -224,6 +224,7 @@ void main() {
     when(
       () => mockNotif.scheduleExpiryReminders(
         any(),
+        productName: any(named: 'productName'),
         expiringSoonTitle: any(named: 'expiringSoonTitle'),
         buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
         expiringTodayTitle: any(named: 'expiringTodayTitle'),
@@ -533,6 +534,7 @@ void main() {
     verify(
       () => mockNotif.scheduleExpiryReminders(
         newItem,
+        productName: any(named: 'productName'),
         expiringSoonTitle: any(named: 'expiringSoonTitle'),
         buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
         expiringTodayTitle: any(named: 'expiringTodayTitle'),
@@ -582,6 +584,7 @@ void main() {
     verify(
       () => mockNotif.scheduleExpiryReminders(
         updatedItem,
+        productName: any(named: 'productName'),
         expiringSoonTitle: any(named: 'expiringSoonTitle'),
         buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
         expiringTodayTitle: any(named: 'expiringTodayTitle'),

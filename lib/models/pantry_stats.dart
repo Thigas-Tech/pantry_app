@@ -29,6 +29,9 @@ abstract class PantryStats with _$PantryStats {
     @Default(0) double totalValue,
     @Default(0) double averagePrice,
     @Default(0) int pricedItemCount,
+    @Default([]) List<MonthlySpending> monthlySpending,
+    @Default([]) List<StoreSpending> storeSpending,
+    @Default([]) List<StoreNutriscore> nutriscoreByStore,
   }) = _PantryStats;
 }
 
@@ -62,4 +65,46 @@ abstract class PhotoStats with _$PhotoStats {
     required int withIngredients,
     required int withProduct,
   }) = _PhotoStats;
+}
+
+/// Monthly expenditure for the pricing section of the stats screen.
+@freezed
+abstract class MonthlySpending with _$MonthlySpending {
+  /// Creates a [MonthlySpending].
+  const factory MonthlySpending({
+    /// ISO year-month label, e.g. "2026-07".
+    required String month,
+
+    /// Total spending in base currency for this month.
+    required double total,
+  }) = _MonthlySpending;
+}
+
+/// Total spending and item count grouped by store.
+@freezed
+abstract class StoreSpending with _$StoreSpending {
+  /// Creates a [StoreSpending].
+  const factory StoreSpending({
+    /// Store name.
+    required String store,
+
+    /// Total spending at this store in base currency.
+    required double total,
+
+    /// Number of priced items purchased at this store.
+    required int itemCount,
+  }) = _StoreSpending;
+}
+
+/// Average Nutri-Score per store.
+@freezed
+abstract class StoreNutriscore with _$StoreNutriscore {
+  /// Creates a [StoreNutriscore].
+  const factory StoreNutriscore({
+    /// Store name.
+    required String store,
+
+    /// Average numeric Nutri-Score (5 = A, 4 = B, ... 1 = E).
+    required double averageScore,
+  }) = _StoreNutriscore;
 }

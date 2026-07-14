@@ -286,8 +286,8 @@ void main() {
   group('scheduleExpiryReminders', () {
     const expiringSoonTitle = 'Expiring soon';
     const expiringTodayTitle = 'Food expiring today';
-    String buildExpiringSoonBody(String b) => '$b expires tomorrow';
-    String buildExpiringTodayBody(String b) => '$b expires today!';
+    String buildExpiringSoonBody(String name) => '$name expires tomorrow';
+    String buildExpiringTodayBody(String name) => '$name expires today!';
 
     void stubZonedSchedule() {
       when(
@@ -576,6 +576,67 @@ void main() {
         completes,
       );
     });
+
+    test('passes product name to body builders when provided', () async {
+      stubNotificationsEnabled();
+      stubZonedSchedule();
+
+      const item = InventoryItem(
+        barcode: '789123456',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        productName: 'Milk',
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: 'Milk expires tomorrow',
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: '789123456',
+        ),
+      ).called(1);
+    });
+
+    test('falls back to barcode when productName is null', () async {
+      stubNotificationsEnabled();
+      stubZonedSchedule();
+
+      const item = InventoryItem(
+        barcode: '789123456',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.scheduleExpiryReminders(
+        item,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: '789123456 expires tomorrow',
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: '789123456',
+        ),
+      ).called(1);
+    });
   });
 
   group('scheduleInactivityReminder', () {
@@ -809,8 +870,8 @@ void main() {
   group('rescheduleAllItems', () {
     const expiringSoonTitle = 'Expiring soon';
     const expiringTodayTitle = 'Food expiring today';
-    String buildExpiringSoonBody(String b) => '$b expires tomorrow';
-    String buildExpiringTodayBody(String b) => '$b expires today!';
+    String buildExpiringSoonBody(String name) => '$name expires tomorrow';
+    String buildExpiringTodayBody(String name) => '$name expires today!';
 
     test('no-op when notifications disabled', () async {
       when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
@@ -883,6 +944,105 @@ void main() {
       await Future.wait([first, second]);
 
       verify(() => mockPlugin.cancelAll()).called(1);
+    });
+
+    test('passes product names from barcodeToName to builders', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenAnswer((_) => Future.value());
+
+      const item = InventoryItem(
+        barcode: '789123456',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.rescheduleAllItems(
+        [item],
+        barcodeToName: {'789123456': 'Milk'},
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: 'Milk expires tomorrow',
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: 'Milk expires today!',
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
+    });
+
+    test('falls back to barcode when barcodeToName is missing entry', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenAnswer((_) => Future.value());
+
+      const item = InventoryItem(
+        barcode: '999888777',
+        id: 2,
+        expiryDate: '2099-12-31',
+      );
+      await service.rescheduleAllItems(
+        [item],
+        barcodeToName: {},
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: '999888777 expires tomorrow',
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
     });
   });
 

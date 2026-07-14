@@ -385,13 +385,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expiringToday => 'Food expiring today';
 
   @override
-  String expiresTomorrow(String barcode) {
-    return '$barcode expires tomorrow';
+  String expiresTomorrow(String name) {
+    return '$name expires tomorrow';
   }
 
   @override
-  String expiresToday(String barcode) {
-    return '$barcode expires today!';
+  String expiresToday(String name) {
+    return '$name expires today!';
   }
 
   @override
@@ -1513,4 +1513,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteDigit => 'Delete digit';
+
+  @override
+  String get fromYourPantry => 'From your pantry';
+
+  @override
+  String get inYourPantry => 'In your pantry';
+
+  @override
+  String get monthlySpendingTitle => 'Monthly spending';
+
+  @override
+  String get storeSpendingTitle => 'Spending by store';
+
+  @override
+  String get nutriscoreByStoreTitle => 'Nutri-Score by store';
+
+  @override
+  String get noStoreData => 'No purchase data yet';
+
+  @override
+  String get noSpendingData => 'Add prices to see spending trends';
+
+  @override
+  String get monthLabel => 'Month';
+
+  @override
+  String get averageScore => 'Avg. score';
 }
