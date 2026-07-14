@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:pantry_app/database/feedback_queue_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/price_dao.dart';
+import 'package:pantry_app/database/produce_frequency_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/database/product_submission_queue_dao.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
@@ -13,9 +16,10 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 
 /// Provides access to the local SQLite database.
 ///
@@ -89,6 +93,9 @@ class DatabaseHelper {
   /// DAO for the `stores` table.
   final StoreDao storeDao = const StoreDao();
 
+  /// DAO for the `produce_purchase_frequency` table.
+  final ProduceFrequencyDao produceFrequencyDao = const ProduceFrequencyDao();
+
   /// The lazily‑opened database instance.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -102,7 +109,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 22,
+        version: 23,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -194,6 +201,8 @@ class DatabaseHelper {
     await feedbackQueueDao.createTable(db);
 
     await productSubmissionQueueDao.createTable(db);
+
+    await produceFrequencyDao.createTable(db);
 
     await _createPricesTable(db);
 
@@ -487,6 +496,50 @@ class DatabaseHelper {
         logWarning(
           'Migration v22 failed (column may already exist): $e',
         );
+      }
+    }
+    if (oldVersion < 23) {
+      try {
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS produce_purchase_frequency (
+            produce_key  TEXT PRIMARY KEY,
+            count        INTEGER NOT NULL DEFAULT 0,
+            last_used    INTEGER
+          )
+        ''');
+        final prefs = await SharedPreferences.getInstance();
+        final raw = prefs.getString('produce_purchase_frequency');
+        if (raw != null) {
+          try {
+            final decoded = jsonDecode(raw) as Map<String, dynamic>;
+            final batch = db.batch();
+            final now = DateTime.now().millisecondsSinceEpoch;
+            for (final entry in decoded.entries) {
+              batch.insert(
+                'produce_purchase_frequency',
+                {
+                  'produce_key': (entry.key as String).toLowerCase().trim(),
+                  'count': entry.value as int,
+                  'last_used': now,
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+            }
+            await batch.commit(noResult: true);
+            await prefs.remove('produce_purchase_frequency');
+            logInfo(
+              'Migrated produce purchase frequency from '
+              'SharedPreferences to SQLite',
+            );
+          } on Exception catch (e) {
+            logWarning(
+              'Failed to migrate purchase frequency: $e',
+            );
+          }
+        }
+        logInfo('Migration to version 23 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v23 failed: $e');
       }
     }
   }

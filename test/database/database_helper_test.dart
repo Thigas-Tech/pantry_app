@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Tests for [DatabaseHelper] using an in‑memory SQLite database.
@@ -724,5 +726,105 @@ void main() {
         expect(saved.unit, 'medium apple');
       },
     );
+  });
+
+  group('Migration v22 — v23 (produce_purchase_frequency)', () {
+    test('fresh v23 DB has produce_purchase_frequency table', () async {
+      final database = await db.database;
+      final tables = await database.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' "
+        "AND name='produce_purchase_frequency'",
+      );
+      expect(tables, isNotEmpty);
+    });
+
+    test('migrates SharedPreferences data to SQLite table', () async {
+      final prefsData = jsonEncode({'apple': 5, 'banana': 3});
+      SharedPreferences.setMockInitialValues({
+        'produce_purchase_frequency': prefsData,
+      });
+
+      final tempDir = Directory.systemTemp.createTempSync('pantry_v22_freq_');
+      final v22Path = '${tempDir.path}/v22.db';
+      final v22Db = await openDatabase(
+        v22Path,
+        version: 22,
+        onCreate: (db, version) async {
+          await db.execute('''
+            CREATE TABLE products (
+              barcode TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              brand TEXT,
+              image_url TEXT,
+              category TEXT,
+              ingredients TEXT,
+              serving_size TEXT,
+              energy_kcal REAL,
+              protein_g REAL,
+              carbs_g REAL,
+              fat_g REAL,
+              fiber_g REAL,
+              salt_g REAL,
+              last_synced INTEGER,
+              nutriscore_grade TEXT,
+              nutriscore_not_applicable_category TEXT,
+              source TEXT NOT NULL DEFAULT 'api',
+              nutrition_image_path TEXT,
+              ingredients_image_path TEXT,
+              product_image_path TEXT,
+              submission_status TEXT NOT NULL DEFAULT 'not_submitted',
+              off_nutrition_image_url TEXT,
+              off_ingredients_image_url TEXT,
+              off_product_image_url TEXT,
+              categories_hierarchy TEXT,
+              language_code TEXT NOT NULL DEFAULT 'en',
+              search_text TEXT,
+              plu_code TEXT,
+              product_type TEXT NOT NULL DEFAULT 'barcoded'
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE inventory (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT NOT NULL,
+              quantity REAL DEFAULT 1,
+              unit TEXT DEFAULT 'pieces',
+              expiry_date TEXT,
+              location TEXT DEFAULT 'pantry',
+              notes TEXT,
+              date_added INTEGER,
+              inventory_id INTEGER NOT NULL,
+              serving_weight_g REAL
+            )
+          ''');
+        },
+      );
+      await v22Db.close();
+
+      final dbHelper = DatabaseHelper.withPath(v22Path);
+      final database = await dbHelper.database;
+
+      final rows = await database.query('produce_purchase_frequency');
+      expect(rows.length, 2);
+
+      final apple = rows.firstWhere(
+        (r) => r['produce_key'] == 'apple',
+      );
+      expect(apple['count'], 5);
+
+      final banana = rows.firstWhere(
+        (r) => r['produce_key'] == 'banana',
+      );
+      expect(banana['count'], 3);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.containsKey('produce_purchase_frequency'),
+        isFalse,
+      );
+
+      await database.close();
+      tempDir.deleteSync(recursive: true);
+    });
   });
 }
