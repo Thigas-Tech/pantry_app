@@ -1,24 +1,21 @@
-import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/database/produce_frequency_dao.dart';
 
 /// Tracks how often each produce item is purchased.
 ///
-/// Stores frequency counts in [SharedPreferences] as a JSON-encoded map.
-/// Used by the quick-add carousel to show the user's most frequent produce.
+/// Stores frequency counts in the `produce_purchase_frequency` SQLite
+/// table via [ProduceFrequencyDao]. Used by the quick-add carousel to
+/// show the user's most frequent produce.
 class ProducePurchaseTracker {
   /// Creates a [ProducePurchaseTracker].
   ///
-  /// [prefs] can be injected for testing. When omitted, the default
-  /// [SharedPreferences] instance is used.
-  ProducePurchaseTracker({SharedPreferences? prefs})
-    : _prefs = prefs != null
-          ? Future<SharedPreferences>.value(prefs)
-          : SharedPreferences.getInstance();
+  /// [dbHelper] can be injected for testing. When omitted, the default
+  /// [DatabaseHelper] singleton is used.
+  ProducePurchaseTracker({DatabaseHelper? dbHelper})
+    : _dbHelper = dbHelper ?? DatabaseHelper();
 
-  final Future<SharedPreferences> _prefs;
-
-  static const _key = 'produce_purchase_frequency';
+  final DatabaseHelper _dbHelper;
+  final ProduceFrequencyDao _dao = const ProduceFrequencyDao();
 
   /// Default produce list shown when the user has no purchase history.
   static List<String> getDefaultList() => const [
@@ -34,31 +31,40 @@ class ProducePurchaseTracker {
 
   /// Records a purchase of [produceName].
   Future<void> recordPurchase(String produceName) async {
-    final prefs = await _prefs;
-    final map = await _load();
-    final key = produceName.toLowerCase().trim();
-    map[key] = (map[key] ?? 0) + 1;
-    await prefs.setString(_key, jsonEncode(map));
+    final db = await _dbHelper.database;
+    await _dao.increment(produceName, db);
+  }
+
+  /// Reverts a purchase of [produceName] (undo).
+  ///
+  /// The count is reduced by 1 but never below 0.
+  Future<void> undoPurchase(String produceName) async {
+    final db = await _dbHelper.database;
+    await _dao.decrement(produceName, db);
   }
 
   /// Returns the top [limit] most frequently purchased produce items.
+  ///
+  /// Names are capitalized for display. If fewer than [limit] items
+  /// exist in the history, the result is padded with defaults from
+  /// [getDefaultList].
   Future<List<String>> getTopPurchases({int limit = 8}) async {
-    final map = await _load();
-    if (map.isEmpty) return getDefaultList().take(limit).toList();
+    final db = await _dbHelper.database;
+    final top = await _dao.getTopPurchases(db, limit: limit);
 
-    final sorted = map.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    if (top.isEmpty) {
+      return getDefaultList().take(limit).toList();
+    }
 
-    final result = sorted
-        .map((e) {
-          // Capitalize first letter for display.
-          final name = e.key;
-          return name[0].toUpperCase() + name.substring(1);
-        })
-        .take(limit)
-        .toList();
+    final result = top.where((row) => (row['count'] as int) > 0).map((row) {
+      final name = row['produce_key'] as String;
+      return name[0].toUpperCase() + name.substring(1);
+    }).toList();
 
-    // Pad with defaults if we don't have enough history.
+    if (result.isEmpty) {
+      return getDefaultList().take(limit).toList();
+    }
+
     if (result.length < limit) {
       for (final d in getDefaultList()) {
         if (result.length >= limit) break;
@@ -69,17 +75,5 @@ class ProducePurchaseTracker {
     }
 
     return result;
-  }
-
-  Future<Map<String, int>> _load() async {
-    final prefs = await _prefs;
-    final raw = prefs.getString(_key);
-    if (raw == null) return {};
-    try {
-      final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      return decoded.map((k, v) => MapEntry(k, v as int));
-    } on Exception {
-      return {};
-    }
   }
 }
