@@ -8,6 +8,7 @@ Run BEFORE every local commit. Fix ALL issues:
   flutter test --concurrency=2
   flutter build apk --debug
   dart doc .
+  scripts/check_stale_info.sh
   # If FEATURE_FREEZE.md is checked, verify only fixes + polish are included.
   grep -q '[x] feature_freeze' FEATURE_FREEZE.md && \
     echo "FEATURE FREEZE ACTIVE — only bug fixes and polish allowed" || true

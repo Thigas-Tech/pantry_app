@@ -902,6 +902,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get store => 'Loja';
 
   @override
+  String get addNewStore => 'Adicionar nova loja';
+
+  @override
+  String get storeAdded => 'Loja adicionada';
+
+  @override
+  String get storeAlreadyExists => 'Já existe uma loja com este nome';
+
+  @override
+  String get storeName => 'Nome da loja';
+
+  @override
   String get discounted => 'Com desconto';
 
   @override
@@ -2366,6 +2378,18 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get store => 'Loja';
+
+  @override
+  String get addNewStore => 'Adicionar nova loja';
+
+  @override
+  String get storeAdded => 'Loja adicionada';
+
+  @override
+  String get storeAlreadyExists => 'Já existe uma loja com este nome';
+
+  @override
+  String get storeName => 'Nome da loja';
 
   @override
   String get discounted => 'Com desconto';

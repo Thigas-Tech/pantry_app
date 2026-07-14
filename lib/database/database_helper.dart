@@ -5,10 +5,12 @@ import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/database/product_submission_queue_dao.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
+import 'package:pantry_app/database/store_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
+import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:path/path.dart';
@@ -27,13 +29,14 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Seven tables are created on first launch (version 16):
+/// Eight tables are created on first launch (version 19):
 /// - `products` – product data fetched from Open Food Facts.
 /// - `inventories` – named pantries (e.g. "Home", "Work").
 /// - `inventory` – instances of products the user has added to a pantry.
 /// - `feedback_queue` – offline queue for GitHub issue reports.
 /// - `prices` – purchase price observations per barcode.
 /// - `shopping_list` – items the user intends to buy.
+/// - `stores` – saved store names for autocomplete.
 ///
 /// ## Delegation
 ///
@@ -83,6 +86,9 @@ class DatabaseHelper {
   /// DAO for the `shopping_list` table.
   final ShoppingListDao shoppingListDao = const ShoppingListDao();
 
+  /// DAO for the `stores` table.
+  final StoreDao storeDao = const StoreDao();
+
   /// The lazily‑opened database instance.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -96,7 +102,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 18,
+        version: 19,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -190,6 +196,8 @@ class DatabaseHelper {
 
     await _createShoppingListTable(db);
 
+    await _createStoresTable(db);
+
     await inventoriesDao.seedDefault(db);
 
     logInfo('Database schema created successfully');
@@ -229,6 +237,10 @@ class DatabaseHelper {
 
   Future<void> _createShoppingListTable(Database db) async {
     await shoppingListDao.createTable(db);
+  }
+
+  Future<void> _createStoresTable(Database db) async {
+    await storeDao.createTable(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -406,6 +418,26 @@ class DatabaseHelper {
         logInfo('Migration to version 18 completed');
       } on Exception catch (e) {
         logWarning('Migration v18 failed (columns may already exist): $e');
+      }
+    }
+    if (oldVersion < 19) {
+      try {
+        await _createStoresTable(db);
+
+        await db.execute(
+          'INSERT OR IGNORE INTO stores (name)'
+          ' SELECT DISTINCT TRIM(store) FROM prices'
+          " WHERE store IS NOT NULL AND TRIM(store) != ''",
+        );
+        await db.execute(
+          'INSERT OR IGNORE INTO stores (name)'
+          ' SELECT DISTINCT TRIM(price_store) FROM shopping_list'
+          " WHERE price_store IS NOT NULL AND TRIM(price_store) != ''",
+        );
+
+        logInfo('Migration to version 19 completed');
+      } on Exception catch (e) {
+        logWarning('Migration v19 failed: $e');
       }
     }
   }
@@ -859,5 +891,11 @@ class DatabaseHelper {
   Future<int> getPendingShoppingCount({int? inventoryId}) async {
     final db = await database;
     return shoppingListDao.pendingCount(db, inventoryId: inventoryId);
+  }
+
+  /// Returns all saved stores, ordered alphabetically.
+  Future<List<Store>> getAllStores() async {
+    final db = await database;
+    return storeDao.getAll(db);
   }
 }

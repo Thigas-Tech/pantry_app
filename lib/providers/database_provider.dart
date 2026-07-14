@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/store.dart';
 
 /// Provides the singleton [DatabaseHelper] instance to the widget tree.
 ///
@@ -17,3 +18,10 @@ import 'package:pantry_app/database/database_helper.dart';
 final databaseProvider = Provider<DatabaseHelper>((ref) {
   return DatabaseHelper();
 });
+
+/// Lists all saved stores alphabetically for autocomplete suggestions.
+final FutureProvider<List<Store>> storesProvider =
+    FutureProvider.autoDispose<List<Store>>((ref) {
+      final db = ref.watch(databaseProvider);
+      return db.getAllStores();
+    });

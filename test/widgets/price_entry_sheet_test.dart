@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/models/store.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import '../helpers/pump_app.dart';
@@ -47,6 +49,7 @@ void main() {
         ),
         overrides: [
           settingsProvider.overrideWith(_brlSettings),
+          storesProvider.overrideWith((ref) => const <Store>[]),
         ],
       );
 
@@ -77,6 +80,7 @@ void main() {
         ),
         overrides: [
           settingsProvider.overrideWith(_defaultSettings),
+          storesProvider.overrideWith((ref) => const <Store>[]),
         ],
       );
 
@@ -97,6 +101,7 @@ void main() {
         ),
         overrides: [
           settingsProvider.overrideWith(_brlSettings),
+          storesProvider.overrideWith((ref) => const <Store>[]),
         ],
       );
 
@@ -123,6 +128,7 @@ void main() {
         ),
         overrides: [
           settingsProvider.overrideWith(_defaultSettings),
+          storesProvider.overrideWith((ref) => const <Store>[]),
         ],
       );
 

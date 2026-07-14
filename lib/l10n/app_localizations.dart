@@ -1770,6 +1770,30 @@ abstract class AppLocalizations {
   /// **'Store'**
   String get store;
 
+  /// No description provided for @addNewStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new store'**
+  String get addNewStore;
+
+  /// No description provided for @storeAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Store added'**
+  String get storeAdded;
+
+  /// No description provided for @storeAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A store with this name already exists'**
+  String get storeAlreadyExists;
+
+  /// No description provided for @storeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Store name'**
+  String get storeName;
+
   /// No description provided for @discounted.
   ///
   /// In en, this message translates to:
