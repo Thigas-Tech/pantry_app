@@ -111,11 +111,11 @@ lib/
 test/                  # Unit and widget tests
 ```
 
-For a deep dive into the architecture, see [ARCHITECTURE/INDEX.md](ARCHITECTURE/INDEX.md).
+For a deep dive into the architecture, see [ARCHITECTURE/INDEX.md](https://github.com/Thigas-Tech/pantry_app/blob/main/ARCHITECTURE/INDEX.md).
 
 ## Contributing
 
-See [ARCHITECTURE/INDEX.md](ARCHITECTURE/INDEX.md) for the full architecture overview.
+See [ARCHITECTURE/INDEX.md](https://github.com/Thigas-Tech/pantry_app/blob/main/ARCHITECTURE/INDEX.md) for the full architecture overview.
 
 ### Quick rules
 
