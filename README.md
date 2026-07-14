@@ -24,6 +24,9 @@ never waste food again.
 - **Pull-to-refresh** — updates cached product data from Open Food Facts when online
 - **Nutri-Score** — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products
 - **Manual product entry** — full form with nutrition table and camera capture when a barcode is unknown or you're offline
+- **Price tracking** — record purchase prices with store, date, and currency; view price history and total inventory value
+- **Shopping list** — add items from cached products or free-text, mark as purchased, batch-move to pantry
+- **Store autocomplete** — saved store names persist across uses, suggested in the price entry sheet
 
 ## Screenshots
 
@@ -101,6 +104,10 @@ lib/
     inventory_dao.dart       # Inventory items CRUD + joins
     inventories_dao.dart     # Named pantries CRUD
     feedback_queue_dao.dart  # Offline feedback submission queue
+    price_dao.dart           # Price observations CRUD + aggregation
+    shopping_list_dao.dart   # Shopping list CRUD (per-inventory)
+    store_dao.dart           # Saved store names CRUD
+    product_submission_queue_dao.dart  # OFF submission queue
   l10n/                # App translations (English ARB)
   models/              # Freezed data models
   providers/           # Riverpod state & dependency injection
@@ -143,6 +150,7 @@ flutter test --concurrency=2 --coverage  # With coverage
 | State management   | Riverpod 3.x                    |
 | Local database     | SQLite (sqflite)                |
 | HTTP client        | http                             |
+| OFF SDK            | openfoodfacts                   |
 | Code generation    | freezed, json_serializable      |
 | Barcode scanning   | mobile_scanner (Google ML Kit)  |
 | Image capture      | image_picker                    |

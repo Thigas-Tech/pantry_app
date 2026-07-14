@@ -1,4 +1,4 @@
-## 1. High‑level overview
+## 1. High-level overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -8,7 +8,8 @@
 │  ScannerScreen     EmptyPantry       snackbar_helper         │
 │  ProductDetail     NutritionTable                            │
 │  AddToInventory    ScannerOverlay                            │
-│  Settings / Stats  ...                                       │
+│  Settings / Stats  PriceEntrySheet                          │
+│  ShoppingList      ...                                       │
 └─────────┬────────────────────────────────────────────────────┘
           │  watches / reads Riverpod providers
 ┌─────────▼────────────────────────────────────────────────────┐
@@ -20,28 +21,40 @@
 │  imageCacheProvider        notificationServiceProvider        │
 │  connectivityProvider      githubIssueServiceProvider         │
 │  apiServiceProvider        inventoryCountProvider             │
+│  priceRepositoryProvider   priceHistoryProvider               │
+│  shoppingListProvider      storesProvider                     │
+│  currencyServiceProvider   photoServiceProvider              │
 └─────────┬────────────────────────────────────────────────────┘
           │  calls
 ┌─────────▼────────────────────────────────────────────────────┐
 │                    Business Logic Layer                        │
 │  services/                                                    │
 │  ProductRepository    OffAdapter    NotificationService       │
-│  ImageCacheService    GithubIssueService  AdService           │
-│  DonationService      CloudBackupService FirebaseService      │
+│  ImageCacheService    GithubIssueService                      │
+│  PriceRepository      CurrencyService  OpenPricesService      │
+│  StoreDao             ShoppingListDao  PhotoService           │
 └─────────┬──────────────┬──────────────────┬─────────────────┘
           │              │                  │
 ┌─────────▼────┐  ┌─────▼──────────────┐   │
 │  Local DB    │  │  Remote API        │   │
 │  database/   │  │  services/         │   │
 │  SQLite      │  │  Open Food Facts   │   │
-│  DAO pattern │  │  v3 REST (SDK) │   │
-└──────────────┘  └────────────────────┘   │
-                                            │
-                               ┌───────────────────────────────┐
-                               │  [Planned] Firebase Services   │
-                               │  Auth (Google Sign-In)        │
-                               │  Storage (cloud backup)       │
-                               │  AdMob (ads)                  │
-                               │  Play Billing (IAP)           │
-                               └───────────────────────────────┘
+│  7 tables:   │  │  v3 REST (SDK) │   │
+│  products    │  │                    │   │
+│  inventories │  │  Open Prices API   │   │
+│  inventory   │  │  ExchangeRate-API  │   │
+│  feedback_q  │  └────────────────────┘   │
+│  prices      │                           │
+│  shopping_l. │   ┌───────────────────────┘
+│  stores      │   │
+│  DAO pattern │   │
+└──────────────┘   │
+                    │
+       ┌───────────────────────────────┐
+       │  [Planned] Firebase Services   │
+       │  Auth (Google Sign-In)        │
+       │  Storage (cloud backup)       │
+       │  AdMob (ads)                  │
+       │  Play Billing (IAP)           │
+       └───────────────────────────────┘
 ```

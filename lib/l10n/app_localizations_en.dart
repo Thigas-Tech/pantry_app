@@ -902,6 +902,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get store => 'Store';
 
   @override
+  String get addNewStore => 'Add new store';
+
+  @override
+  String get storeAdded => 'Store added';
+
+  @override
+  String get storeAlreadyExists => 'A store with this name already exists';
+
+  @override
+  String get storeName => 'Store name';
+
+  @override
   String get discounted => 'Discounted';
 
   @override

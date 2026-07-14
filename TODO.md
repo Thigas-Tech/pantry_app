@@ -245,9 +245,10 @@ infrastructure or external server hosting are listed last.
     to react to DB changes.
   - **No inventories at all**: When the user has deleted all inventories,
     hide the switcher entirely and show a "Create pantry" button instead.
-- [x] **Price tracking** — add `priceAmount` / `priceCurrency` fields to
-  `InventoryItem`. Track spending per product, monthly totals, and price
-  history over time. Stubbed with `ComingSoonView` on Stats screen.
+- [x] **Price tracking** — implemented via `prices` table and `PriceRepository`
+  with per-product price history, total inventory value, and store autocomplete.
+  See `lib/database/price_dao.dart`, `lib/services/price_repository.dart`,
+  `lib/services/open_prices_service.dart`, `lib/widgets/price_entry_sheet.dart`.
 - [ ] **NFC-e receipt scanning** — parse Brazilian electronic tax receipts
   (NFC-e QR codes) to auto-populate product lists with quantities and
   prices. Requires camera integration, SEFAZ API for QR decoding, and
@@ -793,7 +794,7 @@ infrastructure or external server hosting are listed last.
   4. Add `brand_name_overrides` JSON map to `Product` model + seed data in
      `ProductDao`.
   5. Add display helper `resolveBrandName()` in `Product` extension.
-  6. DB migration: add `products.lang` column (bundle with version 9).
+   6. DB migration: add `products.lang` column (bundled with other schema changes; added at v15).
   7. Tests: mock API responses with `lc=fr`, verify French name returned;
      verify brand names preserved.
 
@@ -838,7 +839,7 @@ infrastructure or external server hosting are listed last.
   2. Add `ingredientsTextLanguages` field to `Product` model
      (`Map<String, String>?`).
   3. DB migration: add `products.ingredients_text_languages` JSON column
-     (version 9, bundled).
+     (version 15, bundled).
   4. On `ProductDetailScreen`, display ingredients in app's locale. Add
      toggle button "show original".
   5. When `ingredients_text_with_allergens_XX` is available, render
@@ -905,14 +906,14 @@ infrastructure or external server hosting are listed last.
   into on-demand APK modules: (1) scanner, (2) OFF API + search, (3)
   import/export. Users only download modules they use. Requires
   `dynamicFeature` in `build.gradle` and `split` attributes in
-  `AndroidManifest.xml`. Reference: [Flutter Deferred Components](https://docs.flutter.dev/perf/deferred-components).
+   `AndroidManifest.xml`. Reference: [Flutter Deferred Components](https://docs.flutter.dev/perf/deferred-components).
 
 ### Database migrations
 
-- [x] **DB migrations through v11** — schema is at version 11 with all
-  planned migrations (feedback_queue table, photo paths, OFF image URLs,
-  category hierarchy, submission status). Further version bumps for
-  new features still needed.
+- [x] **DB migrations through v19** -- schema is at version 19 with all
+  planned migrations (feedback_queue, prices, shopping_list, search_text,
+  language_code, product_submission_queue, stores). Further version bumps
+  for new features still needed.
 
 ---
 
@@ -1255,7 +1256,7 @@ storage costs.
   5. Add price + store display on `ProductDetailScreen._InventoryTile`.
   6. Add total inventory value to `StatsScreen`.
   7. Price editing bottom sheet (long‑press on inventory tile).
-  8. DB migration version 9 (bundled with other schema changes).
+  8. DB migration version 12 (bundled with other schema changes; stores at v19).
 
   **Implementation (Phase 2 — Open Prices API)**:
   1. Create `lib/services/open_prices_api.dart` — HTTP client.

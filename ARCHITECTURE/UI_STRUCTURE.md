@@ -16,12 +16,13 @@ HomeScreen
 
 ProductDetailScreen
 ├── AppBar (name, OFF link)
-├── Hero → CachedImage (FutureBuilder → cached WebP or network)
-├── NutriScoreBadge + tooltip (A–E grade)
+├── Hero -> CachedImage (FutureBuilder -> cached WebP or network)
+├── NutriScoreBadge + tooltip (A-E grade)
 ├── InfoRows (barcode, brand, category, serving size)
 ├── NutritionTable (energy, protein, carbs, fat, fiber, salt)
 ├── Ingredients (ExpansionTile)
 ├── InventoryTiles (location icon, qty, expiry, edit/delete)
+├── PriceHistorySection (latest price, store, date; tap for history)
 └── "Add to Inventory" button
 
 AddProductScreen (manual entry when offline or barcode not found)
@@ -38,12 +39,12 @@ SearchScreen
 
 StatsScreen
 ├── Summary cards (total products, items, added this week/month)
-├── NutriScoreBar (fl_chart BarChart by grade A–E)
+├── NutriScoreBar (fl_chart BarChart by grade A-E)
 ├── CategoryChart (fl_chart BarChart by category)
 ├── LocationChart (fl_chart BarChart by storage location)
 ├── Photo completeness (local vs OFF photos)
-├── ComingSoonView (price tracking — placeholder)
-├── ComingSoonView (NFC-e receipts — placeholder)
+├── PriceStatistics (total value, average price, priced item count)
+├── ComingSoonView (NFC-e receipts -- placeholder)
 └── RefreshIndicator (pull-to-refresh)
 
 ScannerScreen
@@ -59,4 +60,20 @@ SettingsScreen
 ├── Manage Inventories link
 ├── Flush cache (API products + image cache)
 └── About (What's New changelog sheet)
+
+ShoppingListScreen
+├── AppBar (add-to-pantry button, clear-purchased, refresh)
+├── PendingSection (items not yet purchased)
+│   ├── ShoppingItemTile (name, qty, price, store; swipe actions)
+│   └── SectionHeader with running total
+├── PurchasedSection (items marked purchased)
+└── FAB -> AddToShoppingListSheet (search cached products or manual entry)
+
+PriceEntrySheet (bottom sheet, reused from multiple screens)
+├── Amount field (POS-style calculator with locale-aware decimal)
+├── Store field (Autocomplete from saved stores, "+ Add new store" button)
+├── Date picker
+├── Discounted toggle
+├── Notes field
+└── Submit button
 ```

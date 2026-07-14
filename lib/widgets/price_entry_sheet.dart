@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -79,6 +82,8 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
   DateTime _date = DateTime.now();
   bool _isDiscounted = false;
   late String _decimalSep;
+  TextEditingController? _autocompleteCtrl;
+  bool _isAddingStore = false;
 
   bool get _isEditing => widget.existingPrice != null;
 
@@ -169,10 +174,7 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
                 },
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _storeCtrl,
-                decoration: InputDecoration(labelText: l10n.store),
-              ),
+              _buildStoreField(l10n),
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -214,6 +216,112 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     );
   }
 
+  Widget _buildStoreField(AppLocalizations l10n) {
+    final storesAsync = ref.watch(storesProvider);
+
+    return storesAsync.when(
+      data: (stores) {
+        return Autocomplete<String>(
+          initialValue: TextEditingValue(
+            text: _storeCtrl.text,
+            selection: TextSelection.collapsed(
+              offset: _storeCtrl.text.length,
+            ),
+          ),
+          optionsBuilder: (textEditingValue) {
+            final input = textEditingValue.text.toLowerCase();
+            if (input.isEmpty) return stores.map((s) => s.name);
+            return stores
+                .where((s) => s.name.toLowerCase().contains(input))
+                .map((s) => s.name);
+          },
+          onSelected: (value) {
+            _storeCtrl.text = value;
+          },
+          fieldViewBuilder: (context, ctrl, focusNode, onFieldSubmitted) {
+            _autocompleteCtrl = ctrl;
+            return TextFormField(
+              controller: ctrl,
+              focusNode: focusNode,
+              decoration: InputDecoration(labelText: l10n.store),
+              onChanged: (_) {
+                _storeCtrl.text = ctrl.text;
+              },
+              onFieldSubmitted: (_) => onFieldSubmitted(),
+            );
+          },
+          optionsViewBuilder: (context, onSelected, options) {
+            return _StoreOptionsView(
+              options: options.toList(),
+              onSelected: onSelected,
+              addNewLabel: l10n.addNewStore,
+              onAddNew: () => _handleAddNewStore(l10n),
+            );
+          },
+        );
+      },
+      loading: () {
+        return TextFormField(
+          controller: _storeCtrl,
+          decoration: InputDecoration(labelText: l10n.store),
+        );
+      },
+      error: (_, stackTrace) {
+        return TextFormField(
+          controller: _storeCtrl,
+          decoration: InputDecoration(labelText: l10n.store),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleAddNewStore(AppLocalizations l10n) async {
+    if (_isAddingStore) return;
+    _isAddingStore = true;
+
+    final nameCtrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.addNewStore),
+          content: TextField(
+            controller: nameCtrl,
+            decoration: InputDecoration(labelText: l10n.storeName),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, nameCtrl.text.trim()),
+              child: Text(l10n.add),
+            ),
+          ],
+        );
+      },
+    );
+
+    nameCtrl.dispose();
+    _isAddingStore = false;
+
+    if (result == null || result.isEmpty) return;
+
+    final db = ref.read(databaseProvider);
+    final storeId = await db.storeDao.insert(await db.database, result);
+
+    if (storeId >= 0) {
+      ref.invalidate(storesProvider);
+      _storeCtrl.text = result;
+      _autocompleteCtrl?.text = result;
+      if (mounted) {
+        SnackbarHelper.showInfo(context, l10n.storeAdded);
+      }
+    }
+  }
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -235,12 +343,20 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
       return;
     }
 
+    final storeName = _storeCtrl.text.trim().isEmpty
+        ? null
+        : _storeCtrl.text.trim();
+
+    if (storeName != null && storeName.isNotEmpty) {
+      unawaited(_autoInsertStore(storeName));
+    }
+
     final price = Price(
       barcode: widget.barcode,
       price: amount,
       currency: _currency,
       id: widget.existingPrice?.id,
-      store: _storeCtrl.text.trim().isEmpty ? null : _storeCtrl.text.trim(),
+      store: storeName,
       isDiscounted: _isDiscounted,
       regularPrice: widget.existingPrice?.regularPrice,
       datePurchased: _date.millisecondsSinceEpoch,
@@ -255,6 +371,68 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     );
 
     Navigator.of(context).pop(price);
+  }
+
+  Future<void> _autoInsertStore(String name) async {
+    try {
+      final db = ref.read(databaseProvider);
+      await db.storeDao.insert(await db.database, name);
+      ref.invalidate(storesProvider);
+    } on Exception {
+      // Silently ignore — store list will catch up on next open.
+    }
+  }
+}
+
+/// Dropdown list of matching stores with a trailing add-new button.
+class _StoreOptionsView extends StatelessWidget {
+  const _StoreOptionsView({
+    required this.options,
+    required this.onSelected,
+    required this.addNewLabel,
+    required this.onAddNew,
+  });
+
+  final List<String> options;
+  final AutocompleteOnSelected<String> onSelected;
+  final String addNewLabel;
+  final VoidCallback onAddNew;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Material(
+        elevation: 4,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 200),
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            itemCount: options.length + 1,
+            itemBuilder: (context, index) {
+              if (index < options.length) {
+                return ListTile(
+                  title: Text(options[index]),
+                  onTap: () => onSelected(options[index]),
+                );
+              }
+              return ListTile(
+                leading: const Icon(Icons.add),
+                title: Text(addNewLabel),
+                onTap: onAddNew,
+                iconColor: theme.colorScheme.primary,
+                titleTextStyle: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
 

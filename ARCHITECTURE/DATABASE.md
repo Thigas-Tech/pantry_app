@@ -1,24 +1,34 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 11)
+### 2.1 Schema (version 19)
 
-Three tables:
+Eight tables:
 
-| Table         | Purpose                                                  |
-|---------------|----------------------------------------------------------|
-| `products`    | Cached product data from Open Food Facts. PK = barcode.  Includes `source` column: `'api'` (OFF‑fetched, flushable) or `'manual'` (user‑entered, protected). |
-| `inventories` | Named pantries (e.g. "Home", "Work"). PK = id            |
-| `inventory`   | Instances of products in a pantry. FK → products, inventories |
+| Table | Purpose |
+|---|---|
+| `products` | Cached product data from Open Food Facts. PK = barcode. Includes `source` column: `'api'` (OFF-fetched, flushable) or `'manual'` (user-entered, protected). |
+| `inventories` | Named pantries (e.g. "Home", "Work"). PK = id |
+| `inventory` | Instances of products in a pantry. FK -> products, inventories |
+| `feedback_queue` | Offline queue for GitHub issue reports |
+| `product_submission_queue` | Offline queue for OFF product submissions |
+| `prices` | Purchase price observations per barcode |
+| `shopping_list` | Items the user intends to buy |
+| `stores` | Saved store names for autocomplete on price entry |
 
 ### 2.2 DAO pattern
 
 Each table has a dedicated Data Access Object:
 
-| DAO                    | Responsibility                            |
-|------------------------|-------------------------------------------|
-| `ProductDao`           | Upsert / lookup products, count, source‑aware queries |
-| `InventoryDao`         | CRUD items, joined queries                |
-| `InventoriesDao`       | CRUD named pantries, migrations           |
+| DAO | Responsibility |
+|---|---|
+| `ProductDao` | Upsert / lookup products, count, source-aware queries |
+| `InventoryDao` | CRUD items, joined queries |
+| `InventoriesDao` | CRUD named pantries, migrations |
+| `FeedbackQueueDao` | CRUD offline feedback queue |
+| `ProductSubmissionQueueDao` | CRUD offline submission queue |
+| `PriceDao` | CRUD prices, aggregation queries (total value, average) |
+| `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
+| `StoreDao` | CRUD saved store names, case-insensitive lookup |
 
 Every DAO method receives a `Database` instance so it can be tested independently.
 
@@ -36,22 +46,30 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 → v11).
+- `_onUpgrade` handles version bumps (currently v1 -> v19).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
 | Version | Change |
-|---------|--------|
-| v1 → v2 | Added `inventories` table, `inventory_id` column |
-| v2 → v3 | Default unit `pcs` → `pieces`, migration of existing data |
-| v3 → v4 | Added `nutriscore_grade TEXT` column to `products` |
-| v4 → v5 | Added `nutriscore_not_applicable_category TEXT` column |
-| v5 → v6 | Added `source TEXT NOT NULL DEFAULT 'api'` column |
-| v6 → v7 | Added photo path columns for manual products |
-| v7 → v8 | Added `submission_status` column for OFF product submission |
-| v8 → v9 | Added 3 OFF image URL columns for photo‑completeness |
-| v9 → v10 | Added `categories_hierarchy` column |
-| v10 → v11 | Added `feedback_queue` table for offline issue reporting |
+|---|---|
+| v1 -> v2 | Added `inventories` table, `inventory_id` column |
+| v2 -> v3 | Default unit `pcs` -> `pieces`, migration of existing data |
+| v3 -> v4 | Added `nutriscore_grade TEXT` column to `products` |
+| v4 -> v5 | Added `nutriscore_not_applicable_category TEXT` column |
+| v5 -> v6 | Added `source TEXT NOT NULL DEFAULT 'api'` column |
+| v6 -> v7 | Added photo path columns for manual products |
+| v7 -> v8 | Added `submission_status` column for OFF product submission |
+| v8 -> v9 | Added 3 OFF image URL columns for photo-completeness |
+| v9 -> v10 | Added `categories_hierarchy` column |
+| v10 -> v11 | Added `feedback_queue` table for offline issue reporting |
+| v11 -> v12 | Added `prices` table for purchase price observations |
+| v12 -> v13 | Added `shopping_list` table |
+| v13 -> v14 | Added `idx_inventory_date_added` index on `inventory` |
+| v14 -> v15 | Added `language_code TEXT` column to `products` |
+| v15 -> v16 | Added `product_submission_queue` table |
+| v16 -> v17 | Added `search_text` column and index on `products` |
+| v17 -> v18 | Added price columns to `shopping_list` (price_amount, price_currency, price_store, price_photo_path) + `idx_shopping_inventory_id` |
+| v18 -> v19 | Added `stores` table + seed from existing `prices.store` and `shopping_list.price_store` |
 
 ### 2.4 Connectivity layer
 
@@ -59,6 +77,6 @@ Version history:
 `StreamProvider<bool>` (`connectivityProvider`). The app uses this to:
 
 - Refresh cached product data on startup and pull-to-refresh (online only).
-- Skip the Open Food Facts API lookup when offline — going directly to
+- Skip the Open Food Facts API lookup when offline -- going directly to
   manual product entry with a warning snackbar.
 - Guard any network-dependent operation with a connectivity check.
