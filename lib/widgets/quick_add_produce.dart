@@ -39,13 +39,16 @@ class QuickAddProduce extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildHeader(context),
-        if (items.isEmpty) _buildEmptyState() else _buildCarousel(),
-      ],
+    return Material(
+      type: MaterialType.transparency,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildHeader(context),
+          if (items.isEmpty) _buildEmptyState() else _buildCarousel(),
+        ],
+      ),
     );
   }
 

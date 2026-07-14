@@ -92,10 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     } on Exception catch (e) {
       logWarning('Failed to load quick-add items: $e');
       if (mounted) {
-        setState(() {
-          _quickAddItems = [];
-          _quickAddLoading = false;
-        });
+        setState(() => _quickAddLoading = false);
       }
     }
   }

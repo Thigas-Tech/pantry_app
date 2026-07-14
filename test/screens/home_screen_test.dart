@@ -30,8 +30,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
@@ -42,6 +44,7 @@ import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import '../helpers/pump_app.dart';
 
@@ -80,6 +83,11 @@ InventoryWithProduct testItem(
 
 void main() {
   late MockImageCacheService mockImageCache;
+
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
 
   setUp(() {
     mockImageCache = MockImageCacheService();
@@ -432,6 +440,9 @@ void main() {
           activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
           hasConnectionProvider.overrideWith((ref) => Future.value(true)),
           productRepositoryProvider.overrideWithValue(mockRepo),
+          databaseProvider.overrideWithValue(
+            DatabaseHelper.withPath(inMemoryDatabasePath),
+          ),
         ],
       );
 
@@ -467,6 +478,9 @@ void main() {
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         productRepositoryProvider.overrideWithValue(
           createMockProductRepository(),
+        ),
+        databaseProvider.overrideWithValue(
+          DatabaseHelper.withPath(inMemoryDatabasePath),
         ),
       ],
     );
@@ -507,6 +521,9 @@ void main() {
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         productRepositoryProvider.overrideWithValue(mockRepo),
+        databaseProvider.overrideWithValue(
+          DatabaseHelper.withPath(inMemoryDatabasePath),
+        ),
       ],
     );
 
