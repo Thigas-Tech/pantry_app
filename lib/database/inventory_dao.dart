@@ -22,6 +22,7 @@ class InventoryDao {
     'notes': item.notes,
     'date_added': item.dateAdded,
     'inventory_id': item.inventoryId,
+    'serving_weight_g': item.servingWeightG,
   };
 
   /// Converts a database row map into an [InventoryItem].
@@ -35,6 +36,7 @@ class InventoryDao {
     notes: map['notes'] as String?,
     dateAdded: map['date_added'] as int?,
     inventoryId: map['inventory_id'] as int? ?? 1,
+    servingWeightG: (map['serving_weight_g'] as num?)?.toDouble(),
   );
 
   /// Inserts a new inventory item.

@@ -593,7 +593,13 @@
   "locationPantry": "Pantry",
   "locationFridge": "Fridge",
   "locationFreezer": "Freezer",
-  "unitPieces": "pieces",
+  "unitSingular": "unit",
+  "unitPlural": "units",
+  "weightModeLabel": "Weight (g)",
+  "unitModeLabel": "Unit",
+  "servingSmall": "Small",
+  "servingMedium": "Medium",
+  "servingLarge": "Large",
   "unitGrams": "g",
   "unitKg": "kg",
   "unitMl": "ml",
@@ -683,5 +689,10 @@
   "categoryDairies": "Dairies",
   "categoryInstantBeverages": "Instant beverages",
   "categoryMilkfat": "Milkfat",
-  "categoryStarches": "Starches"
+  "categoryStarches": "Starches",
+  "pluEntryTooltip": "Enter PLU code (produce)",
+  "enterPluCode": "Enter PLU Code",
+  "pluCodeNotFound": "PLU code not recognized",
+  "digitLabel": "Digit",
+  "deleteDigit": "Delete digit"
 }

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product_type.dart';
 
 part 'product.freezed.dart';
 
@@ -220,6 +221,22 @@ abstract class Product with _$Product {
     /// - [productSubmissionSubmitted] — successfully submitted.
     /// - [productSubmissionFailed] — submission failed; retry possible.
     @Default(productSubmissionNotSubmitted) String submissionStatus,
+
+    /// The PLU (Price Look-Up) code for this product, if it is a fresh
+    /// produce item (e.g. `'4011'` for Banana, `'4032'` for Apple).
+    ///
+    /// Only meaningful when [productType] is [ProductType.produce]. 4-digit
+    /// codes are standard PLU codes; 5-digit codes starting with `'9'`
+    /// indicate organic produce. This field is nullable for barcoded and
+    /// custom products.
+    String? pluCode,
+
+    /// The classification of this product.
+    ///
+    /// - [ProductType.barcoded] — scanned from manufacturer barcode (default).
+    /// - [ProductType.produce] — identified by PLU code as fresh produce.
+    /// - [ProductType.custom] — manually entered by the user.
+    @Default(ProductType.barcoded) ProductType productType,
   }) = _Product;
 
   /// Creates a [Product] from an SDK [off.Product].

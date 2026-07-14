@@ -1199,7 +1199,25 @@ class AppLocalizationsPt extends AppLocalizations {
   String get locationFreezer => 'Freezer';
 
   @override
-  String get unitPieces => 'unidades';
+  String get unitSingular => 'unidade';
+
+  @override
+  String get unitPlural => 'unidades';
+
+  @override
+  String get weightModeLabel => 'Weight (g)';
+
+  @override
+  String get unitModeLabel => 'Unit';
+
+  @override
+  String get servingSmall => 'Small';
+
+  @override
+  String get servingMedium => 'Medium';
+
+  @override
+  String get servingLarge => 'Large';
 
   @override
   String get unitGrams => 'g';
@@ -1480,6 +1498,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get categoryStarches => 'Amidos';
+
+  @override
+  String get pluEntryTooltip => 'Enter PLU code (produce)';
+
+  @override
+  String get enterPluCode => 'Enter PLU Code';
+
+  @override
+  String get pluCodeNotFound => 'PLU code not recognized';
+
+  @override
+  String get digitLabel => 'Digit';
+
+  @override
+  String get deleteDigit => 'Delete digit';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2677,7 +2710,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get locationFreezer => 'Freezer';
 
   @override
-  String get unitPieces => 'unidades';
+  String get unitSingular => 'unidade';
+
+  @override
+  String get unitPlural => 'unidades';
 
   @override
   String get unitGrams => 'g';

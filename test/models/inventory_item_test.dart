@@ -60,4 +60,41 @@ void main() {
       expect(updated.barcode, '789'); // unchanged
     });
   });
+
+  group('InventoryItem servingWeightG', () {
+    test('servingWeightG defaults to null', () {
+      const item = InventoryItem(barcode: '123');
+      expect(item.servingWeightG, isNull);
+    });
+
+    test('servingWeightG can be set', () {
+      const item = InventoryItem(barcode: '123', servingWeightG: 182);
+      expect(item.servingWeightG, 182);
+    });
+
+    test('copyWith preserves servingWeightG', () {
+      const item = InventoryItem(
+        barcode: '123',
+        servingWeightG: 182,
+      );
+      final updated = item.copyWith(quantity: 3);
+      expect(updated.servingWeightG, 182);
+      expect(updated.quantity, 3);
+    });
+
+    test('fromJson reads serving_weight_g', () {
+      final json = {
+        'barcode': '123',
+        'serving_weight_g': 182.0,
+      };
+      final item = InventoryItem.fromJson(json);
+      expect(item.servingWeightG, 182.0);
+    });
+
+    test('toJson writes serving_weight_g', () {
+      const item = InventoryItem(barcode: '123', servingWeightG: 182);
+      final json = item.toJson();
+      expect(json['serving_weight_g'], 182.0);
+    });
+  });
 }

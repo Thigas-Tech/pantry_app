@@ -55,7 +55,12 @@ mixin _$InventoryItem {
 ///
 /// This is a foreign key referencing the `inventories` table.
 /// Defaults to `1` (the default "Home" inventory).
-@JsonKey(name: 'inventory_id') int get inventoryId;
+@JsonKey(name: 'inventory_id') int get inventoryId;/// The weight in grams of one serving unit.
+///
+/// Only meaningful for produce items added in unit mode (e.g. `182` for
+/// "1 medium apple"). `null` for weight-mode items, non-produce items,
+/// and legacy items without serving data.
+@JsonKey(name: 'serving_weight_g') double? get servingWeightG;
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -68,16 +73,16 @@ $InventoryItemCopyWith<InventoryItem> get copyWith => _$InventoryItemCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId)&&(identical(other.servingWeightG, servingWeightG) || other.servingWeightG == servingWeightG));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded,inventoryId);
+int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded,inventoryId,servingWeightG);
 
 @override
 String toString() {
-  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId)';
+  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId, servingWeightG: $servingWeightG)';
 }
 
 
@@ -88,7 +93,7 @@ abstract mixin class $InventoryItemCopyWith<$Res>  {
   factory $InventoryItemCopyWith(InventoryItem value, $Res Function(InventoryItem) _then) = _$InventoryItemCopyWithImpl;
 @useResult
 $Res call({
- String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded,@JsonKey(name: 'inventory_id') int inventoryId
+ String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded,@JsonKey(name: 'inventory_id') int inventoryId,@JsonKey(name: 'serving_weight_g') double? servingWeightG
 });
 
 
@@ -105,7 +110,7 @@ class _$InventoryItemCopyWithImpl<$Res>
 
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,Object? servingWeightG = freezed,}) {
   return _then(_self.copyWith(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
@@ -116,7 +121,8 @@ as String?,location: null == location ? _self.location : location // ignore: cas
 as String,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
 as int?,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
-as int,
+as int,servingWeightG: freezed == servingWeightG ? _self.servingWeightG : servingWeightG // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -201,10 +207,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId, @JsonKey(name: 'serving_weight_g')  double? servingWeightG)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _InventoryItem() when $default != null:
-return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId);case _:
+return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId,_that.servingWeightG);case _:
   return orElse();
 
 }
@@ -222,10 +228,10 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId, @JsonKey(name: 'serving_weight_g')  double? servingWeightG)  $default,) {final _that = this;
 switch (_that) {
 case _InventoryItem():
-return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId);case _:
+return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId,_that.servingWeightG);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -242,10 +248,10 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: 'expiry_date')  String? expiryDate,  String location,  String? notes, @JsonKey(name: 'date_added')  int? dateAdded, @JsonKey(name: 'inventory_id')  int inventoryId, @JsonKey(name: 'serving_weight_g')  double? servingWeightG)?  $default,) {final _that = this;
 switch (_that) {
 case _InventoryItem() when $default != null:
-return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId);case _:
+return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId,_that.servingWeightG);case _:
   return null;
 
 }
@@ -257,7 +263,7 @@ return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDat
 @JsonSerializable()
 
 class _InventoryItem implements InventoryItem {
-  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pieces', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded, @JsonKey(name: 'inventory_id') this.inventoryId = 1});
+  const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pieces', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded, @JsonKey(name: 'inventory_id') this.inventoryId = 1, @JsonKey(name: 'serving_weight_g') this.servingWeightG});
   factory _InventoryItem.fromJson(Map<String, dynamic> json) => _$InventoryItemFromJson(json);
 
 /// The barcode of the product (e.g. EAN‑13, UPC).
@@ -309,6 +315,12 @@ class _InventoryItem implements InventoryItem {
 /// This is a foreign key referencing the `inventories` table.
 /// Defaults to `1` (the default "Home" inventory).
 @override@JsonKey(name: 'inventory_id') final  int inventoryId;
+/// The weight in grams of one serving unit.
+///
+/// Only meaningful for produce items added in unit mode (e.g. `182` for
+/// "1 medium apple"). `null` for weight-mode items, non-produce items,
+/// and legacy items without serving data.
+@override@JsonKey(name: 'serving_weight_g') final  double? servingWeightG;
 
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
@@ -323,16 +335,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryItem&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.id, id) || other.id == id)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.location, location) || other.location == location)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId)&&(identical(other.servingWeightG, servingWeightG) || other.servingWeightG == servingWeightG));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded,inventoryId);
+int get hashCode => Object.hash(runtimeType,barcode,id,quantity,unit,expiryDate,location,notes,dateAdded,inventoryId,servingWeightG);
 
 @override
 String toString() {
-  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId)';
+  return 'InventoryItem(barcode: $barcode, id: $id, quantity: $quantity, unit: $unit, expiryDate: $expiryDate, location: $location, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId, servingWeightG: $servingWeightG)';
 }
 
 
@@ -343,7 +355,7 @@ abstract mixin class _$InventoryItemCopyWith<$Res> implements $InventoryItemCopy
   factory _$InventoryItemCopyWith(_InventoryItem value, $Res Function(_InventoryItem) _then) = __$InventoryItemCopyWithImpl;
 @override @useResult
 $Res call({
- String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded,@JsonKey(name: 'inventory_id') int inventoryId
+ String barcode, int? id, double quantity, String unit,@JsonKey(name: 'expiry_date') String? expiryDate, String location, String? notes,@JsonKey(name: 'date_added') int? dateAdded,@JsonKey(name: 'inventory_id') int inventoryId,@JsonKey(name: 'serving_weight_g') double? servingWeightG
 });
 
 
@@ -360,7 +372,7 @@ class __$InventoryItemCopyWithImpl<$Res>
 
 /// Create a copy of InventoryItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? id = freezed,Object? quantity = null,Object? unit = null,Object? expiryDate = freezed,Object? location = null,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,Object? servingWeightG = freezed,}) {
   return _then(_InventoryItem(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
@@ -371,7 +383,8 @@ as String?,location: null == location ? _self.location : location // ignore: cas
 as String,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
 as int?,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
-as int,
+as int,servingWeightG: freezed == servingWeightG ? _self.servingWeightG : servingWeightG // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 

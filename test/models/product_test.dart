@@ -4,6 +4,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 
 /// Tests for the [Product] model.
 ///
@@ -11,11 +12,74 @@ import 'package:pantry_app/models/product.dart';
 /// handling of missing optional fields, immutability via `copyWith`, and
 /// safe API merge semantics via `Product.mergeFromApi`.
 void main() {
+  group('ProductType', () {
+    test('enum values exist for barcoded, produce, custom', () {
+      expect(ProductType.values, hasLength(3));
+      expect(ProductType.values, contains(ProductType.barcoded));
+      expect(ProductType.values, contains(ProductType.produce));
+      expect(ProductType.values, contains(ProductType.custom));
+    });
+  });
+
   group('Product', () {
+    test('productType defaults to barcoded for new products', () {
+      const product = Product(barcode: '123', name: 'Test');
+      expect(product.productType, ProductType.barcoded);
+    });
+
+    test('productType can be set to produce', () {
+      const product = Product(
+        barcode: '123',
+        name: 'Test',
+        productType: ProductType.produce,
+      );
+      expect(product.productType, ProductType.produce);
+    });
+
+    test('pluCode is nullable and defaults to null', () {
+      const product = Product(barcode: '123', name: 'Test');
+      expect(product.pluCode, isNull);
+    });
+
+    test('pluCode can be set for produce products', () {
+      const product = Product(
+        barcode: '123',
+        name: 'Banana',
+        productType: ProductType.produce,
+        pluCode: '4011',
+      );
+      expect(product.pluCode, '4011');
+    });
+
+    test('copyWith preserves new fields', () {
+      const product = Product(
+        barcode: '123',
+        name: 'Banana',
+        productType: ProductType.produce,
+        pluCode: '4011',
+      );
+      final updated = product.copyWith(pluCode: '94011');
+      expect(updated.pluCode, '94011');
+      expect(updated.productType, ProductType.produce);
+      expect(updated.name, 'Banana');
+    });
+
+    test(
+      'fromOffProduct creates barcoded product type with null pluCode',
+      () {
+        final offProduct = off.Product(
+          barcode: '123',
+          productName: 'Test Product',
+        );
+        final product = Product.fromOffProduct(offProduct);
+        expect(product.productType, ProductType.barcoded);
+        expect(product.pluCode, isNull);
+      },
+    );
+
     test(
       'fromOffProduct creates a valid Product from a complete off.Product',
       () {
-        /// Parses every field correctly from the SDK object.
         final offProduct = off.Product(
           barcode: '123',
           productName: 'Test Product',

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// A form screen for creating or editing an inventory item.
@@ -17,6 +19,7 @@ class AddToInventoryScreen extends StatefulWidget {
     super.key,
     this.existingItem,
     this.suggestedExpiry,
+    this.productType,
   });
 
   /// The product barcode this inventory item belongs to.
@@ -31,6 +34,9 @@ class AddToInventoryScreen extends StatefulWidget {
   /// A suggested expiry date in ISO 8601 format (`YYYY-MM-DD`).
   final String? suggestedExpiry;
 
+  /// The product type — controls whether the weight/unit toggle is shown.
+  final ProductType? productType;
+
   @override
   State<AddToInventoryScreen> createState() => _AddToInventoryScreenState();
 }
@@ -42,6 +48,11 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   late String _location;
   late DateTime? _expiryDate;
   String _notes = '';
+
+  bool _produceIsWeightMode = true;
+  String _selectedSize = 'Medium';
+
+  bool get _isProduce => widget.productType == ProductType.produce;
 
   static const _presetUnits = ['pieces', 'g', 'kg', 'ml', 'L'];
   static const _presetLocations = ['pantry', 'fridge', 'freezer'];
@@ -130,11 +141,25 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     }
     _formKey.currentState!.save();
 
+    String unit;
+    double? servingWeightG;
+
+    if (_isProduce && !_produceIsWeightMode) {
+      unit = _selectedSize;
+      servingWeightG = ProduceServingPresets.forName('Apple')?[_selectedSize];
+    } else if (_isProduce) {
+      unit = 'g';
+      servingWeightG = null;
+    } else {
+      unit = _unit;
+      servingWeightG = null;
+    }
+
     final item = InventoryItem(
       id: widget.existingItem?.id,
       barcode: widget.barcode,
       quantity: _quantity,
-      unit: _unit,
+      unit: unit,
       location: _location,
       expiryDate: _expiryDate?.toIso8601String().substring(0, 10),
       notes: _notes.isNotEmpty ? _notes : null,
@@ -142,6 +167,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
           widget.existingItem?.dateAdded ??
           DateTime.now().millisecondsSinceEpoch,
       inventoryId: widget.existingItem?.inventoryId ?? widget.inventoryId,
+      servingWeightG: servingWeightG,
     );
     logInfo(
       '''Inventory item ready: barcode=${item.barcode} qty=${item.quantity} ${item.unit} loc=${item.location} expiry=${item.expiryDate} inventory=${item.inventoryId}''',
@@ -174,6 +200,26 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              if (_isProduce)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: SegmentedButton<bool>(
+                    segments: [
+                      ButtonSegment(
+                        value: true,
+                        label: Text(l10n.weightModeLabel),
+                      ),
+                      ButtonSegment(
+                        value: false,
+                        label: Text(l10n.unitModeLabel),
+                      ),
+                    ],
+                    selected: {_produceIsWeightMode},
+                    onSelectionChanged: (v) {
+                      setState(() => _produceIsWeightMode = v.first);
+                    },
+                  ),
+                ),
               TextFormField(
                 initialValue: _quantity.toString(),
                 decoration: InputDecoration(labelText: l10n.quantityLabel),
@@ -187,20 +233,34 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 },
                 onSaved: (v) => _quantity = double.parse(v!),
               ),
-              DropdownButtonFormField<String>(
-                initialValue: _presetUnits.contains(_unit)
-                    ? _unit
-                    : '__custom__',
-                items: unitItems,
-                onChanged: (v) {
-                  if (v == '__custom__') {
-                    unawaited(_pickCustomUnit());
-                  } else {
-                    setState(() => _unit = v!);
-                  }
-                },
-                decoration: InputDecoration(labelText: l10n.unitLabel),
-              ),
+              if (_isProduce && !_produceIsWeightMode)
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedSize,
+                  items: const [
+                    DropdownMenuItem(value: 'Small', child: Text('Small')),
+                    DropdownMenuItem(value: 'Medium', child: Text('Medium')),
+                    DropdownMenuItem(value: 'Large', child: Text('Large')),
+                  ],
+                  onChanged: (v) {
+                    setState(() => _selectedSize = v!);
+                  },
+                  decoration: InputDecoration(labelText: l10n.servingSize),
+                ),
+              if (!_isProduce)
+                DropdownButtonFormField<String>(
+                  initialValue: _presetUnits.contains(_unit)
+                      ? _unit
+                      : '__custom__',
+                  items: unitItems,
+                  onChanged: (v) {
+                    if (v == '__custom__') {
+                      unawaited(_pickCustomUnit());
+                    } else {
+                      setState(() => _unit = v!);
+                    }
+                  },
+                  decoration: InputDecoration(labelText: l10n.unitLabel),
+                ),
               DropdownButtonFormField<String>(
                 initialValue: _presetLocations.contains(_location)
                     ? _location

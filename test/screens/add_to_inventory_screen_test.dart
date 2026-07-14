@@ -18,6 +18,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import '../helpers/pump_app.dart';
 
@@ -31,7 +32,7 @@ void main() {
 
       final quantityField = find.widgetWithText(TextFormField, '1.0');
       expect(quantityField, findsOneWidget);
-      expect(find.text('pieces'), findsOneWidget);
+      expect(find.text('unit'), findsOneWidget);
       expect(find.text('Pantry'), findsOneWidget);
       expect(find.text('Expiry date (optional)'), findsOneWidget);
       expect(
@@ -249,6 +250,60 @@ void main() {
 
       await tester.enterText(find.byType(TextFormField).first, '5');
       await tester.tap(find.widgetWithText(ElevatedButton, 'Update Item'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddToInventoryScreen), findsNothing);
+    });
+  });
+
+  group('AddToInventoryScreen produce weight/unit toggle', () {
+    testWidgets('shows weight/unit toggle for produce products', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        const AddToInventoryScreen(
+          barcode: '4011',
+          inventoryId: 1,
+          productType: ProductType.produce,
+        ),
+      );
+
+      expect(find.text('Weight (g)'), findsOneWidget);
+      expect(find.text('Unit'), findsOneWidget);
+    });
+
+    testWidgets('does NOT show weight/unit toggle for barcoded products', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        const AddToInventoryScreen(
+          barcode: '123',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+        ),
+      );
+
+      expect(find.text('Weight (g)'), findsNothing);
+      expect(find.text('unit'), findsOneWidget);
+    });
+
+    testWidgets('saves produce with unit g in weight mode', (tester) async {
+      await pumpApp(
+        tester,
+        const AddToInventoryScreen(
+          barcode: '4011',
+          inventoryId: 1,
+          productType: ProductType.produce,
+        ),
+      );
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, '1.0'),
+        '200',
+      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Add to Pantry'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AddToInventoryScreen), findsNothing);

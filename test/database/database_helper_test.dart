@@ -692,4 +692,37 @@ void main() {
       tempDir.deleteSync(recursive: true);
     });
   });
+
+  group('Migration v22 — serving_weight_g', () {
+    test('fresh v22 DB has serving_weight_g column on inventory', () async {
+      final database = await db.database;
+      final columns = await database.rawQuery(
+        "PRAGMA table_info('inventory')",
+      );
+      final columnNames = columns
+          .map((c) => (c['name'] as String?) ?? '')
+          .toList();
+      expect(columnNames, contains('serving_weight_g'));
+    });
+
+    test(
+      'insert and retrieve inventory item with servingWeightG survives '
+      'round-trip',
+      () async {
+        await db.insertProduct(
+          const Product(barcode: 'produce', name: 'Apple'),
+        );
+        const item = InventoryItem(
+          barcode: 'produce',
+          unit: 'medium apple',
+          servingWeightG: 182,
+        );
+        final id = await db.insertInventoryItem(item);
+        final items = await db.getInventoryItems(inventoryId: 1);
+        final saved = items.firstWhere((i) => i.id == id);
+        expect(saved.servingWeightG, 182);
+        expect(saved.unit, 'medium apple');
+      },
+    );
+  });
 }

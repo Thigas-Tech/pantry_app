@@ -5,8 +5,15 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 /// and theme modes.
 extension AppLocalizationsX on AppLocalizations {
   /// Formats a quantity with a localized unit (e.g., "5 kg").
+  ///
+  /// When [unit] is `'pieces'`, the display uses [unitSingular] for
+  /// quantity 1 and [unitPlural] for all other quantities.
   String formatQuantityUnit(double? quantity, String? unit) {
     if (quantity == null || unit == null) return '';
+    if (unit == 'pieces') {
+      final label = quantity == 1 ? unitSingular : unitPlural;
+      return '${quantity.toInt()} $label';
+    }
     return '${quantity.toInt()} ${localizeUnit(unit)}';
   }
 
@@ -14,7 +21,7 @@ extension AppLocalizationsX on AppLocalizations {
   String localizeUnit(String unit) {
     switch (unit.toLowerCase()) {
       case 'pieces':
-        return unitPieces;
+        return unitSingular;
       case 'g':
       case 'grams':
         return unitGrams;

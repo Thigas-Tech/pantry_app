@@ -4,18 +4,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/services/plu_service.dart';
+import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/scanner_overlay_painter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-/// A barcode input screen.
+/// A unified input screen for barcodes and produce PLU codes.
 ///
-/// Offers two modes: camera scanner via [MobileScanner] and manual text entry.
-/// The user is prompted for confirmation before navigating away with no result.
+/// Offers three modes:
+/// - Camera scanner via [MobileScanner] for barcodes.
+/// - Manual barcode text entry.
+/// - PLU code entry via numeric keypad for produce without barcodes.
+///
+/// Returns a [ScanResult] via [Navigator.pop]. The user is prompted for
+/// confirmation before navigating away with no result.
 class ScannerScreen extends StatefulWidget {
   /// Creates a [ScannerScreen] widget.
-  const ScannerScreen({super.key});
+  ///
+  /// [pluService] can be injected for testing. When omitted, a default
+  /// [PluService] instance is used.
+  const ScannerScreen({this.pluService, super.key});
+
+  /// The PLU code→name lookup service.
+  final PluService? pluService;
 
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();
@@ -23,6 +36,9 @@ class ScannerScreen extends StatefulWidget {
 
 class _ScannerScreenState extends State<ScannerScreen> {
   bool _showManualEntry = false;
+  bool _showPluEntry = false;
+
+  PluService get _pluService => widget.pluService ?? const PluService();
 
   @override
   Widget build(BuildContext context) {
@@ -52,19 +68,40 @@ class _ScannerScreenState extends State<ScannerScreen> {
           Navigator.of(context).pop();
         }
       },
-      child: _showManualEntry
-          ? _ManualEntryView(
-              onSwitchToCamera: () {
-                logInfo('Switched to camera scanner');
-                setState(() => _showManualEntry = false);
-              },
-            )
-          : _MobileScannerView(
-              onSwitchToManual: () {
-                logInfo('Switched to manual entry');
-                setState(() => _showManualEntry = true);
-              },
-            ),
+      child: _buildCurrentMode(),
+    );
+  }
+
+  Widget _buildCurrentMode() {
+    if (_showPluEntry) {
+      return _PluEntryView(
+        pluService: _pluService,
+        onSwitchToCamera: () {
+          logInfo('Switched to camera scanner from PLU');
+          setState(() {
+            _showPluEntry = false;
+            _showManualEntry = false;
+          });
+        },
+      );
+    }
+    if (_showManualEntry) {
+      return _ManualEntryView(
+        onSwitchToCamera: () {
+          logInfo('Switched to camera scanner');
+          setState(() => _showManualEntry = false);
+        },
+      );
+    }
+    return _MobileScannerView(
+      onSwitchToManual: () {
+        logInfo('Switched to manual entry');
+        setState(() => _showManualEntry = true);
+      },
+      onSwitchToPlu: () {
+        logInfo('Switched to PLU entry');
+        setState(() => _showPluEntry = true);
+      },
     );
   }
 }
@@ -76,10 +113,16 @@ class _ScannerScreenState extends State<ScannerScreen> {
 /// Displays a camera preview with an animated overlay and handles
 /// permission requests, errors, and torch control.
 class _MobileScannerView extends StatefulWidget {
-  const _MobileScannerView({required this.onSwitchToManual});
+  const _MobileScannerView({
+    required this.onSwitchToManual,
+    required this.onSwitchToPlu,
+  });
 
   /// Callback to switch to manual barcode entry.
   final VoidCallback onSwitchToManual;
+
+  /// Callback to switch to PLU code entry.
+  final VoidCallback onSwitchToPlu;
 
   @override
   State<_MobileScannerView> createState() => _MobileScannerViewState();
@@ -127,17 +170,10 @@ class _MobileScannerViewState extends State<_MobileScannerView>
         _animationController.stop();
       case AppLifecycleState.resumed:
         unawaited(_animationController.repeat(reverse: true));
-        // If the user left to Settings, granted permission, and returned,
-        // we retry the scanner automatically.
         unawaited(_checkPermissionAndRetry());
     }
   }
 
-  /// Checks if camera permission is now granted and we were previously
-  /// showing a permission-denied error. If so, retries the scanner.
-  ///
-  /// This handles the scenario where the user leaves the app, grants
-  /// permission in system settings, and then returns.
   Future<void> _checkPermissionAndRetry() async {
     final status = await Permission.camera.status;
     if (status.isGranted &&
@@ -148,8 +184,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
-  /// Listens for errors from the [MobileScannerController] and updates
-  /// the UI accordingly.
   void _onScannerStateChanged() {
     final error = _scannerController.value.error;
     if (error != null && _currentException == null) {
@@ -159,11 +193,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
-  /// Requests camera permission and handles the result.
-  ///
-  /// If permission is granted for the first time (via the system dialog),
-  /// it automatically clears any existing error and retries the scanner,
-  /// eliminating the need for the user to leave and re-enter the screen.
   Future<void> _requestCameraPermission() async {
     logInfo('Checking camera permissions');
     try {
@@ -184,8 +213,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
       final result = await Permission.camera.request();
       if (result.isGranted) {
         logInfo('Camera permission granted');
-        // If we were previously showing an error (e.g. permissionDenied),
-        // clear it and restart the scanner immediately.
         if (_currentException != null) {
           _retry();
         }
@@ -209,15 +236,12 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
-  /// Sets the current scanner error, but only if no error is already set.
   void _setError(MobileScannerException exception) {
     if (_currentException != null) return;
     _currentException = exception;
     if (mounted) setState(() {});
   }
 
-  /// Resets the scanner state and rebuilds the widget with a new key,
-  /// forcing [MobileScanner] to reinitialize.
   void _retry() {
     logInfo('Retrying scanner');
     _hasScanned = false;
@@ -226,7 +250,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     unawaited(_requestCameraPermission());
   }
 
-  /// Opens the app's system settings so the user can grant camera permission.
   Future<void> _openSettings() async {
     logInfo('Opening app settings for camera permission');
     final l10n = AppLocalizations.of(context)!;
@@ -236,15 +259,10 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     }
   }
 
-  /// Toggles the device torch (flashlight) on or off.
   void _toggleTorch() {
     unawaited(_scannerController.toggleTorch());
   }
 
-  /// Called when a barcode is detected by the scanner.
-  ///
-  /// Ignores duplicate scans, validates the barcode data, and pops the
-  /// screen with the scanned value.
   void _onBarcodeDetected(BarcodeCapture capture) {
     if (_hasScanned) {
       logInfo('Scan already captured -- ignoring duplicate');
@@ -260,20 +278,14 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     logInfo('Barcode scanned via camera: ${barcode.rawValue}');
     unawaited(HapticFeedback.mediumImpact());
     if (context.mounted) {
-      Navigator.of(context).pop(barcode.rawValue);
+      Navigator.of(context).pop(BarcodeResult(barcode.rawValue!));
     }
   }
 
-  /// Called when an error occurs during barcode detection (e.g. ML Kit).
   void _onDetectionError(Object error, StackTrace stackTrace) {
     logException('Barcode detection error', error, stackTrace);
   }
 
-  /// Builds the error widget from the [Image.errorBuilder]
-  /// callback of [MobileScanner].
-  ///
-  /// Ensures the error state is recorded so it can be displayed even if the
-  /// callback fires before the first frame.
   Widget _onScannerError(
     BuildContext context,
     MobileScannerException exception,
@@ -287,19 +299,17 @@ class _MobileScannerViewState extends State<_MobileScannerView>
     return _buildErrorContent(exception);
   }
 
-  /// Constructs the full error screen with appropriate actions based on
-  /// the error code.
   Widget _buildErrorContent(MobileScannerException exception) {
     logError('Scanner error: ${exception.errorCode.name}');
     return ScannerErrorContent(
       exception: exception,
       onRetry: _retry,
       onSwitchToManual: widget.onSwitchToManual,
+      onSwitchToPlu: widget.onSwitchToPlu,
       onOpenSettings: _openSettings,
     );
   }
 
-  /// Placeholder shown while the camera preview is loading.
   Widget _buildPlaceholder(BuildContext context) {
     return const ColoredBox(
       color: Colors.black87,
@@ -313,7 +323,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // If an error is set, show the error screen instead of the camera.
     if (_currentException != null) {
       return Scaffold(
         appBar: AppBar(
@@ -330,7 +339,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
       );
     }
 
-    // Normal scanner UI.
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.scanBarcode),
@@ -350,6 +358,11 @@ class _MobileScannerViewState extends State<_MobileScannerView>
             },
           ),
           IconButton(
+            icon: const Icon(Icons.dialpad),
+            tooltip: l10n.pluEntryTooltip,
+            onPressed: widget.onSwitchToPlu,
+          ),
+          IconButton(
             icon: const Icon(Icons.edit),
             tooltip: l10n.manualEntryTooltip,
             onPressed: widget.onSwitchToManual,
@@ -367,8 +380,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
             placeholderBuilder: _buildPlaceholder,
             tapToFocus: true,
           ),
-          // Positioned.fill ensures the overlay is centered and covers the
-          // entire camera preview area, fixing misalignment issues.
           Positioned.fill(
             child: AnimatedBuilder(
               animation: _animationController,
@@ -387,9 +398,6 @@ class _MobileScannerViewState extends State<_MobileScannerView>
 }
 
 /// Displays scanner error content based on the error code.
-///
-/// Extracted as a separate widget so it can be tested with specific error
-/// codes.
 @visibleForTesting
 class ScannerErrorContent extends StatelessWidget {
   /// Creates a [ScannerErrorContent] widget.
@@ -397,6 +405,7 @@ class ScannerErrorContent extends StatelessWidget {
     required this.exception,
     required this.onRetry,
     required this.onSwitchToManual,
+    required this.onSwitchToPlu,
     required this.onOpenSettings,
     super.key,
   });
@@ -409,6 +418,9 @@ class ScannerErrorContent extends StatelessWidget {
 
   /// Called when the user switches to manual barcode entry.
   final VoidCallback onSwitchToManual;
+
+  /// Called when the user switches to PLU code entry.
+  final VoidCallback onSwitchToPlu;
 
   /// Called when the user wants to open app settings.
   final VoidCallback onOpenSettings;
@@ -434,6 +446,14 @@ class ScannerErrorContent extends StatelessWidget {
             ),
           ),
           TextButton.icon(
+            onPressed: onSwitchToPlu,
+            icon: const Icon(Icons.dialpad, color: Colors.white70),
+            label: Text(
+              l10n.pluEntryTooltip,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ),
+          TextButton.icon(
             onPressed: onSwitchToManual,
             icon: const Icon(Icons.edit, color: Colors.white70),
             label: Text(
@@ -445,6 +465,14 @@ class ScannerErrorContent extends StatelessWidget {
       case MobileScannerErrorCode.unsupported:
         message = l10n.cameraNotAvailable;
         actions = [
+          TextButton.icon(
+            onPressed: onSwitchToPlu,
+            icon: const Icon(Icons.dialpad, color: Colors.white),
+            label: Text(
+              l10n.pluEntryTooltip,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
           TextButton.icon(
             onPressed: onSwitchToManual,
             icon: const Icon(Icons.edit, color: Colors.white),
@@ -468,6 +496,14 @@ class ScannerErrorContent extends StatelessWidget {
             label: Text(
               l10n.retryScan,
               style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          TextButton.icon(
+            onPressed: onSwitchToPlu,
+            icon: const Icon(Icons.dialpad, color: Colors.white70),
+            label: Text(
+              l10n.pluEntryTooltip,
+              style: const TextStyle(color: Colors.white70),
             ),
           ),
           TextButton.icon(
@@ -522,7 +558,7 @@ class ScannerErrorContent extends StatelessWidget {
 /// A widget that allows the user to type or paste a barcode number.
 ///
 /// Validates that the input is numeric and of sufficient length before
-/// popping the screen with the barcode string.
+/// popping the screen with a [BarcodeResult].
 class _ManualEntryView extends StatefulWidget {
   const _ManualEntryView({required this.onSwitchToCamera});
 
@@ -536,7 +572,6 @@ class _ManualEntryView extends StatefulWidget {
 class _ManualEntryViewState extends State<_ManualEntryView> {
   final _controller = TextEditingController();
 
-  /// Validates the entered barcode and returns it to the caller.
   void _submit() {
     final text = _controller.text.trim();
     if (text.isEmpty || text.length < 8 || !RegExp(r'^\d+$').hasMatch(text)) {
@@ -546,7 +581,7 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
     }
     logInfo('Barcode entered manually: $text');
     unawaited(HapticFeedback.mediumImpact());
-    Navigator.of(context).pop(text);
+    Navigator.of(context).pop(BarcodeResult(text));
   }
 
   @override
@@ -603,6 +638,209 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ---------- PLU entry ----------
+
+/// A widget for entering PLU (Price Look-Up) codes for produce.
+///
+/// Uses a numeric keypad optimized for 4-5 digit codes. Each digit press
+/// triggers an immediate lookup via [PluService]; when a match is found
+/// the produce name is shown and the user can confirm.
+class _PluEntryView extends StatefulWidget {
+  const _PluEntryView({
+    required this.pluService,
+    required this.onSwitchToCamera,
+  });
+
+  /// The PLU lookup service.
+  final PluService pluService;
+
+  /// Callback to switch back to the camera scanner.
+  final VoidCallback onSwitchToCamera;
+
+  @override
+  State<_PluEntryView> createState() => _PluEntryViewState();
+}
+
+class _PluEntryViewState extends State<_PluEntryView> {
+  String _code = '';
+  PluEntry? _matchedEntry;
+
+  void _onDigit(String digit) {
+    if (_code.length >= 5) return;
+    setState(() {
+      _code += digit;
+      _matchedEntry = widget.pluService.lookup(_code);
+    });
+  }
+
+  void _onDelete() {
+    if (_code.isEmpty) return;
+    setState(() {
+      _code = _code.substring(0, _code.length - 1);
+      _matchedEntry = widget.pluService.lookup(_code.isEmpty ? '' : _code);
+    });
+  }
+
+  void _onConfirm() {
+    if (_matchedEntry == null) return;
+    logInfo('PLU confirmed: ${_matchedEntry!.code} — ${_matchedEntry!.name}');
+    unawaited(HapticFeedback.mediumImpact());
+    Navigator.of(context).pop(
+      PluResult(
+        pluCode: _matchedEntry!.code,
+        produceName: _matchedEntry!.name,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.enterPluCode),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.camera_alt),
+            tooltip: l10n.cameraTooltip,
+            onPressed: widget.onSwitchToCamera,
+          ),
+        ],
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Code display
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              _code.isEmpty ? '----' : _code.padRight(5, '_'),
+              style: const TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.w300,
+                letterSpacing: 12,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Matched name
+          SizedBox(
+            height: 32,
+            child: _matchedEntry != null
+                ? Text(
+                    _matchedEntry!.name,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : _code.length >= 4
+                ? Text(
+                    l10n.pluCodeNotFound,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(height: 24),
+          // Numeric keypad
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 48),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _key('1', l10n),
+                    _key('2', l10n),
+                    _key('3', l10n),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _key('4', l10n),
+                    _key('5', l10n),
+                    _key('6', l10n),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _key('7', l10n),
+                    _key('8', l10n),
+                    _key('9', l10n),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _deleteKey(l10n),
+                    _key('0', l10n),
+                    _confirmKey(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _key(String digit, AppLocalizations l10n) {
+    return SizedBox(
+      width: 72,
+      height: 64,
+      child: ElevatedButton(
+        onPressed: () => _onDigit(digit),
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          digit,
+          style: const TextStyle(fontSize: 24),
+          semanticsLabel: '${l10n.digitLabel} $digit',
+        ),
+      ),
+    );
+  }
+
+  Widget _deleteKey(AppLocalizations l10n) {
+    return SizedBox(
+      width: 72,
+      height: 64,
+      child: IconButton(
+        onPressed: _code.isNotEmpty ? _onDelete : null,
+        icon: const Icon(Icons.backspace_outlined),
+        tooltip: l10n.deleteDigit,
+      ),
+    );
+  }
+
+  Widget _confirmKey() {
+    return SizedBox(
+      width: 72,
+      height: 64,
+      child: FilledButton(
+        onPressed: _matchedEntry != null ? _onConfirm : null,
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const Icon(Icons.check),
       ),
     );
   }
