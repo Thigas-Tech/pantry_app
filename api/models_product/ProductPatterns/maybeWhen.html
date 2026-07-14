@@ -86,6 +86,8 @@
 <li><span class="parameter" id="param-ingredientsImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">ingredientsImagePath</span>, </span></li>
 <li><span class="parameter" id="param-productImagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productImagePath</span>, </span></li>
 <li><span class="parameter" id="param-submissionStatus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">submissionStatus</span>, </span></li>
+<li><span class="parameter" id="param-pluCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">pluCode</span>, </span></li>
+<li><span class="parameter" id="param-productType"><span class="type-annotation"><a href="../../models_product_type/ProductType.html">ProductType</a></span> <span class="parameter-name">productType</span>, </span></li>
 </ol>)?, {</span></li>
 <li><span class="parameter" id="maybeWhen-param-orElse"><span>required</span> <span class="type-annotation">TResult</span> <span class="parameter-name">orElse</span>(), </span></li>
 </ol>})
@@ -110,10 +112,10 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult maybeWhen&lt;TResult extends Object?&gt;(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List&lt;String&gt;? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult maybeWhen&lt;TResult extends Object?&gt;(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List&lt;String&gt;? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus,  String? pluCode,  ProductType productType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus);case _:
+return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus,_that.pluCode,_that.productType);case _:
   return orElse();
 
 }

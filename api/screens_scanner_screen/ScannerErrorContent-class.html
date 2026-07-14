@@ -55,8 +55,6 @@
     
 <section class="desc markdown">
   <p>Displays scanner error content based on the error code.</p>
-<p>Extracted as a separate widget so it can be tested with specific error
-codes.</p>
 </section>
 
 
@@ -96,7 +94,7 @@ codes.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ScannerErrorContent.new" class="callable">
-          <span class="name"><a href="../screens_scanner_screen/ScannerErrorContent/ScannerErrorContent.html">ScannerErrorContent</a></span><span class="signature">({<span class="parameter" id="param-exception"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/mobile_scanner/7.2.0/mobile_scanner/MobileScannerException-class.html">MobileScannerException</a></span> <span class="parameter-name">exception</span>, </span><span class="parameter" id="param-onRetry"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onRetry</span>, </span><span class="parameter" id="param-onSwitchToManual"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToManual</span>, </span><span class="parameter" id="param-onOpenSettings"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onOpenSettings</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../screens_scanner_screen/ScannerErrorContent/ScannerErrorContent.html">ScannerErrorContent</a></span><span class="signature">({<span class="parameter" id="param-exception"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/mobile_scanner/7.2.0/mobile_scanner/MobileScannerException-class.html">MobileScannerException</a></span> <span class="parameter-name">exception</span>, </span><span class="parameter" id="param-onRetry"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onRetry</span>, </span><span class="parameter" id="param-onSwitchToManual"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToManual</span>, </span><span class="parameter" id="param-onSwitchToPlu"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToPlu</span>, </span><span class="parameter" id="param-onOpenSettings"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onOpenSettings</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../screens_scanner_screen/ScannerErrorContent-class.html">ScannerErrorContent</a> widget.
@@ -178,6 +176,18 @@ codes.</p>
 </dt>
 <dd>
   Called when the user switches to manual barcode entry.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="onSwitchToPlu" class="property">
+  <span class="name"><a href="../screens_scanner_screen/ScannerErrorContent/onSwitchToPlu.html">onSwitchToPlu</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span>
+  
+
+</dt>
+<dd>
+  Called when the user switches to PLU code entry.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>

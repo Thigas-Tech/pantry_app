@@ -69,6 +69,7 @@
 <li><span class="parameter" id="param-notes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">notes</span>, </span></li>
 <li><span class="parameter" id="param-dateAdded"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(name: &#39;date_added&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">dateAdded</span>, </span></li>
 <li><span class="parameter" id="param-inventoryId"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(name: &#39;inventory_id&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
+<li><span class="parameter" id="param-servingWeightG"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(name: &#39;serving_weight_g&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">servingWeightG</span>, </span></li>
 </ol>)?</span></li>
 </ol>)
 
@@ -92,10 +93,10 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult? whenOrNull&lt;TResult extends Object?&gt;(TResult? Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: &#39;expiry_date&#39;)  String? expiryDate,  String location,  String? notes, @JsonKey(name: &#39;date_added&#39;)  int? dateAdded, @JsonKey(name: &#39;inventory_id&#39;)  int inventoryId)?  $default,) {final _that = this;
+  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult? whenOrNull&lt;TResult extends Object?&gt;(TResult? Function( String barcode,  int? id,  double quantity,  String unit, @JsonKey(name: &#39;expiry_date&#39;)  String? expiryDate,  String location,  String? notes, @JsonKey(name: &#39;date_added&#39;)  int? dateAdded, @JsonKey(name: &#39;inventory_id&#39;)  int inventoryId, @JsonKey(name: &#39;serving_weight_g&#39;)  double? servingWeightG)?  $default,) {final _that = this;
 switch (_that) {
 case _InventoryItem() when $default != null:
-return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId);case _:
+return $default(_that.barcode,_that.id,_that.quantity,_that.unit,_that.expiryDate,_that.location,_that.notes,_that.dateAdded,_that.inventoryId,_that.servingWeightG);case _:
   return null;
 
 }

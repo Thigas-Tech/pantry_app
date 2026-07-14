@@ -102,6 +102,13 @@
             .cast&lt;String&gt;()
       : null,
   languageCode: (map[&#39;language_code&#39;] as String?) ?? &#39;en&#39;,
+  pluCode: map[&#39;plu_code&#39;] as String?,
+  productType: map[&#39;product_type&#39;] != null
+      ? ProductType.values.firstWhere(
+          (t) =&gt; t.name == map[&#39;product_type&#39;],
+          orElse: () =&gt; ProductType.barcoded,
+        )
+      : ProductType.barcoded,
 );</code></pre>
 </section>
 

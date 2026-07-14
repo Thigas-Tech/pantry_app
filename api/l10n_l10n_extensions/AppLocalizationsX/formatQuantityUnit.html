@@ -65,6 +65,8 @@
     
 <section class="desc markdown">
   <p>Formats a quantity with a localized unit (e.g., "5 kg").</p>
+<p>When <code>unit</code> is <code>'pieces'</code>, the display uses <a href="../../l10n_app_localizations/AppLocalizations/unitSingular.html">unitSingular</a> for
+quantity 1 and <a href="../../l10n_app_localizations/AppLocalizations/unitPlural.html">unitPlural</a> for all other quantities.</p>
 </section>
 
 
@@ -73,6 +75,10 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">String formatQuantityUnit(double? quantity, String? unit) {
   if (quantity == null || unit == null) return &#39;&#39;;
+  if (unit == &#39;pieces&#39;) {
+    final label = quantity == 1 ? unitSingular : unitPlural;
+    return &#39;${quantity.toInt()} $label&#39;;
+  }
   return &#39;${quantity.toInt()} ${localizeUnit(unit)}&#39;;
 }</code></pre>
 </section>
