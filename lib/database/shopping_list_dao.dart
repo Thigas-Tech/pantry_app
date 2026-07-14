@@ -92,22 +92,33 @@ class ShoppingListDao {
   }
 
   /// Inserts a shopping list item, merging quantities with an existing
-  /// pending item that has the same barcode and unit.
+  /// pending item that has the same barcode, unit, and inventory.
   ///
-  /// When a pending (not purchased) item with the same barcode and unit
-  /// already exists, the quantities are summed instead of creating a
-  /// duplicate row. Items with a null/empty barcode or different units
-  /// are always inserted as new rows. The operation runs inside a
-  /// SQLite transaction to prevent double-tap race conditions.
+  /// When a pending (not purchased) item with the same barcode, unit, and
+  /// [ShoppingItem.inventoryId] already exists, the quantities are summed
+  /// instead of creating a duplicate row. Items with a null/empty barcode,
+  /// null inventoryId, or different units are always inserted as new rows.
+  /// Items with a null inventoryId fall back to the old cross-inventory
+  /// merge behaviour for backward compatibility during migration.
+  /// The operation runs inside a SQLite transaction to prevent double-tap
+  /// race conditions.
   Future<int> insertOrMergeByBarcode(Database db, ShoppingItem item) async {
     logInfo('Insert/merge shopping item: ${item.name}');
     try {
       return await db.transaction<int>((txn) async {
         if (item.barcode != null && item.barcode!.isNotEmpty) {
+          final scopedFilter = item.inventoryId != null;
+          final where = scopedFilter
+              ? 'barcode = ? AND is_purchased = 0 AND unit = ?'
+                    ' AND inventory_id = ?'
+              : 'barcode = ? AND is_purchased = 0 AND unit = ?';
+          final whereArgs = scopedFilter
+              ? [item.barcode, item.unit, item.inventoryId]
+              : [item.barcode, item.unit];
           final existing = await txn.query(
             'shopping_list',
-            where: 'barcode = ? AND is_purchased = 0 AND unit = ?',
-            whereArgs: [item.barcode, item.unit],
+            where: where,
+            whereArgs: whereArgs,
             limit: 1,
           );
           if (existing.isNotEmpty) {
@@ -314,13 +325,23 @@ class ShoppingListDao {
     }
   }
 
-  /// Deletes all purchased items. Returns the number of rows deleted.
-  Future<int> clearPurchased(Database db) async {
-    logInfo('Clearing all purchased shopping items');
+  /// Deletes all purchased items, optionally scoped to an inventory.
+  ///
+  /// When [inventoryId] is non-null, only purchased items belonging to
+  /// that inventory are deleted. When `null`, all purchased items across
+  /// all inventories are cleared (backward‑compatible default).
+  /// Returns the number of rows deleted.
+  Future<int> clearPurchased(Database db, {int? inventoryId}) async {
+    logInfo('Clearing purchased shopping items');
     try {
+      final where = inventoryId != null
+          ? 'is_purchased = 1 AND inventory_id = ?'
+          : 'is_purchased = 1';
+      final whereArgs = inventoryId != null ? [inventoryId] : null;
       final affected = await db.delete(
         'shopping_list',
-        where: 'is_purchased = 1',
+        where: where,
+        whereArgs: whereArgs,
       );
       logInfo('Cleared $affected purchased items');
       return affected;
@@ -330,19 +351,32 @@ class ShoppingListDao {
     }
   }
 
-  /// Marks items matching the given [barcode] as purchased.
+  /// Marks items matching the given [barcode] as purchased, optionally
+  /// scoped to an inventory.
   ///
-  /// Used by NFC-e receipt scanning to auto-clear shopping list items
-  /// when their barcode appears on a receipt.
-  Future<int> markPurchasedByBarcode(Database db, String barcode) async {
+  /// When [inventoryId] is non-null, only pending items in that inventory
+  /// are marked. When `null`, items across all inventories are marked
+  /// (used by NFC-e receipt scanning where a receipt may span multiple
+  /// pantries).
+  Future<int> markPurchasedByBarcode(
+    Database db,
+    String barcode, {
+    int? inventoryId,
+  }) async {
     logInfo('Marking items with barcode $barcode as purchased');
     try {
       final now = DateTime.now().millisecondsSinceEpoch;
+      final where = inventoryId != null
+          ? 'barcode = ? AND is_purchased = 0 AND inventory_id = ?'
+          : 'barcode = ? AND is_purchased = 0';
+      final whereArgs = inventoryId != null
+          ? [barcode, inventoryId]
+          : [barcode];
       final affected = await db.update(
         'shopping_list',
         {'is_purchased': 1, 'date_purchased': now},
-        where: 'barcode = ? AND is_purchased = 0',
-        whereArgs: [barcode],
+        where: where,
+        whereArgs: whereArgs,
       );
       if (affected > 0) {
         logInfo('Marked $affected items as purchased via barcode $barcode');

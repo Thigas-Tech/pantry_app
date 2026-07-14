@@ -334,4 +334,141 @@ void main() {
       expect(items[0].priceCurrency, 'USD');
     });
   });
+
+  group('insertOrMergeByBarcode inventory scoping', () {
+    test('merges within same inventory', () async {
+      await dao.insertOrMergeByBarcode(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123', inventoryId: 1),
+      );
+      await dao.insertOrMergeByBarcode(
+        db,
+        const ShoppingItem(
+          name: 'Milk',
+          barcode: '123',
+          quantity: 3,
+          inventoryId: 1,
+        ),
+      );
+
+      final inv1 = await dao.listPending(db, inventoryId: 1);
+      expect(inv1.length, 1);
+      expect(inv1[0].quantity, 4.0);
+    });
+
+    test('does not merge across different inventories', () async {
+      await dao.insertOrMergeByBarcode(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123', inventoryId: 1),
+      );
+      await dao.insertOrMergeByBarcode(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123', inventoryId: 2),
+      );
+
+      final inv1 = await dao.listPending(db, inventoryId: 1);
+      final inv2 = await dao.listPending(db, inventoryId: 2);
+      expect(inv1.length, 1);
+      expect(inv2.length, 1);
+      expect(inv1[0].inventoryId, 1);
+      expect(inv2[0].inventoryId, 2);
+    });
+
+    test('with null inventoryId merges across all (backward compat)', () async {
+      await dao.insertOrMergeByBarcode(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123'),
+      );
+      await dao.insertOrMergeByBarcode(
+        db,
+        const ShoppingItem(
+          name: 'Milk',
+          barcode: '123',
+          quantity: 2,
+        ),
+      );
+
+      final all = await dao.listAll(db);
+      expect(all.length, 1);
+      expect(all[0].quantity, 3.0);
+    });
+  });
+
+  group('clearPurchased inventory scoping', () {
+    test('scoped only deletes items from the given inventory', () async {
+      await dao.insert(
+        db,
+        const ShoppingItem(name: 'Milk', inventoryId: 1),
+      );
+      final milkId = await dao.insert(
+        db,
+        const ShoppingItem(name: 'Milk', inventoryId: 2),
+      );
+      await dao.togglePurchased(db, milkId);
+
+      await dao.clearPurchased(db, inventoryId: 2);
+
+      final inv1 = await dao.listAll(db, inventoryId: 1);
+      final inv2 = await dao.listAll(db, inventoryId: 2);
+      expect(inv1.length, 1);
+      expect(inv2, isEmpty);
+    });
+
+    test('without inventoryId clears all (backward compat)', () async {
+      final id1 = await dao.insert(
+        db,
+        const ShoppingItem(name: 'Milk', inventoryId: 1),
+      );
+      final id2 = await dao.insert(
+        db,
+        const ShoppingItem(name: 'Bread', inventoryId: 2),
+      );
+      await dao.togglePurchased(db, id1);
+      await dao.togglePurchased(db, id2);
+
+      await dao.clearPurchased(db);
+
+      final all = await dao.listAll(db);
+      expect(all, isEmpty);
+    });
+  });
+
+  group('markPurchasedByBarcode inventory scoping', () {
+    test('scoped only marks items from the given inventory', () async {
+      await dao.insert(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123', inventoryId: 1),
+      );
+      await dao.insert(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123', inventoryId: 2),
+      );
+
+      await dao.markPurchasedByBarcode(db, '123', inventoryId: 1);
+
+      final pendingInv1 = await dao.listPending(db, inventoryId: 1);
+      final pendingInv2 = await dao.listPending(db, inventoryId: 2);
+      expect(pendingInv1, isEmpty);
+      expect(pendingInv2.length, 1);
+      expect(pendingInv2[0].inventoryId, 2);
+    });
+
+    test('without inventoryId marks across all (backward compat)', () async {
+      await dao.insert(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123', inventoryId: 1),
+      );
+      await dao.insert(
+        db,
+        const ShoppingItem(name: 'Milk', barcode: '123', inventoryId: 2),
+      );
+
+      await dao.markPurchasedByBarcode(db, '123');
+
+      final pendingInv1 = await dao.listPending(db, inventoryId: 1);
+      final pendingInv2 = await dao.listPending(db, inventoryId: 2);
+      expect(pendingInv1, isEmpty);
+      expect(pendingInv2, isEmpty);
+    });
+  });
 }

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/shopping_item.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/shopping_list_screen.dart';
 
 import '../helpers/pump_app.dart';
+
+class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
+  @override
+  int build() => 1;
+}
 
 void main() {
   testWidgets('renders AppBar with shopping list title', (tester) async {
@@ -91,4 +97,46 @@ void main() {
     expect(find.text('Bread'), findsOneWidget);
     expect(find.text('1 pcs'), findsOneWidget);
   });
+
+  testWidgets(
+    'shows items from the active inventory with inventoryId',
+    (tester) async {
+      await pumpApp(
+        tester,
+        const ShoppingListScreen(),
+        overrides: [
+          activeInventoryProvider.overrideWith(
+            FakeActiveInventoryNotifier.new,
+          ),
+          pendingShoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Inv1 Item', inventoryId: 1),
+            ],
+          ),
+          purchasedShoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(
+                name: 'Inv1 Purchased',
+                inventoryId: 1,
+                isPurchased: true,
+              ),
+            ],
+          ),
+          shoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Inv1 Item', inventoryId: 1),
+              const ShoppingItem(
+                name: 'Inv1 Purchased',
+                inventoryId: 1,
+                isPurchased: true,
+              ),
+            ],
+          ),
+        ],
+      );
+
+      expect(find.text('Inv1 Item'), findsOneWidget);
+      expect(find.text('Inv1 Purchased'), findsOneWidget);
+    },
+  );
 }

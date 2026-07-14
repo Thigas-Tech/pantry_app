@@ -99,10 +99,13 @@ Future<void> deleteShoppingItem(WidgetRef ref, int id) async {
   invalidateShoppingList(ref);
 }
 
-/// Deletes all purchased shopping list items.
+/// Deletes all purchased shopping list items for the active inventory.
 Future<int> clearPurchasedShoppingItems(WidgetRef ref) async {
   final db = ref.read(databaseProvider);
-  final deleted = await db.clearPurchasedShoppingItems();
+  final inventoryId = ref.read(activeInventoryProvider);
+  final deleted = await db.clearPurchasedShoppingItems(
+    inventoryId: inventoryId,
+  );
   invalidateShoppingList(ref);
   return deleted;
 }

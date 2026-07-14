@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/shopping_item.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
@@ -164,7 +165,10 @@ class _ClearPurchasedButton extends ConsumerWidget {
         );
         if (confirm != true) return;
         final db = ref.read(databaseProvider);
-        final purchasedItems = await db.getPurchasedShoppingItems();
+        final inventoryId = ref.read(activeInventoryProvider);
+        final purchasedItems = await db.getPurchasedShoppingItems(
+          inventoryId: inventoryId,
+        );
         final deleted = await clearPurchasedShoppingItems(ref);
         if (!context.mounted) return;
         if (deleted > 0) {
