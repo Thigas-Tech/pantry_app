@@ -351,4 +351,147 @@ class PriceDao {
     }
     return deleted;
   }
+
+  /// Returns monthly expenditure grouped by ISO year-month for products
+  /// in the given [inventoryId].
+  ///
+  /// Uses the latest price per product barcode, then groups by month of the
+  /// purchase date. Returns raw rows `{month, total}` in base currency.
+  Future<List<Map<String, dynamic>>> monthlyExpenditure(
+    Database db, {
+    required int inventoryId,
+  }) async {
+    try {
+      final result = await db.rawQuery(
+        '''
+        WITH inventory_barcodes AS (
+          SELECT DISTINCT barcode FROM inventory
+          WHERE inventory_id = ?
+        ),
+        latest_prices AS (
+          SELECT p.barcode, p.price, p.date_purchased,
+            ROW_NUMBER() OVER (
+              PARTITION BY p.barcode ORDER BY p.date_purchased DESC
+            ) AS rn
+          FROM prices p
+          INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
+        )
+        SELECT
+          strftime('%Y-%m', date_purchased / 1000, 'unixepoch') AS month,
+          SUM(price) AS total
+        FROM latest_prices
+        WHERE rn = 1
+        GROUP BY month
+        ORDER BY month ASC
+      ''',
+        [inventoryId],
+      );
+      logInfo(
+        'Fetched monthly expenditure: ${result.length} months',
+      );
+      return result;
+    } on Exception catch (e) {
+      logError('Error fetching monthly expenditure: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns spending grouped by store for products in the given
+  /// [inventoryId].
+  ///
+  /// Uses the latest price per product barcode, then groups by store.
+  /// Returns raw rows `{store, total, item_count}`.
+  Future<List<Map<String, dynamic>>> storeSpending(
+    Database db, {
+    required int inventoryId,
+  }) async {
+    try {
+      final result = await db.rawQuery(
+        '''
+        WITH inventory_barcodes AS (
+          SELECT DISTINCT barcode FROM inventory
+          WHERE inventory_id = ?
+        ),
+        latest_prices AS (
+          SELECT p.barcode, p.price, p.store,
+            ROW_NUMBER() OVER (
+              PARTITION BY p.barcode ORDER BY p.date_purchased DESC
+            ) AS rn
+          FROM prices p
+          INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
+          WHERE p.store IS NOT NULL AND p.store != ''
+        )
+        SELECT
+          store,
+          SUM(price) AS total,
+          COUNT(*) AS item_count
+        FROM latest_prices
+        WHERE rn = 1
+        GROUP BY store
+        ORDER BY total DESC
+      ''',
+        [inventoryId],
+      );
+      logInfo('Fetched store spending: ${result.length} stores');
+      return result;
+    } on Exception catch (e) {
+      logError('Error fetching store spending: $e');
+      rethrow;
+    }
+  }
+
+  /// Returns the average Nutri-Score per store for products in the
+  /// given [inventoryId].
+  ///
+  /// Joins the prices and products tables on barcode, maps Nutri-Score grades
+  /// (a-e) to numeric values (5-1), and averages per store.
+  /// Stores with no priced products or null grades are excluded.
+  /// Returns raw rows `{store, avg_score}`.
+  Future<List<Map<String, dynamic>>> nutriscoreByStore(
+    Database db, {
+    required int inventoryId,
+  }) async {
+    try {
+      final result = await db.rawQuery(
+        '''
+        WITH inventory_barcodes AS (
+          SELECT DISTINCT barcode FROM inventory
+          WHERE inventory_id = ?
+        ),
+        latest_prices AS (
+          SELECT p.barcode, p.store,
+            ROW_NUMBER() OVER (
+              PARTITION BY p.barcode ORDER BY p.date_purchased DESC
+            ) AS rn
+          FROM prices p
+          INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
+          WHERE p.store IS NOT NULL AND p.store != ''
+        )
+        SELECT
+          lp.store,
+          AVG(
+            CASE pr.nutriscore_grade
+              WHEN 'a' THEN 5
+              WHEN 'b' THEN 4
+              WHEN 'c' THEN 3
+              WHEN 'd' THEN 2
+              WHEN 'e' THEN 1
+              ELSE NULL
+            END
+          ) AS avg_score
+        FROM latest_prices lp
+        INNER JOIN products pr ON lp.barcode = pr.barcode
+        WHERE lp.rn = 1 AND pr.nutriscore_grade IS NOT NULL
+        GROUP BY lp.store
+        ORDER BY avg_score DESC
+      ''',
+        [inventoryId],
+      );
+      logInfo('Fetched Nutri-Score by store: ${result.length} stores');
+      return result;
+    } on Exception catch (e) {
+      logError('Error fetching Nutri-Score by store: $e');
+      rethrow;
+    }
+  }
 }

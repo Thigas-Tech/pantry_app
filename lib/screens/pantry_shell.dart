@@ -205,16 +205,21 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     ref.listen(connectivityProvider, _onConnectivityChanged);
 
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) => setState(() => _selectedIndex = index),
-        children: const [
-          HomeScreen(),
-          SearchScreen(),
-          StatsScreen(),
-          ShoppingListScreen(),
-          SettingsScreen(),
-        ],
+      body: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) => setState(() => _selectedIndex = index),
+          children: const [
+            HomeScreen(),
+            SearchScreen(),
+            StatsScreen(),
+            ShoppingListScreen(),
+            SettingsScreen(),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,

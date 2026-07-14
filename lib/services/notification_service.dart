@@ -193,14 +193,19 @@ class NotificationService {
 
   /// Schedules two local notifications for [item].
   ///
+  /// [productName] is displayed in the notification body. When `null` or
+  /// empty, falls back to the item barcode so the user can still identify
+  /// the expiring product.
+  ///
   /// Skips scheduling if notifications are disabled or if the item
   /// has no expiry date or the expiry date is in the past.
   Future<void> scheduleExpiryReminders(
     InventoryItem item, {
     required String expiringSoonTitle,
     required String expiringTodayTitle,
-    required String Function(String barcode) buildExpiringSoonBody,
-    required String Function(String barcode) buildExpiringTodayBody,
+    required String Function(String name) buildExpiringSoonBody,
+    required String Function(String name) buildExpiringTodayBody,
+    String? productName,
     String channelName = 'Expiry reminders',
     String channelDescription = 'Warns about expiring food',
     bool notificationsEnabled = true,
@@ -235,6 +240,10 @@ class NotificationService {
     final itemId = item.id!;
     final now = tz.TZDateTime.now(tz.local);
 
+    final displayName = (productName != null && productName.isNotEmpty)
+        ? productName
+        : item.barcode;
+
     final notificationDetails = NotificationDetails(
       android: AndroidNotificationDetails(
         'expiry_channel',
@@ -255,7 +264,7 @@ class NotificationService {
         await _plugin.zonedSchedule(
           id: itemId * 2,
           title: expiringSoonTitle,
-          body: buildExpiringSoonBody(item.barcode),
+          body: buildExpiringSoonBody(displayName),
           scheduledDate: expiringSoonDate,
           notificationDetails: notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -283,7 +292,7 @@ class NotificationService {
         await _plugin.zonedSchedule(
           id: itemId * 2 + 1,
           title: expiringTodayTitle,
-          body: buildExpiringTodayBody(item.barcode),
+          body: buildExpiringTodayBody(displayName),
           scheduledDate: expiringTodayDate,
           notificationDetails: notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -500,14 +509,19 @@ class NotificationService {
   /// new ones for items with future expiry dates. This recovers from
   /// device reboots, app updates, and timezone changes.
   ///
+  /// [barcodeToName] is an optional map from barcode to human-readable
+  /// product name used in notification bodies. When a barcode is not in
+  /// the map the raw barcode is displayed as a fallback.
+  ///
   /// Guards against concurrent calls with an internal lock.
   /// Best-effort — individual scheduling failures are caught and logged.
   Future<void> rescheduleAllItems(
     List<InventoryItem> items, {
     required String expiringSoonTitle,
     required String expiringTodayTitle,
-    required String Function(String barcode) buildExpiringSoonBody,
-    required String Function(String barcode) buildExpiringTodayBody,
+    required String Function(String name) buildExpiringSoonBody,
+    required String Function(String name) buildExpiringTodayBody,
+    Map<String, String>? barcodeToName,
     bool notificationsEnabled = true,
   }) async {
     if (!notificationsEnabled) {
@@ -529,6 +543,7 @@ class NotificationService {
       for (final item in items) {
         await scheduleExpiryReminders(
           item,
+          productName: barcodeToName?[item.barcode],
           expiringSoonTitle: expiringSoonTitle,
           expiringTodayTitle: expiringTodayTitle,
           buildExpiringSoonBody: buildExpiringSoonBody,

@@ -344,4 +344,87 @@ void main() {
       expect(find.text('Save'), findsOneWidget);
     });
   });
+
+  group('system nav bar padding', () {
+    testWidgets('outer Padding wraps Form with dynamic bottom', (tester) async {
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => PriceEntrySheet.show(context, barcode: '123'),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: priceSheetOverrides(),
+      );
+
+      await openSheet(tester);
+
+      final formWidget = find.byType(Form);
+      final padWidget = tester.widget<Padding>(
+        find.ancestor(of: formWidget, matching: find.byType(Padding)).first,
+      );
+      final insets = padWidget.padding as EdgeInsets;
+      expect(insets.bottom, greaterThanOrEqualTo(16));
+      expect(insets.left, 16);
+      expect(insets.right, 16);
+      expect(insets.top, 16);
+    });
+  });
+
+  group('PriceCalculatorFormatter widget integration', () {
+    testWidgets('typing 5,0,0 produces 5.00 in add mode', (tester) async {
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => PriceEntrySheet.show(context, barcode: '123'),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: priceSheetOverrides(),
+      );
+
+      await openSheet(tester);
+
+      final field = find.byType(TextField).first;
+      await tester.enterText(field, '500');
+      await tester.pumpAndSettle();
+
+      final controller = tester.widget<TextField>(field).controller;
+      expect(controller?.text, '5.00');
+    });
+
+    testWidgets('typing 5,0,0 produces 5.00 in edit mode', (tester) async {
+      final price = Price(
+        barcode: '123',
+        price: 5.99,
+        dateAdded: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => PriceEntrySheet.show(
+              context,
+              barcode: '123',
+              existingPrice: price,
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: priceSheetOverrides(),
+      );
+
+      await openSheet(tester);
+
+      final field = find.byType(TextField).first;
+      await tester.enterText(field, '500');
+      await tester.pumpAndSettle();
+
+      final controller = tester.widget<TextField>(field).controller;
+      expect(controller?.text, '5.00');
+    });
+  });
 }

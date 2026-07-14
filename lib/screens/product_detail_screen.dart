@@ -494,6 +494,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               );
               await notificationService.scheduleExpiryReminders(
                 item,
+                productName: widget.product.name,
                 expiringSoonTitle: l10n.expiringSoon,
                 buildExpiringSoonBody: l10n.expiresTomorrow,
                 expiringTodayTitle: l10n.expiringToday,
@@ -738,6 +739,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         }
         await notificationService.scheduleExpiryReminders(
           result,
+          productName: widget.product.name,
           expiringSoonTitle: l10n.expiringSoon,
           buildExpiringSoonBody: l10n.expiresTomorrow,
           expiringTodayTitle: l10n.expiringToday,
@@ -772,6 +774,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       await repo.updateInventoryItem(updated);
       await notificationService.scheduleExpiryReminders(
         updated,
+        productName: widget.product.name,
         expiringSoonTitle: l10n.expiringSoon,
         buildExpiringSoonBody: l10n.expiresTomorrow,
         expiringTodayTitle: l10n.expiringToday,
@@ -831,6 +834,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               final restoredItem = item.copyWith(id: restoredId);
               await notificationService.scheduleExpiryReminders(
                 restoredItem,
+                productName: widget.product.name,
                 expiringSoonTitle: l10n.expiringSoon,
                 buildExpiringSoonBody: l10n.expiresTomorrow,
                 expiringTodayTitle: l10n.expiringToday,

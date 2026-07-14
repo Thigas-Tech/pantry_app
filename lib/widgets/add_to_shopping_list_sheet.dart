@@ -8,6 +8,8 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 
 /// A bottom sheet for adding items to the shopping list.
@@ -85,6 +87,7 @@ class _AddToShoppingListSheetState
     }
     _requestId++;
     final locale = Localizations.localeOf(context).languageCode;
+    logInfo('Search queued — query="$query" locale=$locale');
     _debounce = Timer(
       const Duration(milliseconds: 500),
       () => _search(query, locale),
@@ -101,10 +104,16 @@ class _AddToShoppingListSheetState
     try {
       final db = ref.read(databaseProvider);
       final local = await db.searchProducts(normalizedQuery);
-      if (capturedRequestId != _requestId || !mounted) return;
+      if (capturedRequestId != _requestId || !mounted) {
+        logInfo('Search stale — request $capturedRequestId superseded');
+        return;
+      }
       setState(() => _localResults = local);
+      logInfo('Local search — query="$query" results=${local.length}');
+
       final hasConnection = await ref.read(hasConnectionProvider.future);
       if (!hasConnection) {
+        logWarning('Offline — skipping API search for "$query"');
         if (mounted) {
           setState(() => _isSearching = false);
         }
@@ -120,16 +129,22 @@ class _AddToShoppingListSheetState
         if (capturedRequestId != _requestId || !mounted) return;
 
         final existingBarcodes = _localResults.map((p) => p.barcode).toSet();
+        final deduped = apiProducts
+            .where((p) => !existingBarcodes.contains(p.barcode))
+            .toList();
         setState(() {
-          _apiResults = apiProducts
-              .where((p) => !existingBarcodes.contains(p.barcode))
-              .toList();
+          _apiResults = deduped;
           _isSearching = false;
         });
+        logInfo(
+          'API search — query="$query" results=${apiProducts.length} '
+          'dedup=${deduped.length}',
+        );
       } else {
         setState(() => _isSearching = false);
       }
-    } on Exception {
+    } on Exception catch (e) {
+      logError('Search failed — query="$query" error=$e');
       if (!mounted) return;
       setState(() => _isSearching = false);
     }
@@ -142,14 +157,35 @@ class _AddToShoppingListSheetState
     );
   }
 
+  ShoppingItem _inventoryEntryToItem(
+    Map<String, dynamic> entry,
+  ) {
+    final name = entry['name'] as String? ?? entry['barcode'] as String;
+    return ShoppingItem(
+      name: name,
+      barcode: entry['barcode'] as String,
+    );
+  }
+
   void _addFromProduct(Product product) {
+    logInfo(
+      'Add from product — barcode=${product.barcode} name=${product.name}',
+    );
     Navigator.of(context).pop(_productToItem(product));
+  }
+
+  void _addFromInventory(Map<String, dynamic> entry) {
+    logInfo(
+      'Add from inventory — barcode=${entry['barcode']} name=${entry['name']}',
+    );
+    Navigator.of(context).pop(_inventoryEntryToItem(entry));
   }
 
   void _addCustomItem() {
     if (!_formKey.currentState!.validate()) return;
     final name = _nameController.text.trim();
     final qty = double.tryParse(_quantityController.text.trim()) ?? 1;
+    logInfo('Add custom item — name="$name" qty=$qty');
     final item = ShoppingItem(name: name, quantity: qty);
     Navigator.of(context).pop(item);
   }
@@ -157,7 +193,6 @@ class _AddToShoppingListSheetState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final theme = Theme.of(context);
 
     return DraggableScrollableSheet(
@@ -167,91 +202,170 @@ class _AddToShoppingListSheetState
       expand: false,
       builder: (ctx, scrollController) {
         if (_showCustomForm) {
-          return _buildCustomForm(l10n, bottomInset, scrollController);
+          return _buildCustomForm(l10n, scrollController);
         }
-        return _buildSearch(l10n, bottomInset, theme, scrollController);
+        return _buildSearch(l10n, theme, scrollController);
       },
     );
   }
 
   Widget _buildSearch(
     AppLocalizations l10n,
-    double bottomInset,
     ThemeData theme,
     ScrollController scrollController,
   ) {
     final allResults = [..._localResults, ..._apiResults];
+    final inventoryProducts = ref.watch(inventoryProductsProvider);
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottomInset),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: SearchBar(
-              controller: _searchController,
-              hintText: l10n.productSearchHint,
-              leading: const Padding(
-                padding: EdgeInsets.only(left: 12),
-                child: Icon(Icons.search),
-              ),
-              trailing: [
-                if (_searchController.text.isNotEmpty)
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _debounce?.cancel();
-                      _searchController.clear();
-                      setState(() {
-                        _localResults = [];
-                        _apiResults = [];
-                        _isSearching = false;
-                      });
-                    },
-                  ),
-              ],
-              onChanged: _onSearchChanged,
-              textInputAction: TextInputAction.search,
-              autoFocus: true,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: SearchBar(
+            controller: _searchController,
+            hintText: l10n.productSearchHint,
+            leading: const Padding(
+              padding: EdgeInsets.only(left: 12),
+              child: Icon(Icons.search),
             ),
+            trailing: [
+              if (_searchController.text.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _debounce?.cancel();
+                    _searchController.clear();
+                    setState(() {
+                      _localResults = [];
+                      _apiResults = [];
+                      _isSearching = false;
+                    });
+                  },
+                ),
+            ],
+            onChanged: _onSearchChanged,
+            textInputAction: TextInputAction.search,
+            autoFocus: true,
           ),
-          Expanded(
-            child: _isSearching
-                ? const Center(child: CircularProgressIndicator())
-                : _searchController.text.trim().isEmpty
-                ? _buildEmptyState(l10n, theme)
-                : allResults.isEmpty
-                ? _buildNoResults(l10n, theme)
-                : ListView.builder(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemCount: allResults.length,
-                    itemBuilder: (ctx, index) {
-                      final product = allResults[index];
-                      final isApi = index >= _localResults.length;
-                      return _ProductResultTile(
-                        product: product,
-                        isApi: isApi,
-                        onTap: () => _addFromProduct(product),
-                      );
-                    },
-                  ),
+        ),
+        Expanded(
+          child: _isSearching
+              ? const Center(child: CircularProgressIndicator())
+              : _searchController.text.trim().isEmpty
+              ? _buildInitialState(l10n, theme, inventoryProducts)
+              : allResults.isEmpty
+              ? _buildNoResults(l10n, theme)
+              : ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: allResults.length,
+                  itemBuilder: (ctx, index) {
+                    final product = allResults[index];
+                    final isApi = index >= _localResults.length;
+                    return _ProductResultTile(
+                      product: product,
+                      isApi: isApi,
+                      onTap: () => _addFromProduct(product),
+                    );
+                  },
+                ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            16 +
+                MediaQuery.of(context).padding.bottom +
+                MediaQuery.of(context).viewInsets.bottom,
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: OutlinedButton.icon(
-              onPressed: () => setState(() => _showCustomForm = true),
-              icon: const Icon(Icons.edit_note, size: 20),
-              label: Text(l10n.addCustomItem),
-            ),
+          child: OutlinedButton.icon(
+            onPressed: () => setState(() => _showCustomForm = true),
+            icon: const Icon(Icons.edit_note, size: 20),
+            label: Text(l10n.addCustomItem),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _buildEmptyState(AppLocalizations l10n, ThemeData theme) {
+  Widget _buildInitialState(
+    AppLocalizations l10n,
+    ThemeData theme,
+    AsyncValue<List<Map<String, dynamic>>> inventoryProducts,
+  ) {
+    return inventoryProducts.when(
+      data: (products) {
+        if (products.isEmpty) {
+          logInfo('Inventory products empty — showing search hint');
+          return _buildEmptyHint(l10n, theme);
+        }
+        logInfo('Inventory products loaded — count=${products.length}');
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.kitchen_outlined,
+                    size: 18,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.fromYourPantry,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: products.length,
+                itemBuilder: (ctx, index) {
+                  final entry = products[index];
+                  final name =
+                      entry['name'] as String? ?? entry['barcode'] as String;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: theme.colorScheme.tertiaryContainer,
+                      child: Icon(
+                        Icons.kitchen_outlined,
+                        size: 20,
+                        color: theme.colorScheme.onTertiaryContainer,
+                      ),
+                    ),
+                    title: Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(l10n.inYourPantry),
+                    onTap: () => _addFromInventory(entry),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => _buildEmptyHint(l10n, theme),
+      error: (e, _) {
+        logError('Failed to load inventory products: $e');
+        return _buildEmptyHint(l10n, theme);
+      },
+    );
+  }
+
+  Widget _buildEmptyHint(AppLocalizations l10n, ThemeData theme) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -301,11 +415,12 @@ class _AddToShoppingListSheetState
 
   Widget _buildCustomForm(
     AppLocalizations l10n,
-    double bottomInset,
     ScrollController scrollController,
   ) {
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + keyboardHeight),
       child: Form(
         key: _formKey,
         child: ListView(

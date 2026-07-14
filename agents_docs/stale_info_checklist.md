@@ -89,3 +89,4 @@ These patterns reappear frequently. Search for them when auditing:
 - **Wrong artifact retention**: 7 days vs 90 days
 - **Deploy workflow described as active**: Tag trigger may be commented out
 - **ARCHITECTURE.md referenced as flat file**: Was restructured to `ARCHITECTURE/INDEX.md` directory. Search for bare `ARCHITECTURE.md` references across all `.md` files
+- **Bottom sheet without system nav bar padding**: Search for `showModalBottomSheet` in `lib/widgets/` and verify each one has `MediaQuery.of(context).padding.bottom` or equivalent. See `agents_docs/bottom_sheet_safe_area.md` for the pattern.

@@ -45,6 +45,9 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     ),
     db.inventoryDao.weeklyAdditions(database, inventoryId: activeId),
     db.productDao.productsWithCategories(database),
+    db.priceDao.monthlyExpenditure(database, inventoryId: activeId),
+    db.priceDao.storeSpending(database, inventoryId: activeId),
+    db.priceDao.nutriscoreByStore(database, inventoryId: activeId),
   ]);
 
   final prodCount = results[0] as int;
@@ -57,6 +60,9 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
   final expiryDist = results[8] as Map<String, int>;
   final weekly = results[9] as List<Map<String, dynamic>>;
   final productCategories = results[10] as List<Map<String, dynamic>>;
+  final monthlyRows = results[11] as List<Map<String, dynamic>>;
+  final storeRows = results[12] as List<Map<String, dynamic>>;
+  final nutriscoreByStoreRows = results[13] as List<Map<String, dynamic>>;
 
   // Compute parent categories from hierarchy data.
   final parentCounts = <String, int>{};
@@ -140,6 +146,31 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
       withIngredients: offPhoto['ingredients'] ?? 0,
       withProduct: offPhoto['product'] ?? 0,
     ),
+    monthlySpending: monthlyRows
+        .map(
+          (r) => MonthlySpending(
+            month: r['month'] as String,
+            total: (r['total'] as num?)?.toDouble() ?? 0,
+          ),
+        )
+        .toList(),
+    storeSpending: storeRows
+        .map(
+          (r) => StoreSpending(
+            store: r['store'] as String,
+            total: (r['total'] as num?)?.toDouble() ?? 0,
+            itemCount: r['item_count'] as int? ?? 0,
+          ),
+        )
+        .toList(),
+    nutriscoreByStore: nutriscoreByStoreRows
+        .map(
+          (r) => StoreNutriscore(
+            store: r['store'] as String,
+            averageScore: (r['avg_score'] as num?)?.toDouble() ?? 0,
+          ),
+        )
+        .toList(),
   );
 });
 

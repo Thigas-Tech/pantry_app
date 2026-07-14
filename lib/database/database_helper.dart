@@ -681,6 +681,20 @@ class DatabaseHelper {
     return inventoryDao.listByBarcode(db, barcode, inventoryId: inventoryId);
   }
 
+  /// Returns distinct product barcodes and names from the active inventory,
+  /// limited to the most recent [limit] entries.
+  Future<List<Map<String, dynamic>>> getDistinctProductsFromInventory({
+    required int inventoryId,
+    int limit = 20,
+  }) async {
+    final db = await database;
+    return inventoryDao.distinctProductsFromInventory(
+      db,
+      inventoryId: inventoryId,
+      limit: limit,
+    );
+  }
+
   /// Updates an existing inventory item.
   Future<int> updateInventoryItem(InventoryItem item) async {
     final db = await database;

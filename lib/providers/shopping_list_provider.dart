@@ -6,6 +6,7 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/services/photo_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// Provides a singleton [ShoppingListDao] instance.
 final shoppingListDaoProvider = Provider<ShoppingListDao>((ref) {
@@ -79,13 +80,24 @@ Future<void> addShoppingItem(WidgetRef ref, ShoppingItem item) async {
   final scopedItem = item.inventoryId == null
       ? item.copyWith(inventoryId: activeInventoryId)
       : item;
-  await db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
-  invalidateShoppingList(ref);
+  logInfo(
+    'Add shopping item — barcode=${scopedItem.barcode ?? 'none'} '
+    'name="${scopedItem.name}" qty=${scopedItem.quantity} '
+    'inventoryId=${scopedItem.inventoryId}',
+  );
+  try {
+    await db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
+    invalidateShoppingList(ref);
+  } on Exception catch (e) {
+    logError('Failed to add shopping item: $e');
+    rethrow;
+  }
 }
 
 /// Toggles the purchased state for the item with the given [id].
 Future<void> toggleShoppingItem(WidgetRef ref, int id) async {
   final db = ref.read(databaseProvider);
+  logInfo('Toggle shopping item — id=$id');
   await db.toggleShoppingItemPurchased(id);
   invalidateShoppingList(ref);
 }
@@ -94,9 +106,15 @@ Future<void> toggleShoppingItem(WidgetRef ref, int id) async {
 Future<void> deleteShoppingItem(WidgetRef ref, int id) async {
   final db = ref.read(databaseProvider);
   final photoService = ref.read(photoServiceProvider);
-  await photoService.deletePhotoForItem(id);
-  await db.deleteShoppingItem(id);
-  invalidateShoppingList(ref);
+  logInfo('Delete shopping item — id=$id');
+  try {
+    await photoService.deletePhotoForItem(id);
+    await db.deleteShoppingItem(id);
+    invalidateShoppingList(ref);
+  } on Exception catch (e) {
+    logError('Failed to delete shopping item id=$id: $e');
+    rethrow;
+  }
 }
 
 /// Deletes all purchased shopping list items for the active inventory.
@@ -106,6 +124,7 @@ Future<int> clearPurchasedShoppingItems(WidgetRef ref) async {
   final deleted = await db.clearPurchasedShoppingItems(
     inventoryId: inventoryId,
   );
+  logInfo('Cleared purchased shopping items — count=$deleted');
   invalidateShoppingList(ref);
   return deleted;
 }
@@ -172,9 +191,17 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
     inventoryId: inventoryId,
   );
 
+  logInfo(
+    'Move purchased to inventory — total=${allPurchased.length} '
+    'inventoryId=$inventoryId',
+  );
+
   await database.transaction((txn) async {
     for (final item in allPurchased) {
       if (item.barcode == null || item.barcode!.isEmpty) {
+        logWarning(
+          'Skipped item id=${item.id} — no barcode',
+        );
         skippedCount++;
         continue;
       }
@@ -186,6 +213,10 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
         limit: 1,
       );
       if (existingProduct.isEmpty) {
+        logWarning(
+          'Skipped item id=${item.id} barcode=${item.barcode} — '
+          'product not in cache',
+        );
         skippedCount++;
         continue;
       }
@@ -205,6 +236,10 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
           where: 'id = ?',
           whereArgs: [existingInv.first['id']],
         );
+        logInfo(
+          'Merged inventory — barcode=${item.barcode} '
+          'qty=${existingQty + item.quantity}',
+        );
       } else {
         await txn.insert('inventory', {
           'barcode': item.barcode,
@@ -214,6 +249,10 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
           'inventory_id': inventoryId,
           'date_added': DateTime.now().millisecondsSinceEpoch,
         });
+        logInfo(
+          'Created inventory item — barcode=${item.barcode} '
+          'qty=${item.quantity}',
+        );
       }
 
       if (item.priceAmount != null) {
@@ -227,6 +266,10 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
           'sync_status': 'local_only',
           'is_discounted': 0,
         });
+        logInfo(
+          'Saved price — barcode=${item.barcode} '
+          'amount=${item.priceAmount} ${item.priceCurrency}',
+        );
       }
 
       await txn.delete(
@@ -239,9 +282,24 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
     }
   });
 
+  logInfo(
+    'Move completed — moved=$movedCount skipped=$skippedCount',
+  );
+
   invalidateShoppingList(ref);
   return MoveToInventoryResult(
     movedCount: movedCount,
     skippedCount: skippedCount,
   );
 }
+
+/// Provides distinct product barcodes and names from the active inventory
+/// for the "From your pantry" suggestions in the add-to-shopping-list sheet.
+// ignore: specify_nonobvious_property_types
+final inventoryProductsProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
+      final db = ref.watch(databaseProvider);
+      final inventoryId = ref.watch(activeInventoryProvider);
+      logInfo('Fetching distinct products from inventory $inventoryId');
+      return db.getDistinctProductsFromInventory(inventoryId: inventoryId);
+    });
