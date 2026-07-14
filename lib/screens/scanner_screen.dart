@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/produce_quick_add_item.dart';
 import 'package:pantry_app/services/plu_service.dart';
+import 'package:pantry_app/services/produce_icon_service.dart';
+import 'package:pantry_app/services/produce_purchase_tracker.dart';
+import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/quick_add_produce.dart';
 import 'package:pantry_app/widgets/scanner_overlay_painter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -37,8 +42,64 @@ class ScannerScreen extends StatefulWidget {
 class _ScannerScreenState extends State<ScannerScreen> {
   bool _showManualEntry = false;
   bool _showPluEntry = false;
+  List<ProduceQuickAddItem> _quickAddItems = [];
+  bool _quickAddLoading = false;
 
   PluService get _pluService => widget.pluService ?? const PluService();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_loadQuickAddItems());
+    });
+  }
+
+  Future<void> _loadQuickAddItems() async {
+    if (_quickAddLoading) return;
+    setState(() => _quickAddLoading = true);
+    try {
+      // Scanner shows only default produce list for quick adding.
+      // Full personalization + seasonal is on the HomeScreen.
+      final items = ProducePurchaseTracker.getDefaultList().map((name) {
+        return ProduceQuickAddItem(
+          name: name.toLowerCase(),
+          displayName: name,
+          icon: ProduceIconService.forName(name),
+          weightHintG: ProduceServingPresets.forName(name)?['Medium'],
+          source: ProduceItemSource.fallback,
+        );
+      }).toList();
+      if (mounted) {
+        setState(() {
+          _quickAddItems = items;
+          _quickAddLoading = false;
+        });
+      }
+    } on Exception catch (e) {
+      logWarning('Failed to load scanner quick-add: $e');
+      if (mounted) setState(() => _quickAddLoading = false);
+    }
+  }
+
+  Widget _buildQuickAddCarousel() {
+    final l10n = AppLocalizations.of(context)!;
+    if (_quickAddLoading) {
+      return const SizedBox(height: 48, child: SizedBox.shrink());
+    }
+    return QuickAddProduce(
+      items: _quickAddItems,
+      onProduceSelected: (_) {
+        // Quick-add on the scanner screen does nothing — items are
+        // added from the HomeScreen carousel. The scanner's carousel
+        // serves as a visual reference and can be added later.
+        return;
+      },
+      sectionTitle: l10n.quickAddProduceTitle,
+      infoTooltip: l10n.quickAddProduceTooltip,
+      emptyMessage: l10n.quickAddProduceEmpty,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +129,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
           Navigator.of(context).pop();
         }
       },
-      child: _buildCurrentMode(),
+      child: Column(
+        children: [
+          Expanded(child: _buildCurrentMode()),
+          _buildQuickAddCarousel(),
+        ],
+      ),
     );
   }
 
