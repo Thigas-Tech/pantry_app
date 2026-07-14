@@ -62,7 +62,7 @@ database operations use the same connection.</p>
 constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
 or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
-<p>Eight tables are created on first launch (version 19):</p>
+<p>Eight tables are created on first launch (version 20):</p>
 <ul>
 <li><code>products</code> – product data fetched from Open Food Facts.</li>
 <li><code>inventories</code> – named pantries (e.g. "Home", "Work").</li>
@@ -293,14 +293,15 @@ used for local storage.</li>
 </dd>
 
         <dt id="clearPurchasedShoppingItems" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/clearPurchasedShoppingItems.html">clearPurchasedShoppingItems</a></span><span class="signature">(<wbr>)
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/clearPurchasedShoppingItems.html">clearPurchasedShoppingItems</a></span><span class="signature">(<wbr>{<span class="parameter" id="clearPurchasedShoppingItems-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Deletes all purchased shopping list items.
+  Deletes all purchased shopping list items, optionally scoped to an
+inventory.
   
 
 </dd>
@@ -820,14 +821,15 @@ that has the same barcode and inventoryId.
 </dd>
 
         <dt id="markShoppingItemsByBarcode" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/markShoppingItemsByBarcode.html">markShoppingItemsByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="markShoppingItemsByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/markShoppingItemsByBarcode.html">markShoppingItemsByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="markShoppingItemsByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="markShoppingItemsByBarcode-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Marks items matching the given <code>barcode</code> as purchased.
+  Marks items matching the given <code>barcode</code> as purchased, optionally
+scoped to an inventory.
   
 
 </dd>

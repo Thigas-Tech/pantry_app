@@ -65,12 +65,15 @@
     
 <section class="desc markdown">
   <p>Inserts a shopping list item, merging quantities with an existing
-pending item that has the same barcode and unit.</p>
-<p>When a pending (not purchased) item with the same barcode and unit
-already exists, the quantities are summed instead of creating a
-duplicate row. Items with a null/empty barcode or different units
-are always inserted as new rows. The operation runs inside a
-SQLite transaction to prevent double-tap race conditions.</p>
+pending item that has the same barcode, unit, and inventory.</p>
+<p>When a pending (not purchased) item with the same barcode, unit, and
+<code>ShoppingItem.inventoryId</code> already exists, the quantities are summed
+instead of creating a duplicate row. Items with a null/empty barcode,
+null inventoryId, or different units are always inserted as new rows.
+Items with a null inventoryId fall back to the old cross-inventory
+merge behaviour for backward compatibility during migration.
+The operation runs inside a SQLite transaction to prevent double-tap
+race conditions.</p>
 </section>
 
 
@@ -82,10 +85,18 @@ SQLite transaction to prevent double-tap race conditions.</p>
   try {
     return await db.transaction&lt;int&gt;((txn) async {
       if (item.barcode != null &amp;&amp; item.barcode!.isNotEmpty) {
+        final scopedFilter = item.inventoryId != null;
+        final where = scopedFilter
+            ? &#39;barcode = ? AND is_purchased = 0 AND unit = ?&#39;
+                  &#39; AND inventory_id = ?&#39;
+            : &#39;barcode = ? AND is_purchased = 0 AND unit = ?&#39;;
+        final whereArgs = scopedFilter
+            ? [item.barcode, item.unit, item.inventoryId]
+            : [item.barcode, item.unit];
         final existing = await txn.query(
           &#39;shopping_list&#39;,
-          where: &#39;barcode = ? AND is_purchased = 0 AND unit = ?&#39;,
-          whereArgs: [item.barcode, item.unit],
+          where: where,
+          whereArgs: whereArgs,
           limit: 1,
         );
         if (existing.isNotEmpty) {

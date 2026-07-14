@@ -55,33 +55,47 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-<span class="name ">markPurchasedByBarcode</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="markPurchasedByBarcode-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
-<li><span class="parameter" id="markPurchasedByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
-</ol>)
+<span class="name ">markPurchasedByBarcode</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="markPurchasedByBarcode-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
+<li><span class="parameter" id="markPurchasedByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
+<li><span class="parameter" id="markPurchasedByBarcode-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Marks items matching the given <code>barcode</code> as purchased.</p>
-<p>Used by NFC-e receipt scanning to auto-clear shopping list items
-when their barcode appears on a receipt.</p>
+  <p>Marks items matching the given <code>barcode</code> as purchased, optionally
+scoped to an inventory.</p>
+<p>When <code>inventoryId</code> is non-null, only pending items in that inventory
+are marked. When <code>null</code>, items across all inventories are marked
+(used by NFC-e receipt scanning where a receipt may span multiple
+pantries).</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; markPurchasedByBarcode(Database db, String barcode) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; markPurchasedByBarcode(
+  Database db,
+  String barcode, {
+  int? inventoryId,
+}) async {
   logInfo(&#39;Marking items with barcode $barcode as purchased&#39;);
   try {
     final now = DateTime.now().millisecondsSinceEpoch;
+    final where = inventoryId != null
+        ? &#39;barcode = ? AND is_purchased = 0 AND inventory_id = ?&#39;
+        : &#39;barcode = ? AND is_purchased = 0&#39;;
+    final whereArgs = inventoryId != null
+        ? [barcode, inventoryId]
+        : [barcode];
     final affected = await db.update(
       &#39;shopping_list&#39;,
       {&#39;is_purchased&#39;: 1, &#39;date_purchased&#39;: now},
-      where: &#39;barcode = ? AND is_purchased = 0&#39;,
-      whereArgs: [barcode],
+      where: where,
+      whereArgs: whereArgs,
     );
     if (affected &gt; 0) {
       logInfo(&#39;Marked $affected items as purchased via barcode $barcode&#39;);

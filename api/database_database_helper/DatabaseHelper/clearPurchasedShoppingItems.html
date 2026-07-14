@@ -55,23 +55,27 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-<span class="name ">clearPurchasedShoppingItems</span>(<wbr>)
+<span class="name ">clearPurchasedShoppingItems</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="clearPurchasedShoppingItems-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Deletes all purchased shopping list items.</p>
+  <p>Deletes all purchased shopping list items, optionally scoped to an
+inventory.</p>
+<p>When <code>inventoryId</code> is non-null, only purchased items belonging to
+that inventory are deleted.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; clearPurchasedShoppingItems() async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; clearPurchasedShoppingItems({int? inventoryId}) async {
   final db = await database;
-  return shoppingListDao.clearPurchased(db);
+  return shoppingListDao.clearPurchased(db, inventoryId: inventoryId);
 }</code></pre>
 </section>
 

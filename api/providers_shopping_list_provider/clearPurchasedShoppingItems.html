@@ -63,7 +63,7 @@
     </section>
     
 <section class="desc markdown">
-  <p>Deletes all purchased shopping list items.</p>
+  <p>Deletes all purchased shopping list items for the active inventory.</p>
 </section>
 
 
@@ -72,7 +72,10 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; clearPurchasedShoppingItems(WidgetRef ref) async {
   final db = ref.read(databaseProvider);
-  final deleted = await db.clearPurchasedShoppingItems();
+  final inventoryId = ref.read(activeInventoryProvider);
+  final deleted = await db.clearPurchasedShoppingItems(
+    inventoryId: inventoryId,
+  );
   invalidateShoppingList(ref);
   return deleted;
 }</code></pre>

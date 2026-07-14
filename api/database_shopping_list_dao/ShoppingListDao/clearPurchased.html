@@ -55,27 +55,37 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-<span class="name ">clearPurchased</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="clearPurchased-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span></li>
-</ol>)
+<span class="name ">clearPurchased</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="clearPurchased-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span></li>
+<li><span class="parameter" id="clearPurchased-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Deletes all purchased items. Returns the number of rows deleted.</p>
+  <p>Deletes all purchased items, optionally scoped to an inventory.</p>
+<p>When <code>inventoryId</code> is non-null, only purchased items belonging to
+that inventory are deleted. When <code>null</code>, all purchased items across
+all inventories are cleared (backward‑compatible default).
+Returns the number of rows deleted.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; clearPurchased(Database db) async {
-  logInfo(&#39;Clearing all purchased shopping items&#39;);
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; clearPurchased(Database db, {int? inventoryId}) async {
+  logInfo(&#39;Clearing purchased shopping items&#39;);
   try {
+    final where = inventoryId != null
+        ? &#39;is_purchased = 1 AND inventory_id = ?&#39;
+        : &#39;is_purchased = 1&#39;;
+    final whereArgs = inventoryId != null ? [inventoryId] : null;
     final affected = await db.delete(
       &#39;shopping_list&#39;,
-      where: &#39;is_purchased = 1&#39;,
+      where: where,
+      whereArgs: whereArgs,
     );
     logInfo(&#39;Cleared $affected purchased items&#39;);
     return affected;
