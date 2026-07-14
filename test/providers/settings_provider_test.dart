@@ -1,6 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pantry_app/models/hemisphere.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,6 +78,7 @@ void main() {
         baseCurrency: 'BRL',
         openPricesSyncEnabled: true,
         openPricesToken: 'tok_abc',
+        hemisphereOverride: Hemisphere.southern,
       );
 
       await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -94,6 +96,7 @@ void main() {
       expect(prefs.getString('baseCurrency'), 'BRL');
       expect(prefs.getBool('openPricesSyncEnabled'), true);
       expect(prefs.getString('openPricesToken'), 'tok_abc');
+      expect(prefs.getString('hemisphereOverride'), 'southern');
 
       container.dispose();
     });
@@ -106,6 +109,20 @@ void main() {
       expect(settings.retentionDays, isA<int>());
       expect(settings.baseCurrency, isNotEmpty);
       container.dispose();
+    });
+
+    test('hemisphereOverride defaults to auto', () {
+      final container = ProviderContainer();
+      final settings = container.read(settingsProvider);
+      expect(settings.hemisphereOverride, Hemisphere.auto);
+      container.dispose();
+    });
+
+    test('copyWith preserves hemisphereOverride', () {
+      const settings = Settings(hemisphereOverride: Hemisphere.southern);
+      final copy = settings.copyWith(baseCurrency: 'EUR');
+      expect(copy.baseCurrency, 'EUR');
+      expect(copy.hemisphereOverride, Hemisphere.southern);
     });
   });
 }

@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
+import 'package:pantry_app/models/hemisphere.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -25,6 +26,7 @@ class Settings {
     this.baseCurrency = 'USD',
     this.openPricesSyncEnabled = false,
     this.openPricesToken = '',
+    this.hemisphereOverride = Hemisphere.auto,
   });
 
   /// Whether expiry notifications are enabled.
@@ -77,6 +79,11 @@ class Settings {
   /// Bearer token for the Open Prices API.
   final String openPricesToken;
 
+  /// Manual hemisphere override for seasonal produce.
+  ///
+  /// [Hemisphere.auto] means detect from device locale country code.
+  final Hemisphere hemisphereOverride;
+
   /// Returns a copy with the given fields replaced.
   Settings copyWith({
     bool? notificationsEnabled,
@@ -91,6 +98,7 @@ class Settings {
     String? baseCurrency,
     bool? openPricesSyncEnabled,
     String? openPricesToken,
+    Hemisphere? hemisphereOverride,
   }) {
     return Settings(
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -108,6 +116,7 @@ class Settings {
       openPricesSyncEnabled:
           openPricesSyncEnabled ?? this.openPricesSyncEnabled,
       openPricesToken: openPricesToken ?? this.openPricesToken,
+      hemisphereOverride: hemisphereOverride ?? this.hemisphereOverride,
     );
   }
 }
@@ -142,6 +151,9 @@ class SettingsNotifier extends Notifier<Settings> {
         openPricesSyncEnabled: prefs.getBool('openPricesSyncEnabled') ?? false,
         openPricesToken:
             prefs.getString('openPricesToken') ?? AppConfig.openPricesToken,
+        hemisphereOverride: _parseHemisphere(
+          prefs.getString('hemisphereOverride'),
+        ),
       );
     } on Exception catch (e) {
       logWarning('Failed to load settings from SharedPreferences: $e');
@@ -155,6 +167,14 @@ class SettingsNotifier extends Notifier<Settings> {
   set value(Settings settings) {
     state = settings;
     unawaited(_persist(settings));
+  }
+
+  static Hemisphere _parseHemisphere(String? value) {
+    if (value == null) return Hemisphere.auto;
+    for (final h in Hemisphere.values) {
+      if (h.name == value) return h;
+    }
+    return Hemisphere.auto;
   }
 
   Future<void> _persist(Settings settings) async {
@@ -190,6 +210,10 @@ class SettingsNotifier extends Notifier<Settings> {
         settings.openPricesSyncEnabled,
       );
       await prefs.setString('openPricesToken', settings.openPricesToken);
+      await prefs.setString(
+        'hemisphereOverride',
+        settings.hemisphereOverride.name,
+      );
     } on Exception catch (e) {
       logWarning('Failed to persist settings to SharedPreferences: $e');
     }
