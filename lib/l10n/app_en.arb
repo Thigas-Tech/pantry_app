@@ -697,5 +697,11 @@
   "deleteDigit": "Delete digit",
   "quickAddProduceTitle": "Quick Add",
   "quickAddProduceTooltip": "Based on your purchases and seasonal availability",
-  "quickAddProduceEmpty": "Start adding produce to see quick picks here!"
+  "quickAddProduceEmpty": "Start adding produce to see quick picks here!",
+  "settingsGeneral": "General",
+  "hemisphereSetting": "Hemisphere",
+  "hemisphereAuto": "Auto (detect from country)",
+  "hemisphereNorthern": "Northern Hemisphere",
+  "hemisphereSouthern": "Southern Hemisphere",
+  "hemisphereChanged": "Hemisphere updated"
 }

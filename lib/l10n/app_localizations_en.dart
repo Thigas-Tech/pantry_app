@@ -1522,4 +1522,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickAddProduceEmpty => 'Start adding produce to see quick picks here!';
+
+  @override
+  String get settingsGeneral => 'General';
+
+  @override
+  String get hemisphereSetting => 'Hemisphere';
+
+  @override
+  String get hemisphereAuto => 'Auto (detect from country)';
+
+  @override
+  String get hemisphereNorthern => 'Northern Hemisphere';
+
+  @override
+  String get hemisphereSouthern => 'Southern Hemisphere';
+
+  @override
+  String get hemisphereChanged => 'Hemisphere updated';
 }

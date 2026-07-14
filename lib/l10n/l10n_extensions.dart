@@ -1,8 +1,9 @@
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/hemisphere.dart';
 
 /// Extension on [AppLocalizations] providing convenience methods for
 /// formatting quantities, localizing units, locations, inventory names,
-/// and theme modes.
+/// hemisphere, and theme modes.
 extension AppLocalizationsX on AppLocalizations {
   /// Formats a quantity with a localized unit (e.g., "5 kg").
   ///
@@ -227,4 +228,11 @@ extension AppLocalizationsX on AppLocalizations {
         return category;
     }
   }
+
+  /// Returns the localized display string for [hemisphere].
+  String localizeHemisphere(Hemisphere hemisphere) => switch (hemisphere) {
+    Hemisphere.auto => hemisphereAuto,
+    Hemisphere.northern => hemisphereNorthern,
+    Hemisphere.southern => hemisphereSouthern,
+  };
 }

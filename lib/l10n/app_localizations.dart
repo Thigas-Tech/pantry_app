@@ -2909,6 +2909,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start adding produce to see quick picks here!'**
   String get quickAddProduceEmpty;
+
+  /// No description provided for @settingsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsGeneral;
+
+  /// No description provided for @hemisphereSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hemisphere'**
+  String get hemisphereSetting;
+
+  /// No description provided for @hemisphereAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto (detect from country)'**
+  String get hemisphereAuto;
+
+  /// No description provided for @hemisphereNorthern.
+  ///
+  /// In en, this message translates to:
+  /// **'Northern Hemisphere'**
+  String get hemisphereNorthern;
+
+  /// No description provided for @hemisphereSouthern.
+  ///
+  /// In en, this message translates to:
+  /// **'Southern Hemisphere'**
+  String get hemisphereSouthern;
+
+  /// No description provided for @hemisphereChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Hemisphere updated'**
+  String get hemisphereChanged;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

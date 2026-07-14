@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/models/hemisphere.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -43,6 +44,24 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // ---- General ----
+          ExpansionTile(
+            leading: const Icon(Icons.tune),
+            title: Text(l10n.settingsGeneral),
+            initiallyExpanded: false,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.public),
+                title: Text(l10n.hemisphereSetting),
+                subtitle: Text(
+                  l10n.localizeHemisphere(settings.hemisphereOverride),
+                ),
+                onTap: () =>
+                    _showHemisphereDialog(context, ref, l10n, settings),
+              ),
+            ],
+          ),
+          // ---- Appearance ----
           ExpansionTile(
             leading: const Icon(Icons.brightness_6),
             title: Text(l10n.settingsAppearance),
@@ -848,4 +867,41 @@ String _formatBytes(int bytes, AppLocalizations l10n) {
     return l10n.kbUnit((bytes / 1024).toStringAsFixed(1));
   }
   return l10n.mbUnit((bytes / (1024 * 1024)).toStringAsFixed(1));
+}
+
+Future<void> _showHemisphereDialog(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  Settings settings,
+) async {
+  final selected = await showDialog<Hemisphere>(
+    context: context,
+    builder: (ctx) => SimpleDialog(
+      title: Text(l10n.hemisphereSetting),
+      children: [
+        RadioGroup<Hemisphere>(
+          groupValue: settings.hemisphereOverride,
+          onChanged: (value) => Navigator.pop(ctx, value),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: Hemisphere.values.map((option) {
+              return RadioListTile<Hemisphere>(
+                value: option,
+                title: Text(l10n.localizeHemisphere(option)),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    ),
+  );
+  if (selected != null) {
+    ref.read(settingsProvider.notifier).value = settings.copyWith(
+      hemisphereOverride: selected,
+    );
+    if (context.mounted) {
+      SnackbarHelper.showInfo(context, l10n.hemisphereChanged);
+    }
+  }
 }

@@ -1205,19 +1205,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get unitPlural => 'unidades';
 
   @override
-  String get weightModeLabel => 'Weight (g)';
+  String get weightModeLabel => 'Peso (g)';
 
   @override
-  String get unitModeLabel => 'Unit';
+  String get unitModeLabel => 'Unidade';
 
   @override
-  String get servingSmall => 'Small';
+  String get servingSmall => 'Pequeno';
 
   @override
-  String get servingMedium => 'Medium';
+  String get servingMedium => 'Medio';
 
   @override
-  String get servingLarge => 'Large';
+  String get servingLarge => 'Grande';
 
   @override
   String get unitGrams => 'g';
@@ -1500,19 +1500,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryStarches => 'Amidos';
 
   @override
-  String get pluEntryTooltip => 'Enter PLU code (produce)';
+  String get pluEntryTooltip => 'Inserir codigo PLU (produto)';
 
   @override
-  String get enterPluCode => 'Enter PLU Code';
+  String get enterPluCode => 'Inserir Codigo PLU';
 
   @override
-  String get pluCodeNotFound => 'PLU code not recognized';
+  String get pluCodeNotFound => 'Codigo PLU nao reconhecido';
 
   @override
-  String get digitLabel => 'Digit';
+  String get digitLabel => 'Digito';
 
   @override
-  String get deleteDigit => 'Delete digit';
+  String get deleteDigit => 'Apagar digito';
 
   @override
   String get quickAddProduceTitle => 'Adicao Rapida';
@@ -1522,6 +1522,24 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get quickAddProduceEmpty => 'Comece a adicionar produtos para ver sugestoes aqui!';
+
+  @override
+  String get settingsGeneral => 'Geral';
+
+  @override
+  String get hemisphereSetting => 'Hemisferio';
+
+  @override
+  String get hemisphereAuto => 'Automatico (detectar pelo pais)';
+
+  @override
+  String get hemisphereNorthern => 'Hemisferio Norte';
+
+  @override
+  String get hemisphereSouthern => 'Hemisferio Sul';
+
+  @override
+  String get hemisphereChanged => 'Hemisferio atualizado';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2725,6 +2743,21 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get unitPlural => 'unidades';
 
   @override
+  String get weightModeLabel => 'Peso (g)';
+
+  @override
+  String get unitModeLabel => 'Unidade';
+
+  @override
+  String get servingSmall => 'Pequeno';
+
+  @override
+  String get servingMedium => 'Medio';
+
+  @override
+  String get servingLarge => 'Grande';
+
+  @override
   String get unitGrams => 'g';
 
   @override
@@ -3005,6 +3038,21 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get categoryStarches => 'Amidos';
 
   @override
+  String get pluEntryTooltip => 'Inserir codigo PLU (produto)';
+
+  @override
+  String get enterPluCode => 'Inserir Codigo PLU';
+
+  @override
+  String get pluCodeNotFound => 'Codigo PLU nao reconhecido';
+
+  @override
+  String get digitLabel => 'Digito';
+
+  @override
+  String get deleteDigit => 'Apagar digito';
+
+  @override
   String get quickAddProduceTitle => 'Adicao Rapida';
 
   @override
@@ -3012,4 +3060,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get quickAddProduceEmpty => 'Comece a adicionar produtos para ver sugestoes aqui!';
+
+  @override
+  String get settingsGeneral => 'Geral';
+
+  @override
+  String get hemisphereSetting => 'Hemisferio';
+
+  @override
+  String get hemisphereAuto => 'Automatico (detectar pelo pais)';
+
+  @override
+  String get hemisphereNorthern => 'Hemisferio Norte';
+
+  @override
+  String get hemisphereSouthern => 'Hemisferio Sul';
+
+  @override
+  String get hemisphereChanged => 'Hemisferio atualizado';
 }
