@@ -1,5 +1,15 @@
 # Changelog
 
+### Unreleased
+
+### Added
+- **Seasonal produce suggestions**: Quick-add carousel now personalizes with top 3 most-frequent purchases and up to 5 seasonal items, weighted by hemisphere (auto-detected from country code, with manual override in Settings). New `HemisphereService` (24 Southern Hemisphere country codes), `Season` enum with meteorological boundaries, and `SeasonalProduceService` (8 climate-based produce lists). `CarouselCompositionService` merges purchase history (`produce_purchase_frequency` SQLite table, v23 migration) with seasonal data. (`lib/models/hemisphere.dart` new, `lib/models/season.dart` new, `lib/services/hemisphere_service.dart` new, `lib/services/seasonal_produce_service.dart` new, `lib/services/carousel_composition_service.dart` new, `lib/services/produce_icon_service.dart` new, `lib/models/produce_quick_add_item.dart` new, `lib/database/produce_frequency_dao.dart` new, wraps #124)
+- **Enhanced quick-add carousel UI**: Section header with info tooltip, Material icons per produce, weight hint display (e.g. `~182g`), empty state message. `QuickAddProduce` accepts `List<ProduceQuickAddItem>` with source tracking (personalized/seasonal/fallback). (`lib/widgets/quick_add_produce.dart`, wraps #124)
+- **Purchase frequency in SQLite**: `ProducePurchaseTracker` now stores history in `produce_purchase_frequency` table (v23 DB migration). Existing SharedPreferences data is migrated on upgrade. New `undoPurchase()` for undo support. (`lib/services/produce_purchase_tracker.dart`, `lib/database/database_helper.dart`, wraps #124)
+- **Hemisphere setting**: Settings > General section with hemisphere picker (Auto/Northern/Southern). Persisted via SharedPreferences. (`lib/providers/settings_provider.dart`, `lib/screens/settings_screen.dart`, `lib/l10n/l10n_extensions.dart`, wraps #124)
+- **New ARB keys**: `quickAddProduceTitle`, `quickAddProduceTooltip`, `quickAddProduceEmpty`, `settingsGeneral`, `hemisphereSetting`, `hemisphereAuto`, `hemisphereNorthern`, `hemisphereSouthern`, `hemisphereChanged` in all 3 locales. Filled missing #113 keys (`weightModeLabel`, `unitModeLabel`, `servingSmall`, `servingMedium`, `servingLarge`, `pluEntryTooltip`, `enterPluCode`, `pluCodeNotFound`, `digitLabel`, `deleteDigit`) in pt and pt_BR. (`lib/l10n/app_*.arb`, wraps #124)
+- **HomeScreen integration**: Carousel uses `CarouselCompositionService` with hemisphere detection. Items added with `servingWeightG` from `ProduceServingPresets`. Undo revers purchase history count. (`lib/screens/home_screen.dart`, wraps #124)
+
 ## [0.0.6]
 
 ### Added
