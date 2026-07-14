@@ -45,35 +45,19 @@ class ProducePurchaseTracker {
 
   /// Returns the top [limit] most frequently purchased produce items.
   ///
-  /// Names are capitalized for display. If fewer than [limit] items
-  /// exist in the history, the result is padded with defaults from
-  /// [getDefaultList].
+  /// Names are capitalized for display. Returns only items with count > 0
+  /// from the purchase history. An empty list means no purchases yet.
   Future<List<String>> getTopPurchases({int limit = 8}) async {
     final db = await _dbHelper.database;
     final top = await _dao.getTopPurchases(db, limit: limit);
 
-    if (top.isEmpty) {
-      return getDefaultList().take(limit).toList();
-    }
-
-    final result = top.where((row) => (row['count'] as int) > 0).map((row) {
-      final name = row['produce_key'] as String;
-      return name[0].toUpperCase() + name.substring(1);
-    }).toList();
-
-    if (result.isEmpty) {
-      return getDefaultList().take(limit).toList();
-    }
-
-    if (result.length < limit) {
-      for (final d in getDefaultList()) {
-        if (result.length >= limit) break;
-        if (!result.any((r) => r.toLowerCase() == d.toLowerCase())) {
-          result.add(d);
-        }
-      }
-    }
-
-    return result;
+    return top
+        .where((row) => (row['count'] as int) > 0)
+        .map((row) {
+          final name = row['produce_key'] as String;
+          return name[0].toUpperCase() + name.substring(1);
+        })
+        .take(limit)
+        .toList();
   }
 }

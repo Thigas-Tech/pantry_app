@@ -24,13 +24,12 @@ void main() {
       await db.close();
     });
 
-    test('getTopPurchases returns defaults when no history', () async {
+    test('getTopPurchases returns empty when no history', () async {
       final items = await tracker.getTopPurchases(limit: 3);
-      expect(items, isNotEmpty);
-      expect(items.length, lessThanOrEqualTo(3));
+      expect(items, isEmpty);
     });
 
-    test('records and retrieves purchases ordered by frequency', () async {
+    test('records and retrieves purchases by frequency', () async {
       await tracker.recordPurchase('Apple');
       await tracker.recordPurchase('Banana');
       await tracker.recordPurchase('Banana');
@@ -38,6 +37,7 @@ void main() {
       final top = await tracker.getTopPurchases(limit: 3);
       expect(top.first, 'Banana');
       expect(top, contains('Apple'));
+      expect(top.length, 2);
     });
 
     test('undoPurchase decrements count', () async {
@@ -46,33 +46,30 @@ void main() {
       await tracker.undoPurchase('Apple');
 
       final top = await tracker.getTopPurchases(limit: 8);
-      // Apple should appear but have lower priority after undo
-      expect(top, contains('Apple'));
+      expect(top.length, 1);
+      expect(top.first, 'Apple');
     });
 
-    test('undoPurchase keeps count at zero, Apple appears first', () async {
+    test('undoPurchase keeps count at zero, Apple appears but '
+        'Orange disappears after full undo', () async {
       await tracker.recordPurchase('Orange');
       await tracker.recordPurchase('Apple');
       await tracker.undoPurchase('Orange');
-      await tracker.undoPurchase('Orange');
 
       final top = await tracker.getTopPurchases(limit: 8);
-      // Apple (count 1) beats Orange (count 0): Apple should come first
-      // Orange may appear from defaults, but Apple has higher priority
       expect(top, contains('Apple'));
-      // Apple should be before Orange if Orange is in the list
-      final appleIdx = top.indexOf('Apple');
-      final orangeIdx = top.indexOf('Orange');
-      if (orangeIdx >= 0) {
-        expect(appleIdx, lessThan(orangeIdx));
-      }
+      // Orange count is 0, not included
+      expect(
+        top.any((t) => t.toLowerCase() == 'orange'),
+        isFalse,
+      );
     });
 
-    test('getTopPurchases pads with defaults when less than limit', () async {
+    test('getTopPurchases does not pad with defaults', () async {
       await tracker.recordPurchase('Apple');
 
       final top = await tracker.getTopPurchases(limit: 5);
-      expect(top.length, 5);
+      expect(top.length, 1);
       expect(top.first, 'Apple');
     });
 
@@ -82,6 +79,7 @@ void main() {
       await tracker.recordPurchase('Apple');
 
       final top = await tracker.getTopPurchases(limit: 3);
+      expect(top.length, 1);
       expect(top.first, 'Apple');
     });
 
