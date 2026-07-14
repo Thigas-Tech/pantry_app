@@ -76,6 +76,7 @@
   final deleted = await db.clearPurchasedShoppingItems(
     inventoryId: inventoryId,
   );
+  logInfo(&#39;Cleared purchased shopping items — count=$deleted&#39;);
   invalidateShoppingList(ref);
   return deleted;
 }</code></pre>

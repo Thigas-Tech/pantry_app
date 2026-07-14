@@ -100,6 +100,9 @@ final statsProvider = FutureProvider.autoDispose&lt;PantryStats&gt;((ref) async 
     ),
     db.inventoryDao.weeklyAdditions(database, inventoryId: activeId),
     db.productDao.productsWithCategories(database),
+    db.priceDao.monthlyExpenditure(database, inventoryId: activeId),
+    db.priceDao.storeSpending(database, inventoryId: activeId),
+    db.priceDao.nutriscoreByStore(database, inventoryId: activeId),
   ]);
 
   final prodCount = results[0] as int;
@@ -112,6 +115,9 @@ final statsProvider = FutureProvider.autoDispose&lt;PantryStats&gt;((ref) async 
   final expiryDist = results[8] as Map&lt;String, int&gt;;
   final weekly = results[9] as List&lt;Map&lt;String, dynamic&gt;&gt;;
   final productCategories = results[10] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final monthlyRows = results[11] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final storeRows = results[12] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final nutriscoreByStoreRows = results[13] as List&lt;Map&lt;String, dynamic&gt;&gt;;
 
   &#47;&#47; Compute parent categories from hierarchy data.
   final parentCounts = &lt;String, int&gt;{};
@@ -195,6 +201,31 @@ final statsProvider = FutureProvider.autoDispose&lt;PantryStats&gt;((ref) async 
       withIngredients: offPhoto[&#39;ingredients&#39;] ?? 0,
       withProduct: offPhoto[&#39;product&#39;] ?? 0,
     ),
+    monthlySpending: monthlyRows
+        .map(
+          (r) =&gt; MonthlySpending(
+            month: r[&#39;month&#39;] as String,
+            total: (r[&#39;total&#39;] as num?)?.toDouble() ?? 0,
+          ),
+        )
+        .toList(),
+    storeSpending: storeRows
+        .map(
+          (r) =&gt; StoreSpending(
+            store: r[&#39;store&#39;] as String,
+            total: (r[&#39;total&#39;] as num?)?.toDouble() ?? 0,
+            itemCount: r[&#39;item_count&#39;] as int? ?? 0,
+          ),
+        )
+        .toList(),
+    nutriscoreByStore: nutriscoreByStoreRows
+        .map(
+          (r) =&gt; StoreNutriscore(
+            store: r[&#39;store&#39;] as String,
+            averageScore: (r[&#39;avg_score&#39;] as num?)?.toDouble() ?? 0,
+          ),
+        )
+        .toList(),
   );
 });</code></pre>
 </section>

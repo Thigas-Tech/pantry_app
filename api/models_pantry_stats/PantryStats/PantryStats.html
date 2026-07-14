@@ -72,6 +72,9 @@
 <li><span class="parameter" id="param-totalValue"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalValue</span>, </span></li>
 <li><span class="parameter" id="param-averagePrice"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">averagePrice</span>, </span></li>
 <li><span class="parameter" id="param-pricedItemCount"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">pricedItemCount</span>, </span></li>
+<li><span class="parameter" id="param-monthlySpending"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>([])</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_pantry_stats/MonthlySpending-class.html">MonthlySpending</a></span>&gt;</span></span> <span class="parameter-name">monthlySpending</span>, </span></li>
+<li><span class="parameter" id="param-storeSpending"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>([])</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_pantry_stats/StoreSpending-class.html">StoreSpending</a></span>&gt;</span></span> <span class="parameter-name">storeSpending</span>, </span></li>
+<li><span class="parameter" id="param-nutriscoreByStore"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>([])</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_pantry_stats/StoreNutriscore-class.html">StoreNutriscore</a></span>&gt;</span></span> <span class="parameter-name">nutriscoreByStore</span>, </span></li>
 </ol>})
     </section>
     
@@ -102,6 +105,9 @@
   @Default(0) double totalValue,
   @Default(0) double averagePrice,
   @Default(0) int pricedItemCount,
+  @Default([]) List&lt;MonthlySpending&gt; monthlySpending,
+  @Default([]) List&lt;StoreSpending&gt; storeSpending,
+  @Default([]) List&lt;StoreNutriscore&gt; nutriscoreByStore,
 }) = _PantryStats;</code></pre>
 </section>
 

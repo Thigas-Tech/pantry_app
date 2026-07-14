@@ -60,7 +60,7 @@
     </ol>
   </div>
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-<span class="name ">expiresToday</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="expiresToday-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
+<span class="name ">expiresToday</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="expiresToday-param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
 </ol>)
 
       <div class="features"><span class="feature">override</span></div>
@@ -70,7 +70,7 @@
 <section class="desc markdown">
   <p>No description provided for @expiresToday.</p>
 <p>In en, this message translates to:
-<strong>'{barcode} expires today!'</strong></p>
+<strong>'{name} expires today!'</strong></p>
 </section>
 
 
@@ -78,8 +78,8 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-String expiresToday(String barcode) {
-  return &#39;$barcode expires today!&#39;;
+String expiresToday(String name) {
+  return &#39;$name expires today!&#39;;
 }</code></pre>
 </section>
 

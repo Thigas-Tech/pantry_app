@@ -87,6 +87,7 @@ or <code>null</code> if cancelled.</p>
   return showModalBottomSheet&lt;Price&gt;(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     builder: (_) =&gt; PriceEntrySheet._(
       barcode: barcode,
       existingPrice: existingPrice,

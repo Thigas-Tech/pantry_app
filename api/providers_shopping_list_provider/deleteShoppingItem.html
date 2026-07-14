@@ -74,9 +74,15 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteShoppingItem(WidgetRef ref, int id) async {
   final db = ref.read(databaseProvider);
   final photoService = ref.read(photoServiceProvider);
-  await photoService.deletePhotoForItem(id);
-  await db.deleteShoppingItem(id);
-  invalidateShoppingList(ref);
+  logInfo(&#39;Delete shopping item — id=$id&#39;);
+  try {
+    await photoService.deletePhotoForItem(id);
+    await db.deleteShoppingItem(id);
+    invalidateShoppingList(ref);
+  } on Exception catch (e) {
+    logError(&#39;Failed to delete shopping item id=$id: $e&#39;);
+    rethrow;
+  }
 }</code></pre>
 </section>
 

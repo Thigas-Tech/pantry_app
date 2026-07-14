@@ -58,10 +58,11 @@
 <span class="name ">rescheduleAllItems</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="rescheduleAllItems-param-items"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span>&gt;</span></span> <span class="parameter-name">items</span>, {</span></li>
 <li><span class="parameter" id="rescheduleAllItems-param-expiringSoonTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringSoonTitle</span>, </span></li>
 <li><span class="parameter" id="rescheduleAllItems-param-expiringTodayTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringTodayTitle</span>, </span></li>
-<li><span class="parameter" id="rescheduleAllItems-param-buildExpiringSoonBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringSoonBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
+<li><span class="parameter" id="rescheduleAllItems-param-buildExpiringSoonBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringSoonBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
 </ol>), </span></li>
-<li><span class="parameter" id="rescheduleAllItems-param-buildExpiringTodayBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringTodayBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
+<li><span class="parameter" id="rescheduleAllItems-param-buildExpiringTodayBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringTodayBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
 </ol>), </span></li>
+<li><span class="parameter" id="rescheduleAllItems-param-barcodeToName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">barcodeToName</span>, </span></li>
 <li><span class="parameter" id="rescheduleAllItems-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span>, </span></li>
 </ol>})
 
@@ -74,6 +75,9 @@
 <p>Cancels all existing scheduled notifications first, then schedules
 new ones for items with future expiry dates. This recovers from
 device reboots, app updates, and timezone changes.</p>
+<p><code>barcodeToName</code> is an optional map from barcode to human-readable
+product name used in notification bodies. When a barcode is not in
+the map the raw barcode is displayed as a fallback.</p>
 <p>Guards against concurrent calls with an internal lock.
 Best-effort — individual scheduling failures are caught and logged.</p>
 </section>
@@ -86,8 +90,9 @@ Best-effort — individual scheduling failures are caught and logged.</p>
   List&lt;InventoryItem&gt; items, {
   required String expiringSoonTitle,
   required String expiringTodayTitle,
-  required String Function(String barcode) buildExpiringSoonBody,
-  required String Function(String barcode) buildExpiringTodayBody,
+  required String Function(String name) buildExpiringSoonBody,
+  required String Function(String name) buildExpiringTodayBody,
+  Map&lt;String, String&gt;? barcodeToName,
   bool notificationsEnabled = true,
 }) async {
   if (!notificationsEnabled) {
@@ -109,6 +114,7 @@ Best-effort — individual scheduling failures are caught and logged.</p>
     for (final item in items) {
       await scheduleExpiryReminders(
         item,
+        productName: barcodeToName?[item.barcode],
         expiringSoonTitle: expiringSoonTitle,
         expiringTodayTitle: expiringTodayTitle,
         buildExpiringSoonBody: buildExpiringSoonBody,

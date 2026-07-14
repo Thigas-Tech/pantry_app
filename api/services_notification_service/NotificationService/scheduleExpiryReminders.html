@@ -58,10 +58,11 @@
 <span class="name ">scheduleExpiryReminders</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="scheduleExpiryReminders-param-item"><span class="type-annotation"><a href="../../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span> <span class="parameter-name">item</span>, {</span></li>
 <li><span class="parameter" id="scheduleExpiryReminders-param-expiringSoonTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringSoonTitle</span>, </span></li>
 <li><span class="parameter" id="scheduleExpiryReminders-param-expiringTodayTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringTodayTitle</span>, </span></li>
-<li><span class="parameter" id="scheduleExpiryReminders-param-buildExpiringSoonBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringSoonBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
+<li><span class="parameter" id="scheduleExpiryReminders-param-buildExpiringSoonBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringSoonBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
 </ol>), </span></li>
-<li><span class="parameter" id="scheduleExpiryReminders-param-buildExpiringTodayBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringTodayBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
+<li><span class="parameter" id="scheduleExpiryReminders-param-buildExpiringTodayBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringTodayBody</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span></li>
 </ol>), </span></li>
+<li><span class="parameter" id="scheduleExpiryReminders-param-productName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productName</span>, </span></li>
 <li><span class="parameter" id="scheduleExpiryReminders-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;Expiry reminders&#39;</span>, </span></li>
 <li><span class="parameter" id="scheduleExpiryReminders-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Warns about expiring food&#39;</span>, </span></li>
 <li><span class="parameter" id="scheduleExpiryReminders-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span>, </span></li>
@@ -73,6 +74,9 @@
     
 <section class="desc markdown">
   <p>Schedules two local notifications for <code>item</code>.</p>
+<p><code>productName</code> is displayed in the notification body. When <code>null</code> or
+empty, falls back to the item barcode so the user can still identify
+the expiring product.</p>
 <p>Skips scheduling if notifications are disabled or if the item
 has no expiry date or the expiry date is in the past.</p>
 </section>
@@ -85,8 +89,9 @@ has no expiry date or the expiry date is in the past.</p>
   InventoryItem item, {
   required String expiringSoonTitle,
   required String expiringTodayTitle,
-  required String Function(String barcode) buildExpiringSoonBody,
-  required String Function(String barcode) buildExpiringTodayBody,
+  required String Function(String name) buildExpiringSoonBody,
+  required String Function(String name) buildExpiringTodayBody,
+  String? productName,
   String channelName = &#39;Expiry reminders&#39;,
   String channelDescription = &#39;Warns about expiring food&#39;,
   bool notificationsEnabled = true,
@@ -121,6 +126,10 @@ has no expiry date or the expiry date is in the past.</p>
   final itemId = item.id!;
   final now = tz.TZDateTime.now(tz.local);
 
+  final displayName = (productName != null &amp;&amp; productName.isNotEmpty)
+      ? productName
+      : item.barcode;
+
   final notificationDetails = NotificationDetails(
     android: AndroidNotificationDetails(
       &#39;expiry_channel&#39;,
@@ -141,7 +150,7 @@ has no expiry date or the expiry date is in the past.</p>
       await _plugin.zonedSchedule(
         id: itemId * 2,
         title: expiringSoonTitle,
-        body: buildExpiringSoonBody(item.barcode),
+        body: buildExpiringSoonBody(displayName),
         scheduledDate: expiringSoonDate,
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -169,7 +178,7 @@ has no expiry date or the expiry date is in the past.</p>
       await _plugin.zonedSchedule(
         id: itemId * 2 + 1,
         title: expiringTodayTitle,
-        body: buildExpiringTodayBody(item.barcode),
+        body: buildExpiringTodayBody(displayName),
         scheduledDate: expiringTodayDate,
         notificationDetails: notificationDetails,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

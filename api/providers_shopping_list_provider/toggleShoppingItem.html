@@ -73,6 +73,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; toggleShoppingItem(WidgetRef ref, int id) async {
   final db = ref.read(databaseProvider);
+  logInfo(&#39;Toggle shopping item — id=$id&#39;);
   await db.toggleShoppingItemPurchased(id);
   invalidateShoppingList(ref);
 }</code></pre>

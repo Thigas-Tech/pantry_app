@@ -93,9 +93,17 @@ Runs inside a SQLite transaction — all-or-nothing.</p>
     inventoryId: inventoryId,
   );
 
+  logInfo(
+    &#39;Move purchased to inventory — total=${allPurchased.length} &#39;
+    &#39;inventoryId=$inventoryId&#39;,
+  );
+
   await database.transaction((txn) async {
     for (final item in allPurchased) {
       if (item.barcode == null || item.barcode!.isEmpty) {
+        logWarning(
+          &#39;Skipped item id=${item.id} — no barcode&#39;,
+        );
         skippedCount++;
         continue;
       }
@@ -107,6 +115,10 @@ Runs inside a SQLite transaction — all-or-nothing.</p>
         limit: 1,
       );
       if (existingProduct.isEmpty) {
+        logWarning(
+          &#39;Skipped item id=${item.id} barcode=${item.barcode} — &#39;
+          &#39;product not in cache&#39;,
+        );
         skippedCount++;
         continue;
       }
@@ -126,6 +138,10 @@ Runs inside a SQLite transaction — all-or-nothing.</p>
           where: &#39;id = ?&#39;,
           whereArgs: [existingInv.first[&#39;id&#39;]],
         );
+        logInfo(
+          &#39;Merged inventory — barcode=${item.barcode} &#39;
+          &#39;qty=${existingQty + item.quantity}&#39;,
+        );
       } else {
         await txn.insert(&#39;inventory&#39;, {
           &#39;barcode&#39;: item.barcode,
@@ -135,6 +151,10 @@ Runs inside a SQLite transaction — all-or-nothing.</p>
           &#39;inventory_id&#39;: inventoryId,
           &#39;date_added&#39;: DateTime.now().millisecondsSinceEpoch,
         });
+        logInfo(
+          &#39;Created inventory item — barcode=${item.barcode} &#39;
+          &#39;qty=${item.quantity}&#39;,
+        );
       }
 
       if (item.priceAmount != null) {
@@ -148,6 +168,10 @@ Runs inside a SQLite transaction — all-or-nothing.</p>
           &#39;sync_status&#39;: &#39;local_only&#39;,
           &#39;is_discounted&#39;: 0,
         });
+        logInfo(
+          &#39;Saved price — barcode=${item.barcode} &#39;
+          &#39;amount=${item.priceAmount} ${item.priceCurrency}&#39;,
+        );
       }
 
       await txn.delete(
@@ -159,6 +183,10 @@ Runs inside a SQLite transaction — all-or-nothing.</p>
       movedCount++;
     }
   });
+
+  logInfo(
+    &#39;Move completed — moved=$movedCount skipped=$skippedCount&#39;,
+  );
 
   invalidateShoppingList(ref);
   return MoveToInventoryResult(

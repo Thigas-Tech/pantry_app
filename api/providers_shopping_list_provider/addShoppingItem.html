@@ -82,8 +82,18 @@ The item's inventoryId defaults to the active inventory if not set.</p>
   final scopedItem = item.inventoryId == null
       ? item.copyWith(inventoryId: activeInventoryId)
       : item;
-  await db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
-  invalidateShoppingList(ref);
+  logInfo(
+    &#39;Add shopping item — barcode=${scopedItem.barcode ?? &#39;none&#39;} &#39;
+    &#39;name=&quot;${scopedItem.name}&quot; qty=${scopedItem.quantity} &#39;
+    &#39;inventoryId=${scopedItem.inventoryId}&#39;,
+  );
+  try {
+    await db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
+    invalidateShoppingList(ref);
+  } on Exception catch (e) {
+    logError(&#39;Failed to add shopping item: $e&#39;);
+    rethrow;
+  }
 }</code></pre>
 </section>
 
