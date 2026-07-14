@@ -624,4 +624,72 @@ void main() {
       tempDir.deleteSync(recursive: true);
     });
   });
+
+  group('Migration v19 → v20', () {
+    test('backfills null inventory_id on shopping list items', () async {
+      final tempDir = Directory.systemTemp.createTempSync('pantry_v19_');
+      final v19Path = '${tempDir.path}/v19.db';
+      final v19Db = await openDatabase(
+        v19Path,
+        version: 19,
+        onCreate: (db, version) async {
+          await db.execute('''
+            CREATE TABLE inventories (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              created_at INTEGER NOT NULL
+            )
+          ''');
+          await db.execute(
+            "INSERT INTO inventories (name, created_at) VALUES ('Home', 1)",
+          );
+          await db.execute(
+            "INSERT INTO inventories (name, created_at) VALUES ('Work', 2)",
+          );
+          await db.execute('''
+            CREATE TABLE shopping_list (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT,
+              name TEXT NOT NULL,
+              quantity REAL NOT NULL DEFAULT 1.0,
+              unit TEXT NOT NULL DEFAULT 'pieces',
+              is_purchased INTEGER NOT NULL DEFAULT 0,
+              inventory_id INTEGER,
+              date_added INTEGER NOT NULL,
+              date_purchased INTEGER,
+              price_amount REAL,
+              price_currency TEXT,
+              price_store TEXT,
+              price_photo_path TEXT,
+              FOREIGN KEY (inventory_id) REFERENCES inventories(id)
+                ON DELETE SET NULL
+            )
+          ''');
+          await db.insert('shopping_list', {
+            'name': 'Milk',
+            'inventory_id': null,
+            'date_added': 1,
+          });
+          await db.insert('shopping_list', {
+            'name': 'Bread',
+            'inventory_id': 1,
+            'date_added': 2,
+          });
+        },
+      );
+      await v19Db.close();
+
+      final dbHelper = DatabaseHelper.withPath(v19Path);
+      await dbHelper.database;
+
+      final items = await dbHelper.getShoppingList();
+      expect(items.length, 2);
+      expect(items[0].inventoryId, isNotNull);
+      expect(items[1].inventoryId, 1);
+
+      final migratedDb = await dbHelper.database;
+      await migratedDb.close();
+      tempDir.deleteSync(recursive: true);
+    });
+  });
 }

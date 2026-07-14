@@ -29,7 +29,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Eight tables are created on first launch (version 19):
+/// Eight tables are created on first launch (version 20):
 /// - `products` – product data fetched from Open Food Facts.
 /// - `inventories` – named pantries (e.g. "Home", "Work").
 /// - `inventory` – instances of products the user has added to a pantry.
@@ -102,7 +102,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 19,
+        version: 20,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -438,6 +438,28 @@ class DatabaseHelper {
         logInfo('Migration to version 19 completed');
       } on Exception catch (e) {
         logWarning('Migration v19 failed: $e');
+      }
+    }
+    if (oldVersion < 20) {
+      try {
+        final minId = await db.rawQuery(
+          'SELECT COALESCE('
+          '(SELECT id FROM inventories ORDER BY id ASC LIMIT 1),'
+          ' 1'
+          ') AS result',
+        );
+        final defaultId = minId.first['result'] as int? ?? 1;
+        await db.rawUpdate(
+          'UPDATE shopping_list SET inventory_id = ?'
+          ' WHERE inventory_id IS NULL',
+          [defaultId],
+        );
+        logInfo(
+          'Migration to version 20 completed'
+          ' (backfilled null inventory_id to $defaultId)',
+        );
+      } on Exception catch (e) {
+        logWarning('Migration v20 failed: $e');
       }
     }
   }
@@ -875,16 +897,28 @@ class DatabaseHelper {
     return shoppingListDao.togglePurchased(db, id);
   }
 
-  /// Deletes all purchased shopping list items.
-  Future<int> clearPurchasedShoppingItems() async {
+  /// Deletes all purchased shopping list items, optionally scoped to an
+  /// inventory.
+  ///
+  /// When [inventoryId] is non-null, only purchased items belonging to
+  /// that inventory are deleted.
+  Future<int> clearPurchasedShoppingItems({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.clearPurchased(db);
+    return shoppingListDao.clearPurchased(db, inventoryId: inventoryId);
   }
 
-  /// Marks items matching the given [barcode] as purchased.
-  Future<int> markShoppingItemsByBarcode(String barcode) async {
+  /// Marks items matching the given [barcode] as purchased, optionally
+  /// scoped to an inventory.
+  Future<int> markShoppingItemsByBarcode(
+    String barcode, {
+    int? inventoryId,
+  }) async {
     final db = await database;
-    return shoppingListDao.markPurchasedByBarcode(db, barcode);
+    return shoppingListDao.markPurchasedByBarcode(
+      db,
+      barcode,
+      inventoryId: inventoryId,
+    );
   }
 
   /// Returns the count of pending (not purchased) shopping list items.

@@ -139,10 +139,12 @@ void main() {
   });
 
   group('clearPurchasedShoppingItems', () {
-    test('calls clear on DB', () {
-      when(() => mockDb.clearPurchasedShoppingItems()).thenAnswer(
-        (_) async => 3,
-      );
+    test('passes active inventory to DB', () {
+      when(
+        () => mockDb.clearPurchasedShoppingItems(
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => 3);
 
       // Covered at integration level.
     });
