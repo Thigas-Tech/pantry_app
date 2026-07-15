@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+- Changelog system simplified. In-app changelog now reads directly from a user-facing file with no parsing or cleaning needed.
+
+## [0.0.7]
+
 ### Fixed
 - Price calculator formatter no longer shows leading zeros.
 - Bottom sheets no longer obscured by the system navigation bar.
