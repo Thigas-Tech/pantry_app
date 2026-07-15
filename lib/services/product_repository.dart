@@ -4,8 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/produce_nutrition_fallback.dart';
+import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,6 +43,10 @@ class ProductRepository {
   /// Creates a [ProductRepository] with the given [DatabaseHelper] and
   /// primary API. An optional fallback API can be provided for future use.
   ///
+  /// The optional [UsdaApiClient] is used by [addProduceToInventory] to
+  /// fetch nutrition data for produce items from the USDA FoodData Central
+  /// API when a product is not already cached locally.
+  ///
   /// If [SharedPreferences] is provided it is used for refresh‑time
   /// tracking; otherwise
   /// [SharedPreferences] is lazily obtained from the singleton instance.
@@ -47,12 +54,14 @@ class ProductRepository {
     this._db,
     this._api, {
     this._fallbackApi,
+    this._usdaClient,
     this._prefs,
   });
 
   final DatabaseHelper _db;
   final OffAdapter _api;
   final OffAdapter? _fallbackApi;
+  final UsdaApiClient? _usdaClient;
   final SharedPreferences? _prefs;
 
   Future<SharedPreferences> get _sharedPrefs async =>
@@ -178,6 +187,122 @@ class ProductRepository {
       '''Adding inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location} (inventory ${item.inventoryId})''',
     );
     return _db.insertInventoryItem(item);
+  }
+
+  /// Resolves a [Product] for [produceName] with a synthetic barcode.
+  ///
+  /// Generates the barcode `produce-$produceName`, then delegates to
+  /// [_resolveProduceProduct] which tries the USDA API first, then
+  /// hardcoded fallback data, and finally creates a minimal product
+  /// with no nutrition values.
+  ///
+  /// Unlike [addProduceToInventory], this method does not write to
+  /// the database or create an inventory item.
+  ///
+  /// Throws [ArgumentError] if [produceName] is empty.
+  Future<Product> resolveProduceProduct(String produceName) {
+    if (produceName.trim().isEmpty) {
+      throw ArgumentError('produceName must not be empty');
+    }
+    final barcode = 'produce-$produceName';
+    return _resolveProduceProduct(produceName, barcode);
+  }
+
+  /// Adds a produce item to the inventory, fetching nutrition data from the
+  /// USDA API when available and falling back to hardcoded data.
+  ///
+  /// [produceName] is the display name of the produce (e.g. "Apple"). The
+  /// item will be stored with a synthetic barcode `produce-$produceName`
+  /// and a default quantity of 150 g (overridable via [quantity]).
+  ///
+  /// If a product row for the synthetic barcode already exists in the local
+  /// cache, the USDA / fallback lookup is skipped entirely.
+  ///
+  /// Nutrition lookup order:
+  /// 1. USDA FoodData Central API (via [UsdaApiClient])
+  /// 2. Hardcoded fallback data (via [ProduceNutritionFallback])
+  /// 3. Minimal product with no nutrition values (when both sources fail)
+  ///
+  /// Duplicate quick-adds of the same produce are merged via
+  /// [DatabaseHelper.insertOrMergeInventoryItem].
+  ///
+  /// Throws [ArgumentError] if [produceName] is empty.
+  Future<int> addProduceToInventory(
+    String produceName, {
+    required int inventoryId,
+    double quantity = 150,
+  }) async {
+    if (produceName.trim().isEmpty) {
+      throw ArgumentError('produceName must not be empty');
+    }
+
+    final barcode = 'produce-$produceName';
+
+    final existingProduct = await _db.getProduct(barcode);
+    if (existingProduct == null) {
+      final product = await _resolveProduceProduct(produceName, barcode);
+      await cacheProduct(product);
+    }
+
+    final item = InventoryItem(
+      barcode: barcode,
+      unit: 'g',
+      quantity: quantity,
+      inventoryId: inventoryId,
+    );
+
+    return _db.insertOrMergeInventoryItem(item);
+  }
+
+  /// Resolves a [Product] for [produceName] with the given [barcode].
+  ///
+  /// Tries the USDA API first, then hardcoded fallback data, and finally
+  /// creates a minimal product with no nutrition values.
+  Future<Product> _resolveProduceProduct(
+    String produceName,
+    String barcode,
+  ) async {
+    if (_usdaClient != null) {
+      try {
+        final usdaResults = await _usdaClient.searchFood(produceName);
+        if (usdaResults.isNotEmpty) {
+          final usda = usdaResults.first;
+          return usda.copyWith(
+            barcode: barcode,
+            name: produceName,
+            productType: ProductType.produce,
+            source: 'manual',
+            lastSynced: DateTime.now().millisecondsSinceEpoch,
+          );
+        }
+      } on Exception catch (e) {
+        logWarning('USDA lookup failed for "$produceName": $e');
+      }
+    }
+
+    final fallback = ProduceNutritionFallback.forName(produceName);
+    if (fallback != null) {
+      return Product(
+        barcode: barcode,
+        name: produceName,
+        productType: ProductType.produce,
+        source: 'manual',
+        energyKcal: fallback.energyKcal,
+        proteinG: fallback.proteinG,
+        carbsG: fallback.carbsG,
+        fatG: fallback.fatG,
+        fiberG: fallback.fiberG,
+        lastSynced: DateTime.now().millisecondsSinceEpoch,
+      );
+    }
+
+    return Product(
+      barcode: barcode,
+      name: produceName,
+      productType: ProductType.produce,
+      source: 'manual',
+      lastSynced: DateTime.now().millisecondsSinceEpoch,
+    );
   }
 
   /// Updates an existing inventory item.
