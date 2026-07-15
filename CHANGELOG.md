@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+- **Changelog system replaced**: Removed `ChangelogParser` and `userFacingSectionContent` in favour of a hand-written `USER_CHANGELOG.md`. The app now reads user-facing changelog entries directly from the new file instead of parsing and cleaning the developer `CHANGELOG.md`. (`USER_CHANGELOG.md` new, `lib/services/changelog_parser.dart` removed, `lib/services/changelog_cleaner.dart` removed, `lib/widgets/whats_new_sheet.dart`, `lib/screens/pantry_shell.dart`, `lib/screens/settings_screen.dart`, `lib/main.dart`)
+
+## [0.0.7]
+
 ### Fixed
 - **Price calculator formatter produced leading zeros**: `_PriceCalculatorFormatter` (now `PriceCalculatorFormatter`) did not strip leading zeros from the digit string, causing inputs like typing `5,0,0` to produce `0005.00` instead of `5.00`. Fixed by wrapping integer-part extraction with `int.parse(...).toString()`. Extracted the formatter to a public class in `lib/formatters/price_calculator_formatter.dart` with 17 unit tests. (`lib/formatters/price_calculator_formatter.dart` new, `lib/widgets/price_entry_sheet.dart`)
 - **Bottom sheet content obscured by Android system navigation bar**: All four bottom sheets (`price_entry_sheet`, `quantity_and_pantry_sheet`, `add_to_shopping_list_sheet`, `whats_new_sheet`) now add `MediaQuery.padding.bottom` to their content padding. Fixed by replacing `const EdgeInsets.fromLTRB(16, 16, 16, 16)` with `EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad)`. (`lib/widgets/price_entry_sheet.dart`, `lib/widgets/quantity_and_pantry_sheet.dart`, `lib/widgets/add_to_shopping_list_sheet.dart`, `lib/widgets/whats_new_sheet.dart`)
