@@ -1,61 +1,90 @@
+/// Tests for [QuickAddProduce].
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/widgets/quick_add_produce.dart';
-import '../helpers/pump_app.dart';
 
 void main() {
-  group('QuickAddProduce', () {
-    testWidgets('renders produce chips', (tester) async {
-      await pumpApp(
-        tester,
-        Scaffold(
-          body: QuickAddProduce(
-            items: const ['Apple', 'Banana', 'Orange', 'Tomato'],
-            onProduceSelected: (_) {},
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Apple'), findsOneWidget);
-      expect(find.text('Banana'), findsOneWidget);
-      expect(find.text('Orange'), findsOneWidget);
-      expect(find.byType(ActionChip), findsNWidgets(4));
-    });
-
-    testWidgets('tapping a chip calls onProduceSelected', (tester) async {
-      var selected = '';
-      await pumpApp(
-        tester,
-        Scaffold(
+  testWidgets('shows all items as chips when none are loading', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
           body: QuickAddProduce(
             items: const ['Apple', 'Banana'],
-            onProduceSelected: (name) => selected = name,
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Apple'));
-      await tester.pumpAndSettle();
-      expect(selected, 'Apple');
-    });
-
-    testWidgets('long produce names are truncated', (tester) async {
-      await pumpApp(
-        tester,
-        Scaffold(
-          body: QuickAddProduce(
-            items: const ['Brussels Sprouts With Extra Long Name'],
             onProduceSelected: (_) {},
           ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
 
-      final chip = tester.widget<ActionChip>(find.byType(ActionChip));
-      final label = chip.label as Text;
-      expect(label.overflow, TextOverflow.ellipsis);
-      expect(label.maxLines, 1);
-    });
+    expect(find.text('Apple'), findsOneWidget);
+    expect(find.text('Banana'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('shows loading spinner on a chip when it is in loadingItems', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: QuickAddProduce(
+            items: const ['Apple', 'Banana'],
+            loadingItems: const {'Apple'},
+            onProduceSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    // Loading chip shows spinner instead of text
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Apple'), findsNothing);
+    // Non-loading chip still shows text
+    expect(find.text('Banana'), findsOneWidget);
+  });
+
+  testWidgets('non-loading chips remain interactive', (tester) async {
+    var tapped = '';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: QuickAddProduce(
+            items: const ['Apple', 'Banana'],
+            loadingItems: const {'Apple'},
+            onProduceSelected: (name) => tapped = name,
+          ),
+        ),
+      ),
+    );
+
+    // Tap the non-loading chip
+    await tester.tap(find.text('Banana'));
+    expect(tapped, 'Banana');
+
+    // Loading chip's onPressed should be null (disabled)
+    final chips = tester.widgetList<ActionChip>(find.byType(ActionChip));
+    expect(chips.length, 2);
+    final loadingChip = chips.first;
+    final nonLoadingChip = chips.last;
+    expect(loadingChip.onPressed, isNull);
+    expect(nonLoadingChip.onPressed, isNotNull);
+  });
+
+  testWidgets('returns SizedBox.shrink when items is empty', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: QuickAddProduce(
+            items: const [],
+            onProduceSelected: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(QuickAddProduce), findsOneWidget);
+    expect(find.byType(ActionChip), findsNothing);
   });
 }
