@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
@@ -14,7 +13,6 @@ import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/shopping_list_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
-import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
@@ -138,10 +136,6 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     super.dispose();
   }
 
-  /// The [SharedPreferences] key for tracking which version the user last
-  /// saw in the auto‑displayed changelog sheet.
-  static const _changelogLastSeenVersionKey = 'changelog_last_seen_version';
-
   Future<void> _showChangelogIfPending() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -151,42 +145,13 @@ class _PantryShellState extends ConsumerState<PantryShell> {
         return;
       }
 
-      final raw = await rootBundle.loadString('CHANGELOG.md');
-      final parser = ChangelogParser();
-      final allEntries = parser.parse(raw);
-
-      if (allEntries.isEmpty) {
-        logError('Changelog parsed but produced no entries');
-        return;
-      }
-
-      // Show only the entries the user has NOT seen yet — not the
-      // entire changelog history. [Unreleased] is always included.
-      final info = await PackageInfo.fromPlatform();
-      final currentVersion = '${info.version}+${info.buildNumber}';
-      final lastSeen = prefs.getString(_changelogLastSeenVersionKey) ?? '0.0.0';
-      final unseen = parser.filterUnseen(allEntries, lastSeen, currentVersion);
-
-      if (unseen.isEmpty) {
-        logInfo('All changelog entries already seen — skipping');
-        await prefs.setString('changelog_show_pending', 'false');
-        return;
-      }
-
-      logInfo(
-        'Showing changelog: ${unseen.length} entries '
-        '(last seen $lastSeen → $currentVersion)',
-      );
+      final raw = await rootBundle.loadString('USER_CHANGELOG.md');
 
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        await showWhatsNewSheet(context, unseen);
+        await showWhatsNewSheet(context, rawChangelog: raw);
         await prefs.setString('changelog_show_pending', 'false');
-        await prefs.setString(
-          _changelogLastSeenVersionKey,
-          currentVersion,
-        );
       });
     } on Exception catch (e) {
       logError('Failed to show changelog: $e');

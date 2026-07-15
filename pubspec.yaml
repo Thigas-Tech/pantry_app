@@ -63,6 +63,7 @@ flutter:
   assets:
     - .env
     - CHANGELOG.md
+    - USER_CHANGELOG.md
 
 flutter_launcher_icons:
   android: true

@@ -197,7 +197,7 @@ Future<void> _handleAppUpdate() async {
     // Changelog tracking — content-hash-driven, not version-driven.
     // This ensures new [Unreleased] entries are surfaced even when the
     // app version string has not changed between development builds.
-    final raw = await rootBundle.loadString('CHANGELOG.md');
+    final raw = await rootBundle.loadString('USER_CHANGELOG.md');
     final contentHash = raw.hashCode.toString();
     final lastSeenHash = prefs.getString('changelog_content_hash');
 

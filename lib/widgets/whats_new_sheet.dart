@@ -2,37 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
-import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Section headings in CHANGELOG.md that describe internal development
-/// work and should not be displayed to end users in the in-app sheet.
+/// Shows a bottom sheet with the user-facing changelog.
 ///
-/// When adding a new dev-only section heading to the changelog, add it
-/// here as well so it is hidden from the What's New sheet.
-const _devOnlySections = {
-  'Code health',
-  'CSV',
-  'CSV export/import',
-  'Database',
-  'Dependencies',
-  'Documentation',
-  'Roadmap',
-  'Testing and coverage',
-  'Tests',
-};
-
-/// Shows a bottom sheet listing changelog entries since the last seen version.
-///
-/// [entries] should be the result of [ChangelogParser.parse] filtered by
-/// [ChangelogParser.filterUnseen].
+/// [rawChangelog] is the raw content of `USER_CHANGELOG.md`, which is already
+/// written in user-facing language and needs no cleaning.
 ///
 /// Returns `true` on explicit dismiss (button tap), `null` on swipe-away.
-/// In both cases the caller should mark the changelog as seen.
 Future<bool?> showWhatsNewSheet(
-  BuildContext context,
-  List<ChangelogEntry> entries,
-) {
+  BuildContext context, {
+  required String rawChangelog,
+}) {
   return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
@@ -40,20 +21,52 @@ Future<bool?> showWhatsNewSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (ctx) => _WhatsNewSheet(entries: entries),
+    builder: (ctx) => _WhatsNewSheet(rawChangelog: rawChangelog),
   );
 }
 
-/// The content of the "What's New" bottom sheet.
-///
-/// Renders each [ChangelogEntry] as a version header followed by its
-/// content sections grouped under `### Section` headings.
-class _WhatsNewSheet extends StatelessWidget {
-  /// Creates a [_WhatsNewSheet].
-  const _WhatsNewSheet({required this.entries});
+/// Parsed entry from the raw changelog string.
+final class _ChangelogEntry {
+  const _ChangelogEntry({required this.version, required this.content});
 
-  /// The changelog entries to display, newest first.
-  final List<ChangelogEntry> entries;
+  final String version;
+  final String content;
+}
+
+/// Parses a raw versioned changelog string into entries.
+List<_ChangelogEntry> _parseEntries(String raw) {
+  final entries = <_ChangelogEntry>[];
+  final sections = raw.split(RegExp(r'(?:^|\n)## \['));
+  var isFirst = true;
+
+  for (final section in sections) {
+    if (isFirst) {
+      isFirst = false;
+      if (!section.trimLeft().startsWith('[')) continue;
+    }
+
+    final headerEnd = section.indexOf(']');
+    if (headerEnd == -1) continue;
+
+    final version = section.substring(0, headerEnd).trim();
+    if (version.isEmpty) continue;
+
+    final bodyStart = section.indexOf('\n');
+    final content = bodyStart == -1
+        ? ''
+        : section.substring(bodyStart + 1).trim();
+
+    entries.add(_ChangelogEntry(version: version, content: content));
+  }
+
+  return entries;
+}
+
+/// The content of the "What's New" bottom sheet.
+class _WhatsNewSheet extends StatelessWidget {
+  const _WhatsNewSheet({required this.rawChangelog});
+
+  final String rawChangelog;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +74,7 @@ class _WhatsNewSheet extends StatelessWidget {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final maxHeight = (screenHeight - bottomPadding) * 0.8;
+    final entries = _parseEntries(rawChangelog);
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -102,7 +116,7 @@ class _WhatsNewSheet extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 12),
-                    _VersionHeader(entry: entry),
+                    _VersionHeader(version: entry.version),
                     const SizedBox(height: 8),
                     _SectionContent(content: entry.content),
                     const Divider(),
@@ -132,20 +146,18 @@ class _WhatsNewSheet extends StatelessWidget {
   }
 }
 
-/// Displays a version header for a single [ChangelogEntry].
+/// Displays a version header.
 class _VersionHeader extends StatelessWidget {
-  /// Creates a [_VersionHeader].
-  const _VersionHeader({required this.entry});
+  const _VersionHeader({required this.version});
 
-  /// The changelog entry to display the version header for.
-  final ChangelogEntry entry;
+  final String version;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final displayVersion = entry.version == ChangelogParser.unreleasedVersion
+    final displayVersion = version == 'Unreleased'
         ? l10n.unreleasedVersion
-        : entry.version;
+        : version;
 
     return Text(
       l10n.whatsNewVersion(displayVersion),
@@ -156,15 +168,10 @@ class _VersionHeader extends StatelessWidget {
   }
 }
 
-/// Renders the content of a changelog section as grouped `###` subsections.
-///
-/// Parses the raw [content] string, splits by `### Section` headers, and
-/// renders each subsection with its header and bullet-point list.
+/// Renders the content of a changelog entry, grouped by `###` subsections.
 class _SectionContent extends StatelessWidget {
-  /// Creates a [_SectionContent].
   const _SectionContent({required this.content});
 
-  /// The raw content body from a [ChangelogEntry].
   final String content;
 
   @override
@@ -174,52 +181,48 @@ class _SectionContent extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final sections = <_ChangelogSection>[];
     final parts = content.split(RegExp(r'(?:^|\n)### '));
+    final children = <Widget>[];
     var isFirst = true;
 
     for (final part in parts) {
+      String? title;
+      String body;
+
       if (isFirst) {
         isFirst = false;
-        // Content before the first `###` heading.
-        final trimmed = part.trim();
-        if (trimmed.isNotEmpty) {
-          sections.add(_ChangelogSection(body: trimmed));
-        }
-        continue;
+        body = part.trim();
+        if (body.isEmpty) continue;
+      } else {
+        final headerEnd = part.indexOf('\n');
+        title = headerEnd == -1
+            ? part.trim()
+            : part.substring(0, headerEnd).trim();
+        body = headerEnd == -1 ? '' : part.substring(headerEnd + 1).trim();
+        if (body.isEmpty) continue;
       }
 
-      final headerEnd = part.indexOf('\n');
-      final title = headerEnd == -1
-          ? part.trim()
-          : part.substring(0, headerEnd).trim();
-      final lines = headerEnd == -1 ? '' : part.substring(headerEnd + 1).trim();
-
-      if (_devOnlySections.contains(title)) {
-        continue;
+      if (title != null && title.isNotEmpty) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 4),
+            child: Text(
+              title,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        );
       }
 
-      sections.add(_ChangelogSection(title: title, body: lines));
+      children.add(_buildBody(body, theme));
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final section in sections) ...[
-          if (section.title != null && section.title!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 4),
-              child: Text(
-                section.title!,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          if (section.body.isNotEmpty) _buildBody(section.body, theme),
-        ],
-      ],
+      children: children,
     );
   }
 
@@ -231,7 +234,6 @@ class _SectionContent extends StatelessWidget {
       final trimmed = line.trim();
       if (trimmed.isEmpty) continue;
 
-      // Strip leading `- ` bullet marker.
       final displayText = trimmed.startsWith('- ')
           ? trimmed.substring(2).trim()
           : trimmed;
@@ -253,16 +255,9 @@ class _SectionContent extends StatelessWidget {
 }
 
 /// Renders a single line of changelog content with basic markdown support.
-///
-/// Supported formatting:
-/// - `**bold**` or `__bold__` — rendered in bold.
-/// - `` `code` `` — rendered in monospace.
-/// - `[link text](url)` — rendered as a tappable link via `url_launcher`.
 class _MarkdownLine extends StatelessWidget {
-  /// Creates a [_MarkdownLine].
   const _MarkdownLine({required this.text});
 
-  /// The raw text of a single line, already stripped of bullet markers.
   final String text;
 
   @override
@@ -287,7 +282,6 @@ class _MarkdownLine extends StatelessWidget {
         r'\[([^\]]+)\]\(([^)]+)\)',
       ).firstMatch(remaining);
 
-      // Find the earliest match.
       var earliest = boldMatch;
       if (boldAltMatch != null &&
           (earliest == null || boldAltMatch.start < earliest.start)) {
@@ -308,7 +302,6 @@ class _MarkdownLine extends StatelessWidget {
         break;
       }
 
-      // Text before the match.
       if (earliest.start > 0) {
         spans.add(TextSpan(text: remaining.substring(0, earliest.start)));
       }
@@ -362,16 +355,4 @@ Future<void> _tryLaunchUrl(BuildContext context, String url) async {
   } on Exception {
     // Silently ignore failed link launches.
   }
-}
-
-/// Internal model for a grouped subsection of changelog content.
-class _ChangelogSection {
-  /// Creates a [_ChangelogSection].
-  const _ChangelogSection({required this.body, this.title});
-
-  /// The `### Section` heading text, or `null` for ungrouped content.
-  final String? title;
-
-  /// The body content under this section heading.
-  final String body;
 }

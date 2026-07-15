@@ -18,7 +18,6 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/feedback_screen.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
-import 'package:pantry_app/services/changelog_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
@@ -419,18 +418,10 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _showWhatsNew(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final raw = await rootBundle.loadString('CHANGELOG.md');
+      final raw = await rootBundle.loadString('USER_CHANGELOG.md');
       if (!context.mounted) return;
-      final parser = ChangelogParser();
-      final allEntries = parser.parse(raw);
 
-      if (allEntries.isEmpty) {
-        SnackbarHelper.showInfo(context, l10n.whatsNewDismiss);
-        return;
-      }
-
-      if (!context.mounted) return;
-      await showWhatsNewSheet(context, allEntries);
+      await showWhatsNewSheet(context, rawChangelog: raw);
     } on Exception catch (e) {
       logError('Failed to show changelog from settings: $e');
       if (context.mounted) {
