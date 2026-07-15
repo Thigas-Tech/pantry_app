@@ -30,6 +30,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
@@ -43,6 +44,7 @@ import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 
 /// A fake [ActiveInventoryNotifier] that always returns 1
@@ -1466,5 +1468,177 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ProductDetailScreen), findsOneWidget);
+  });
+
+  group('quick-add produce carousel', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    testWidgets(
+      'tapping produce chip resolves and navigates to ProductDetailScreen',
+      (
+        tester,
+      ) async {
+        final mockRepo = createMockProductRepository();
+        const product = Product(
+          barcode: 'produce-Apple',
+          name: 'Apple',
+          productType: ProductType.produce,
+          source: 'manual',
+        );
+        when(
+          () => mockRepo.resolveProduceProduct('Apple'),
+        ).thenAnswer((_) async => product);
+        when(
+          () => mockRepo.getInventoryForBarcode(
+            any(),
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer((_) async => <InventoryItem>[]);
+
+        await pumpApp(
+          tester,
+          const HomeScreen(),
+          imageCacheMock: mockImageCache,
+          overrides: [
+            inventoryWithProductProvider.overrideWith(
+              (ref) => <InventoryWithProduct>[],
+            ),
+            inventoryListProvider.overrideWith(
+              (ref) => <Map<String, dynamic>>[],
+            ),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+        );
+
+        // Wait for _loadQuickAddItems to populate the carousel
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump();
+
+        expect(find.text('Apple'), findsOneWidget);
+
+        await tester.tap(find.text('Apple'));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        verify(() => mockRepo.resolveProduceProduct('Apple')).called(1);
+        expect(find.byType(ProductDetailScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets('shows loading spinner on tapped chip while resolving', (
+      tester,
+    ) async {
+      final mockRepo = createMockProductRepository();
+      final completer = Completer<Product>();
+      when(
+        () => mockRepo.resolveProduceProduct('Apple'),
+      ).thenAnswer((_) => completer.future);
+
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          inventoryWithProductProvider.overrideWith(
+            (ref) => <InventoryWithProduct>[],
+          ),
+          inventoryListProvider.overrideWith(
+            (ref) => <Map<String, dynamic>>[],
+          ),
+          activeInventoryProvider.overrideWith(
+            FakeActiveInventoryNotifier.new,
+          ),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
+
+      await tester.tap(find.text('Apple'));
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('shows error snackbar when resolveProduceProduct fails', (
+      tester,
+    ) async {
+      final mockRepo = createMockProductRepository();
+      when(
+        () => mockRepo.resolveProduceProduct('Apple'),
+      ).thenThrow(Exception('Network error'));
+
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          inventoryWithProductProvider.overrideWith(
+            (ref) => <InventoryWithProduct>[],
+          ),
+          inventoryListProvider.overrideWith(
+            (ref) => <Map<String, dynamic>>[],
+          ),
+          activeInventoryProvider.overrideWith(
+            FakeActiveInventoryNotifier.new,
+          ),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
+
+      await tester.tap(find.text('Apple'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Could not create inventory.'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
+    testWidgets('rapid tap same chip does not call resolve twice', (
+      tester,
+    ) async {
+      final mockRepo = createMockProductRepository();
+      final completer = Completer<Product>();
+      when(
+        () => mockRepo.resolveProduceProduct('Apple'),
+      ).thenAnswer((_) => completer.future);
+
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          inventoryWithProductProvider.overrideWith(
+            (ref) => <InventoryWithProduct>[],
+          ),
+          inventoryListProvider.overrideWith(
+            (ref) => <Map<String, dynamic>>[],
+          ),
+          activeInventoryProvider.overrideWith(
+            FakeActiveInventoryNotifier.new,
+          ),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
+
+      await tester.tap(find.text('Apple'));
+      await tester.pump();
+      // Second tap: text is now replaced by spinner, tap the first chip
+      await tester.tap(find.byType(ActionChip).first);
+      await tester.pump();
+
+      verify(() => mockRepo.resolveProduceProduct('Apple')).called(1);
+    });
   });
 }

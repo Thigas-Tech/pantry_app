@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
-import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -48,6 +47,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   bool _hasCheckedOverdue = false;
   String _searchQuery = '';
   List<String> _quickAddItems = [];
+  final Set<String> _loadingProduce = {};
 
   @override
   bool get wantKeepAlive => true;
@@ -77,35 +77,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _handleQuickProduceAdd(String produceName) async {
+    if (_loadingProduce.contains(produceName)) return;
+    setState(() => _loadingProduce.add(produceName));
+
     final repo = ref.read(productRepositoryProvider);
-    final activeId = ref.read(activeInventoryProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    final item = InventoryItem(
-      barcode: 'produce-$produceName',
-      unit: 'g',
-      quantity: 150,
-      inventoryId: activeId,
-    );
-
     try {
-      final newId = await repo.addInventoryItem(item);
+      final product = await repo.resolveProduceProduct(produceName);
       if (!mounted) return;
-      SnackbarHelper.showUndo(
-        context,
-        l10n.addToPantry,
-        () async {
-          await repo.deleteInventoryItem(newId);
-          if (mounted) {
-            SnackbarHelper.showInfo(context, l10n.removedFromPantry);
-          }
-        },
+      setState(() => _loadingProduce.remove(produceName));
+
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: product),
+        ),
       );
+
+      if (!mounted) return;
       ref.invalidate(inventoryWithProductProvider);
       await ProducePurchaseTracker().recordPurchase(produceName);
     } on Exception catch (e) {
-      logError('Failed to quick-add produce: $e');
+      logError('Failed to resolve produce product: $e');
       if (mounted) {
+        setState(() => _loadingProduce.remove(produceName));
         SnackbarHelper.showError(context, l10n.couldNotCreateInventory);
       }
     }
@@ -465,6 +460,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           if (!_selectionMode && _quickAddItems.isNotEmpty)
             QuickAddProduce(
               items: _quickAddItems,
+              loadingItems: _loadingProduce,
               onProduceSelected: _handleQuickProduceAdd,
             ),
           Expanded(
