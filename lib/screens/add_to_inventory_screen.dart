@@ -73,6 +73,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
               ? DateTime.tryParse(widget.suggestedExpiry!)
               : null);
     _notes = existing?.notes ?? '';
+    _produceIsWeightMode = !_isProduce;
     _syncCustomOptions();
   }
 

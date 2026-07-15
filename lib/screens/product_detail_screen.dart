@@ -706,6 +706,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           existingItem: existing,
           suggestedExpiry: suggested,
           inventoryId: activeId,
+          productType: widget.product.productType,
         ),
       ),
     );
