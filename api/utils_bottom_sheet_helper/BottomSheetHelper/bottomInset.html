@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the show method from the AddToShoppingListSheet class, for the Dart programming language.">
-  <title>show method - AddToShoppingListSheet class - add_to_shopping_list_sheet library - Dart API</title>
+  <meta name="description" content="API docs for the bottomInset method from the BottomSheetHelper class, for the Dart programming language.">
+  <title>bottomInset method - BottomSheetHelper class - bottom_sheet_helper library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../widgets_add_to_shopping_list_sheet/">widgets&#47;add_to_shopping_list_sheet.dart</a></li>
-    <li><a href="../../widgets_add_to_shopping_list_sheet/AddToShoppingListSheet-class.html">AddToShoppingListSheet</a></li>
-    <li class="self-crumb">show static method</li>
+    <li><a href="../../utils_bottom_sheet_helper/">utils&#47;bottom_sheet_helper.dart</a></li>
+    <li><a href="../../utils_bottom_sheet_helper/BottomSheetHelper-class.html">BottomSheetHelper</a></li>
+    <li class="self-crumb">bottomInset static method</li>
   </ol>
-  <div class="self-name">show</div>
+  <div class="self-name">bottomInset</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,16 +46,16 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="widgets_add_to_shopping_list_sheet&#47;AddToShoppingListSheet-class-sidebar.html"
+    data-above-sidebar="utils_bottom_sheet_helper&#47;BottomSheetHelper-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">show</span> static method 
+<h1><span class="kind-method">bottomInset</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a>?</span>&gt;</span></span>
-<span class="name ">show</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span></span></li>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+<span class="name ">bottomInset</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="bottomInset-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span></span></li>
 </ol>)
 
       
@@ -63,19 +63,19 @@
     </section>
     
 <section class="desc markdown">
-  <p>Shows the add-to-shopping-list bottom sheet and returns a
-<a href="../../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a>, or <code>null</code> if cancelled.</p>
+  <p>Combined bottom inset including the system navigation bar and the
+keyboard height. Use as the bottom padding of a sheet's outermost widget
+to prevent content from being hidden behind the keyboard.</p>
+<p>Returns <code>padding.bottom + viewInsets.bottom</code>.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static Future&lt;ShoppingItem?&gt; show(BuildContext context) {
-  return BottomSheetHelper.show&lt;ShoppingItem&gt;(
-    context: context,
-    builder: (_) =&gt; const AddToShoppingListSheet._(),
-  );
+  <pre class="language-dart"><code class="language-dart">static double bottomInset(BuildContext context) {
+  final media = MediaQuery.of(context);
+  return media.padding.bottom + media.viewInsets.bottom;
 }</code></pre>
 </section>
 
@@ -90,12 +90,12 @@
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../widgets_add_to_shopping_list_sheet/">add_to_shopping_list_sheet</a></li>
-    <li><a href="../../widgets_add_to_shopping_list_sheet/AddToShoppingListSheet-class.html">AddToShoppingListSheet</a></li>
-    <li class="self-crumb">show static method</li>
+    <li><a href="../../utils_bottom_sheet_helper/">bottom_sheet_helper</a></li>
+    <li><a href="../../utils_bottom_sheet_helper/BottomSheetHelper-class.html">BottomSheetHelper</a></li>
+    <li class="self-crumb">bottomInset static method</li>
 </ol>
 
-    <h5>AddToShoppingListSheet class</h5>
+    <h5>BottomSheetHelper class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

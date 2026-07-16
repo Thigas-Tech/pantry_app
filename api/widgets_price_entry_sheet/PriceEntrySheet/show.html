@@ -84,10 +84,8 @@ or <code>null</code> if cancelled.</p>
   String? existingCurrency,
   String? existingStore,
 }) {
-  return showModalBottomSheet&lt;Price&gt;(
+  return BottomSheetHelper.show&lt;Price&gt;(
     context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
     builder: (_) =&gt; PriceEntrySheet._(
       barcode: barcode,
       existingPrice: existingPrice,

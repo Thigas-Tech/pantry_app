@@ -78,13 +78,8 @@ written in user-facing language and needs no cleaning.</p>
   BuildContext context, {
   required String rawChangelog,
 }) {
-  return showModalBottomSheet&lt;bool&gt;(
+  return BottomSheetHelper.show&lt;bool&gt;(
     context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
     builder: (ctx) =&gt; _WhatsNewSheet(rawChangelog: rawChangelog),
   );
 }</code></pre>
