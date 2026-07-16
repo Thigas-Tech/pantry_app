@@ -7,6 +7,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/produce_category_mapper.dart';
 import 'package:pantry_app/services/produce_nutrition_fallback.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -272,6 +273,7 @@ class ProductRepository {
             name: produceName,
             productType: ProductType.produce,
             source: 'manual',
+            category: ProduceCategoryMapper.forName(produceName),
             lastSynced: DateTime.now().millisecondsSinceEpoch,
           );
         }
@@ -287,6 +289,7 @@ class ProductRepository {
         name: produceName,
         productType: ProductType.produce,
         source: 'manual',
+        category: ProduceCategoryMapper.forName(produceName),
         energyKcal: fallback.energyKcal,
         proteinG: fallback.proteinG,
         carbsG: fallback.carbsG,
@@ -301,6 +304,7 @@ class ProductRepository {
       name: produceName,
       productType: ProductType.produce,
       source: 'manual',
+      category: ProduceCategoryMapper.forName(produceName),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
     );
   }

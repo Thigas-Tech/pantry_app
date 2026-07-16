@@ -469,6 +469,7 @@ void main() {
       expect(product.barcode, produceBarcode);
       expect(product.productType, ProductType.produce);
       expect(product.name, produceName);
+      expect(product.category, 'Fruit');
     });
 
     test(
@@ -485,8 +486,22 @@ void main() {
 
         // Apple's fallback nutrition: ~52 kcal per 100g
         expect(product.energyKcal, closeTo(52, 1));
+        expect(product.category, 'Fruit');
       },
     );
+
+    test('returns "Vegetables" category for Broccoli', () async {
+      when(() => mockDb.getProduct('produce-Broccoli')).thenAnswer(
+        (_) async => null,
+      );
+      when(() => mockUsda.searchFood('Broccoli')).thenAnswer(
+        (_) async => [],
+      );
+
+      final product = await repository.resolveProduceProduct('Broccoli');
+
+      expect(product.category, 'Vegetables');
+    });
 
     test('throws ArgumentError for empty produce name', () {
       expect(
