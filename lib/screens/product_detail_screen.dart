@@ -105,7 +105,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.product.name),
+        title: Text(
+          widget.product.productType == ProductType.produce
+              ? l10n.localizeProduceName(widget.product.name)
+              : widget.product.name,
+        ),
         actions: [
           if (priceTrackingEnabled) const PriceVisibilityToggle(),
           IconButton(

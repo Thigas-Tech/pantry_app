@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
@@ -85,11 +86,27 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
     }
   }
 
+  /// Returns the localized display name for this inventory item.
+  ///
+  /// For produce items, uses `localizeProduceName` so the name is shown in
+  /// the user's locale (e.g. `"Maca"` in Portuguese). Falls back to `barcode`
+  /// when `productName` is null.
+  String _localizedDisplayName(AppLocalizations l10n) {
+    final name = widget.item.productName;
+    if (name == null) return widget.item.barcode;
+    if (widget.item.productType == ProductType.produce) {
+      return l10n.localizeProduceName(name);
+    }
+    return name;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final itemIsExpired = isExpired(widget.item.expiryDate);
     final expiryLabel = itemIsExpired ? l10n.expired : l10n.good;
+
+    final displayName = _localizedDisplayName(l10n);
 
     return Card(
       elevation: 2,
@@ -112,16 +129,16 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
               ? Hero(
                   tag: 'card_${widget.item.barcode}',
                   child: Semantics(
-                    label: widget.item.productName,
+                    label: displayName,
                     child: _buildLeadingImage(),
                   ),
                 )
               : Semantics(
-                  label: widget.item.productName,
+                  label: displayName,
                   child: _buildLeadingImage(),
                 ),
           title: Text(
-            widget.item.productName ?? widget.item.barcode,
+            displayName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

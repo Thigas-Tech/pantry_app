@@ -1,6 +1,7 @@
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 
 /// A read‑only view that joins an [InventoryItem] with its corresponding
 /// [Product] metadata and inventory details.
@@ -87,6 +88,13 @@ class InventoryWithProduct {
 
     /// The normalized search text from the `products` table.
     this.productSearchText,
+
+    /// The product type (`barcoded`, `produce`, or `custom`).
+    ///
+    /// May be `null` if the product record was deleted (e.g. after a cache
+    /// flush) — the `LEFT JOIN` in the query still returns the inventory row
+    /// with `NULL` product columns.
+    this.productType,
   });
 
   /// Constructs an [InventoryWithProduct] from a raw database row.
@@ -115,6 +123,11 @@ class InventoryWithProduct {
           map['nutriscore_not_applicable_category'] as String?,
       productCategory: map['product_category'] as String?,
       productSearchText: map['product_search_text'] as String?,
+      productType: map['product_type'] != null
+          ? ProductType.values.firstWhere(
+              (t) => t.name == map['product_type'],
+            )
+          : null,
     );
   }
 
@@ -170,4 +183,11 @@ class InventoryWithProduct {
 
   /// The normalized search text from the `products` table.
   final String? productSearchText;
+
+  /// The product type (`barcoded`, `produce`, or `custom`).
+  ///
+  /// May be `null` if the product record was deleted (e.g. after a cache
+  /// flush) — the `LEFT JOIN` in the query still returns the inventory row
+  /// with `NULL` product columns.
+  final ProductType? productType;
 }

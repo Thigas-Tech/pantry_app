@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -509,7 +510,9 @@ class _ProductResultTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: isApi
+      trailing: product.productType == ProductType.produce
+          ? Icon(Icons.eco_outlined, size: 16, color: Colors.green.shade600)
+          : isApi
           ? Icon(
               Icons.cloud_outlined,
               size: 16,
@@ -533,10 +536,20 @@ class _ProductResultTile extends StatelessWidget {
           fit: BoxFit.cover,
           loadingBuilder: (_, child, loadingProgress) {
             if (loadingProgress == null) return child;
-            return _barcodeAvatar(product.barcode, theme);
+            return _produceOrBarcodeAvatar(product, theme);
           },
-          errorBuilder: (_, _, _) => _barcodeAvatar(product.barcode, theme),
+          errorBuilder: (_, _, _) => _produceOrBarcodeAvatar(product, theme),
         ),
+      );
+    }
+    return _produceOrBarcodeAvatar(product, theme);
+  }
+
+  Widget _produceOrBarcodeAvatar(Product product, ThemeData theme) {
+    if (product.productType == ProductType.produce) {
+      return CircleAvatar(
+        backgroundColor: Colors.green.shade100,
+        child: Icon(Icons.eco_outlined, color: Colors.green.shade600, size: 18),
       );
     }
     return _barcodeAvatar(product.barcode, theme);

@@ -1542,7 +1542,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get averageScore => 'Nota media';
 
   @override
-  String get produceApple => 'Maca';
+  String get produceApple => 'Maça';
 
   @override
   String get produceBanana => 'Banana';
@@ -3074,7 +3074,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get averageScore => 'Nota media';
 
   @override
-  String get produceApple => 'Maca';
+  String get produceApple => 'Maça';
 
   @override
   String get produceBanana => 'Banana';
