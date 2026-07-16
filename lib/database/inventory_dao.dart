@@ -389,7 +389,11 @@ class InventoryDao {
     try {
       final result = await db.rawQuery(
         '''
-        SELECT DISTINCT products.barcode, products.name
+        SELECT DISTINCT
+          products.barcode,
+          products.name,
+          products.image_url,
+          products.product_type
         FROM inventory
         INNER JOIN products ON inventory.barcode = products.barcode
         WHERE inventory.inventory_id = ?

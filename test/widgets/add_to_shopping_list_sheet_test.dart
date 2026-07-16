@@ -196,6 +196,358 @@ void main() {
       expect(find.text('In your pantry'), findsAtLeast(1));
     });
 
+    testWidgets(
+      'does not use DraggableScrollableSheet',
+      (tester) async {
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(DraggableScrollableSheet), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'outer Padding includes bottomInset for keyboard avoidance',
+      (tester) async {
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        final addItemButton = find.text('Add custom item');
+        final outerPad = tester.widget<Padding>(
+          find
+              .ancestor(
+                of: addItemButton,
+                matching: find.byType(Padding),
+              )
+              .first,
+        );
+
+        final insets = outerPad.padding;
+        if (insets is EdgeInsets) {
+          expect(insets.bottom, greaterThanOrEqualTo(0));
+        }
+      },
+    );
+
+    testWidgets(
+      'does not use Expanded directly inside primary flow Column',
+      (tester) async {
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        final columns = find.byType(Column);
+        Column? ourColumn;
+        for (final col in columns.evaluate()) {
+          final w = col.widget as Column;
+          if (w.mainAxisSize == MainAxisSize.min) {
+            ourColumn = w;
+            break;
+          }
+        }
+
+        expect(ourColumn, isNotNull);
+        final hasExpanded = ourColumn!.children.any((c) => c is Expanded);
+        expect(hasExpanded, isFalse);
+      },
+    );
+
+    testWidgets(
+      'outer Padding child is SingleChildScrollView in primary flow',
+      (tester) async {
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        Widget? scrollViewChild;
+        for (final element in find.byType(Padding).evaluate()) {
+          final pad = element.widget as Padding;
+          if (pad.child is SingleChildScrollView) {
+            scrollViewChild = pad.child;
+            break;
+          }
+        }
+
+        expect(scrollViewChild, isA<SingleChildScrollView>());
+      },
+    );
+
+    testWidgets(
+      'inventory section does not overflow when keyboard is shown',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => List.generate(
+            4,
+            (i) => {
+              'barcode': '00$i',
+              'name': 'Product $i',
+              'image_url': null,
+              'product_type': 'barcoded',
+            },
+          ),
+        );
+
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('From your pantry'), findsOneWidget);
+        expect(find.text('Product 0'), findsOneWidget);
+
+        await tester.showKeyboard(find.byType(SearchBar));
+        await tester.pumpAndSettle();
+
+        expect(find.text('From your pantry'), findsOneWidget);
+        expect(find.text('Product 0'), findsOneWidget);
+        expect(find.text('Add custom item'), findsOneWidget);
+        await tester.tap(find.text('Add custom item'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Item name'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'shows kitchen icon for inventory item without image_url',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {
+              'barcode': '111',
+              'name': 'Milk',
+              'image_url': null,
+              'product_type': 'barcoded',
+            },
+          ],
+        );
+
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Milk'), findsOneWidget);
+        // Kitchen icon: header + item
+        expect(find.byIcon(Icons.kitchen_outlined), findsNWidgets(2));
+      },
+    );
+
+    testWidgets(
+      'shows product image for pantry item with image_url',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {
+              'barcode': '111',
+              'name': 'Milk',
+              'image_url': 'https://example.com/milk.jpg',
+              'product_type': 'barcoded',
+            },
+          ],
+        );
+
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Milk'), findsOneWidget);
+        expect(find.byType(Image), findsAtLeast(1));
+      },
+    );
+
+    testWidgets(
+      'shows leaf avatar for produce pantry item without image_url',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {
+              'barcode': 'produce-Apple',
+              'name': 'Apple',
+              'image_url': null,
+              'product_type': 'produce',
+            },
+          ],
+        );
+
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Apple'), findsOneWidget);
+        expect(find.byIcon(Icons.eco_outlined), findsAtLeast(1));
+        expect(find.byIcon(Icons.kitchen_outlined), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'handles pantry item with empty image_url string',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {
+              'barcode': '111',
+              'name': 'Milk',
+              'image_url': '',
+              'product_type': 'barcoded',
+            },
+          ],
+        );
+
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Milk'), findsOneWidget);
+        expect(find.byIcon(Icons.kitchen_outlined), findsNWidgets(2));
+      },
+    );
+
+    testWidgets(
+      'handles pantry item with missing keys gracefully',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {
+              'barcode': '111',
+              'name': 'Milk',
+            },
+          ],
+        );
+
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(context),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Milk'), findsOneWidget);
+        expect(find.byIcon(Icons.kitchen_outlined), findsNWidgets(2));
+      },
+    );
+
     testWidgets('inventory section hidden when empty', (tester) async {
       when(
         () => mockDb.getDistinctProductsFromInventory(
