@@ -85,7 +85,7 @@ is desired.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ProductRepository.new" class="callable">
-          <span class="name"><a href="../services_product_repository/ProductRepository/ProductRepository.html">ProductRepository</a></span><span class="signature">(<span class="parameter" id="param-_db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span><span class="parameter" id="param-_api"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">_api</span>, {</span><span class="parameter" id="param-fallbackApi"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a>?</span> <span class="parameter-name">fallbackApi</span>, </span><span class="parameter" id="param-prefs"><span class="type-annotation"><a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a>?</span> <span class="parameter-name">prefs</span></span>})</span>
+          <span class="name"><a href="../services_product_repository/ProductRepository/ProductRepository.html">ProductRepository</a></span><span class="signature">(<span class="parameter" id="param-_db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span><span class="parameter" id="param-_api"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">_api</span>, {</span><span class="parameter" id="param-fallbackApi"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a>?</span> <span class="parameter-name">fallbackApi</span>, </span><span class="parameter" id="param-usdaClient"><span class="type-annotation"><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a>?</span> <span class="parameter-name">usdaClient</span>, </span><span class="parameter" id="param-prefs"><span class="type-annotation"><a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a>?</span> <span class="parameter-name">prefs</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a> with the given <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> and
@@ -154,6 +154,20 @@ stale and a background refresh should be scheduled.
 </dt>
 <dd>
   Inserts a new inventory item and returns its auto‑generated ID.
+  
+
+</dd>
+
+        <dt id="addProduceToInventory" class="callable">
+  <span class="name"><a href="../services_product_repository/ProductRepository/addProduceToInventory.html">addProduceToInventory</a></span><span class="signature">(<wbr><span class="parameter" id="addProduceToInventory-param-produceName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">produceName</span>, {</span><span class="parameter" id="addProduceToInventory-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="addProduceToInventory-param-quantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">quantity</span> = <span class="default-value">150</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Adds a produce item to the inventory, fetching nutrition data from the
+USDA API when available and falling back to hardcoded data.
   
 
 </dd>
@@ -380,6 +394,19 @@ the remote API.
 </dt>
 <dd>
   Renames the inventory with the given <code>id</code>.
+  
+
+</dd>
+
+        <dt id="resolveProduceProduct" class="callable">
+  <span class="name"><a href="../services_product_repository/ProductRepository/resolveProduceProduct.html">resolveProduceProduct</a></span><span class="signature">(<wbr><span class="parameter" id="resolveProduceProduct-param-produceName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">produceName</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Resolves a <a href="../models_product/Product-class.html">Product</a> for <code>produceName</code> with a synthetic barcode.
   
 
 </dd>

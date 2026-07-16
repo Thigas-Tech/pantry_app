@@ -62,15 +62,18 @@
         
 <section class="desc markdown">
   <p>Provides the single <a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a> instance used throughout the app.</p>
-<p>The repository combines the local database (from <a href="../providers_database_provider/databaseProvider.html">databaseProvider</a>) and
-the Open Food Facts SDK adapter (from <a href="../providers_api_service_provider/apiServiceProvider.html">apiServiceProvider</a>) to implement
-the offline-first product lookup.</p>
+<p>The repository combines the local database (from <a href="../providers_database_provider/databaseProvider.html">databaseProvider</a>),
+the Open Food Facts SDK adapter (from <a href="../providers_api_service_provider/apiServiceProvider.html">apiServiceProvider</a>), and the
+USDA FoodData Central API client to implement offline-first product
+lookup and produce quick-add with nutrition data.</p>
 <h2 id="dependencies">Dependencies</h2>
 <ul>
 <li><a href="../providers_database_provider/databaseProvider.html">databaseProvider</a> — supplies the <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> singleton for local
 caching and inventory operations.</li>
 <li><a href="../providers_api_service_provider/apiServiceProvider.html">apiServiceProvider</a> — supplies the configured OFF SDK adapter for
 fetching product data from the internet.</li>
+<li><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> — created inline for the USDA nutrition lookup
+fallback chain.</li>
 </ul>
 <h2 id="lifetime">Lifetime</h2>
 <p>Because this is a <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a> (not a <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a> or <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a>),
@@ -89,7 +92,11 @@ in widgets that need to call repository methods inside <a href="https://api.flut
   <pre class="language-dart"><code class="language-dart">final productRepositoryProvider = Provider&lt;ProductRepository&gt;((ref) {
   final db = ref.read(databaseProvider);
   final api = ref.read(apiServiceProvider);
-  return ProductRepository(db, api);
+  return ProductRepository(
+    db,
+    api,
+    usdaClient: UsdaApiClient(),
+  );
 });</code></pre>
 </section>
 

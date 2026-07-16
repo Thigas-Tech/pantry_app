@@ -70,6 +70,7 @@
 <li><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span></li>
 <li><span class="parameter" id="param-productCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productCategory</span>, </span></li>
 <li><span class="parameter" id="param-productSearchText"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productSearchText</span>, </span></li>
+<li><span class="parameter" id="param-productType"><span class="type-annotation"><a href="../../models_product_type/ProductType.html">ProductType</a>?</span> <span class="parameter-name">productType</span>, </span></li>
 </ol>})
     </section>
     
@@ -141,6 +142,13 @@ the database row (e.g., a product may not have an image URL).</p>
 
   &#47;&#47;&#47; The normalized search text from the `products` table.
   this.productSearchText,
+
+  &#47;&#47;&#47; The product type (`barcoded`, `produce`, or `custom`).
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; May be `null` if the product record was deleted (e.g. after a cache
+  &#47;&#47;&#47; flush) — the `LEFT JOIN` in the query still returns the inventory row
+  &#47;&#47;&#47; with `NULL` product columns.
+  this.productType,
 });</code></pre>
 </section>
 

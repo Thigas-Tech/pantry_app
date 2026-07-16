@@ -89,6 +89,11 @@ net in case the database contains unexpected <code>NULL</code> values.</p>
         map[&#39;nutriscore_not_applicable_category&#39;] as String?,
     productCategory: map[&#39;product_category&#39;] as String?,
     productSearchText: map[&#39;product_search_text&#39;] as String?,
+    productType: map[&#39;product_type&#39;] != null
+        ? ProductType.values.firstWhere(
+            (t) =&gt; t.name == map[&#39;product_type&#39;],
+          )
+        : null,
   );
 }</code></pre>
 </section>

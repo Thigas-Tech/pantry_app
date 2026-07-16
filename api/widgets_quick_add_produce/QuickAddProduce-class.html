@@ -56,7 +56,9 @@
 <section class="desc markdown">
   <p>A horizontal scrollable list of produce item chips for quick adding.</p>
 <p>Each chip shows a produce name. Tapping a chip invokes
-<a href="../widgets_quick_add_produce/QuickAddProduce/onProduceSelected.html">onProduceSelected</a> with the produce name, and triggers haptic feedback.</p>
+<a href="../widgets_quick_add_produce/QuickAddProduce/onProduceSelected.html">onProduceSelected</a> with the produce name, and triggers haptic feedback.
+Chips whose name is present in <a href="../widgets_quick_add_produce/QuickAddProduce/loadingItems.html">loadingItems</a> display a small
+<a href="https://api.flutter.dev/flutter/material/CircularProgressIndicator-class.html">CircularProgressIndicator</a> and are disabled.</p>
 </section>
 
 
@@ -90,7 +92,7 @@
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="QuickAddProduce.new" class="callable">
-          <span class="name"><a href="../widgets_quick_add_produce/QuickAddProduce/QuickAddProduce.html">QuickAddProduce</a></span><span class="signature">({<span class="parameter" id="param-items"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">items</span>, </span><span class="parameter" id="param-onProduceSelected"><span>required</span> <span class="type-annotation">void</span> <span class="parameter-name">onProduceSelected</span>(<span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>), </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../widgets_quick_add_produce/QuickAddProduce/QuickAddProduce.html">QuickAddProduce</a></span><span class="signature">({<span class="parameter" id="param-items"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">items</span>, </span><span class="parameter" id="param-onProduceSelected"><span>required</span> <span class="type-annotation">void</span> <span class="parameter-name">onProduceSelected</span>(<span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>), </span><span class="parameter" id="param-loadingItems"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Set-class.html">Set</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">loadingItems</span> = <span class="default-value">const {}</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../widgets_quick_add_produce/QuickAddProduce-class.html">QuickAddProduce</a> carousel.
@@ -137,6 +139,18 @@
 <dd class="inherited">
   Controls how one widget replaces another widget in the tree.
   <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="loadingItems" class="property">
+  <span class="name"><a href="../widgets_quick_add_produce/QuickAddProduce/loadingItems.html">loadingItems</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Set-class.html">Set</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd>
+  The set of produce names currently being resolved.
+  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 

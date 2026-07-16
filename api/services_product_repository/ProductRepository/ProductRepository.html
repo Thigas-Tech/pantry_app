@@ -57,6 +57,7 @@
       <span class="name ">ProductRepository</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="param-_db"><span class="type-annotation"><a href="../../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span></li>
 <li><span class="parameter" id="param-_api"><span class="type-annotation"><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">_api</span>, {</span></li>
 <li><span class="parameter" id="param-fallbackApi"><span class="type-annotation"><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a>?</span> <span class="parameter-name">fallbackApi</span>, </span></li>
+<li><span class="parameter" id="param-usdaClient"><span class="type-annotation"><a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a>?</span> <span class="parameter-name">usdaClient</span>, </span></li>
 <li><span class="parameter" id="param-prefs"><span class="type-annotation"><a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a>?</span> <span class="parameter-name">prefs</span>, </span></li>
 </ol>})
     </section>
@@ -64,6 +65,9 @@
 <section class="desc markdown">
   <p>Creates a <a href="../../services_product_repository/ProductRepository-class.html">ProductRepository</a> with the given <a href="../../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> and
 primary API. An optional fallback API can be provided for future use.</p>
+<p>The optional <a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> is used by <a href="../../services_product_repository/ProductRepository/addProduceToInventory.html">addProduceToInventory</a> to
+fetch nutrition data for produce items from the USDA FoodData Central
+API when a product is not already cached locally.</p>
 <p>If <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a> is provided it is used for refresh‑time
 tracking; otherwise
 <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a> is lazily obtained from the singleton instance.</p>
@@ -77,6 +81,7 @@ tracking; otherwise
   this._db,
   this._api, {
   this._fallbackApi,
+  this._usdaClient,
   this._prefs,
 });</code></pre>
 </section>
