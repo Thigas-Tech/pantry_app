@@ -4,13 +4,14 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import '../helpers/pump_app.dart';
 
 InventoryWithProduct createItem({
-  String name = 'Test Item',
+  String? name = 'Test Item',
   String barcode = '123',
   double quantity = 2,
   String unit = 'pcs',
@@ -18,6 +19,7 @@ InventoryWithProduct createItem({
   String? expiryDate,
   String? imageUrl,
   String? nutriscoreGrade,
+  ProductType? productType,
 }) {
   return InventoryWithProduct(
     id: 1,
@@ -30,6 +32,7 @@ InventoryWithProduct createItem({
     inventoryId: 1,
     productImageUrl: imageUrl,
     nutriscoreGrade: nutriscoreGrade,
+    productType: productType,
   );
 }
 
@@ -195,5 +198,96 @@ void main() {
     await tester.pump();
 
     expect(longPressed, isFalse);
+  });
+
+  group('produce localization', () {
+    testWidgets('localizes produce item name in Portuguese', (tester) async {
+      final item = createItem(
+        name: 'Apple',
+        productType: ProductType.produce,
+      );
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        locale: const Locale('pt'),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+        ],
+      );
+
+      expect(find.text('Maça'), findsOneWidget);
+      expect(find.text('Apple'), findsNothing);
+    });
+
+    testWidgets('shows English name for produce item in English locale', (
+      tester,
+    ) async {
+      final item = createItem(
+        name: 'Carrot',
+        productType: ProductType.produce,
+      );
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+        ],
+      );
+
+      expect(find.text('Carrot'), findsOneWidget);
+    });
+
+    testWidgets('does not localize non-produce item names', (tester) async {
+      final item = createItem(
+        name: 'Apple Juice',
+        productType: ProductType.barcoded,
+      );
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        locale: const Locale('pt'),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+        ],
+      );
+
+      // Non-produce items should show the stored name, not localized.
+      expect(find.text('Apple Juice'), findsOneWidget);
+    });
+
+    testWidgets('falls back to barcode when productName is null', (
+      tester,
+    ) async {
+      final item = createItem(
+        name: null,
+        productType: ProductType.produce,
+        barcode: 'produce-Banana',
+      );
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+        ],
+      );
+
+      expect(find.text('produce-Banana'), findsOneWidget);
+    });
   });
 }

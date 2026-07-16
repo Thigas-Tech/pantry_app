@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -39,6 +40,12 @@ void main() {
     barcode: '002',
     name: 'API Bread',
     brand: 'Brand B',
+  );
+  const produceProduct = Product(
+    barcode: 'produce-Carrot',
+    name: 'Carrot',
+    productType: ProductType.produce,
+    source: 'manual',
   );
 
   setUp(() {
@@ -394,6 +401,101 @@ void main() {
           pageSize: any(named: 'pageSize'),
         ),
       );
+    });
+  });
+
+  group('produce icon', () {
+    testWidgets('shows leaf avatar for produce item without image', (
+      tester,
+    ) async {
+      when(
+        () => mockDb.searchProducts('carrot'),
+      ).thenAnswer((_) async => [produceProduct]);
+      when(
+        () => mockApi.searchProducts(
+          'carrot',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpSearchScreen(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'carrot');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+
+      expect(find.text('Carrot'), findsOneWidget);
+      // Should show leaf icon instead of barcode text "pro".
+      // 2 leaf icons: one in avatar, one in trailing position.
+      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
+    });
+
+    testWidgets('trailing: leaf over cloud for local produce item', (
+      tester,
+    ) async {
+      when(
+        () => mockDb.searchProducts('carrot'),
+      ).thenAnswer((_) async => [produceProduct]);
+      when(
+        () => mockApi.searchProducts(
+          'carrot',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpSearchScreen(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'carrot');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+
+      // Produce items show leaf (avatar + trailing), never cloud.
+      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
+      expect(find.byIcon(Icons.cloud_outlined), findsNothing);
+    });
+
+    testWidgets('trailing: leaf over cloud for API produce item', (
+      tester,
+    ) async {
+      when(() => mockDb.searchProducts('carrot')).thenAnswer((_) async => []);
+      when(
+        () => mockApi.searchProducts(
+          'carrot',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => [produceProduct]);
+
+      await pumpSearchScreen(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'carrot');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+
+      // Produce items override cloud with leaf (avatar + trailing).
+      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
+      expect(find.byIcon(Icons.cloud_outlined), findsNothing);
+    });
+
+    testWidgets('non-produce API product still shows cloud icon', (
+      tester,
+    ) async {
+      when(() => mockDb.searchProducts('bread')).thenAnswer((_) async => []);
+      when(
+        () => mockApi.searchProducts(
+          'bread',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => [apiProduct]);
+
+      await pumpSearchScreen(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'bread');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+
+      // Non-produce API items still show cloud.
+      expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.eco_outlined), findsNothing);
     });
   });
 }

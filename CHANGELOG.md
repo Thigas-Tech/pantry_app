@@ -2,7 +2,18 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Wrong Portuguese translation for produceApple**: `"Maca"` corrected to `"Maçã"` in `app_pt.arb` and `app_pt_BR.arb`. Regenerated via `flutter gen-l10n`. (`lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`, `lib/l10n/app_localizations_pt.dart`)
+
+### Added
+- **`productType` on `InventoryWithProduct`**: New `productType` field (`ProductType?`) fetched via `products.product_type AS product_type` in the SQL join query. (`lib/models/inventory_with_product.dart`, `lib/database/inventory_dao.dart`)
+- **Tests for produce localization and leaf icons**: 4 tests in `inventory_card_test.dart` for localized produce display and null/fallback; 4 tests in `search_screen_test.dart` for produce leaf avatar + trailing icon; 2 tests in `add_to_shopping_list_sheet_test.dart` for produce leaf icon in sheet. `pumpApp` helper accepts optional `Locale? locale` parameter. (`test/widgets/inventory_card_test.dart`, `test/screens/search_screen_test.dart`, `test/widgets/add_to_shopping_list_sheet_test.dart`, `test/helpers/pump_app.dart`)
+
 ### Changed
+- **InventoryCard localizes produce names**: New `_localizedDisplayName(AppLocalizations)` helper applies `l10n.localizeProduceName()` when `product.productType == ProductType.produce`. Title and both Semantics labels use the localized name. (`lib/widgets/inventory_card.dart`)
+- **ProductDetailScreen AppBar localizes produce**: Title calls `l10n.localizeProduceName()` for produce items instead of displaying the raw product name. (`lib/screens/product_detail_screen.dart`)
+- **Search screen leaf icon for produce**: `_produceOrBarcodeAvatar()` shows `Icons.eco_outlined` (green) for produce items instead of barcode text. Trailing icon also shows leaf instead of cloud icon. (`lib/screens/search_screen.dart`)
+- **AddToShoppingListSheet leaf icon for produce**: Same `_produceOrBarcodeAvatar()` pattern — leaf avatar and leaf trailing icon for produce results. (`lib/widgets/add_to_shopping_list_sheet.dart`)
 - **Changelog system replaced**: Removed `ChangelogParser` and `userFacingSectionContent` in favour of a hand-written `USER_CHANGELOG.md`. The app now reads user-facing changelog entries directly from the new file instead of parsing and cleaning the developer `CHANGELOG.md`. (`USER_CHANGELOG.md` new, `lib/services/changelog_parser.dart` removed, `lib/services/changelog_cleaner.dart` removed, `lib/widgets/whats_new_sheet.dart`, `lib/screens/pantry_shell.dart`, `lib/screens/settings_screen.dart`, `lib/main.dart`)
 
 ## [0.0.7]

@@ -2,7 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed
+- Portuguese translation for "apple" corrected from "Maca" to "Maçã".
+
+### Added
+- Produce items now show a green leaf icon in search results and the shopping list sheet instead of a barcode fallback.
+
 ### Changed
+- Produce names are now properly localized in inventory cards and product detail screens.
 - Changelog system simplified. In-app changelog now reads directly from a user-facing file with no parsing or cleaning needed.
 
 ## [0.0.7]

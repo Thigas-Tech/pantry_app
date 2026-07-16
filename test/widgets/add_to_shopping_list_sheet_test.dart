@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -217,6 +218,91 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('From your pantry'), findsNothing);
+    });
+  });
+
+  group('produce icon', () {
+    testWidgets('shows leaf avatar for produce item in search results', (
+      tester,
+    ) async {
+      when(() => mockDb.searchProducts('carrot')).thenAnswer(
+        (_) async => [
+          const Product(
+            barcode: 'produce-Carrot',
+            name: 'Carrot',
+            productType: ProductType.produce,
+            source: 'manual',
+          ),
+        ],
+      );
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => AddToShoppingListSheet.show(context),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: sheetOverrides(),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(SearchBar), 'carrot');
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Carrot'), findsOneWidget);
+      // Leaf icons: avatar + trailing.
+      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
+      expect(find.byIcon(Icons.cloud_outlined), findsNothing);
+    });
+
+    testWidgets('shows cloud icon for non-produce API item', (
+      tester,
+    ) async {
+      when(() => mockDb.searchProducts('bread')).thenAnswer(
+        (_) async => <Product>[],
+      );
+      when(
+        () => mockOff.searchProducts(
+          'bread',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          const Product(barcode: '002', name: 'API Bread', brand: 'Brand'),
+        ],
+      );
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => AddToShoppingListSheet.show(context),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          apiServiceProvider.overrideWithValue(mockOff),
+          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        ],
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(SearchBar), 'bread');
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      // Non-produce API items show cloud, no leaf.
+      expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.eco_outlined), findsNothing);
     });
   });
 }

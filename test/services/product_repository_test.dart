@@ -3,27 +3,39 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/product_repository.dart';
+import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class MockOffAdapter extends Mock implements OffAdapter {}
 
+class MockUsdaApiClient extends Mock implements UsdaApiClient {}
+
 void main() {
   late ProductRepository repository;
   late MockDatabaseHelper mockDb;
   late MockOffAdapter mockApi;
   late MockOffAdapter fallbackApi;
+  late MockUsdaApiClient mockUsda;
 
   setUp(() {
     mockDb = MockDatabaseHelper();
     mockApi = MockOffAdapter();
     fallbackApi = MockOffAdapter();
-    repository = ProductRepository(mockDb, mockApi, fallbackApi: fallbackApi);
+    mockUsda = MockUsdaApiClient();
+    repository = ProductRepository(
+      mockDb,
+      mockApi,
+      fallbackApi: fallbackApi,
+      usdaClient: mockUsda,
+    );
     registerFallbackValue(const Product(barcode: '', name: ''));
+    registerFallbackValue(const InventoryItem(barcode: ''));
   });
 
   const testBarcode = '123456789';
@@ -437,6 +449,257 @@ void main() {
       await repository.setLastRefreshTime();
       final overdue = await repository.isCacheOverdue();
       expect(overdue, isFalse);
+    });
+  });
+
+  group('resolveProduceProduct', () {
+    const produceName = 'Apple';
+    const produceBarcode = 'produce-Apple';
+
+    test('returns product with synthetic barcode and produce type', () async {
+      when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+        (_) async => null,
+      );
+      when(() => mockUsda.searchFood(produceName)).thenAnswer(
+        (_) async => [],
+      );
+
+      final product = await repository.resolveProduceProduct(produceName);
+
+      expect(product.barcode, produceBarcode);
+      expect(product.productType, ProductType.produce);
+      expect(product.name, produceName);
+      expect(product.category, 'Fruit');
+    });
+
+    test(
+      'returns product with fallback nutrition data when USDA empty',
+      () async {
+        when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+          (_) async => null,
+        );
+        when(() => mockUsda.searchFood(produceName)).thenAnswer(
+          (_) async => [],
+        );
+
+        final product = await repository.resolveProduceProduct(produceName);
+
+        // Apple's fallback nutrition: ~52 kcal per 100g
+        expect(product.energyKcal, closeTo(52, 1));
+        expect(product.category, 'Fruit');
+      },
+    );
+
+    test('returns "Vegetables" category for Broccoli', () async {
+      when(() => mockDb.getProduct('produce-Broccoli')).thenAnswer(
+        (_) async => null,
+      );
+      when(() => mockUsda.searchFood('Broccoli')).thenAnswer(
+        (_) async => [],
+      );
+
+      final product = await repository.resolveProduceProduct('Broccoli');
+
+      expect(product.category, 'Vegetables');
+    });
+
+    test('throws ArgumentError for empty produce name', () {
+      expect(
+        () => repository.resolveProduceProduct(''),
+        throwsArgumentError,
+      );
+    });
+
+    test('does not write to database', () async {
+      when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+        (_) async => null,
+      );
+      when(() => mockUsda.searchFood(produceName)).thenAnswer(
+        (_) async => [],
+      );
+
+      await repository.resolveProduceProduct(produceName);
+
+      verifyNever(() => mockDb.insertProduct(any()));
+      verifyNever(() => mockDb.insertInventoryItem(any()));
+      verifyNever(() => mockDb.insertOrMergeInventoryItem(any()));
+    });
+  });
+
+  group('addProduceToInventory', () {
+    const produceBarcode = 'produce-Apple';
+    const produceName = 'Apple';
+
+    setUp(() {
+      when(() => mockDb.insertOrMergeInventoryItem(any())).thenAnswer(
+        (_) async => 42,
+      );
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
+    });
+
+    test('uses existing product row when present', () async {
+      when(
+        () => mockDb.getProduct(produceBarcode),
+      ).thenAnswer(
+        (_) async => const Product(barcode: produceBarcode, name: produceName),
+      );
+
+      final id = await repository.addProduceToInventory(
+        produceName,
+        inventoryId: 1,
+      );
+
+      expect(id, 42);
+      verify(() => mockDb.getProduct(produceBarcode)).called(1);
+      verifyNever(() => mockUsda.searchFood(any()));
+      verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
+    });
+
+    test('uses USDA data when product not in DB and USDA succeeds', () async {
+      when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+        (_) async => null,
+      );
+      when(() => mockUsda.searchFood(produceName)).thenAnswer(
+        (_) async => [
+          const Product(
+            barcode: 'plu-1234',
+            name: 'Apple, raw',
+            energyKcal: 52,
+            productType: ProductType.produce,
+          ),
+        ],
+      );
+
+      final id = await repository.addProduceToInventory(
+        produceName,
+        inventoryId: 2,
+      );
+
+      expect(id, 42);
+      verify(() => mockUsda.searchFood(produceName)).called(1);
+      verify(() => mockDb.insertProduct(captureAny()));
+      verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
+    });
+
+    test(
+      'falls back to ProduceNutritionFallback when USDA returns empty',
+      () async {
+        when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+          (_) async => null,
+        );
+        when(() => mockUsda.searchFood(produceName)).thenAnswer(
+          (_) async => [],
+        );
+
+        final id = await repository.addProduceToInventory(
+          produceName,
+          inventoryId: 1,
+        );
+
+        expect(id, 42);
+        final captured =
+            verify(
+                  () => mockDb.insertProduct(captureAny()),
+                ).captured.first
+                as Product;
+        expect(captured.barcode, produceBarcode);
+        expect(captured.energyKcal, closeTo(52, 1));
+        verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
+      },
+    );
+
+    test('falls back when USDA throws exception', () async {
+      when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+        (_) async => null,
+      );
+      when(() => mockUsda.searchFood(produceName)).thenThrow(
+        Exception('Network error'),
+      );
+
+      final id = await repository.addProduceToInventory(
+        produceName,
+        inventoryId: 1,
+      );
+
+      expect(id, 42);
+      final captured =
+          verify(
+                () => mockDb.insertProduct(captureAny()),
+              ).captured.first
+              as Product;
+      expect(captured.energyKcal, closeTo(52, 1));
+      verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
+    });
+
+    test(
+      'creates minimal product when USDA empty and no fallback data',
+      () async {
+        when(() => mockDb.getProduct('produce-UnknownFruit')).thenAnswer(
+          (_) async => null,
+        );
+        when(() => mockUsda.searchFood('UnknownFruit')).thenAnswer(
+          (_) async => [],
+        );
+
+        final id = await repository.addProduceToInventory(
+          'UnknownFruit',
+          inventoryId: 1,
+        );
+
+        expect(id, 42);
+        final captured =
+            verify(
+                  () => mockDb.insertProduct(captureAny()),
+                ).captured.first
+                as Product;
+        expect(captured.barcode, 'produce-UnknownFruit');
+        expect(captured.energyKcal, isNull);
+        expect(captured.productType, ProductType.produce);
+        verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
+      },
+    );
+
+    test('throws ArgumentError for empty produce name', () {
+      expect(
+        () => repository.addProduceToInventory('', inventoryId: 1),
+        throwsArgumentError,
+      );
+    });
+
+    test('passes custom quantity to insertOrMergeInventoryItem', () async {
+      when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+        (_) async => const Product(barcode: produceBarcode, name: produceName),
+      );
+
+      await repository.addProduceToInventory(
+        produceName,
+        inventoryId: 1,
+        quantity: 300,
+      );
+
+      // Verify quantity 300 was passed in the inventory item
+      verify(
+        () => mockDb.insertOrMergeInventoryItem(
+          any(
+            that: isA<InventoryItem>().having(
+              (i) => i.quantity,
+              'quantity',
+              300,
+            ),
+          ),
+        ),
+      ).called(1);
+    });
+
+    test('uses insertOrMergeInventoryItem (not addInventoryItem)', () async {
+      when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
+        (_) async => const Product(barcode: produceBarcode, name: produceName),
+      );
+
+      await repository.addProduceToInventory(produceName, inventoryId: 1);
+
+      verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
+      verifyNever(() => mockDb.insertInventoryItem(any()));
     });
   });
 }

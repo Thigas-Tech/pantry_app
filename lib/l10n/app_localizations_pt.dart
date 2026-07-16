@@ -1540,6 +1540,30 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get averageScore => 'Nota media';
+
+  @override
+  String get produceApple => 'Maça';
+
+  @override
+  String get produceBanana => 'Banana';
+
+  @override
+  String get produceOrange => 'Laranja';
+
+  @override
+  String get produceTomato => 'Tomate';
+
+  @override
+  String get producePotato => 'Batata';
+
+  @override
+  String get produceCarrot => 'Cenoura';
+
+  @override
+  String get produceOnion => 'Cebola';
+
+  @override
+  String get produceLettuce => 'Alface';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -3048,4 +3072,28 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get averageScore => 'Nota media';
+
+  @override
+  String get produceApple => 'Maça';
+
+  @override
+  String get produceBanana => 'Banana';
+
+  @override
+  String get produceOrange => 'Laranja';
+
+  @override
+  String get produceTomato => 'Tomate';
+
+  @override
+  String get producePotato => 'Batata';
+
+  @override
+  String get produceCarrot => 'Cenoura';
+
+  @override
+  String get produceOnion => 'Cebola';
+
+  @override
+  String get produceLettuce => 'Alface';
 }

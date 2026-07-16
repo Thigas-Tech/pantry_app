@@ -102,7 +102,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 22,
+        version: 23,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -489,6 +489,21 @@ class DatabaseHelper {
         );
       }
     }
+    if (oldVersion < 23) {
+      try {
+        await db.rawUpdate(
+          "UPDATE products SET category = 'Fruits and vegetables based foods'"
+          " WHERE product_type = 'produce' AND category IS NULL",
+        );
+        logInfo(
+          'Migration to version 23 completed'
+          ' (backfilled produce category)',
+        );
+      } on Exception catch (e) {
+        logWarning('Migration v23 failed: $e');
+      }
+    }
+    logInfo('Database upgrade completed');
   }
 
   // --------------------- Product (delegating to ProductDao) -------

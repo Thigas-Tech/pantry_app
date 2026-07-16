@@ -47,6 +47,7 @@ Future<void> pumpApp(
   Widget child, {
   List<Override> overrides = const [],
   MockImageCacheService? imageCacheMock,
+  Locale? locale,
   bool settle = true,
 }) async {
   final effectiveImageCache = imageCacheMock ?? MockImageCacheService();
@@ -68,7 +69,7 @@ Future<void> pumpApp(
         ...overrides,
       ],
       child: MaterialApp(
-        locale: const Locale('en'),
+        locale: locale ?? const Locale('en'),
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,

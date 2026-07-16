@@ -7,11 +7,14 @@ import 'package:flutter/services.dart';
 ///
 /// Each chip shows a produce name. Tapping a chip invokes
 /// [onProduceSelected] with the produce name, and triggers haptic feedback.
+/// Chips whose name is present in [loadingItems] display a small
+/// [CircularProgressIndicator] and are disabled.
 class QuickAddProduce extends StatelessWidget {
   /// Creates a [QuickAddProduce] carousel.
   const QuickAddProduce({
     required this.items,
     required this.onProduceSelected,
+    this.loadingItems = const {},
     super.key,
   });
 
@@ -20,6 +23,12 @@ class QuickAddProduce extends StatelessWidget {
 
   /// Called when the user taps a produce chip.
   final void Function(String name) onProduceSelected;
+
+  /// The set of produce names currently being resolved.
+  ///
+  /// Chips with names in this set show a [CircularProgressIndicator] and
+  /// are disabled to prevent duplicate taps.
+  final Set<String> loadingItems;
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +43,25 @@ class QuickAddProduce extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final name = items[index];
+          final isLoading = loadingItems.contains(name);
           return ActionChip(
-            label: Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onPressed: () {
-              unawaited(HapticFeedback.lightImpact());
-              onProduceSelected(name);
-            },
+            label: isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+            onPressed: isLoading
+                ? null
+                : () {
+                    unawaited(HapticFeedback.lightImpact());
+                    onProduceSelected(name);
+                  },
           );
         },
       ),
