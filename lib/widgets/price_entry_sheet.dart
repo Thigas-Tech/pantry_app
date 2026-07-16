@@ -8,6 +8,7 @@ import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// A bottom sheet for entering or editing a price observation.
@@ -56,10 +57,8 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
     String? existingCurrency,
     String? existingStore,
   }) {
-    return showModalBottomSheet<Price>(
+    return BottomSheetHelper.show<Price>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
       builder: (_) => PriceEntrySheet._(
         barcode: barcode,
         existingPrice: existingPrice,
@@ -130,10 +129,13 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + keyboardHeight),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        16 + BottomSheetHelper.bottomInset(context),
+      ),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(

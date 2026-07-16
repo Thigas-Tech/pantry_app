@@ -10,6 +10,7 @@ import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 
@@ -39,10 +40,8 @@ class AddToShoppingListSheet extends ConsumerStatefulWidget {
   /// Shows the add-to-shopping-list bottom sheet and returns a
   /// [ShoppingItem], or `null` if cancelled.
   static Future<ShoppingItem?> show(BuildContext context) {
-    return showModalBottomSheet<ShoppingItem>(
+    return BottomSheetHelper.show<ShoppingItem>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
       builder: (_) => const AddToShoppingListSheet._(),
     );
   }
@@ -182,6 +181,53 @@ class _AddToShoppingListSheetState
     Navigator.of(context).pop(_inventoryEntryToItem(entry));
   }
 
+  Widget _buildPantryEntryAvatar(
+    Map<String, dynamic> entry,
+    ThemeData theme,
+  ) {
+    final imageUrl = entry['image_url'] as String?;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      final ratio = MediaQuery.devicePixelRatioOf(context);
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 40,
+          height: 40,
+          cacheWidth: (40 * ratio).round(),
+          cacheHeight: (40 * ratio).round(),
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => _fallbackPantryAvatar(entry, theme),
+          loadingBuilder: (_, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return _fallbackPantryAvatar(entry, theme);
+          },
+        ),
+      );
+    }
+    return _fallbackPantryAvatar(entry, theme);
+  }
+
+  Widget _fallbackPantryAvatar(
+    Map<String, dynamic> entry,
+    ThemeData theme,
+  ) {
+    final productType = entry['product_type'] as String?;
+    if (productType == 'produce') {
+      return CircleAvatar(
+        backgroundColor: Colors.green.shade100,
+        child: Icon(Icons.eco_outlined, color: Colors.green.shade600, size: 18),
+      );
+    }
+    return CircleAvatar(
+      backgroundColor: theme.colorScheme.tertiaryContainer,
+      child: Icon(
+        Icons.kitchen_outlined,
+        size: 20,
+        color: theme.colorScheme.onTertiaryContainer,
+      ),
+    );
+  }
+
   void _addCustomItem() {
     if (!_formKey.currentState!.validate()) return;
     final name = _nameController.text.trim();
@@ -195,99 +241,95 @@ class _AddToShoppingListSheetState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final bottomPad = BottomSheetHelper.bottomInset(context);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.3,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (ctx, scrollController) {
-        if (_showCustomForm) {
-          return _buildCustomForm(l10n, scrollController);
-        }
-        return _buildSearch(l10n, theme, scrollController);
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomPad),
+      child: _showCustomForm
+          ? _buildCustomForm(l10n)
+          : SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildSearchBar(l10n),
+                  _buildSearchBody(l10n, theme),
+                  _buildAddCustomItemButton(l10n),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildSearchBar(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: SearchBar(
+        controller: _searchController,
+        hintText: l10n.productSearchHint,
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 12),
+          child: Icon(Icons.search),
+        ),
+        trailing: [
+          if (_searchController.text.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                _debounce?.cancel();
+                _searchController.clear();
+                setState(() {
+                  _localResults = [];
+                  _apiResults = [];
+                  _isSearching = false;
+                });
+              },
+            ),
+        ],
+        onChanged: _onSearchChanged,
+        textInputAction: TextInputAction.search,
+        autoFocus: true,
+      ),
+    );
+  }
+
+  Widget _buildSearchBody(AppLocalizations l10n, ThemeData theme) {
+    final allResults = [..._localResults, ..._apiResults];
+    final inventoryProducts = ref.watch(inventoryProductsProvider);
+
+    if (_isSearching) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_searchController.text.trim().isEmpty) {
+      return _buildInitialState(l10n, theme, inventoryProducts);
+    }
+    if (allResults.isEmpty) {
+      return _buildNoResults(l10n, theme);
+    }
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      itemCount: allResults.length,
+      itemBuilder: (ctx, index) {
+        final product = allResults[index];
+        final isApi = index >= _localResults.length;
+        return _ProductResultTile(
+          product: product,
+          isApi: isApi,
+          onTap: () => _addFromProduct(product),
+        );
       },
     );
   }
 
-  Widget _buildSearch(
-    AppLocalizations l10n,
-    ThemeData theme,
-    ScrollController scrollController,
-  ) {
-    final allResults = [..._localResults, ..._apiResults];
-    final inventoryProducts = ref.watch(inventoryProductsProvider);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: SearchBar(
-            controller: _searchController,
-            hintText: l10n.productSearchHint,
-            leading: const Padding(
-              padding: EdgeInsets.only(left: 12),
-              child: Icon(Icons.search),
-            ),
-            trailing: [
-              if (_searchController.text.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _debounce?.cancel();
-                    _searchController.clear();
-                    setState(() {
-                      _localResults = [];
-                      _apiResults = [];
-                      _isSearching = false;
-                    });
-                  },
-                ),
-            ],
-            onChanged: _onSearchChanged,
-            textInputAction: TextInputAction.search,
-            autoFocus: true,
-          ),
-        ),
-        Expanded(
-          child: _isSearching
-              ? const Center(child: CircularProgressIndicator())
-              : _searchController.text.trim().isEmpty
-              ? _buildInitialState(l10n, theme, inventoryProducts)
-              : allResults.isEmpty
-              ? _buildNoResults(l10n, theme)
-              : ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: allResults.length,
-                  itemBuilder: (ctx, index) {
-                    final product = allResults[index];
-                    final isApi = index >= _localResults.length;
-                    return _ProductResultTile(
-                      product: product,
-                      isApi: isApi,
-                      onTap: () => _addFromProduct(product),
-                    );
-                  },
-                ),
-        ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            8,
-            16,
-            16 +
-                MediaQuery.of(context).padding.bottom +
-                MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: OutlinedButton.icon(
-            onPressed: () => setState(() => _showCustomForm = true),
-            icon: const Icon(Icons.edit_note, size: 20),
-            label: Text(l10n.addCustomItem),
-          ),
-        ),
-      ],
+  Widget _buildAddCustomItemButton(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: OutlinedButton.icon(
+        onPressed: () => setState(() => _showCustomForm = true),
+        icon: const Icon(Icons.edit_note, size: 20),
+        label: Text(l10n.addCustomItem),
+      ),
     );
   }
 
@@ -303,59 +345,46 @@ class _AddToShoppingListSheetState
           return _buildEmptyHint(l10n, theme);
         }
         logInfo('Inventory products loaded — count=${products.length}');
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.kitchen_outlined,
-                    size: 18,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.fromYourPantry,
-                    style: theme.textTheme.titleSmall?.copyWith(
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          itemCount: products.length + 1,
+          itemBuilder: (ctx, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(4, 16, 0, 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.kitchen_outlined,
+                      size: 18,
                       color: theme.colorScheme.primary,
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: products.length,
-                itemBuilder: (ctx, index) {
-                  final entry = products[index];
-                  final name =
-                      entry['name'] as String? ?? entry['barcode'] as String;
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: theme.colorScheme.tertiaryContainer,
-                      child: Icon(
-                        Icons.kitchen_outlined,
-                        size: 20,
-                        color: theme.colorScheme.onTertiaryContainer,
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.fromYourPantry,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.primary,
                       ),
                     ),
-                    title: Text(
-                      name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(l10n.inYourPantry),
-                    onTap: () => _addFromInventory(entry),
-                  );
-                },
+                  ],
+                ),
+              );
+            }
+            final entry = products[index - 1];
+            final name = entry['name'] as String? ?? entry['barcode'] as String;
+            return ListTile(
+              leading: _buildPantryEntryAvatar(entry, theme),
+              title: Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+              subtitle: Text(l10n.inYourPantry),
+              onTap: () => _addFromInventory(entry),
+            );
+          },
         );
       },
       loading: () => _buildEmptyHint(l10n, theme),
@@ -416,63 +445,61 @@ class _AddToShoppingListSheetState
 
   Widget _buildCustomForm(
     AppLocalizations l10n,
-    ScrollController scrollController,
   ) {
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + keyboardHeight),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
       child: Form(
         key: _formKey,
-        child: ListView(
-          controller: scrollController,
-          shrinkWrap: true,
-          children: [
-            Text(
-              l10n.addCustomItem,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                hintText: l10n.quickAddHint,
-                labelText: l10n.itemName,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.addCustomItem,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              autofocus: true,
-              validator: (v) =>
-                  (v?.trim().isEmpty ?? true) ? l10n.requiredField : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _quantityController,
-              decoration: InputDecoration(labelText: l10n.quantity),
-              keyboardType: TextInputType.number,
-              validator: (v) {
-                final qty = double.tryParse(v ?? '');
-                if (qty == null || qty < 1) return l10n.requiredField;
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => setState(() => _showCustomForm = false),
-                    child: Text(l10n.backToSearch),
-                  ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  hintText: l10n.quickAddHint,
+                  labelText: l10n.itemName,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: _addCustomItem,
-                    child: Text(l10n.add),
+                autofocus: true,
+                validator: (v) =>
+                    (v?.trim().isEmpty ?? true) ? l10n.requiredField : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _quantityController,
+                decoration: InputDecoration(labelText: l10n.quantity),
+                keyboardType: TextInputType.number,
+                validator: (v) {
+                  final qty = double.tryParse(v ?? '');
+                  if (qty == null || qty < 1) return l10n.requiredField;
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => setState(() => _showCustomForm = false),
+                      child: Text(l10n.backToSearch),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: _addCustomItem,
+                      child: Text(l10n.add),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

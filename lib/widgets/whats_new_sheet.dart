@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Shows a bottom sheet with the user-facing changelog.
@@ -14,13 +15,8 @@ Future<bool?> showWhatsNewSheet(
   BuildContext context, {
   required String rawChangelog,
 }) {
-  return showModalBottomSheet<bool>(
+  return BottomSheetHelper.show<bool>(
     context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
     builder: (ctx) => _WhatsNewSheet(rawChangelog: rawChangelog),
   );
 }
@@ -130,7 +126,7 @@ class _WhatsNewSheet extends StatelessWidget {
               16,
               8,
               16,
-              16 + MediaQuery.of(context).padding.bottom,
+              16 + BottomSheetHelper.bottomInset(context),
             ),
             child: SizedBox(
               width: double.infinity,
