@@ -8,6 +8,7 @@ import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -23,6 +24,7 @@ import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/notification_service.dart';
+import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -281,7 +283,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               _infoRow(l10n.categoryLabel, widget.product.category!),
             if (widget.product.source == 'manual') _buildSubmissionStatus(l10n),
             const Divider(),
-            _infoRow(l10n.servingSize, widget.product.servingSize ?? 'N/A'),
+            _infoRow(l10n.servingSize, _displayServingSize(l10n)),
 
             // Nutrition table
             NutritionTable(product: widget.product),
@@ -638,6 +640,22 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         SnackbarHelper.showError(context, l10n.submissionError);
       }
     }
+  }
+
+  /// Returns the serving size to display, using preset data for produce items
+  /// that lack a serving size, or "100 g" when no preset is available.
+  String _displayServingSize(AppLocalizations l10n) {
+    if (widget.product.servingSize != null) return widget.product.servingSize!;
+    if (widget.product.productType == ProductType.produce) {
+      final presets = ProduceServingPresets.forName(widget.product.name);
+      if (presets != null) {
+        final medium = presets['Medium'];
+        if (medium != null)
+          return '1 ${l10n.servingMedium.toLowerCase()} (${medium.toInt()} g)';
+      }
+      return '100 g';
+    }
+    return 'N/A';
   }
 
   /// Builds a simple label‑value row used for non‑nutrition product information
