@@ -2,8 +2,35 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 
 /// Extension on [AppLocalizations] providing convenience methods for
 /// formatting quantities, localizing units, locations, inventory names,
-/// and theme modes.
+/// theme modes, and produce names.
 extension AppLocalizationsX on AppLocalizations {
+  /// Returns the localized name for a produce item.
+  ///
+  /// When the name has no matching ARB key, returns the input capitalized.
+  String localizeProduceName(String name) {
+    switch (name.toLowerCase().trim()) {
+      case 'apple':
+        return produceApple;
+      case 'banana':
+        return produceBanana;
+      case 'orange':
+        return produceOrange;
+      case 'tomato':
+        return produceTomato;
+      case 'potato':
+        return producePotato;
+      case 'carrot':
+        return produceCarrot;
+      case 'onion':
+        return produceOnion;
+      case 'lettuce':
+        return produceLettuce;
+      default:
+        if (name.isEmpty) return name;
+        return name[0].toUpperCase() + name.substring(1);
+    }
+  }
+
   /// Formats a quantity with a localized unit (e.g., "5 kg").
   ///
   /// When [unit] is `'pieces'`, the display uses [unitSingular] for

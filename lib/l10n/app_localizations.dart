@@ -2945,6 +2945,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Avg. score'**
   String get averageScore;
+
+  /// No description provided for @produceApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple'**
+  String get produceApple;
+
+  /// No description provided for @produceBanana.
+  ///
+  /// In en, this message translates to:
+  /// **'Banana'**
+  String get produceBanana;
+
+  /// No description provided for @produceOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get produceOrange;
+
+  /// No description provided for @produceTomato.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomato'**
+  String get produceTomato;
+
+  /// No description provided for @producePotato.
+  ///
+  /// In en, this message translates to:
+  /// **'Potato'**
+  String get producePotato;
+
+  /// No description provided for @produceCarrot.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrot'**
+  String get produceCarrot;
+
+  /// No description provided for @produceOnion.
+  ///
+  /// In en, this message translates to:
+  /// **'Onion'**
+  String get produceOnion;
+
+  /// No description provided for @produceLettuce.
+  ///
+  /// In en, this message translates to:
+  /// **'Lettuce'**
+  String get produceLettuce;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

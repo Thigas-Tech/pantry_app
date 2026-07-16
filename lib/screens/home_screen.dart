@@ -315,6 +315,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
+  List<Widget> _buildProduceCarousel(AppLocalizations l10n) {
+    final localizedItems = _quickAddItems
+        .map((e) => l10n.localizeProduceName(e))
+        .toList();
+
+    // Reverse lookup: display name -> English callback name.
+    String resolveCallbackName(String displayName) {
+      for (var i = 0; i < localizedItems.length; i++) {
+        if (localizedItems[i] == displayName) return _quickAddItems[i];
+      }
+      return displayName;
+    }
+
+    return [
+      QuickAddProduce(
+        items: localizedItems,
+        loadingItems: _loadingProduce,
+        onProduceSelected: (localizedName) =>
+            _handleQuickProduceAdd(resolveCallbackName(localizedName)),
+      ),
+    ];
+  }
+
   Widget _buildSearchAnchor(
     AppLocalizations l10n,
     List<InventoryWithProduct> items,
@@ -458,11 +481,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           if (!_selectionMode)
             _buildSearchAnchor(l10n, inventoryAsync.asData?.value ?? []),
           if (!_selectionMode && _quickAddItems.isNotEmpty)
-            QuickAddProduce(
-              items: _quickAddItems,
-              loadingItems: _loadingProduce,
-              onProduceSelected: _handleQuickProduceAdd,
-            ),
+            ..._buildProduceCarousel(l10n),
           Expanded(
             child: inventoryAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),

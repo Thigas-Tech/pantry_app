@@ -1,3 +1,6 @@
+import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/services/produce_serving_presets.dart';
+
 /// Maps produce names to category strings compatible with OFF category
 /// localization in [AppLocalizationsX.localizeCategory].
 ///
@@ -174,11 +177,21 @@ class ProduceCategoryMapper {
 
   static Map<String, String> _buildAllKeys() {
     final map = <String, String>{};
-    for (final k in _fruits) map[k] = 'Fruit';
-    for (final k in _vegetables) map[k] = 'Vegetables';
-    for (final k in _nuts) map[k] = 'Nuts and their products';
-    for (final k in _herbs) map[k] = 'Spices and herbs';
-    for (final k in _legumes) map[k] = 'Legumes and their products';
+    for (final k in _fruits) {
+      map[k] = 'Fruit';
+    }
+    for (final k in _vegetables) {
+      map[k] = 'Vegetables';
+    }
+    for (final k in _nuts) {
+      map[k] = 'Nuts and their products';
+    }
+    for (final k in _herbs) {
+      map[k] = 'Spices and herbs';
+    }
+    for (final k in _legumes) {
+      map[k] = 'Legumes and their products';
+    }
     return map;
   }
 

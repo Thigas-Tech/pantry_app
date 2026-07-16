@@ -703,5 +703,13 @@
   "noStoreData": "No purchase data yet",
   "noSpendingData": "Add prices to see spending trends",
   "monthLabel": "Month",
-  "averageScore": "Avg. score"
+  "averageScore": "Avg. score",
+  "produceApple": "Apple",
+  "produceBanana": "Banana",
+  "produceOrange": "Orange",
+  "produceTomato": "Tomato",
+  "producePotato": "Potato",
+  "produceCarrot": "Carrot",
+  "produceOnion": "Onion",
+  "produceLettuce": "Lettuce"
 }

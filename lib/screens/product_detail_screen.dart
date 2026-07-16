@@ -650,8 +650,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       final presets = ProduceServingPresets.forName(widget.product.name);
       if (presets != null) {
         final medium = presets['Medium'];
-        if (medium != null)
+        if (medium != null) {
           return '1 ${l10n.servingMedium.toLowerCase()} (${medium.toInt()} g)';
+        }
       }
       return '100 g';
     }

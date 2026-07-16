@@ -1540,4 +1540,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get averageScore => 'Avg. score';
+
+  @override
+  String get produceApple => 'Apple';
+
+  @override
+  String get produceBanana => 'Banana';
+
+  @override
+  String get produceOrange => 'Orange';
+
+  @override
+  String get produceTomato => 'Tomato';
+
+  @override
+  String get producePotato => 'Potato';
+
+  @override
+  String get produceCarrot => 'Carrot';
+
+  @override
+  String get produceOnion => 'Onion';
+
+  @override
+  String get produceLettuce => 'Lettuce';
 }

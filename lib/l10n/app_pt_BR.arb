@@ -641,5 +641,13 @@
   "noStoreData": "Sem dados de compra",
   "noSpendingData": "Adicione precos para ver tendencias",
   "monthLabel": "Mes",
-  "averageScore": "Nota media"
+  "averageScore": "Nota media",
+  "produceApple": "Maca",
+  "produceBanana": "Banana",
+  "produceOrange": "Laranja",
+  "produceTomato": "Tomate",
+  "producePotato": "Batata",
+  "produceCarrot": "Cenoura",
+  "produceOnion": "Cebola",
+  "produceLettuce": "Alface"
 }
