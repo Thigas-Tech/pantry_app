@@ -66,7 +66,7 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 4. Tests for ALL new code. Use mocktail. Place in test/ subdirectory.
 5. After freezed or l10n changes: dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n
 6. Localize: all user-visible strings in lib/l10n/app_en.arb. Never hardcode English.
-7. Update CHANGELOG.md (developer-facing) and USER_CHANGELOG.md (user-facing) for every feature, fix, or change. The USER_CHANGELOG.md must contain only user-facing information with no implementation details.
+7. Update CHANGELOG.md (developer-facing) and USER_CHANGELOG.md (user-facing) for every feature, fix, or change. The USER_CHANGELOG.md must contain only user-facing information with no implementation details. When USER_CHANGELOG.md is modified, also update USER_CHANGELOG_pt.md and USER_CHANGELOG_pt_BR.md with the same entries translated.
 8. Product() MUST pass source: 'api' or 'manual'. Never omit.
 9. No emoji anywhere (code, docs, commits, ARB strings).
 10. Audit every plan for pitfalls before writing code.

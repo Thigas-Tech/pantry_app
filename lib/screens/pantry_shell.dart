@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -13,6 +12,7 @@ import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/shopping_list_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
+import 'package:pantry_app/utils/changelog_loader.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
@@ -46,7 +46,9 @@ class _PantryShellState extends ConsumerState<PantryShell> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _selectedIndex);
-    unawaited(_showChangelogIfPending());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_showChangelogIfPending());
+    });
     unawaited(_showNotificationDeniedWarning());
     unawaited(_showAmoledNudge());
   }
@@ -138,6 +140,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
 
   Future<void> _showChangelogIfPending() async {
     try {
+      final locale = Localizations.localeOf(context);
       final prefs = await SharedPreferences.getInstance();
       final showPending = prefs.getString('changelog_show_pending') == 'true';
       if (!showPending) {
@@ -145,7 +148,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
         return;
       }
 
-      final raw = await rootBundle.loadString('USER_CHANGELOG.md');
+      final raw = await loadLocalizedChangelog(locale);
 
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {

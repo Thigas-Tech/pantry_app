@@ -9,6 +9,7 @@
 
 ### Added
 - Produce items now show a green leaf icon in search results and the shopping list sheet instead of a barcode fallback.
+- "What's New" sheet now shows changelog in Portuguese or Brazilian Portuguese when the app language is set accordingly.
 
 ### Changed
 - Produce names are now properly localized in inventory cards and product detail screens.
