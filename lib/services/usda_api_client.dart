@@ -45,7 +45,9 @@ class UsdaApiClient {
       return [];
     }
 
-    final uri = Uri.parse('$_baseUrl/foods/search');
+    final uri = Uri.parse('$_baseUrl/foods/search').replace(
+      queryParameters: {'api_key': _apiKey},
+    );
 
     try {
       logInfo('Searching USDA for "$query"');
@@ -56,10 +58,15 @@ class UsdaApiClient {
           'query': query,
           'dataType': ['Foundation', 'SR Legacy'],
           'pageSize': 10,
-          'api_key': _apiKey,
         }),
       );
 
+      if (response.statusCode == 403) {
+        logWarning(
+          'USDA API returned 403 — check your API key in .env (USDA_API_KEY)',
+        );
+        return [];
+      }
       if (response.statusCode != 200) {
         logWarning(
           'USDA search returned ${response.statusCode} for "$query"',

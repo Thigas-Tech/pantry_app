@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Fixed
+- USDA nutrition data for produce items now loads correctly (was returning 403 due to incorrect API key placement).
+- Produce items no longer cause "refresh failed" warnings during pull-to-refresh.
 - Portuguese translation for "apple" corrected from "Maca" to "Maçã".
 
 ### Added

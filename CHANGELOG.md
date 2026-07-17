@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Fixed
+- **USDA FoodData Central API returned 403 on every search**: `api_key` was placed in the POST body instead of as a URL query parameter. The API ignores the body parameter and returns `403 Forbidden`. Moved `api_key` to a URI query parameter via `Uri.replace(queryParameters: ...)`. Also added a distinct warning message for 403 suggesting the user checks their `.env` config. (`lib/services/usda_api_client.dart`)
+- **Refresh failed for every produce item**: `refreshInventoryProducts()` passed synthetic barcodes (`produce-Banana`, `plu-12345`) to the OFF API, which always returns `ProductNotFoundException`. Filtered out barcodes starting with `produce-` or `plu-` before the refresh batch. (`lib/services/product_repository.dart`)
 - **Wrong Portuguese translation for produceApple**: `"Maca"` corrected to `"Maçã"` in `app_pt.arb` and `app_pt_BR.arb`. Regenerated via `flutter gen-l10n`. (`lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`, `lib/l10n/app_localizations_pt.dart`)
 
 ### Added
