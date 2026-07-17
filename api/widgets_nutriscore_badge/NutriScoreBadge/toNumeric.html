@@ -73,15 +73,7 @@ not‑applicable grades.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">static int? toNumeric(String? grade) {
-  if (_isNotApplicable(grade)) return null;
-  return switch (grade?.toLowerCase()) {
-    &#39;a&#39; =&gt; 5,
-    &#39;b&#39; =&gt; 4,
-    &#39;c&#39; =&gt; 3,
-    &#39;d&#39; =&gt; 2,
-    &#39;e&#39; =&gt; 1,
-    _ =&gt; null,
-  };
+  return nutriscoreGradeToNumeric(grade);
 }</code></pre>
 </section>
 
