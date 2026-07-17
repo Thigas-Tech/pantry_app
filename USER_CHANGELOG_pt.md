@@ -1,11 +1,13 @@
 # Registro de alteracoes do usuario
 
-## [Unreleased]
+## [0.0.8]
 
 ### Corrigido
 - Os dados de nutricao do USDA para produtos alimentares agora carregam corretamente (estava a retornar 403 devido a posicao incorreta da chave de API).
 - Os produtos alimentares ja nao causam avisos de "falha na atualizacao" durante o pull-to-refresh.
-- Traducao de "apple" corrigida de "Maca" para "Maca".
+- Traducao de "apple" corrigida de "Maca" para "Maçã".
+- Os graficos do ecra de estatisticas agora sao apresentados corretamente com legendas de eixo e dados de loja adequados.
+- O teclado ja nao esconde o conteudo das folhas inferiores ao introduzir dados.
 
 ### Adicionado
 - Os produtos alimentares agora mostram um icone de folha verde nos resultados de pesquisa e na folha de lista de compras, em vez do icone de codigo de barras.

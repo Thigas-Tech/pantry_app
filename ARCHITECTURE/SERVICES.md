@@ -105,13 +105,14 @@ User scans barcode
 ### 3.7 Feedback service (GitHub Issues)
 
 - `GithubIssueService` -- HTTP POST to GitHub Issues API with PAT from
-  `.env` (`GITHUB_FEEDBACK_TOKEN`), never committed.
+  `.env` (`FEEDBACK_TOKEN`), never committed.
 - Offline queue: unresolved issues stored in `feedback_queue` SQLite table
   (version 11 migration). Flushed when `connectivityProvider` emits `true`
   via listener in `PantryShell` and at app startup.
 - Screenshots: user attaches from gallery or camera via `image_picker`,
-  encoded as PNG base64, embedded as data URI in issue body (no external
-  CDN needed -- GitHub renders data URIs natively).
+  encoded as WebP (800px max, compact) and uploaded to catbox.moe,
+  producing rendered image URLs in GitHub issues. Falls back to a
+  collapsible base64 block if the upload fails.
 - Rate limiting: max 1 issue per 60 seconds, max 5 per 24h per device
   (via `SharedPreferences` counters).
 - Duplicate detection: hash of title+body, skipped if submitted within 24h.
@@ -163,6 +164,75 @@ User scans barcode
   photos and product images.
 
 ### 3.13 Store persistence
+
+- `StoreDao` -- stores saved store names in the `stores` table (version 19
+  migration). `insert` is case-insensitive and deduplicates. `getAll` returns
+  stores ordered alphabetically.
+- The price entry sheet uses `storesProvider` (FutureProvider) to power an
+  `Autocomplete<String>` dropdown with a "+" add-new button.
+- New store names submitted through the price entry sheet are automatically
+  persisted to the `stores` table.
+
+### 3.14 USDA API client
+
+- `UsdaApiClient` -- HTTP client for the
+  [USDA FoodData Central API](https://fdc.nal.usda.gov/).
+  Used as a nutritional fallback when a produce item (PLU code) is not found
+  in Open Food Facts.
+- Fetches product data by PLU code via `GET /fdc/v1/foods/search`.
+- API key is read from `.env` (`USDA_API_KEY`) and sent as a URL query
+  parameter. Returns a distinct `usdaAuthFailed` message on 403.
+
+### 3.15 Produce category mapper
+
+- `ProduceCategoryMapper` -- maps PLU codes and produce names to OFF
+  taxonomy categories with a fallback heuristic based on produce type
+  (fruit, vegetable, herb, mushroom).
+
+### 3.16 Produce nutrition fallback
+
+- `ProduceNutritionFallback` -- hard-coded approximate nutrition values
+  for ~70 common produce items (energy, protein, carbs, fat, fiber).
+  Used when the USDA API is unreachable or the PLU code is not in the
+  USDA database.
+
+### 3.17 Produce serving presets
+
+- `ProduceServingPresets` -- maps ~35 produce names to Small/Medium/Large
+  serving sizes with `servingWeightG` defaults for the weight/unit toggle.
+
+### 3.18 Produce purchase tracker
+
+- `ProducePurchaseTracker` -- tracks how often the user buys each produce
+  item via SharedPreferences. Used by the quick-add carousel to surface
+  frequently-bought items.
+
+### 3.19 Produce search service
+
+- `ProduceSearchService` -- coordinates the OFF API, USDA API, and manual
+  entry flow for produce items. Tries OFF first, falls back to USDA, then
+  to nutrition fallback, and finally to manual entry.
+
+### 3.20 PLU service
+
+- `PluService` -- local lookup table of ~70 common PLU codes (e.g. 4011
+  for Banana) mapped to produce names. Used for barcode-less produce
+  entry on the scanner screen.
+
+### 3.21 Scan result
+
+- `ScanResult` (sealed class) -- models the output of the scanner screen.
+  Variants: `BarcodeResult(String barcode)` and `PluResult(int pluCode)`.
+  Used by the home screen to dispatch between barcode lookup and produce
+  search flow.
+
+### 3.22 Changelog loader
+
+- `ChangelogLoader` utility at `lib/utils/changelog_loader.dart` provides
+  `loadLocalizedChangelog(Locale)` that resolves locale-specific
+  `USER_CHANGELOG_*.md` asset paths with fallback to English. Used by
+  the "What's New" sheet to display user-facing changelog in the app's
+  current language.
 
 - `StoreDao` -- stores saved store names in the `stores` table (version 19
   migration). `insert` is case-insensitive and deduplicates. `getAll` returns

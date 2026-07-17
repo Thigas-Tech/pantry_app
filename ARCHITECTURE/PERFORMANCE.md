@@ -37,7 +37,7 @@ products are never re‑fetched.
 - Animate repeatedly (e.g., badge transitions, progress indicators)
 - Are embedded in a scrolling parent but have static content
 
-In v1.0.0 each `InventoryCard` in the main inventory `ListView.builder` is
+Each `InventoryCard` in the main inventory `ListView.builder` is
 wrapped in `RepaintBoundary` with `ValueKey(item.id)`. This prevents parent
 scroll events from triggering card repaints and enables efficient widget
 recycling. Cards that load network images or toggle selection do not
@@ -87,7 +87,7 @@ Workflows live in `.github/workflows/`:
 | `patrol-e2e.yml` | Weekly (Sun 03:00 UTC) | Patrol integration test suite on Android emulator |
 | `flashlight.yml` | Weekly (Sun 04:00 UTC) | Flashlight battery/CPU/GPU profiling on emulator |
 | `perfetto.yml` | Weekly (Sun 05:00 UTC) | Perfetto startup trace collection and frame-timing analysis |
-| `deploy-to-playstore.yml` | Workflow dispatch (tag trigger disabled) | Signed release AAB, upload to Play Console internal track via `r0adkll/upload-google-play`. Tag push trigger is commented out pending Play Console document verification. |
+| `deploy-to-playstore.yml` | Release published | Signed release AAB + APK, upload to Play Console internal track via `r0adkll/upload-google-play`. Triggered by `build.yml` publish job or manual release creation. |
 
 > **Note:** The `publish` job in `build.yml` creates a GitHub release using
 > `gh release create` with artifacts attached.

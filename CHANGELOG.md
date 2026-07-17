@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.0.8] - 2026-07-16
 
 ### Fixed
 - **USDA FoodData Central API returned 403 on every search**: `api_key` was placed in the POST body instead of as a URL query parameter. The API ignores the body parameter and returns `403 Forbidden`. Moved `api_key` to a URI query parameter via `Uri.replace(queryParameters: ...)`. Also added a distinct warning message for 403 suggesting the user checks their `.env` config. (`lib/services/usda_api_client.dart`)

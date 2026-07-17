@@ -1,11 +1,13 @@
 # User Changelog
 
-## [Unreleased]
+## [0.0.8]
 
 ### Fixed
 - USDA nutrition data for produce items now loads correctly (was returning 403 due to incorrect API key placement).
 - Produce items no longer cause "refresh failed" warnings during pull-to-refresh.
 - Portuguese translation for "apple" corrected from "Maca" to "Maçã".
+- Statistics screen charts now display correctly with proper axis labels and store data.
+- Keyboard no longer hides bottom sheet content when entering data.
 
 ### Added
 - Produce items now show a green leaf icon in search results and the shopping list sheet instead of a barcode fallback.

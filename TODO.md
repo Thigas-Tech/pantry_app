@@ -35,18 +35,21 @@ infrastructure or external server hosting are listed last.
   expected in a patch release. Remove `ndk { debugSymbolLevel }` workaround
   when fixed.
   Follow [flutter/flutter#186810](https://github.com/flutter/flutter/issues/186810).
-- [ ] **GitHub Actions — Play Store deployment** — on new tag (`v*`):
+- [x] **GitHub Actions — Play Store deployment** — on release published:
   - Decode keystore from `ANDROID_KEYSTORE_BASE64` secret
+  - Decode `key.properties` from `KEY_PROPERTIES_BASE64` secret
   - `flutter build appbundle` + `flutter build apk` (release, signed)
   - Upload both to Google Play Console via `r0adkll/upload-google-play`
+  - Triggered by `build.yml` publish job (creates GitHub Release) or
+    manual release creation.
   - Requires: Play Store service account JSON, signing keystore, and
     AdMob/Firebase configs stored as GitHub secrets.
 - [x] **Deploy-to-Play-Store workflow file** — exists at
-  `.github/workflows/deploy-to-playstore.yml`. Tag trigger disabled
-  pending Play Console verification.
-- [ ] **Signing setup** — create upload keystore, configure
-  `android/key.properties` template, update `build.gradle.kts` for
-  release signing (reads from `key.properties` or env vars at CI).
+  `.github/workflows/deploy-to-playstore.yml`. Triggers on
+  `release: [published]`.
+- [x] **Signing setup** — `android/key.properties` template exists,
+  `build.gradle.kts` reads from `key.properties` with fallback to debug
+  signing. Keystore and properties decoded from GitHub secrets in CI.
 
 ### Monetization (shipped with Play Store launch)
 
