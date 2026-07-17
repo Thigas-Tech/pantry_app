@@ -744,6 +744,7 @@ Widget _buildMonthlySpending(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 48,
+                        maxIncluded: false,
                         getTitlesWidget: (value, _) {
                           final formatted = repo.formatPrice(
                             value,
@@ -865,6 +866,7 @@ Widget _buildStoreSpending(
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 48,
+                  maxIncluded: false,
                   getTitlesWidget: (value, _) {
                     final formatted = repo.formatPrice(value, baseCurrency);
                     final short = formatted

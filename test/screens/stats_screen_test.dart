@@ -16,6 +16,7 @@ library;
 
 import 'dart:async';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -307,6 +308,45 @@ void main() {
       expect(find.text('Spending by store'), findsOneWidget);
       expect(find.text('BigBox'), findsOneWidget);
       expect(find.text('CostLess'), findsOneWidget);
+    },
+  );
+
+  /// Verifies the store spending left axis has maxIncluded set to false
+  /// to prevent duplicate top labels.
+  testWidgets(
+    'store spending y-axis maxIncluded is false',
+    (tester) async {
+      final priceRepo = _MockPriceRepository();
+      when(() => priceRepo.formatPrice(any(), any())).thenReturn(r'$92.00');
+      await pumpApp(
+        tester,
+        const StatsScreen(),
+        overrides: [
+          statsProvider.overrideWith(
+            (ref) => Future.value(_populatedStatsWithStores()),
+          ),
+          settingsProvider.overrideWith(
+            _TestSettingsNotifier.withPriceTracking,
+          ),
+          priceRepositoryProvider.overrideWithValue(priceRepo),
+        ],
+      );
+
+      // Scroll to the store spending section (item index 9).
+      await tester.drag(
+        find.byType(ListView).first,
+        const Offset(0, -3000),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Verify maxIncluded is false on the first BarChart's left axis.
+      final charts = find.byType(BarChart);
+      expect(charts, findsAtLeast(1));
+      final chart = tester.widget<BarChart>(charts.first);
+      final data = chart.data;
+      final leftTitles = data.titlesData.leftTitles.sideTitles;
+      expect(leftTitles.maxIncluded, isFalse);
     },
   );
 }
