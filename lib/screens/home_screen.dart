@@ -414,6 +414,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
 
     final inventories = ref.watch(inventoryListProvider);
+    final averageNutriscore = ref.watch(averageNutriscoreProvider).value;
 
     return Scaffold(
       appBar: AppBar(
@@ -458,9 +459,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           as String?) ??
                       l10n.myPantry,
                 ),
-                nutriscoreGrade: inventoryAsync.asData?.value.isNotEmpty == true
-                    ? null
-                    : null,
+                nutriscoreGrade: averageNutriscore,
                 onTap: () async {
                   final result = await Navigator.of(context).push<Object>(
                     MaterialPageRoute(

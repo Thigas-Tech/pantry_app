@@ -6,6 +6,8 @@
 ///   - Empty state (icon + title + subtitle) when no items exist.
 ///   - Populated state with summary cards, expiry donut, and chart
 ///     section headers.
+///   - Nutri-Score by store shows letter instead of number (#135).
+///   - Store spending bar chart shows formatted price tooltip (#136).
 ///
 /// Uses `pumpApp` with [statsProvider] overridden to return controlled
 /// Future values.  Chart widgets are verified for presence and labels;
@@ -16,9 +18,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
+import 'package:pantry_app/services/price_repository.dart';
 
 import '../helpers/pump_app.dart';
 
@@ -84,6 +90,55 @@ PantryStats _populatedStats() => const PantryStats(
   ),
 );
 
+PantryStats _populatedStatsWithStores() => const PantryStats(
+  totalProducts: 5,
+  totalItems: 12,
+  averageNutriscoreNumeric: 3,
+  expiredCount: 2,
+  expiringSoonCount: 3,
+  goodCount: 7,
+  addedThisWeek: 4,
+  addedThisMonth: 8,
+  weeklyAdditions: [
+    WeeklyCount(weekLabel: 'W26', count: 2),
+    WeeklyCount(weekLabel: 'W27', count: 2),
+  ],
+  itemsByLocation: {'pantry': 8, 'fridge': 4},
+  categoriesTop: [
+    CategoryCount(category: 'Dairy', count: 4),
+    CategoryCount(category: 'Grains', count: 3),
+  ],
+  nutriscoreDistribution: {'a': 1, 'b': 2, 'c': 2},
+  itemsBySource: {'api': 4, 'manual': 1},
+  localPhotos: PhotoStats(
+    total: 5,
+    withNutrition: 2,
+    withIngredients: 1,
+    withProduct: 3,
+  ),
+  offPhotos: PhotoStats(
+    total: 3,
+    withNutrition: 1,
+    withIngredients: 0,
+    withProduct: 2,
+  ),
+  totalValue: 150,
+  averagePrice: 12.5,
+  pricedItemCount: 10,
+  monthlySpending: [
+    MonthlySpending(month: '2026-06', total: 92),
+    MonthlySpending(month: '2026-07', total: 150),
+  ],
+  storeSpending: [
+    StoreSpending(store: 'BigBox', total: 92, itemCount: 5),
+    StoreSpending(store: 'CostLess', total: 58, itemCount: 3),
+  ],
+  nutriscoreByStore: [
+    StoreNutriscore(store: 'Supermarket', averageScore: 4.2),
+    StoreNutriscore(store: 'Market', averageScore: 3),
+  ],
+);
+
 Future<void> _pumpWithStats(WidgetTester tester, PantryStats stats) async {
   await pumpApp(
     tester,
@@ -94,6 +149,20 @@ Future<void> _pumpWithStats(WidgetTester tester, PantryStats stats) async {
     ],
   );
   await tester.pump();
+}
+
+class _MockPriceRepository extends Mock implements PriceRepository {}
+
+class _TestSettingsNotifier extends SettingsNotifier {
+  _TestSettingsNotifier(this._settings);
+
+  factory _TestSettingsNotifier.withPriceTracking() =>
+      _TestSettingsNotifier(const Settings(priceTrackingEnabled: true));
+
+  final Settings _settings;
+
+  @override
+  Settings build() => _settings;
 }
 
 void main() {
@@ -177,4 +246,67 @@ void main() {
     expect(find.text('Expiring soon'), findsOneWidget);
     expect(find.text('Good'), findsOneWidget);
   });
+
+  /// Verifies Nutri-Score by store shows letters instead of
+  /// numeric scores (regression test for issue #135).
+  testWidgets(
+    'nutriscore by store shows letter instead of number (#135)',
+    (tester) async {
+      await _pumpWithStats(tester, _populatedStatsWithStores());
+
+      // Scroll to the Nutri-Score by store section (item index 10).
+      await tester.scrollUntilVisible(
+        find.text('Nutri-Score by store'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      // Store names rendered in the section.
+      expect(find.text('Supermarket'), findsOneWidget);
+      expect(find.text('Market'), findsOneWidget);
+
+      // Nutri-Score letters: 4.2 -> B, 3.0 -> C.
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+
+      // Numeric values should NOT appear (regression check).
+      expect(find.text('4.2'), findsNothing);
+      expect(find.text('3.0'), findsNothing);
+    },
+  );
+
+  /// Verifies the store spending bar chart renders when price
+  /// tracking is enabled, and the section title appears.
+  testWidgets(
+    'store spending section renders with price tracking (#136)',
+    (tester) async {
+      final priceRepo = _MockPriceRepository();
+      when(() => priceRepo.formatPrice(any(), any())).thenReturn(r'$92.00');
+      await pumpApp(
+        tester,
+        const StatsScreen(),
+        overrides: [
+          statsProvider.overrideWith(
+            (ref) => Future.value(_populatedStatsWithStores()),
+          ),
+          settingsProvider.overrideWith(
+            _TestSettingsNotifier.withPriceTracking,
+          ),
+          priceRepositoryProvider.overrideWithValue(priceRepo),
+        ],
+      );
+
+      // Scroll to the store spending section (item index 9).
+      await tester.drag(
+        find.byType(ListView).first,
+        const Offset(0, -3000),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('Spending by store'), findsOneWidget);
+      expect(find.text('BigBox'), findsOneWidget);
+      expect(find.text('CostLess'), findsOneWidget);
+    },
+  );
 }

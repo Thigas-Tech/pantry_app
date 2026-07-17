@@ -9,6 +9,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/utils/nutriscore.dart';
 
 /// Aggregated statistics for the active pantry inventory.
 ///
@@ -78,11 +79,10 @@ final statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
   final sortedParents = parentCounts.entries.toList()
     ..sort((a, b) => b.value.compareTo(a.value));
 
-  const gradeValues = {'a': 5, 'b': 4, 'c': 3, 'd': 2, 'e': 1};
   var nutriSum = 0;
   var nutriCount = 0;
   for (final entry in nutriDist.entries) {
-    final val = gradeValues[entry.key.toLowerCase()];
+    final val = nutriscoreGradeToNumeric(entry.key);
     if (val != null) {
       nutriSum += val * entry.value;
       nutriCount += entry.value;

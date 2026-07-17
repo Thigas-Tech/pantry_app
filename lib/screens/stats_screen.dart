@@ -10,6 +10,7 @@ import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
 import 'package:pantry_app/screens/coming_soon_screen.dart';
+import 'package:pantry_app/utils/nutriscore.dart';
 import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
@@ -319,13 +320,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
     final textColor = Theme.of(context).colorScheme.onSurface;
     final grades = ['a', 'b', 'c', 'd', 'e'];
-    final colors = [
-      Colors.green.shade700,
-      Colors.lightGreen,
-      Colors.yellow.shade700,
-      Colors.orange,
-      Colors.red,
-    ];
+    final colors = grades.map((g) => nutriscoreColorForGrade(g)!).toList();
     final barGroups = <BarChartGroupData>[];
 
     for (var i = 0; i < grades.length; i++) {
@@ -693,6 +688,8 @@ Widget _buildMonthlySpending(
     return const SizedBox.shrink();
   }
 
+  final repo = ref.read(priceRepositoryProvider);
+  final baseCurrency = ref.read(settingsProvider).baseCurrency;
   final spots = <FlSpot>[];
   for (var i = 0; i < stats.monthlySpending.length; i++) {
     final entry = stats.monthlySpending[i];
@@ -748,8 +745,15 @@ Widget _buildMonthlySpending(
                         showTitles: true,
                         reservedSize: 48,
                         getTitlesWidget: (value, _) {
+                          final formatted = repo.formatPrice(
+                            value,
+                            baseCurrency,
+                          );
+                          final short = formatted
+                              .replaceAll(RegExp(r'[,.]\d{2}$'), '')
+                              .replaceAll(RegExp(r'\s+'), '');
                           return Text(
-                            value.toStringAsFixed(0),
+                            short,
                             style: theme.textTheme.labelSmall,
                           );
                         },
@@ -759,6 +763,25 @@ Widget _buildMonthlySpending(
                     rightTitles: const AxisTitles(),
                   ),
                   borderData: FlBorderData(),
+                  lineTouchData: LineTouchData(
+                    touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((spot) {
+                          final entry = stats.monthlySpending[spot.spotIndex];
+                          final formatted = repo.formatPrice(
+                            entry.total,
+                            baseCurrency,
+                          );
+                          return LineTooltipItem(
+                            '${entry.month}\n$formatted',
+                            TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          );
+                        }).toList();
+                      },
+                    ),
+                  ),
                   lineBarsData: [
                     LineChartBarData(
                       spots: spots,
@@ -793,6 +816,8 @@ Widget _buildStoreSpending(
     return const SizedBox.shrink();
   }
 
+  final repo = ref.read(priceRepositoryProvider);
+  final baseCurrency = ref.read(settingsProvider).baseCurrency;
   final topStores = stats.storeSpending.take(10).toList();
 
   return Column(
@@ -841,8 +866,12 @@ Widget _buildStoreSpending(
                   showTitles: true,
                   reservedSize: 48,
                   getTitlesWidget: (value, _) {
+                    final formatted = repo.formatPrice(value, baseCurrency);
+                    final short = formatted
+                        .replaceAll(RegExp(r'[,.]\d{2}$'), '')
+                        .replaceAll(RegExp(r'\s+'), '');
                     return Text(
-                      value.toStringAsFixed(0),
+                      short,
                       style: theme.textTheme.labelSmall,
                     );
                   },
@@ -852,6 +881,21 @@ Widget _buildStoreSpending(
               rightTitles: const AxisTitles(),
             ),
             borderData: FlBorderData(),
+            barTouchData: BarTouchData(
+              touchTooltipData: BarTouchTooltipData(
+                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                  final store = topStores[groupIndex];
+                  final formatted = repo.formatPrice(
+                    store.total,
+                    baseCurrency,
+                  );
+                  return BarTooltipItem(
+                    '${store.store}\n$formatted',
+                    TextStyle(color: theme.colorScheme.onSurface),
+                  );
+                },
+              ),
+            ),
             barGroups: topStores.asMap().entries.map((e) {
               return BarChartGroupData(
                 x: e.key,
@@ -890,12 +934,9 @@ Widget _buildNutriscoreByStore(
       _buildSectionTitle(context, l10n.nutriscoreByStoreTitle),
       const SizedBox(height: 8),
       ...stats.nutriscoreByStore.map((entry) {
+        final letter = nutriscoreNumericToLetter(entry.averageScore);
+        final color = nutriscoreColorForNumeric(entry.averageScore);
         final ratio = (entry.averageScore / 5.0).clamp(0.0, 1.0);
-        final color = Color.lerp(
-          Colors.red,
-          Colors.green,
-          ratio,
-        )!;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
@@ -923,12 +964,13 @@ Widget _buildNutriscoreByStore(
               ),
               const SizedBox(width: 8),
               SizedBox(
-                width: 64,
+                width: 48,
                 child: Text(
-                  entry.averageScore.toStringAsFixed(1),
+                  letter,
                   textAlign: TextAlign.end,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: color,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
