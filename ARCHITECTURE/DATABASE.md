@@ -1,6 +1,6 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 19)
+### 2.1 Schema (version 23)
 
 Eight tables:
 
@@ -46,7 +46,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v19).
+- `_onUpgrade` handles version bumps (currently v1 -> v23).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -70,6 +70,10 @@ Version history:
 | v16 -> v17 | Added `search_text` column and index on `products` |
 | v17 -> v18 | Added price columns to `shopping_list` (price_amount, price_currency, price_store, price_photo_path) + `idx_shopping_inventory_id` |
 | v18 -> v19 | Added `stores` table + seed from existing `prices.store` and `shopping_list.price_store` |
+| v19 -> v20 | Backfill null `inventory_id` in `shopping_list` to default inventory |
+| v20 -> v21 | Added `plu_code TEXT` and `product_type TEXT NOT NULL DEFAULT 'barcoded'` to `products` |
+| v21 -> v22 | Added `serving_weight_g REAL` to `inventory` for produce serving sizes |
+| v22 -> v23 | Backfill `category` for produce items with default "Fruits and vegetables based foods" |
 
 ### 2.4 Connectivity layer
 

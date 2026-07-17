@@ -30,7 +30,7 @@ never waste food again.
 
 ## Screenshots
 
-Add screenshots here: Home, Scanner, Product Detail, Settings.
+Screenshots will be added here: Home, Scanner, Product Detail, Settings.
 
 ## Getting started
 
