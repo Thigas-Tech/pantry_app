@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
@@ -18,6 +17,7 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/feedback_screen.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
+import 'package:pantry_app/utils/changelog_loader.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
@@ -418,7 +418,9 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _showWhatsNew(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final raw = await rootBundle.loadString('USER_CHANGELOG.md');
+      final raw = await loadLocalizedChangelog(
+        Localizations.localeOf(context),
+      );
       if (!context.mounted) return;
 
       await showWhatsNewSheet(context, rawChangelog: raw);

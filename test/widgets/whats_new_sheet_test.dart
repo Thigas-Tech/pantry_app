@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/utils/changelog_loader.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
 
 import '../helpers/pump_app.dart';
@@ -12,10 +13,12 @@ Future<void> pumpSheet(
   WidgetTester tester,
   Widget child, {
   bool settle = true,
+  Locale locale = const Locale('en'),
+  String rawChangelog = rawChangelogEn,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
-      locale: const Locale('en'),
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -38,7 +41,7 @@ Future<void> pumpSheet(
   if (settle) await tester.pumpAndSettle();
 }
 
-const rawChangelog =
+const rawChangelogEn =
     '# User Changelog\n'
     '\n'
     '## [Unreleased]\n'
@@ -60,11 +63,74 @@ const rawChangelog =
     '### Added\n'
     '- **Bold** feature name.\n';
 
+const rawChangelogPt =
+    '# Registro de alteracoes do usuario\n'
+    '\n'
+    '## [Unreleased]\n'
+    '### Adicionado\n'
+    '- Nada ainda.\n'
+    '\n'
+    '## [0.1.0]\n'
+    '### Adicionado\n'
+    '- Primeiro recurso.\n'
+    '- Segundo recurso.\n';
+
 void main() {
+  group('changelogAssetPath', () {
+    test('returns English path for en locale', () {
+      expect(changelogAssetPath(const Locale('en')), 'USER_CHANGELOG.md');
+    });
+
+    test('returns Portuguese path for pt locale', () {
+      expect(
+        changelogAssetPath(const Locale('pt')),
+        'USER_CHANGELOG_pt.md',
+      );
+    });
+
+    test('returns pt_BR path for pt_BR locale', () {
+      expect(
+        changelogAssetPath(const Locale('pt', 'BR')),
+        'USER_CHANGELOG_pt_BR.md',
+      );
+    });
+
+    test('builds path for unsupported locale', () {
+      expect(
+        changelogAssetPath(const Locale('fr')),
+        'USER_CHANGELOG_fr.md',
+      );
+    });
+  });
+
+  group('loadLocalizedChangelog', () {
+    test('returns English content for en locale', () async {
+      final content = await loadLocalizedChangelog(const Locale('en'));
+      expect(content, contains('# User Changelog'));
+    });
+
+    test('falls back to English for unsupported locale', () async {
+      // When the asset file for an unsupported locale does not exist,
+      // the function falls back to the English file.
+      final content = await loadLocalizedChangelog(const Locale('fr'));
+      expect(content, contains('# User Changelog'));
+    });
+  });
+
   group('WhatsNewSheet', () {
-    testWidgets('renders title', (tester) async {
+    testWidgets('renders title in English', (tester) async {
       await pumpSheet(tester, const SizedBox.shrink());
       expect(find.text("What's new"), findsOneWidget);
+    });
+
+    testWidgets('renders title in Portuguese', (tester) async {
+      await pumpSheet(
+        tester,
+        const SizedBox.shrink(),
+        locale: const Locale('pt'),
+        rawChangelog: rawChangelogPt,
+      );
+      expect(find.text('Novidades'), findsOneWidget);
     });
 
     testWidgets('renders version header for single entry', (tester) async {
@@ -95,9 +161,34 @@ void main() {
       expect(find.text('Bug fix one.'), findsOneWidget);
     });
 
-    testWidgets('renders Unreleased as localised string', (tester) async {
+    testWidgets('renders Unreleased as localised string in English', (
+      tester,
+    ) async {
       await pumpSheet(tester, const SizedBox.shrink());
       expect(find.textContaining('Unreleased'), findsOneWidget);
+    });
+
+    testWidgets('renders Unreleased as localised string in Portuguese', (
+      tester,
+    ) async {
+      await pumpSheet(
+        tester,
+        const SizedBox.shrink(),
+        locale: const Locale('pt'),
+        rawChangelog: rawChangelogPt,
+      );
+      expect(find.textContaining('Nao lancado'), findsOneWidget);
+    });
+
+    testWidgets('renders Portuguese content when locale is pt', (tester) async {
+      await pumpSheet(
+        tester,
+        const SizedBox.shrink(),
+        locale: const Locale('pt'),
+        rawChangelog: rawChangelogPt,
+      );
+      expect(find.text('Primeiro recurso.'), findsOneWidget);
+      expect(find.text('Segundo recurso.'), findsOneWidget);
     });
   });
 }
