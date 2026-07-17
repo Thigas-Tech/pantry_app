@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -111,7 +111,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     _hasCheckedOverdue = true;
     try {
       final repo = ref.read(productRepositoryProvider);
-      final online = await InternetConnectionChecker.instance.hasConnection;
+      final online = await ref.read(hasConnectionProvider.future);
       if (!online) return;
       if (!await repo.isCacheOverdue()) return;
       final activeId = ref.read(activeInventoryProvider);

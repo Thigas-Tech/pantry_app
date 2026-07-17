@@ -406,6 +406,40 @@ void main() {
       // second pass also fails (the stub still throws).
       expect(count, 1);
     });
+
+    test('skips synthetic produce barcodes during refresh', () async {
+      const realBarcode = '0737628064502';
+      const produceBarcode = 'produce-Banana';
+      const pluBarcode = 'plu-12345';
+      const realProduct = Product(
+        barcode: realBarcode,
+        name: 'Real Product',
+      );
+
+      when(
+        () => mockDb.getInventoryItems(inventoryId: 1),
+      ).thenAnswer(
+        (_) async => [
+          const InventoryItem(barcode: realBarcode),
+          const InventoryItem(barcode: produceBarcode),
+          const InventoryItem(barcode: pluBarcode),
+        ],
+      );
+      when(
+        () => mockApi.getByBarcode(realBarcode),
+      ).thenAnswer((_) async => realProduct);
+      when(() => mockDb.getProduct(realBarcode)).thenAnswer((_) async => null);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
+
+      final count = await repository.refreshInventoryProducts(1);
+
+      // Only the real barcode should be refreshed
+      expect(count, 1);
+      verify(() => mockApi.getByBarcode(realBarcode)).called(1);
+      // Synthetic barcodes must never reach the OFF API
+      verifyNever(() => mockApi.getByBarcode(produceBarcode));
+      verifyNever(() => mockApi.getByBarcode(pluBarcode));
+    });
   });
 
   group('refreshInventoryProductsBackground', () {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
@@ -97,6 +99,77 @@ void main() {
       for (final product in results) {
         expect(product.barcode, startsWith('plu-'));
       }
+    });
+
+    test('sends api_key as URL query parameter not in body', () async {
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
+      ).thenAnswer((_) async => http.Response('{"foods":[]}', 200));
+
+      await client.searchFood('Orange');
+
+      final captured = verify(
+        () => mockClient.post(
+          captureAny(),
+          headers: any(named: 'headers'),
+          body: captureAny(named: 'body'),
+        ),
+      ).captured;
+      final uri = captured[0] as Uri;
+      final body = captured[1] as String;
+
+      expect(uri.queryParameters['api_key'], 'test-key');
+      final decoded = jsonDecode(body) as Map<String, dynamic>;
+      expect(decoded, isNot(contains('api_key')));
+    });
+
+    test('URL-encodes special characters in api_key', () async {
+      const keyWithSpecialChars = 'key+123&a=1 b';
+      final clientWithSpecialKey = UsdaApiClient(
+        httpClient: mockClient,
+        apiKey: keyWithSpecialChars,
+      );
+
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
+      ).thenAnswer((_) async => http.Response('{"foods":[]}', 200));
+
+      await clientWithSpecialKey.searchFood('test');
+
+      final captured = verify(
+        () => mockClient.post(
+          captureAny(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
+      ).captured;
+      final uri = captured[0] as Uri;
+
+      expect(uri.queryParameters['api_key'], keyWithSpecialChars);
+      // The raw query string should be percent-encoded
+      expect(uri.query, contains('api_key='));
+      expect(uri.query, isNot(contains(' ')));
+    });
+
+    test('returns empty list on 403 Forbidden', () async {
+      when(
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
+      ).thenAnswer((_) async => http.Response('Forbidden', 403));
+
+      final results = await client.searchFood('apple');
+      expect(results, isEmpty);
     });
   });
 }

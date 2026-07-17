@@ -401,7 +401,14 @@ class ProductRepository {
   /// pull‑to‑refresh and post‑flush recovery.
   Future<int> refreshInventoryProducts(int inventoryId) async {
     final items = await _db.getInventoryItems(inventoryId: inventoryId);
-    final barcodes = items.map((e) => e.barcode).toSet();
+    final allBarcodes = items.map((e) => e.barcode).toSet();
+    final barcodes = allBarcodes.where((b) {
+      return !b.startsWith('produce-') && !b.startsWith('plu-');
+    }).toSet();
+    final skipped = allBarcodes.length - barcodes.length;
+    if (skipped > 0) {
+      logInfo('Skipped $skipped synthetic produce barcodes during refresh');
+    }
     if (barcodes.isEmpty) return 0;
 
     logInfo(

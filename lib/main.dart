@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/config.dart';
@@ -78,6 +79,23 @@ Future<void> main() async {
     off.OpenFoodFactsLanguage.ENGLISH,
   ];
   logInfo('OFF SDK configured');
+
+  InternetConnectionChecker.instance.configure(
+    addresses: [
+      AddressCheckOption(
+        uri: Uri.parse('https://world.openfoodfacts.org'),
+      ),
+      AddressCheckOption(
+        uri: Uri.parse('https://api.openfoodfacts.org'),
+      ),
+      AddressCheckOption(
+        uri: Uri.parse('https://fdc.nal.usda.gov'),
+      ),
+    ],
+    timeout: const Duration(seconds: 10),
+    interval: const Duration(seconds: 10),
+  );
+  logInfo('InternetConnectionChecker configured with OFF endpoints');
 
   await _handleAppUpdate();
 
