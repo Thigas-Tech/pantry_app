@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantry_app/utils/nutriscore.dart';
 
 /// Displays the Nutri-Score grade of a product as a coloured badge.
 ///
@@ -78,26 +79,17 @@ class NutriScoreBadge extends StatelessWidget {
 
   /// Returns `true` if the [grade] is `'not-applicable'`.
   static bool isNotApplicable(String? grade) {
-    return _isNotApplicable(grade);
+    return nutriscoreIsNotApplicable(grade);
   }
 
   /// Returns the Nutri-Score colour for [grade], or `null` if invalid.
   static Color? _colorForGrade(String? grade) {
-    final g = grade?.toLowerCase().trim();
-    if (g == null || g.isEmpty || g.length > 1) return null;
-    return switch (g) {
-      'a' => const Color(0xFF038141),
-      'b' => const Color(0xFF85BB2F),
-      'c' => const Color(0xFFFECB02),
-      'd' => const Color(0xFFEE8200),
-      'e' => const Color(0xFFE73F0B),
-      _ => null,
-    };
+    return nutriscoreColorForGrade(grade);
   }
 
   /// Returns `true` if [grade] is `'not-applicable'` (case‑insensitive).
   static bool _isNotApplicable(String? grade) {
-    return grade?.toLowerCase().trim() == 'not-applicable';
+    return nutriscoreIsNotApplicable(grade);
   }
 
   /// Converts a Nutri-Score grade to a numeric value for averaging.
@@ -105,14 +97,6 @@ class NutriScoreBadge extends StatelessWidget {
   /// `'a'` = 5, `'b'` = 4, …, `'e'` = 1. Returns `null` for invalid or
   /// not‑applicable grades.
   static int? toNumeric(String? grade) {
-    if (_isNotApplicable(grade)) return null;
-    return switch (grade?.toLowerCase()) {
-      'a' => 5,
-      'b' => 4,
-      'c' => 3,
-      'd' => 2,
-      'e' => 1,
-      _ => null,
-    };
+    return nutriscoreGradeToNumeric(grade);
   }
 }
