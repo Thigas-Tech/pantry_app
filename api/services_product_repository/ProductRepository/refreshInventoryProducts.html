@@ -88,7 +88,14 @@ pull‑to‑refresh and post‑flush recovery.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; refreshInventoryProducts(int inventoryId) async {
   final items = await _db.getInventoryItems(inventoryId: inventoryId);
-  final barcodes = items.map((e) =&gt; e.barcode).toSet();
+  final allBarcodes = items.map((e) =&gt; e.barcode).toSet();
+  final barcodes = allBarcodes.where((b) {
+    return !b.startsWith(&#39;produce-&#39;) &amp;&amp; !b.startsWith(&#39;plu-&#39;);
+  }).toSet();
+  final skipped = allBarcodes.length - barcodes.length;
+  if (skipped &gt; 0) {
+    logInfo(&#39;Skipped $skipped synthetic produce barcodes during refresh&#39;);
+  }
   if (barcodes.isEmpty) return 0;
 
   logInfo(

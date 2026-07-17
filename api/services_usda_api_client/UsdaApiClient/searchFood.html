@@ -81,7 +81,9 @@ whole foods. Generated products use a synthetic barcode prefixed with
     return [];
   }
 
-  final uri = Uri.parse(&#39;$_baseUrl&#47;foods&#47;search&#39;);
+  final uri = Uri.parse(&#39;$_baseUrl&#47;foods&#47;search&#39;).replace(
+    queryParameters: {&#39;api_key&#39;: _apiKey},
+  );
 
   try {
     logInfo(&#39;Searching USDA for &quot;$query&quot;&#39;);
@@ -92,10 +94,15 @@ whole foods. Generated products use a synthetic barcode prefixed with
         &#39;query&#39;: query,
         &#39;dataType&#39;: [&#39;Foundation&#39;, &#39;SR Legacy&#39;],
         &#39;pageSize&#39;: 10,
-        &#39;api_key&#39;: _apiKey,
       }),
     );
 
+    if (response.statusCode == 403) {
+      logWarning(
+        &#39;USDA API returned 403 — check your API key in .env (USDA_API_KEY)&#39;,
+      );
+      return [];
+    }
     if (response.statusCode != 200) {
       logWarning(
         &#39;USDA search returned ${response.statusCode} for &quot;$query&quot;&#39;,

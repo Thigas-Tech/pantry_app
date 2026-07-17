@@ -70,6 +70,9 @@ this implementation yields the initial connectivity state as the
 first event so that downstream code never sees a null/loading state.
 A 3-second timeout prevents slow DNS lookups from blocking the
 initial emission.</p>
+<p>Offline transitions are debounced for 3 seconds to suppress transient
+network blips (DNS hiccups, mobile network handovers, slow server
+responses).</p>
 </section>
 
         
@@ -84,15 +87,9 @@ initial emission.</p>
     logWarning(&#39;Initial connectivity check timed out — defaulting to offline&#39;);
     yield false;
   }
-  yield* InternetConnectionChecker.instance.onStatusChange.map((status) {
-    final online = status == InternetConnectionStatus.connected;
-    if (online) {
-      logInfo(&#39;Connectivity restored — device is online&#39;);
-    } else {
-      logWarning(&#39;Connectivity lost — device is offline&#39;);
-    }
-    return online;
-  });
+  yield* debounceConnectivityStatus(
+    InternetConnectionChecker.instance.onStatusChange,
+  );
 });</code></pre>
 </section>
 

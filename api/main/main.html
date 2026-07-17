@@ -102,6 +102,23 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   ];
   logInfo(&#39;OFF SDK configured&#39;);
 
+  InternetConnectionChecker.instance.configure(
+    addresses: [
+      AddressCheckOption(
+        uri: Uri.parse(&#39;https:&#47;&#47;world.openfoodfacts.org&#39;),
+      ),
+      AddressCheckOption(
+        uri: Uri.parse(&#39;https:&#47;&#47;api.openfoodfacts.org&#39;),
+      ),
+      AddressCheckOption(
+        uri: Uri.parse(&#39;https:&#47;&#47;fdc.nal.usda.gov&#39;),
+      ),
+    ],
+    timeout: const Duration(seconds: 10),
+    interval: const Duration(seconds: 10),
+  );
+  logInfo(&#39;InternetConnectionChecker configured with OFF endpoints&#39;);
+
   await _handleAppUpdate();
 
   &#47;&#47; Create the shared container and init the notification service before
