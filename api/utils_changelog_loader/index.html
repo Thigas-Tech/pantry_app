@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="price_provider library API docs, for the Dart programming language.">
-  <title>price_provider library - Dart API</title>
+  <meta name="description" content="changelog_loader library API docs, for the Dart programming language.">
+  <title>changelog_loader library - Dart API</title>
 
 
   
@@ -25,9 +25,9 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">pantry_app</a></li>
-    <li class="self-crumb">providers/price_provider.dart</li>
+    <li class="self-crumb">utils/changelog_loader.dart</li>
   </ol>
-  <div class="self-name">price_provider</div>
+  <div class="self-name">changelog_loader</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,13 +45,13 @@
     id="dartdoc-main-content"
     class="main-content"
     data-above-sidebar=""
-    data-below-sidebar="providers_price_provider&#47;providers_price_provider-library-sidebar.html">
+    data-below-sidebar="utils_changelog_loader&#47;utils_changelog_loader-library-sidebar.html">
   
     <div>
       
 
       <h1>
-        <span class="kind-library">providers/price_provider</span>
+        <span class="kind-library">utils/changelog_loader</span>
         library 
  
 
@@ -67,98 +67,38 @@
 
 
 
-    <section class="summary offset-anchor" id="properties">
-      <h2>Properties</h2>
-      <dl class="properties">
-          <dt id="averagePriceProvider" class="property">
-  <span class="name"><a href="../providers_price_provider/averagePriceProvider.html">averagePriceProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
+
+    <section class="summary offset-anchor" id="functions">
+      <h2>Functions</h2>
+      <dl class="callables">
+          <dt id="changelogAssetPath" class="callable">
+  <span class="name"><a href="../utils_changelog_loader/changelogAssetPath.html">changelogAssetPath</a></span><span class="signature">(<wbr><span class="parameter" id="changelogAssetPath-param-locale"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/Locale-class.html">Locale</a></span> <span class="parameter-name">locale</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
   
 
 </dt>
 <dd>
-  Provides the average item price in the currently active inventory,
-converted to the user's base currency.
-  <div class="features"><span class="feature">final</span></div>
+  Returns the asset path for the changelog file for the given <code>locale</code>.
+  
 
 </dd>
 
-          <dt id="inventoryValueProvider" class="property">
-  <span class="name"><a href="../providers_price_provider/inventoryValueProvider.html">inventoryValueProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span>&gt;</span></span>
+          <dt id="loadLocalizedChangelog" class="callable">
+  <span class="name"><a href="../utils_changelog_loader/loadLocalizedChangelog.html">loadLocalizedChangelog</a></span><span class="signature">(<wbr><span class="parameter" id="loadLocalizedChangelog-param-locale"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/Locale-class.html">Locale</a></span> <span class="parameter-name">locale</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
+  </span>
   
 
 </dt>
 <dd>
-  Provides the total value of the currently active inventory, converted
-to the user's base currency.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-          <dt id="latestPriceProvider" class="property">
-  <span class="name"><a href="../providers_price_provider/latestPriceProvider.html">latestPriceProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
+  Loads the localized <code>USER_CHANGELOG.md</code> content for the given <code>locale</code>.
   
-
-</dt>
-<dd>
-  Provides the most recent price for a specific barcode, or <code>null</code>.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-          <dt id="pendingSyncCountProvider" class="property">
-  <span class="name"><a href="../providers_price_provider/pendingSyncCountProvider.html">pendingSyncCountProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-  
-
-</dt>
-<dd>
-  Provides the count of prices pending sync to Open Prices.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-          <dt id="pricedItemCountProvider" class="property">
-  <span class="name"><a href="../providers_price_provider/pricedItemCountProvider.html">pricedItemCountProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-  
-
-</dt>
-<dd>
-  Provides the count of priced items in the currently active inventory.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-          <dt id="priceHistoryProvider" class="property">
-  <span class="name"><a href="../providers_price_provider/priceHistoryProvider.html">priceHistoryProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
-  
-
-</dt>
-<dd>
-  Provides the price history for a specific barcode.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-          <dt id="pricesHiddenProvider" class="property">
-  <span class="name"><a href="../providers_price_provider/pricesHiddenProvider.html">pricesHiddenProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
-  
-
-</dt>
-<dd>
-  Whether prices are hidden for privacy.
-  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
       </dl>
     </section>
-
 
 
   </div> <!-- /.main-content -->
@@ -171,7 +111,7 @@ to the user's base currency.
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">pantry_app</a></li>
-    <li class="self-crumb">providers/price_provider.dart</li>
+    <li class="self-crumb">utils/changelog_loader.dart</li>
 </ol>
 
     <h5><span class="package-name">pantry_app</span> <span class="package-kind">package</span></h5>
@@ -281,7 +221,7 @@ to the user's base currency.
 
   </div>
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
-    <h5>price_provider library</h5>
+    <h5>changelog_loader library</h5>
   </div><!--/sidebar-offcanvas-right-->
 </main>
 <footer>
