@@ -6,6 +6,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/produce_category_mapper.dart';
 import 'package:pantry_app/services/produce_nutrition_fallback.dart';
@@ -57,6 +58,7 @@ class ProductRepository {
     this._fallbackApi,
     this._usdaClient,
     this._prefs,
+    this._firebaseCache,
   });
 
   final DatabaseHelper _db;
@@ -64,6 +66,7 @@ class ProductRepository {
   final OffAdapter? _fallbackApi;
   final UsdaApiClient? _usdaClient;
   final SharedPreferences? _prefs;
+  final FirebaseCacheService? _firebaseCache;
 
   Future<SharedPreferences> get _sharedPrefs async =>
       _prefs ?? await SharedPreferences.getInstance();
@@ -98,6 +101,31 @@ class ProductRepository {
       return cached;
     }
 
+    // 1.5 Firebase cache
+    if (_firebaseCache != null && _firebaseCache.isAvailable) {
+      try {
+        final fbProduct = await _firebaseCache.resolveBarcodedProduct(
+          barcode,
+          languageCode: lang,
+        );
+        if (fbProduct != null) {
+          logInfo('Firebase cache hit for $barcode');
+          return fbProduct;
+        }
+        logInfo(
+          'Firebase miss for $barcode '
+          '- resolveBarcodedProduct already tried OFF; skipping retry',
+        );
+        // The service already tried OFF internally.  Skip the direct OFF
+        // call (step 2) and proceed to the fallback chain.
+        return _fallbackOrThrow(barcode, lang);
+      } on ProductNotFoundException {
+        rethrow;
+      } on Exception catch (e) {
+        logWarning('Firebase cache lookup failed for $barcode: $e');
+      }
+    }
+
     // 2. Try primary API
     try {
       logInfo('Fetching $barcode from primary API');
@@ -107,34 +135,42 @@ class ProductRepository {
       return remote;
     } on ProductNotFoundException {
       logWarning('Product $barcode not found in primary API');
-      if (_fallbackApi != null) {
-        logInfo('Trying fallback API for $barcode');
-        try {
-          final remote = await _fallbackApi.getByBarcode(
-            barcode,
-            languageCode: lang,
-          );
-          await _db.insertProduct(remote);
-          logInfo('Fetched $barcode from fallback API');
-          return remote;
-        } on ProductNotFoundException {
-          logWarning('Product $barcode not found in fallback API');
-          rethrow;
-        } on Exception catch (e) {
-          logError('Fallback API error for $barcode: $e');
-          throw FetchFailedException(
-            'Failed to fetch product. Please check your connection.',
-          );
-        }
-      } else {
-        rethrow;
-      }
+      return _fallbackOrThrow(barcode, lang);
     } on Exception catch (e) {
       logError('Network error for $barcode: $e');
       throw FetchFailedException(
         'Failed to fetch product. Please check your connection.',
       );
     }
+  }
+
+  /// Tries the fallback API (if configured) or throws.
+  ///
+  /// Shared between the direct-API path and the Firebase-cache path so the
+  /// fallback behaviour is identical regardless of which source was tried
+  /// first.
+  Future<Product> _fallbackOrThrow(String barcode, String lang) async {
+    if (_fallbackApi != null) {
+      logInfo('Trying fallback API for $barcode');
+      try {
+        final remote = await _fallbackApi.getByBarcode(
+          barcode,
+          languageCode: lang,
+        );
+        await _db.insertProduct(remote);
+        logInfo('Fetched $barcode from fallback API');
+        return remote;
+      } on ProductNotFoundException {
+        logWarning('Product $barcode not found in fallback API');
+        rethrow;
+      } on Exception catch (e) {
+        logError('Fallback API error for $barcode: $e');
+        throw FetchFailedException(
+          'Failed to fetch product. Please check your connection.',
+        );
+      }
+    }
+    throw ProductNotFoundException(barcode);
   }
 
   /// Checks the local cache for a product with the given [barcode].
@@ -263,6 +299,25 @@ class ProductRepository {
     String produceName,
     String barcode,
   ) async {
+    if (_firebaseCache != null && _firebaseCache.isAvailable) {
+      try {
+        final cached = await _firebaseCache.resolveProduceProduct(produceName);
+        if (cached != null) {
+          return cached.copyWith(
+            barcode: barcode,
+            productType: ProductType.produce,
+            source: 'manual',
+            category: ProduceCategoryMapper.forName(produceName),
+            lastSynced: DateTime.now().millisecondsSinceEpoch,
+          );
+        }
+        // Service already tried USDA internally; skip direct USDA call.
+        return _produceFallbackOrMinimal(produceName, barcode);
+      } on Exception catch (e) {
+        logWarning('Firebase produce cache lookup failed: $e');
+      }
+    }
+
     if (_usdaClient != null) {
       try {
         final usdaResults = await _usdaClient.searchFood(produceName);
@@ -282,6 +337,12 @@ class ProductRepository {
       }
     }
 
+    return _produceFallbackOrMinimal(produceName, barcode);
+  }
+
+  /// Returns a hardcoded fallback product for [produceName], or a minimal
+  /// product with no nutrition data when no fallback is available.
+  Product _produceFallbackOrMinimal(String produceName, String barcode) {
     final fallback = ProduceNutritionFallback.forName(produceName);
     if (fallback != null) {
       return Product(

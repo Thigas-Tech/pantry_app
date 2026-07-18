@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/firebase_cache_provider.dart';
+import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 
@@ -12,6 +14,10 @@ import 'package:pantry_app/services/usda_api_client.dart';
 /// the Open Food Facts SDK adapter (from [apiServiceProvider]), and the
 /// USDA FoodData Central API client to implement offline-first product
 /// lookup and produce quick-add with nutrition data.
+///
+/// When the Firebase cache provider creates a [FirebaseCacheService] with
+/// `isAvailable == true`, the repository also consults the shared Firebase
+/// cache before falling through to the primary API.
 ///
 /// ## Dependencies
 ///
@@ -37,9 +43,11 @@ import 'package:pantry_app/services/usda_api_client.dart';
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   final db = ref.read(databaseProvider);
   final api = ref.read(apiServiceProvider);
+  final firebaseCache = ref.read(firebaseCacheProvider);
   return ProductRepository(
     db,
     api,
     usdaClient: UsdaApiClient(),
+    firebaseCache: firebaseCache,
   );
 });
