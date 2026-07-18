@@ -1,5 +1,12 @@
 # User Changelog
 
+## [0.0.8+4]
+
+- Product data is now cached in the cloud, making repeat lookups faster even
+  after clearing your local cache.
+- Your selected pantry is now remembered across app restarts.
+- Fixed a rare crash when navigating back from some screens.
+
 ## [0.0.8]
 
 ### Fixed

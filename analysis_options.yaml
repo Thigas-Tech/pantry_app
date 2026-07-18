@@ -70,4 +70,6 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    - "**app_localizations*.dart"
+    - "**firebase_options.dart"
     - "tools/**"

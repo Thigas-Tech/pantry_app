@@ -1,5 +1,12 @@
 # Registro de alteracoes do usuario
 
+## [0.0.8+4]
+
+- Os dados dos produtos agora sao armazenados em cache na nuvem, tornando as
+  consultas repetidas mais rapidas mesmo apos limpar o cache local.
+- Sua despensa selecionada agora e lembrada entre as reinicializacoes do app.
+- Corrigida uma travada rara ao navegar de volta de algumas telas.
+
 ## [0.0.8]
 
 ### Corrigido

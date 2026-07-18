@@ -57,7 +57,7 @@ class ActiveInventoryNotifier extends Notifier<int> {
       final resolvedId = _fallbackId(inventories);
       unawaited(prefs.setInt('active_inventory_id', resolvedId));
       state = resolvedId;
-    } catch (e) {
+    } on Exception catch (e) {
       logWarning('Failed to load persisted active inventory: $e');
     }
   }
@@ -68,7 +68,7 @@ class ActiveInventoryNotifier extends Notifier<int> {
       final db = ref.read(databaseProvider);
       final result = await db.getInventories();
       return result;
-    } catch (_) {
+    } on Exception catch (_) {
       return null;
     }
   }
@@ -87,7 +87,7 @@ class ActiveInventoryNotifier extends Notifier<int> {
     try {
       final db = ref.read(databaseProvider);
       await db.inventoriesDao.seedDefault(await db.database);
-    } catch (e) {
+    } on Exception catch (e) {
       logWarning('Failed to reseed default inventory: $e');
     }
   }
@@ -97,7 +97,7 @@ class ActiveInventoryNotifier extends Notifier<int> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('active_inventory_id', id);
-    } catch (e) {
+    } on Exception catch (e) {
       logWarning('Failed to persist active inventory: $e');
     }
   }

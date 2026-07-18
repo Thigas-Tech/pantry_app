@@ -8,8 +8,9 @@
 │  ScannerScreen     EmptyPantry       snackbar_helper         │
 │  ProductDetail     NutritionTable                            │
 │  AddToInventory    ScannerOverlay                            │
-│  Settings / Stats  PriceEntrySheet                          │
-│  ShoppingList      ...                                       │
+│  Settings / Stats  PriceEntrySheet                           │
+│  ShoppingList      QuickAddProduce                           │
+│                    ...                                       │
 └─────────┬────────────────────────────────────────────────────┘
           │  watches / reads Riverpod providers
 ┌─────────▼────────────────────────────────────────────────────┐
@@ -24,6 +25,8 @@
 │  priceRepositoryProvider   priceHistoryProvider               │
 │  shoppingListProvider      storesProvider                     │
 │  currencyServiceProvider   photoServiceProvider              │
+│  firebaseCacheProvider     authServiceProvider               │
+│  authStateProvider         inventoryProductsProvider          │
 └─────────┬────────────────────────────────────────────────────┘
           │  calls
 ┌─────────▼────────────────────────────────────────────────────┐
@@ -33,22 +36,27 @@
 │  ImageCacheService    GithubIssueService                      │
 │  PriceRepository      CurrencyService  OpenPricesService      │
 │  StoreDao             ShoppingListDao  PhotoService           │
+│  FirebaseCacheService  FirebaseCacheClient                    │
+│  FirebaseFirestoreClientAdapter  AuthService                  │
+│  FirebaseAuthService                                          │
 └─────────┬──────────────┬──────────────────┬─────────────────┘
           │              │                  │
 ┌─────────▼────┐  ┌─────▼──────────────┐   │
 │  Local DB    │  │  Remote API        │   │
 │  database/   │  │  services/         │   │
 │  SQLite      │  │  Open Food Facts   │   │
-│  7 tables:   │  │  v3 REST (SDK) │   │
-│  products    │  │                    │   │
-│  inventories │  │  Open Prices API   │   │
-│  inventory   │  │  ExchangeRate-API  │   │
-│  feedback_q  │  └────────────────────┘   │
-│  prices      │                           │
-│  shopping_l. │   ┌───────────────────────┘
-│  stores      │   │
-│  DAO pattern │   │
-└──────────────┘   │
+│  9 tables:   │  │  v3 REST (SDK)     │   │
+│  products    │  │                     │   │
+│  inventories │  │  Open Prices API    │   │
+│  inventory   │  │  ExchangeRate-API   │   │
+│  feedback_q  │  └─────────┬───────────┘   │
+│  prices      │            │                │
+│  shopping_l. │  ┌─────────▼───────────┐   │
+│  stores      │  │  Cloud Cache        │   │
+│  firebase_   │  │  Cloud Firestore    │   │
+│   cache_meta │  │  product_cache/     │   │
+│  DAO pattern │  │  produce_cache/     │   │
+└──────────────┘  └─────────────────────┘   │
                     │
        ┌───────────────────────────────┐
        │  [Planned] Firebase Services   │

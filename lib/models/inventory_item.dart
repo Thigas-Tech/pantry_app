@@ -46,7 +46,7 @@ part 'inventory_item.g.dart';
 ///
 /// ## Immutability
 ///
-/// This class uses the `freezed` package, making it **immutable**. All
+/// This class uses the freezed package, making it **immutable**. All
 /// mutating operations (e.g., changing the quantity) must be done via the
 /// generated [copyWith] method, which returns a new instance.
 @freezed

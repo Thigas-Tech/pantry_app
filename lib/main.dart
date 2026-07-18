@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -75,8 +76,10 @@ Future<void> main() async {
     try {
       await Firebase.initializeApp();
       logInfo('Firebase initialized successfully');
+      await FirebaseAuth.instance.signInAnonymously();
+      logInfo('Anonymous auth initialized');
     } on Exception catch (e) {
-      logWarning('Firebase init failed (graceful degradation): $e');
+      logWarning('Firebase init/auth failed (graceful degradation): $e');
     }
   }
 

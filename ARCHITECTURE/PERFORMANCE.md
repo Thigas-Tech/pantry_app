@@ -17,9 +17,9 @@ and storage footprint. Cached images are served instantly — no network calls
 on subsequent views.
 
 All `Image.network` calls set `cacheWidth` and `cacheHeight` at display
-resolution (display dp × `devicePixelRatio`) to prevent full-resolution
-decode. Inventory card and search thumbnails are 40×40 dp; product detail
-photos are 200 dp tall × screen-width wide.
+resolution (display dp x `devicePixelRatio`) to prevent full-resolution
+decode. Inventory card and search thumbnails are 40x40 dp; product detail
+photos are 200 dp tall x screen-width wide.
 
 ### 11.3 Offline-first architecture
 
@@ -27,10 +27,26 @@ photos are 200 dp tall × screen-width wide.
 first, fetch from API only on cache miss. This dramatically reduces API
 calls — a product viewed twice generates one network call, not two. The
 background cache refresh is throttled (5+ days overdue, connectivity
-required), and only API‑sourced products are refreshed — user‑entered
-products are never re‑fetched.
+required), and only API-sourced products are refreshed — user-entered
+products are never re-fetched.
 
-### 11.4 RepaintBoundary placement
+### 11.4 Firestore cloud cache
+
+`FirebaseCacheService` adds a remote caching layer on top of the local
+SQLite cache. Product data is replicated to Cloud Firestore with a 180-day
+rolling refresh window. Benefits:
+
+- Survives local cache flushes — products are still available from Firestore
+  after the user clears their local cache.
+- Reduces OFF API calls — repeated lookups for popular barcodes hit the
+  Firestore cache instead of the upstream API.
+- Write-throttled — the 180-day TTL and per-entry refresh tracking ensure
+  the Firestore free-tier daily write limits are respected.
+- Graceful degradation — all Firestore operations are wrapped in try/catch
+  with `isAvailable: false` fallback. No errors propagate to the UI when
+  Firebase is unavailable.
+
+### 11.5 RepaintBoundary placement
 
 `RepaintBoundary` should be applied to widget subtrees that:
 - Scroll independently (e.g., items inside `ListView.builder`)
@@ -43,18 +59,18 @@ scroll events from triggering card repaints and enables efficient widget
 recycling. Cards that load network images or toggle selection do not
 force their siblings to repaint.
 
-### 11.5 Thread strategy
+### 11.6 Thread strategy
 
 sqflite already executes SQL on a background isolate internally. The
 following operations are candidates for `Isolate` / `compute()` offloading:
 - Open Food Facts API response parsing (`json.decode` of large payloads)
-- Image encoding (camera capture → WebP conversion in `ImageCacheService`)
+- Image encoding (camera capture -> WebP conversion in `ImageCacheService`)
 
 `compute()` from `package:flutter/foundation.dart` is preferred over raw
 `Isolate` for fire-and-forget tasks. Use `SendPort` messaging for
 long-running workers.
 
-### 11.6 AAB and deferred components (Android)
+### 11.7 AAB and deferred components (Android)
 
 The app builds as an Android App Bundle (AAB) for Play Store distribution.
 A future optimization will split into dynamic feature modules so users only
@@ -65,7 +81,7 @@ download the features they actually use:
 This reduces the initial install size and download bandwidth, especially
 for users on metered connections.
 
-### 11.7 Eco-mode pattern
+### 11.8 Eco-mode pattern
 
 A planned `EcoModeNotifier` (mirrors `ThemeModeNotifier`) will let users
 opt into reduced energy consumption. When enabled:
@@ -75,13 +91,13 @@ opt into reduced energy consumption. When enabled:
 
 Designed to complement Android Battery Saver and iOS Low Power Mode.
 
-### 11.8 CI/CD pipeline
+### 11.9 CI/CD pipeline
 
 The project uses GitHub Actions for continuous integration and delivery.
 Workflows live in `.github/workflows/`:
 
 | Workflow | Trigger | Purpose |
-|---|---|---|---|
+|---|---|---|---|---|
 | `ci.yml` | Pull request to `main` | Format check, `flutter analyze`, unit + widget tests, coverage report with PR comment |
 | `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB + release APK + AAB, uploads artifacts (90-day retention), and creates a GitHub release via `gh release create` (publish job) |
 | `patrol-e2e.yml` | Weekly (Sun 03:00 UTC) | Patrol integration test suite on Android emulator |
@@ -99,7 +115,7 @@ build, `macos-latest` for emulator-based workloads (E2E, Flashlight, Perfetto).
 Helper script in `scripts/`:
 - `inject_env.sh` — creates `.env` from GitHub secrets for build-time config injection
 
-### 11.9 Performance measurement
+### 11.10 Performance measurement
 
 The CI pipeline integrates automated performance profiling:
 - **Flashlight** — weekly automated battery, CPU, GPU profiling on emulator.

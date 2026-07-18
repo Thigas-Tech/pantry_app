@@ -65,10 +65,11 @@ infrastructure or external server hosting are listed last.
 - [ ] **Pro subscription** — monthly ($0.99) and yearly ($9.99)
   auto-renewing subscription. Removes all ads when active. Tied to
   cloud backup feature.
-- [ ] **Firebase setup** — create Firebase project, register Android
-  app `com.thigas_tech.pantry_app`, download `google-services.json`,
-  add `firebase_core`, `firebase_auth`, `firebase_storage` dependencies.
-  Enable Google Sign-In in Firebase Console.
+- [x] **Firebase core setup** — Firebase project created, `google-services.json`
+  downloaded, `firebase_core` + `cloud_firestore` + `firebase_auth`
+  added as dependencies. Product cache and anonymous auth are live.
+- [ ] **Google Sign-In** — enable Google Sign-In in Firebase Console,
+  add `google_sign_in` package, wire into `AuthService`.
 - [ ] **Cloud backup service** — `FirebaseService` (Auth + Storage init),
   `CloudBackupService` (export DB → upload to `users/{uid}/backup.db`,
   restore by download + replace + provider invalidation).

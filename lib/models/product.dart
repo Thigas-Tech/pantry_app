@@ -41,14 +41,14 @@ const String productSubmissionFailed = 'failed';
 /// ## Source and freshness
 ///
 /// - Data is fetched from the Open Food Facts API via the official
-///   `openfoodfacts` Dart SDK and stored locally for offline use.
+///   openfoodfacts Dart SDK and stored locally for offline use.
 /// - [lastSynced] records an epoch timestamp (milliseconds since Unix epoch)
 ///   of when the product was last fetched. This can be used in the future to
 ///   implement cache freshness checks (e.g. re-fetch if older than 30 days).
 ///
 /// ## Immutability
 ///
-/// This class uses the `freezed` package, making it **immutable**. Any
+/// This class uses the freezed package, making it **immutable**. Any
 /// modification must be done via the generated [copyWith] method, which
 /// returns a new instance.
 ///
@@ -176,8 +176,8 @@ abstract class Product with _$Product {
     ///
     /// - `'api'` — fetched from Open Food Facts (can be safely flushed and
     ///   re-fetched).
-    /// - `'manual'` — entered by the user via the add-product screen or
-    ///   imported from CSV (must never be deleted by a cache flush).
+    /// - `'manual'` — entered by the user via the add-product screen
+    ///   (must never be deleted by a cache flush).
     ///
     /// Defaults to `'api'` because most products come from the OFF
     /// integration. The add-product screen overrides it to
@@ -301,7 +301,7 @@ extension ProductToOff on Product {
 ///
 /// Both [mergeFromApi] and [mergeFromManual] are defined as extensions
 /// rather than methods on the abstract class because freezed generates a
-/// concrete implementation ([_Product]) that `implements` (not `extends`)
+/// concrete implementation ([_Product]) that implements (not extends)
 /// the abstract class.
 ///
 /// ## API merge rules ([mergeFromApi])

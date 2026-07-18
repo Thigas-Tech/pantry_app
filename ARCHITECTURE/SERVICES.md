@@ -93,14 +93,25 @@ User scans barcode
 - Pro subscription: auto-renewing, monthly ($0.99) and yearly ($9.99).
 - `isPro` flag derived from `queryPastPurchases()` — checked before showing ads and enabling cloud backup.
 
-### 3.6 Firebase integration — [Planned]
+### 3.6 Firebase cache service
 
-> **Not yet implemented.** See `agents_docs/monetization.md` for the full
-> deferred implementation plan.
-
-- Planned: `FirebaseService` initialising `firebase_core`, `FirebaseAuth` and `FirebaseStorage`.
-- Planned: `CloudBackupService` exporting SQLite to Firebase Storage at `users/{uid}/pantry_backup.db`.
-- Planned: Google Sign-In via `google_sign_in` + `firebase_auth`.
+- `FirebaseCacheService` manages a **two-tier cache** for product data using
+  Cloud Firestore as a persistent remote cache alongside the local SQLite DB.
+- **Firestore collections**: `product_cache/{barcode}` for OFF barcoded items
+  and `produce_cache/{name}` for USDA produce items.
+- **Lookup chain**: SQLite → Firestore → OFF/USDA API → fallback. Firestore
+  acts as a mid-tier cache that survives local cache flushes.
+- **180-day rolling refresh**: Each cache entry stores a `lastRefreshedAt`
+  timestamp. Entries are refreshed only after 180 days (configurable via
+  `FirebaseCacheMetaDao`), respecting Firestore free-tier daily write limits.
+- **Graceful degradation**: If Firebase is disabled, unavailable, or the
+  project has no authentication configured, the cache service sets
+  `isAvailable: false` and all operations become no-ops. No errors propagate
+  to the UI.
+- **Dependencies**: `firebase_core`, `cloud_firestore`, `firebase_auth`.
+  All three are optional (`FIREBASE_ENABLED` flag in `.env`).
+- **Auth requirement**: Firestore security rules require `request.auth != null`
+  for writes. Anonymous Firebase Auth is enabled at app startup.
 
 ### 3.7 Feedback service (GitHub Issues)
 
@@ -233,11 +244,3 @@ User scans barcode
   `USER_CHANGELOG_*.md` asset paths with fallback to English. Used by
   the "What's New" sheet to display user-facing changelog in the app's
   current language.
-
-- `StoreDao` -- stores saved store names in the `stores` table (version 19
-  migration). `insert` is case-insensitive and deduplicates. `getAll` returns
-  stores ordered alphabetically.
-- The price entry sheet uses `storesProvider` (FutureProvider) to power an
-  `Autocomplete<String>` dropdown with a "+" add-new button.
-- New store names submitted through the price entry sheet are automatically
-  persisted to the `stores` table.
