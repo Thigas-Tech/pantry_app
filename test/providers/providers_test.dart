@@ -13,6 +13,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A mock of [DatabaseHelper] used to override [databaseProvider].
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
@@ -26,6 +27,7 @@ void main() {
   late ProviderContainer container;
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     dotenv.loadFromString(isOptional: true, mergeWith: {});
     container = ProviderContainer();
   });
@@ -43,16 +45,37 @@ void main() {
   });
 
   group('activeInventoryProvider', () {
+    late ProviderContainer mockContainer;
+    late MockDatabaseHelper mockDb;
+
+    setUp(() {
+      mockDb = MockDatabaseHelper();
+      when(() => mockDb.getInventories()).thenAnswer(
+        (_) async => [
+          {'id': 1, 'name': 'Home', 'created_at': 1},
+        ],
+      );
+      mockContainer = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWith((ref) => mockDb),
+        ],
+      );
+    });
+
+    tearDown(() {
+      mockContainer.dispose();
+    });
+
     test('defaults to 1', () {
       /// The active inventory ID should initially be 1 (the "Home" inventory).
-      final id = container.read(activeInventoryProvider);
+      final id = mockContainer.read(activeInventoryProvider);
       expect(id, 1);
     });
 
     test('can be changed', () {
       /// Changing the notifier’s state updates the provider’s value.
-      container.read(activeInventoryProvider.notifier).value = 2;
-      final id = container.read(activeInventoryProvider);
+      mockContainer.read(activeInventoryProvider.notifier).value = 2;
+      final id = mockContainer.read(activeInventoryProvider);
       expect(id, 2);
     });
   });
