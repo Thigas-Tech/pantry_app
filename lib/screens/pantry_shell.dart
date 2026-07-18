@@ -177,18 +177,21 @@ class _PantryShellState extends ConsumerState<PantryShell> {
         top: false,
         left: false,
         right: false,
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: (index) => setState(() => _selectedIndex = index),
-          children: const [
-            HomeScreen(),
-            SearchScreen(),
-            StatsScreen(),
-            ShoppingListScreen(),
-            SettingsScreen(),
-          ],
-        ),
-      ),
+        child: TickerMode(
+          enabled: true,
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) => setState(() => _selectedIndex = index),
+            children: const [
+              HomeScreen(),
+              SearchScreen(),
+              StatsScreen(),
+              ShoppingListScreen(),
+              SettingsScreen(),
+            ], // children
+          ), // PageView
+        ), // TickerMode
+      ), // SafeArea
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
