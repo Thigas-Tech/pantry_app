@@ -7,6 +7,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/services/photo_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
@@ -18,6 +19,8 @@ void main() {
   late MockPhotoService mockPhoto;
 
   setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({'active_inventory_id': 1});
     mockDb = MockDatabaseHelper();
     mockPhoto = MockPhotoService();
 
@@ -39,14 +42,19 @@ void main() {
         inventoryId: any(named: 'inventoryId'),
       ),
     ).thenAnswer((_) async => 0);
-
+    when(
+      () => mockDb.getInventories(),
+    ).thenAnswer(
+      (_) async => [
+        {'id': 1, 'name': 'Home'},
+      ],
+    );
     container = ProviderContainer(
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         photoServiceProvider.overrideWithValue(mockPhoto),
       ],
     );
-    container.read(activeInventoryProvider.notifier).value = 1;
   });
 
   tearDown(() {

@@ -7,6 +7,7 @@ import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/price_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockPriceRepository extends Mock implements PriceRepository {}
 
@@ -26,6 +27,8 @@ void main() {
   late MockPriceRepository mockRepo;
 
   setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({'active_inventory_id': 1});
     mockRepo = MockPriceRepository();
     container = ProviderContainer(
       overrides: [
@@ -33,7 +36,6 @@ void main() {
         settingsProvider.overrideWith(_defaultSettings),
       ],
     );
-    container.read(activeInventoryProvider.notifier).value = 1;
   });
 
   tearDown(() {

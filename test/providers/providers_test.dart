@@ -125,6 +125,12 @@ void main() {
       /// Override [databaseProvider] with a mock, then switch the active
       /// inventory to 2.
       final mockDb = MockDatabaseHelper();
+      when(() => mockDb.getInventories()).thenAnswer(
+        (_) async => [
+          {'id': 1, 'name': 'Home', 'created_at': 1},
+          {'id': 2, 'name': 'Work', 'created_at': 2},
+        ],
+      );
       final rows = [
         {
           'id': 1,
@@ -203,6 +209,11 @@ void main() {
     /// [inventoryWithProductProvider] list.
     test('returns item count from inventoryWithProductProvider', () async {
       final mockDb = MockDatabaseHelper();
+      when(() => mockDb.getInventories()).thenAnswer(
+        (_) async => [
+          {'id': 1, 'name': 'Home', 'created_at': 1},
+        ],
+      );
       final rows = <Map<String, dynamic>>[
         {
           'id': 1,
@@ -242,6 +253,11 @@ void main() {
     /// the products have a NutriScore grade.
     test('returns null when no products have NutriScore', () async {
       final mockDb = MockDatabaseHelper();
+      when(() => mockDb.getInventories()).thenAnswer(
+        (_) async => [
+          {'id': 1, 'name': 'Home', 'created_at': 1},
+        ],
+      );
       when(
         () => mockDb.getInventoryWithProduct(inventoryId: 1),
       ).thenAnswer(
@@ -270,6 +286,11 @@ void main() {
     /// grade when products have NutriScore grades.
     test('returns correct grade for mixed scores', () async {
       final mockDb = MockDatabaseHelper();
+      when(() => mockDb.getInventories()).thenAnswer(
+        (_) async => [
+          {'id': 1, 'name': 'Home', 'created_at': 1},
+        ],
+      );
       when(
         () => mockDb.getInventoryWithProduct(inventoryId: 1),
       ).thenAnswer(
