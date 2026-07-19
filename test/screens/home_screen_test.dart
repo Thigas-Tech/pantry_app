@@ -1,6 +1,3 @@
-// false positives
-// ignore_for_file: unused_local_variable
-
 /// @file HomeScreen widget tests.
 ///
 /// Tests for the main dashboard screen.  The screen displays:
@@ -443,8 +440,9 @@ void main() {
       expect(find.byType(ScannerScreen), findsOneWidget);
 
       // Pop the scanner with a barcode
-      final navigator = tester.state<NavigatorState>(find.byType(Navigator))
-        ..pop(const BarcodeResult('123'));
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .pop(const BarcodeResult('123'));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -478,8 +476,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(ScannerScreen), findsOneWidget);
 
-    final navigator = tester.state<NavigatorState>(find.byType(Navigator))
-      ..pop(); // null value
+    // null value
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -515,8 +513,9 @@ void main() {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    final navigator = tester.state<NavigatorState>(find.byType(Navigator))
-      ..pop(const BarcodeResult('123'));
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .pop(const BarcodeResult('123'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 

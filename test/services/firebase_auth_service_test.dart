@@ -6,9 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/auth_user.dart';
 import 'package:pantry_app/services/firebase_auth_service.dart';
 
-// controller.close() fires in tearDown — no need to await.
-// ignore_for_file: discarded_futures
-
 // ====================================================================
 //  Mocks
 // ====================================================================
@@ -33,7 +30,7 @@ void main() {
     });
 
     tearDown(() {
-      authStateController.close();
+      unawaited(authStateController.close());
     });
 
     // ------------------------------------------------------------------

@@ -1,6 +1,3 @@
-// the test doc comments tend to get too long
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/product.dart';
@@ -149,7 +146,8 @@ void main() {
     });
 
     test('copyWith creates a modified copy', () {
-      /// The original product remains unchanged; only the specified fields are updated.
+      /// The original product remains unchanged; only the specified fields
+      /// are updated.
       const product = Product(barcode: '789', name: 'Original');
       final updated = product.copyWith(name: 'Updated', brand: 'Brand');
       expect(updated.name, 'Updated');
@@ -225,7 +223,8 @@ void main() {
         final api = Product.fromOffProduct(
           off.Product(barcode: '1', productName: 'P'),
         );
-        // API product has default source='api' and submissionStatus='not_submitted'.
+        // API product has default source='api' and
+        // submissionStatus='not_submitted'.
         final merged = cached.mergeFromApi(api);
         expect(merged.source, 'manual');
         expect(merged.submissionStatus, productSubmissionSubmitted);
