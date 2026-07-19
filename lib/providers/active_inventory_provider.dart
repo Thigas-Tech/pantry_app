@@ -40,10 +40,13 @@ class ActiveInventoryNotifier extends Notifier<int> {
   Future<void> _validateAndLoad() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!ref.mounted) return;
       final stored = prefs.getInt('active_inventory_id');
+      if (!ref.mounted) return;
       final targetId = stored ?? 1;
 
       final inventories = await _fetchInventories();
+      if (!ref.mounted) return;
       if (inventories == null) return;
 
       final exists = inventories.any((i) => i['id'] == targetId);
