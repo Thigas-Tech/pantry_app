@@ -56,7 +56,7 @@
 <section class="desc markdown">
   <p>Application configuration loaded from a <code>.env</code> file at startup.</p>
 <p>All sensitive values (API credentials, contact email, etc.) are read from
-environment variables loaded by <code>flutter_dotenv</code>. A <code>.env.example</code> file is
+environment variables loaded by the <a href="https://pub.dev/documentation/flutter_dotenv/6.0.1/flutterdotenv/DotEnv-class.html">DotEnv</a> class. A <code>.env.example</code> file is
 provided as a template; copy it to <code>.env</code> and fill in real values.</p>
 <h2 id="security-note">Security note</h2>
 <ul>
@@ -195,6 +195,18 @@ Open Food Facts (required by their API terms).
 </dt>
 <dd>
   The GitHub personal access token used for in-app feedback submissions.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="firebaseEnabled" class="property">
+  <span class="name"><a href="../config/AppConfig/firebaseEnabled.html">firebaseEnabled</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd>
+  Whether Firebase integration is enabled.
   <div class="features"><span class="feature">no setter</span></div>
 
 </dd>

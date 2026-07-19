@@ -67,12 +67,12 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">&#47;&#47; ignore: specify_nonobvious_property_types
-final pendingSyncCountProvider = FutureProvider.autoDispose&lt;int&gt;((ref) async {
-  final repo = ref.watch(priceRepositoryProvider);
-  final pending = await repo.getPendingSyncPrices();
-  return pending.length;
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">final FutureProvider&lt;int&gt; pendingSyncCountProvider =
+    FutureProvider.autoDispose&lt;int&gt;((ref) async {
+      final repo = ref.watch(priceRepositoryProvider);
+      final pending = await repo.getPendingSyncPrices();
+      return pending.length;
+    });</code></pre>
 </section>
 
 

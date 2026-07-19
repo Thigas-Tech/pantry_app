@@ -68,18 +68,18 @@ to the user's base currency.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">&#47;&#47; ignore: specify_nonobvious_property_types
-final inventoryValueProvider = FutureProvider.autoDispose&lt;double?&gt;((ref) async {
-  final repo = ref.watch(priceRepositoryProvider);
-  final activeId = ref.watch(activeInventoryProvider);
-  final settings = ref.watch(settingsProvider);
-  final value = await repo.totalInventoryValue(
-    activeId,
-    baseCurrency: settings.baseCurrency,
-  );
-  if (value == null) return null;
-  return double.tryParse(value.toStringAsFixed(2));
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">final FutureProvider&lt;double?&gt; inventoryValueProvider =
+    FutureProvider.autoDispose&lt;double?&gt;((ref) async {
+      final repo = ref.watch(priceRepositoryProvider);
+      final activeId = ref.watch(activeInventoryProvider);
+      final settings = ref.watch(settingsProvider);
+      final value = await repo.totalInventoryValue(
+        activeId,
+        baseCurrency: settings.baseCurrency,
+      );
+      if (value == null) return null;
+      return double.tryParse(value.toStringAsFixed(2));
+    });</code></pre>
 </section>
 
 

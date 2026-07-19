@@ -68,9 +68,9 @@ contents grouped by expiry status. It reads the active inventory ID from
 <a href="../providers_active_inventory_provider/activeInventoryProvider.html">activeInventoryProvider</a> and calls <a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">DatabaseHelper.getInventoryWithProduct</a>
 with that ID.</p>
 <h2 id="reactivity">Reactivity</h2>
-<p>The provider is <strong>automatically invalidated</strong> whenever the inventory data
-changes (item added/updated/deleted) or when the active inventory is
-switched. This ensures the home screen always shows the current data.</p>
+<p>The provider is not reactive to database changes. It must be explicitly
+invalidated via <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef/invalidate.html">WidgetRef.invalidate</a> after every inventory mutation
+(add, update, delete, move).</p>
 </section>
 
         
@@ -82,7 +82,9 @@ switched. This ensures the home screen always shows the current data.</p>
     final activeId = ref.watch&lt;int&gt;(activeInventoryProvider);
     final db = ref.watch(databaseProvider);
     final rows = await db.getInventoryWithProduct(inventoryId: activeId);
-    return rows.map(InventoryWithProduct.fromMap).toList();
+    final result = rows.map(InventoryWithProduct.fromMap).toList();
+    await Future&lt;void&gt;.delayed(Duration.zero);
+    return result;
   },
 );</code></pre>
 </section>

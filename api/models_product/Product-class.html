@@ -73,13 +73,13 @@ available from the API.</p>
 <h2 id="source-and-freshness">Source and freshness</h2>
 <ul>
 <li>Data is fetched from the Open Food Facts API via the official
-<code>openfoodfacts</code> Dart SDK and stored locally for offline use.</li>
+openfoodfacts Dart SDK and stored locally for offline use.</li>
 <li><code>lastSynced</code> records an epoch timestamp (milliseconds since Unix epoch)
 of when the product was last fetched. This can be used in the future to
 implement cache freshness checks (e.g. re-fetch if older than 30 days).</li>
 </ul>
 <h2 id="immutability">Immutability</h2>
-<p>This class uses the <code>freezed</code> package, making it <strong>immutable</strong>. Any
+<p>This class uses the freezed package, making it <strong>immutable</strong>. Any
 modification must be done via the generated <code>copyWith</code> method, which
 returns a new instance.</p>
 <p>See also:</p>

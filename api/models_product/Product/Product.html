@@ -188,7 +188,7 @@ and may not be present for every product.</p>
   &#47;&#47;&#47; additives).
   &#47;&#47;&#47;
   &#47;&#47;&#47; Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
-  &#47;&#47;&#47; the SDK&#39;s `nutriscore` field.
+  &#47;&#47;&#47; the SDK&#39;s off.Product.nutriscore field.
   String? nutriscoreGrade,
 
   &#47;&#47;&#47; The product category that makes Nutri-Score not applicable, if any.
@@ -206,8 +206,8 @@ and may not be present for every product.</p>
   &#47;&#47;&#47;
   &#47;&#47;&#47; - `&#39;api&#39;` — fetched from Open Food Facts (can be safely flushed and
   &#47;&#47;&#47;   re-fetched).
-  &#47;&#47;&#47; - `&#39;manual&#39;` — entered by the user via the add-product screen or
-  &#47;&#47;&#47;   imported from CSV (must never be deleted by a cache flush).
+  &#47;&#47;&#47; - `&#39;manual&#39;` — entered by the user via the add-product screen
+  &#47;&#47;&#47;   (must never be deleted by a cache flush).
   &#47;&#47;&#47;
   &#47;&#47;&#47; Defaults to `&#39;api&#39;` because most products come from the OFF
   &#47;&#47;&#47; integration. The add-product screen overrides it to

@@ -91,6 +91,17 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   await dotenv.load();
   logInfo(&#39;Environment loaded&#39;);
 
+  if (AppConfig.firebaseEnabled) {
+    try {
+      await Firebase.initializeApp();
+      logInfo(&#39;Firebase initialized successfully&#39;);
+      await FirebaseAuth.instance.signInAnonymously();
+      logInfo(&#39;Anonymous auth initialized&#39;);
+    } on Exception catch (e) {
+      logWarning(&#39;Firebase init&#47;auth failed (graceful degradation): $e&#39;);
+    }
+  }
+
   off.OpenFoodAPIConfiguration.userAgent = off.UserAgent(
     name: &#39;PantryApp&#39;,
     version: &#39;1.0&#39;,

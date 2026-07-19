@@ -51,57 +51,24 @@ never waste food again.</p>
 <a href="https://github.com/Thigas-Tech/pantry_app/actions/workflows/build.yml"><img src="https://github.com/Thigas-Tech/pantry_app/actions/workflows/build.yml/badge.svg" alt="Build"></a></p>
 <h2 id="features">Features</h2>
 <ul>
-<li>
-<p><strong>Barcode scanning</strong> — camera-based via Google ML Kit (<code>mobile_scanner</code>) or manual text entry</p>
-</li>
-<li>
-<p><strong>Product lookup</strong> — fetches name, brand, nutrition, ingredients from Open Food Facts</p>
-</li>
-<li>
-<p><strong>Local database</strong> — products are cached locally in SQLite; works without internet for known items</p>
-</li>
-<li>
-<p><strong>Multiple pantries</strong> — create, rename, and delete named inventories (e.g. Home, Work)</p>
-</li>
-<li>
-<p><strong>Expiry tracking</strong> — items grouped into Expired / Expiring Soon / Good on the home screen</p>
-</li>
-<li>
-<p><strong>Local notifications</strong> — two reminders per item: one day before expiry and on expiry day</p>
-</li>
-<li>
-<p><strong>Custom units &amp; locations</strong> — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options</p>
-</li>
-<li>
-<p><strong>Nutrition table</strong> — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml</p>
-</li>
-<li>
-<p><strong>Material You</strong> — dynamic colours from your device wallpaper, light/dark/system theme</p>
-</li>
-<li>
-<p><strong>Undo delete</strong> — restore an accidentally deleted inventory item with a snackbar action</p>
-</li>
-<li>
-<p><strong>Offline-first</strong> — connectivity detection skips API when offline, warns the user, and uses cached data</p>
-</li>
-<li>
-<p><strong>Pull-to-refresh</strong> — updates cached product data from Open Food Facts when online</p>
-</li>
-<li>
-<p><strong>Nutri-Score</strong> — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products</p>
-</li>
-<li>
-<p><strong>Manual product entry</strong> — full form with nutrition table and camera capture when a barcode is unknown or you're offline</p>
-</li>
-<li>
-<p><strong>Price tracking</strong> — record purchase prices with store, date, and currency; view price history and total inventory value</p>
-</li>
-<li>
-<p><strong>Shopping list</strong> — add items from cached products or free-text, mark as purchased, batch-move to pantry</p>
-</li>
-<li>
-<p><strong>Store autocomplete</strong> — saved store names persist across uses, suggested in the price entry sheet</p>
-</li>
+<li><strong>Barcode scanning</strong> — camera-based via Google ML Kit (<code>mobile_scanner</code>) or manual text entry</li>
+<li><strong>Product lookup</strong> — fetches name, brand, nutrition, ingredients from Open Food Facts</li>
+<li><strong>Local database</strong> — products are cached locally in SQLite; works without internet for known items</li>
+<li><strong>Cloud product cache</strong> — Firestore-backed 180-day rolling cache for OFF barcoded and USDA produce products with offline-first fallback</li>
+<li><strong>Multiple pantries</strong> — create, rename, and delete named inventories (e.g. Home, Work)</li>
+<li><strong>Expiry tracking</strong> — items grouped into Expired / Expiring Soon / Good on the home screen</li>
+<li><strong>Local notifications</strong> — two reminders per item: one day before expiry and on expiry day</li>
+<li><strong>Custom units &amp; locations</strong> — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options</li>
+<li><strong>Nutrition table</strong> — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml</li>
+<li><strong>Material You</strong> — dynamic colours from your device wallpaper, light/dark/system theme</li>
+<li><strong>Undo delete</strong> — restore an accidentally deleted inventory item with a snackbar action</li>
+<li><strong>Offline-first</strong> — connectivity detection skips API when offline, warns the user, and uses cached data</li>
+<li><strong>Pull-to-refresh</strong> — updates cached product data from Open Food Facts when online</li>
+<li><strong>Nutri-Score</strong> — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products</li>
+<li><strong>Manual product entry</strong> — full form with nutrition table and camera capture when a barcode is unknown or you're offline</li>
+<li><strong>Price tracking</strong> — record purchase prices with store, date, and currency; view price history and total inventory value</li>
+<li><strong>Shopping list</strong> — add items from cached products or free-text, mark as purchased, batch-move to pantry</li>
+<li><strong>Store autocomplete</strong> — saved store names persist across uses, suggested in the price entry sheet</li>
 </ul>
 <h2 id="screenshots">Screenshots</h2>
 <p>Screenshots will be added here: Home, Scanner, Product Detail, Settings.</p>
@@ -161,11 +128,15 @@ flutter build appbundle --debug
     shopping_list_dao.dart   # Shopping list CRUD (per-inventory)
     store_dao.dart           # Saved store names CRUD
     product_submission_queue_dao.dart  # OFF submission queue
+    firebase_cache_meta_dao.dart  # Firestore cache sync metadata
   l10n/                # App translations (English ARB)
   models/              # Freezed data models
   providers/           # Riverpod state &amp; dependency injection
   screens/             # UI pages
   services/            # Business logic
+    firebase_cache_client.dart  # Firestore read/write client
+    firebase_cache_service.dart  # 180-day Firestore cache coordinator
+    firebase_firestore_client_adapter.dart  # Serialization adapter
   utils/               # Logger, snackbar helpers
   widgets/             # Reusable components
 test/                  # Unit and widget tests
@@ -188,72 +159,23 @@ flutter test --concurrency=2         # All tests
 flutter test --concurrency=2 --coverage  # With coverage
 </code></pre>
 <h2 id="tech-stack">Tech stack</h2>
-<table>
-<thead>
-<tr>
-<th>Category</th>
-<th>Technology</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Framework</td>
-<td>Flutter (stable)</td>
-</tr>
-<tr>
-<td>Language</td>
-<td>Dart 3.12+</td>
-</tr>
-<tr>
-<td>State management</td>
-<td>Riverpod 3.x</td>
-</tr>
-<tr>
-<td>Local database</td>
-<td>SQLite (sqflite)</td>
-</tr>
-<tr>
-<td>HTTP client</td>
-<td>http</td>
-</tr>
-<tr>
-<td>OFF SDK</td>
-<td>openfoodfacts</td>
-</tr>
-<tr>
-<td>Code generation</td>
-<td>freezed, json_serializable</td>
-</tr>
-<tr>
-<td>Barcode scanning</td>
-<td>mobile_scanner (Google ML Kit)</td>
-</tr>
-<tr>
-<td>Image capture</td>
-<td>image_picker</td>
-</tr>
-<tr>
-<td>Notifications</td>
-<td>flutter_local_notifications</td>
-</tr>
-<tr>
-<td>Connectivity</td>
-<td>internet_connection_checker</td>
-</tr>
-<tr>
-<td>Testing</td>
-<td>flutter_test + mocktail</td>
-</tr>
-<tr>
-<td>Linting</td>
-<td>very_good_analysis, lint/strict</td>
-</tr>
-<tr>
-<td>Theming</td>
-<td>dynamic_color (Material You)</td>
-</tr>
-</tbody>
-</table>
+<p>| Category           | Technology                       |
+|---|---|---|
+| Framework          | Flutter (stable)                 |
+| Language           | Dart 3.12+                      |
+| State management   | Riverpod 3.x                    |
+| Local database     | SQLite (sqflite)                |
+| Cloud database     | Cloud Firestore                  |
+| HTTP client        | http                             |
+| OFF SDK            | openfoodfacts                   |
+| Code generation    | freezed, json_serializable      |
+| Barcode scanning   | mobile_scanner (Google ML Kit)  |
+| Image capture      | image_picker                    |
+| Notifications      | flutter_local_notifications     |
+| Connectivity       | internet_connection_checker     |
+| Testing            | flutter_test + mocktail         |
+| Linting            | very_good_analysis, lint/strict |
+| Theming            | dynamic_color (Material You)    |</p>
 <h2 id="license">License</h2>
 <p>MIT</p>
 <h2 id="api-documentation">API documentation</h2>
@@ -298,6 +220,13 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="feedback_queue_dao">
   <span class="name"><a href="database_feedback_queue_dao/">database/feedback_queue_dao</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="firebase_cache_meta_dao">
+  <span class="name"><a href="database_firebase_cache_meta_dao/">database/firebase_cache_meta_dao</a></span> 
 
 </dt>
 <dd>
@@ -352,6 +281,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="firebase_options">
+  <span class="name"><a href="firebase_options/">firebase_options</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="price_calculator_formatter">
   <span class="name"><a href="formatters_price_calculator_formatter/">formatters/price_calculator_formatter</a></span> 
 
@@ -394,6 +330,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="auth_user">
+  <span class="name"><a href="models_auth_user/">models/auth_user</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="inventory_item">
   <span class="name"><a href="models_inventory_item/">models/inventory_item</a></span> 
 
@@ -422,8 +365,22 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="produce_cache_entry">
+  <span class="name"><a href="models_produce_cache_entry/">models/produce_cache_entry</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="product">
   <span class="name"><a href="models_product/">models/product</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="product_cache_entry">
+  <span class="name"><a href="models_product_cache_entry/">models/product_cache_entry</a></span> 
 
 </dt>
 <dd>
@@ -464,6 +421,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="auth_provider">
+  <span class="name"><a href="providers_auth_provider/">providers/auth_provider</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="connectivity_provider">
   <span class="name"><a href="providers_connectivity_provider/">providers/connectivity_provider</a></span> 
 
@@ -480,6 +444,13 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="database_provider">
   <span class="name"><a href="providers_database_provider/">providers/database_provider</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="firebase_cache_provider">
+  <span class="name"><a href="providers_firebase_cache_provider/">providers/firebase_cache_provider</a></span> 
 
 </dt>
 <dd>
@@ -674,6 +645,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="auth_service">
+  <span class="name"><a href="services_auth_service/">services/auth_service</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="currency_service">
   <span class="name"><a href="services_currency_service/">services/currency_service</a></span> 
 
@@ -683,6 +661,34 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="exceptions">
   <span class="name"><a href="services_exceptions/">services/exceptions</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="firebase_auth_service">
+  <span class="name"><a href="services_firebase_auth_service/">services/firebase_auth_service</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="firebase_cache_client">
+  <span class="name"><a href="services_firebase_cache_client/">services/firebase_cache_client</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="firebase_cache_service">
+  <span class="name"><a href="services_firebase_cache_service/">services/firebase_cache_service</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="firebase_firestore_client_adapter">
+  <span class="name"><a href="services_firebase_firestore_client_adapter/">services/firebase_firestore_client_adapter</a></span> 
 
 </dt>
 <dd>
@@ -1002,6 +1008,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="config/">config</a></li>
       <li><a href="database_database_helper/">database/database_helper</a></li>
       <li><a href="database_feedback_queue_dao/">database/feedback_queue_dao</a></li>
+      <li><a href="database_firebase_cache_meta_dao/">database/firebase_cache_meta_dao</a></li>
       <li><a href="database_inventories_dao/">database/inventories_dao</a></li>
       <li><a href="database_inventory_dao/">database/inventory_dao</a></li>
       <li><a href="database_price_dao/">database/price_dao</a></li>
@@ -1009,25 +1016,31 @@ dart pub global run dhttpd --path doc/api
       <li><a href="database_product_submission_queue_dao/">database/product_submission_queue_dao</a></li>
       <li><a href="database_shopping_list_dao/">database/shopping_list_dao</a></li>
       <li><a href="database_store_dao/">database/store_dao</a></li>
+      <li><a href="firebase_options/">firebase_options</a></li>
       <li><a href="formatters_price_calculator_formatter/">formatters/price_calculator_formatter</a></li>
       <li><a href="l10n_app_localizations/">l10n/app_localizations</a></li>
       <li><a href="l10n_app_localizations_en/">l10n/app_localizations_en</a></li>
       <li><a href="l10n_app_localizations_pt/">l10n/app_localizations_pt</a></li>
       <li><a href="l10n_l10n_extensions/">l10n/l10n_extensions</a></li>
       <li><a href="main/">main</a></li>
+      <li><a href="models_auth_user/">models/auth_user</a></li>
       <li><a href="models_inventory_item/">models/inventory_item</a></li>
       <li><a href="models_inventory_with_product/">models/inventory_with_product</a></li>
       <li><a href="models_pantry_stats/">models/pantry_stats</a></li>
       <li><a href="models_price/">models/price</a></li>
+      <li><a href="models_produce_cache_entry/">models/produce_cache_entry</a></li>
       <li><a href="models_product/">models/product</a></li>
+      <li><a href="models_product_cache_entry/">models/product_cache_entry</a></li>
       <li><a href="models_product_type/">models/product_type</a></li>
       <li><a href="models_shopping_item/">models/shopping_item</a></li>
       <li><a href="models_store/">models/store</a></li>
       <li><a href="providers_active_inventory_provider/">providers/active_inventory_provider</a></li>
       <li><a href="providers_api_service_provider/">providers/api_service_provider</a></li>
+      <li><a href="providers_auth_provider/">providers/auth_provider</a></li>
       <li><a href="providers_connectivity_provider/">providers/connectivity_provider</a></li>
       <li><a href="providers_currency_service_provider/">providers/currency_service_provider</a></li>
       <li><a href="providers_database_provider/">providers/database_provider</a></li>
+      <li><a href="providers_firebase_cache_provider/">providers/firebase_cache_provider</a></li>
       <li><a href="providers_github_issue_service_provider/">providers/github_issue_service_provider</a></li>
       <li><a href="providers_image_cache_provider/">providers/image_cache_provider</a></li>
       <li><a href="providers_inventory_provider/">providers/inventory_provider</a></li>
@@ -1055,8 +1068,13 @@ dart pub global run dhttpd --path doc/api
       <li><a href="screens_settings_screen/">screens/settings_screen</a></li>
       <li><a href="screens_shopping_list_screen/">screens/shopping_list_screen</a></li>
       <li><a href="screens_stats_screen/">screens/stats_screen</a></li>
+      <li><a href="services_auth_service/">services/auth_service</a></li>
       <li><a href="services_currency_service/">services/currency_service</a></li>
       <li><a href="services_exceptions/">services/exceptions</a></li>
+      <li><a href="services_firebase_auth_service/">services/firebase_auth_service</a></li>
+      <li><a href="services_firebase_cache_client/">services/firebase_cache_client</a></li>
+      <li><a href="services_firebase_cache_service/">services/firebase_cache_service</a></li>
+      <li><a href="services_firebase_firestore_client_adapter/">services/firebase_firestore_client_adapter</a></li>
       <li><a href="services_github_issue_service/">services/github_issue_service</a></li>
       <li><a href="services_image_cache_service/">services/image_cache_service</a></li>
       <li><a href="services_notification_background_handler/">services/notification_background_handler</a></li>

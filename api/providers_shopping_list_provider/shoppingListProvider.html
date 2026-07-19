@@ -67,14 +67,14 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">&#47;&#47; ignore: specify_nonobvious_property_types
-final shoppingListProvider = FutureProvider.autoDispose&lt;List&lt;ShoppingItem&gt;&gt;((
-  ref,
-) {
-  final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
-  return db.getShoppingList(inventoryId: inventoryId);
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">final FutureProvider&lt;List&lt;ShoppingItem&gt;&gt; shoppingListProvider =
+    FutureProvider.autoDispose&lt;List&lt;ShoppingItem&gt;&gt;((
+      ref,
+    ) {
+      final db = ref.watch(databaseProvider);
+      final inventoryId = ref.watch(activeInventoryProvider);
+      return db.getShoppingList(inventoryId: inventoryId);
+    });</code></pre>
 </section>
 
 

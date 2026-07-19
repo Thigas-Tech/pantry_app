@@ -81,7 +81,10 @@ executions of <a href="../../providers_active_inventory_provider/ActiveInventory
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-int build() =&gt; 1;</code></pre>
+int build() {
+  unawaited(_validateAndLoad());
+  return 1;
+}</code></pre>
 </section>
 
 

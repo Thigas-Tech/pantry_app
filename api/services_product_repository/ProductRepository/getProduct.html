@@ -86,6 +86,31 @@ cache exists.</p>
     return cached;
   }
 
+  &#47;&#47; 1.5 Firebase cache
+  if (_firebaseCache != null &amp;&amp; _firebaseCache.isAvailable) {
+    try {
+      final fbProduct = await _firebaseCache.resolveBarcodedProduct(
+        barcode,
+        languageCode: lang,
+      );
+      if (fbProduct != null) {
+        logInfo(&#39;Firebase cache hit for $barcode&#39;);
+        return fbProduct;
+      }
+      logInfo(
+        &#39;Firebase miss for $barcode &#39;
+        &#39;- resolveBarcodedProduct already tried OFF; skipping retry&#39;,
+      );
+      &#47;&#47; The service already tried OFF internally.  Skip the direct OFF
+      &#47;&#47; call (step 2) and proceed to the fallback chain.
+      return _fallbackOrThrow(barcode, lang);
+    } on ProductNotFoundException {
+      rethrow;
+    } on Exception catch (e) {
+      logWarning(&#39;Firebase cache lookup failed for $barcode: $e&#39;);
+    }
+  }
+
   &#47;&#47; 2. Try primary API
   try {
     logInfo(&#39;Fetching $barcode from primary API&#39;);
@@ -95,28 +120,7 @@ cache exists.</p>
     return remote;
   } on ProductNotFoundException {
     logWarning(&#39;Product $barcode not found in primary API&#39;);
-    if (_fallbackApi != null) {
-      logInfo(&#39;Trying fallback API for $barcode&#39;);
-      try {
-        final remote = await _fallbackApi.getByBarcode(
-          barcode,
-          languageCode: lang,
-        );
-        await _db.insertProduct(remote);
-        logInfo(&#39;Fetched $barcode from fallback API&#39;);
-        return remote;
-      } on ProductNotFoundException {
-        logWarning(&#39;Product $barcode not found in fallback API&#39;);
-        rethrow;
-      } on Exception catch (e) {
-        logError(&#39;Fallback API error for $barcode: $e&#39;);
-        throw FetchFailedException(
-          &#39;Failed to fetch product. Please check your connection.&#39;,
-        );
-      }
-    } else {
-      rethrow;
-    }
+    return _fallbackOrThrow(barcode, lang);
   } on Exception catch (e) {
     logError(&#39;Network error for $barcode: $e&#39;);
     throw FetchFailedException(

@@ -55,10 +55,15 @@
     
 <section class="desc markdown">
   <p>Holds the ID of the currently selected inventory (pantry).</p>
-<p>Defaults to <code>1</code> (the built‑in "Home" inventory created during migration).
-When the user switches inventories in the home screen, this notifier's
-state is updated. All inventory‑related queries and providers read this
-to filter their data.</p>
+<p>The value is persisted to <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a> under the key
+<code>active_inventory_id</code> so that the selection survives app restarts.
+On initialization the provider reads the persisted value and validates
+that the corresponding inventory still exists in the database. If the
+persisted inventory was deleted, the provider falls back to the first
+available inventory or, when no inventories exist, reseeds the default
+"Home" inventory.</p>
+<p>Defaults to <code>1</code> (the built‑in "Home" inventory created during migration)
+on the very first run or when no persisted value is found.</p>
 </section>
 
 

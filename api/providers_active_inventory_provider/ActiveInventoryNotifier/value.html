@@ -91,13 +91,16 @@
     </section>
     
 <section class="desc markdown">
-  <p>Updates the active inventory ID.</p>
+  <p>Updates the active inventory ID and persists the change.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">set value(int id) =&gt; state = id;</code></pre>
+  <pre class="language-dart"><code class="language-dart">set value(int id) {
+  state = id;
+  unawaited(_persist(id));
+}</code></pre>
 </section>
 
   </section>
