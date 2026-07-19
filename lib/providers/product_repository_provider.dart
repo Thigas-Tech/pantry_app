@@ -15,9 +15,9 @@ import 'package:pantry_app/services/usda_api_client.dart';
 /// USDA FoodData Central API client to implement offline-first product
 /// lookup and produce quick-add with nutrition data.
 ///
-/// When the Firebase cache provider creates a [FirebaseCacheService] with
-/// `isAvailable == true`, the repository also consults the shared Firebase
-/// cache before falling through to the primary API.
+/// When the Firebase cache provider creates a [FirebaseCacheService] where
+/// [FirebaseCacheService.isAvailable] is true, the repository also consults
+/// the shared Firebase cache before falling through to the primary API.
 ///
 /// ## Dependencies
 ///

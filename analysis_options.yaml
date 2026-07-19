@@ -8,7 +8,7 @@ linter:
     # ----- Disabled (not applicable to Flutter apps) -----
     avoid_slow_async_io: false
 
-    # ----- Disabled (OFF lint rules — too much churn) -----
+    # ----- Disabled (very_good_analysis style rules — too much churn) -----
     always_specify_types: false
     always_put_control_body_on_new_line: false
 

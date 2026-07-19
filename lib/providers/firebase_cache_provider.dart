@@ -15,7 +15,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// initialise a [FirebaseFirestoreClientAdapter] wrapping
 /// [FirebaseFirestore.instance]. If that call fails (e.g. missing
 /// `google-services.json`), the cache service is created with
-/// `isAvailable: false` and all operations are no-ops.
+/// [FirebaseCacheService.isAvailable] is false and all operations are no-ops.
 ///
 /// When [AppConfig.firebaseEnabled] is `false` (default), the cache service
 /// is created in disabled mode without any Firebase interaction.

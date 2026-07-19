@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Application configuration loaded from a `.env` file at startup.
 ///
 /// All sensitive values (API credentials, contact email, etc.) are read from
-/// environment variables loaded by `flutter_dotenv`. A `.env.example` file is
+/// environment variables loaded by the [DotEnv] class. A `.env.example` file is
 /// provided as a template; copy it to `.env` and fill in real values.
 ///
 /// ## Security note

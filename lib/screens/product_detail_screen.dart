@@ -494,12 +494,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 quantity: result.quantity,
               );
               await repo.cacheProduct(widget.product);
-              await repo.addInventoryItem(item);
+              final newId = await repo.addInventoryItem(item);
+              final savedItem = item.copyWith(id: newId);
               final notificationService = ref.read(
                 notificationServiceProvider,
               );
               await notificationService.scheduleExpiryReminders(
-                item,
+                savedItem,
                 productName: widget.product.name,
                 expiringSoonTitle: l10n.expiringSoon,
                 buildExpiringSoonBody: l10n.expiresTomorrow,
@@ -509,7 +510,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 channelDescription: l10n.expiryChannelDescription,
               );
               await _rescheduleInactivityReminder();
-              ref.invalidate(inventoryWithProductProvider);
               if (context.mounted) {
                 SnackbarHelper.showInfo(context, l10n.itemAdded);
               }
@@ -747,6 +747,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           if (existing.id != null) {
             await notificationService.cancelReminders(existing.id!);
           }
+          await notificationService.scheduleExpiryReminders(
+            result,
+            productName: widget.product.name,
+            expiringSoonTitle: l10n.expiringSoon,
+            buildExpiringSoonBody: l10n.expiresTomorrow,
+            expiringTodayTitle: l10n.expiringToday,
+            buildExpiringTodayBody: l10n.expiresToday,
+            channelName: l10n.expiryChannelName,
+            channelDescription: l10n.expiryChannelDescription,
+          );
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.itemUpdated);
           }
@@ -755,26 +765,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             '''Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
           await repo.cacheProduct(widget.product);
-          await repo.addInventoryItem(result);
+          final newId = await repo.addInventoryItem(result);
+          final savedItem = result.copyWith(id: newId);
           await _rescheduleInactivityReminder();
+          await notificationService.scheduleExpiryReminders(
+            savedItem,
+            productName: widget.product.name,
+            expiringSoonTitle: l10n.expiringSoon,
+            buildExpiringSoonBody: l10n.expiresTomorrow,
+            expiringTodayTitle: l10n.expiringToday,
+            buildExpiringTodayBody: l10n.expiresToday,
+            channelName: l10n.expiryChannelName,
+            channelDescription: l10n.expiryChannelDescription,
+          );
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.itemAdded);
           }
         }
-        await notificationService.scheduleExpiryReminders(
-          result,
-          productName: widget.product.name,
-          expiringSoonTitle: l10n.expiringSoon,
-          buildExpiringSoonBody: l10n.expiresTomorrow,
-          expiringTodayTitle: l10n.expiringToday,
-          buildExpiringTodayBody: l10n.expiresToday,
-          channelName: l10n.expiryChannelName,
-          channelDescription: l10n.expiryChannelDescription,
-        );
         setState(() => _inventoryVersion++);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(inventoryWithProductProvider);
-        });
       } on Exception catch (e) {
         logError('Inventory operation failed: $e');
         if (mounted) {
@@ -808,9 +816,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       );
       logInfo('Quantity updated: ${item.barcode} — $newQuantity');
       setState(() => _inventoryVersion++);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.invalidate(inventoryWithProductProvider);
-      });
     } on Exception catch (e) {
       logError('Failed to update quantity: $e');
       if (mounted) {

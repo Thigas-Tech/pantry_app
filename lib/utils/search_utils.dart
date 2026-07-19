@@ -4,7 +4,7 @@ import 'package:pantry_app/models/product.dart';
 /// Normalises [input] for search purposes.
 ///
 /// Steps:
-/// 1. Remove diacritics using the `diacritic` package.
+/// 1. Remove diacritics using the [removeDiacritics] function.
 /// 2. Trim and collapse whitespace.
 /// 3. Lower-case the result.
 String normalizeForSearch(String input) {

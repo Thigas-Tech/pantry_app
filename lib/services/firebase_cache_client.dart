@@ -53,8 +53,8 @@ abstract class FirestoreSnapshot {
 class FirebaseCacheClient {
   /// Creates a [FirebaseCacheClient].
   ///
-  /// Pass `firestore` as a [FirestoreClient] instance (or null). When
-  /// `enabled` is false, all operations are no-ops.
+  /// Pass a [FirestoreClient] instance (or null). When disabled, all
+  /// operations are no-ops.
   FirebaseCacheClient({
     this._firestore,
     this._enabled = false,

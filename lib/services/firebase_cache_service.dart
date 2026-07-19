@@ -24,8 +24,9 @@ const int _refreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 ///    source API when the cache misses or is unavailable.
 /// 2. **Cache write** — after a successful source-API fetch, the result is
 ///    written to Firestore asynchronously (fire-and-forget).
-/// 3. **Refresh** — iterates stale entries (those whose `nextRefreshAt` has
-///    passed) and re-fetches fresh data from the source APIs.
+/// 3. **Refresh** — iterates stale entries (those whose
+///    [ProductCacheEntry.nextRefreshAt] has passed) and re-fetches fresh
+///    data from the source APIs.
 ///
 /// ## Graceful degradation
 ///

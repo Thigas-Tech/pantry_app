@@ -931,11 +931,9 @@ infrastructure or external server hosting are listed last.
   `itemId * 2`/`*2+1` ID scheme, 9:00 AM scheduling, timezone fix via
   `flutter_timezone`, `rescheduleAllItems()` on boot, proper channel
   creation, permission re-request. See CHANGELOG for details.
-- [ ] **Remake import/export from scratch** — rewrite `CsvService` to
-  support: export only cached (API-fetched) products, export a specific
-  inventory, export products from a specific inventory, and import via
-  `filegate` (platform file picker). Replace the stats-screen picker with a
-  streamlined FileGate-based flow.
+- [ ] **Rebuild import/export** — export cached (API-fetched) products,
+  export a specific inventory, and import via platform file picker with
+  format detection and error recovery.
 - [ ] **Recipe suggestions** — call a recipe API with items expiring this
   week; suggest meals that use them. Coordinate with "Recipe notification
   recommendations from pantry" (Medium Effort). If both are implemented,

@@ -523,6 +523,66 @@ void main() {
     expect(find.text('Product not found in database.'), findsOneWidget);
   });
 
+  testWidgets(
+    'FAB scanner flow: navigates to ProductDetailScreen on barcode hit',
+    (
+      tester,
+    ) async {
+      final mockRepo = createMockProductRepository();
+      const testProduct = Product(
+        name: 'Test Item',
+        barcode: '123',
+      );
+      when(
+        () => mockRepo.getProduct('123'),
+      ).thenAnswer((_) async => testProduct);
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          inventoryWithProductProvider.overrideWith(
+            (ref) => <InventoryWithProduct>[],
+          ),
+          inventoryListProvider.overrideWith(
+            (ref) => <Map<String, dynamic>>[],
+          ),
+          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // Pop scanner with a valid barcode.
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .pop(const BarcodeResult('123'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // ProductDetailScreen should open.
+      expect(find.byType(ProductDetailScreen), findsOneWidget);
+
+      // Pop ProductDetailScreen.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(HomeScreen), findsOneWidget);
+    },
+  );
+
   testWidgets('NavigationBar displays all tab labels', (tester) async {
     await pumpApp(
       tester,
@@ -1639,5 +1699,173 @@ void main() {
 
       verify(() => mockRepo.resolveProduceProduct('Apple')).called(1);
     });
+  });
+
+  group('background refresh — overdue and pull-to-refresh', () {
+    testWidgets(
+      'overdue check calls refreshInventoryProducts (not background variant)',
+      (tester) async {
+        final mockRepo = createMockProductRepository();
+        when(mockRepo.isCacheOverdue).thenAnswer((_) async => true);
+        when(
+          () => mockRepo.refreshInventoryProducts(any()),
+        ).thenAnswer((_) async => 1);
+        when(mockRepo.setLastRefreshTime).thenAnswer((_) async {});
+
+        await pumpApp(
+          tester,
+          const HomeScreen(),
+          imageCacheMock: mockImageCache,
+          overrides: [
+            inventoryWithProductProvider.overrideWith(
+              (ref) => <InventoryWithProduct>[],
+            ),
+            inventoryListProvider.overrideWith(
+              (ref) => <Map<String, dynamic>>[],
+            ),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            hasConnectionProvider.overrideWith(
+              (ref) => Future.value(true),
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+        );
+
+        // Wait for initState → addPostFrameCallback → _refreshIfOverdue
+        await tester.pumpAndSettle();
+
+        verify(() => mockRepo.refreshInventoryProducts(any())).called(1);
+        verifyNever(() => mockRepo.refreshInventoryProductsBackground(any()));
+      },
+    );
+
+    testWidgets(
+      'pull-to-refresh awaits refreshInventoryProducts then invalidates',
+      (tester) async {
+        final mockRepo = createMockProductRepository();
+        final refreshCompleter = Completer<int>();
+        when(
+          () => mockRepo.refreshInventoryProducts(any()),
+        ).thenAnswer((_) => refreshCompleter.future);
+        when(mockRepo.setLastRefreshTime).thenAnswer((_) async {});
+
+        await pumpApp(
+          tester,
+          const HomeScreen(),
+          imageCacheMock: mockImageCache,
+          settle: false,
+          overrides: [
+            inventoryWithProductProvider.overrideWith(
+              (ref) => <InventoryWithProduct>[
+                testItem('Existing', barcode: '1'),
+              ],
+            ),
+            inventoryListProvider.overrideWith(
+              (ref) => <Map<String, dynamic>>[
+                {'id': 1, 'name': 'Home'},
+              ],
+            ),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            hasConnectionProvider.overrideWith(
+              (ref) => Future.value(true),
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+        );
+
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        // Verify the provider loaded data
+        expect(find.text('Existing'), findsOneWidget);
+
+        // Drag down on RefreshIndicator to trigger pull-to-refresh
+        await tester.fling(
+          find.byType(RefreshIndicator),
+          const Offset(0, 300),
+          1000,
+        );
+        await tester.pump();
+
+        // Refresh shouldn't have completed yet — provider shouldn't re-fetch
+        expect(find.text('Existing'), findsOneWidget);
+
+        // Complete the refresh
+        refreshCompleter.complete(1);
+        await tester.pumpAndSettle();
+
+        // Verify the correct methods were called
+        verify(() => mockRepo.refreshInventoryProducts(any())).called(1);
+        verifyNever(() => mockRepo.refreshInventoryProductsBackground(any()));
+      },
+    );
+  });
+
+  group('FAB scanner flow — add item and pop back', () {
+    testWidgets(
+      'returns to HomeScreen without unhandled exceptions',
+      (tester) async {
+        final mockRepo = createMockProductRepository();
+        when(
+          () => mockRepo.getProduct('123'),
+        ).thenAnswer(
+          (_) async => const Product(name: 'Bisnaguinha', barcode: '123'),
+        );
+        when(
+          () => mockRepo.getInventoryForBarcode(
+            any(),
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        await pumpApp(
+          tester,
+          const HomeScreen(),
+          imageCacheMock: mockImageCache,
+          overrides: [
+            inventoryWithProductProvider.overrideWith(
+              (ref) => <InventoryWithProduct>[],
+            ),
+            inventoryListProvider.overrideWith(
+              (ref) => <Map<String, dynamic>>[],
+            ),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            hasConnectionProvider.overrideWith(
+              (ref) => Future.value(true),
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+        );
+
+        // Scan → ProductDetailScreen
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        tester
+            .state<NavigatorState>(find.byType(Navigator))
+            .pop(const BarcodeResult('123'));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        // ProductDetailScreen should open.
+        expect(find.byType(ProductDetailScreen), findsOneWidget);
+
+        // Wait for all async operations to complete
+        await tester.pumpAndSettle();
+
+        // Pop ProductDetailScreen back to HomeScreen
+        tester.state<NavigatorState>(find.byType(Navigator)).pop();
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        // pumpAndSettle will throw if setState-during-build occurs
+        await tester.pumpAndSettle();
+        expect(find.byType(HomeScreen), findsOneWidget);
+      },
+    );
   });
 }

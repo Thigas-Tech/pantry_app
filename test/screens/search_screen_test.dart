@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 
@@ -47,6 +48,11 @@ void main() {
     productType: ProductType.produce,
     source: 'manual',
   );
+
+  setUpAll(() {
+    registerFallbackValue(const InventoryItem(barcode: 'fallback'));
+    registerFallbackValue(const Product(barcode: 'fallback', name: 'Fallback'));
+  });
 
   setUp(() {
     mockDb = MockDatabaseHelper();
@@ -496,6 +502,98 @@ void main() {
       // Non-produce API items still show cloud.
       expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
       expect(find.byIcon(Icons.eco_outlined), findsNothing);
+    });
+  });
+
+  group('add to inventory', () {
+    testWidgets(
+      'swipe-to-add calls repo.cacheProduct and repo.addInventoryItem',
+      (
+        tester,
+      ) async {
+        final mockRepo = createMockProductRepository();
+        when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async {});
+        when(() => mockRepo.addInventoryItem(any())).thenAnswer((_) async => 1);
+        when(
+          () => mockDb.searchProducts('milk'),
+        ).thenAnswer((_) async => [localProduct]);
+        when(
+          () => mockApi.searchProducts(
+            'milk',
+            pageSize: any(named: 'pageSize'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        await pumpSearchScreen(
+          tester,
+          extraOverrides: [
+            productRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+        );
+
+        await tester.enterText(find.byType(SearchBar), 'milk');
+        await tester.pump(const Duration(milliseconds: 550));
+        await tester.pump();
+
+        await tester.drag(find.text('Local Milk'), const Offset(500, 0));
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        verify(() => mockRepo.cacheProduct(localProduct)).called(1);
+        verify(
+          () => mockRepo.addInventoryItem(
+            any(
+              that: isA<InventoryItem>().having(
+                (i) => i.barcode,
+                'barcode',
+                localProduct.barcode,
+              ),
+            ),
+          ),
+        ).called(1);
+        expect(find.text('Add to Pantry'), findsOneWidget);
+      },
+    );
+
+    testWidgets('undo after swipe-to-add calls deleteInventoryItem', (
+      tester,
+    ) async {
+      final mockRepo = createMockProductRepository();
+      when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async => {});
+      when(() => mockRepo.addInventoryItem(any())).thenAnswer((_) async => 1);
+      when(
+        () => mockRepo.deleteInventoryItem(any()),
+      ).thenAnswer((_) async => 1);
+      when(
+        () => mockDb.searchProducts('milk'),
+      ).thenAnswer((_) async => [localProduct]);
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpSearchScreen(
+        tester,
+        extraOverrides: [
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+
+      await tester.drag(find.text('Local Milk'), const Offset(500, 0));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Undo'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      verify(() => mockRepo.deleteInventoryItem(1)).called(1);
+      expect(find.text('Removed from pantry.'), findsOneWidget);
     });
   });
 }

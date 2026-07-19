@@ -2,10 +2,6 @@
 // ignore_for_file: cascade_invocations
 // ignore_for_file: omit_local_variable_types
 
-// ignore_for_file: avoid_print
-// ignore_for_file: cascade_invocations
-// ignore_for_file: omit_local_variable_types
-
 /// Dart VM Service health check CLI tool.
 ///
 /// Connects to a running Flutter/Dart app in debug mode and produces

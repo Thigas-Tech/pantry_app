@@ -158,7 +158,7 @@ abstract class Product with _$Product {
     /// additives).
     ///
     /// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
-    /// the SDK's `nutriscore` field.
+    /// the SDK's off.Product.nutriscore field.
     String? nutriscoreGrade,
 
     /// The product category that makes Nutri-Score not applicable, if any.

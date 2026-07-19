@@ -88,9 +88,11 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
 
   /// Returns the localized display name for this inventory item.
   ///
-  /// For produce items, uses `localizeProduceName` so the name is shown in
-  /// the user's locale (e.g. `"Maca"` in Portuguese). Falls back to `barcode`
-  /// when `productName` is null.
+  /// For produce items, calls the localizeProduceName method on
+  /// [AppLocalizations] so the name is shown in the user's locale
+  /// (e.g. `"Maca"` in Portuguese). Falls back
+  /// to [InventoryWithProduct.barcode] when
+  /// [InventoryWithProduct.productName] is null.
   String _localizedDisplayName(AppLocalizations l10n) {
     final name = widget.item.productName;
     if (name == null) return widget.item.barcode;

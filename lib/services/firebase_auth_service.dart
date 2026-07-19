@@ -20,7 +20,8 @@ import 'package:pantry_app/utils/logger.dart';
 /// and use `FirebaseAuth.instance.currentUser!.linkWithCredential` to preserve
 /// anonymous data under the permanent account.
 class FirebaseAuthService implements AuthService {
-  /// Creates a [FirebaseAuthService] backed by the given `auth` instance.
+  /// Creates a [FirebaseAuthService] implementing [AuthService] using the
+  /// given Firebase Auth instance.
   FirebaseAuthService(this._auth)
     : _controller = StreamController<AuthUser?>.broadcast() {
     _authSubscription = _auth.authStateChanges().listen(

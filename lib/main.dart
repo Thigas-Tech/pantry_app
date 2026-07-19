@@ -22,6 +22,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
+import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
@@ -289,12 +290,15 @@ Future<void> _scheduleCacheRefresh() async {
     await repo.setLastRefreshTime();
     final db = appContainer.read(databaseProvider);
     final inventories = await db.getInventories();
-    for (final inv in inventories) {
-      repo.refreshInventoryProductsBackground(inv['id'] as int);
-    }
-    logInfo(
-      'Background refresh scheduled for ${inventories.length} inventories',
+    await Future.wait(
+      inventories.map(
+        (inv) => repo.refreshInventoryProducts(inv['id'] as int),
+      ),
     );
+    logInfo(
+      'Refreshed products for ${inventories.length} inventories',
+    );
+    appContainer.invalidate(inventoryWithProductProvider);
   } on Exception catch (e) {
     logError('Scheduled cache refresh failed: $e');
   }

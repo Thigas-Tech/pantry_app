@@ -25,13 +25,17 @@ const int _productRefreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 /// The following [Product] fields are intentionally not stored in
 /// Firestore because they are local-only or transient:
 ///
-/// - `nutritionImagePath`, `ingredientsImagePath`, `productImagePath`
-///   (local file paths, not portable across devices)
-/// - `source` (always `'api'` for OFF products; irrelevant for cache)
-/// - `submissionStatus` (transient submission state, not cacheable)
-/// - `productType` (all entries in `product_cache` are implicitly barcoded)
-/// - `pluCode` (only applies to produce, never to OFF barcoded items)
-/// - `lastSynced` (replaced by [lastRefreshedAt] in the cache entry)
+/// - [Product.nutritionImagePath], [Product.ingredientsImagePath],
+///   [Product.productImagePath] (local file paths, not portable across
+///   devices)
+/// - [Product.source] (always `'api'` for OFF products; irrelevant for
+///   cache)
+/// - [Product.submissionStatus] (transient submission state, not cacheable)
+/// - [Product.productType] (all entries in `product_cache` are implicitly
+///   barcoded)
+/// - [Product.pluCode] (only applies to produce, never to OFF barcoded
+///   items)
+/// - [Product.lastSynced] (replaced by [lastRefreshedAt] in the cache entry)
 @freezed
 abstract class ProductCacheEntry with _$ProductCacheEntry {
   /// Creates a [ProductCacheEntry].
