@@ -1,8 +1,8 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 23)
+### 2.1 Schema (version 24)
 
-Eight tables:
+Nine tables:
 
 | Table | Purpose |
 |---|---|
@@ -14,6 +14,7 @@ Eight tables:
 | `prices` | Purchase price observations per barcode |
 | `shopping_list` | Items the user intends to buy |
 | `stores` | Saved store names for autocomplete on price entry |
+| `firebase_cache_meta` | Tracks last-refresh timestamps for product cache entries synced to Firestore |
 
 ### 2.2 DAO pattern
 
@@ -29,6 +30,7 @@ Each table has a dedicated Data Access Object:
 | `PriceDao` | CRUD prices, aggregation queries (total value, average) |
 | `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
 | `StoreDao` | CRUD saved store names, case-insensitive lookup |
+| `FirebaseCacheMetaDao` | CRUD Firestore cache sync metadata, next-refresh tracking |
 
 Every DAO method receives a `Database` instance so it can be tested independently.
 
@@ -46,7 +48,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v23).
+- `_onUpgrade` handles version bumps (currently v1 -> v24).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -74,6 +76,7 @@ Version history:
 | v20 -> v21 | Added `plu_code TEXT` and `product_type TEXT NOT NULL DEFAULT 'barcoded'` to `products` |
 | v21 -> v22 | Added `serving_weight_g REAL` to `inventory` for produce serving sizes |
 | v22 -> v23 | Backfill `category` for produce items with default "Fruits and vegetables based foods" |
+| v23 -> v24 | Added `firebase_cache_meta` table for Firestore cache sync tracking |
 
 ### 2.4 Connectivity layer
 

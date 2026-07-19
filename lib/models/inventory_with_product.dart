@@ -23,7 +23,7 @@ import 'package:pantry_app/models/product_type.dart';
 ///
 /// ## Immutability
 ///
-/// This class is fully immutable – all fields are `final`. To modify data,
+/// This class is fully immutable – all fields are final. To modify data,
 /// update the underlying [InventoryItem] or [Product] through the repository.
 class InventoryWithProduct {
   /// Constructs an [InventoryWithProduct] instance.

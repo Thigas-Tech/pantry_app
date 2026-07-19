@@ -1,4 +1,5 @@
 import 'package:pantry_app/database/feedback_queue_dao.dart';
+import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/price_dao.dart';
@@ -89,6 +90,10 @@ class DatabaseHelper {
   /// DAO for the `stores` table.
   final StoreDao storeDao = const StoreDao();
 
+  /// DAO for the `firebase_cache_meta` table.
+  final FirebaseCacheMetaDao firebaseCacheMetaDao =
+      const FirebaseCacheMetaDao();
+
   /// The lazily‑opened database instance.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -102,7 +107,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 23,
+        version: 24,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -200,6 +205,8 @@ class DatabaseHelper {
     await _createShoppingListTable(db);
 
     await _createStoresTable(db);
+
+    await firebaseCacheMetaDao.createTable(db);
 
     await inventoriesDao.seedDefault(db);
 
@@ -501,6 +508,14 @@ class DatabaseHelper {
         );
       } on Exception catch (e) {
         logWarning('Migration v23 failed: $e');
+      }
+    }
+    if (oldVersion < 24) {
+      try {
+        await firebaseCacheMetaDao.createTable(db);
+        logInfo('Migration to version 24 (firebase_cache_meta) completed');
+      } on Exception catch (e) {
+        logWarning('Migration v24 failed: $e');
       }
     }
     logInfo('Database upgrade completed');

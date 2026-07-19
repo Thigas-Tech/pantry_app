@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.8+4] — 2026-07-18
+
+### Added
+- Firebase product cache: replicates OFF and USDA product data to Cloud
+  Firestore with a 180-day rolling refresh cycle.
+- Anonymous Firebase Auth for Firestore security rule compliance.
+- `authServiceProvider` and `authStateProvider` for reactive auth state.
+- AuthUser model with anonymous/non-anonymous support.
+
+### Fixed
+- Active inventory ID persistence and validation on startup (falls back to
+  first available inventory or reseeds default).
+- Riverpod setState during build on back-navigation.
+- Bottom sheet safe area padding on gesture navigation.
+
 ## [0.0.8] - 2026-07-16
 
 ### Fixed

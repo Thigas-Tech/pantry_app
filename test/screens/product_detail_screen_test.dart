@@ -590,7 +590,7 @@ void main() {
     verify(() => mockRepo.addInventoryItem(newItem)).called(1);
     verify(
       () => mockNotif.scheduleExpiryReminders(
-        newItem,
+        any(),
         productName: any(named: 'productName'),
         expiringSoonTitle: any(named: 'expiringSoonTitle'),
         buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
@@ -1022,4 +1022,62 @@ void main() {
 
     verify(() => mockSubmission.submitProduct(any())).called(1);
   });
+
+  testWidgets(
+    'add to inventory passes non-null id to scheduleExpiryReminders',
+    (tester) async {
+      setLargeScreen(tester);
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => []);
+      when(
+        () => mockRepo.addInventoryItem(any()),
+      ).thenAnswer((_) => Future<int>.value(42));
+      when(
+        () => mockRepo.cacheProduct(any()),
+      ).thenAnswer((_) async {});
+
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: screenOverrides(
+          mockRepo: mockRepo,
+          mockNotif: mockNotif,
+          mockDb: mockDb,
+        ),
+      );
+
+      await tester.tap(find.text('Add to Inventory'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AddToInventoryScreen), findsOneWidget);
+
+      // Pop with an item that has null id (matching AddToInventoryScreen
+      // for a new item).
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .pop(
+            InventoryItem(barcode: testProduct.barcode),
+          );
+      await tester.pumpAndSettle();
+
+      final captured = verify(
+        () => mockNotif.scheduleExpiryReminders(
+          captureAny<InventoryItem>(),
+          productName: any(named: 'productName'),
+          expiringSoonTitle: any(named: 'expiringSoonTitle'),
+          buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
+          expiringTodayTitle: any(named: 'expiringTodayTitle'),
+          buildExpiringTodayBody: any(named: 'buildExpiringTodayBody'),
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+        ),
+      ).captured;
+      final remindedItem = captured.first as InventoryItem;
+      expect(remindedItem.id, isNotNull);
+      expect(remindedItem.id, 42);
+    },
+  );
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Static helper for showing consistent modal bottom sheets across the app.
 ///
-/// All sheets use `isScrollControlled` and `useSafeArea` for proper
+/// All sheets are scroll-controlled and use system-safe areas for proper
 /// keyboard-avoidance and system-ui respect. Use [bottomInset] for the
 /// standard bottom padding that accounts for the navigation bar and keyboard.
 ///

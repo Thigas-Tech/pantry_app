@@ -15,16 +15,18 @@ import 'package:pantry_app/widgets/nutriscore_badge.dart';
 ///
 /// ## Reactivity
 ///
-/// The provider is **automatically invalidated** whenever the inventory data
-/// changes (item added/updated/deleted) or when the active inventory is
-/// switched. This ensures the home screen always shows the current data.
+/// The provider is not reactive to database changes. It must be explicitly
+/// invalidated via [WidgetRef.invalidate] after every inventory mutation
+/// (add, update, delete, move).
 final inventoryWithProductProvider = FutureProvider<List<InventoryWithProduct>>(
   (ref) async {
     await Future<void>.delayed(Duration.zero);
     final activeId = ref.watch<int>(activeInventoryProvider);
     final db = ref.watch(databaseProvider);
     final rows = await db.getInventoryWithProduct(inventoryId: activeId);
-    return rows.map(InventoryWithProduct.fromMap).toList();
+    final result = rows.map(InventoryWithProduct.fromMap).toList();
+    await Future<void>.delayed(Duration.zero);
+    return result;
   },
 );
 

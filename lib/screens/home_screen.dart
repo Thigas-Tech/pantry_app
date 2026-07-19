@@ -95,7 +95,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
 
       if (!mounted) return;
-      ref.invalidate(inventoryWithProductProvider);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(inventoryWithProductProvider);
+      });
       await ProducePurchaseTracker().recordPurchase(produceName);
     } on Exception catch (e) {
       logError('Failed to resolve produce product: $e');
@@ -115,8 +117,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       if (!online) return;
       if (!await repo.isCacheOverdue()) return;
       final activeId = ref.read(activeInventoryProvider);
-      repo.refreshInventoryProductsBackground(activeId);
+      await repo.refreshInventoryProducts(activeId);
       await repo.setLastRefreshTime();
+      if (!mounted) return;
+      ref.invalidate(inventoryWithProductProvider);
     } on Exception catch (e) {
       logWarning('Overdue cache check failed: $e');
     }
@@ -312,6 +316,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           builder: (_) => const SearchScreen(),
         ),
       );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(inventoryWithProductProvider);
+      });
     }
   }
 
@@ -467,7 +474,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                   );
                   if (result == true && context.mounted) {
-                    ref.invalidate(inventoryWithProductProvider);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ref.invalidate(inventoryWithProductProvider);
+                    });
                   }
                 },
               ),
@@ -604,11 +613,9 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
       onRefresh: () async {
         final repo = ref.read(productRepositoryProvider);
         final activeId = ref.read(activeInventoryProvider);
-        repo.refreshInventoryProductsBackground(activeId);
+        await repo.refreshInventoryProducts(activeId);
         await repo.setLastRefreshTime();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(inventoryWithProductProvider);
-        });
+        ref.invalidate(inventoryWithProductProvider);
       },
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 12),

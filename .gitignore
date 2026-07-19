@@ -54,3 +54,4 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 test_output.txt
+android/app/google-services.json

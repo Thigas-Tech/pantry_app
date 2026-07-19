@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
@@ -722,6 +723,137 @@ void main() {
         final saved = items.firstWhere((i) => i.id == id);
         expect(saved.servingWeightG, 182);
         expect(saved.unit, 'medium apple');
+      },
+    );
+  });
+
+  group('Migration v23 → v24', () {
+    test(
+      'creates firebase_cache_meta table and preserves existing data',
+      () async {
+        final tempDir = Directory.systemTemp.createTempSync('pantry_v23_');
+        final v23Path = '${tempDir.path}/pantry.db';
+
+        // Create a v23 database with the core tables.
+        final v23Db = await openDatabase(
+          v23Path,
+          version: 23,
+          onCreate: (db, _) async {
+            await db.execute('''
+              CREATE TABLE products (
+                barcode TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                brand TEXT,
+                image_url TEXT,
+                category TEXT,
+                ingredients TEXT,
+                serving_size TEXT,
+                energy_kcal REAL,
+                protein_g REAL,
+                carbs_g REAL,
+                fat_g REAL,
+                fiber_g REAL,
+                salt_g REAL,
+                last_synced INTEGER,
+                nutriscore_grade TEXT,
+                nutriscore_not_applicable_category TEXT,
+                source TEXT NOT NULL DEFAULT 'api',
+                nutrition_image_path TEXT,
+                ingredients_image_path TEXT,
+                product_image_path TEXT,
+                submission_status TEXT NOT NULL DEFAULT 'not_submitted',
+                off_nutrition_image_url TEXT,
+                off_ingredients_image_url TEXT,
+                off_product_image_url TEXT,
+                categories_hierarchy TEXT,
+                language_code TEXT NOT NULL DEFAULT 'en',
+                search_text TEXT,
+                plu_code TEXT,
+                product_type TEXT NOT NULL DEFAULT 'barcoded'
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE inventories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                created_at INTEGER NOT NULL
+              )
+            ''');
+            await db.execute('''
+              CREATE TABLE inventory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                barcode TEXT NOT NULL,
+                quantity REAL DEFAULT 1,
+                unit TEXT DEFAULT 'pieces',
+                expiry_date TEXT,
+                location TEXT DEFAULT 'pantry',
+                notes TEXT,
+                date_added INTEGER,
+                inventory_id INTEGER NOT NULL DEFAULT 1,
+                serving_weight_g REAL,
+                FOREIGN KEY(barcode) REFERENCES products(barcode),
+                FOREIGN KEY(inventory_id) REFERENCES inventories(id)
+              )
+            ''');
+            // Insert seed data
+            await db.insert('inventories', {
+              'id': 1,
+              'name': 'Home',
+              'created_at': DateTime.now().millisecondsSinceEpoch,
+            });
+            await db.insert('products', {
+              'barcode': 'test-barcode-123',
+              'name': 'Surviving Product',
+              'product_type': 'barcoded',
+            });
+            await db.insert('inventory', {
+              'barcode': 'test-barcode-123',
+              'inventory_id': 1,
+              'date_added': DateTime.now().millisecondsSinceEpoch,
+            });
+          },
+        );
+        await v23Db.close();
+
+        // Open with current DatabaseHelper — migration runs.
+        final dbHelper = DatabaseHelper.withPath(v23Path);
+        final migratedDb = await dbHelper.database;
+
+        // Verify firebase_cache_meta table exists.
+        final tableResult = await migratedDb.rawQuery(
+          'SELECT name FROM sqlite_master '
+          "WHERE type='table' AND name='firebase_cache_meta'",
+        );
+        expect(tableResult, isNotEmpty);
+
+        // Verify migration is idempotent (reopen doesn't error).
+        await migratedDb.close();
+        final dbHelper2 = DatabaseHelper.withPath(v23Path);
+        await dbHelper2.database;
+
+        // Verify existing data is intact.
+        final product = await dbHelper2.getProduct('test-barcode-123');
+        expect(product, isNotNull);
+        expect(product!.name, 'Surviving Product');
+
+        // Verify we can insert into the new table.
+        final metaDb = await dbHelper2.database;
+        await const FirebaseCacheMetaDao().upsert(
+          metaDb,
+          'test-barcode-123',
+          'barcoded',
+          lastRefreshedAt: 1000,
+          nextRefreshAt: 1000 + (180 * 24 * 60 * 60 * 1000),
+        );
+        final metaEntry = await const FirebaseCacheMetaDao().get(
+          metaDb,
+          'test-barcode-123',
+        );
+        expect(metaEntry, isNotNull);
+        expect(metaEntry!['cache_type'], 'barcoded');
+
+        await metaDb.close();
+        tempDir.deleteSync(recursive: true);
       },
     );
   });

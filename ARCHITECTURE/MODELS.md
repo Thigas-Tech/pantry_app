@@ -1,10 +1,21 @@
 ## 6. Models (`lib/models/`)
 
 All models use **freezed** for immutable value types and **json_serializable**
-for JSON deserialization from the Open Food Facts API.
+for JSON deserialization from the Open Food Facts API, except where noted.
 
-| Model                 | Source     | Notes                           |
-|-----------------------|------------|---------------------------------|
-| `Product`             | freezed    | Cached OFF product data         |
-| `InventoryItem`       | freezed    | An instance of a product in a pantry |
-| `InventoryWithProduct`| plain Dart | Join from `getInventoryWithProduct` |
+| Model | Source | Notes |
+|---|---|---|
+| `Product` | freezed | Cached OFF product data with nutrition, images, source tracking |
+| `InventoryItem` | freezed | An instance of a product in a pantry (qty, expiry, location) |
+| `InventoryWithProduct` | plain Dart | Join result from `getInventoryWithProduct` query |
+| `Price` | freezed | Purchase price observation (amount, currency, store, proof photo) |
+| `ShoppingItem` | freezed | Shopping list entry with price fields and photo support |
+| `PantryStats` | freezed | Aggregated statistics for the stats screen |
+| `Store` | freezed | Saved store name for autocomplete |
+| `ProductType` | enum | Barcoded, produce, or custom |
+| `ScanResult` | sealed class | Barcode or PLU result from scanner |
+| `AuthUser` | plain Dart | Authenticated user (uid, isAnonymous, email, displayName) |
+| `ProductCacheEntry` | freezed | Firestore document for `product_cache/{barcode}` |
+| `ProduceCacheEntry` | freezed | Firestore document for `produce_cache/{name}` |
+| `FeedbackQueueEntry` | freezed | Offline queue item for GitHub issue reports |
+| `ProductSubmissionQueueEntry` | freezed | Offline queue item for OFF product submissions |

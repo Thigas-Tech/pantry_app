@@ -6,11 +6,6 @@
 /// in-memory database seeded with controlled data.
 library;
 
-/// AGENTS.md rule 7 requires explicit `source: 'api'` on Product() calls.
-/// The freezed `@Default('api')` triggers `avoid_redundant_argument_values`,
-/// so suppress that specific lint in this test file.
-// ignore_for_file: avoid_redundant_argument_values
-
 import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -276,7 +271,6 @@ void main() {
         name: 'Milk',
         category: 'Dairy',
         nutriscoreGrade: 'a',
-        source: 'api',
         categoriesHierarchy: ['en:dairy', 'en:milk'],
       );
       await dbHelper.productDao.insert(db, product);
@@ -291,7 +285,6 @@ void main() {
           expiryDate: DateTime.now()
               .add(const Duration(days: 10))
               .toIso8601String(),
-          inventoryId: 1,
           dateAdded: DateTime.now().millisecondsSinceEpoch,
         ),
       );
@@ -336,7 +329,6 @@ void main() {
         barcode: '001',
         name: 'Item',
         nutriscoreGrade: 'b',
-        source: 'api',
       );
       await dbHelper.productDao.insert(db, product);
 
@@ -344,9 +336,7 @@ void main() {
         db,
         InventoryItem(
           barcode: '001',
-          quantity: 1,
           unit: 'pcs',
-          inventoryId: 1,
           dateAdded: DateTime.now().millisecondsSinceEpoch,
         ),
       );
@@ -385,7 +375,6 @@ void main() {
         barcode: '001',
         name: 'Expired Milk',
         category: 'Dairy',
-        source: 'api',
       );
       await dbHelper.productDao.insert(db, product);
 
@@ -393,12 +382,10 @@ void main() {
         db,
         InventoryItem(
           barcode: '001',
-          quantity: 1,
           unit: 'pcs',
           expiryDate: DateTime.now()
               .subtract(const Duration(days: 10))
               .toIso8601String(),
-          inventoryId: 1,
           dateAdded: DateTime.now().millisecondsSinceEpoch,
         ),
       );

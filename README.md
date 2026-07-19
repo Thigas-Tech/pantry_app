@@ -12,11 +12,11 @@ never waste food again.
 - **Barcode scanning** — camera-based via Google ML Kit (`mobile_scanner`) or manual text entry
 - **Product lookup** — fetches name, brand, nutrition, ingredients from Open Food Facts
 - **Local database** — products are cached locally in SQLite; works without internet for known items
+- **Cloud product cache** — Firestore-backed 180-day rolling cache for OFF barcoded and USDA produce products with offline-first fallback
 - **Multiple pantries** — create, rename, and delete named inventories (e.g. Home, Work)
 - **Expiry tracking** — items grouped into Expired / Expiring Soon / Good on the home screen
 - **Local notifications** — two reminders per item: one day before expiry and on expiry day
 - **Custom units & locations** — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options
-
 - **Nutrition table** — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml
 - **Material You** — dynamic colours from your device wallpaper, light/dark/system theme
 - **Undo delete** — restore an accidentally deleted inventory item with a snackbar action
@@ -108,11 +108,15 @@ lib/
     shopping_list_dao.dart   # Shopping list CRUD (per-inventory)
     store_dao.dart           # Saved store names CRUD
     product_submission_queue_dao.dart  # OFF submission queue
+    firebase_cache_meta_dao.dart  # Firestore cache sync metadata
   l10n/                # App translations (English ARB)
   models/              # Freezed data models
   providers/           # Riverpod state & dependency injection
   screens/             # UI pages
   services/            # Business logic
+    firebase_cache_client.dart  # Firestore read/write client
+    firebase_cache_service.dart  # 180-day Firestore cache coordinator
+    firebase_firestore_client_adapter.dart  # Serialization adapter
   utils/               # Logger, snackbar helpers
   widgets/             # Reusable components
 test/                  # Unit and widget tests
@@ -144,11 +148,12 @@ flutter test --concurrency=2 --coverage  # With coverage
 ## Tech stack
 
 | Category           | Technology                       |
-|--------------------|----------------------------------|
+|---|---|---|
 | Framework          | Flutter (stable)                 |
 | Language           | Dart 3.12+                      |
 | State management   | Riverpod 3.x                    |
 | Local database     | SQLite (sqflite)                |
+| Cloud database     | Cloud Firestore                  |
 | HTTP client        | http                             |
 | OFF SDK            | openfoodfacts                   |
 | Code generation    | freezed, json_serializable      |

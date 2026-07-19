@@ -1,6 +1,3 @@
-// the test doc comments tend to get too long
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 
@@ -10,7 +7,8 @@ import 'package:pantry_app/models/inventory_with_product.dart';
 /// of default values for missing columns.
 void main() {
   group('InventoryWithProduct', () {
-    /// A complete row from the joined query (inventory + product + inventories).
+    /// A complete row from the joined query
+    /// (inventory + product + inventories).
     final completeMap = {
       'id': 1,
       'barcode': '123',
@@ -44,7 +42,8 @@ void main() {
     });
 
     test('defaults applied when fields are missing', () {
-      /// Only the required fields are present; optional columns fall back to sensible defaults.
+      /// Only the required fields are present; optional columns fall back
+      /// to sensible defaults.
       final minimal = {
         'barcode': '456',
         'quantity': 1,

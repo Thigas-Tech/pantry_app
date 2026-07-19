@@ -5,6 +5,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
@@ -16,23 +17,36 @@ class MockOffAdapter extends Mock implements OffAdapter {}
 
 class MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
+class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
+
 void main() {
   late ProductRepository repository;
   late MockDatabaseHelper mockDb;
   late MockOffAdapter mockApi;
   late MockOffAdapter fallbackApi;
   late MockUsdaApiClient mockUsda;
+  late MockFirebaseCacheService mockFirebaseCache;
+  late ProductRepository fbRepo;
 
   setUp(() {
     mockDb = MockDatabaseHelper();
     mockApi = MockOffAdapter();
     fallbackApi = MockOffAdapter();
     mockUsda = MockUsdaApiClient();
+    mockFirebaseCache = MockFirebaseCacheService();
+    when(() => mockFirebaseCache.isAvailable).thenReturn(true);
     repository = ProductRepository(
       mockDb,
       mockApi,
       fallbackApi: fallbackApi,
       usdaClient: mockUsda,
+    );
+    fbRepo = ProductRepository(
+      mockDb,
+      mockApi,
+      fallbackApi: fallbackApi,
+      usdaClient: mockUsda,
+      firebaseCache: mockFirebaseCache,
     );
     registerFallbackValue(const Product(barcode: '', name: ''));
     registerFallbackValue(const InventoryItem(barcode: ''));
@@ -734,6 +748,207 @@ void main() {
 
       verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
       verifyNever(() => mockDb.insertInventoryItem(any()));
+    });
+  });
+
+  group('Firebase cache integration', () {
+    group('getProduct', () {
+      test(
+        'calls Firebase cache after local miss and returns Firebase product',
+        () async {
+          when(
+            () => mockDb.getProduct(testBarcode),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockFirebaseCache.resolveBarcodedProduct(
+              testBarcode,
+              languageCode: any(named: 'languageCode'),
+            ),
+          ).thenAnswer((_) async => testProduct);
+
+          final product = await fbRepo.getProduct(testBarcode);
+
+          expect(product, testProduct);
+          verify(
+            () => mockFirebaseCache.resolveBarcodedProduct(
+              testBarcode,
+              languageCode: any(named: 'languageCode'),
+            ),
+          ).called(1);
+          verifyNever(() => mockApi.getByBarcode(any()));
+        },
+      );
+
+      test('does NOT call Firebase when product is in local cache', () async {
+        when(
+          () => mockDb.getProduct(testBarcode),
+        ).thenAnswer((_) async => testProduct);
+
+        final product = await fbRepo.getProduct(testBarcode);
+
+        expect(product, testProduct);
+        verifyNever(
+          () => mockFirebaseCache.resolveBarcodedProduct(
+            any(),
+            languageCode: any(named: 'languageCode'),
+          ),
+        );
+        verifyNever(() => mockApi.getByBarcode(any()));
+      });
+
+      test(
+        'skips direct OFF API when Firebase returns null '
+        '(service already tried OFF)',
+        () async {
+          when(
+            () => mockDb.getProduct(testBarcode),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockFirebaseCache.resolveBarcodedProduct(
+              testBarcode,
+              languageCode: any(named: 'languageCode'),
+            ),
+          ).thenAnswer((_) async => null);
+          when(
+            () => fallbackApi.getByBarcode(
+              testBarcode,
+              languageCode: any(named: 'languageCode'),
+            ),
+          ).thenThrow(ProductNotFoundException(testBarcode));
+
+          await expectLater(
+            () => fbRepo.getProduct(testBarcode),
+            throwsA(isA<ProductNotFoundException>()),
+          );
+
+          verify(
+            () => mockFirebaseCache.resolveBarcodedProduct(
+              testBarcode,
+              languageCode: any(named: 'languageCode'),
+            ),
+          ).called(1);
+          verifyNever(() => mockApi.getByBarcode(any()));
+        },
+      );
+
+      test(
+        'falls through to OFF API when Firebase throws',
+        () async {
+          when(
+            () => mockDb.getProduct(testBarcode),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockFirebaseCache.resolveBarcodedProduct(
+              testBarcode,
+              languageCode: any(named: 'languageCode'),
+            ),
+          ).thenThrow(Exception('Firestore down'));
+          when(
+            () => mockApi.getByBarcode(testBarcode),
+          ).thenAnswer((_) async => testProduct);
+          when(
+            () => mockDb.insertProduct(testProduct),
+          ).thenAnswer((_) async => {});
+
+          final product = await fbRepo.getProduct(testBarcode);
+
+          expect(product, testProduct);
+          verify(() => mockApi.getByBarcode(testBarcode)).called(1);
+        },
+      );
+    });
+
+    group('resolveProduceProduct', () {
+      const produceName = 'Apple';
+      const produceBarcode = 'produce-Apple';
+
+      test(
+        'checks Firebase before USDA when resolving produce',
+        () async {
+          when(
+            () => mockFirebaseCache.resolveProduceProduct(produceName),
+          ).thenAnswer(
+            (_) async => testProduct.copyWith(
+              barcode: produceBarcode,
+              name: produceName,
+              productType: ProductType.produce,
+            ),
+          );
+
+          final product = await fbRepo.resolveProduceProduct(produceName);
+
+          expect(product, isNotNull);
+          expect(product.barcode, produceBarcode);
+          expect(product.productType, ProductType.produce);
+          expect(product.source, 'manual');
+          expect(product.category, 'Fruit');
+          verify(
+            () => mockFirebaseCache.resolveProduceProduct(produceName),
+          ).called(1);
+          verifyNever(() => mockUsda.searchFood(any()));
+        },
+      );
+
+      test(
+        'uses USDA when firebaseCache is null',
+        () async {
+          final repoNoFb = ProductRepository(
+            mockDb,
+            mockApi,
+            usdaClient: mockUsda,
+          );
+          when(
+            () => mockUsda.searchFood(produceName),
+          ).thenAnswer((_) async => []);
+
+          final product = await repoNoFb.resolveProduceProduct(produceName);
+
+          expect(product, isNotNull);
+          expect(product.barcode, produceBarcode);
+          verify(() => mockUsda.searchFood(produceName)).called(1);
+        },
+      );
+    });
+
+    group('addProduceToInventory', () {
+      const produceBarcode = 'produce-Apple';
+      const produceName = 'Apple';
+
+      setUp(() {
+        when(
+          () => mockDb.insertOrMergeInventoryItem(any()),
+        ).thenAnswer((_) async => 42);
+        when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
+      });
+
+      test(
+        'uses Firebase when local cache misses for produce',
+        () async {
+          when(
+            () => mockDb.getProduct(produceBarcode),
+          ).thenAnswer((_) async => null);
+          when(
+            () => mockFirebaseCache.resolveProduceProduct(produceName),
+          ).thenAnswer(
+            (_) async => testProduct.copyWith(
+              name: produceName,
+              energyKcal: 52,
+            ),
+          );
+
+          final id = await fbRepo.addProduceToInventory(
+            produceName,
+            inventoryId: 1,
+          );
+
+          expect(id, 42);
+          verify(
+            () => mockFirebaseCache.resolveProduceProduct(produceName),
+          ).called(1);
+          verify(() => mockDb.insertProduct(captureAny()));
+          verifyNever(() => mockUsda.searchFood(any()));
+        },
+      );
     });
   });
 }

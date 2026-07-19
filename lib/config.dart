@@ -3,7 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Application configuration loaded from a `.env` file at startup.
 ///
 /// All sensitive values (API credentials, contact email, etc.) are read from
-/// environment variables loaded by `flutter_dotenv`. A `.env.example` file is
+/// environment variables loaded by the [DotEnv] class. A `.env.example` file is
 /// provided as a template; copy it to `.env` and fill in real values.
 ///
 /// ## Security note
@@ -71,4 +71,13 @@ class AppConfig {
   /// Register for free at https://fdc.nal.usda.gov/api-key-signup.html.
   /// Leave empty to disable USDA API fallback for produce searches.
   static String get usdaApiKey => dotenv.env['USDA_API_KEY'] ?? '';
+
+  /// Whether Firebase integration is enabled.
+  ///
+  /// Set to `true` in `.env` after running `flutterfire configure` and
+  /// placing the generated `google-services.json` / `GoogleService-Info.plist`
+  /// in the platform project. When `false`, all Firebase operations are
+  /// no-ops and the app works exactly as before.
+  static bool get firebaseEnabled =>
+      dotenv.env['FIREBASE_ENABLED']?.toLowerCase() == 'true';
 }

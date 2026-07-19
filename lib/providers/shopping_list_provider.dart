@@ -19,19 +19,18 @@ final photoServiceProvider = Provider<PhotoService>((ref) {
 });
 
 /// Provides all shopping list items, scoped to the active inventory.
-// ignore: specify_nonobvious_property_types
-final shoppingListProvider = FutureProvider.autoDispose<List<ShoppingItem>>((
-  ref,
-) {
-  final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
-  return db.getShoppingList(inventoryId: inventoryId);
-});
+final FutureProvider<List<ShoppingItem>> shoppingListProvider =
+    FutureProvider.autoDispose<List<ShoppingItem>>((
+      ref,
+    ) {
+      final db = ref.watch(databaseProvider);
+      final inventoryId = ref.watch(activeInventoryProvider);
+      return db.getShoppingList(inventoryId: inventoryId);
+    });
 
 /// Provides only pending (not purchased) shopping list items, scoped to the
 /// active inventory.
-// ignore: specify_nonobvious_property_types
-final pendingShoppingListProvider =
+final FutureProvider<List<ShoppingItem>> pendingShoppingListProvider =
     FutureProvider.autoDispose<List<ShoppingItem>>((ref) {
       final db = ref.watch(databaseProvider);
       final inventoryId = ref.watch(activeInventoryProvider);
@@ -39,8 +38,7 @@ final pendingShoppingListProvider =
     });
 
 /// Provides only purchased shopping list items, scoped to the active inventory.
-// ignore: specify_nonobvious_property_types
-final purchasedShoppingListProvider =
+final FutureProvider<List<ShoppingItem>> purchasedShoppingListProvider =
     FutureProvider.autoDispose<List<ShoppingItem>>((ref) {
       final db = ref.watch(databaseProvider);
       final inventoryId = ref.watch(activeInventoryProvider);
@@ -49,12 +47,12 @@ final purchasedShoppingListProvider =
 
 /// Provides the count of pending (not purchased) items, scoped to the active
 /// inventory.
-// ignore: specify_nonobvious_property_types
-final pendingShoppingCountProvider = FutureProvider.autoDispose<int>((ref) {
-  final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
-  return db.getPendingShoppingCount(inventoryId: inventoryId);
-});
+final FutureProvider<int> pendingShoppingCountProvider =
+    FutureProvider.autoDispose<int>((ref) {
+      final db = ref.watch(databaseProvider);
+      final inventoryId = ref.watch(activeInventoryProvider);
+      return db.getPendingShoppingCount(inventoryId: inventoryId);
+    });
 
 /// Invalidates all shopping list providers.
 ///
@@ -295,8 +293,7 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
 
 /// Provides distinct product barcodes and names from the active inventory
 /// for the "From your pantry" suggestions in the add-to-shopping-list sheet.
-// ignore: specify_nonobvious_property_types
-final inventoryProductsProvider =
+final FutureProvider<List<Map<String, dynamic>>> inventoryProductsProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
       final db = ref.watch(databaseProvider);
       final inventoryId = ref.watch(activeInventoryProvider);

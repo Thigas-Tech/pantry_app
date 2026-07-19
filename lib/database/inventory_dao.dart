@@ -354,7 +354,7 @@ class InventoryDao {
 
   /// Returns weekly item-addition counts for the last [weeks] weeks.
   ///
-  /// Items without a `dateAdded` are excluded.
+  /// Items without a [InventoryItem.dateAdded] are excluded.
   Future<List<Map<String, dynamic>>> weeklyAdditions(
     Database db, {
     required int inventoryId,

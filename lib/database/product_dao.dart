@@ -204,7 +204,7 @@ class ProductDao {
 
   /// Deletes products with the given [source] value.
   ///
-  /// Called by `DatabaseHelper.clearCachedProducts` to remove only
+  /// Called by [DatabaseHelper.clearCachedProducts] to remove only
   /// API‑fetched products while preserving user‑entered records.
   Future<void> deleteBySource(Database db, String source) async {
     final count = await db.delete(

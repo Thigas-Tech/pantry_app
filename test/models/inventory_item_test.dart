@@ -1,6 +1,3 @@
-// the test doc comments tend to get too long
-// ignore_for_file: lines_longer_than_80_chars
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 
@@ -38,7 +35,8 @@ void main() {
     });
 
     test('defaults are applied when fields are missing', () {
-      /// Only the required [barcode] is supplied; all other fields use their defaults.
+      /// Only the required [barcode] is supplied; all other fields use
+      /// their defaults.
       final minimal = {'barcode': '456'};
       final item = InventoryItem.fromJson(minimal);
       expect(item.id, isNull);
@@ -52,7 +50,8 @@ void main() {
     });
 
     test('copyWith creates a modified copy', () {
-      /// The original item is untouched; a new instance is returned with the changes.
+      /// The original item is untouched; a new instance is returned with
+      /// the changes.
       const item = InventoryItem(barcode: '789', quantity: 3);
       final updated = item.copyWith(quantity: 5, location: 'freezer');
       expect(updated.quantity, 5);

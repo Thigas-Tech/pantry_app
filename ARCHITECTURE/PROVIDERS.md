@@ -34,3 +34,7 @@
 | `pendingShoppingCountProvider` | `FutureProvider` | Pending item count |
 | `storesProvider` | `FutureProvider` | Saved store names for autocomplete |
 | `photoServiceProvider` | `Provider` | Camera/gallery photo capture |
+| `firebaseCacheProvider` | `Provider` | Singleton `FirebaseCacheService` |
+| `inventoryProductsProvider` | `FutureProvider` | Distinct products from active inventory |
+| `authServiceProvider` | `Provider` | `AuthService` (FirebaseAuth or no-op) |
+| `authStateProvider` | `StreamProvider` | Reactive `AuthUser` stream |

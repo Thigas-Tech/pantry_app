@@ -3,10 +3,11 @@
 ```
 HomeScreen
 ├── AppBar (title, switcher, settings)
+├── QuickAddProduce (horizontal carousel of 8 common produce items)
 ├── ErrorView (loading/error states)
 ├── EmptyPantry (empty state with scan prompt)
 └── _InventoryList
-    ├── SearchBar (Autocomplete with image thumbnails)
+    ├── SearchBar (Autocomplete with image thumbnails, leaf icon for produce)
     ├── StockCountBadges (horizontal ListView.builder)
     ├── CategoryFilterChips (horizontal ListView.builder)
     ├── RefreshIndicator (pull-to-refresh)
@@ -33,7 +34,7 @@ AddProductScreen (manual entry when offline or barcode not found)
 
 SearchScreen
 ├── SearchBar (300ms debounce timer)
-├── ResultTile (product image or CircleAvatar fallback)
+├── ResultTile (product image or CircleAvatar fallback, leaf icon for produce)
 ├── Swipe-to-add (Dismissible, start-to-end)
 └── Long-press menu (add to inventory, copy barcode)
 
@@ -50,6 +51,7 @@ StatsScreen
 ScannerScreen
 ├── PopScope (confirmation dialog on back)
 ├── _MobileScannerView (camera + ScannerOverlayPainter)
+├── PLU code entry (numeric keypad for produce items)
 └── _ManualEntryView (text field + submit button)
 
 SettingsScreen
@@ -59,13 +61,14 @@ SettingsScreen
 ├── Expiring-soon threshold dialog
 ├── Manage Inventories link
 ├── Flush cache (API products + image cache)
-└── About (What's New changelog sheet)
+├── About (What's New changelog sheet)
+└── Sign out (Firebase Auth)
 
 ShoppingListScreen
 ├── AppBar (add-to-pantry button, clear-purchased, refresh)
 ├── PendingSection (items not yet purchased)
 │   ├── ShoppingItemTile (name, qty, price, store; swipe actions)
-│   └── SectionHeader with running total
+│   └── SectionHeader with per-currency running totals
 ├── PurchasedSection (items marked purchased)
 └── FAB -> AddToShoppingListSheet (search cached products or manual entry)
 

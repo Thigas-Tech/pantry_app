@@ -66,13 +66,15 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 ## 7. `agents_docs/*.md`
 
 | File | Staleness trigger |
-|---|---|
+|---|---|---|
 | `playstore.md` | CI/CD deploy workflow changed |
 | `play_console_later.md` | Play Console verification complete |
 | `emulator_instructions.md` | Smoke test script or AVD config changed |
 | `manual_testing_guide.md` | Smoke test, emulator script, or AVD config changed |
 | `FEATURE_FREEZE.md` | Feature freeze checkbox added or removed |
 | `wiki.md` | Wiki CI workflow changed |
+| `FIREBASE_CACHE_PLAN.md` | Architecture diagram changes, schema version bumped, new cache tier added |
+| `FIREBASE_CACHE_TODO.md` | Any Firebase-related feature or fix committed |
 
 ---
 
@@ -81,7 +83,7 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 These patterns reappear frequently. Search for them when auditing:
 
 - **Removed feature mentioned as current**: CSV import/export, Dio, `quality_gate.sh`, `exportData()`
-- **Non-existent provider listed**: `adServiceProvider`, `donationServiceProvider`, `firebaseServiceProvider`, `cloudBackupServiceProvider`, `backupStatusProvider`, `isProProvider`, `isAdFreeProvider`
+- **Non-existent provider listed**: `adServiceProvider`, `donationServiceProvider`, `firebaseServiceProvider`, `cloudBackupServiceProvider`, `backupStatusProvider`, `isProProvider`, `isAdFreeProvider` (note: `firebaseCacheProvider`, `authServiceProvider`, and `authStateProvider` now exist)
 - **Implemented feature marked `[ ]`**: Check `TODO.md` against actual source files
 - **Contradictory `[Unreleased]` entries**: Earlier changelog sections may describe the true current state
 - **Wrong dependency name**: `connectivity_plus` vs `internet_connection_checker`, `dio` vs `http`
