@@ -25,8 +25,9 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
-import 'package:pantry_app/services/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
+import '../services/mock_notification_service.dart';
 
 // ---------- Fakes -----------------------------------------------------------
 
@@ -45,7 +46,11 @@ class FakeSettingsNotifier extends SettingsNotifier {
   Settings build() => const Settings();
 }
 
-class MockNotificationService extends Mock implements NotificationService {}
+/// A fake with [Settings.notificationsEnabled] set to `false`.
+class FakeSettingsNotifierNotifsOff extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(notificationsEnabled: false);
+}
 
 // ---------- Tests -----------------------------------------------------------
 
@@ -106,6 +111,7 @@ void main() {
     final mockNotif = MockNotificationService();
     when(mockNotif.requestPermission).thenAnswer((_) async => true);
     when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+    when(mockNotif.canScheduleExactNotifications).thenAnswer((_) async => true);
 
     await pumpApp(
       tester,
@@ -186,6 +192,9 @@ void main() {
       final mockNotif = MockNotificationService();
       when(mockNotif.requestPermission).thenAnswer((_) async => true);
       when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+      when(
+        mockNotif.canScheduleExactNotifications,
+      ).thenAnswer((_) async => true);
       await pumpApp(
         tester,
         const SettingsScreen(),
@@ -267,6 +276,145 @@ void main() {
 
     expect(find.text("What's new"), findsOneWidget);
   });
+
+  /// Verifies toggling notifications ON shows rationale dialog first time.
+  testWidgets('notif toggle shows rationale dialog on first attempt', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+
+    final mockNotif = MockNotificationService();
+    when(mockNotif.requestPermission).thenAnswer((_) async => true);
+    when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+    when(mockNotif.canScheduleExactNotifications).thenAnswer((_) async => true);
+
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifierNotifsOff.new),
+        notificationServiceProvider.overrideWithValue(mockNotif),
+      ],
+    );
+
+    final switchFinder = find.byType(Switch);
+    // The second switch (at index 1) is the notifications switch.
+    // It starts OFF thanks to FakeSettingsNotifierNotifsOff.
+    await tester.tap(switchFinder.at(1));
+    await tester.pumpAndSettle();
+
+    // Rationale dialog should be shown.
+    expect(find.text('Notifications help you keep track'), findsOneWidget);
+    // requestPermission should NOT yet be called.
+    verifyNever(mockNotif.requestPermission);
+  });
+
+  /// Verifies that "Allow" in rationale dialog calls requestPermission.
+  testWidgets('rationale Allow calls requestPermission and shows snackbar', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+
+    final mockNotif = MockNotificationService();
+    when(mockNotif.requestPermission).thenAnswer((_) async => true);
+    when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+    when(mockNotif.canScheduleExactNotifications).thenAnswer((_) async => true);
+
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifierNotifsOff.new),
+        notificationServiceProvider.overrideWithValue(mockNotif),
+      ],
+    );
+
+    final switchFinder = find.byType(Switch);
+    await tester.tap(switchFinder.at(1));
+    await tester.pumpAndSettle();
+
+    // Tap "Allow"
+    await tester.tap(find.text('Allow'));
+    await tester.pumpAndSettle();
+
+    verify(mockNotif.requestPermission).called(1);
+    // Snackbar appears.
+    expect(find.text('Notifications enabled.'), findsOneWidget);
+  });
+
+  /// Verifies that "Not now" in rationale dialog skips requestPermission.
+  testWidgets('rationale Not now skips requestPermission', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+
+    final mockNotif = MockNotificationService();
+    when(mockNotif.requestPermission).thenAnswer((_) async => true);
+    when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+    when(mockNotif.canScheduleExactNotifications).thenAnswer((_) async => true);
+
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifierNotifsOff.new),
+        notificationServiceProvider.overrideWithValue(mockNotif),
+      ],
+    );
+
+    final switchFinder = find.byType(Switch);
+    await tester.tap(switchFinder.at(1));
+    await tester.pumpAndSettle();
+
+    // Tap "Not now"
+    await tester.tap(find.text('Not now'));
+    await tester.pumpAndSettle();
+
+    verifyNever(mockNotif.requestPermission);
+  });
+
+  /// Verifies toggling notifications ON again skips rationale and calls
+  /// requestPermission directly.
+  testWidgets(
+    'second toggle skips rationale calls requestPermission directly',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+
+      final mockNotif = MockNotificationService();
+      when(mockNotif.requestPermission).thenAnswer((_) async => true);
+      when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+      when(
+        mockNotif.canScheduleExactNotifications,
+      ).thenAnswer((_) async => true);
+
+      await pumpApp(
+        tester,
+        const SettingsScreen(),
+        overrides: [
+          themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+          settingsProvider.overrideWith(FakeSettingsNotifierNotifsOff.new),
+          notificationServiceProvider.overrideWithValue(mockNotif),
+        ],
+      );
+
+      // Pre-set the flag so rationale is skipped.
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notification_rationale_shown', true);
+
+      final switchFinder = find.byType(Switch);
+      await tester.tap(switchFinder.at(1));
+      await tester.pumpAndSettle();
+
+      // No rationale dialog.
+      expect(
+        find.text('Notifications help you keep track'),
+        findsNothing,
+      );
+      // requestPermission called directly.
+      verify(mockNotif.requestPermission).called(1);
+    },
+  );
 
   /// Verifies the "Send Feedback" tile is present.
   testWidgets('shows send feedback tile', (tester) async {

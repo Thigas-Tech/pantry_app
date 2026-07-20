@@ -2993,6 +2993,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lettuce'**
   String get produceLettuce;
+
+  /// No description provided for @exactAlarmsDeniedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled test notifications may be delayed because exact alarms are not granted. Grant it in Settings > Notifications > Schedule exact alarms.'**
+  String get exactAlarmsDeniedHint;
+
+  /// No description provided for @notificationRationaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications help you keep track'**
+  String get notificationRationaleTitle;
+
+  /// No description provided for @notificationRationaleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry uses notifications to:\n\n- Remind you when food is about to expire\n- Nudge you to add products regularly\n- Confirm that test notifications work\n\nYou can change this anytime in Settings.'**
+  String get notificationRationaleBody;
+
+  /// No description provided for @notificationRationaleAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get notificationRationaleAllow;
+
+  /// No description provided for @notificationRationaleNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notificationRationaleNotNow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

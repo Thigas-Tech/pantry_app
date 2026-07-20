@@ -70,12 +70,12 @@ void main() {
 
   late MockFlutterLocalNotificationsPlugin mockPlugin;
   late MockAndroidFlutterLocalNotificationsPlugin mockAndroidPlugin;
-  late NotificationService service;
+  late FlutterNotificationService service;
 
   setUp(() {
     mockPlugin = MockFlutterLocalNotificationsPlugin();
     mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
-    service = NotificationService(
+    service = FlutterNotificationService(
       plugin: mockPlugin,
       defaultLocation: tz.UTC,
     );
@@ -174,6 +174,27 @@ void main() {
       },
     );
 
+    test('creates expiry and general channels on initialize', () async {
+      when(
+        () => mockPlugin.initialize(
+          settings: any(named: 'settings'),
+          onDidReceiveNotificationResponse: any(
+            named: 'onDidReceiveNotificationResponse',
+          ),
+          onDidReceiveBackgroundNotificationResponse: any(
+            named: 'onDidReceiveBackgroundNotificationResponse',
+          ),
+        ),
+      ).thenAnswer((_) => Future.value(true));
+
+      await service.initialize();
+
+      verify(
+        () => mockAndroidPlugin.createNotificationChannel(any()),
+      ).called(2);
+      expect(service.initialized, isTrue);
+    });
+
     test('handles channel creation failure gracefully', () async {
       final failingAndroid = MockAndroidFlutterLocalNotificationsPlugin();
       when(
@@ -198,11 +219,10 @@ void main() {
       ).thenAnswer((_) => Future.value(true));
 
       await service.initialize();
-      // Channel failure is non-fatal; the service still initialises.
       expect(service.initialized, isTrue);
       verify(
         () => failingAndroid.createNotificationChannel(any()),
-      ).called(1);
+      ).called(2);
     });
   });
 
@@ -1055,6 +1075,144 @@ void main() {
 
       final result = await service.getLaunchDetails();
       expect(result, same(details));
+    });
+
+    test('returns null when plugin throws', () async {
+      when(
+        () => mockPlugin.getNotificationAppLaunchDetails(),
+      ).thenThrow(Exception('plugin error'));
+
+      final result = await service.getLaunchDetails();
+      expect(result, isNull);
+    });
+  });
+
+  group('showTestNotification', () {
+    test('calls plugin.show with id 0', () async {
+      when(
+        () => mockPlugin.show(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          notificationDetails: any(named: 'notificationDetails'),
+        ),
+      ).thenAnswer((_) => Future.value());
+
+      await service.showTestNotification();
+
+      verify(
+        () => mockPlugin.show(
+          id: 0,
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          notificationDetails: any(named: 'notificationDetails'),
+        ),
+      ).called(1);
+    });
+  });
+
+  group('canScheduleExactNotifications', () {
+    test('returns true when plugin reports true', () async {
+      when(
+        mockAndroidPlugin.canScheduleExactNotifications,
+      ).thenAnswer((_) => Future.value(true));
+
+      final result = await service.canScheduleExactNotifications();
+      expect(result, isTrue);
+    });
+
+    test('returns false when plugin reports false', () async {
+      when(
+        mockAndroidPlugin.canScheduleExactNotifications,
+      ).thenAnswer((_) => Future.value(false));
+
+      final result = await service.canScheduleExactNotifications();
+      expect(result, isFalse);
+    });
+
+    test('returns null when not on Android', () async {
+      when(
+        () => mockPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >(),
+      ).thenReturn(null);
+
+      final result = await service.canScheduleExactNotifications();
+      expect(result, isNull);
+    });
+
+    test('handles exception gracefully', () async {
+      when(
+        mockAndroidPlugin.canScheduleExactNotifications,
+      ).thenThrow(Exception('check failed'));
+
+      final result = await service.canScheduleExactNotifications();
+      expect(result, isNull);
+    });
+  });
+
+  group('scheduleTestNotification', () {
+    test('calls plugin.zonedSchedule with id 1', () async {
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenAnswer((_) => Future.value());
+      when(
+        mockAndroidPlugin.canScheduleExactNotifications,
+      ).thenAnswer((_) => Future.value(true));
+
+      await service.scheduleTestNotification();
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: 1,
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
+    });
+
+    test('uses inexact when exact alarms unavailable', () async {
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenAnswer((_) => Future.value());
+      when(
+        mockAndroidPlugin.canScheduleExactNotifications,
+      ).thenAnswer((_) => Future.value(false));
+
+      await service.scheduleTestNotification();
+
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: 1,
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          payload: any(named: 'payload'),
+        ),
+      ).called(1);
     });
   });
 }

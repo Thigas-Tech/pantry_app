@@ -29,6 +29,7 @@ import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
+import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/services/notification_background_handler.dart';
@@ -42,6 +43,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// transitions, and passed to [MaterialApp.scaffoldMessengerKey].
 final GlobalKey<ScaffoldMessengerState> rootMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
+
+/// Global navigator key for notification-tap deep linking.
+///
+/// Used by [_handleNotificationTap] to push [ProductDetailScreen] when the
+/// user taps a notification. This key is passed to [MaterialApp.navigatorKey]
+/// so that routes can be pushed from outside the widget tree.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// The single [ProviderContainer] shared by the entire app.
 ///
@@ -158,6 +166,7 @@ Future<void> main() async {
 /// Runs non-critical post-init tasks sequentially with delays to avoid
 /// janking the first few frames.
 void _runPostInitTasks() {
+  unawaited(_handleColdStartNotification());
   unawaited(_scheduleCacheRefresh());
   unawaited(
     Future<void>.delayed(
@@ -198,6 +207,15 @@ void _runPostInitTasks() {
 /// later from Settings.
 Future<void> _requestNotificationPermission() async {
   try {
+    final prefs = await SharedPreferences.getInstance();
+    final rationaleShown =
+        prefs.getBool('notification_rationale_shown') == true;
+    if (!rationaleShown) {
+      logInfo(
+        'Rationale not yet shown — deferring permission request to Settings',
+      );
+      return;
+    }
     final notifService = appContainer.read(notificationServiceProvider);
     if (!notifService.initialized) {
       logWarning('Cannot request permission — notification service not ready');
@@ -215,6 +233,30 @@ Future<void> _requestNotificationPermission() async {
     }
   } on Exception catch (e) {
     logWarning('Notification permission request failed: $e');
+  }
+}
+
+/// Checks whether the app was launched by tapping a notification and, if so,
+/// navigates to the product detail screen.
+///
+/// This handles cold-start deep links where the app is started by the system
+/// in response to a notification tap, before the widget tree is fully mounted.
+/// Runs after the first frame so the navigator is available.
+Future<void> _handleColdStartNotification() async {
+  try {
+    final notifService = appContainer.read(notificationServiceProvider);
+    final details = await notifService.getLaunchDetails();
+    if (details?.didNotificationLaunchApp != true) return;
+    final payload = details?.notificationResponse?.payload;
+    if (payload == null || payload.isEmpty) return;
+    if (payload == 'inactivity_reminder') return;
+
+    logInfo('Cold-start notification: payload=$payload');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_navigateToProduct(payload));
+    });
+  } on Exception catch (e) {
+    logWarning('Cold-start notification handling failed: $e');
   }
 }
 
@@ -387,7 +429,8 @@ Future<void> _refreshFirebaseCache() async {
 /// Handles a notification tap by navigating to the product detail screen.
 ///
 /// Reads the barcode from [NotificationResponse.payload] and looks up
-/// the product in the database.
+/// the product in the database. Inactivity reminders are ignored since
+/// they have no associated product.
 void _handleNotificationTap(
   NotificationResponse response,
 ) {
@@ -397,9 +440,42 @@ void _handleNotificationTap(
     return;
   }
 
+  if (payload == 'inactivity_reminder') {
+    logInfo('Notification tap for inactivity reminder — no navigation');
+    return;
+  }
+
   logInfo('Notification tap: payload=$payload, actionId=${response.actionId}');
-  // Deep-link handling is deferred to the notification tap callback in
-  // PantryShell, which has access to the Navigator context.
+  unawaited(_navigateToProduct(payload));
+}
+
+/// Looks up the product by [barcode] and navigates to its detail screen.
+Future<void> _navigateToProduct(String barcode) async {
+  final context = navigatorKey.currentContext;
+  if (context == null) {
+    logWarning('No navigator context for notification tap');
+    return;
+  }
+
+  try {
+    final db = DatabaseHelper();
+    final product = await db.getProduct(barcode);
+    if (product == null) {
+      logWarning('Product not found for barcode: $barcode');
+      if (!context.mounted) return;
+      SnackbarHelper.showInfo(context, 'Product not found');
+      return;
+    }
+
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ProductDetailScreen(product: product),
+      ),
+    );
+  } on Exception catch (e) {
+    logError('Failed to navigate to product from notification tap: $e');
+  }
 }
 
 /// Reschedules all expiry reminders for items with future expiry dates.
@@ -422,10 +498,8 @@ Future<void> _rescheduleNotifications() async {
       );
       items.addAll(invItems);
     }
-    final prefs = await SharedPreferences.getInstance();
-    final notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
-
-    if (!notificationsEnabled) {
+    final settings = appContainer.read(settingsProvider);
+    if (!settings.notificationsEnabled) {
       logInfo('Notifications disabled in settings, skipping reschedule');
       return;
     }
@@ -451,7 +525,7 @@ Future<void> _rescheduleNotifications() async {
       expiringTodayTitle: l10n.expiringToday,
       buildExpiringSoonBody: l10n.expiresTomorrow,
       buildExpiringTodayBody: l10n.expiresToday,
-      notificationsEnabled: notificationsEnabled,
+      notificationsEnabled: settings.notificationsEnabled,
     );
     logInfo('Notification reschedule completed');
   } on Exception catch (e) {
@@ -474,14 +548,9 @@ Future<void> _scheduleInactivityReminder() async {
     }
     final db = DatabaseHelper();
     final lastAddDateEpoch = await db.getLastAddDate();
-    final prefs = await SharedPreferences.getInstance();
-    final inactivityReminderEnabled =
-        prefs.getBool('inactivityReminderEnabled') ?? true;
-    final inactivityThresholdDays =
-        prefs.getInt('inactivityThresholdDays') ?? 10;
-    final notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
+    final settings = appContainer.read(settingsProvider);
 
-    if (!inactivityReminderEnabled) {
+    if (!settings.inactivityReminderEnabled) {
       logInfo('Inactivity reminder disabled in settings, skipping');
       return;
     }
@@ -494,12 +563,12 @@ Future<void> _scheduleInactivityReminder() async {
     );
     await notifService.scheduleInactivityReminder(
       lastAddDateEpoch: lastAddDateEpoch,
-      thresholdDays: inactivityThresholdDays,
+      thresholdDays: settings.inactivityThresholdDays,
       title: l10n.inactivityReminderTitle,
       buildBody: l10n.inactivityReminderBody,
       channelName: l10n.inactivityReminderChannelName,
       channelDescription: l10n.inactivityReminderChannelDescription,
-      notificationsEnabled: notificationsEnabled,
+      notificationsEnabled: settings.notificationsEnabled,
     );
     logInfo('Inactivity reminder scheduling completed');
   } on Exception catch (e) {
@@ -545,6 +614,7 @@ class PantryApp extends ConsumerWidget {
 
         return MaterialApp(
           title: 'Pantry',
+          navigatorKey: navigatorKey,
           scaffoldMessengerKey: rootMessengerKey,
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),

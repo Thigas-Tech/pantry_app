@@ -1564,6 +1564,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get produceLettuce => 'Alface';
+
+  @override
+  String get exactAlarmsDeniedHint => 'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
+
+  @override
+  String get notificationRationaleTitle => 'Notificações ajudam você a acompanhar';
+
+  @override
+  String get notificationRationaleBody => 'O Pantry usa notificações para:\n\n- Lembrar quando os alimentos estão perto de vencer\n- Lembrar de adicionar produtos regularmente\n- Confirmar que notificações de teste funcionam\n\nVocê pode mudar isso a qualquer momento em Configurações.';
+
+  @override
+  String get notificationRationaleAllow => 'Permitir';
+
+  @override
+  String get notificationRationaleNotNow => 'Agora não';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -3096,4 +3111,19 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get produceLettuce => 'Alface';
+
+  @override
+  String get exactAlarmsDeniedHint => 'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
+
+  @override
+  String get notificationRationaleTitle => 'Notificações ajudam você a acompanhar';
+
+  @override
+  String get notificationRationaleBody => 'O Pantry usa notificações para:\n\n- Lembrar quando os alimentos estão perto de vencer\n- Lembrar de adicionar produtos regularmente\n- Confirmar que notificações de teste funcionam\n\nVocê pode mudar isso a qualquer momento em Configurações.';
+
+  @override
+  String get notificationRationaleAllow => 'Permitir';
+
+  @override
+  String get notificationRationaleNotNow => 'Agora não';
 }
