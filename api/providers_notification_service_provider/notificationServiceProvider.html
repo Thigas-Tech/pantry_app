@@ -54,16 +54,16 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_notification_service/NotificationService-class.html">NotificationService</a></span>&gt;</span>
+          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_notification_service_interface/NotificationService-class.html">NotificationService</a></span>&gt;</span>
           <span class="name ">notificationServiceProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
         </section>
         
 <section class="desc markdown">
-  <p>Provides the <a href="../services_notification_service/NotificationService-class.html">NotificationService</a> instance.</p>
+  <p>Provides the <a href="../services_notification_service_interface/NotificationService-class.html">NotificationService</a> instance.</p>
 <p>The service is created immediately but initialization
-(<a href="../services_notification_service/NotificationService/initialize.html">NotificationService.initialize</a>) must be called separately at app
+(<a href="../services_notification_service_interface/NotificationService/initialize.html">NotificationService.initialize</a>) must be called separately at app
 startup (see <code>main.dart</code>) because it requires platform channels.</p>
 </section>
 
@@ -71,7 +71,7 @@ startup (see <code>main.dart</code>) because it requires platform channels.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">final notificationServiceProvider = Provider&lt;NotificationService&gt;((ref) {
-  return NotificationService();
+  return FlutterNotificationService();
 });</code></pre>
 </section>
 

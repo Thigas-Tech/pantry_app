@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the FlutterNotificationService class from the notification_service library, for the Dart programming language.">
+  <title>FlutterNotificationService class - notification_service library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_notification_service/">services&#47;notification_service.dart</a></li>
+    <li class="self-crumb">FlutterNotificationService class</li>
+  </ol>
+  <div class="self-name">FlutterNotificationService</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_notification_service&#47;services_notification_service-library-sidebar.html"
+    data-below-sidebar="services_notification_service&#47;FlutterNotificationService-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">FlutterNotificationService</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Manages local notifications for expiry and inactivity reminders.</p>
+<p>Designed for <strong>Android</strong> (and ready for iOS when that platform is added).
+Desktop and web are not supported for scheduled notifications.</p>
+<h2 id="timezone-handling">Timezone handling</h2>
+<p>Uses flutter_timezone to query the device's IANA timezone identifier
+and the timezone package for <a href="https://pub.dev/documentation/timezone/0.11.1/timezone/TZDateTime-class.html">tz.TZDateTime</a> math. The combination
+provides reliable timezone resolution on all platforms without the
+fragile <a href="https://api.flutter.dev/flutter/dart-core/DateTime/timeZoneName.html">DateTime.timeZoneName</a> workaround.</p>
+<h2 id="notification-ids">Notification IDs</h2>
+<p>Each inventory item can have up to two scheduled notifications:</p>
+<ul>
+<li>ID = <code>itemId * 2</code>      -&gt; "Expiring soon" (1 day before)</li>
+<li>ID = <code>itemId * 2 + 1</code>  -&gt; "Expiring today" (on the expiry day)</li>
+</ul>
+<p>The ID scheme uses <code>itemId * 2</code> instead of <a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a> to guarantee
+positivity (required by Android) and avoid collisions between items
+that share a barcode.</p>
+<h2 id="channel">Channel</h2>
+<p>All expiry reminders use <code>'expiry_channel'</code>, created explicitly during
+<a href="../services_notification_service/FlutterNotificationService/initialize.html">initialize</a> with <a href="https://pub.dev/documentation/flutter_local_notifications/22.0.1/flutter_local_notifications/Importance.html">Importance.high</a> and
+<a href="https://pub.dev/documentation/flutter_local_notifications/22.0.1/flutter_local_notifications/AndroidNotificationCategory.html">AndroidNotificationCategory.reminder</a>.</p>
+<h2 id="time-of-day">Time-of-day</h2>
+<p>Notifications fire at 9:00 AM on the reminder day rather than at
+midnight. Most users check their pantry in the morning, and a 9 AM
+notification is more useful than one at midnight.</p>
+<p>See also:</p>
+<ul>
+<li><a href="https://pub.dev/packages/flutter_local_notifications">flutter_local_notifications</a>
+— the underlying plugin.</li>
+<li><a href="https://pub.dev/packages/flutter_timezone">flutter_timezone</a>
+— device IANA timezone identifier.</li>
+</ul>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+
+        
+  <dt>Implemented types</dt>
+  <dd>
+    <ul class="comma-separated clazz-relationships">
+        <li><a href="../services_notification_service_interface/NotificationService-class.html">NotificationService</a></li>
+    </ul>
+  </dd>
+        
+
+
+        
+        
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="FlutterNotificationService.new" class="callable">
+          <span class="name"><a href="../services_notification_service/FlutterNotificationService/FlutterNotificationService.html">FlutterNotificationService</a></span><span class="signature">({<span class="parameter" id="param-plugin"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_local_notifications/22.0.1/flutter_local_notifications/FlutterLocalNotificationsPlugin-class.html">FlutterLocalNotificationsPlugin</a>?</span> <span class="parameter-name">plugin</span>, </span><span class="parameter" id="param-defaultLocation"><span class="type-annotation"><a href="https://pub.dev/documentation/timezone/0.11.1/timezone/Location-class.html">Location</a>?</span> <span class="parameter-name">defaultLocation</span></span>})</span>
+        </dt>
+        <dd>
+          Creates a <a href="../services_notification_service/FlutterNotificationService-class.html">FlutterNotificationService</a> that uses the given <code>plugin</code>.
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="initialized" class="property">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/initialized.html">initialized</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd>
+  Whether the service has been successfully initialized.
+  <div class="features"><span class="feature">no setter</span><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="areNotificationsEnabled" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/areNotificationsEnabled.html">areNotificationsEnabled</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Checks whether system notifications are currently enabled.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="cancelAllReminders" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/cancelAllReminders.html">cancelAllReminders</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Cancels all pending notification requests.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="cancelInactivityReminder" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/cancelInactivityReminder.html">cancelInactivityReminder</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Cancels the daily inactivity reminder.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="cancelReminders" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/cancelReminders.html">cancelReminders</a></span><span class="signature">(<wbr><span class="parameter" id="cancelReminders-param-itemId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">itemId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Cancels both notifications associated with the given <code>itemId</code>.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="canScheduleExactNotifications" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/canScheduleExactNotifications.html">canScheduleExactNotifications</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Whether the device can schedule exact-timing notifications.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="ensureInactivityChannel" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/ensureInactivityChannel.html">ensureInactivityChannel</a></span><span class="signature">(<wbr>{<span class="parameter" id="ensureInactivityChannel-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;Inactivity reminders&#39;</span>, </span><span class="parameter" id="ensureInactivityChannel-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Reminds you to add products regularly&#39;</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Creates the <code>inactivity_channel</code> notification channel.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="ensureNotificationChannel" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/ensureNotificationChannel.html">ensureNotificationChannel</a></span><span class="signature">(<wbr>{<span class="parameter" id="ensureNotificationChannel-param-channelId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelId</span> = <span class="default-value">&#39;expiry_channel&#39;</span>, </span><span class="parameter" id="ensureNotificationChannel-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;Expiry reminders&#39;</span>, </span><span class="parameter" id="ensureNotificationChannel-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Warns about expiring food&#39;</span>, </span><span class="parameter" id="ensureNotificationChannel-param-importance"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_local_notifications/22.0.1/flutter_local_notifications/Importance.html">Importance</a></span> <span class="parameter-name">importance</span> = <span class="default-value">Importance.high</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Creates a notification channel with the given <code>channelId</code>.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="getLaunchDetails" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/getLaunchDetails.html">getLaunchDetails</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/flutter_local_notifications_platform_interface/12.0.0/flutter_local_notifications_platform_interface/NotificationAppLaunchDetails-class.html">NotificationAppLaunchDetails</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns whether the app was launched by tapping a notification.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="initialize" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/initialize.html">initialize</a></span><span class="signature">(<wbr>{<span class="parameter" id="initialize-param-onDidReceiveResponse"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_local_notifications_platform_interface/12.0.0/flutter_local_notifications_platform_interface/DidReceiveNotificationResponseCallback.html">DidReceiveNotificationResponseCallback</a>?</span> <span class="parameter-name">onDidReceiveResponse</span>, </span><span class="parameter" id="initialize-param-onDidReceiveBackgroundResponse"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_local_notifications_platform_interface/12.0.0/flutter_local_notifications_platform_interface/DidReceiveBackgroundNotificationResponseCallback.html">DidReceiveBackgroundNotificationResponseCallback</a>?</span> <span class="parameter-name">onDidReceiveBackgroundResponse</span>, </span><span class="parameter" id="initialize-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;Expiry reminders&#39;</span>, </span><span class="parameter" id="initialize-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Warns about expiring food&#39;</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Initializes the notification plugin with tap handlers.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="requestPermission" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/requestPermission.html">requestPermission</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Requests POST_NOTIFICATIONS permission on Android 13+.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="rescheduleAllItems" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/rescheduleAllItems.html">rescheduleAllItems</a></span><span class="signature">(<wbr><span class="parameter" id="rescheduleAllItems-param-items"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span>&gt;</span></span> <span class="parameter-name">items</span>, {</span><span class="parameter" id="rescheduleAllItems-param-expiringSoonTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringSoonTitle</span>, </span><span class="parameter" id="rescheduleAllItems-param-expiringTodayTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringTodayTitle</span>, </span><span class="parameter" id="rescheduleAllItems-param-buildExpiringSoonBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringSoonBody</span>(<span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>), </span><span class="parameter" id="rescheduleAllItems-param-buildExpiringTodayBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringTodayBody</span>(<span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>), </span><span class="parameter" id="rescheduleAllItems-param-barcodeToName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span>?</span> <span class="parameter-name">barcodeToName</span>, </span><span class="parameter" id="rescheduleAllItems-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Reschedules expiry reminders for all given <code>items</code>.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="scheduleExpiryReminders" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/scheduleExpiryReminders.html">scheduleExpiryReminders</a></span><span class="signature">(<wbr><span class="parameter" id="scheduleExpiryReminders-param-item"><span class="type-annotation"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span> <span class="parameter-name">item</span>, {</span><span class="parameter" id="scheduleExpiryReminders-param-expiringSoonTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringSoonTitle</span>, </span><span class="parameter" id="scheduleExpiryReminders-param-expiringTodayTitle"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">expiringTodayTitle</span>, </span><span class="parameter" id="scheduleExpiryReminders-param-buildExpiringSoonBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringSoonBody</span>(<span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>), </span><span class="parameter" id="scheduleExpiryReminders-param-buildExpiringTodayBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildExpiringTodayBody</span>(<span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span></span>), </span><span class="parameter" id="scheduleExpiryReminders-param-productName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productName</span>, </span><span class="parameter" id="scheduleExpiryReminders-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;Expiry reminders&#39;</span>, </span><span class="parameter" id="scheduleExpiryReminders-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Warns about expiring food&#39;</span>, </span><span class="parameter" id="scheduleExpiryReminders-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Schedules two local notifications for <code>item</code>.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="scheduleInactivityReminder" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/scheduleInactivityReminder.html">scheduleInactivityReminder</a></span><span class="signature">(<wbr>{<span class="parameter" id="scheduleInactivityReminder-param-lastAddDateEpoch"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">lastAddDateEpoch</span>, </span><span class="parameter" id="scheduleInactivityReminder-param-thresholdDays"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">thresholdDays</span>, </span><span class="parameter" id="scheduleInactivityReminder-param-title"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span>, </span><span class="parameter" id="scheduleInactivityReminder-param-buildBody"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">buildBody</span>(<span class="parameter" id="param-days"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">days</span></span>), </span><span class="parameter" id="scheduleInactivityReminder-param-channelName"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span>, </span><span class="parameter" id="scheduleInactivityReminder-param-channelDescription"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span>, </span><span class="parameter" id="scheduleInactivityReminder-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Schedules a one-shot inactivity reminder.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="scheduleTestNotification" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/scheduleTestNotification.html">scheduleTestNotification</a></span><span class="signature">(<wbr>{<span class="parameter" id="scheduleTestNotification-param-title"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span> = <span class="default-value">&#39;Scheduled Test&#39;</span>, </span><span class="parameter" id="scheduleTestNotification-param-body"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span> = <span class="default-value">&#39;This fired 5 seconds later.&#39;</span>, </span><span class="parameter" id="scheduleTestNotification-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;General Notifications&#39;</span>, </span><span class="parameter" id="scheduleTestNotification-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Standard app notifications&#39;</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Schedules a test notification for 5 seconds from now.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="showTestNotification" class="callable">
+  <span class="name"><a href="../services_notification_service/FlutterNotificationService/showTestNotification.html">showTestNotification</a></span><span class="signature">(<wbr>{<span class="parameter" id="showTestNotification-param-title"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span> = <span class="default-value">&#39;Test Successful&#39;</span>, </span><span class="parameter" id="showTestNotification-param-body"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span> = <span class="default-value">&#39;Immediate notifications are working!&#39;</span>, </span><span class="parameter" id="showTestNotification-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;General Notifications&#39;</span>, </span><span class="parameter" id="showTestNotification-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Standard app notifications&#39;</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sends an immediate test notification.
+  <div class="features"><span class="feature">override</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_notification_service/">notification_service</a></li>
+    <li class="self-crumb">FlutterNotificationService class</li>
+</ol>
+
+    <h5>notification_service library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.8+4
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

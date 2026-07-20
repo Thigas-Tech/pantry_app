@@ -159,6 +159,12 @@ Widget build(BuildContext context, WidgetRef ref) {
             ListTile(
               title: Text(l10n.testNotification),
               onTap: () async {
+                if (!context.mounted) return;
+                final proceed = await _showPermissionRationaleIfNeeded(
+                  context,
+                  l10n,
+                );
+                if (!proceed) return;
                 final notifService = ref.read(notificationServiceProvider);
                 final granted = await notifService.requestPermission();
                 if (granted != false) {
@@ -180,7 +186,29 @@ Widget build(BuildContext context, WidgetRef ref) {
             ),
             ListTile(
               title: Text(l10n.testScheduledNotification),
+              subtitle: FutureBuilder&lt;bool?&gt;(
+                future: ref
+                    .read(notificationServiceProvider)
+                    .canScheduleExactNotifications(),
+                builder: (context, snapshot) {
+                  if (snapshot.data == false) {
+                    return Text(
+                      l10n.exactAlarmsDeniedHint,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               onTap: () async {
+                if (!context.mounted) return;
+                final proceed = await _showPermissionRationaleIfNeeded(
+                  context,
+                  l10n,
+                );
+                if (!proceed) return;
                 final notifService = ref.read(notificationServiceProvider);
                 final granted = await notifService.requestPermission();
                 if (granted != false) {
@@ -206,6 +234,12 @@ Widget build(BuildContext context, WidgetRef ref) {
               onChanged: (value) async {
                 logInfo(&#39;Notifications toggled: $value&#39;);
                 if (value) {
+                  if (!context.mounted) return;
+                  final proceed = await _showPermissionRationaleIfNeeded(
+                    context,
+                    l10n,
+                  );
+                  if (!proceed) return;
                   final notifService = ref.read(
                     notificationServiceProvider,
                   );
@@ -219,6 +253,8 @@ Widget build(BuildContext context, WidgetRef ref) {
                     }
                     return;
                   }
+                  &#47;&#47; Reschedule all items when re-enabled
+                  unawaited(_rescheduleAllItems(ref, l10n));
                 } else {
                   final notifService = ref.read(
                     notificationServiceProvider,
@@ -248,6 +284,12 @@ Widget build(BuildContext context, WidgetRef ref) {
                   notificationServiceProvider,
                 );
                 if (value) {
+                  if (!context.mounted) return;
+                  final proceed = await _showPermissionRationaleIfNeeded(
+                    context,
+                    l10n,
+                  );
+                  if (!proceed) return;
                   final granted = await notifService.requestPermission();
                   if (granted == false) {
                     if (context.mounted) {
