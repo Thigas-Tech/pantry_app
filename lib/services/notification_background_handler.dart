@@ -1,5 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:pantry_app/services/notification_service.dart';
+import 'package:pantry_app/services/notification_service_interface.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// Top-level handler for background notification taps.

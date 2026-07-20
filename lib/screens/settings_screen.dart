@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -22,6 +24,7 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A screen where the user can adjust application preferences.
 ///
@@ -82,6 +85,12 @@ class SettingsScreen extends ConsumerWidget {
               ListTile(
                 title: Text(l10n.testNotification),
                 onTap: () async {
+                  if (!context.mounted) return;
+                  final proceed = await _showPermissionRationaleIfNeeded(
+                    context,
+                    l10n,
+                  );
+                  if (!proceed) return;
                   final notifService = ref.read(notificationServiceProvider);
                   final granted = await notifService.requestPermission();
                   if (granted != false) {
@@ -103,7 +112,29 @@ class SettingsScreen extends ConsumerWidget {
               ),
               ListTile(
                 title: Text(l10n.testScheduledNotification),
+                subtitle: FutureBuilder<bool?>(
+                  future: ref
+                      .read(notificationServiceProvider)
+                      .canScheduleExactNotifications(),
+                  builder: (context, snapshot) {
+                    if (snapshot.data == false) {
+                      return Text(
+                        l10n.exactAlarmsDeniedHint,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
                 onTap: () async {
+                  if (!context.mounted) return;
+                  final proceed = await _showPermissionRationaleIfNeeded(
+                    context,
+                    l10n,
+                  );
+                  if (!proceed) return;
                   final notifService = ref.read(notificationServiceProvider);
                   final granted = await notifService.requestPermission();
                   if (granted != false) {
@@ -129,6 +160,12 @@ class SettingsScreen extends ConsumerWidget {
                 onChanged: (value) async {
                   logInfo('Notifications toggled: $value');
                   if (value) {
+                    if (!context.mounted) return;
+                    final proceed = await _showPermissionRationaleIfNeeded(
+                      context,
+                      l10n,
+                    );
+                    if (!proceed) return;
                     final notifService = ref.read(
                       notificationServiceProvider,
                     );
@@ -142,6 +179,8 @@ class SettingsScreen extends ConsumerWidget {
                       }
                       return;
                     }
+                    // Reschedule all items when re-enabled
+                    unawaited(_rescheduleAllItems(ref, l10n));
                   } else {
                     final notifService = ref.read(
                       notificationServiceProvider,
@@ -171,6 +210,12 @@ class SettingsScreen extends ConsumerWidget {
                     notificationServiceProvider,
                   );
                   if (value) {
+                    if (!context.mounted) return;
+                    final proceed = await _showPermissionRationaleIfNeeded(
+                      context,
+                      l10n,
+                    );
+                    if (!proceed) return;
                     final granted = await notifService.requestPermission();
                     if (granted == false) {
                       if (context.mounted) {
@@ -804,6 +849,73 @@ class SettingsScreen extends ConsumerWidget {
         SnackbarHelper.showError(context, l10n.flushCacheFailed);
       }
     }
+  }
+
+  /// Reschedules all expiry reminders for every inventory item.
+  Future<void> _rescheduleAllItems(
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    try {
+      final notifService = ref.read(notificationServiceProvider);
+      final db = DatabaseHelper();
+      final database = await db.database;
+      final inventories = await db.getInventories();
+      final items = <InventoryItem>[];
+      for (final inv in inventories) {
+        final invItems = await db.inventoryDao.list(
+          database,
+          inventoryId: inv['id'] as int,
+        );
+        items.addAll(invItems);
+      }
+      final settings = ref.read(settingsProvider);
+      await notifService.rescheduleAllItems(
+        items,
+        expiringSoonTitle: l10n.expiringSoon,
+        expiringTodayTitle: l10n.expiringToday,
+        buildExpiringSoonBody: l10n.expiresTomorrow,
+        buildExpiringTodayBody: l10n.expiresToday,
+        notificationsEnabled: settings.notificationsEnabled,
+      );
+    } on Exception catch (e) {
+      logError('Failed to reschedule notifications on toggle: $e');
+    }
+  }
+
+  /// Shows the notification rationale dialog on first permission request.
+  ///
+  /// Returns `true` if the user tapped "Allow" (or rationale was already
+  /// shown), `false` if the user tapped "Not now".
+  Future<bool> _showPermissionRationaleIfNeeded(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyShown = prefs.getBool('notification_rationale_shown') == true;
+    if (alreadyShown) return true;
+    if (!context.mounted) return false;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.notificationRationaleTitle),
+        content: Text(l10n.notificationRationaleBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.notificationRationaleNotNow),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.notificationRationaleAllow),
+          ),
+        ],
+      ),
+    );
+
+    await prefs.setBool('notification_rationale_shown', true);
+    return result ?? false;
   }
 
   /// Shows a dialog explaining that notification permission was denied

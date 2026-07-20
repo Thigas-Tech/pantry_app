@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/services/notification_service_interface.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -50,9 +51,9 @@ const _inactivityReminderId = 999_999_001;
 ///   — the underlying plugin.
 /// - [flutter_timezone](https://pub.dev/packages/flutter_timezone)
 ///   — device IANA timezone identifier.
-class NotificationService {
-  /// Creates a [NotificationService] that uses the given [plugin].
-  NotificationService({
+class FlutterNotificationService implements NotificationService {
+  /// Creates a [FlutterNotificationService] that uses the given [plugin].
+  FlutterNotificationService({
     FlutterLocalNotificationsPlugin? plugin,
     this._defaultLocation,
   }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
@@ -62,24 +63,10 @@ class NotificationService {
   bool _initialized = false;
   bool _rescheduling = false;
 
-  /// Whether the service has been successfully initialized.
+  @override
   bool get initialized => _initialized;
 
-  /// Initializes the notification plugin with tap handlers.
-  ///
-  /// Must be called once at app startup, before any notification is
-  /// scheduled. Creates the [AndroidNotificationChannel] and registers
-  /// the response callbacks for tap handling.
-  ///
-  /// See also:
-  /// - [FlutterLocalNotificationsPlugin.initialize] — the underlying plugin
-  ///   method.
-  ///
-  /// [onDidReceiveResponse] is fired on the main isolate when the user
-  /// taps a notification. [onDidReceiveBackgroundResponse] is fired in a
-  /// background isolate for actions that do not show the UI.
-  ///
-  /// Safe to call multiple times — subsequent calls are no-ops.
+  @override
   Future<void> initialize({
     DidReceiveNotificationResponseCallback? onDidReceiveResponse,
     DidReceiveBackgroundNotificationResponseCallback?
@@ -100,15 +87,16 @@ class NotificationService {
     tz.setLocalLocation(location);
     logInfo('Timezone set to ${location.name}');
 
-    try {
-      await ensureNotificationChannel(
-        channelName: channelName,
-        channelDescription: channelDescription,
-      );
-    } on Exception catch (e) {
-      logWarning('Failed to create notification channel: $e');
-      return;
-    }
+    await ensureNotificationChannel(
+      channelName: channelName,
+      channelDescription: channelDescription,
+    );
+    await ensureNotificationChannel(
+      channelId: 'pantry_general_channel',
+      channelName: 'General Notifications',
+      channelDescription: 'Standard app notifications',
+      importance: Importance.max,
+    );
 
     const androidSettings = AndroidInitializationSettings('ic_notification');
     const iosSettings = DarwinInitializationSettings();
@@ -130,11 +118,7 @@ class NotificationService {
     }
   }
 
-  /// Creates the `inactivity_channel` notification channel with
-  /// [Importance.low] and [AndroidNotificationCategory.recommendation].
-  ///
-  /// Uses [AndroidNotificationChannelAction.createIfNotExists] so existing
-  /// user-configured channel settings are never overwritten.
+  @override
   Future<void> ensureInactivityChannel({
     String channelName = 'Inactivity reminders',
     String channelDescription = 'Reminds you to add products regularly',
@@ -160,21 +144,18 @@ class NotificationService {
     }
   }
 
-  /// Creates the `expiry_channel` notification channel.
-  ///
-  /// Uses [AndroidNotificationChannelAction.createIfNotExists] so that
-  /// existing user-configured channel settings are never overwritten.
-  /// Should be called during [initialize] before any notification is
-  /// scheduled.
+  @override
   Future<void> ensureNotificationChannel({
+    String channelId = 'expiry_channel',
     String channelName = 'Expiry reminders',
     String channelDescription = 'Warns about expiring food',
+    Importance importance = Importance.high,
   }) async {
     final channel = AndroidNotificationChannel(
-      'expiry_channel',
+      channelId,
       channelName,
       description: channelDescription,
-      importance: Importance.high,
+      importance: importance,
     );
 
     final androidPlugin = _plugin
@@ -185,20 +166,13 @@ class NotificationService {
 
     try {
       await androidPlugin.createNotificationChannel(channel);
-      logInfo('Notification channel created/verified');
+      logInfo('Notification channel ($channelId) created/verified');
     } on Exception catch (e) {
-      logWarning('Failed to create notification channel: $e');
+      logWarning('Failed to create notification channel ($channelId): $e');
     }
   }
 
-  /// Schedules two local notifications for [item].
-  ///
-  /// [productName] is displayed in the notification body. When `null` or
-  /// empty, falls back to the item barcode so the user can still identify
-  /// the expiring product.
-  ///
-  /// Skips scheduling if notifications are disabled or if the item
-  /// has no expiry date or the expiry date is in the past.
+  @override
   Future<void> scheduleExpiryReminders(
     InventoryItem item, {
     required String expiringSoonTitle,
@@ -257,7 +231,6 @@ class NotificationService {
 
     final oneDayBefore = expiry.subtract(const Duration(days: 1));
 
-    // "Expiring soon" — 9 AM one day before expiry
     final expiringSoonDate = _toMorningTZDateTime(oneDayBefore);
     if (expiringSoonDate.isAfter(now)) {
       try {
@@ -285,7 +258,6 @@ class NotificationService {
       );
     }
 
-    // "Expiring today" — 9 AM on the expiry day
     final expiringTodayDate = _toMorningTZDateTime(expiry);
     if (expiringTodayDate.isAfter(now)) {
       try {
@@ -315,7 +287,7 @@ class NotificationService {
     }
   }
 
-  /// Cancels both notifications associated with the given [itemId].
+  @override
   Future<void> cancelReminders(int itemId) async {
     logInfo('Cancelling reminders for item $itemId');
     try {
@@ -327,7 +299,7 @@ class NotificationService {
     }
   }
 
-  /// Cancels all pending notification requests.
+  @override
   Future<void> cancelAllReminders() async {
     logInfo('Cancelling all reminder notifications');
     try {
@@ -338,7 +310,6 @@ class NotificationService {
     }
   }
 
-  /// The standard notification channel details
   NotificationDetails _getChannelDetails({
     String channelName = 'General Notifications',
     String channelDescription = 'Standard app notifications',
@@ -355,7 +326,7 @@ class NotificationService {
     );
   }
 
-  /// Sends an immediate test notification.
+  @override
   Future<void> showTestNotification({
     String title = 'Test Successful',
     String body = 'Immediate notifications are working!',
@@ -373,7 +344,7 @@ class NotificationService {
     );
   }
 
-  /// Schedules a test notification for 5 seconds from now.
+  @override
   Future<void> scheduleTestNotification({
     String title = 'Scheduled Test',
     String body = 'This fired 5 seconds later.',
@@ -384,6 +355,17 @@ class NotificationService {
       tz.local,
     ).add(const Duration(seconds: 5));
 
+    final exactAvailable = await canScheduleExactNotifications();
+    final scheduleMode = (exactAvailable == true)
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
+    if (exactAvailable == false) {
+      logWarning(
+        'Exact alarms not available — test notification will use inexact '
+        'scheduling',
+      );
+    }
+
     await _plugin.zonedSchedule(
       id: 1,
       title: title,
@@ -393,22 +375,11 @@ class NotificationService {
         channelName: channelName,
         channelDescription: channelDescription,
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: scheduleMode,
     );
   }
 
-  /// Schedules a one-shot inactivity reminder for tomorrow at 9 AM if the
-  /// user has not added any product for [thresholdDays] or more.
-  ///
-  /// Pass `null` for [lastAddDateEpoch] when the inventory table is empty
-  /// (first launch) — no notification is scheduled. The reminder is rescheduled
-  /// on every app startup and whenever a new product is added.
-  ///
-  /// Uses a fixed ID ([_inactivityReminderId]) — calling this again replaces
-  /// any previously scheduled inactivity reminder.
-  ///
-  /// See also:
-  /// - [cancelInactivityReminder] to cancel the pending reminder.
+  @override
   Future<void> scheduleInactivityReminder({
     required int? lastAddDateEpoch,
     required int thresholdDays,
@@ -454,7 +425,6 @@ class NotificationService {
       return;
     }
 
-    // Schedule tomorrow at 9 AM
     final tomorrow = now.add(const Duration(days: 1));
     final scheduledDate = _toMorningTZDateTime(tomorrow);
 
@@ -488,11 +458,7 @@ class NotificationService {
     }
   }
 
-  /// Cancels the daily inactivity reminder associated with
-  /// [_inactivityReminderId].
-  ///
-  /// Safe to call even if no reminder is pending — the plugin ignores
-  /// cancellation of non-existent notifications.
+  @override
   Future<void> cancelInactivityReminder() async {
     logInfo('Cancelling inactivity reminder');
     try {
@@ -503,18 +469,7 @@ class NotificationService {
     }
   }
 
-  /// Reschedules expiry reminders for all given [items].
-  ///
-  /// Cancels all existing scheduled notifications first, then schedules
-  /// new ones for items with future expiry dates. This recovers from
-  /// device reboots, app updates, and timezone changes.
-  ///
-  /// [barcodeToName] is an optional map from barcode to human-readable
-  /// product name used in notification bodies. When a barcode is not in
-  /// the map the raw barcode is displayed as a fallback.
-  ///
-  /// Guards against concurrent calls with an internal lock.
-  /// Best-effort — individual scheduling failures are caught and logged.
+  @override
   Future<void> rescheduleAllItems(
     List<InventoryItem> items, {
     required String expiringSoonTitle,
@@ -560,11 +515,7 @@ class NotificationService {
     }
   }
 
-  /// Requests the `POST_NOTIFICATIONS` permission on Android 13+.
-  ///
-  /// Returns `true` if permission was granted, `false` if denied,
-  /// and `null` if the platform does not require permission handling
-  /// (desktop/web or Android < 13).
+  @override
   Future<bool?> requestPermission() async {
     logInfo('Requesting notification permission');
     final androidPlugin = _plugin
@@ -582,10 +533,23 @@ class NotificationService {
     return granted;
   }
 
-  /// Checks whether system notifications are currently enabled.
-  ///
-  /// Returns `true` if notifications are enabled, `false` if disabled,
-  /// and `null` if the platform does not support this check.
+  @override
+  Future<bool?> canScheduleExactNotifications() async {
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidPlugin == null) return null;
+
+    try {
+      return await androidPlugin.canScheduleExactNotifications();
+    } on Exception catch (e) {
+      logWarning('Failed to check exact alarm status: $e');
+      return null;
+    }
+  }
+
+  @override
   Future<bool?> areNotificationsEnabled() async {
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
@@ -601,9 +565,7 @@ class NotificationService {
     }
   }
 
-  /// Returns whether the app was launched by tapping a notification.
-  ///
-  /// Call this on startup to handle cold-start notification taps.
+  @override
   Future<NotificationAppLaunchDetails?> getLaunchDetails() async {
     try {
       return await _plugin.getNotificationAppLaunchDetails();
@@ -613,27 +575,117 @@ class NotificationService {
     }
   }
 
+  /// Common timezone abbreviations mapped to IANA identifiers.
+  static const _tzAbbreviations = <String, String>{
+    'BRT': 'America/Sao_Paulo',
+    'BRST': 'America/Sao_Paulo',
+    'EST': 'America/New_York',
+    'EDT': 'America/New_York',
+    'CST': 'America/Chicago',
+    'CDT': 'America/Chicago',
+    'MST': 'America/Denver',
+    'MDT': 'America/Denver',
+    'PST': 'America/Los_Angeles',
+    'PDT': 'America/Los_Angeles',
+    'CET': 'Europe/Berlin',
+    'CEST': 'Europe/Berlin',
+    'GMT': 'UTC',
+    'UTC': 'UTC',
+    'JST': 'Asia/Tokyo',
+    'IST': 'Asia/Kolkata',
+    'AEST': 'Australia/Sydney',
+    'AEDT': 'Australia/Sydney',
+    'NZST': 'Pacific/Auckland',
+    'NZDT': 'Pacific/Auckland',
+  };
+
   /// Resolves the device's local timezone using flutter_timezone.
-  ///
-  /// Falls back to [tz.UTC] if the plugin fails or the returned IANA
-  /// identifier is not present in the bundled timezone database.
   Future<tz.Location> _resolveDeviceTimezone() async {
     if (_defaultLocation != null) return _defaultLocation;
 
     try {
       final tzInfo = await FlutterTimezone.getLocalTimezone();
-      try {
-        return tz.getLocation(tzInfo.identifier);
-      } on tz.LocationNotFoundException {
-        logWarning(
-          'IANA identifier "${tzInfo.identifier}" not in timezone '
-          'database, falling back to UTC',
-        );
-        return tz.UTC;
-      }
+      final identifier = tzInfo.identifier;
+
+      final resolved = _resolveTimezoneIdentifier(identifier);
+      if (resolved != null) return resolved;
+
+      logWarning(
+        'Could not resolve timezone "$identifier", falling back to UTC',
+      );
+      return tz.UTC;
     } on Exception catch (e) {
       logWarning('Failed to resolve device timezone: $e, falling back to UTC');
       return tz.UTC;
+    }
+  }
+
+  /// Attempts to resolve [identifier] to a [tz.Location].
+  ///
+  /// Handles IANA names, common abbreviations, and raw UTC offset strings.
+  /// Returns `null` if the identifier cannot be resolved.
+  tz.Location? _resolveTimezoneIdentifier(String identifier) {
+    // 1. Try as a direct IANA identifier.
+    try {
+      return tz.getLocation(identifier);
+    } on tz.LocationNotFoundException {
+      // Continue to fallbacks.
+    }
+
+    // 2. Check abbreviation map.
+    final ianaName = _tzAbbreviations[identifier];
+    if (ianaName != null) {
+      try {
+        return tz.getLocation(ianaName);
+      } on tz.LocationNotFoundException {
+        // Continue to fallbacks.
+      }
+    }
+
+    // 3. Strip "GMT" prefix (common on some Android devices).
+    if (identifier.startsWith('GMT') || identifier.startsWith('gmt')) {
+      final offset = identifier.substring(3);
+      if (offset.isEmpty) return tz.UTC;
+      return _parseOffsetLocation(offset);
+    }
+
+    // 4. Try as a raw UTC offset (e.g. "-03", "+05:30", "UTC+8").
+    if (identifier.startsWith('UTC') || identifier.startsWith('utc')) {
+      final offset = identifier.substring(3);
+      if (offset.isEmpty) return tz.UTC;
+      return _parseOffsetLocation(offset);
+    }
+
+    return null;
+  }
+
+  /// Parses a UTC offset string like "-03", "+05:30", or "8" and returns
+  /// a [tz.Location] with the fixed offset.
+  tz.Location? _parseOffsetLocation(String offset) {
+    try {
+      final cleaned = offset.trim();
+      final negative = cleaned.startsWith('-');
+      final parts = cleaned
+          .replaceFirst(RegExp('^[+-]'), '')
+          .split(':')
+          .map((s) => int.tryParse(s) ?? 0)
+          .toList();
+      final hours = parts.isNotEmpty ? parts[0] : 0;
+      final minutes = parts.length > 1 ? parts[1] : 0;
+      final totalMinutes = (hours * 60 + minutes) * (negative ? -1 : 1);
+      final offsetDuration = Duration(minutes: totalMinutes);
+      final sign = negative ? '-' : '+';
+      final locationName =
+          'UTC$sign$hours:${minutes.toString().padLeft(2, '0')}';
+      return tz.Location(
+        locationName,
+        [],
+        [],
+        [tz.TimeZone(offsetDuration, isDst: false, abbreviation: locationName)],
+      );
+    } on Exception catch (e) {
+      logWarning('Failed to parse UTC offset "$offset": $e');
+      return null;
     }
   }
 

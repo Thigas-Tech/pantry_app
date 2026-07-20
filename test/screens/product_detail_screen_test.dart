@@ -43,11 +43,11 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
-import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import '../helpers/pump_app.dart';
+import '../services/mock_notification_service.dart';
 
 // ---------- Test data -------------------------------------------------------
 
@@ -169,8 +169,6 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 // ---------- Mocks -----------------------------------------------------------
 
 class MockProductRepository extends Mock implements ProductRepository {}
-
-class MockNotificationService extends Mock implements NotificationService {}
 
 class MockProductSubmissionService extends Mock
     implements ProductSubmissionService {}

@@ -1564,4 +1564,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get produceLettuce => 'Lettuce';
+
+  @override
+  String get exactAlarmsDeniedHint => 'Scheduled test notifications may be delayed because exact alarms are not granted. Grant it in Settings > Notifications > Schedule exact alarms.';
+
+  @override
+  String get notificationRationaleTitle => 'Notifications help you keep track';
+
+  @override
+  String get notificationRationaleBody => 'Pantry uses notifications to:\n\n- Remind you when food is about to expire\n- Nudge you to add products regularly\n- Confirm that test notifications work\n\nYou can change this anytime in Settings.';
+
+  @override
+  String get notificationRationaleAllow => 'Allow';
+
+  @override
+  String get notificationRationaleNotNow => 'Not now';
 }

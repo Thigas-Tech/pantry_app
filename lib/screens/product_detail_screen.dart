@@ -23,7 +23,6 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
-import 'package:pantry_app/services/notification_service.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -70,7 +69,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// ## Notifications
 ///
 /// After an item is created or updated,
-/// [NotificationService.scheduleExpiryReminders] is called. When an item is
+/// expiry reminders are scheduled. When an item is
 /// deleted, the corresponding reminders are cancelled.
 class ProductDetailScreen extends ConsumerStatefulWidget {
   /// Creates a [ProductDetailScreen] for the given [product].

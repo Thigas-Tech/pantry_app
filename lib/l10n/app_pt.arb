@@ -665,5 +665,10 @@
   "producePotato": "Batata",
   "produceCarrot": "Cenoura",
   "produceOnion": "Cebola",
-  "produceLettuce": "Alface"
+  "produceLettuce": "Alface",
+  "exactAlarmsDeniedHint": "Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.",
+  "notificationRationaleTitle": "Notificações ajudam você a acompanhar",
+  "notificationRationaleBody": "O Pantry usa notificações para:\n\n- Lembrar quando os alimentos estão perto de vencer\n- Lembrar de adicionar produtos regularmente\n- Confirmar que notificações de teste funcionam\n\nVocê pode mudar isso a qualquer momento em Configurações.",
+  "notificationRationaleAllow": "Permitir",
+  "notificationRationaleNotNow": "Agora não"
 }
