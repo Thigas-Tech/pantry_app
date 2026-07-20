@@ -2172,6 +2172,12 @@ abstract class AppLocalizations {
   /// **'Enter a valid price amount'**
   String get invalidPriceAmount;
 
+  /// No description provided for @apiSearchWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch all online results. Some products may be missing.'**
+  String get apiSearchWarning;
+
   /// No description provided for @dismiss.
   ///
   /// In en, this message translates to:

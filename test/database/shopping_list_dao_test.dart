@@ -470,5 +470,106 @@ void main() {
       expect(pendingInv1, isEmpty);
       expect(pendingInv2, isEmpty);
     });
+
+    group('insertOrMergeByBarcode FK fallback', () {
+      setUp(() async {
+        // Create referenced tables so FK constraints are enforceable.
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS products (
+            barcode TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            source TEXT NOT NULL DEFAULT 'api'
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS inventories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            created_at INTEGER NOT NULL
+          )
+        ''');
+        await db.execute('PRAGMA foreign_keys = ON');
+      });
+
+      test('insert with valid barcode and existing product succeeds', () async {
+        await db.insert('products', {
+          'barcode': '001',
+          'name': 'Existing Product',
+          'source': 'api',
+        });
+
+        final id = await dao.insertOrMergeByBarcode(
+          db,
+          const ShoppingItem(
+            name: 'Test',
+            barcode: '001',
+          ),
+        );
+
+        expect(id, isNonNegative);
+        final items = await dao.listAll(db);
+        expect(items.length, 1);
+        expect(items.first.barcode, '001');
+      });
+
+      test(
+        'insert with barcode missing from products table falls back to null',
+        () async {
+          // Do NOT insert the product row — FK will fail.
+          final id = await dao.insertOrMergeByBarcode(
+            db,
+            const ShoppingItem(
+              name: 'Orphan',
+              barcode: '999',
+            ),
+          );
+
+          expect(id, isNonNegative);
+          final items = await dao.listAll(db);
+          expect(items.length, 1);
+          expect(items.first.barcode, isNull);
+          expect(items.first.name, 'Orphan');
+        },
+      );
+
+      test('merge path still works after FK fallback', () async {
+        await db.insert('products', {
+          'barcode': '001',
+          'name': 'Existing',
+          'source': 'api',
+        });
+
+        // First insert (will succeed via FK)
+        await dao.insertOrMergeByBarcode(
+          db,
+          const ShoppingItem(
+            name: 'Item',
+            barcode: '001',
+          ),
+        );
+
+        // Delete the product row to simulate cache flush.
+        await db.delete('products', where: 'barcode = ?', whereArgs: ['001']);
+
+        // Second insert — FK fails, should fall back to null barcode.
+        final id = await dao.insertOrMergeByBarcode(
+          db,
+          const ShoppingItem(
+            name: 'Item',
+            barcode: '001',
+            quantity: 2,
+          ),
+        );
+
+        expect(id, isNonNegative);
+        // Should NOT merge because barcode was nulled.
+        final items = await dao.listAll(db);
+        expect(items.length, 2);
+        // The second item should have null barcode.
+        final newest = items.first;
+        expect(newest.barcode, isNull);
+        expect(newest.quantity, 2);
+      });
+    });
   });
 }

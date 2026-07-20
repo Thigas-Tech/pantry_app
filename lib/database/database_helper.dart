@@ -30,20 +30,23 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Eight tables are created on first launch (version 20):
+/// Nine tables are created on first launch (version 24):
 /// - `products` – product data fetched from Open Food Facts.
 /// - `inventories` – named pantries (e.g. "Home", "Work").
 /// - `inventory` – instances of products the user has added to a pantry.
 /// - `feedback_queue` – offline queue for GitHub issue reports.
+/// - `product_submission_queue` – offline queue for OFF product submissions.
 /// - `prices` – purchase price observations per barcode.
 /// - `shopping_list` – items the user intends to buy.
 /// - `stores` – saved store names for autocomplete.
+/// - `firebase_cache_meta` – Firestore cache sync metadata.
 ///
 /// ## Delegation
 ///
 /// CRUD operations are delegated to dedicated DAO classes:
-/// [ProductDao], [InventoryDao], [InventoriesDao]. This keeps each file
-/// focused on a single table.
+/// [ProductDao], [InventoryDao], [InventoriesDao], [PriceDao],
+/// [ShoppingListDao], [StoreDao], [FeedbackQueueDao],
+/// [ProductSubmissionQueueDao], [FirebaseCacheMetaDao].
 ///
 /// See also:
 /// - [sqflite](https://pub.dev/packages/sqflite) — the SQLite plugin

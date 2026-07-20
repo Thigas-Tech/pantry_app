@@ -1136,6 +1136,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidPriceAmount => 'Enter a valid price amount';
 
   @override
+  String get apiSearchWarning => 'Could not fetch all online results. Some products may be missing.';
+
+  @override
   String get dismiss => 'Dismiss';
 
   @override

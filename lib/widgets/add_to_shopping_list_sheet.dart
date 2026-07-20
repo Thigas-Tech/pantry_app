@@ -9,6 +9,7 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -60,6 +61,7 @@ class _AddToShoppingListSheetState
   bool _isSearching = false;
   int _requestId = 0;
   bool _showCustomForm = false;
+  bool _apiSearchFailed = false;
 
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
@@ -82,6 +84,7 @@ class _AddToShoppingListSheetState
         _localResults = [];
         _apiResults = [];
         _isSearching = false;
+        _apiSearchFailed = false;
       });
       return;
     }
@@ -146,7 +149,10 @@ class _AddToShoppingListSheetState
     } on Exception catch (e) {
       logError('Search failed — query="$query" error=$e');
       if (!mounted) return;
-      setState(() => _isSearching = false);
+      setState(() {
+        _isSearching = false;
+        _apiSearchFailed = true;
+      });
     }
   }
 
@@ -167,17 +173,46 @@ class _AddToShoppingListSheetState
     );
   }
 
-  void _addFromProduct(Product product) {
+  void _addFromProduct(Product product, {bool isApi = false}) {
     logInfo(
-      'Add from product — barcode=${product.barcode} name=${product.name}',
+      'Add from product — barcode=${product.barcode} name=${product.name} '
+      'isApi=$isApi',
     );
+    if (isApi) {
+      unawaited(
+        ref.read(productRepositoryProvider).cacheProduct(product),
+      );
+    }
     Navigator.of(context).pop(_productToItem(product));
   }
 
-  void _addFromInventory(Map<String, dynamic> entry) {
+  Future<void> _addFromInventory(Map<String, dynamic> entry) async {
+    final barcode = entry['barcode'] as String?;
     logInfo(
-      'Add from inventory — barcode=${entry['barcode']} name=${entry['name']}',
+      'Add from inventory — barcode=$barcode name=${entry['name']}',
     );
+    if (barcode != null && barcode.isNotEmpty) {
+      final existing = await ref
+          .read(productRepositoryProvider)
+          .getProductFromCache(barcode);
+      if (existing == null) {
+        logWarning(
+          'Product $barcode missing from cache, but shown in inventory '
+          'suggestions — fetching before pop',
+        );
+        try {
+          final fetched = await ref
+              .read(productRepositoryProvider)
+              .getProduct(barcode);
+          await ref.read(productRepositoryProvider).cacheProduct(fetched);
+        } on Exception catch (e) {
+          logWarning(
+            'Could not fetch product $barcode for inventory suggestion: $e',
+          );
+        }
+      }
+    }
+    if (!mounted) return;
     Navigator.of(context).pop(_inventoryEntryToItem(entry));
   }
 
@@ -302,34 +337,73 @@ class _AddToShoppingListSheetState
     if (_searchController.text.trim().isEmpty) {
       return _buildInitialState(l10n, theme, inventoryProducts);
     }
-    if (allResults.isEmpty) {
+    if (allResults.isEmpty && !_apiSearchFailed) {
       return _buildNoResults(l10n, theme);
     }
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      itemCount: allResults.length,
-      itemBuilder: (ctx, index) {
-        final product = allResults[index];
-        final isApi = index >= _localResults.length;
-        return _ProductResultTile(
-          product: product,
-          isApi: isApi,
-          onTap: () => _addFromProduct(product),
-        );
-      },
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_apiSearchFailed)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+            child: MaterialBanner(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              content: Text(
+                l10n.apiSearchWarning,
+                style: theme.textTheme.bodySmall,
+              ),
+              leading: Icon(
+                Icons.warning_amber_rounded,
+                size: 20,
+                color: theme.colorScheme.error,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => setState(() => _apiSearchFailed = false),
+                  child: Text(l10n.dismiss),
+                ),
+              ],
+            ),
+          ),
+        if (allResults.isEmpty && _apiSearchFailed)
+          _buildNoResults(l10n, theme)
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: allResults.length,
+            itemBuilder: (ctx, index) {
+              final product = allResults[index];
+              final isApi = index >= _localResults.length;
+              return _ProductResultTile(
+                product: product,
+                isApi: isApi,
+                onTap: () => _addFromProduct(product, isApi: isApi),
+              );
+            },
+          ),
+      ],
     );
   }
 
   Widget _buildAddCustomItemButton(AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: OutlinedButton.icon(
-        onPressed: () => setState(() => _showCustomForm = true),
-        icon: const Icon(Icons.edit_note, size: 20),
-        label: Text(l10n.addCustomItem),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Divider(height: 1),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => setState(() => _showCustomForm = true),
+              icon: const Icon(Icons.edit_note, size: 20),
+              label: Text(l10n.addCustomItem),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

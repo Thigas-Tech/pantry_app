@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
@@ -106,6 +107,37 @@ class OffAdapter {
   off.UriProductHelper get _uriHelper =>
       useStaging ? off.uriHelperFoodTest : off.uriHelperFoodProd;
 
+  /// Returns `true` when [error] indicates HTTP 429 rate limiting.
+  ///
+  /// The OFF SDK wraps 429 responses as generic exceptions with the
+  /// HTTP error page in the message body.
+  @visibleForTesting
+  static bool isRateLimitError(Object error) {
+    final msg = error.toString();
+    return msg.contains('429 Too Many Requests');
+  }
+
+  /// Returns a retry delay with linear backoff and ±25% jitter.
+  ///
+  /// [attempt] is zero-based (0 = first retry).  The base delay is
+  /// `(attempt + 1)` seconds.  When [isRateLimit] is `true`, the base
+  /// delay is multiplied by 5 to be more respectful of the server's
+  /// capacity.  The result is clamped to >= 500 ms.
+  @visibleForTesting
+  static Duration retryDelay(
+    int attempt, {
+    Random? random,
+    bool isRateLimit = false,
+  }) {
+    const baseMs = 1000;
+    final multiplier = isRateLimit ? 5 : 1;
+    final base = (attempt + 1) * baseMs * multiplier;
+    final rng = random ?? Random();
+    // ±25% jitter
+    final jitter = ((rng.nextDouble() - 0.5) * 0.5 * base).round();
+    return Duration(milliseconds: (base + jitter).clamp(500, base * 2));
+  }
+
   /// The test user used for unauthenticated read operations.
   ///
   /// This follows smooth-app's convention — OFF does not require auth
@@ -132,37 +164,59 @@ class OffAdapter {
   /// [languageCode] is a two-letter code (e.g. `'en'`, `'fr'`, `'pt'`)
   /// that requests product data in the user's preferred language.
   ///
+  /// Retries up to [maxRetries] times on transient failures (network
+  /// errors, server errors, rate limiting) with linear backoff.  Does
+  /// NOT retry on [ProductNotFoundException] — unknown barcodes fail
+  /// fast.
+  ///
   /// Throws [ProductNotFoundException] if the barcode is unknown.
   /// Throws [FetchFailedException] on network or server errors that
   /// are not "not found" responses.
   Future<Product> getByBarcode(
     String barcode, {
     String languageCode = 'en',
+    int maxRetries = 2,
   }) async {
-    logInfo('Fetching $barcode via SDK');
-    try {
-      final result = await _onGetProductV3(
-        OffQuery.barcodeConfig(barcode, language: languageCode),
-        user: readUser,
-        uriHelper: _uriHelper,
-      );
-      if (result.product == null) {
-        logWarning('Product $barcode not found');
-        throw ProductNotFoundException(barcode);
+    for (var attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        logInfo('Fetching $barcode via SDK (attempt ${attempt + 1})');
+        final result = await _onGetProductV3(
+          OffQuery.barcodeConfig(barcode, language: languageCode),
+          user: readUser,
+          uriHelper: _uriHelper,
+        );
+        if (result.product == null) {
+          logWarning('Product $barcode not found');
+          throw ProductNotFoundException(barcode);
+        }
+        logInfo('Fetched $barcode — ${result.product!.productName}');
+        return Product.fromOffProduct(
+          result.product!,
+          languageCode: languageCode,
+        );
+      } on ProductNotFoundException {
+        rethrow;
+      } on Exception catch (e) {
+        if (attempt < maxRetries) {
+          final isRateLimit = isRateLimitError(e);
+          final delay = retryDelay(attempt, isRateLimit: isRateLimit);
+          logWarning(
+            'Fetch $barcode failed (attempt ${attempt + 1}), '
+            'retrying in ${delay.inSeconds}s: $e',
+          );
+          await Future<void>.delayed(delay);
+        } else {
+          logError('Fetch $barcode failed after all retries: $e');
+          throw FetchFailedException(
+            'Failed to fetch product. Please check your connection.',
+          );
+        }
       }
-      logInfo('Fetched $barcode — ${result.product!.productName}');
-      return Product.fromOffProduct(
-        result.product!,
-        languageCode: languageCode,
-      );
-    } on ProductNotFoundException {
-      rethrow;
-    } on Exception catch (e) {
-      logError('SDK error for $barcode: $e');
-      throw FetchFailedException(
-        'Failed to fetch product. Please check your connection.',
-      );
     }
+    // Unreachable — either returns or throws above.
+    throw FetchFailedException(
+      'Failed to fetch product. Please check your connection.',
+    );
   }
 
   /// Searches for products matching [query] by name or barcode prefix.
@@ -206,7 +260,8 @@ class OffAdapter {
         return products;
       } on Exception catch (e) {
         if (attempt < maxRetries) {
-          final delay = Duration(seconds: attempt + 1);
+          final isRateLimit = isRateLimitError(e);
+          final delay = retryDelay(attempt, isRateLimit: isRateLimit);
           logWarning(
             'Search "$query" failed (attempt ${attempt + 1}), '
             'retrying in ${delay.inSeconds}s: $e',
@@ -256,7 +311,8 @@ class OffAdapter {
         return false;
       } on Exception catch (e) {
         if (attempt < maxRetries) {
-          final delay = Duration(seconds: attempt + 1);
+          final isRateLimit = isRateLimitError(e);
+          final delay = retryDelay(attempt, isRateLimit: isRateLimit);
           logWarning(
             'Submission failed for ${product.barcode} '
             '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e',
@@ -329,7 +385,8 @@ class OffAdapter {
         return false;
       } on Exception catch (e) {
         if (attempt < maxRetries) {
-          final delay = Duration(seconds: attempt + 1);
+          final isRateLimit = isRateLimitError(e);
+          final delay = retryDelay(attempt, isRateLimit: isRateLimit);
           logWarning(
             '$imageField image upload failed for $barcode '
             '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e',

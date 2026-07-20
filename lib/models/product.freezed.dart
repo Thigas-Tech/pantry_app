@@ -70,7 +70,7 @@ mixin _$Product {
 /// additives).
 ///
 /// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
-/// the SDK's `nutriscore` field.
+/// the SDK's off.Product.nutriscore field.
  String? get nutriscoreGrade;/// The product category that makes Nutri-Score not applicable, if any.
 ///
 /// This is present only when [nutriscoreGrade] is `'not-applicable'` and
@@ -84,8 +84,8 @@ mixin _$Product {
 ///
 /// - `'api'` — fetched from Open Food Facts (can be safely flushed and
 ///   re-fetched).
-/// - `'manual'` — entered by the user via the add-product screen or
-///   imported from CSV (must never be deleted by a cache flush).
+/// - `'manual'` — entered by the user via the add-product screen
+///   (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
 /// integration. The add-product screen overrides it to
@@ -440,7 +440,7 @@ class _Product implements Product {
 /// additives).
 ///
 /// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
-/// the SDK's `nutriscore` field.
+/// the SDK's off.Product.nutriscore field.
 @override final  String? nutriscoreGrade;
 /// The product category that makes Nutri-Score not applicable, if any.
 ///
@@ -456,8 +456,8 @@ class _Product implements Product {
 ///
 /// - `'api'` — fetched from Open Food Facts (can be safely flushed and
 ///   re-fetched).
-/// - `'manual'` — entered by the user via the add-product screen or
-///   imported from CSV (must never be deleted by a cache flush).
+/// - `'manual'` — entered by the user via the add-product screen
+///   (must never be deleted by a cache flush).
 ///
 /// Defaults to `'api'` because most products come from the OFF
 /// integration. The add-product screen overrides it to

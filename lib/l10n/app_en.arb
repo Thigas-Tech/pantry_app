@@ -570,6 +570,7 @@
   "choosePantry": "Choose a pantry",
   "addToPantrySkipped": "Price saved. Add from product page to track inventory.",
   "invalidPriceAmount": "Enter a valid price amount",
+  "apiSearchWarning": "Could not fetch all online results. Some products may be missing.",
   "dismiss": "Dismiss",
   "priceHidden": "Price hidden",
   "scanFailed": "Barcode scan failed.",

@@ -1136,6 +1136,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get invalidPriceAmount => 'Digite um valor de preço válido';
 
   @override
+  String get apiSearchWarning => 'Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.';
+
+  @override
   String get dismiss => 'Dispensar';
 
   @override
@@ -2711,6 +2714,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get invalidPriceAmount => 'Digite um valor de preço válido';
+
+  @override
+  String get apiSearchWarning => 'Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.';
 
   @override
   String get dismiss => 'Dispensar';

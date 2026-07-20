@@ -137,9 +137,27 @@ class ShoppingListDao {
             return existingItem.id!;
           }
         }
-        final id = await txn.insert('shopping_list', toMap(item));
-        logInfo('Shopping item inserted with id $id');
-        return id;
+        try {
+          final id = await txn.insert('shopping_list', toMap(item));
+          logInfo('Shopping item inserted with id $id');
+          return id;
+        } on DatabaseException catch (e) {
+          if (item.barcode != null &&
+              e.toString().contains('FOREIGN KEY constraint failed')) {
+            logWarning(
+              'FK constraint on barcode=${item.barcode} — '
+              'retrying insert with null barcode',
+            );
+            final fallbackItem = item.copyWith(barcode: null);
+            final id = await txn.insert(
+              'shopping_list',
+              toMap(fallbackItem),
+            );
+            logInfo('Shopping item inserted with null barcode — id=$id');
+            return id;
+          }
+          rethrow;
+        }
       });
     } on Exception catch (e) {
       logError('Failed to insert/merge shopping item: $e');
