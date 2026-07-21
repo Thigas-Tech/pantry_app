@@ -74,7 +74,9 @@ void main() {
 
     test('can be changed', () {
       /// Changing the notifier’s state updates the provider’s value.
-      mockContainer.read(activeInventoryProvider.notifier).value = 2;
+      mockContainer
+          .read(activeInventoryProvider.notifier)
+          .setActiveInventory(2);
       final id = mockContainer.read(activeInventoryProvider);
       expect(id, 2);
     });
@@ -159,7 +161,7 @@ void main() {
       addTearDown(container.dispose);
 
       // Simulate switching to inventory 2 (Work).
-      container.read(activeInventoryProvider.notifier).value = 2;
+      container.read(activeInventoryProvider.notifier).setActiveInventory(2);
 
       final items = await container.read(inventoryWithProductProvider.future);
       expect(items.length, 1);

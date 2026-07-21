@@ -551,106 +551,120 @@ void main() {
   // Add to inventory
   // --------------------------------------------------------------------------
 
-  testWidgets('add to inventory flow', (tester) async {
-    setLargeScreen(tester);
-    when(
-      () => mockRepo.getInventoryForBarcode(
-        any(),
-        inventoryId: any(named: 'inventoryId'),
-      ),
-    ).thenAnswer((_) async => []);
-    when(
-      () => mockRepo.addInventoryItem(any()),
-    ).thenAnswer((_) => Future<int>.value(1));
-    when(
-      () => mockRepo.cacheProduct(any()),
-    ).thenAnswer((_) async {});
-
-    await pumpApp(
+  testWidgets(
+    'add to inventory flow creates item and shows snackbar',
+    (
       tester,
-      const ProductDetailScreen(product: testProduct),
-      overrides: screenOverrides(
-        mockRepo: mockRepo,
-        mockNotif: mockNotif,
-        mockDb: mockDb,
-      ),
-    );
+    ) async {
+      setLargeScreen(tester);
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => []);
+      when(
+        () => mockRepo.addInventoryItem(any()),
+      ).thenAnswer((_) => Future<int>.value(1));
+      when(
+        () => mockRepo.cacheProduct(any()),
+      ).thenAnswer((_) async {});
 
-    await tester.tap(find.text('Add to Inventory'));
-    await tester.pumpAndSettle();
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: screenOverrides(
+          mockRepo: mockRepo,
+          mockNotif: mockNotif,
+          mockDb: mockDb,
+        ),
+      );
 
-    expect(find.byType(AddToInventoryScreen), findsOneWidget);
+      await tester.tap(find.text('Add to Inventory'));
+      await tester.pumpAndSettle();
 
-    final newItem = makeItem(id: 3, quantity: 1);
-    tester.state<NavigatorState>(find.byType(Navigator)).pop(newItem);
-    await tester.pumpAndSettle();
+      expect(find.byType(AddToInventoryScreen), findsOneWidget);
 
-    verify(() => mockRepo.addInventoryItem(newItem)).called(1);
-    verify(
-      () => mockNotif.scheduleExpiryReminders(
-        any(),
-        productName: any(named: 'productName'),
-        expiringSoonTitle: any(named: 'expiringSoonTitle'),
-        buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
-        expiringTodayTitle: any(named: 'expiringTodayTitle'),
-        buildExpiringTodayBody: any(named: 'buildExpiringTodayBody'),
-        channelName: any(named: 'channelName'),
-        channelDescription: any(named: 'channelDescription'),
-      ),
-    ).called(1);
-    // The snackbar says "Item added to pantry."
-    expect(find.textContaining('Item added'), findsOneWidget);
-  });
+      final newItem = makeItem(id: 3, quantity: 1);
+      tester.state<NavigatorState>(find.byType(Navigator)).pop(newItem);
+      await tester.pumpAndSettle();
+
+      verify(() => mockRepo.addInventoryItem(newItem)).called(1);
+      verify(
+        () => mockNotif.scheduleExpiryReminders(
+          any(),
+          productName: any(named: 'productName'),
+          expiringSoonTitle: any(named: 'expiringSoonTitle'),
+          buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
+          expiringTodayTitle: any(named: 'expiringTodayTitle'),
+          buildExpiringTodayBody: any(named: 'buildExpiringTodayBody'),
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+        ),
+      ).called(1);
+      // The snackbar says "Item added to pantry."
+      expect(find.textContaining('Item added'), findsOneWidget);
+    },
+  );
 
   // --------------------------------------------------------------------------
   // Edit inventory item
   // --------------------------------------------------------------------------
 
-  testWidgets('edit inventory item flow', (tester) async {
-    setLargeScreen(tester);
-    final existingItem = makeItem(id: 5, unit: 'kg');
-    when(
-      () => mockRepo.getInventoryForBarcode(
-        any(),
-        inventoryId: any(named: 'inventoryId'),
-      ),
-    ).thenAnswer((_) async => [existingItem]);
-    when(
-      () => mockRepo.updateInventoryItem(any()),
-    ).thenAnswer((_) => Future<int>.value(1));
-
-    await pumpApp(
+  testWidgets(
+    'edit inventory item flow updates item and shows snackbar',
+    (
       tester,
-      const ProductDetailScreen(product: testProduct),
-      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
-    );
+    ) async {
+      setLargeScreen(tester);
+      final existingItem = makeItem(id: 5, unit: 'kg');
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => [existingItem]);
+      when(
+        () => mockRepo.updateInventoryItem(any()),
+      ).thenAnswer((_) => Future<int>.value(1));
 
-    await tester.tap(find.byIcon(Icons.edit));
-    await tester.pumpAndSettle();
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: screenOverrides(
+          mockRepo: mockRepo,
+          mockNotif: mockNotif,
+          mockDb: mockDb,
+        ),
+      );
 
-    expect(find.byType(AddToInventoryScreen), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
 
-    final updatedItem = existingItem.copyWith(quantity: 5);
-    tester.state<NavigatorState>(find.byType(Navigator)).pop(updatedItem);
-    await tester.pumpAndSettle();
+      expect(find.byType(AddToInventoryScreen), findsOneWidget);
 
-    verify(() => mockRepo.updateInventoryItem(updatedItem)).called(1);
-    verify(() => mockNotif.cancelReminders(existingItem.id!)).called(1);
-    verify(
-      () => mockNotif.scheduleExpiryReminders(
-        updatedItem,
-        productName: any(named: 'productName'),
-        expiringSoonTitle: any(named: 'expiringSoonTitle'),
-        buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
-        expiringTodayTitle: any(named: 'expiringTodayTitle'),
-        buildExpiringTodayBody: any(named: 'buildExpiringTodayBody'),
-        channelName: any(named: 'channelName'),
-        channelDescription: any(named: 'channelDescription'),
-      ),
-    ).called(1);
-    // The snackbar says "Item updated."
-    expect(find.textContaining('Item updated'), findsOneWidget);
-  });
+      final updatedItem = existingItem.copyWith(quantity: 5);
+      tester.state<NavigatorState>(find.byType(Navigator)).pop(updatedItem);
+      await tester.pumpAndSettle();
+
+      verify(() => mockRepo.updateInventoryItem(updatedItem)).called(1);
+      verify(() => mockNotif.cancelReminders(existingItem.id!)).called(1);
+      verify(
+        () => mockNotif.scheduleExpiryReminders(
+          updatedItem,
+          productName: any(named: 'productName'),
+          expiringSoonTitle: any(named: 'expiringSoonTitle'),
+          buildExpiringSoonBody: any(named: 'buildExpiringSoonBody'),
+          expiringTodayTitle: any(named: 'expiringTodayTitle'),
+          buildExpiringTodayBody: any(named: 'buildExpiringTodayBody'),
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+        ),
+      ).called(1);
+      // The snackbar says "Item updated."
+      expect(find.textContaining('Item updated'), findsOneWidget);
+    },
+  );
 
   // --------------------------------------------------------------------------
   // Delete inventory item
@@ -1079,3 +1093,7 @@ void main() {
     },
   );
 }
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------

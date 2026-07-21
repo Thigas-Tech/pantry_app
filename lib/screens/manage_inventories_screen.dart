@@ -30,9 +30,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => ErrorView(
           message: l10n.inventoryLoadFailed,
-          onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
-            (_) => ref.invalidate(inventoryListProvider),
-          ),
+          onRetry: () => ref.invalidate(inventoryListProvider),
         ),
         data: (list) {
           if (list.isEmpty) {
@@ -70,8 +68,9 @@ class ManageInventoriesScreen extends ConsumerWidget {
                         ? const Icon(Icons.check, color: Colors.teal)
                         : null,
                     onTap: () {
-                      ref.read(activeInventoryProvider.notifier).value =
-                          inv['id'] as int;
+                      ref
+                          .read(activeInventoryProvider.notifier)
+                          .setActiveInventory(inv['id'] as int);
                       Navigator.of(context).pop();
                     },
                     onLongPress: () => _showRenameDialog(
@@ -128,9 +127,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
       try {
         await repo.createInventory(name);
         logInfo('Created inventory "$name"');
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ref.invalidate(inventoryListProvider),
-        );
+        ref.invalidate(inventoryListProvider);
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.inventoryCreated(name));
         }
@@ -185,9 +182,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
       try {
         await repo.renameInventory(id, newName);
         logInfo('Renamed inventory $id to "$newName"');
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ref.invalidate(inventoryListProvider),
-        );
+        ref.invalidate(inventoryListProvider);
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.inventoryRenamed(newName));
         }
@@ -230,9 +225,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
       try {
         await repo.deleteInventory(id);
         logInfo('Deleted inventory $id ("$name")');
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ref.invalidate(inventoryListProvider),
-        );
+        ref.invalidate(inventoryListProvider);
 
         // If the deleted inventory was the active one,
         // switch to the first remaining.
@@ -240,8 +233,9 @@ class ManageInventoriesScreen extends ConsumerWidget {
         if (activeId == id) {
           final inventories = await ref.read(inventoryListProvider.future);
           if (inventories.isNotEmpty) {
-            ref.read(activeInventoryProvider.notifier).value =
-                inventories.first['id'] as int;
+            ref
+                .read(activeInventoryProvider.notifier)
+                .setActiveInventory(inventories.first['id'] as int);
           }
         }
         if (context.mounted) {

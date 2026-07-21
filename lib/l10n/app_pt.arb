@@ -408,6 +408,7 @@
   "includeLogsExplanation": "Avisos e erros recentes desta sessao",
   "logsPrivacyNote": "Os registros podem conter nomes de produtos e horarios.",
   "navList": "Lista",
+  "apiSearchWarning": "Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.",
   "dismiss": "Dispensar",
   "priceHidden": "Preco oculto",
   "add": "Adicionar",

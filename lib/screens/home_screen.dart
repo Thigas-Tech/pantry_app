@@ -32,6 +32,17 @@ import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/quick_add_produce.dart';
 
 /// The main pantry inventory screen.
+///
+/// Displays the active inventory with search, filter, and batch operations.
+/// Features include:
+/// - Quick-add produce carousel for common items
+/// - Inventory switcher card showing active pantry name and Nutri-Score
+/// - Paginated inventory list grouped by expiry status
+///   (expired / expiring soon / good)
+/// - Inline search via `SearchAnchor.bar` with autocomplete and produce
+///   leaf icons
+/// - Batch delete via long-press multi-select mode
+/// - Pull-to-refresh with overdue cache check
 class HomeScreen extends ConsumerStatefulWidget {
   /// Creates a [HomeScreen].
   const HomeScreen({super.key});

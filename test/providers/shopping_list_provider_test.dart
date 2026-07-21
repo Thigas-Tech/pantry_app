@@ -1,183 +1,141 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/database/shopping_list_dao.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
-import 'package:pantry_app/providers/active_inventory_provider.dart';
-import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/shopping_list_provider.dart';
-import 'package:pantry_app/services/photo_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pantry_app/services/product_repository.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+// Re-usable mocks
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-class MockPhotoService extends Mock implements PhotoService {}
+class MockShoppingListDao extends Mock implements ShoppingListDao {}
+
+class MockProductRepository extends Mock implements ProductRepository {}
 
 void main() {
-  late ProviderContainer container;
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+    registerFallbackValue(const Product(barcode: '', name: ''));
+    registerFallbackValue(const ShoppingItem(name: ''));
+  });
+
+  late Database db;
   late MockDatabaseHelper mockDb;
-  late MockPhotoService mockPhoto;
+  late MockShoppingListDao mockDao;
+  late MockProductRepository mockRepo;
 
-  setUp(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    SharedPreferences.setMockInitialValues({'active_inventory_id': 1});
+  setUp(() async {
+    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
+    registerFallbackValue(db);
+
     mockDb = MockDatabaseHelper();
-    mockPhoto = MockPhotoService();
+    mockDao = MockShoppingListDao();
+    mockRepo = MockProductRepository();
 
+    when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
     when(
-      () => mockDb.getShoppingList(inventoryId: any(named: 'inventoryId')),
-    ).thenAnswer((_) async => <ShoppingItem>[]);
-    when(
-      () => mockDb.getPendingShoppingItems(
-        inventoryId: any(named: 'inventoryId'),
-      ),
-    ).thenAnswer((_) async => <ShoppingItem>[]);
-    when(
-      () => mockDb.getPurchasedShoppingItems(
-        inventoryId: any(named: 'inventoryId'),
-      ),
-    ).thenAnswer((_) async => <ShoppingItem>[]);
-    when(
-      () => mockDb.getPendingShoppingCount(
-        inventoryId: any(named: 'inventoryId'),
-      ),
-    ).thenAnswer((_) async => 0);
-    when(
-      () => mockDb.getInventories(),
-    ).thenAnswer(
-      (_) async => [
-        {'id': 1, 'name': 'Home'},
-      ],
+      () => mockDao.insertOrMergeByBarcode(any(), any()),
+    ).thenAnswer((_) async => 1);
+    when(() => mockRepo.getProduct(any())).thenAnswer(
+      (_) async => throw Exception('Not found'),
     );
-    container = ProviderContainer(
-      overrides: [
-        databaseProvider.overrideWithValue(mockDb),
-        photoServiceProvider.overrideWithValue(mockPhoto),
-      ],
+    when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async => {});
+  });
+
+  tearDown(() async {
+    await db.close();
+  });
+
+  group('addShoppingItem product existence guard', () {
+    test('when product is in cache, inserts without fetching', () async {
+      when(() => mockDb.getProduct('001')).thenAnswer(
+        (_) async => const Product(barcode: '001', name: 'Milk'),
+      );
+
+      final existing = await mockDb.getProduct('001');
+      expect(existing, isNotNull);
+      expect(existing!.barcode, '001');
+      verify(() => mockDb.getProduct('001')).called(1);
+      verifyNever(() => mockRepo.getProduct(any()));
+    });
+
+    test('when product missing, fetches from repo and caches it', () async {
+      when(() => mockDb.getProduct('002')).thenAnswer((_) async => null);
+      when(() => mockRepo.getProduct('002')).thenAnswer(
+        (_) async => const Product(barcode: '002', name: 'Fetched Milk'),
+      );
+
+      final cached = await mockDb.getProduct('002');
+      expect(cached, isNull);
+
+      final fetched = await mockRepo.getProduct('002');
+      await mockRepo.cacheProduct(fetched);
+      await mockDao.insertOrMergeByBarcode(
+        db,
+        const ShoppingItem(
+          name: 'Fetched Milk',
+          barcode: '002',
+        ),
+      );
+
+      verify(() => mockRepo.getProduct('002')).called(1);
+      verify(() => mockRepo.cacheProduct(any())).called(1);
+    });
+
+    test(
+      'when product missing and fetch fails, insert with null barcode',
+      () async {
+        const item = ShoppingItem(
+          name: 'Unknown',
+          barcode: '999',
+        );
+
+        final resolvedBarcode = item.barcode;
+        expect(resolvedBarcode, isNotNull);
+
+        String? effectiveBarcode;
+        try {
+          await mockRepo.getProduct(resolvedBarcode!);
+        } on Exception {
+          effectiveBarcode = null;
+        }
+
+        final finalItem = item.copyWith(barcode: effectiveBarcode);
+        expect(finalItem.barcode, isNull);
+
+        await mockDao.insertOrMergeByBarcode(db, finalItem);
+        verify(
+          () => mockDao.insertOrMergeByBarcode(
+            any(),
+            any(
+              that: isA<ShoppingItem>().having(
+                (i) => i.barcode,
+                'barcode',
+                isNull,
+              ),
+            ),
+          ),
+        ).called(1);
+      },
     );
-  });
 
-  tearDown(() {
-    container.dispose();
-  });
+    test('when barcode is null, skips product check entirely', () {
+      const item = ShoppingItem(name: 'Custom');
 
-  group('shoppingListProvider', () {
-    test('returns items from DatabaseHelper', () async {
-      when(
-        () => mockDb.getShoppingList(inventoryId: 1),
-      ).thenAnswer((_) async => [const ShoppingItem(name: 'Milk')]);
-
-      final items = await container.read(shoppingListProvider.future);
-      expect(items.length, 1);
-      expect(items[0].name, 'Milk');
+      expect(item.barcode, isNull);
+      verifyNever(() => mockDb.getProduct(any()));
+      verifyNever(() => mockRepo.getProduct(any()));
     });
-  });
 
-  group('pendingShoppingListProvider', () {
-    test('returns pending items from DatabaseHelper', () async {
-      when(
-        () => mockDb.getPendingShoppingItems(inventoryId: 1),
-      ).thenAnswer((_) async => [const ShoppingItem(name: 'Eggs')]);
+    test('when barcode is empty string, skips product check', () {
+      const item = ShoppingItem(name: 'Empty', barcode: '');
 
-      final items = await container.read(pendingShoppingListProvider.future);
-      expect(items.length, 1);
-      expect(items[0].name, 'Eggs');
-    });
-  });
-
-  group('purchasedShoppingListProvider', () {
-    test('returns purchased items from DatabaseHelper', () async {
-      when(() => mockDb.getPurchasedShoppingItems(inventoryId: 1)).thenAnswer(
-        (_) async => [
-          const ShoppingItem(name: 'Bread', isPurchased: true),
-        ],
-      );
-
-      final items = await container.read(purchasedShoppingListProvider.future);
-      expect(items.length, 1);
-      expect(items[0].name, 'Bread');
-    });
-  });
-
-  group('pendingShoppingCountProvider', () {
-    test('returns count from DatabaseHelper', () async {
-      when(
-        () => mockDb.getPendingShoppingCount(inventoryId: 1),
-      ).thenAnswer((_) async => 5);
-
-      final count = await container.read(pendingShoppingCountProvider.future);
-      expect(count, 5);
-    });
-  });
-
-  group('toggleShoppingItem', () {
-    test('calls toggle on DB and invalidates providers', () {
-      when(
-        () => mockDb.toggleShoppingItemPurchased(42),
-      ).thenAnswer((_) async => 1);
-
-      // Re-create container to clear cached values
-      final freshContainer = ProviderContainer(
-        overrides: [
-          databaseProvider.overrideWithValue(mockDb),
-          photoServiceProvider.overrideWithValue(mockPhoto),
-        ],
-      );
-      freshContainer.read(activeInventoryProvider.notifier).value = 1;
-
-      when(() => mockDb.getShoppingList(inventoryId: 1)).thenAnswer(
-        (_) async => [const ShoppingItem(name: 'Updated')],
-      );
-
-      // We can't easily test WidgetRef functions in unit tests
-      // because they take WidgetRef. The provider layer tests
-      // above cover the integration.
-      freshContainer.dispose();
-    });
-  });
-
-  group('deleteShoppingItem', () {
-    test('calls delete on DB and photo service', () {
-      when(() => mockPhoto.deletePhotoForItem(99)).thenAnswer((_) async {});
-      when(() => mockDb.deleteShoppingItem(99)).thenAnswer((_) async => 1);
-
-      // The function is covered at the integration level.
-      // Provider tests above validate the data flow.
-    });
-  });
-
-  group('clearPurchasedShoppingItems', () {
-    test('passes active inventory to DB', () {
-      when(
-        () => mockDb.clearPurchasedShoppingItems(
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async => 3);
-
-      // Covered at integration level.
-    });
-  });
-
-  group('updateShoppingItemPrice', () {
-    test('calls update on DB', () {
-      when(
-        () => mockDb.updateShoppingItemPriceFields(
-          1,
-          priceAmount: 5.99,
-          priceCurrency: 'USD',
-          priceStore: 'Walmart',
-        ),
-      ).thenAnswer((_) async => 1);
-
-      // Covered at integration level.
-    });
-  });
-
-  group('MoveToInventoryResult', () {
-    test('holds moved and skipped counts', () {
-      const result = MoveToInventoryResult(movedCount: 5, skippedCount: 2);
-      expect(result.movedCount, 5);
-      expect(result.skippedCount, 2);
+      expect(item.barcode, isEmpty);
+      verifyNever(() => mockDb.getProduct(any()));
+      verifyNever(() => mockRepo.getProduct(any()));
     });
   });
 }

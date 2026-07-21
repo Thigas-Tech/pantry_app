@@ -24,11 +24,8 @@ class ActiveInventoryNotifier extends Notifier<int> {
     return 1;
   }
 
-  /// The current active inventory ID.
-  int get value => state;
-
   /// Updates the active inventory ID and persists the change.
-  set value(int id) {
+  void setActiveInventory(int id) {
     state = id;
     unawaited(_persist(id));
   }

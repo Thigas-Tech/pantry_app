@@ -5,6 +5,8 @@ import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/photo_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 
@@ -71,13 +73,47 @@ void invalidateShoppingList(WidgetRef ref) {
 /// When an existing pending item has the same barcode and unit, the
 /// quantities are summed instead of creating a duplicate row.
 /// The item's inventoryId defaults to the active inventory if not set.
+///
+/// Before inserting, ensures the referenced product exists in the local
+/// cache to avoid FOREIGN KEY constraint failures.  If the product is
+/// missing and cannot be fetched, the barcode is set to null so the
+/// insert still succeeds.
 Future<void> addShoppingItem(WidgetRef ref, ShoppingItem item) async {
   final db = ref.read(databaseProvider);
   final database = await db.database;
   final activeInventoryId = ref.read(activeInventoryProvider);
-  final scopedItem = item.inventoryId == null
+  final repo = ref.read(productRepositoryProvider);
+  var scopedItem = item.inventoryId == null
       ? item.copyWith(inventoryId: activeInventoryId)
       : item;
+
+  // Ensure the product exists in cache before inserting (avoid FK failure).
+  if (scopedItem.barcode != null && scopedItem.barcode!.isNotEmpty) {
+    final existing = await db.getProduct(scopedItem.barcode!);
+    if (existing == null) {
+      try {
+        logInfo(
+          'Product ${scopedItem.barcode} not in cache — '
+          'fetching before shopping list insert',
+        );
+        final fetched = await repo.getProduct(scopedItem.barcode!);
+        await repo.cacheProduct(fetched);
+      } on ProductNotFoundException {
+        logWarning(
+          'Product ${scopedItem.barcode} not found anywhere — '
+          'adding without barcode',
+        );
+        scopedItem = scopedItem.copyWith(barcode: null);
+      } on FetchFailedException {
+        logWarning(
+          'Could not fetch product ${scopedItem.barcode} — '
+          'adding without barcode',
+        );
+        scopedItem = scopedItem.copyWith(barcode: null);
+      }
+    }
+  }
+
   logInfo(
     'Add shopping item — barcode=${scopedItem.barcode ?? 'none'} '
     'name="${scopedItem.name}" qty=${scopedItem.quantity} '

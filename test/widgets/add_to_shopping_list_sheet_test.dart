@@ -9,13 +9,17 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
 import '../helpers/pump_app.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class MockOffAdapter extends Mock implements OffAdapter {}
+
+class MockProductRepository2 extends Mock implements ProductRepository {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
@@ -25,10 +29,14 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 void main() {
   late MockDatabaseHelper mockDb;
   late MockOffAdapter mockOff;
+  late MockProductRepository2 mockRepo;
 
   setUp(() {
+    registerFallbackValue(const Product(barcode: '', name: ''));
+
     mockDb = MockDatabaseHelper();
     mockOff = MockOffAdapter();
+    mockRepo = MockProductRepository2();
 
     when(() => mockDb.searchProducts(any())).thenAnswer(
       (_) async => <Product>[],
@@ -38,11 +46,13 @@ void main() {
         inventoryId: any(named: 'inventoryId'),
       ),
     ).thenAnswer((_) async => <Map<String, dynamic>>[]);
+    when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async => {});
   });
 
   List<Override> sheetOverrides() => [
     databaseProvider.overrideWithValue(mockDb),
     apiServiceProvider.overrideWithValue(mockOff),
+    productRepositoryProvider.overrideWithValue(mockRepo),
     hasConnectionProvider.overrideWith((ref) => Future.value(false)),
     activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
   ];
@@ -571,6 +581,185 @@ void main() {
 
       expect(find.text('From your pantry'), findsNothing);
     });
+
+    testWidgets('shows api search failure banner on API error', (tester) async {
+      when(() => mockDb.searchProducts('fail')).thenAnswer(
+        (_) async => <Product>[],
+      );
+      when(
+        () => mockOff.searchProducts(
+          'fail',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenThrow(Exception('Server error'));
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => AddToShoppingListSheet.show(context),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          apiServiceProvider.overrideWithValue(mockOff),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        ],
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(SearchBar), 'fail');
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+      expect(
+        find.text(
+          'Could not fetch all online results. Some products may be missing.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('api failure banner can be dismissed', (tester) async {
+      when(() => mockDb.searchProducts('fail')).thenAnswer(
+        (_) async => <Product>[],
+      );
+      when(
+        () => mockOff.searchProducts(
+          'fail',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenThrow(Exception('Server error'));
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => AddToShoppingListSheet.show(context),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          apiServiceProvider.overrideWithValue(mockOff),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        ],
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(SearchBar), 'fail');
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+
+      await tester.tap(find.text('Dismiss'));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+    });
+
+    testWidgets('tapping API result caches product before returning', (
+      tester,
+    ) async {
+      Product? cachedProduct;
+      when(() => mockDb.searchProducts('bread')).thenAnswer(
+        (_) async => <Product>[],
+      );
+      when(
+        () => mockOff.searchProducts(
+          'bread',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          const Product(barcode: '002', name: 'API Bread', brand: 'Brand'),
+        ],
+      );
+      when(() => mockRepo.cacheProduct(any())).thenAnswer(
+        (invocation) async {
+          cachedProduct = invocation.positionalArguments[0] as Product;
+        },
+      );
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => AddToShoppingListSheet.show(context),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          apiServiceProvider.overrideWithValue(mockOff),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        ],
+        settle: false,
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(SearchBar), 'bread');
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('API Bread'));
+      await tester.pumpAndSettle();
+
+      expect(cachedProduct, isNotNull);
+      expect(cachedProduct!.barcode, '002');
+    });
+
+    testWidgets('tapping local result does not call cacheProduct', (
+      tester,
+    ) async {
+      var cacheCalled = false;
+      when(() => mockDb.searchProducts('local')).thenAnswer(
+        (_) async => [
+          const Product(barcode: '001', name: 'Local Milk', brand: 'Brand'),
+        ],
+      );
+      when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async {
+        cacheCalled = true;
+      });
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => AddToShoppingListSheet.show(context),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: sheetOverrides(),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(SearchBar), 'local');
+      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Local Milk'));
+      await tester.pumpAndSettle();
+
+      expect(cacheCalled, isFalse);
+    });
   });
 
   group('produce icon', () {
@@ -640,6 +829,7 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(mockDb),
           apiServiceProvider.overrideWithValue(mockOff),
+          productRepositoryProvider.overrideWithValue(mockRepo),
           hasConnectionProvider.overrideWith((ref) => Future.value(true)),
           activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         ],

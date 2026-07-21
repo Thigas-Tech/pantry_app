@@ -13,7 +13,6 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
-import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
@@ -873,9 +872,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               if (mounted) {
                 SnackbarHelper.showInfo(context, l10n.itemRestored);
                 setState(() => _inventoryVersion++);
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ref.invalidate(inventoryWithProductProvider);
-                });
               }
             } on Exception catch (e) {
               logError('Failed to undo delete: $e');
@@ -883,9 +879,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           });
         }
         setState(() => _inventoryVersion++);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(inventoryWithProductProvider);
-        });
       } on Exception catch (e) {
         logError('Failed to delete item: $e');
         if (mounted) {

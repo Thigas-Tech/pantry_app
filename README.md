@@ -114,9 +114,24 @@ lib/
   providers/           # Riverpod state & dependency injection
   screens/             # UI pages
   services/            # Business logic
+    product_repository.dart   # Offline-first product cache + API
+    off_adapter.dart          # Open Food Facts API wrapper
     firebase_cache_client.dart  # Firestore read/write client
     firebase_cache_service.dart  # 180-day Firestore cache coordinator
     firebase_firestore_client_adapter.dart  # Serialization adapter
+    auth_service.dart         # Firebase Auth / no-op
+    firebase_auth_service.dart   # Firebase anonymous auth
+    notification_service.dart  # Expiry reminder scheduling
+    image_cache_service.dart   # WebP image download & cache
+    price_repository.dart      # Price CRUD + Open Prices sync
+    currency_service.dart      # Exchange rate conversion
+    open_prices_api_client.dart  # Open Prices API HTTP client
+    open_prices_service.dart     # Open Prices sync coordinator
+    github_issue_service.dart    # GitHub Issues API wrapper
+    photo_service.dart           # Camera/gallery photo capture
+    plu_service.dart             # PLU code lookup for produce
+    produce_search_service.dart  # Produce flow coordinator
+    product_submission_service.dart  # OFF offline submission queue
   utils/               # Logger, snackbar helpers
   widgets/             # Reusable components
 test/                  # Unit and widget tests

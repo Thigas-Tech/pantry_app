@@ -7,6 +7,8 @@
 /// and edge-case paths.
 library;
 
+import 'dart:math';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
@@ -125,6 +127,165 @@ void main() {
         expect(
           () => adapter.getByBarcode('001'),
           throwsA(isA<FetchFailedException>()),
+        );
+      });
+
+      /// Verifies [getByBarcode] retries on transient failure and
+      /// succeeds on the second attempt.
+      test('retries on transient failure and succeeds', () async {
+        var attempts = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onGetProductV3:
+              (config, {user, uriHelper = off.uriHelperFoodProd}) async {
+                attempts++;
+                if (attempts == 1) {
+                  throw Exception('Temporary outage');
+                }
+                return off.ProductResultV3.fromJson({
+                  'product': {'code': '001', 'product_name': 'Test Milk'},
+                  'status_verbose': 'found',
+                });
+              },
+        );
+
+        final product = await adapter.getByBarcode('001');
+        expect(product.name, 'Test Milk');
+        expect(attempts, 2);
+      });
+
+      /// Verifies [getByBarcode] throws [FetchFailedException] after
+      /// all retries are exhausted.
+      test('throws after exhausting all retries', () async {
+        var attempts = 0;
+        const maxRetries = 2;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onGetProductV3: (config, {user, uriHelper = off.uriHelperFoodProd}) {
+            attempts++;
+            throw Exception('Persistent failure');
+          },
+        );
+
+        try {
+          await adapter.getByBarcode('001');
+          fail('Expected FetchFailedException');
+        } on FetchFailedException {
+          // Expected path.
+        }
+        // Total attempts = maxRetries + 1 (initial + retries)
+        expect(attempts, maxRetries + 1);
+      });
+
+      /// Verifies [getByBarcode] does NOT retry on
+      /// [ProductNotFoundException] — unknown barcodes should fail fast.
+      test('does not retry on ProductNotFoundException', () {
+        var attempts = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onGetProductV3:
+              (config, {user, uriHelper = off.uriHelperFoodProd}) async {
+                attempts++;
+                return off.ProductResultV3.fromJson({
+                  'status_verbose': 'not found',
+                });
+              },
+        );
+
+        expect(
+          () => adapter.getByBarcode('999'),
+          throwsA(isA<ProductNotFoundException>()),
+        );
+        expect(attempts, 1);
+      });
+    });
+
+    group('retryDelay', () {
+      test('returns base delay for attempt 0 with seed 42', () {
+        final random = Random(42);
+        final delay = OffAdapter.retryDelay(0, random: random);
+        // Base is 1000ms, jitter is ±25% of 1000 = ±250
+        expect(delay.inMilliseconds, inInclusiveRange(750, 1250));
+      });
+
+      test('returns base delay for attempt 1 with seed 42', () {
+        final random = Random(42);
+        final delay = OffAdapter.retryDelay(1, random: random);
+        // Base is 2000ms, jitter is ±25% of 2000 = ±500
+        expect(delay.inMilliseconds, inInclusiveRange(1500, 2500));
+      });
+
+      test('returns base delay for attempt 2 with seed 42', () {
+        final random = Random(42);
+        final delay = OffAdapter.retryDelay(2, random: random);
+        // Base is 3000ms, jitter is ±25% of 3000 = ±750
+        expect(delay.inMilliseconds, inInclusiveRange(2250, 3750));
+      });
+
+      test('same seed produces same delay', () {
+        final a = OffAdapter.retryDelay(0, random: Random(123));
+        final b = OffAdapter.retryDelay(0, random: Random(123));
+        expect(a, b);
+      });
+
+      test('different seeds produce different delays', () {
+        final a = OffAdapter.retryDelay(0, random: Random(1));
+        final b = OffAdapter.retryDelay(0, random: Random(999));
+        expect(a, isNot(b));
+      });
+
+      test('rate limit multiplies delay by 5', () {
+        final random = Random(42);
+        final normal = OffAdapter.retryDelay(0, random: random);
+        final random2 = Random(42);
+        final rateLimited = OffAdapter.retryDelay(
+          0,
+          random: random2,
+          isRateLimit: true,
+        );
+        expect(
+          rateLimited.inMilliseconds,
+          greaterThan(normal.inMilliseconds * 4),
+        );
+      });
+    });
+
+    group('isRateLimitError', () {
+      test('detects 429 Too Many Requests', () {
+        expect(
+          OffAdapter.isRateLimitError(
+            Exception(
+              'JSON expected, html found: '
+              '<head><title>429 Too Many Requests</title></head>',
+            ),
+          ),
+          isTrue,
+        );
+      });
+
+      test('returns false for generic error', () {
+        expect(
+          OffAdapter.isRateLimitError(Exception('Network error')),
+          isFalse,
+        );
+      });
+
+      test('returns false for 404 error', () {
+        expect(
+          OffAdapter.isRateLimitError(Exception('404 Not Found')),
+          isFalse,
+        );
+      });
+
+      test('returns false for server error', () {
+        expect(
+          OffAdapter.isRateLimitError(
+            Exception(
+              'JSON expected, server error found: '
+              'Page temporarily unavailable',
+            ),
+          ),
+          isFalse,
         );
       });
     });

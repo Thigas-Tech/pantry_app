@@ -30,25 +30,33 @@ void main() {
   });
 
   group('SettingsNotifier', () {
-    test('value setter updates state immediately', () {
+    test('replace updates state immediately', () {
       final container = ProviderContainer();
-      container.read(settingsProvider.notifier).value = const Settings(
-        notificationsEnabled: false,
-      );
+      container
+          .read(settingsProvider.notifier)
+          .replace(
+            const Settings(
+              notificationsEnabled: false,
+            ),
+          );
       expect(container.read(settingsProvider).notificationsEnabled, false);
 
       container.dispose();
     });
 
-    test('value setter persists to SharedPreferences', () async {
+    test('replace persists to SharedPreferences', () async {
       SharedPreferences.setMockInitialValues({});
       final container = ProviderContainer();
-      container.read(settingsProvider.notifier).value = const Settings(
-        notificationsEnabled: false,
-        retentionDays: 90,
-        amoledDarkMode: true,
-        baseCurrency: 'EUR',
-      );
+      container
+          .read(settingsProvider.notifier)
+          .replace(
+            const Settings(
+              notificationsEnabled: false,
+              retentionDays: 90,
+              amoledDarkMode: true,
+              baseCurrency: 'EUR',
+            ),
+          );
 
       await Future<void>.delayed(const Duration(milliseconds: 200));
 
@@ -64,20 +72,24 @@ void main() {
     test('persists all settings fields', () async {
       SharedPreferences.setMockInitialValues({});
       final container = ProviderContainer();
-      container.read(settingsProvider.notifier).value = const Settings(
-        notificationsEnabled: false,
-        retentionDays: 45,
-        expiringSoonDays: 7,
-        inactivityReminderEnabled: false,
-        inactivityThresholdDays: 14,
-        amoledDarkMode: true,
-        priceTrackingEnabled: true,
-        priceRetentionDays: 365,
-        pricesHidden: true,
-        baseCurrency: 'BRL',
-        openPricesSyncEnabled: true,
-        openPricesToken: 'tok_abc',
-      );
+      container
+          .read(settingsProvider.notifier)
+          .replace(
+            const Settings(
+              notificationsEnabled: false,
+              retentionDays: 45,
+              expiringSoonDays: 7,
+              inactivityReminderEnabled: false,
+              inactivityThresholdDays: 14,
+              amoledDarkMode: true,
+              priceTrackingEnabled: true,
+              priceRetentionDays: 365,
+              pricesHidden: true,
+              baseCurrency: 'BRL',
+              openPricesSyncEnabled: true,
+              openPricesToken: 'tok_abc',
+            ),
+          );
 
       await Future<void>.delayed(const Duration(milliseconds: 200));
 

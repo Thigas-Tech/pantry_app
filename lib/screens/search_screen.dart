@@ -12,7 +12,8 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/inventory_provider.dart'
+    show inventoryWithProductProvider;
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -433,17 +434,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                     color: theme.colorScheme.outline,
                   )
                 : null,
-            onTap: () {
+            onTap: () async {
               logInfo(
                 'Search result tapped: ${product.barcode} — ${product.name}',
               );
-              unawaited(
-                Navigator.of(context).push<void>(
-                  MaterialPageRoute(
-                    builder: (_) => ProductDetailScreen(product: product),
-                  ),
+              await Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailScreen(product: product),
                 ),
               );
+              ref.invalidate(inventoryWithProductProvider);
             },
             onLongPress: () => _showLongPressMenu(product),
           ),

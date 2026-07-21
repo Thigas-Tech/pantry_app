@@ -65,9 +65,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => ErrorView(
                 message: error.toString(),
-                onRetry: () => WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => ref.invalidate(statsProvider),
-                ),
+                onRetry: () => ref.invalidate(statsProvider),
               ),
             ),
     );
@@ -110,9 +108,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ref.invalidate(statsProvider),
-        );
+        ref.invalidate(statsProvider);
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -1006,8 +1002,10 @@ class _PricingSection extends ConsumerWidget {
     );
     if (!priceTrackingEnabled) return const SizedBox.shrink();
 
-    final repo = ref.read(priceRepositoryProvider);
-    final baseCurrency = ref.read(settingsProvider).baseCurrency;
+    final repo = ref.watch(priceRepositoryProvider);
+    final baseCurrency = ref.watch(
+      settingsProvider.select((s) => s.baseCurrency),
+    );
     final totalFormatted = repo.formatPrice(stats.totalValue, baseCurrency);
     final avgFormatted = repo.formatPrice(stats.averagePrice, baseCurrency);
 

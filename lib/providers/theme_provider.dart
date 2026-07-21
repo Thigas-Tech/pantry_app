@@ -43,11 +43,8 @@ class ThemeModeNotifier extends Notifier<ThemeModeOption> {
     } on Exception catch (_) {}
   }
 
-  /// The current theme mode.
-  ThemeModeOption get value => state;
-
   /// Updates the theme mode and persists the choice.
-  set value(ThemeModeOption mode) {
+  void setThemeMode(ThemeModeOption mode) {
     state = mode;
     unawaited(_persist(mode));
   }

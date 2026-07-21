@@ -339,6 +339,7 @@
   "appVersionLabel": "Versao do app",
   "osLabel": "SO",
   "navList": "Lista",
+  "apiSearchWarning": "Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.",
   "dismiss": "Dispensar",
   "priceHidden": "Preco oculto",
   "add": "Adicionar",

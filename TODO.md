@@ -338,7 +338,7 @@ infrastructure or external server hosting are listed last.
   home_screen.dart (1). Removed empty `setState(() {})` from
   `product_detail_screen.dart._retrySubmission()`.
 
-- [ ] **SearchBar/SearchAnchor upgrade** — replace manual `TextField` in
+- [x] **SearchBar/SearchAnchor upgrade** — replace manual `TextField` in
   SearchScreen and HomeScreen with M3 `SearchBar`/`SearchAnchor` for native
   autocomplete and animation.
 - [ ] **Fix issues discovered during emulator run** — address the following
@@ -874,14 +874,14 @@ infrastructure or external server hosting are listed last.
   - **Allergen formatting varies**: Use lightweight parser for basic
     bold/color markup; avoid heavyweight `flutter_html` if possible.
 
-- [ ] **Shopping list** — tab or separate screen; mark items as "to buy"
+- [x] **Shopping list** — tab or separate screen; mark items as "to buy"
   with a toggle. Items appear in a dedicated list until purchased (then
   move to inventory).
 - [ ] **Barcode history** — show the last N scanned barcodes with quick-add
   button. Persist to SQLite.
 - [ ] **Empty-pantry onboarding** — when inventory is empty, show a guided
   "scan your first item" flow instead of just the empty state widget.
-- [ ] **Offline-first product submission queue** — queue `submitProduct`
+- [x] **Offline-first product submission queue** — queue `submitProduct`
   calls when offline; flush when `connectivityProvider` emits `true`.
 - [ ] **WHO-based food quality recommendations** — research complete:
   ADI-based additive safety warnings, non‑sugar sweetener health guidance,
@@ -914,7 +914,7 @@ infrastructure or external server hosting are listed last.
 
 ### Database migrations
 
-- [x] **DB migrations through v19** -- schema is at version 19 with all
+- [x] **DB migrations through v24** -- schema is at version 24 with all
   planned migrations (feedback_queue, prices, shopping_list, search_text,
   language_code, product_submission_queue, stores). Further version bumps
   for new features still needed.
