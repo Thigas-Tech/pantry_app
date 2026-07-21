@@ -9,13 +9,13 @@
 ///   - Search bar filtering and clear functionality.
 ///   - Navigation via the FAB (scanner flow) and settings button.
 ///
-/// All tests use the shared `pumpApp` helper.  We override the relevant
-/// Riverpod providers (`inventoryWithProductProvider`, `inventoryListProvider`,
-/// `activeInventoryProvider`, `productRepositoryProvider`) with fake/mocked
-/// values.  The `imageCacheProvider` is stubbed via the harness to prevent
-/// errors inside `InventoryCard`'s `FutureBuilder`.
+/// All tests use the shared pumpApp helper.  We override the relevant
+/// Riverpod providers (inventoryWithProductProvider, inventoryListProvider,
+/// activeInventoryProvider, productRepositoryProvider) with fake/mocked
+/// values.  The imageCacheProvider is stubbed via the harness to prevent
+/// errors inside InventoryCard's FutureBuilder.
 ///
-/// The loading test uses `settle: false` to keep the future pending, then
+/// The loading test uses settle: false to keep the future pending, then
 /// completes it manually to avoid a “pending timer” error.
 library;
 

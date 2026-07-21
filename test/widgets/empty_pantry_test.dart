@@ -3,9 +3,9 @@
 /// Tests the empty‑state widget that appears when the pantry has no items.
 /// The widget renders a kitchen icon, a title, a subtitle, and a scan button.
 /// We verify that the correct localised strings appear and that the button
-/// triggers the `onScan` callback.
+/// triggers the onScan callback.
 ///
-/// This test uses the shared `pumpApp` helper from `test/helpers/pump_app.dart`
+/// This test uses the shared pumpApp helper from test/helpers/pump_app.dart
 /// to wrap the widget in a minimal MaterialApp with English locale and
 /// localisation delegates.
 library;

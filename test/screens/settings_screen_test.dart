@@ -12,8 +12,8 @@
 /// - Expiring-soon days tile opens and saves a dialog value.
 /// - "What's New" and "Send Feedback" tiles are present.
 ///
-/// All tests use the `pumpApp` helper.  We override `themeModeProvider` and
-/// `settingsProvider` with controlled fakes to isolate the screen from real
+/// All tests use the pumpApp helper.  We override themeModeProvider and
+/// settingsProvider with controlled fakes to isolate the screen from real
 /// state.
 library;
 
@@ -39,14 +39,14 @@ class FakeThemeModeNotifier extends ThemeModeNotifier {
 
 /// A controllable fake for the settings notifier.
 /// Assumes [Settings] has the fields:
-///   `notificationsEnabled` (bool, defaults to true)
-///   `retentionDays` (int, defaults to 60)
+///   notificationsEnabled (bool, defaults to true)
+///   retentionDays (int, defaults to 60)
 class FakeSettingsNotifier extends SettingsNotifier {
   @override
   Settings build() => const Settings();
 }
 
-/// A fake with [Settings.notificationsEnabled] set to `false`.
+/// A fake with [Settings.notificationsEnabled] set to false.
 class FakeSettingsNotifierNotifsOff extends SettingsNotifier {
   @override
   Settings build() => const Settings(notificationsEnabled: false);

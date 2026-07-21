@@ -18,10 +18,10 @@ class MockImageCacheService extends Mock implements ImageCacheService {}
 /// Creates a [MockProductRepository] with common stubs already configured.
 ///
 /// Stubs included:
-/// - `isCacheOverdue()` → `false` (prevents background refresh on init)
-/// - `getLastRefreshTime()` → `null` (cooldown check returns no prior refresh)
+/// - isCacheOverdue() → false (prevents background refresh on init)
+/// - getLastRefreshTime() → null (cooldown check returns no prior refresh)
 ///
-/// Tests can override any stub by calling `when(() => ...).thenAnswer(...)`
+/// Tests can override any stub by calling when(() => ...).thenAnswer(...)
 /// after receiving the instance.
 MockProductRepository createMockProductRepository() {
   final repo = MockProductRepository();
@@ -39,7 +39,7 @@ MockProductRepository createMockProductRepository() {
 ///
 /// Additional [overrides] take precedence over the defaults.
 ///
-/// If [settle] is `false` (default `true`), only a single frame is pumped
+/// If [settle] is false (default true), only a single frame is pumped
 /// after [WidgetTester.pumpWidget] – useful when you need
 /// to keep an async future pending.
 Future<void> pumpApp(

@@ -9,7 +9,7 @@
 ///   - Nutri-Score by store shows letter instead of number (#135).
 ///   - Store spending bar chart shows formatted price tooltip (#136).
 ///
-/// Uses `pumpApp` with [statsProvider] overridden to return controlled
+/// Uses pumpApp with [statsProvider] overridden to return controlled
 /// Future values.  Chart widgets are verified for presence and labels;
 /// fl_chart rendering is not pixel-tested.
 library;

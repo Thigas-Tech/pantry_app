@@ -4,10 +4,10 @@ import 'package:pantry_app/models/inventory_item.dart';
 /// Tests for the [InventoryItem] model.
 ///
 /// Covers JSON deserialization with the snake_case database keys,
-/// default values, and the new `inventoryId` field.
+/// default values, and the new inventoryId field.
 void main() {
   group('InventoryItem', () {
-    /// A complete row from the `inventory` table.
+    /// A complete row from the inventory table.
     final completeJson = {
       'id': 1,
       'barcode': '123',
@@ -21,7 +21,7 @@ void main() {
     };
 
     test('fromJson creates a valid InventoryItem from a complete JSON', () {
-      /// Every field is correctly parsed, including the new `inventory_id`.
+      /// Every field is correctly parsed, including the new inventory_id.
       final item = InventoryItem.fromJson(completeJson);
       expect(item.id, 1);
       expect(item.barcode, '123');

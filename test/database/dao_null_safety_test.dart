@@ -5,7 +5,7 @@
 /// with an in-memory database for fast, isolated DAO-level tests.
 ///
 /// SQLite returns NULL for SUM on empty result sets — the DAO layer
-/// must handle this with null-coalescing (??) instead of `!`.
+/// must handle this with null-coalescing (??) instead of !.
 /// Similarly, [ProductDao.fromMap] and [InventoryDao.fromMap] must
 /// gracefully handle missing columns with sensible defaults.
 library;

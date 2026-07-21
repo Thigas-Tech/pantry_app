@@ -6,8 +6,8 @@ import 'package:pantry_app/models/product_type.dart';
 /// Tests for the [Product] model.
 ///
 /// Covers JSON deserialization from the Open Food Facts v3 API format,
-/// handling of missing optional fields, immutability via `copyWith`, and
-/// safe API merge semantics via `Product.mergeFromApi`.
+/// handling of missing optional fields, immutability via copyWith, and
+/// safe API merge semantics via Product.mergeFromApi.
 void main() {
   group('ProductType', () {
     test('enum values exist for barcoded, produce, custom', () {
@@ -123,7 +123,7 @@ void main() {
 
     test('fromOffProduct handles missing optional fields', () {
       /// Only the required fields are present; all optional fields become
-      /// `null`.
+      /// null.
       final offProduct = off.Product(
         barcode: '456',
         productName: 'Minimal',
