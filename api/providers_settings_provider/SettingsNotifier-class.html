@@ -97,7 +97,7 @@ to <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_prefer
   </section>
     
   <section
-      class="summary offset-anchor"
+      class="summary offset-anchor inherited"
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
@@ -161,18 +161,6 @@ to <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_prefer
 
 </dd>
 
-        <dt id="value" class="property">
-  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/value.html">value</a></span>
-  <span class="signature">&#8596; <a href="../providers_settings_provider/Settings-class.html">Settings</a></span>
-  
-
-</dt>
-<dd>
-  The current settings.
-  <div class="features"><span class="feature">getter/setter pair</span></div>
-
-</dd>
-
     </dl>
   </section>
 
@@ -221,6 +209,19 @@ to <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_prefer
 
 </dd>
 
+        <dt id="replace" class="callable">
+  <span class="name deprecated"><a class="deprecated" href="../providers_settings_provider/SettingsNotifier/replace.html">replace</a></span><span class="signature">(<wbr><span class="parameter" id="replace-param-settings"><span class="type-annotation"><a href="../providers_settings_provider/Settings-class.html">Settings</a></span> <span class="parameter-name">settings</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Replaces the entire settings and persists every field.
+  
+
+</dd>
+
         <dt id="runBuild" class="callable inherited">
   <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier/runBuild.html">runBuild</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; WhenComplete?</span>
@@ -231,6 +232,162 @@ to <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_prefer
 <dd class="inherited">
   Executes <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier/build.html">Notifier.build</a>.
   <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setAmoledDarkMode" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setAmoledDarkMode.html">setAmoledDarkMode</a></span><span class="signature">(<wbr>{<span class="parameter" id="setAmoledDarkMode-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets whether AMOLED dark mode is enabled.
+  
+
+</dd>
+
+        <dt id="setBaseCurrency" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setBaseCurrency.html">setBaseCurrency</a></span><span class="signature">(<wbr><span class="parameter" id="setBaseCurrency-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">value</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets the base currency code (ISO 4217).
+  
+
+</dd>
+
+        <dt id="setExpiringSoonDays" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setExpiringSoonDays.html">setExpiringSoonDays</a></span><span class="signature">(<wbr><span class="parameter" id="setExpiringSoonDays-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">value</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets the number of days for "expiring soon".
+  
+
+</dd>
+
+        <dt id="setInactivityReminderEnabled" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setInactivityReminderEnabled.html">setInactivityReminderEnabled</a></span><span class="signature">(<wbr>{<span class="parameter" id="setInactivityReminderEnabled-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets whether the inactivity reminder is enabled.
+  
+
+</dd>
+
+        <dt id="setInactivityThresholdDays" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setInactivityThresholdDays.html">setInactivityThresholdDays</a></span><span class="signature">(<wbr><span class="parameter" id="setInactivityThresholdDays-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">value</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets the inactivity threshold in days.
+  
+
+</dd>
+
+        <dt id="setNotificationsEnabled" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setNotificationsEnabled.html">setNotificationsEnabled</a></span><span class="signature">(<wbr>{<span class="parameter" id="setNotificationsEnabled-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets whether expiry notifications are enabled.
+  
+
+</dd>
+
+        <dt id="setOpenPricesSyncEnabled" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setOpenPricesSyncEnabled.html">setOpenPricesSyncEnabled</a></span><span class="signature">(<wbr>{<span class="parameter" id="setOpenPricesSyncEnabled-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets whether Open Prices sync is enabled.
+  
+
+</dd>
+
+        <dt id="setOpenPricesToken" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setOpenPricesToken.html">setOpenPricesToken</a></span><span class="signature">(<wbr><span class="parameter" id="setOpenPricesToken-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">value</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets the Open Prices API bearer token.
+  
+
+</dd>
+
+        <dt id="setPriceRetentionDays" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setPriceRetentionDays.html">setPriceRetentionDays</a></span><span class="signature">(<wbr><span class="parameter" id="setPriceRetentionDays-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">value</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets the price retention period in days.
+  
+
+</dd>
+
+        <dt id="setPricesHidden" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setPricesHidden.html">setPricesHidden</a></span><span class="signature">(<wbr>{<span class="parameter" id="setPricesHidden-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets whether prices are hidden.
+  
+
+</dd>
+
+        <dt id="setPriceTrackingEnabled" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setPriceTrackingEnabled.html">setPriceTrackingEnabled</a></span><span class="signature">(<wbr>{<span class="parameter" id="setPriceTrackingEnabled-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets whether price tracking is enabled.
+  
+
+</dd>
+
+        <dt id="setRetentionDays" class="callable">
+  <span class="name"><a href="../providers_settings_provider/SettingsNotifier/setRetentionDays.html">setRetentionDays</a></span><span class="signature">(<wbr><span class="parameter" id="setRetentionDays-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">value</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets the number of days before cleanup.
+  
 
 </dd>
 

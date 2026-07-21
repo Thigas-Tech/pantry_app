@@ -110,7 +110,8 @@ products with empty barcodes are filtered out.</p>
       return products;
     } on Exception catch (e) {
       if (attempt &lt; maxRetries) {
-        final delay = Duration(seconds: attempt + 1);
+        final isRateLimit = isRateLimitError(e);
+        final delay = retryDelay(attempt, isRateLimit: isRateLimit);
         logWarning(
           &#39;Search &quot;$query&quot; failed (attempt ${attempt + 1}), &#39;
           &#39;retrying in ${delay.inSeconds}s: $e&#39;,

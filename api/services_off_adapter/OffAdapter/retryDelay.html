@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the submitProduct method from the OffAdapter class, for the Dart programming language.">
-  <title>submitProduct method - OffAdapter class - off_adapter library - Dart API</title>
+  <meta name="description" content="API docs for the retryDelay method from the OffAdapter class, for the Dart programming language.">
+  <title>retryDelay method - OffAdapter class - off_adapter library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../services_off_adapter/">services&#47;off_adapter.dart</a></li>
     <li><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></li>
-    <li class="self-crumb">submitProduct method</li>
+    <li class="self-crumb">retryDelay static method</li>
   </ol>
-  <div class="self-name">submitProduct</div>
+  <div class="self-name">retryDelay</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -49,77 +49,51 @@
     data-above-sidebar="services_off_adapter&#47;OffAdapter-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">submitProduct</span> method 
+<h1><span class="kind-method">retryDelay</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
-<span class="name ">submitProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span></li>
-</ol>)
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/meta/visibleForTesting-constant.html">visibleForTesting</a></li>
+    </ol>
+  </div>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span>
+<span class="name ">retryDelay</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="retryDelay-param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, {</span></li>
+<li><span class="parameter" id="retryDelay-param-random"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-math/Random-class.html">Random</a>?</span> <span class="parameter-name">random</span>, </span></li>
+<li><span class="parameter" id="retryDelay-param-isRateLimit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isRateLimit</span> = <span class="default-value">false</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Submits a product to Open Food Facts.</p>
-<p>Returns <code>true</code> on success, <code>false</code> if credentials are missing or
-the server rejected the submission.</p>
+  <p>Returns a retry delay with linear backoff and ±25% jitter.</p>
+<p><code>attempt</code> is zero-based (0 = first retry).  The base delay is
+<code>(attempt + 1)</code> seconds.  When <code>isRateLimit</code> is <code>true</code>, the base
+delay is multiplied by 5 to be more respectful of the server's
+capacity.  The result is clamped to &gt;= 500 ms.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; submitProduct(Product product) async {
-  final user = writeUser;
-  if (user == null) {
-    logWarning(&#39;Cannot submit — no OFF credentials configured&#39;);
-    return false;
-  }
-  const maxRetries = 2;
-  for (var attempt = 0; attempt &lt;= maxRetries; attempt++) {
-    try {
-      logInfo(
-        &#39;Submitting product ${product.barcode} to OFF &#39;
-        &#39;(attempt ${attempt + 1})&#39;,
-      );
-      final offProduct = product.toOffProduct();
-      final status = await _onSaveProduct(
-        user,
-        offProduct,
-        uriHelper: _uriHelper,
-      );
-      final success = status.status == 1;
-      if (success) {
-        logInfo(&#39;Product ${product.barcode} submitted successfully&#39;);
-        return true;
-      }
-      logWarning(
-        &#39;Product ${product.barcode} submission returned status &#39;
-        &#39;${status.status}: ${status.statusVerbose}&#39;,
-      );
-      return false;
-    } on Exception catch (e) {
-      if (attempt &lt; maxRetries) {
-        final isRateLimit = isRateLimitError(e);
-        final delay = retryDelay(attempt, isRateLimit: isRateLimit);
-        logWarning(
-          &#39;Submission failed for ${product.barcode} &#39;
-          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e&#39;,
-        );
-        await Future&lt;void&gt;.delayed(delay);
-      } else {
-        logError(
-          &#39;Submission failed for ${product.barcode} after &#39;
-          &#39;all retries: $e&#39;,
-        );
-        return false;
-      }
-    }
-  }
-  return false;
+  <pre class="language-dart"><code class="language-dart">@visibleForTesting
+static Duration retryDelay(
+  int attempt, {
+  Random? random,
+  bool isRateLimit = false,
+}) {
+  const baseMs = 1000;
+  final multiplier = isRateLimit ? 5 : 1;
+  final base = (attempt + 1) * baseMs * multiplier;
+  final rng = random ?? Random();
+  &#47;&#47; ±25% jitter
+  final jitter = ((rng.nextDouble() - 0.5) * 0.5 * base).round();
+  return Duration(milliseconds: (base + jitter).clamp(500, base * 2));
 }</code></pre>
 </section>
 
@@ -136,7 +110,7 @@ the server rejected the submission.</p>
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../services_off_adapter/">off_adapter</a></li>
     <li><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></li>
-    <li class="self-crumb">submitProduct method</li>
+    <li class="self-crumb">retryDelay static method</li>
 </ol>
 
     <h5>OffAdapter class</h5>

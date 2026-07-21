@@ -69,6 +69,10 @@ item with the same barcode and unit already exists.</p>
 <p>When an existing pending item has the same barcode and unit, the
 quantities are summed instead of creating a duplicate row.
 The item's inventoryId defaults to the active inventory if not set.</p>
+<p>Before inserting, ensures the referenced product exists in the local
+cache to avoid FOREIGN KEY constraint failures.  If the product is
+missing and cannot be fetched, the barcode is set to null so the
+insert still succeeds.</p>
 </section>
 
 
@@ -79,9 +83,38 @@ The item's inventoryId defaults to the active inventory if not set.</p>
   final db = ref.read(databaseProvider);
   final database = await db.database;
   final activeInventoryId = ref.read(activeInventoryProvider);
-  final scopedItem = item.inventoryId == null
+  final repo = ref.read(productRepositoryProvider);
+  var scopedItem = item.inventoryId == null
       ? item.copyWith(inventoryId: activeInventoryId)
       : item;
+
+  &#47;&#47; Ensure the product exists in cache before inserting (avoid FK failure).
+  if (scopedItem.barcode != null &amp;&amp; scopedItem.barcode!.isNotEmpty) {
+    final existing = await db.getProduct(scopedItem.barcode!);
+    if (existing == null) {
+      try {
+        logInfo(
+          &#39;Product ${scopedItem.barcode} not in cache — &#39;
+          &#39;fetching before shopping list insert&#39;,
+        );
+        final fetched = await repo.getProduct(scopedItem.barcode!);
+        await repo.cacheProduct(fetched);
+      } on ProductNotFoundException {
+        logWarning(
+          &#39;Product ${scopedItem.barcode} not found anywhere — &#39;
+          &#39;adding without barcode&#39;,
+        );
+        scopedItem = scopedItem.copyWith(barcode: null);
+      } on FetchFailedException {
+        logWarning(
+          &#39;Could not fetch product ${scopedItem.barcode} — &#39;
+          &#39;adding without barcode&#39;,
+        );
+        scopedItem = scopedItem.copyWith(barcode: null);
+      }
+    }
+  }
+
   logInfo(
     &#39;Add shopping item — barcode=${scopedItem.barcode ?? &#39;none&#39;} &#39;
     &#39;name=&quot;${scopedItem.name}&quot; qty=${scopedItem.quantity} &#39;

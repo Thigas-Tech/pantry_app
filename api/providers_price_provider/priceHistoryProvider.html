@@ -67,8 +67,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;List&lt;Price&gt;, String&gt; priceHistoryProvider =
-    FutureProvider.autoDispose.family&lt;List&lt;Price&gt;, String&gt;(
+  <pre class="language-dart"><code class="language-dart">final priceHistoryProvider = FutureProvider.autoDispose
+    .family&lt;List&lt;Price&gt;, String&gt;(
       (ref, barcode) {
         return ref.watch(priceRepositoryProvider).getPriceHistory(barcode);
       },

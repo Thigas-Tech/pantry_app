@@ -120,9 +120,7 @@ Widget build(BuildContext context, WidgetRef ref) {
       loading: () =&gt; const Center(child: CircularProgressIndicator()),
       error: (err, _) =&gt; ErrorView(
         message: l10n.inventoryLoadFailed,
-        onRetry: () =&gt; WidgetsBinding.instance.addPostFrameCallback(
-          (_) =&gt; ref.invalidate(inventoryListProvider),
-        ),
+        onRetry: () =&gt; ref.invalidate(inventoryListProvider),
       ),
       data: (list) {
         if (list.isEmpty) {
@@ -160,8 +158,9 @@ Widget build(BuildContext context, WidgetRef ref) {
                       ? const Icon(Icons.check, color: Colors.teal)
                       : null,
                   onTap: () {
-                    ref.read(activeInventoryProvider.notifier).value =
-                        inv[&#39;id&#39;] as int;
+                    ref
+                        .read(activeInventoryProvider.notifier)
+                        .setActiveInventory(inv[&#39;id&#39;] as int);
                     Navigator.of(context).pop();
                   },
                   onLongPress: () =&gt; _showRenameDialog(

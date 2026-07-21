@@ -126,7 +126,8 @@ success, <code>false</code> if credentials are missing or the upload fails.</p>
       return false;
     } on Exception catch (e) {
       if (attempt &lt; maxRetries) {
-        final delay = Duration(seconds: attempt + 1);
+        final isRateLimit = isRateLimitError(e);
+        final delay = retryDelay(attempt, isRateLimit: isRateLimit);
         logWarning(
           &#39;$imageField image upload failed for $barcode &#39;
           &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e&#39;,

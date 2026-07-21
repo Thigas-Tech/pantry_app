@@ -115,9 +115,27 @@ race conditions.</p>
           return existingItem.id!;
         }
       }
-      final id = await txn.insert(&#39;shopping_list&#39;, toMap(item));
-      logInfo(&#39;Shopping item inserted with id $id&#39;);
-      return id;
+      try {
+        final id = await txn.insert(&#39;shopping_list&#39;, toMap(item));
+        logInfo(&#39;Shopping item inserted with id $id&#39;);
+        return id;
+      } on DatabaseException catch (e) {
+        if (item.barcode != null &amp;&amp;
+            e.toString().contains(&#39;FOREIGN KEY constraint failed&#39;)) {
+          logWarning(
+            &#39;FK constraint on barcode=${item.barcode} — &#39;
+            &#39;retrying insert with null barcode&#39;,
+          );
+          final fallbackItem = item.copyWith(barcode: null);
+          final id = await txn.insert(
+            &#39;shopping_list&#39;,
+            toMap(fallbackItem),
+          );
+          logInfo(&#39;Shopping item inserted with null barcode — id=$id&#39;);
+          return id;
+        }
+        rethrow;
+      }
     });
   } on Exception catch (e) {
     logError(&#39;Failed to insert&#47;merge shopping item: $e&#39;);

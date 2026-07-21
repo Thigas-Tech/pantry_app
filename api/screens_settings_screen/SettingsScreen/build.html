@@ -135,10 +135,9 @@ Widget build(BuildContext context, WidgetRef ref) {
               value: settings.amoledDarkMode,
               onChanged: (value) {
                 logInfo(&#39;AMOLED dark mode toggled: $value&#39;);
-                final current = ref.read(settingsProvider);
-                ref.read(settingsProvider.notifier).value = current.copyWith(
-                  amoledDarkMode: value,
-                );
+                ref
+                    .read(settingsProvider.notifier)
+                    .setAmoledDarkMode(value: value);
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -261,10 +260,9 @@ Widget build(BuildContext context, WidgetRef ref) {
                   );
                   await notifService.cancelAllReminders();
                 }
-                final current = ref.read(settingsProvider);
-                ref.read(settingsProvider.notifier).value = current.copyWith(
-                  notificationsEnabled: value,
-                );
+                ref
+                    .read(settingsProvider.notifier)
+                    .setNotificationsEnabled(value: value);
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -303,10 +301,9 @@ Widget build(BuildContext context, WidgetRef ref) {
                 } else {
                   await notifService.cancelInactivityReminder();
                 }
-                final current = ref.read(settingsProvider);
-                ref.read(settingsProvider.notifier).value = current.copyWith(
-                  inactivityReminderEnabled: value,
-                );
+                ref
+                    .read(settingsProvider.notifier)
+                    .setInactivityReminderEnabled(value: value);
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -366,10 +363,9 @@ Widget build(BuildContext context, WidgetRef ref) {
               value: settings.priceTrackingEnabled,
               onChanged: (value) {
                 logInfo(&#39;Price tracking toggled: $value&#39;);
-                final current = ref.read(settingsProvider);
-                ref.read(settingsProvider.notifier).value = current.copyWith(
-                  priceTrackingEnabled: value,
-                );
+                ref
+                    .read(settingsProvider.notifier)
+                    .setPriceTrackingEnabled(value: value);
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -396,10 +392,9 @@ Widget build(BuildContext context, WidgetRef ref) {
               value: settings.pricesHidden,
               onChanged: (value) {
                 logInfo(&#39;Prices hidden toggled: $value&#39;);
-                final current = ref.read(settingsProvider);
-                ref.read(settingsProvider.notifier).value = current.copyWith(
-                  pricesHidden: value,
-                );
+                ref
+                    .read(settingsProvider.notifier)
+                    .setPricesHidden(value: value);
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -422,10 +417,9 @@ Widget build(BuildContext context, WidgetRef ref) {
                   if (consent != true) return;
                 }
                 logInfo(&#39;Open Prices sync toggled: $value&#39;);
-                final current = ref.read(settingsProvider);
-                ref.read(settingsProvider.notifier).value = current.copyWith(
-                  openPricesSyncEnabled: value,
-                );
+                ref
+                    .read(settingsProvider.notifier)
+                    .setOpenPricesSyncEnabled(value: value);
               },
             ),
             if (settings.openPricesSyncEnabled) ...[

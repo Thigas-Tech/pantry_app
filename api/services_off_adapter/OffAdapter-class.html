@@ -152,7 +152,7 @@ or return <code>false</code> if no credentials are set.</li>
     <h2>Methods</h2>
     <dl class="callables">
         <dt id="getByBarcode" class="callable">
-  <span class="name"><a href="../services_off_adapter/OffAdapter/getByBarcode.html">getByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="getByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getByBarcode-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span> = <span class="default-value">&#39;en&#39;</span></span>})
+  <span class="name"><a href="../services_off_adapter/OffAdapter/getByBarcode.html">getByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="getByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getByBarcode-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span> = <span class="default-value">&#39;en&#39;</span>, </span><span class="parameter" id="getByBarcode-param-maxRetries"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maxRetries</span> = <span class="default-value">2</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>
   </span>
   
@@ -257,6 +257,19 @@ or return <code>false</code> if no credentials are set.</li>
   <section class="summary offset-anchor" id="static-methods">
     <h2>Static Methods</h2>
     <dl class="callables">
+        <dt id="isRateLimitError" class="callable">
+  <span class="name"><a href="../services_off_adapter/OffAdapter/isRateLimitError.html">isRateLimitError</a></span><span class="signature">(<wbr><span class="parameter" id="isRateLimitError-param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns <code>true</code> when <code>error</code> indicates HTTP 429 rate limiting.
+  
+
+</dd>
+
         <dt id="parseImageField" class="callable">
   <span class="name"><a href="../services_off_adapter/OffAdapter/parseImageField.html">parseImageField</a></span><span class="signature">(<wbr><span class="parameter" id="parseImageField-param-field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">field</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ImageField.html">ImageField</a></span>
@@ -266,6 +279,19 @@ or return <code>false</code> if no credentials are set.</li>
 </dt>
 <dd>
   Parses an image field string into the SDK's <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/ImageField.html">off.ImageField</a> enum.
+  
+
+</dd>
+
+        <dt id="retryDelay" class="callable">
+  <span class="name"><a href="../services_off_adapter/OffAdapter/retryDelay.html">retryDelay</a></span><span class="signature">(<wbr><span class="parameter" id="retryDelay-param-attempt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">attempt</span>, {</span><span class="parameter" id="retryDelay-param-random"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-math/Random-class.html">Random</a>?</span> <span class="parameter-name">random</span>, </span><span class="parameter" id="retryDelay-param-isRateLimit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isRateLimit</span> = <span class="default-value">false</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns a retry delay with linear backoff and ±25% jitter.
   
 
 </dd>

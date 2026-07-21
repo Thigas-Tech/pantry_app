@@ -57,6 +57,7 @@
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product/Product-class.html">Product</a></span>&gt;</span></span>
 <span class="name ">getByBarcode</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="getByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
 <li><span class="parameter" id="getByBarcode-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span> = <span class="default-value">&#39;en&#39;</span>, </span></li>
+<li><span class="parameter" id="getByBarcode-param-maxRetries"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maxRetries</span> = <span class="default-value">2</span>, </span></li>
 </ol>})
 
       
@@ -67,6 +68,10 @@
   <p>Fetches a product by barcode from Open Food Facts.</p>
 <p><code>languageCode</code> is a two-letter code (e.g. <code>'en'</code>, <code>'fr'</code>, <code>'pt'</code>)
 that requests product data in the user's preferred language.</p>
+<p>Retries up to <code>maxRetries</code> times on transient failures (network
+errors, server errors, rate limiting) with linear backoff.  Does
+NOT retry on <a href="../../services_exceptions/ProductNotFoundException-class.html">ProductNotFoundException</a> — unknown barcodes fail
+fast.</p>
 <p>Throws <a href="../../services_exceptions/ProductNotFoundException-class.html">ProductNotFoundException</a> if the barcode is unknown.
 Throws <a href="../../services_exceptions/FetchFailedException-class.html">FetchFailedException</a> on network or server errors that
 are not "not found" responses.</p>
@@ -79,31 +84,48 @@ are not "not found" responses.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; getByBarcode(
   String barcode, {
   String languageCode = &#39;en&#39;,
+  int maxRetries = 2,
 }) async {
-  logInfo(&#39;Fetching $barcode via SDK&#39;);
-  try {
-    final result = await _onGetProductV3(
-      OffQuery.barcodeConfig(barcode, language: languageCode),
-      user: readUser,
-      uriHelper: _uriHelper,
-    );
-    if (result.product == null) {
-      logWarning(&#39;Product $barcode not found&#39;);
-      throw ProductNotFoundException(barcode);
+  for (var attempt = 0; attempt &lt;= maxRetries; attempt++) {
+    try {
+      logInfo(&#39;Fetching $barcode via SDK (attempt ${attempt + 1})&#39;);
+      final result = await _onGetProductV3(
+        OffQuery.barcodeConfig(barcode, language: languageCode),
+        user: readUser,
+        uriHelper: _uriHelper,
+      );
+      if (result.product == null) {
+        logWarning(&#39;Product $barcode not found&#39;);
+        throw ProductNotFoundException(barcode);
+      }
+      logInfo(&#39;Fetched $barcode — ${result.product!.productName}&#39;);
+      return Product.fromOffProduct(
+        result.product!,
+        languageCode: languageCode,
+      );
+    } on ProductNotFoundException {
+      rethrow;
+    } on Exception catch (e) {
+      if (attempt &lt; maxRetries) {
+        final isRateLimit = isRateLimitError(e);
+        final delay = retryDelay(attempt, isRateLimit: isRateLimit);
+        logWarning(
+          &#39;Fetch $barcode failed (attempt ${attempt + 1}), &#39;
+          &#39;retrying in ${delay.inSeconds}s: $e&#39;,
+        );
+        await Future&lt;void&gt;.delayed(delay);
+      } else {
+        logError(&#39;Fetch $barcode failed after all retries: $e&#39;);
+        throw FetchFailedException(
+          &#39;Failed to fetch product. Please check your connection.&#39;,
+        );
+      }
     }
-    logInfo(&#39;Fetched $barcode — ${result.product!.productName}&#39;);
-    return Product.fromOffProduct(
-      result.product!,
-      languageCode: languageCode,
-    );
-  } on ProductNotFoundException {
-    rethrow;
-  } on Exception catch (e) {
-    logError(&#39;SDK error for $barcode: $e&#39;);
-    throw FetchFailedException(
-      &#39;Failed to fetch product. Please check your connection.&#39;,
-    );
   }
+  &#47;&#47; Unreachable — either returns or throws above.
+  throw FetchFailedException(
+    &#39;Failed to fetch product. Please check your connection.&#39;,
+  );
 }</code></pre>
 </section>
 

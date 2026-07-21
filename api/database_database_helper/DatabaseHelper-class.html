@@ -62,20 +62,23 @@ database operations use the same connection.</p>
 constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
 or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
-<p>Eight tables are created on first launch (version 20):</p>
+<p>Nine tables are created on first launch (version 24):</p>
 <ul>
 <li><code>products</code> – product data fetched from Open Food Facts.</li>
 <li><code>inventories</code> – named pantries (e.g. "Home", "Work").</li>
 <li><code>inventory</code> – instances of products the user has added to a pantry.</li>
 <li><code>feedback_queue</code> – offline queue for GitHub issue reports.</li>
+<li><code>product_submission_queue</code> – offline queue for OFF product submissions.</li>
 <li><code>prices</code> – purchase price observations per barcode.</li>
 <li><code>shopping_list</code> – items the user intends to buy.</li>
 <li><code>stores</code> – saved store names for autocomplete.</li>
+<li><code>firebase_cache_meta</code> – Firestore cache sync metadata.</li>
 </ul>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
-<a href="../database_product_dao/ProductDao-class.html">ProductDao</a>, <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>, <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a>. This keeps each file
-focused on a single table.</p>
+<a href="../database_product_dao/ProductDao-class.html">ProductDao</a>, <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>, <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a>, <a href="../database_price_dao/PriceDao-class.html">PriceDao</a>,
+<a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a>, <a href="../database_store_dao/StoreDao-class.html">StoreDao</a>, <a href="../database_feedback_queue_dao/FeedbackQueueDao-class.html">FeedbackQueueDao</a>,
+<a href="../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>, <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>.</p>
 <p>See also:</p>
 <ul>
 <li><a href="https://pub.dev/packages/sqflite">sqflite</a> — the SQLite plugin

@@ -78,12 +78,10 @@ invalidated via <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/fl
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">final inventoryWithProductProvider = FutureProvider&lt;List&lt;InventoryWithProduct&gt;&gt;(
   (ref) async {
-    await Future&lt;void&gt;.delayed(Duration.zero);
     final activeId = ref.watch&lt;int&gt;(activeInventoryProvider);
     final db = ref.watch(databaseProvider);
     final rows = await db.getInventoryWithProduct(inventoryId: activeId);
     final result = rows.map(InventoryWithProduct.fromMap).toList();
-    await Future&lt;void&gt;.delayed(Duration.zero);
     return result;
   },
 );</code></pre>
