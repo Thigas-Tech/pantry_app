@@ -57,6 +57,7 @@ dev_dependencies:
   mocktail: ^1.0.5
   openfoodfacts_flutter_lints:
     git: https://github.com/openfoodfacts/openfoodfacts_flutter_lints.git
+  riverpod_lint: ^3.1.4
   very_good_analysis: ^10.3.0
   vm_service: ^15.2.0
 

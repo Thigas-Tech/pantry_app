@@ -1,3 +1,6 @@
+plugins:
+  riverpod_lint: ^3.1.4
+
 include:
   - package:openfoodfacts_flutter_lints/flutter.yaml
   - package:very_good_analysis/analysis_options.yaml
