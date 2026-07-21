@@ -29,7 +29,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart'; // for Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -39,7 +38,6 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
@@ -554,7 +552,7 @@ void main() {
   // --------------------------------------------------------------------------
 
   testWidgets(
-    'add to inventory flow invalidates inventoryWithProductProvider',
+    'add to inventory flow creates item and shows snackbar',
     (
       tester,
     ) async {
@@ -572,29 +570,15 @@ void main() {
         () => mockRepo.cacheProduct(any()),
       ).thenAnswer((_) async {});
 
-      var recomputeCount = 0;
-      when(
-        () => mockDb.getInventoryWithProduct(
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async {
-        recomputeCount++;
-        return [];
-      });
-
       await pumpApp(
         tester,
-        const _ProviderWatcher(
-          child: ProductDetailScreen(product: testProduct),
-        ),
+        const ProductDetailScreen(product: testProduct),
         overrides: screenOverrides(
           mockRepo: mockRepo,
           mockNotif: mockNotif,
           mockDb: mockDb,
         ),
       );
-
-      final initialCount = recomputeCount;
 
       await tester.tap(find.text('Add to Inventory'));
       await tester.pumpAndSettle();
@@ -620,10 +604,6 @@ void main() {
       ).called(1);
       // The snackbar says "Item added to pantry."
       expect(find.textContaining('Item added'), findsOneWidget);
-
-      // The post-frame invalidation should have triggered a recomputation of
-      // inventoryWithProductProvider.
-      expect(recomputeCount, greaterThan(initialCount));
     },
   );
 
@@ -632,7 +612,7 @@ void main() {
   // --------------------------------------------------------------------------
 
   testWidgets(
-    'edit inventory item flow invalidates inventoryWithProductProvider',
+    'edit inventory item flow updates item and shows snackbar',
     (
       tester,
     ) async {
@@ -648,29 +628,15 @@ void main() {
         () => mockRepo.updateInventoryItem(any()),
       ).thenAnswer((_) => Future<int>.value(1));
 
-      var recomputeCount = 0;
-      when(
-        () => mockDb.getInventoryWithProduct(
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async {
-        recomputeCount++;
-        return [];
-      });
-
       await pumpApp(
         tester,
-        const _ProviderWatcher(
-          child: ProductDetailScreen(product: testProduct),
-        ),
+        const ProductDetailScreen(product: testProduct),
         overrides: screenOverrides(
           mockRepo: mockRepo,
           mockNotif: mockNotif,
           mockDb: mockDb,
         ),
       );
-
-      final initialCount = recomputeCount;
 
       await tester.tap(find.byIcon(Icons.edit));
       await tester.pumpAndSettle();
@@ -697,10 +663,6 @@ void main() {
       ).called(1);
       // The snackbar says "Item updated."
       expect(find.textContaining('Item updated'), findsOneWidget);
-
-      // The post-frame invalidation should have triggered a recomputation of
-      // inventoryWithProductProvider.
-      expect(recomputeCount, greaterThan(initialCount));
     },
   );
 
@@ -1135,17 +1097,3 @@ void main() {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/// Wraps [child] and watches [inventoryWithProductProvider] so that
-/// invalidation of that provider triggers a recomputation observable by tests.
-class _ProviderWatcher extends ConsumerWidget {
-  const _ProviderWatcher({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(inventoryWithProductProvider);
-    return child;
-  }
-}

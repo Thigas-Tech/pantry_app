@@ -20,12 +20,10 @@ import 'package:pantry_app/widgets/nutriscore_badge.dart';
 /// (add, update, delete, move).
 final inventoryWithProductProvider = FutureProvider<List<InventoryWithProduct>>(
   (ref) async {
-    await Future<void>.delayed(Duration.zero);
     final activeId = ref.watch<int>(activeInventoryProvider);
     final db = ref.watch(databaseProvider);
     final rows = await db.getInventoryWithProduct(inventoryId: activeId);
     final result = rows.map(InventoryWithProduct.fromMap).toList();
-    await Future<void>.delayed(Duration.zero);
     return result;
   },
 );

@@ -13,7 +13,7 @@ class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   int build() => 1;
 
   @override
-  set value(int newValue) {}
+  void setActiveInventory(int newValue) {}
 }
 
 InventoryWithProduct _testItem(

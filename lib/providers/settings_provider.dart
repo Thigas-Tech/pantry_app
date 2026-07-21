@@ -148,13 +148,86 @@ class SettingsNotifier extends Notifier<Settings> {
     }
   }
 
-  /// The current settings.
-  Settings get value => state;
-
   /// Replaces the entire settings and persists every field.
-  set value(Settings settings) {
+  ///
+  /// Prefer the specific setter methods over this bulk replacement.
+  /// Deprecated: use individual setter methods instead.
+  @Deprecated('Use individual setter methods instead')
+  void replace(Settings settings) {
     state = settings;
     unawaited(_persist(settings));
+  }
+
+  /// Sets whether expiry notifications are enabled.
+  void setNotificationsEnabled({required bool value}) {
+    state = state.copyWith(notificationsEnabled: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the number of days before cleanup.
+  void setRetentionDays(int value) {
+    state = state.copyWith(retentionDays: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the number of days for "expiring soon".
+  void setExpiringSoonDays(int value) {
+    state = state.copyWith(expiringSoonDays: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets whether the inactivity reminder is enabled.
+  void setInactivityReminderEnabled({required bool value}) {
+    state = state.copyWith(inactivityReminderEnabled: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the inactivity threshold in days.
+  void setInactivityThresholdDays(int value) {
+    state = state.copyWith(inactivityThresholdDays: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets whether AMOLED dark mode is enabled.
+  void setAmoledDarkMode({required bool value}) {
+    state = state.copyWith(amoledDarkMode: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets whether price tracking is enabled.
+  void setPriceTrackingEnabled({required bool value}) {
+    state = state.copyWith(priceTrackingEnabled: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the price retention period in days.
+  void setPriceRetentionDays(int value) {
+    state = state.copyWith(priceRetentionDays: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets whether prices are hidden.
+  void setPricesHidden({required bool value}) {
+    state = state.copyWith(pricesHidden: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the base currency code (ISO 4217).
+  void setBaseCurrency(String value) {
+    state = state.copyWith(baseCurrency: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets whether Open Prices sync is enabled.
+  void setOpenPricesSyncEnabled({required bool value}) {
+    state = state.copyWith(openPricesSyncEnabled: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the Open Prices API bearer token.
+  void setOpenPricesToken(String value) {
+    state = state.copyWith(openPricesToken: value);
+    unawaited(_persist(state));
   }
 
   Future<void> _persist(Settings settings) async {

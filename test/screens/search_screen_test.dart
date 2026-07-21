@@ -7,6 +7,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -18,6 +19,8 @@ import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/inventory_provider.dart'
+    show inventoryWithProductProvider;
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
@@ -27,6 +30,25 @@ import '../helpers/pump_app.dart';
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class MockOffAdapter extends Mock implements OffAdapter {}
+
+/// A helper widget that watches [inventoryWithProductProvider] and counts
+/// rebuilds so test assertions can detect when the provider is invalidated.
+class _ProviderWatcher extends ConsumerWidget {
+  const _ProviderWatcher({
+    required this.recomputeCount,
+    required this.child,
+  });
+
+  final ValueNotifier<int> recomputeCount;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(inventoryWithProductProvider);
+    recomputeCount.value++;
+    return child;
+  }
+}
 
 void main() {
   late MockDatabaseHelper mockDb;
@@ -70,10 +92,11 @@ void main() {
   Future<void> pumpSearchScreen(
     WidgetTester tester, {
     List<Override> extraOverrides = const [],
+    Widget Function(Widget)? wrap,
   }) async {
     await pumpApp(
       tester,
-      const SearchScreen(),
+      wrap != null ? wrap(const SearchScreen()) : const SearchScreen(),
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         apiServiceProvider.overrideWithValue(mockApi),
@@ -595,5 +618,71 @@ void main() {
       verify(() => mockRepo.deleteInventoryItem(1)).called(1);
       expect(find.text('Removed from pantry.'), findsOneWidget);
     });
+  });
+
+  group('invalidation on navigation return', () {
+    testWidgets(
+      're-queries inventoryWithProductProvider after returning from '
+      'ProductDetailScreen',
+      (tester) async {
+        final mockRepo = createMockProductRepository();
+        when(
+          () => mockRepo.getInventoryForBarcode(
+            any(),
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockDb.getInventoryWithProduct(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        // Stub search to return a result so we can tap one.
+        when(
+          () => mockDb.searchProducts('milk'),
+        ).thenAnswer((_) async => [localProduct]);
+
+        final recomputeCount = ValueNotifier<int>(0);
+
+        await pumpSearchScreen(
+          tester,
+          extraOverrides: [
+            productRepositoryProvider.overrideWithValue(mockRepo),
+          ],
+          wrap: (child) => _ProviderWatcher(
+            recomputeCount: recomputeCount,
+            child: child,
+          ),
+        );
+
+        // Let the _ProviderWatcher settle.
+        await tester.pump();
+
+        clearInteractions(mockDb);
+
+        await tester.enterText(find.byType(SearchBar), 'milk');
+        await tester.pump(const Duration(milliseconds: 550));
+        await tester.pump();
+
+        await tester.tap(find.text('Local Milk'));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump();
+
+        expect(find.byType(ProductDetailScreen), findsOneWidget);
+
+        tester.state<NavigatorState>(find.byType(Navigator)).pop();
+        await tester.pump();
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        verify(
+          () => mockDb.getInventoryWithProduct(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).called(1);
+      },
+    );
   });
 }

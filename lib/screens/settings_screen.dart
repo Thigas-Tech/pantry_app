@@ -61,10 +61,9 @@ class SettingsScreen extends ConsumerWidget {
                 value: settings.amoledDarkMode,
                 onChanged: (value) {
                   logInfo('AMOLED dark mode toggled: $value');
-                  final current = ref.read(settingsProvider);
-                  ref.read(settingsProvider.notifier).value = current.copyWith(
-                    amoledDarkMode: value,
-                  );
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setAmoledDarkMode(value: value);
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -187,10 +186,9 @@ class SettingsScreen extends ConsumerWidget {
                     );
                     await notifService.cancelAllReminders();
                   }
-                  final current = ref.read(settingsProvider);
-                  ref.read(settingsProvider.notifier).value = current.copyWith(
-                    notificationsEnabled: value,
-                  );
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setNotificationsEnabled(value: value);
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -229,10 +227,9 @@ class SettingsScreen extends ConsumerWidget {
                   } else {
                     await notifService.cancelInactivityReminder();
                   }
-                  final current = ref.read(settingsProvider);
-                  ref.read(settingsProvider.notifier).value = current.copyWith(
-                    inactivityReminderEnabled: value,
-                  );
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setInactivityReminderEnabled(value: value);
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -292,10 +289,9 @@ class SettingsScreen extends ConsumerWidget {
                 value: settings.priceTrackingEnabled,
                 onChanged: (value) {
                   logInfo('Price tracking toggled: $value');
-                  final current = ref.read(settingsProvider);
-                  ref.read(settingsProvider.notifier).value = current.copyWith(
-                    priceTrackingEnabled: value,
-                  );
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setPriceTrackingEnabled(value: value);
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -322,10 +318,9 @@ class SettingsScreen extends ConsumerWidget {
                 value: settings.pricesHidden,
                 onChanged: (value) {
                   logInfo('Prices hidden toggled: $value');
-                  final current = ref.read(settingsProvider);
-                  ref.read(settingsProvider.notifier).value = current.copyWith(
-                    pricesHidden: value,
-                  );
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setPricesHidden(value: value);
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -348,10 +343,9 @@ class SettingsScreen extends ConsumerWidget {
                     if (consent != true) return;
                   }
                   logInfo('Open Prices sync toggled: $value');
-                  final current = ref.read(settingsProvider);
-                  ref.read(settingsProvider.notifier).value = current.copyWith(
-                    openPricesSyncEnabled: value,
-                  );
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setOpenPricesSyncEnabled(value: value);
                 },
               ),
               if (settings.openPricesSyncEnabled) ...[
@@ -513,7 +507,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (selected != null) {
       logInfo('Theme changed to ${selected.name}');
-      ref.read(themeModeProvider.notifier).value = selected;
+      ref.read(themeModeProvider.notifier).setThemeMode(selected);
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
@@ -533,9 +527,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (days != null) {
       logInfo('Retention period changed to $days days');
-      ref.read(settingsProvider.notifier).value = current.copyWith(
-        retentionDays: days,
-      );
+      ref.read(settingsProvider.notifier).setRetentionDays(days);
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.retentionPeriodSet(days));
       }
@@ -555,9 +547,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (days != null) {
       logInfo('Expiring soon threshold changed to $days days');
-      ref.read(settingsProvider.notifier).value = current.copyWith(
-        expiringSoonDays: days,
-      );
+      ref.read(settingsProvider.notifier).setExpiringSoonDays(days);
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.expiringSoonDaysSet(days));
       }
@@ -627,9 +617,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (selected != null && selected != current.baseCurrency) {
       logInfo('Base currency changed to $selected');
-      ref.read(settingsProvider.notifier).value = current.copyWith(
-        baseCurrency: selected,
-      );
+      ref.read(settingsProvider.notifier).setBaseCurrency(selected);
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
@@ -652,9 +640,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (days != null) {
       logInfo('Price retention changed to $days days');
-      ref.read(settingsProvider.notifier).value = current.copyWith(
-        priceRetentionDays: days,
-      );
+      ref.read(settingsProvider.notifier).setPriceRetentionDays(days);
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
@@ -719,9 +705,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (result != null) {
       logInfo('Open Prices API token updated');
-      ref.read(settingsProvider.notifier).value = current.copyWith(
-        openPricesToken: result,
-      );
+      ref.read(settingsProvider.notifier).setOpenPricesToken(result);
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.openPricesTokenSaved);
       }
@@ -776,9 +760,7 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (days != null) {
       logInfo('Inactivity threshold changed to $days days');
-      ref.read(settingsProvider.notifier).value = current.copyWith(
-        inactivityThresholdDays: days,
-      );
+      ref.read(settingsProvider.notifier).setInactivityThresholdDays(days);
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
