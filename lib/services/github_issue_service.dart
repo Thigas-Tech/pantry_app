@@ -15,7 +15,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// On platforms that support HTTP (Android, iOS, desktop), issues are
 /// posted to the GitHub Issues API with the developer's PAT. When the
-/// device is offline the issue is stored in the `feedback_queue` SQLite
+/// device is offline the issue is stored in the feedback_queue SQLite
 /// table and flushed automatically when connectivity is restored.
 ///
 /// On web, issue submissions are not supported;
@@ -207,7 +207,7 @@ class GithubIssueService {
     return (submitted: submitted, failed: failed);
   }
 
-  /// Returns `true` if the user has not exceeded rate limits.
+  /// Returns true if the user has not exceeded rate limits.
   bool _canSubmit() {
     try {
       final prefs = _prefs;
@@ -261,7 +261,7 @@ class GithubIssueService {
     }
   }
 
-  /// Returns `true` if an identical issue was submitted in the last 24 hours.
+  /// Returns true if an identical issue was submitted in the last 24 hours.
   bool isDuplicate(String title, String body) {
     try {
       final prefs = _prefs;

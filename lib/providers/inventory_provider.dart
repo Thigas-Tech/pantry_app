@@ -42,7 +42,7 @@ final inventoryCountProvider = FutureProvider<int>((ref) async {
 
 /// Provides the average Nutri-Score letter for the active inventory.
 ///
-/// Returns a grade (`'a'`–`'e'`) or `null` if none of the products in the
+/// Returns a grade ('a'–'e') or null if none of the products in the
 /// current pantry have [NutriScoreBadge] data.
 final averageNutriscoreProvider = FutureProvider<String?>((ref) async {
   final items = await ref.watch(inventoryWithProductProvider.future);

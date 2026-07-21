@@ -37,13 +37,13 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// Free-form product name or the linked product's name.
     required String name,
 
-    /// The linked product barcode, or `null` for free-text items.
+    /// The linked product barcode, or null for free-text items.
     String? barcode,
 
     /// Desired quantity to purchase. Defaults to 1.0.
     @Default(1.0) double quantity,
 
-    /// Unit for [quantity] (e.g. `'pieces'`, `'g'`, `'ml'`).
+    /// Unit for [quantity] (e.g. 'pieces', 'g', 'ml').
     @Default('pieces') String unit,
 
     /// Whether this item has been purchased.
@@ -52,7 +52,7 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// Auto-increment primary key.
     int? id,
 
-    /// Target pantry for move-to-inventory, or `null` if not set.
+    /// Target pantry for move-to-inventory, or null if not set.
     int? inventoryId,
 
     /// Epoch timestamp (milliseconds since Unix epoch) of when the item
@@ -63,16 +63,16 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// was marked as purchased.
     int? datePurchased,
 
-    /// Price entered while shopping, or `null` if no price was set.
+    /// Price entered while shopping, or null if no price was set.
     double? priceAmount,
 
-    /// ISO 4217 currency code for [priceAmount] (e.g. `'USD'`, `'BRL'`).
+    /// ISO 4217 currency code for [priceAmount] (e.g. 'USD', 'BRL').
     String? priceCurrency,
 
     /// Store where the item was or will be purchased.
     String? priceStore,
 
-    /// Local file path to a photo of the price tag, or `null` if none.
+    /// Local file path to a photo of the price tag, or null if none.
     String? pricePhotoPath,
   }) = _ShoppingItem;
 }

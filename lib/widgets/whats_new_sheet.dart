@@ -7,10 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Shows a bottom sheet with the user-facing changelog.
 ///
-/// [rawChangelog] is the raw content of `USER_CHANGELOG.md`, which is already
+/// [rawChangelog] is the raw content of USER_CHANGELOG.md, which is already
 /// written in user-facing language and needs no cleaning.
 ///
-/// Returns `true` on explicit dismiss (button tap), `null` on swipe-away.
+/// Returns true on explicit dismiss (button tap), null on swipe-away.
 Future<bool?> showWhatsNewSheet(
   BuildContext context, {
   required String rawChangelog,
@@ -164,7 +164,7 @@ class _VersionHeader extends StatelessWidget {
   }
 }
 
-/// Renders the content of a changelog entry, grouped by `###` subsections.
+/// Renders the content of a changelog entry, grouped by ### subsections.
 class _SectionContent extends StatelessWidget {
   const _SectionContent({required this.content});
 

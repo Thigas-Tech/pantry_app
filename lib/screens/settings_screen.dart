@@ -64,6 +64,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref
                       .read(settingsProvider.notifier)
                       .setAmoledDarkMode(value: value);
+
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -189,6 +190,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref
                       .read(settingsProvider.notifier)
                       .setNotificationsEnabled(value: value);
+
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -230,6 +232,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref
                       .read(settingsProvider.notifier)
                       .setInactivityReminderEnabled(value: value);
+
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -292,6 +295,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref
                       .read(settingsProvider.notifier)
                       .setPriceTrackingEnabled(value: value);
+
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -321,6 +325,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref
                       .read(settingsProvider.notifier)
                       .setPricesHidden(value: value);
+
                   if (context.mounted) {
                     SnackbarHelper.showInfo(
                       context,
@@ -346,6 +351,7 @@ class SettingsScreen extends ConsumerWidget {
                   ref
                       .read(settingsProvider.notifier)
                       .setOpenPricesSyncEnabled(value: value);
+
                 },
               ),
               if (settings.openPricesSyncEnabled) ...[
@@ -508,6 +514,7 @@ class SettingsScreen extends ConsumerWidget {
     if (selected != null) {
       logInfo('Theme changed to ${selected.name}');
       ref.read(themeModeProvider.notifier).setThemeMode(selected);
+
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
@@ -528,6 +535,7 @@ class SettingsScreen extends ConsumerWidget {
     if (days != null) {
       logInfo('Retention period changed to $days days');
       ref.read(settingsProvider.notifier).setRetentionDays(days);
+
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.retentionPeriodSet(days));
       }
@@ -548,6 +556,7 @@ class SettingsScreen extends ConsumerWidget {
     if (days != null) {
       logInfo('Expiring soon threshold changed to $days days');
       ref.read(settingsProvider.notifier).setExpiringSoonDays(days);
+
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.expiringSoonDaysSet(days));
       }
@@ -618,6 +627,7 @@ class SettingsScreen extends ConsumerWidget {
     if (selected != null && selected != current.baseCurrency) {
       logInfo('Base currency changed to $selected');
       ref.read(settingsProvider.notifier).setBaseCurrency(selected);
+
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
@@ -641,6 +651,7 @@ class SettingsScreen extends ConsumerWidget {
     if (days != null) {
       logInfo('Price retention changed to $days days');
       ref.read(settingsProvider.notifier).setPriceRetentionDays(days);
+
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
@@ -706,6 +717,7 @@ class SettingsScreen extends ConsumerWidget {
     if (result != null) {
       logInfo('Open Prices API token updated');
       ref.read(settingsProvider.notifier).setOpenPricesToken(result);
+
       if (context.mounted) {
         SnackbarHelper.showInfo(context, l10n.openPricesTokenSaved);
       }
@@ -761,6 +773,7 @@ class SettingsScreen extends ConsumerWidget {
     if (days != null) {
       logInfo('Inactivity threshold changed to $days days');
       ref.read(settingsProvider.notifier).setInactivityThresholdDays(days);
+
       if (context.mounted) {
         SnackbarHelper.showInfo(
           context,
@@ -867,8 +880,8 @@ class SettingsScreen extends ConsumerWidget {
 
   /// Shows the notification rationale dialog on first permission request.
   ///
-  /// Returns `true` if the user tapped "Allow" (or rationale was already
-  /// shown), `false` if the user tapped "Not now".
+  /// Returns true if the user tapped "Allow" (or rationale was already
+  /// shown), false if the user tapped "Not now".
   Future<bool> _showPermissionRationaleIfNeeded(
     BuildContext context,
     AppLocalizations l10n,

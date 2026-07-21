@@ -12,7 +12,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 ///
 /// Each test runs against a fresh database created with
 /// [DatabaseHelper.withPath]. The schema is version 2, which
-/// includes the `inventories` table and the `inventory_id` column.
+/// includes the inventories table and the inventory_id column.
 void main() {
   setUpAll(() {
     sqfliteFfiInit();

@@ -3,10 +3,10 @@ import 'package:pantry_app/utils/nutriscore.dart';
 
 /// Displays the Nutri-Score grade of a product as a coloured badge.
 ///
-/// The grade should be one of `'a'`, `'b'`, `'c'`, `'d'`, or `'e'`.
-/// If the grade is `null` or invalid, nothing is rendered.
+/// The grade should be one of 'a', 'b', 'c', 'd', or 'e'.
+/// If the grade is null or invalid, nothing is rendered.
 ///
-/// When the grade is `'not-applicable'` a grey dashed badge is shown,
+/// When the grade is 'not-applicable' a grey dashed badge is shown,
 /// indicating that the Nutri-Score system does not apply to this product
 /// category (e.g. food additives).
 ///
@@ -20,7 +20,7 @@ class NutriScoreBadge extends StatelessWidget {
   /// Creates a [NutriScoreBadge] for the given [grade].
   const NutriScoreBadge({required this.grade, this.size = 28, super.key});
 
-  /// The Nutri-Score grade (`'a'`–`'e'` or `'not-applicable'`).
+  /// The Nutri-Score grade ('a'–'e' or 'not-applicable').
   final String? grade;
 
   /// The width and height of the badge.
@@ -77,24 +77,24 @@ class NutriScoreBadge extends StatelessWidget {
     );
   }
 
-  /// Returns `true` if the [grade] is `'not-applicable'`.
+  /// Returns true if the [grade] is 'not-applicable'.
   static bool isNotApplicable(String? grade) {
     return nutriscoreIsNotApplicable(grade);
   }
 
-  /// Returns the Nutri-Score colour for [grade], or `null` if invalid.
+  /// Returns the Nutri-Score colour for [grade], or null if invalid.
   static Color? _colorForGrade(String? grade) {
     return nutriscoreColorForGrade(grade);
   }
 
-  /// Returns `true` if [grade] is `'not-applicable'` (case‑insensitive).
+  /// Returns true if [grade] is 'not-applicable' (case‑insensitive).
   static bool _isNotApplicable(String? grade) {
     return nutriscoreIsNotApplicable(grade);
   }
 
   /// Converts a Nutri-Score grade to a numeric value for averaging.
   ///
-  /// `'a'` = 5, `'b'` = 4, …, `'e'` = 1. Returns `null` for invalid or
+  /// 'a' = 5, 'b' = 4, …, 'e' = 1. Returns null for invalid or
   /// not‑applicable grades.
   static int? toNumeric(String? grade) {
     return nutriscoreGradeToNumeric(grade);

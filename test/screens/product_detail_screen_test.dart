@@ -18,11 +18,11 @@
 /// - Open Food Facts button presence.
 ///
 /// The default test viewport is too small for this long screen, so we
-/// temporarily enlarge it with `setLargeScreen()` before every test.
+/// temporarily enlarge it with setLargeScreen() before every test.
 ///
-/// Every test uses the `pumpApp` helper, which sets up the required
-/// providers and locales.  We override `productRepositoryProvider` and
-/// `notificationServiceProvider` with stubbed mocks.
+/// Every test uses the pumpApp helper, which sets up the required
+/// providers and locales.  We override productRepositoryProvider and
+/// notificationServiceProvider with stubbed mocks.
 library;
 
 import 'dart:async';

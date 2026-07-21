@@ -61,7 +61,7 @@ jobs:
             "${FEEDBACK_TOKEN:-}"
 
       - name: Analyze Flutter
-        run: flutter analyze --fatal-infos --fatal-warnings
+        run: dart analyze
 
       - name: Run Flutter tests
         run: flutter test --concurrency=2

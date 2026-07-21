@@ -3,7 +3,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `inventory` table.
+/// Data-access layer for the inventory table.
 ///
 /// All methods receive a [Database] instance so they can be used
 /// independently of [DatabaseHelper] in tests.
@@ -189,7 +189,7 @@ class InventoryDao {
 
   /// Moves multiple inventory items to a different inventory (pantry).
   ///
-  /// Uses a batch `UPDATE` to atomically reassign all [itemIds] to the
+  /// Uses a batch UPDATE to atomically reassign all [itemIds] to the
   /// [targetInventoryId]. Logs the number of affected rows on success.
   Future<void> moveItemsToInventory(
     Database db,
@@ -220,10 +220,10 @@ class InventoryDao {
   /// Retrieves all inventory rows joined with product metadata for a
   /// specific [inventoryId].
   ///
-  /// Uses a `LEFT JOIN` on `products` so that inventory items remain visible
+  /// Uses a LEFT JOIN on products so that inventory items remain visible
   /// even when their product record has been deleted (e.g. after a cache
   /// flush). When the product is missing, product fields such as
-  /// `product_name` will be `NULL` and should be handled by the UI (e.g.
+  /// product_name will be NULL and should be handled by the UI (e.g.
   /// falling back to the barcode).
   Future<List<Map<String, dynamic>>> listWithProduct(
     Database db, {
@@ -306,9 +306,9 @@ class InventoryDao {
 
   /// Returns counts grouped by expiry status.
   ///
-  /// Items with a NULL expiry date are counted as `good`. Items expiring
-  /// within [expiringSoonDays] days are counted as `expiring`. Items with
-  /// a date before today are counted as `expired`.
+  /// Items with a NULL expiry date are counted as good. Items expiring
+  /// within [expiringSoonDays] days are counted as expiring. Items with
+  /// a date before today are counted as expired.
   Future<Map<String, int>> expiryDistribution(
     Database db, {
     required int inventoryId,
@@ -339,7 +339,7 @@ class InventoryDao {
 
   /// Returns the most recent [InventoryItem.dateAdded] across all inventories.
   ///
-  /// Returns `null` if the inventory table is empty.
+  /// Returns null if the inventory table is empty.
   Future<int?> getLastAddDate(Database db) async {
     try {
       final result = await db.rawQuery(

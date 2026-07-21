@@ -76,7 +76,7 @@ class ProductRepository {
 
   /// Returns the current application locale as a two-letter language code.
   ///
-  /// Falls back to `'en'` when the platform locale cannot be determined.
+  /// Falls back to 'en' when the platform locale cannot be determined.
   String _currentLanguageCode() {
     final locale = PlatformDispatcher.instance.locale;
     final code = locale.languageCode;
@@ -175,7 +175,7 @@ class ProductRepository {
 
   /// Checks the local cache for a product with the given [barcode].
   ///
-  /// Returns the cached [Product] or `null` if not found in the local
+  /// Returns the cached [Product] or null if not found in the local
   /// database. Unlike [getProduct], this method does not make any
   /// network requests.
   Future<Product?> getProductFromCache(String barcode) {
@@ -228,7 +228,7 @@ class ProductRepository {
 
   /// Resolves a [Product] for [produceName] with a synthetic barcode.
   ///
-  /// Generates the barcode `produce-$produceName`, then delegates to
+  /// Generates the barcode produce-$produceName, then delegates to
   /// [_resolveProduceProduct] which tries the USDA API first, then
   /// hardcoded fallback data, and finally creates a minimal product
   /// with no nutrition values.
@@ -249,7 +249,7 @@ class ProductRepository {
   /// USDA API when available and falling back to hardcoded data.
   ///
   /// [produceName] is the display name of the produce (e.g. "Apple"). The
-  /// item will be stored with a synthetic barcode `produce-$produceName`
+  /// item will be stored with a synthetic barcode produce-$produceName
   /// and a default quantity of 150 g (overridable via [quantity]).
   ///
   /// If a product row for the synthetic barcode already exists in the local
@@ -403,7 +403,7 @@ class ProductRepository {
   }
 
   /// Returns the total number of inventory items for a given [inventoryId]
-  /// or globally if `null`.
+  /// or globally if null.
   Future<int> getInventoryCount({int? inventoryId}) {
     return _db.getInventoryCount(inventoryId: inventoryId);
   }
@@ -548,7 +548,7 @@ class ProductRepository {
     logInfo('Last refresh time updated');
   }
 
-  /// Returns the stored last‑refresh timestamp, or `null` if no refresh has
+  /// Returns the stored last‑refresh timestamp, or null if no refresh has
   /// ever been recorded.
   Future<DateTime?> getLastRefreshTime() async {
     final prefs = await _sharedPrefs;
@@ -561,7 +561,7 @@ class ProductRepository {
   /// stale and a background refresh should be scheduled.
   int get cacheOverdueDays => _cacheOverdueDays;
 
-  /// Returns `true` when the last refresh timestamp is missing or older than
+  /// Returns true when the last refresh timestamp is missing or older than
   /// [cacheOverdueDays] days.
   ///
   /// Used at app startup and on the home screen to decide whether to fire a

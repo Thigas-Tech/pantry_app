@@ -17,7 +17,7 @@ class PriceMask extends ConsumerWidget {
     super.key,
   });
 
-  /// The fully-formatted price string (e.g. `"R$ 15,90"`).
+  /// The fully-formatted price string (e.g. "R$ 15,90").
   final String formattedPrice;
 
   /// The widget to show when prices are not hidden.

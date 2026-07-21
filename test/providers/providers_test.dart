@@ -77,6 +77,7 @@ void main() {
       mockContainer
           .read(activeInventoryProvider.notifier)
           .setActiveInventory(2);
+
       final id = mockContainer.read(activeInventoryProvider);
       expect(id, 2);
     });
@@ -162,6 +163,7 @@ void main() {
 
       // Simulate switching to inventory 2 (Work).
       container.read(activeInventoryProvider.notifier).setActiveInventory(2);
+
 
       final items = await container.read(inventoryWithProductProvider.future);
       expect(items.length, 1);

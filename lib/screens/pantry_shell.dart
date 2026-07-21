@@ -108,6 +108,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
           ref
               .read(themeModeProvider.notifier)
               .setThemeMode(ThemeModeOption.dark);
+
           if (mounted) {
             SnackbarHelper.showInfo(
               context,

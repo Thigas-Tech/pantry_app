@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 /// Colours use ANSI escape codes which work in most terminals. On platforms
 /// that do not support ANSI colours the messages still print normally.
 ///
-/// The verbose flag mirrors [kDebugMode] — `true` in debug builds, `false`
+/// The verbose flag mirrors [kDebugMode] — true in debug builds, false
 /// in release and profile builds. This means [logInfo] and [logDebug] calls
 /// are tree-shaken from release binaries entirely.
 const bool _verbose = kDebugMode;
@@ -43,7 +43,7 @@ void _append(String line) {
 
 /// Logs a debug-level message (no colour, verbose-only).
 ///
-/// Only printed when [_verbose] is `true` (debug builds).
+/// Only printed when [_verbose] is true (debug builds).
 void logDebug(String message) {
   if (_verbose) {
     final line = '${_timestamp()} [DEBUG] $message';
@@ -54,7 +54,7 @@ void logDebug(String message) {
 
 /// Logs an informational message (blue).
 ///
-/// Only printed when [_verbose] is `true` (debug builds).
+/// Only printed when [_verbose] is true (debug builds).
 void logInfo(String message) {
   if (_verbose) {
     final line = '${_timestamp()} [INFO] $message';

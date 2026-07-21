@@ -1,6 +1,6 @@
-/// Parses an ISO‑8601 date string (e.g. `'2026-07-15'`) to a [DateTime].
+/// Parses an ISO‑8601 date string (e.g. '2026-07-15') to a [DateTime].
 ///
-/// Returns `null` if the string is `null`, empty, or cannot be parsed.
+/// Returns null if the string is null, empty, or cannot be parsed.
 DateTime? parseExpiryDate(String? dateString) {
   if (dateString == null || dateString.isEmpty) return null;
   return DateTime.tryParse(dateString);
@@ -16,7 +16,7 @@ bool isExpired(String? dateString) {
 }
 
 /// Whether [dateString] represents a date within [days] days from today
-/// (not yet expired, but soon). Returns `false` if already expired or no date.
+/// (not yet expired, but soon). Returns false if already expired or no date.
 bool isExpiringSoon(String? dateString, int days) {
   final date = parseExpiryDate(dateString);
   if (date == null) return false;

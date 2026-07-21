@@ -7,8 +7,8 @@ import 'package:pantry_app/models/product_type.dart';
 /// [Product] metadata and inventory details.
 ///
 /// This class is **not** persisted directly. Instead, it is built on the fly
-/// by [DatabaseHelper.getInventoryWithProduct] using a `LEFT JOIN` on
-/// `products` and an `INNER JOIN` on `inventories`. The `LEFT JOIN` ensures
+/// by [DatabaseHelper.getInventoryWithProduct] using a LEFT JOIN on
+/// products and an INNER JOIN on inventories. The LEFT JOIN ensures
 /// inventory items remain visible even after a cache flush deletes their
 /// product records. It provides all the data needed by the home screen to
 /// display a single inventory card, avoiding the need for multiple separate
@@ -38,10 +38,10 @@ class InventoryWithProduct {
     /// The quantity of this inventory item, in [unit].
     required this.quantity,
 
-    /// The unit of measurement (e.g. `'pcs'`, `'g'`).
+    /// The unit of measurement (e.g. 'pcs', 'g').
     required this.unit,
 
-    /// The storage location (e.g. `'pantry'`, `'fridge'`).
+    /// The storage location (e.g. 'pantry', 'fridge').
     required this.location,
 
     /// The ID of the inventory this item belongs to.
@@ -50,7 +50,7 @@ class InventoryWithProduct {
     /// The auto‑generated primary key of the inventory row.
     this.id,
 
-    /// The expiry date in ISO 8601 format (`YYYY-MM-DD`), or `null`.
+    /// The expiry date in ISO 8601 format (YYYY-MM-DD), or null.
     this.expiryDate,
 
     /// Free‑form notes the user may have added.
@@ -59,11 +59,11 @@ class InventoryWithProduct {
     /// Epoch timestamp (milliseconds) when the item was first added.
     this.dateAdded,
 
-    /// The product name from the `products` table.
+    /// The product name from the products table.
     ///
-    /// May be `null` if the product record was deleted (e.g. after a cache
-    /// flush) — the `LEFT JOIN` in the query still returns the inventory row
-    /// with `NULL` product columns.
+    /// May be null if the product record was deleted (e.g. after a cache
+    /// flush) — the LEFT JOIN in the query still returns the inventory row
+    /// with NULL product columns.
     this.productName,
 
     /// A URL to the product’s front image from Open Food Facts.
@@ -72,28 +72,28 @@ class InventoryWithProduct {
     /// The name of the inventory this item belongs to.
     this.inventoryName,
 
-    /// The Nutri-Score grade from the `products` table (e.g. `'a'`–`'e'`).
-    /// May be `'not-applicable'` when the Nutri-Score system does not apply.
+    /// The Nutri-Score grade from the products table (e.g. 'a'–'e').
+    /// May be 'not-applicable' when the Nutri-Score system does not apply.
     this.nutriscoreGrade,
 
     /// The category that makes Nutri-Score not applicable, if any
-    /// (e.g. `'en:food-additives'`).
+    /// (e.g. 'en:food-additives').
     this.nutriscoreNotApplicableCategory,
 
-    /// The product category from the `products` table (e.g. `'Spreads'`).
+    /// The product category from the products table (e.g. 'Spreads').
     ///
-    /// May be `null` if the product record was deleted or the category
+    /// May be null if the product record was deleted or the category
     /// was not set. Used for category filter chips on the home screen.
     this.productCategory,
 
-    /// The normalized search text from the `products` table.
+    /// The normalized search text from the products table.
     this.productSearchText,
 
-    /// The product type (`barcoded`, `produce`, or `custom`).
+    /// The product type (barcoded, produce, or custom).
     ///
-    /// May be `null` if the product record was deleted (e.g. after a cache
-    /// flush) — the `LEFT JOIN` in the query still returns the inventory row
-    /// with `NULL` product columns.
+    /// May be null if the product record was deleted (e.g. after a cache
+    /// flush) — the LEFT JOIN in the query still returns the inventory row
+    /// with NULL product columns.
     this.productType,
   });
 
@@ -103,7 +103,7 @@ class InventoryWithProduct {
   /// and must contain all the columns listed in that query.
   ///
   /// Defaults are applied to [quantity], [unit], and [location] as a safety
-  /// net in case the database contains unexpected `NULL` values.
+  /// net in case the database contains unexpected NULL values.
   factory InventoryWithProduct.fromMap(Map<String, dynamic> map) {
     return InventoryWithProduct(
       id: map['id'] as int?,
@@ -140,13 +140,13 @@ class InventoryWithProduct {
   /// The quantity of this item, expressed in [unit].
   final double quantity;
 
-  /// The unit of measurement for [quantity] (e.g. `'pcs'`, `'g'`).
+  /// The unit of measurement for [quantity] (e.g. 'pcs', 'g').
   final String unit;
 
-  /// The expiry date in ISO 8601 format (`YYYY-MM-DD`), if set.
+  /// The expiry date in ISO 8601 format (YYYY-MM-DD), if set.
   final String? expiryDate;
 
-  /// The storage location (e.g. `'pantry'`, `'fridge'`, `'freezer'`).
+  /// The storage location (e.g. 'pantry', 'fridge', 'freezer').
   final String location;
 
   /// User‑provided notes about this item.
@@ -158,7 +158,7 @@ class InventoryWithProduct {
   /// The ID of the inventory (pantry) this item belongs to.
   final int inventoryId;
 
-  /// The product name from the `products` table, for display purposes.
+  /// The product name from the products table, for display purposes.
   final String? productName;
 
   /// A URL to the product’s front image from Open Food Facts.
@@ -167,27 +167,27 @@ class InventoryWithProduct {
   /// The display name of the inventory this item belongs to.
   final String? inventoryName;
 
-  /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
+  /// The Nutri-Score grade of the product ('a' through 'e'), or null
   /// if unavailable.
   final String? nutriscoreGrade;
 
   /// The product category that makes Nutri-Score not applicable, if any
-  /// (e.g. `'en:food-additives'`).
+  /// (e.g. 'en:food-additives').
   final String? nutriscoreNotApplicableCategory;
 
-  /// The product category from the `products` table (e.g. `'Spreads'`).
+  /// The product category from the products table (e.g. 'Spreads').
   ///
-  /// May be `null` if the product record was deleted or the category
+  /// May be null if the product record was deleted or the category
   /// was not set. Used for category filter chips on the home screen.
   final String? productCategory;
 
-  /// The normalized search text from the `products` table.
+  /// The normalized search text from the products table.
   final String? productSearchText;
 
-  /// The product type (`barcoded`, `produce`, or `custom`).
+  /// The product type (barcoded, produce, or custom).
   ///
-  /// May be `null` if the product record was deleted (e.g. after a cache
-  /// flush) — the `LEFT JOIN` in the query still returns the inventory row
-  /// with `NULL` product columns.
+  /// May be null if the product record was deleted (e.g. after a cache
+  /// flush) — the LEFT JOIN in the query still returns the inventory row
+  /// with NULL product columns.
   final ProductType? productType;
 }

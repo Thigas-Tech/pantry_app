@@ -7,7 +7,7 @@ part 'product_cache_entry.g.dart';
 /// 180 days in milliseconds.
 const int _productRefreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 
-/// Firestore document for the `product_cache/{barcode}` collection.
+/// Firestore document for the product_cache/{barcode} collection.
 ///
 /// Stores OFF (Open Food Facts) barcoded product data in a shared cloud
 /// cache so that multiple devices can benefit from a single API fetch.
@@ -28,10 +28,10 @@ const int _productRefreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 /// - [Product.nutritionImagePath], [Product.ingredientsImagePath],
 ///   [Product.productImagePath] (local file paths, not portable across
 ///   devices)
-/// - [Product.source] (always `'api'` for OFF products; irrelevant for
+/// - [Product.source] (always 'api' for OFF products; irrelevant for
 ///   cache)
 /// - [Product.submissionStatus] (transient submission state, not cacheable)
-/// - [Product.productType] (all entries in `product_cache` are implicitly
+/// - [Product.productType] (all entries in product_cache are implicitly
 ///   barcoded)
 /// - [Product.pluCode] (only applies to produce, never to OFF barcoded
 ///   items)
@@ -61,7 +61,7 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// The brand name(s), often comma-separated.
     @JsonKey(includeIfNull: false) String? brand,
 
-    /// The product category (e.g. `"Spreads, Sweet spreads"`).
+    /// The product category (e.g. "Spreads, Sweet spreads").
     @JsonKey(includeIfNull: false) String? category,
 
     /// The OFF taxonomy hierarchy, broadest to most specific.
@@ -70,7 +70,7 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// The full ingredients list as plain text.
     @JsonKey(includeIfNull: false) String? ingredients,
 
-    /// The suggested serving size (e.g. `"15 g"`).
+    /// The suggested serving size (e.g. "15 g").
     @JsonKey(includeIfNull: false) String? servingSize,
 
     /// Energy in kilocalories per 100 g.
@@ -91,7 +91,7 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// Salt in grams per 100 g.
     @JsonKey(includeIfNull: false) double? saltG,
 
-    /// The Nutri-Score grade (`'a'` through `'e'`), or `'not-applicable'`.
+    /// The Nutri-Score grade ('a' through 'e'), or 'not-applicable'.
     @JsonKey(includeIfNull: false) String? nutriscoreGrade,
 
     /// URL to the product's front image on the OFF CDN.
@@ -106,7 +106,7 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// URL to the product packaging image on the OFF CDN.
     @JsonKey(includeIfNull: false) String? offProductImageUrl,
 
-    /// The locale used when fetching this product (e.g. `'en'`, `'pt'`).
+    /// The locale used when fetching this product (e.g. 'en', 'pt').
     @Default('en') String languageCode,
 
     /// Schema version for forward compatibility.

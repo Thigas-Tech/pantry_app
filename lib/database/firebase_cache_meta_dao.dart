@@ -1,7 +1,7 @@
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `firebase_cache_meta` table.
+/// Data-access layer for the firebase_cache_meta table.
 ///
 /// Tracks which products have been cached in Firestore and when each
 /// document needs its next refresh (180-day rolling cycle).
@@ -9,7 +9,7 @@ class FirebaseCacheMetaDao {
   /// Creates a [FirebaseCacheMetaDao].
   const FirebaseCacheMetaDao();
 
-  /// Creates the `firebase_cache_meta` table with indexes.
+  /// Creates the firebase_cache_meta table with indexes.
   Future<void> createTable(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS firebase_cache_meta (
@@ -58,7 +58,7 @@ class FirebaseCacheMetaDao {
   }
 
   /// Retrieves a single entry by [cacheKey].
-  /// Returns `null` when the key does not exist.
+  /// Returns null when the key does not exist.
   Future<Map<String, dynamic>?> get(Database db, String cacheKey) async {
     final result = await db.query(
       'firebase_cache_meta',
@@ -68,9 +68,9 @@ class FirebaseCacheMetaDao {
     return result.isNotEmpty ? result.first : null;
   }
 
-  /// Returns all entries where `next_refresh_at < [nowInMs]`.
+  /// Returns all entries where next_refresh_at < [nowInMs].
   ///
-  /// Optionally filter by [cacheType] (`'barcoded'` | `'produce'`).
+  /// Optionally filter by [cacheType] ('barcoded' | 'produce').
   Future<List<Map<String, dynamic>>> getStaleEntries(
     Database db, {
     required int nowInMs,

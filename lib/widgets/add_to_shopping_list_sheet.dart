@@ -27,7 +27,7 @@ import 'package:pantry_app/utils/search_utils.dart';
 /// A fallback "Add custom item" button switches to a free-text form
 /// (name + quantity + unit) for items that are not in any product database.
 ///
-/// Opens via [showModalBottomSheet]. Returns a [ShoppingItem] or `null` if
+/// Opens via [showModalBottomSheet]. Returns a [ShoppingItem] or null if
 /// cancelled.
 ///
 /// Example:
@@ -39,7 +39,7 @@ class AddToShoppingListSheet extends ConsumerStatefulWidget {
   const AddToShoppingListSheet._();
 
   /// Shows the add-to-shopping-list bottom sheet and returns a
-  /// [ShoppingItem], or `null` if cancelled.
+  /// [ShoppingItem], or null if cancelled.
   static Future<ShoppingItem?> show(BuildContext context) {
     return BottomSheetHelper.show<ShoppingItem>(
       context: context,

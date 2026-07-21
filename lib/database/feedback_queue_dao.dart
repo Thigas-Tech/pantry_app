@@ -1,7 +1,7 @@
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// DAO for the `feedback_queue` table.
+/// DAO for the feedback_queue table.
 ///
 /// Stores issues that could not be submitted immediately (e.g. because the
 /// device was offline). When connectivity is restored, the pending rows are
@@ -10,7 +10,7 @@ class FeedbackQueueDao {
   /// Creates a [FeedbackQueueDao].
   const FeedbackQueueDao();
 
-  /// Creates the `feedback_queue` table if it does not exist.
+  /// Creates the feedback_queue table if it does not exist.
   Future<void> createTable(Database db) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS feedback_queue (

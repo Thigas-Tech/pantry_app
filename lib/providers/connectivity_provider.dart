@@ -7,7 +7,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// Debounces offline transitions on a connectivity status stream.
 ///
 /// When the source stream emits [InternetConnectionStatus.disconnected],
-/// this transformer does **not** immediately emit `false`. Instead, it
+/// this transformer does **not** immediately emit false. Instead, it
 /// waits for [debounceDuration]. If the source emits
 /// [InternetConnectionStatus.connected] before the timer elapses, the
 /// offline event is suppressed entirely (the timer is cancelled).
@@ -15,7 +15,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// Reconnection events (disconnected → connected) are emitted immediately
 /// — there is no debounce on the upward transition.
 ///
-/// The debounce window is reset on each successive `disconnected` event
+/// The debounce window is reset on each successive disconnected event
 /// while a timer is already running.
 Stream<bool> debounceConnectivityStatus(
   Stream<InternetConnectionStatus> source, {
@@ -77,7 +77,7 @@ Stream<bool> debounceConnectivityStatus(
 /// Provides a reactive stream of internet connectivity status.
 ///
 /// Uses [InternetConnectionChecker.instance] to monitor whether the
-/// device has internet access. Emits `true` when connected, `false`
+/// device has internet access. Emits true when connected, false
 /// when offline.
 ///
 /// Unlike the default [StreamProvider] which starts as [AsyncLoading],

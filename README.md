@@ -149,13 +149,13 @@ See [ARCHITECTURE/INDEX.md](https://github.com/Thigas-Tech/pantry_app/blob/main/
 2. **Tests** — add tests for ALL new code using `mocktail`
 3. **Localization** — all user-visible strings go in `lib/l10n/app_en.arb`
 4. **Code generation** — after changing models or ARB files, run `build_runner` and `flutter gen-l10n`
-5. **Zero lint issues** — `flutter analyze` must report zero issues before committing
+5. **Zero lint issues** — `dart analyze` must report zero issues before committing
 6. **All tests pass** — `flutter test --concurrency=2` must pass before committing
 
 ### Running checks
 
 ```bash
-flutter analyze                      # Lint + static analysis
+dart analyze                         # Lint + static analysis
 flutter test --concurrency=2         # All tests
 flutter test --concurrency=2 --coverage  # With coverage
 ```

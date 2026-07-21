@@ -33,7 +33,7 @@ extension AppLocalizationsX on AppLocalizations {
 
   /// Formats a quantity with a localized unit (e.g., "5 kg").
   ///
-  /// When [unit] is `'pieces'`, the display uses [unitSingular] for
+  /// When [unit] is 'pieces', the display uses [unitSingular] for
   /// quantity 1 and [unitPlural] for all other quantities.
   String formatQuantityUnit(double? quantity, String? unit) {
     if (quantity == null || unit == null) return '';

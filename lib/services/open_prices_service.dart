@@ -34,16 +34,16 @@ class SyncResult {
 /// ## Token-based auth
 ///
 /// The service reads the Bearer token from [OpenPricesApiClient] which
-/// defaults to the configured token (from `.env` or shared preferences).
+/// defaults to the configured token (from .env or shared preferences).
 /// If the token is empty, all API operations return empty/error results
 /// and the app works in local-only mode.
 ///
 /// ## Sync flow
 ///
 /// 1. Upload the proof photo (TODO — blocked by receipt capture).
-/// 2. Create the price with `proof_id`.
-/// 3. Store the returned `open_prices_id`.
-/// 4. Mark as `synced`.
+/// 2. Create the price with proof_id.
+/// 3. Store the returned open_prices_id.
+/// 4. Mark as synced.
 class OpenPricesService {
   /// Creates an [OpenPricesService].
   OpenPricesService({
@@ -111,8 +111,8 @@ class OpenPricesService {
 
   /// Validates the configured token against the Open Prices API.
   ///
-  /// Returns `true` if the token is non-empty and the API responds with
-  /// a success status. Returns `false` on network error.
+  /// Returns true if the token is non-empty and the API responds with
+  /// a success status. Returns false on network error.
   Future<bool> validateToken() => _api.validateToken();
 
   /// Disposes the underlying HTTP client.

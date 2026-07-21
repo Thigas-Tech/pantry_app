@@ -9,13 +9,13 @@
 ///   - Search bar filtering and clear functionality.
 ///   - Navigation via the FAB (scanner flow) and settings button.
 ///
-/// All tests use the shared `pumpApp` helper.  We override the relevant
-/// Riverpod providers (`inventoryWithProductProvider`, `inventoryListProvider`,
-/// `activeInventoryProvider`, `productRepositoryProvider`) with fake/mocked
-/// values.  The `imageCacheProvider` is stubbed via the harness to prevent
-/// errors inside `InventoryCard`'s `FutureBuilder`.
+/// All tests use the shared pumpApp helper.  We override the relevant
+/// Riverpod providers (inventoryWithProductProvider, inventoryListProvider,
+/// activeInventoryProvider, productRepositoryProvider) with fake/mocked
+/// values.  The imageCacheProvider is stubbed via the harness to prevent
+/// errors inside InventoryCard's FutureBuilder.
 ///
-/// The loading test uses `settle: false` to keep the future pending, then
+/// The loading test uses settle: false to keep the future pending, then
 /// completes it manually to avoid a “pending timer” error.
 library;
 
@@ -47,14 +47,17 @@ import '../helpers/pump_app.dart';
 /// A fake [ActiveInventoryNotifier] that always returns 1
 /// and records the last set value.
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
-  int lastSetValue = 1;
+  int _lastSetValue = 1;
+
+  /// Returns the last value passed to [state].
+  int getRecordedLastSetValue() => _lastSetValue;
 
   @override
   int build() => 1;
 
   @override
   void setActiveInventory(int newValue) {
-    lastSetValue = newValue;
+    _lastSetValue = newValue;
     super.setActiveInventory(newValue);
   }
 }
@@ -400,7 +403,7 @@ void main() {
     await tester.tap(find.text('Work').last);
     await tester.pumpAndSettle();
 
-    expect(fakeNotifier.lastSetValue, 2);
+    expect(fakeNotifier.getRecordedLastSetValue(), 2);
   });
 
   testWidgets(

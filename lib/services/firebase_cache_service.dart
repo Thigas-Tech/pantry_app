@@ -31,7 +31,7 @@ const int _refreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 /// ## Graceful degradation
 ///
 /// Every public method guards with [isAvailable]. When Firebase is unavailable
-/// (no `google-services.json`, disabled feature flag, or runtime error) the
+/// (no google-services.json, disabled feature flag, or runtime error) the
 /// lookup methods bypass Firestore entirely and call the source API directly.
 ///
 /// See [FirebaseCacheClient] for the low-level Firestore abstraction and
@@ -65,7 +65,7 @@ class FirebaseCacheService {
 
   /// Looks up a barcoded product, trying Firebase first, then OFF.
   ///
-  /// Returns `null` when the product is unknown to all sources.
+  /// Returns null when the product is unknown to all sources.
   Future<Product?> resolveBarcodedProduct(
     String barcode, {
     required String languageCode,
@@ -101,7 +101,7 @@ class FirebaseCacheService {
 
   /// Looks up a produce product, trying Firebase first, then USDA.
   ///
-  /// Returns `null` when the produce is unknown to all sources or when
+  /// Returns null when the produce is unknown to all sources or when
   /// [produceName] is empty.
   Future<Product?> resolveProduceProduct(String produceName) async {
     final trimmed = produceName.trim();
@@ -163,7 +163,7 @@ class FirebaseCacheService {
   ///
   /// [produceName] is the human-readable name (e.g. "Apple"). The cache
   /// key is normalized to lowercase. [fdcId] is the USDA FDC identifier,
-  /// or `null` when unknown.
+  /// or null when unknown.
   Future<void> cacheProduceProduct(
     Product product,
     String produceName, {

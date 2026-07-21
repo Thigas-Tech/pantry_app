@@ -8,7 +8,7 @@ Store via GitHub Actions CI/CD.
 When a tag matching `v*.*.*` (e.g. `v0.0.5`) is pushed to the repository,
 the `.github/workflows/deploy-to-playstore.yml` workflow:
 
-1. Runs `flutter analyze` and `flutter test`.
+1. Runs `dart analyze` and `flutter test`.
 2. Injects the `.env` file from GitHub Secrets.
 3. Decodes the upload keystore and signing properties.
 4. Builds a signed release AAB and APK.
@@ -105,7 +105,7 @@ pending Play Console document verification).
 
 Steps:
 1. Checkout + Flutter setup
-2. `flutter analyze --fatal-infos --fatal-warnings`
+2. `dart analyze`
 3. `flutter test --concurrency=2`
 4. Inject `.env` from secrets
 5. Decode `ANDROID_KEYSTORE_BASE64` → `android/upload-keystore.jks`

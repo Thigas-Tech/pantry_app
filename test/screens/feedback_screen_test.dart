@@ -9,7 +9,7 @@
 ///   - Offline submit queues the issue and pops.
 ///   - Online submit falling back to queue also pops.
 ///
-/// Uses the shared `pumpApp` helper.  Providers are overridden to isolate
+/// Uses the shared pumpApp helper.  Providers are overridden to isolate
 /// the screen from real network, storage, and service dependencies.
 library;
 

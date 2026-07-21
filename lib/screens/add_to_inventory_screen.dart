@@ -31,7 +31,7 @@ class AddToInventoryScreen extends StatefulWidget {
   /// If provided, the form is in edit mode and pre-filled with this item.
   final InventoryItem? existingItem;
 
-  /// A suggested expiry date in ISO 8601 format (`YYYY-MM-DD`).
+  /// A suggested expiry date in ISO 8601 format (YYYY-MM-DD).
   final String? suggestedExpiry;
 
   /// The product type — controls whether the weight/unit toggle is shown.

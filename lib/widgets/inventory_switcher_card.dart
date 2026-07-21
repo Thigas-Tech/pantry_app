@@ -20,14 +20,14 @@ class InventorySwitcherCard extends StatelessWidget {
   /// Called when the card is tapped.
   final VoidCallback onTap;
 
-  /// The active pantry name, or `null` if no inventory exists.
+  /// The active pantry name, or null if no inventory exists.
   final String? name;
 
-  /// The average Nutri-Score grade (`'a'`-`'e'`), or `null` if no products
+  /// The average Nutri-Score grade ('a'-'e'), or null if no products
   /// have Nutri-Score data.
   final String? nutriscoreGrade;
 
-  /// When `true`, shows a placeholder border card without content while
+  /// When true, shows a placeholder border card without content while
   /// providers resolve.
   final bool isLoading;
 

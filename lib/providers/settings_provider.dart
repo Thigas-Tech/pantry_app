@@ -68,7 +68,7 @@ class Settings {
   /// ISO 4217 currency code for displaying prices.
   ///
   /// Auto-detected from the device locale on first launch.
-  /// Common values: `'USD'`, `'BRL'`, `'EUR'`, `'GBP'`, `'JPY'`.
+  /// Common values: 'USD', 'BRL', 'EUR', 'GBP', 'JPY'.
   final String baseCurrency;
 
   /// Whether syncing to the Open Prices community database is enabled.
@@ -126,6 +126,7 @@ class SettingsNotifier extends Notifier<Settings> {
   Future<void> _loadFromPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!ref.mounted) return;
       state = Settings(
         notificationsEnabled: prefs.getBool('notificationsEnabled') ?? true,
         retentionDays: prefs.getInt('retentionDays') ?? 60,
@@ -276,8 +277,8 @@ final settingsProvider = NotifierProvider<SettingsNotifier, Settings>(
 
 /// Maps the device locale to an ISO 4217 currency code.
 ///
-/// Uses [Platform.localeName] (e.g. `pt_BR`, `en_US`) to infer the most
-/// likely currency. Falls back to `'USD'` for unknown locales.
+/// Uses [Platform.localeName] (e.g. pt_BR, en_US) to infer the most
+/// likely currency. Falls back to 'USD' for unknown locales.
 String _detectLocaleCurrency() {
   try {
     final locale = Platform.localeName;

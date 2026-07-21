@@ -8,7 +8,7 @@ infrastructure or external server hosting are listed last.
 ## CI/CD & DevOps (top priority)
 
 - [x] **GitHub Actions — CI pipeline** — on every PR to `main`:
-  - `flutter analyze` (lint check)
+  - `dart analyze` (lint check)
   - `dart format --set-exit-if-changed .` (formatting check)
   - `flutter test --concurrency=2 --coverage` (tests + coverage report)
   - Upload coverage artifact, comment coverage on PR.

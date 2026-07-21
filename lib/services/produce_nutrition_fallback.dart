@@ -335,7 +335,7 @@ class ProduceNutritionFallback {
   /// 1. Exact match on lowercase name.
   /// 2. Strip "organic " prefix and retry.
   /// 3. Substring match against preset keys.
-  /// Returns `null` when no match is found.
+  /// Returns null when no match is found.
   static ProduceNutrition? forName(String name) {
     final lower = name.toLowerCase().trim();
     if (lower.isEmpty) return null;

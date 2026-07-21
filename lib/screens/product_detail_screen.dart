@@ -53,7 +53,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// The screen is a [ConsumerStatefulWidget] because it needs to rebuild the
 /// inventory list after adding, editing, or deleting an item. A simple
-/// counter `_inventoryVersion` is incremented after every mutation; it is
+/// counter _inventoryVersion is incremented after every mutation; it is
 /// used as the [ValueKey] of the [FutureBuilder] so that the future is
 /// re‑evaluated and the list refreshes.
 ///
@@ -588,8 +588,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   /// Formats an API-style category tag for human display.
   ///
-  /// Strips the language prefix (e.g. `en:`) and replaces hyphens with
-  /// spaces so that `'en:food-additives'` becomes `'food additives'`.
+  /// Strips the language prefix (e.g. en:) and replaces hyphens with
+  /// spaces so that 'en:food-additives' becomes 'food additives'.
   static String _formatCategory(String? tag) {
     if (tag == null || tag.isEmpty) return '';
     final withoutPrefix = tag.contains(':') ? tag.split(':').last : tag;

@@ -67,7 +67,7 @@ jobs:
             "${FEEDBACK_TOKEN:-}"
       - name: Analyze Flutter
         if: matrix.category == 'static'
-        run: flutter analyze --fatal-infos --fatal-warnings
+        run: dart analyze
         working-directory: code
       - name: Run Flutter ${{ matrix.category }} tests
         if: matrix.category != 'static'

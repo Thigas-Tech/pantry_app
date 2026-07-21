@@ -47,7 +47,7 @@ class PriceRepository {
     await _db.deletePrice(id);
   }
 
-  /// Returns the price with the given [id], or `null` if not found.
+  /// Returns the price with the given [id], or null if not found.
   Future<Price?> getPriceById(int id) => _db.getPriceById(id);
 
   /// Returns all price entries for the given [barcode], ordered by
@@ -58,7 +58,7 @@ class PriceRepository {
     int? offset,
   }) => _db.getPricesByBarcode(barcode, limit: limit, offset: offset);
 
-  /// Returns the most recent price for the given [barcode], or `null`.
+  /// Returns the most recent price for the given [barcode], or null.
   Future<Price?> getLatestPrice(String barcode) => _db.getLatestPrice(barcode);
 
   /// Returns the total number of prices on record.
@@ -70,8 +70,8 @@ class PriceRepository {
 
   /// Formats [amount] as a currency string in [currencyCode].
   ///
-  /// Uses [NumberFormat.currency] from `package:intl`. Returns a string like
-  /// `"R$ 15,90"` or `"$15.90"`.
+  /// Uses [NumberFormat.currency] from package:intl. Returns a string like
+  /// "R$ 15,90" or "$15.90".
   String formatPrice(double amount, String currencyCode) {
     try {
       return NumberFormat.currency(
@@ -99,7 +99,7 @@ class PriceRepository {
   // ---------------------------------------------------------------------------
 
   /// Returns the sum of the most recent price per distinct product in
-  /// the given inventory, converted to [baseCurrency], or `null` if no
+  /// the given inventory, converted to [baseCurrency], or null if no
   /// prices exist.
   ///
   /// When multiple currencies are present, each price is converted to
@@ -128,7 +128,7 @@ class PriceRepository {
   }
 
   /// Returns the average of the most recent price per distinct product in
-  /// the given inventory, converted to [baseCurrency], or `null` if no
+  /// the given inventory, converted to [baseCurrency], or null if no
   /// prices exist.
   ///
   /// Each price is converted individually before averaging so that

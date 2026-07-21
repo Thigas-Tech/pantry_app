@@ -8,7 +8,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// [AuthService] implementation backed by Firebase Authentication.
 ///
 /// Uses FirebaseAuth for anonymous sign-in and streams auth state changes.
-/// All failures are caught and logged — the service returns `null` instead of
+/// All failures are caught and logged — the service returns null instead of
 /// throwing, following the app's graceful degradation pattern.
 ///
 /// ## Future migration
@@ -17,7 +17,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// ```dart
 /// Future<AuthUser?> signInWithGoogle() async { ... }
 /// ```
-/// and use `FirebaseAuth.instance.currentUser!.linkWithCredential` to preserve
+/// and use FirebaseAuth.instance.currentUser!.linkWithCredential to preserve
 /// anonymous data under the permanent account.
 class FirebaseAuthService implements AuthService {
   /// Creates a [FirebaseAuthService] implementing [AuthService] using the

@@ -14,7 +14,7 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 /// A bottom sheet for entering or editing a price observation.
 ///
 /// Opens via [showModalBottomSheet]. Returns a [Price] object with the
-/// entered data, or `null` if the user cancels.
+/// entered data, or null if the user cancels.
 ///
 /// The amount field uses a locale-aware decimal separator
 /// ([decimalSeparatorFor]).
@@ -48,7 +48,7 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
   final String? existingStore;
 
   /// Shows the price entry bottom sheet and returns the entered [Price],
-  /// or `null` if cancelled.
+  /// or null if cancelled.
   static Future<Price?> show(
     BuildContext context, {
     String barcode = '',

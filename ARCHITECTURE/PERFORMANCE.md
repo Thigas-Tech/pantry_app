@@ -98,7 +98,7 @@ Workflows live in `.github/workflows/`:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|---|---|
-| `ci.yml` | Pull request to `main` | Format check, `flutter analyze`, unit + widget tests, coverage report with PR comment |
+| `ci.yml` | Pull request to `main` | Format check, `dart analyze`, unit + widget tests, coverage report with PR comment |
 | `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB + release APK + AAB, uploads artifacts (90-day retention), and creates a GitHub release via `gh release create` (publish job) |
 | `patrol-e2e.yml` | Weekly (Sun 03:00 UTC) | Patrol integration test suite on Android emulator |
 | `flashlight.yml` | Weekly (Sun 04:00 UTC) | Flashlight battery/CPU/GPU profiling on emulator |

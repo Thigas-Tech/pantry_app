@@ -17,7 +17,7 @@ Uint8List? _decodeAndEncodeWebp(Uint8List bytes) {
 /// Caches product images locally in the WebP format.
 ///
 /// Images are downloaded from the network, decoded, re-encoded as WebP for
-/// storage efficiency, and saved to `<app-documents>/image_cache/<barcode>.webp`.
+/// storage efficiency, and saved to app-documents/image_cache/barcode.webp.
 /// On subsequent requests the cached file is returned without a network call.
 ///
 /// All I/O is asynchronous — no synchronous file operations are used.
@@ -36,7 +36,7 @@ class ImageCacheService {
   /// Downloads the image at [imageUrl] for the product with [barcode],
   /// converts it to WebP, and saves it to the local file system.
   ///
-  /// Returns the path to the cached file, or `null` if caching failed.
+  /// Returns the path to the cached file, or null if caching failed.
   Future<String?> cacheImage(String? imageUrl, String barcode) async {
     if (imageUrl == null || imageUrl.isEmpty) return null;
 

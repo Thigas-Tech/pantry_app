@@ -14,13 +14,13 @@ class PluEntry {
     required this.category,
   });
 
-  /// The PLU code as a string (e.g. `'4011'`, `'94011'`).
+  /// The PLU code as a string (e.g. '4011', '94011').
   final String code;
 
-  /// The common name of the produce item (e.g. `'Banana'`).
+  /// The common name of the produce item (e.g. 'Banana').
   final String name;
 
-  /// The produce category (e.g. `'Fruits'`, `'Vegetables'`).
+  /// The produce category (e.g. 'Fruits', 'Vegetables').
   final String category;
 }
 
@@ -31,8 +31,8 @@ class PluEntry {
 /// data on Open Food Facts.
 ///
 /// The database covers the most common ~100 produce items. Organic variants
-/// use 5-digit codes prefixed with `'9'` (e.g. `'94011'` for Organic Banana
-/// vs `'4011'` for conventional Banana).
+/// use 5-digit codes prefixed with '9' (e.g. '94011' for Organic Banana
+/// vs '4011' for conventional Banana).
 ///
 /// [lookup] resolves a PLU code to a [PluEntry]. [search] does a fuzzy
 /// match by name or category. All lookups are synchronous — the data is
@@ -203,10 +203,10 @@ class PluService {
   /// Looks up a PLU code and returns the corresponding [PluEntry].
   ///
   /// The [code] may include leading zeros or whitespace — it is trimmed and
-  /// normalized before lookup. Returns `null` for codes not in the database.
+  /// normalized before lookup. Returns null for codes not in the database.
   ///
   /// Supports both 4-digit standard PLU codes and 5-digit organic codes
-  /// (prefixed with `'9'`).
+  /// (prefixed with '9').
   PluEntry? lookup(String code) {
     final trimmed = code.trim();
     if (trimmed.isEmpty) return null;

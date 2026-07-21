@@ -37,7 +37,7 @@ class CurrencyService {
   /// Fetches the latest exchange rates for [baseCurrency] from the API
   /// or from the cache if it is less than 24 hours old.
   ///
-  /// Returns a map of currency code → rate (e.g. `{'BRL': 5.20, 'EUR': 0.92}`).
+  /// Returns a map of currency code → rate (e.g. {'BRL': 5.20, 'EUR': 0.92}).
   /// Returns an empty map on failure.
   Future<Map<String, double>> getRates(String baseCurrency) async {
     final normalized = baseCurrency.toUpperCase();
@@ -106,7 +106,7 @@ class CurrencyService {
   /// Detects the likely currency code from the device locale.
   ///
   /// Uses [Platform.localeName] and a curated mapping of country codes to
-  /// ISO 4217 currency codes. Falls back to `'USD'`.
+  /// ISO 4217 currency codes. Falls back to 'USD'.
   String detectLocaleCurrency() {
     try {
       final locale = Platform.localeName;
@@ -253,8 +253,8 @@ String decimalSeparatorFor(String currencyCode) {
 
 /// Returns the currency symbol for [currencyCode].
 ///
-/// Common symbols: `R$` (BRL), `$` (USD/ARS/CLP/COP), `EUR` (EUR),
-/// `GBP` (GBP), `JPY` (JPY), `CNY` (CNY), `CA$` (CAD), `AU$` (AUD).
+/// Common symbols: R$ (BRL), $ (USD/ARS/CLP/COP), EUR (EUR),
+/// GBP (GBP), JPY (JPY), CNY (CNY), CA$ (CAD), AU$ (AUD).
 /// Falls back to the uppercase ISO code for unknown currencies.
 String currencySymbolFor(String currencyCode) {
   return switch (currencyCode.toUpperCase()) {

@@ -46,7 +46,7 @@ void _registerFallbacks() {
 
 // ---------- Helpers ----------------------------------------------------------
 
-/// Typical inventory row data returned by `inventoryListProvider`.
+/// Typical inventory row data returned by inventoryListProvider.
 Map<String, dynamic> makeInventory({
   required int id,
   String name = 'Home',

@@ -6,9 +6,9 @@ import 'package:pantry_app/utils/logger.dart';
 
 /// A price observation fetched from the Open Prices API.
 ///
-/// Maps to the `/api/v1/prices` response item. Only fields relevant to the
-/// app are extracted; the full response includes deeply nested `product`,
-/// `location`, and `proof` objects.
+/// Maps to the /api/v1/prices response item. Only fields relevant to the
+/// app are extracted; the full response includes deeply nested product,
+/// location, and proof objects.
 ///
 /// Reference: https://openfoodfacts.github.io/open-prices/
 class RemotePrice {
@@ -46,13 +46,13 @@ class RemotePrice {
   /// Open Prices identifier.
   final int id;
 
-  /// Product barcode (e.g. `"5449000000996"`).
+  /// Product barcode (e.g. "5449000000996").
   final String productCode;
 
   /// Monetary amount.
   final double price;
 
-  /// ISO 4217 currency code (e.g. `"EUR"`, `"BRL"`).
+  /// ISO 4217 currency code (e.g. "EUR", "BRL").
   final String currency;
 
   /// Product display name, if available.
@@ -61,7 +61,7 @@ class RemotePrice {
   /// Store name from the associated OSM location.
   final String? store;
 
-  /// ISO date string (`YYYY-MM-DD`).
+  /// ISO date string (YYYY-MM-DD).
   final String? date;
 }
 
@@ -111,8 +111,8 @@ class SubmitPriceResult {
 ///
 /// ## Base URL
 ///
-/// Production: `https://prices.openfoodfacts.org/api/v1`
-/// Pre-production: `https://prices.openfoodfacts.net/api/v1`
+/// Production: https://prices.openfoodfacts.org/api/v1
+/// Pre-production: https://prices.openfoodfacts.net/api/v1
 ///
 /// ## Authentication
 ///
@@ -123,14 +123,14 @@ class SubmitPriceResult {
 ///
 /// **How to get a token:**
 /// 1. Create/Log in at https://world.openfoodfacts.org
-/// 2. Post to `https://prices.openfoodfacts.org/api/v1/auth/token` with
+/// 2. Post to https://prices.openfoodfacts.org/api/v1/auth/token with
 ///    your OFF credentials to generate an Open Prices token.
 ///
 /// ## Error handling
 ///
 /// Network errors and non-2xx responses are caught and returned as
 /// [FetchPricesResult] with an empty list, or [SubmitPriceResult] with
-/// `success = false`. No exceptions are thrown.
+/// success = false. No exceptions are thrown.
 ///
 /// Reference: https://openfoodfacts.github.io/open-prices/guides/API/
 class OpenPricesApiClient {
@@ -165,7 +165,7 @@ class OpenPricesApiClient {
 
   /// Fetches prices for the given [barcode] from the Open Prices API.
   ///
-  /// The API uses `product_code` as the query parameter (the normalized
+  /// The API uses product_code as the query parameter (the normalized
   /// barcode string). Results are ordered by date descending (newest first).
   Future<FetchPricesResult> fetchPricesByBarcode(
     String barcode, {
@@ -206,8 +206,8 @@ class OpenPricesApiClient {
 
   /// Validates the configured Bearer token against the Open Prices API.
   ///
-  /// Calls a lightweight authenticated endpoint (`GET /api/v1/prices` with
-  /// `page=1&size=1`). Returns `true` on 200, `false` on 401 or network
+  /// Calls a lightweight authenticated endpoint (GET /api/v1/prices with
+  /// page=1&size=1). Returns true on 200, false on 401 or network
   /// error.
   Future<bool> validateToken() async {
     if (_effectiveToken.isEmpty) return false;
@@ -229,8 +229,8 @@ class OpenPricesApiClient {
   /// (receipt or shelf-label image) for every price write. Until the app
   /// supports proof upload, this method is a placeholder.
   ///
-  /// Required fields on the API: `product_code`, `price`, `currency`,
-  /// `proof_id`, `type`. The [proofId] parameter is mandatory.
+  /// Required fields on the API: product_code, price, currency,
+  /// proof_id, type. The [proofId] parameter is mandatory.
   Future<SubmitPriceResult> submitPrice({
     required String barcode,
     required double price,

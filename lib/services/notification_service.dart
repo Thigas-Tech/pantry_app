@@ -9,7 +9,7 @@ import 'package:timezone/timezone.dart' as tz;
 /// Notification ID for the single daily inactivity reminder.
 ///
 /// Chosen far above any realistic [InventoryItem.id] so it never collides
-/// with expiry IDs (which use `itemId * 2` / `itemId * 2 + 1`).
+/// with expiry IDs (which use itemId * 2 / itemId * 2 + 1).
 const _inactivityReminderId = 999_999_001;
 
 /// Manages local notifications for expiry and inactivity reminders.
@@ -27,16 +27,16 @@ const _inactivityReminderId = 999_999_001;
 /// ## Notification IDs
 ///
 /// Each inventory item can have up to two scheduled notifications:
-/// - ID = `itemId * 2`      -> "Expiring soon" (1 day before)
-/// - ID = `itemId * 2 + 1`  -> "Expiring today" (on the expiry day)
+/// - ID = itemId * 2      -> "Expiring soon" (1 day before)
+/// - ID = itemId * 2 + 1  -> "Expiring today" (on the expiry day)
 ///
-/// The ID scheme uses `itemId * 2` instead of [hashCode] to guarantee
+/// The ID scheme uses itemId * 2 instead of [hashCode] to guarantee
 /// positivity (required by Android) and avoid collisions between items
 /// that share a barcode.
 ///
 /// ## Channel
 ///
-/// All expiry reminders use `'expiry_channel'`, created explicitly during
+/// All expiry reminders use 'expiry_channel', created explicitly during
 /// [initialize] with [Importance.high] and
 /// [AndroidNotificationCategory.reminder].
 ///
@@ -623,7 +623,7 @@ class FlutterNotificationService implements NotificationService {
   /// Attempts to resolve [identifier] to a [tz.Location].
   ///
   /// Handles IANA names, common abbreviations, and raw UTC offset strings.
-  /// Returns `null` if the identifier cannot be resolved.
+  /// Returns null if the identifier cannot be resolved.
   tz.Location? _resolveTimezoneIdentifier(String identifier) {
     // 1. Try as a direct IANA identifier.
     try {

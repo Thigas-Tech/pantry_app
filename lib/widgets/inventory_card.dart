@@ -90,7 +90,7 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
   ///
   /// For produce items, calls the localizeProduceName method on
   /// [AppLocalizations] so the name is shown in the user's locale
-  /// (e.g. `"Maca"` in Portuguese). Falls back
+  /// (e.g. "Maca" in Portuguese). Falls back
   /// to [InventoryWithProduct.barcode] when
   /// [InventoryWithProduct.productName] is null.
   String _localizedDisplayName(AppLocalizations l10n) {

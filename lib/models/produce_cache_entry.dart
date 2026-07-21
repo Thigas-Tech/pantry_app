@@ -8,11 +8,11 @@ part 'produce_cache_entry.g.dart';
 /// 180 days in milliseconds.
 const int _produceRefreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 
-/// Firestore document for the `produce_cache/{name}` collection.
+/// Firestore document for the produce_cache/{name} collection.
 ///
 /// Stores USDA produce nutrition data in a shared cloud cache so that
 /// multiple devices can benefit from a single API fetch. Each document
-/// is keyed by the lowercase English produce name (e.g. `apple`).
+/// is keyed by the lowercase English produce name (e.g. apple).
 ///
 /// ## Refresh cycle
 ///
@@ -29,16 +29,16 @@ abstract class ProduceCacheEntry with _$ProduceCacheEntry {
   const factory ProduceCacheEntry({
     /// USDA FDC (FoodData Central) ID for this produce item.
     ///
-    /// Set to `0` when the FDC ID is not known (e.g. from fallback data).
+    /// Set to 0 when the FDC ID is not known (e.g. from fallback data).
     required int fdcId,
 
     /// Lowercase English produce name used as the Firestore document ID
-    /// (e.g. `"apple"`, `"banana"`).
+    /// (e.g. "apple", "banana").
     required String name,
 
     /// Nutrition per 100 g, keyed by nutrient name.
     ///
-    /// Known keys: `energyKcal`, `proteinG`, `carbsG`, `fatG`, `fiberG`.
+    /// Known keys: energyKcal, proteinG, carbsG, fatG, fiberG.
     /// An empty map means no nutrition data is available.
     required Map<String, double> nutrition,
 
@@ -51,13 +51,13 @@ abstract class ProduceCacheEntry with _$ProduceCacheEntry {
     /// Epoch timestamp (ms) of when this entry should be refreshed next.
     required int nextRefreshAt,
 
-    /// Localized names keyed by locale code (e.g. `{"pt": "Maca"}`).
+    /// Localized names keyed by locale code (e.g. {"pt": "Maca"}).
     @Default({}) Map<String, String> localizedNames,
 
     /// PLU (Price Look-Up) codes associated with this produce item.
     @Default(<String>[]) List<String> pluCodes,
 
-    /// The USDA food category (e.g. `"Fruits and Fruit Juices"`).
+    /// The USDA food category (e.g. "Fruits and Fruit Juices").
     @JsonKey(includeIfNull: false) String? category,
 
     /// Suggested serving size in grams. Null when unknown.
@@ -79,7 +79,7 @@ abstract class ProduceCacheEntry with _$ProduceCacheEntry {
 extension ProduceCacheEntryConversions on ProduceCacheEntry {
   /// Creates a cache entry from a [Product] returned by the USDA API.
   ///
-  /// [fdcId] is the USDA FDC identifier. Pass `0` when unknown.
+  /// [fdcId] is the USDA FDC identifier. Pass 0 when unknown.
   /// [englishName] is the canonical lowercase name used as the Firestore
   /// document key. If [createdAt] is omitted it is set to [lastRefreshedAt].
   static ProduceCacheEntry fromProduct(
@@ -109,7 +109,7 @@ extension ProduceCacheEntryConversions on ProduceCacheEntry {
   /// Converts this cache entry back to a local [Product].
   ///
   /// The [barcode] parameter must be the synthetic barcode used for produce
-  /// items (e.g. `"produce-Apple"`).
+  /// items (e.g. "produce-Apple").
   Product toProduct({required String barcode}) {
     return Product(
       barcode: barcode,
