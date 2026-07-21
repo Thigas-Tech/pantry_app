@@ -126,6 +126,7 @@ class SettingsNotifier extends Notifier<Settings> {
   Future<void> _loadFromPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!ref.mounted) return;
       state = Settings(
         notificationsEnabled: prefs.getBool('notificationsEnabled') ?? true,
         retentionDays: prefs.getInt('retentionDays') ?? 60,

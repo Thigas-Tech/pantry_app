@@ -57,9 +57,8 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 
   @override
   void setActiveInventory(int newValue) {
-    lastSetValue = newValue;
+    _lastSetValue = newValue;
     super.setActiveInventory(newValue);
-
   }
 }
 
