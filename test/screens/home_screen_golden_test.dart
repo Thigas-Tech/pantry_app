@@ -14,6 +14,7 @@ class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 
   @override
   void setActiveInventory(int newValue) {}
+
 }
 
 InventoryWithProduct _testItem(

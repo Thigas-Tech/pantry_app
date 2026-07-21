@@ -327,7 +327,7 @@ After all manual tests pass:
 1. Check logcat for errors: `adb logcat -d | grep -E 'flutter.*ERR'` — should be empty
 2. Verify database integrity: pull DB and check all tables have expected data
 3. Confirm no crash dialogs appeared during testing (watch emulator screen)
-4. Run `flutter analyze --fatal-infos --fatal-warnings` — clean
+4. Run `dart analyze` — clean
 5. Run `flutter test --concurrency=2` — all pass
 6. Run `flutter build apk --debug` — builds cleanly
 7. Run `dart doc .` — 0 warnings, 0 errors

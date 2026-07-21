@@ -24,6 +24,7 @@ class PriceVisibilityToggle extends ConsumerWidget {
       tooltip: hidden ? l10n.showPrices : l10n.hidePrices,
       onPressed: () {
         ref.read(settingsProvider.notifier).setPricesHidden(value: !hidden);
+
         SnackbarHelper.showInfo(
           context,
           hidden ? l10n.pricesVisible : l10n.pricesHidden,
