@@ -1,7 +1,3 @@
-// ignore_for_file: avoid_print
-// ignore_for_file: cascade_invocations
-// ignore_for_file: omit_local_variable_types
-
 /// Dart VM Service health check CLI tool.
 ///
 /// Connects to a running Flutter/Dart app in debug mode and produces
@@ -38,7 +34,7 @@ Future<void> main(List<String> args) async {
     exit(1);
   }
 
-  print('Connecting to $uri ...');
+  stdout.writeln('Connecting to $uri ...');
   VmService? service;
   try {
     service = await vmServiceConnectUri(uri).timeout(
@@ -55,7 +51,7 @@ Future<void> main(List<String> args) async {
     exit(1);
   }
 
-  print('Connected. Fetching VM info...\n');
+  stdout.writeln('Connected. Fetching VM info...\n');
 
   try {
     await _runDiagnostics(service);
@@ -67,19 +63,19 @@ Future<void> main(List<String> args) async {
 Future<void> _runDiagnostics(VmService service) async {
   final vm = await service.getVM();
   _printHeader('VM Overview');
-  print('  Name:      ${vm.name}');
-  print('  Version:   ${vm.version}');
-  print('  PID:       ${vm.pid}');
-  print('  Isolates:  ${vm.isolates?.length ?? 0}');
-  print('  Uptime:    ${_formatUptime(vm.startTime)}');
+  stdout.writeln('  Name:      ${vm.name}');
+  stdout.writeln('  Version:   ${vm.version}');
+  stdout.writeln('  PID:       ${vm.pid}');
+  stdout.writeln('  Isolates:  ${vm.isolates?.length ?? 0}');
+  stdout.writeln('  Uptime:    ${_formatUptime(vm.startTime)}');
 
   final isolateRefs = vm.isolates ?? [];
   if (isolateRefs.isEmpty) {
-    print('\n  No isolates found — app may still be starting.');
+    stdout.writeln('\n  No isolates found — app may still be starting.');
     return;
   }
 
-  var warnings = 0;
+  int warnings = 0;
 
   for (final ref in isolateRefs) {
     final isolateId = ref.id;
@@ -87,21 +83,21 @@ Future<void> _runDiagnostics(VmService service) async {
 
     final isolate = await service.getIsolate(isolateId);
     _printHeader('Isolate: ${isolate.name ?? '(unnamed)'}');
-    print('  ID:            ${isolate.id}');
+    stdout.writeln('  ID:            ${isolate.id}');
 
     warnings += await _printMemoryUsage(service, isolateId);
     warnings += await _printCpuSamples(service, isolateId);
 
     final extensions = isolate.extensionRPCs ?? [];
-    print('  Extensions:    ${extensions.length} registered');
+    stdout.writeln('  Extensions:    ${extensions.length} registered');
     _printFlutterExtensions(extensions);
   }
 
   _printHeader('Health Assessment');
   if (warnings == 0) {
-    print('  Status:  PASS — no warnings detected');
+    stdout.writeln('  Status:  PASS — no warnings detected');
   } else {
-    print('  Status:  WARN — $warnings warning(s) found');
+    stdout.writeln('  Status:  WARN — $warnings warning(s) found');
   }
 }
 
@@ -111,13 +107,13 @@ Future<int> _printMemoryUsage(VmService service, String isolateId) async {
   final heapCapacity = (mem.heapCapacity ?? 0) ~/ (1024 * 1024);
   final external = (mem.externalUsage ?? 0) ~/ (1024 * 1024);
 
-  print('  Memory:');
-  print('    Heap:      $heapUsed MB / $heapCapacity MB');
-  print('    External:  $external MB');
+  stdout.writeln('  Memory:');
+  stdout.writeln('    Heap:      $heapUsed MB / $heapCapacity MB');
+  stdout.writeln('    External:  $external MB');
 
   int warnings = 0;
   if (heapCapacity > 0 && heapUsed > heapCapacity * 0.85) {
-    print('    WARNING: Heap usage > 85% — may trigger GC pressure.');
+    stdout.writeln('    WARNING: Heap usage > 85% — may trigger GC pressure.');
     warnings++;
   }
   return warnings;
@@ -149,17 +145,17 @@ Future<int> _printCpuSamples(VmService service, String isolateId) async {
       }
     }
 
-    print('  CPU (top 5 functions):');
-    final sorted = counts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    stdout.writeln('  CPU (top 5 functions):');
+    final sorted = counts.entries.toList();
+    sorted.sort((a, b) => b.value.compareTo(a.value));
     for (final entry in sorted.take(5)) {
-      print('    ${entry.key}: ${entry.value} samples');
+      stdout.writeln('    ${entry.key}: ${entry.value} samples');
     }
     if (sorted.isEmpty) {
-      print('    No CPU samples collected yet.');
+      stdout.writeln('    No CPU samples collected yet.');
     }
   } on Exception {
-    print('  CPU: not available');
+    stdout.writeln('  CPU: not available');
   }
   return 0;
 }
@@ -167,17 +163,17 @@ Future<int> _printCpuSamples(VmService service, String isolateId) async {
 void _printFlutterExtensions(List<String> extensions) {
   final flutterExts = extensions.where((e) => e.startsWith('ext.flutter.'));
   if (flutterExts.isNotEmpty) {
-    print('  Flutter extensions:');
+    stdout.writeln('  Flutter extensions:');
     for (final ext in flutterExts) {
-      print('    $ext');
+      stdout.writeln('    $ext');
     }
   }
 }
 
 void _printHeader(String text) {
-  print('\n${'─' * 60}');
-  print('  $text');
-  print('${'─' * 60}');
+  stdout.writeln('\n${'─' * 60}');
+  stdout.writeln('  $text');
+  stdout.writeln('${'─' * 60}');
 }
 
 String _formatUptime(int? startTime) {
