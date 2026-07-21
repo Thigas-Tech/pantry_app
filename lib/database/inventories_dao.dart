@@ -2,7 +2,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `inventories` table (named pantries).
+/// Data-access layer for the inventories table (named pantries).
 ///
 /// All methods receive a [Database] instance so they can be used
 /// independently of [DatabaseHelper] in tests.
@@ -45,7 +45,7 @@ class InventoriesDao {
     );
   }
 
-  /// Creates the schema for the `inventories` table.
+  /// Creates the schema for the inventories table.
   Future<void> createTable(Database db) async {
     await db.execute('''
       CREATE TABLE inventories (

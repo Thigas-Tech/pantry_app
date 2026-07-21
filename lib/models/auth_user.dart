@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 
 /// Represents an authenticated user.
 ///
-/// For anonymous auth [isAnonymous] is `true` and [email]/[displayName] are
-/// typically `null`. Non-anonymous (Google/email) auth is supported for future
-/// migration — simply construct with `isAnonymous: false` and the relevant
+/// For anonymous auth [isAnonymous] is true and [email]/[displayName] are
+/// typically null. Non-anonymous (Google/email) auth is supported for future
+/// migration — simply construct with isAnonymous: false and the relevant
 /// fields.
 @immutable
 class AuthUser {

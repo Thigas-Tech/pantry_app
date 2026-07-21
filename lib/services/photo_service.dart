@@ -22,7 +22,7 @@ class PhotoService {
   final Directory? photoDirectory;
 
   /// Opens the device camera and returns the path to the saved photo,
-  /// or `null` if the user cancelled.
+  /// or null if the user cancelled.
   Future<String?> capturePhoto(int itemId) async {
     try {
       final file = await _picker.pickImage(
@@ -39,7 +39,7 @@ class PhotoService {
   }
 
   /// Opens the device gallery and returns the path to the saved photo,
-  /// or `null` if the user cancelled.
+  /// or null if the user cancelled.
   Future<String?> pickFromGallery(int itemId) async {
     try {
       final file = await _picker.pickImage(

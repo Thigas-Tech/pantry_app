@@ -12,9 +12,9 @@ import 'package:pantry_app/models/store.dart';
 ///
 /// ## Usage
 ///
-/// - `ref.watch(databaseProvider)` in widgets that need access to the
+/// - ref.watch(databaseProvider) in widgets that need access to the
 ///   database (usually via repository providers).
-/// - `ref.read(databaseProvider)` in async callbacks.
+/// - ref.read(databaseProvider) in async callbacks.
 final databaseProvider = Provider<DatabaseHelper>((ref) {
   return DatabaseHelper();
 });

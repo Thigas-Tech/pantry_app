@@ -1,15 +1,15 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Application configuration loaded from a `.env` file at startup.
+/// Application configuration loaded from a .env file at startup.
 ///
 /// All sensitive values (API credentials, contact email, etc.) are read from
-/// environment variables loaded by the [DotEnv] class. A `.env.example` file is
-/// provided as a template; copy it to `.env` and fill in real values.
+/// environment variables loaded by the [DotEnv] class. A .env.example file is
+/// provided as a template; copy it to .env and fill in real values.
 ///
 /// ## Security note
 ///
-/// - The `.env` file is **never** committed to version control.
-/// - `.env.example` contains placeholder values and IS committed.
+/// - The .env file is **never** committed to version control.
+/// - .env.example contains placeholder values and IS committed.
 /// - These values are embedded in the app bundle at build time.
 ///
 /// This class cannot be instantiated — all members are static.
@@ -18,7 +18,7 @@ class AppConfig {
 
   /// The Open Food Facts user ID used for product submissions.
   ///
-  /// Set to a non‑empty string in `.env` to enable product‑submission
+  /// Set to a non‑empty string in .env to enable product‑submission
   /// features. Leave empty to disable submissions.
   static String get offUserId => dotenv.env['OFF_USER_ID'] ?? '';
 
@@ -32,14 +32,14 @@ class AppConfig {
   static String get contactEmail =>
       dotenv.env['CONTACT_EMAIL'] ?? 'pantry-app@example.com';
 
-  /// Whether to use the Open Food Facts staging server (`true`) or the
-  /// production server (`false`).
+  /// Whether to use the Open Food Facts staging server (true) or the
+  /// production server (false).
   static bool get useOffStaging =>
       dotenv.env['USE_OFF_STAGING']?.toLowerCase() == 'true';
 
   /// The GitHub personal access token used for in-app feedback submissions.
   ///
-  /// Must have `Issues: Read and write` permission on the repository
+  /// Must have Issues: Read and write permission on the repository
   /// specified by [githubOwner] and [githubRepo].
   static String get feedbackToken => dotenv.env['FEEDBACK_TOKEN'] ?? '';
 
@@ -74,9 +74,9 @@ class AppConfig {
 
   /// Whether Firebase integration is enabled.
   ///
-  /// Set to `true` in `.env` after running `flutterfire configure` and
-  /// placing the generated `google-services.json` / `GoogleService-Info.plist`
-  /// in the platform project. When `false`, all Firebase operations are
+  /// Set to true in .env after running flutterfire configure and
+  /// placing the generated google-services.json / GoogleService-Info.plist
+  /// in the platform project. When false, all Firebase operations are
   /// no-ops and the app works exactly as before.
   static bool get firebaseEnabled =>
       dotenv.env['FIREBASE_ENABLED']?.toLowerCase() == 'true';

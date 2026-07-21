@@ -15,7 +15,7 @@ final priceHistoryProvider = FutureProvider.autoDispose
       },
     );
 
-/// Provides the most recent price for a specific barcode, or `null`.
+/// Provides the most recent price for a specific barcode, or null.
 final latestPriceProvider = FutureProvider.autoDispose.family<Price?, String>(
   (ref, barcode) {
     return ref.watch(priceRepositoryProvider).getLatestPrice(barcode);

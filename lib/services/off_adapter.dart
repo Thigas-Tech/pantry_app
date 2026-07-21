@@ -23,20 +23,20 @@ import 'package:pantry_app/utils/logger.dart';
 /// ## Read vs write users
 ///
 /// - [getByBarcode] and [searchProducts] use a test user
-///   (`smoothie-app/strawberrybanana`), following the convention
+///   (smoothie-app/strawberrybanana), following the convention
 ///   established by the official smooth-app. OFF does not require
 ///   authentication for read operations.
 /// - [submitProduct] and [uploadProductImage] use the credentials
 ///   configured in [AppConfig.offUserId] and [AppConfig.offPassword],
-///   or return `false` if no credentials are set.
+///   or return false if no credentials are set.
 class OffAdapter {
   /// Creates an [OffAdapter].
   ///
-  /// If [useStaging] is `true`, API calls target the OFF staging server
-  /// (`world.openfoodfacts.net`); otherwise they target production
-  /// (`world.openfoodfacts.org`).
+  /// If [useStaging] is true, API calls target the OFF staging server
+  /// (world.openfoodfacts.net); otherwise they target production
+  /// (world.openfoodfacts.org).
   ///
-  /// Each `on*` parameter overrides the corresponding SDK static call
+  /// Each on* parameter overrides the corresponding SDK static call
   /// for testing.  When omitted the real SDK method is used.
   OffAdapter({
     required this.useStaging,
@@ -150,7 +150,7 @@ class OffAdapter {
 
   /// The authenticated user for write operations (submission, upload).
   ///
-  /// Returns `null` if no OFF credentials are configured in `.env`.
+  /// Returns null if no OFF credentials are configured in .env.
   @visibleForTesting
   off.User? get writeUser {
     final userId = AppConfig.offUserId;
@@ -161,7 +161,7 @@ class OffAdapter {
 
   /// Fetches a product by barcode from Open Food Facts.
   ///
-  /// [languageCode] is a two-letter code (e.g. `'en'`, `'fr'`, `'pt'`)
+  /// [languageCode] is a two-letter code (e.g. 'en', 'fr', 'pt')
   /// that requests product data in the user's preferred language.
   ///
   /// Retries up to [maxRetries] times on transient failures (network
@@ -278,7 +278,7 @@ class OffAdapter {
 
   /// Submits a product to Open Food Facts.
   ///
-  /// Returns `true` on success, `false` if credentials are missing or
+  /// Returns true on success, false if credentials are missing or
   /// the server rejected the submission.
   Future<bool> submitProduct(Product product) async {
     final user = writeUser;
@@ -332,8 +332,8 @@ class OffAdapter {
 
   /// Uploads a product image to Open Food Facts.
   ///
-  /// [imagePath] must be a valid local file path. Returns `true` on
-  /// success, `false` if credentials are missing or the upload fails.
+  /// [imagePath] must be a valid local file path. Returns true on
+  /// success, false if credentials are missing or the upload fails.
   Future<bool> uploadProductImage({
     required String barcode,
     required String imageField,

@@ -17,7 +17,7 @@ String changelogAssetPath(Locale locale) {
   return 'USER_CHANGELOG_$localeTag.md';
 }
 
-/// Loads the localized `USER_CHANGELOG.md` content for the given [locale].
+/// Loads the localized USER_CHANGELOG.md content for the given [locale].
 ///
 /// Falls back to English if a translation file is not available or cannot be
 /// loaded.

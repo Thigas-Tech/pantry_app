@@ -23,11 +23,11 @@ class QuantityAndPantryResult {
 /// when multiple pantries exist, choose which one to store the item in.
 ///
 /// Opens via [showModalBottomSheet]. Returns a [QuantityAndPantryResult] or
-/// `null` if the user cancels.
+/// null if the user cancels.
 class QuantityAndPantrySheet extends ConsumerStatefulWidget {
   const QuantityAndPantrySheet._();
 
-  /// Shows the sheet and returns the result, or `null` if cancelled.
+  /// Shows the sheet and returns the result, or null if cancelled.
   static Future<QuantityAndPantryResult?> show(BuildContext context) {
     return showModalBottomSheet<QuantityAndPantryResult>(
       context: context,

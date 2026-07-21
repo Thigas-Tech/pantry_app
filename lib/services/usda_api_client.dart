@@ -38,7 +38,7 @@ class UsdaApiClient {
   ///
   /// Nutrition values are already per 100g in the USDA datasets for most
   /// whole foods. Generated products use a synthetic barcode prefixed with
-  /// `'plu-'` and have [ProductType.produce].
+  /// 'plu-' and have [ProductType.produce].
   Future<List<Product>> searchFood(String query) async {
     if (_apiKey.isEmpty) {
       logWarning('USDA API key not configured — skipping USDA search');

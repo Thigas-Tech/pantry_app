@@ -42,8 +42,8 @@ abstract class FirestoreSnapshot {
 /// Low-level Firestore client for product and produce caches.
 ///
 /// Wraps two Firestore collections:
-///   - `produce_cache/{name}` -- USDA produce data (ProduceCacheEntry)
-///   - `product_cache/{barcode}` -- OFF barcoded product data (ProductCacheEntry)
+///   - produce_cache/{name} -- USDA produce data (ProduceCacheEntry)
+///   - product_cache/{barcode} -- OFF barcoded product data (ProductCacheEntry)
 ///
 /// ## Graceful degradation
 ///

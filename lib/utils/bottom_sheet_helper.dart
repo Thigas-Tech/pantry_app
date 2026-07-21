@@ -43,7 +43,7 @@ class BottomSheetHelper {
   /// keyboard height. Use as the bottom padding of a sheet's outermost widget
   /// to prevent content from being hidden behind the keyboard.
   ///
-  /// Returns `padding.bottom + viewInsets.bottom`.
+  /// Returns padding.bottom + viewInsets.bottom.
   static double bottomInset(BuildContext context) {
     final media = MediaQuery.of(context);
     return media.padding.bottom + media.viewInsets.bottom;

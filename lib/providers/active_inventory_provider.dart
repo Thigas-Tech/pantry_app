@@ -8,14 +8,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Holds the ID of the currently selected inventory (pantry).
 ///
 /// The value is persisted to [SharedPreferences] under the key
-/// `active_inventory_id` so that the selection survives app restarts.
+/// active_inventory_id so that the selection survives app restarts.
 /// On initialization the provider reads the persisted value and validates
 /// that the corresponding inventory still exists in the database. If the
 /// persisted inventory was deleted, the provider falls back to the first
 /// available inventory or, when no inventories exist, reseeds the default
 /// "Home" inventory.
 ///
-/// Defaults to `1` (the built‑in "Home" inventory created during migration)
+/// Defaults to 1 (the built‑in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
 class ActiveInventoryNotifier extends Notifier<int> {
   @override
@@ -62,7 +62,7 @@ class ActiveInventoryNotifier extends Notifier<int> {
     }
   }
 
-  /// Fetches all inventories, returning `null` when the DB is unavailable.
+  /// Fetches all inventories, returning null when the DB is unavailable.
   Future<List<Map<String, dynamic>>?> _fetchInventories() async {
     try {
       final db = ref.read(databaseProvider);

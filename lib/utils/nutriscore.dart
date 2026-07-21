@@ -13,7 +13,7 @@ bool _isNotApplicable(String? grade) {
   return grade?.toLowerCase().trim() == 'not-applicable';
 }
 
-/// Returns the canonical Nutri-Score color for [grade], or `null` if invalid.
+/// Returns the canonical Nutri-Score color for [grade], or null if invalid.
 Color? nutriscoreColorForGrade(String? grade) {
   final g = grade?.toLowerCase().trim();
   if (g == null || g.isEmpty || g.length > 1) return null;
@@ -37,7 +37,7 @@ Color nutriscoreColorForNumeric(double averageScore) {
 
 /// Converts a Nutri-Score grade letter to a numeric value for averaging.
 ///
-/// `'a'` = 5, `'b'` = 4, ..., `'e'` = 1. Returns `null` for invalid or
+/// 'a' = 5, 'b' = 4, ..., 'e' = 1. Returns null for invalid or
 /// not-applicable grades.
 int? nutriscoreGradeToNumeric(String? grade) {
   if (_isNotApplicable(grade)) return null;
@@ -53,7 +53,7 @@ int? nutriscoreGradeToNumeric(String? grade) {
 
 /// Converts a numeric Nutri-Score value to a grade letter.
 ///
-/// 5 -> `'a'`, 4 -> `'b'`, ..., 1 -> `'e'`. Returns `null` for out-of-range
+/// 5 -> 'a', 4 -> 'b', ..., 1 -> 'e'. Returns null for out-of-range
 /// values.
 String? nutriscoreNumericToGrade(int numeric) {
   return switch (numeric) {
@@ -68,8 +68,8 @@ String? nutriscoreNumericToGrade(int numeric) {
 
 /// Converts a numeric average Nutri-Score to a display letter.
 ///
-/// The score is rounded to the nearest integer: 5 -> `'A'`, 4 -> `'B'`, ...,
-/// 1 -> `'E'`. Out-of-range values are clamped to the valid range.
+/// The score is rounded to the nearest integer: 5 -> 'A', 4 -> 'B', ...,
+/// 1 -> 'E'. Out-of-range values are clamped to the valid range.
 String nutriscoreNumericToLetter(double averageScore) {
   final grade = averageScore.round().clamp(1, 5);
   return switch (grade) {
@@ -81,5 +81,5 @@ String nutriscoreNumericToLetter(double averageScore) {
   };
 }
 
-/// Returns `true` if [grade] is `'not-applicable'` (case-insensitive).
+/// Returns true if [grade] is 'not-applicable' (case-insensitive).
 bool nutriscoreIsNotApplicable(String? grade) => _isNotApplicable(grade);

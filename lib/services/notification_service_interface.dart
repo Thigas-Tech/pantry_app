@@ -11,7 +11,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 /// Platform-specific behaviour:
 /// - Android: full support via FlutterNotificationService.
 /// - iOS: basic support (channel creation is a no-op).
-/// - Desktop/web: [areNotificationsEnabled] returns `null`.
+/// - Desktop/web: [areNotificationsEnabled] returns null.
 abstract class NotificationService {
   /// Whether the service has been successfully initialized.
   bool get initialized;
@@ -36,7 +36,7 @@ abstract class NotificationService {
     Importance importance = Importance.high,
   });
 
-  /// Creates the `inactivity_channel` notification channel.
+  /// Creates the inactivity_channel notification channel.
   Future<void> ensureInactivityChannel({
     String channelName = 'Inactivity reminders',
     String channelDescription = 'Reminds you to add products regularly',
@@ -113,9 +113,9 @@ abstract class NotificationService {
 
   /// Whether the device can schedule exact-timing notifications.
   ///
-  /// Returns `null` on non-Android platforms. On Android 12+ this requires
-  /// the `SCHEDULE_EXACT_ALARM` permission; on older Android it defaults to
-  /// `true`. When `false`, [scheduleTestNotification] falls back to
+  /// Returns null on non-Android platforms. On Android 12+ this requires
+  /// the SCHEDULE_EXACT_ALARM permission; on older Android it defaults to
+  /// true. When false, [scheduleTestNotification] falls back to
   /// [AndroidScheduleMode.inexactAllowWhileIdle].
   Future<bool?> canScheduleExactNotifications();
 }

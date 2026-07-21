@@ -19,7 +19,7 @@ const String productSubmissionFailed = 'failed';
 
 /// Represents a cached product from Open Food Facts.
 ///
-/// Each [Product] corresponds to a row in the `products` table. Unlike
+/// Each [Product] corresponds to a row in the products table. Unlike
 /// [InventoryItem], which tracks a specific instance of a product in the
 /// user's pantry, this class holds **static product information** — data that
 /// rarely changes and is shared by all instances of the same barcode.
@@ -28,14 +28,14 @@ const String productSubmissionFailed = 'failed';
 ///
 /// The [barcode] field is the **primary key**. It is the unique identifier
 /// used to fetch the product from the Open Food Facts API and to join with
-/// the `inventory` table.
+/// the inventory table.
 ///
 /// ## Nutrition
 ///
 /// All nutrition values (energy, protein, carbs, fat, fiber, salt) follow the
 /// Open Food Facts convention: they represent the amount **per 100 g** (or
 /// 100 ml) of the product. The unit is always grams, except for energy which
-/// is kilocalories (kcal). These fields may be `null` if the data was not
+/// is kilocalories (kcal). These fields may be null if the data was not
 /// available from the API.
 ///
 /// ## Source and freshness
@@ -58,7 +58,7 @@ const String productSubmissionFailed = 'failed';
 ///   product data.
 /// - [freezed](https://pub.dev/packages/freezed)
 ///   — the code‑generation package that provides immutability, [copyWith],
-///   `==`, [hashCode], and JSON serialisation.
+///   ==, [hashCode], and JSON serialisation.
 @freezed
 abstract class Product with _$Product {
   /// Constructs a [Product].
@@ -79,12 +79,12 @@ abstract class Product with _$Product {
     required String name,
 
     /// The brand name(s), often comma-separated when multiple brands exist
-    /// (e.g. `"Ferrero"`, `"Nestle, Nespresso"`).
+    /// (e.g. "Ferrero", "Nestle, Nespresso").
     String? brand,
 
     /// A URL to the product's front image on the Open Food Facts CDN.
     ///
-    /// May be `null` if no image has been uploaded for this product.
+    /// May be null if no image has been uploaded for this product.
     String? imageUrl,
 
     /// OFF CDN URL for the nutrition facts table image, if available.
@@ -101,15 +101,15 @@ abstract class Product with _$Product {
 
     /// The OFF taxonomy hierarchy for this product, from broadest to
     /// most specific. Each entry is a language-prefixed tag
-    /// (e.g. `en:eggs`, `en:chicken-eggs`).
+    /// (e.g. en:eggs, en:chicken-eggs).
     ///
-    /// May be `null` for manually entered products or when OFF has no
+    /// May be null for manually entered products or when OFF has no
     /// taxonomy data.
     List<String>? categoriesHierarchy,
 
     /// The product category as assigned by the Open Food Facts community.
     ///
-    /// Often a comma-separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
+    /// Often a comma-separated hierarchy (e.g. "Spreads, Sweet spreads").
     /// Used in the add-to-inventory screen to suggest a default expiry date
     /// based on the category (e.g., dairy -> +7 days).
     String? category,
@@ -117,17 +117,17 @@ abstract class Product with _$Product {
     /// The full ingredients list as plain text.
     ///
     /// Currently stored as a single string, exactly as returned by the API.
-    /// In the future this could be migrated to a separate `ingredients` table
+    /// In the future this could be migrated to a separate ingredients table
     /// to enable allergen filtering or per-ingredient search.
     String? ingredients,
 
-    /// The suggested serving size, typically with a unit (e.g. `"15 g"`,
-    /// `"1 cookie (28 g)"`).
+    /// The suggested serving size, typically with a unit (e.g. "15 g",
+    /// "1 cookie (28 g)").
     String? servingSize,
 
     /// Energy content in **kilocalories per 100 g** (or 100 ml).
     ///
-    /// Sourced from `nutriments.energy-kcal_100g` in the API response.
+    /// Sourced from nutriments.energy-kcal_100g in the API response.
     double? energyKcal,
 
     /// Protein content in **grams per 100 g** (or 100 ml).
@@ -152,40 +152,40 @@ abstract class Product with _$Product {
     /// submitted by the user.
     int? lastSynced,
 
-    /// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
-    /// if the data is unavailable. May also be `'not-applicable'` when the
+    /// The Nutri-Score grade of the product ('a' through 'e'), or null
+    /// if the data is unavailable. May also be 'not-applicable' when the
     /// Nutri-Score system does not apply to this product category (e.g. food
     /// additives).
     ///
-    /// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
+    /// Sourced from nutrition_grade_fr in the Open Food Facts v3 API via
     /// the SDK's off.Product.nutriscore field.
     String? nutriscoreGrade,
 
     /// The product category that makes Nutri-Score not applicable, if any.
     ///
-    /// This is present only when [nutriscoreGrade] is `'not-applicable'` and
-    /// explains why (e.g. `'en:food-additives'`).
+    /// This is present only when [nutriscoreGrade] is 'not-applicable' and
+    /// explains why (e.g. 'en:food-additives').
     ///
     /// Note: the official Dart SDK does not expose the
-    /// `nutriscore_data.nutriscore_not_applicable_for_category` field, so
+    /// nutriscore_data.nutriscore_not_applicable_for_category field, so
     /// this value is only populated when reading from the local database
     /// for previously cached products.
     String? nutriscoreNotApplicableCategory,
 
     /// The origin of this product record.
     ///
-    /// - `'api'` — fetched from Open Food Facts (can be safely flushed and
+    /// - 'api' — fetched from Open Food Facts (can be safely flushed and
     ///   re-fetched).
-    /// - `'manual'` — entered by the user via the add-product screen
+    /// - 'manual' — entered by the user via the add-product screen
     ///   (must never be deleted by a cache flush).
     ///
-    /// Defaults to `'api'` because most products come from the OFF
+    /// Defaults to 'api' because most products come from the OFF
     /// integration. The add-product screen overrides it to
-    /// `'manual'`.
+    /// 'manual'.
     @Default('api') String source,
 
     /// The locale code of the language used when this product was fetched
-    /// from Open Food Facts (e.g. `'en'`, `'fr'`, `'pt'`).
+    /// from Open Food Facts (e.g. 'en', 'fr', 'pt').
     ///
     /// This represents the language *requested* by the client, not necessarily
     /// the language *returned* — OFF silently falls back to English if the
@@ -199,19 +199,19 @@ abstract class Product with _$Product {
     /// Local file path to a photo of the nutrition facts table.
     ///
     /// Populated when the user captures a photo on the manual-entry screen.
-    /// Stored as a stable path inside `<app-documents>/product_images/`.
+    /// Stored as a stable path inside app-documents/product_images/.
     String? nutritionImagePath,
 
     /// Local file path to a photo of the ingredients list.
     ///
     /// Populated when the user captures a photo on the manual-entry screen.
-    /// Stored as a stable path inside `<app-documents>/product_images/`.
+    /// Stored as a stable path inside app-documents/product_images/.
     String? ingredientsImagePath,
 
     /// Local file path to a photo of the product packaging / front.
     ///
     /// Populated when the user captures a photo on the manual-entry screen.
-    /// Stored as a stable path inside `<app-documents>/product_images/`.
+    /// Stored as a stable path inside app-documents/product_images/.
     String? productImagePath,
 
     /// The submission status of this product to Open Food Facts.
@@ -223,10 +223,10 @@ abstract class Product with _$Product {
     @Default(productSubmissionNotSubmitted) String submissionStatus,
 
     /// The PLU (Price Look-Up) code for this product, if it is a fresh
-    /// produce item (e.g. `'4011'` for Banana, `'4032'` for Apple).
+    /// produce item (e.g. '4011' for Banana, '4032' for Apple).
     ///
     /// Only meaningful when [productType] is [ProductType.produce]. 4-digit
-    /// codes are standard PLU codes; 5-digit codes starting with `'9'`
+    /// codes are standard PLU codes; 5-digit codes starting with '9'
     /// indicate organic produce. This field is nullable for barcoded and
     /// custom products.
     String? pluCode,
@@ -314,7 +314,7 @@ extension ProductToOff on Product {
 /// - **Local-only fields are never touched** — [source],
 ///   [submissionStatus], [nutritionImagePath], [ingredientsImagePath], and
 ///   [productImagePath] are preserved exactly as-is.
-/// - **Name sentinel** — if the API returns `'Unknown'` (the default when
+/// - **Name sentinel** — if the API returns 'Unknown' (the default when
 ///   the real name is missing), the cached name is kept.
 ///
 /// ## Manual merge rules ([mergeFromManual])
@@ -325,9 +325,9 @@ extension ProductToOff on Product {
 ///   [nutriscoreNotApplicableCategory], [offNutritionImageUrl],
 ///   [offIngredientsImageUrl], [offProductImageUrl], [categoriesHierarchy]
 ///   from the cache are kept because the manual form does not provide them.
-/// - **Local-only fields are never touched** — [source] stays `'manual'`,
+/// - **Local-only fields are never touched** — [source] stays 'manual',
 ///   [submissionStatus] is preserved from the existing cache if it was
-///   `submitted`.
+///   submitted.
 /// - **Empty/nulled user fields** — if the user left a field empty on the
 ///   manual form but the cache has a value, the cache value is kept.
 ///
@@ -339,7 +339,7 @@ extension ProductMerge on Product {
   /// Merges data from an API-fetched [api] product into this product,
   /// preserving local-only fields that the API does not return.
   ///
-  /// Empty strings (`""`) from the API are treated the same as `null` to
+  /// Empty strings ("") from the API are treated the same as null to
   /// prevent incomplete API responses from overwriting cached data.
   Product mergeFromApi(Product api) {
     T? nonEmpty<T extends String>(T? value) =>

@@ -8,7 +8,7 @@ import 'package:pantry_app/utils/logger.dart';
 
 /// Provides the singleton [AuthService] instance.
 ///
-/// When `FIREBASE_ENABLED=true`, this creates a FirebaseAuthService backed
+/// When FIREBASE_ENABLED=true, this creates a FirebaseAuthService backed
 /// by FirebaseAuth.instance. Anonymous sign-in happens in main() before
 /// the widget tree mounts, so the service is ready from the first frame.
 ///
@@ -28,7 +28,7 @@ final authServiceProvider = Provider<AuthService>((ref) {
   return _NoopAuthService();
 });
 
-/// Provides a reactive stream of the current [AuthUser] or `null`.
+/// Provides a reactive stream of the current [AuthUser] or null.
 ///
 /// Delegates to [AuthService.authStateChanges]. Starts as [AsyncLoading]
 /// until the first auth state event is emitted.

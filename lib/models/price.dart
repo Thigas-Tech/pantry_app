@@ -49,9 +49,9 @@ abstract class Price with _$Price {
     /// The monetary amount (taxes included).
     required double price,
 
-    /// ISO 4217 currency code (e.g. `'BRL'`, `'USD'`, `'EUR'`).
+    /// ISO 4217 currency code (e.g. 'BRL', 'USD', 'EUR').
     ///
-    /// Defaults to `'USD'`; auto-detected from locale on first launch.
+    /// Defaults to 'USD'; auto-detected from locale on first launch.
     @Default('USD') String currency,
 
     /// Auto-increment primary key.
@@ -85,7 +85,7 @@ abstract class Price with _$Price {
     /// OpenStreetMap node/way ID for the store location.
     String? locationOsmId,
 
-    /// OpenStreetMap location type (`NODE`, `WAY`, or `RELATION`).
+    /// OpenStreetMap location type (NODE, WAY, or RELATION).
     String? locationOsmType,
 
     /// NFC-e receipt series (reserved for future tax receipt integration).

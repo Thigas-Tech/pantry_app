@@ -11,13 +11,13 @@ import 'package:pantry_app/utils/logger.dart';
 
 /// Provides the singleton [FirebaseCacheService] instance.
 ///
-/// When [AppConfig.firebaseEnabled] is `true`, the provider attempts to
+/// When [AppConfig.firebaseEnabled] is true, the provider attempts to
 /// initialise a [FirebaseFirestoreClientAdapter] wrapping
 /// [FirebaseFirestore.instance]. If that call fails (e.g. missing
-/// `google-services.json`), the cache service is created with
+/// google-services.json), the cache service is created with
 /// [FirebaseCacheService.isAvailable] is false and all operations are no-ops.
 ///
-/// When [AppConfig.firebaseEnabled] is `false` (default), the cache service
+/// When [AppConfig.firebaseEnabled] is false (default), the cache service
 /// is created in disabled mode without any Firebase interaction.
 ///
 /// ## Dependencies

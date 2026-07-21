@@ -6,16 +6,16 @@ import 'package:flutter/services.dart';
 /// the value left (cents), and backspace shifts right.
 ///
 /// Example:
-///   Initial: `0.00`
-///   Type `1` => `0.01`
-///   Type `5` => `0.15`
-///   Type `0` => `1.50`
-///   Backspace => `0.15`
+///   Initial: 0.00
+///   Type 1 => 0.01
+///   Type 5 => 0.15
+///   Type 0 => 1.50
+///   Backspace => 0.15
 class PriceCalculatorFormatter extends TextInputFormatter {
   /// Creates a formatter that uses [separator] between integer and fraction.
   PriceCalculatorFormatter(this.separator);
 
-  /// The decimal separator character (`.` or `,`).
+  /// The decimal separator character (. or ,).
   final String separator;
 
   @override

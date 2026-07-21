@@ -31,15 +31,15 @@ import 'package:sqflite/sqflite.dart';
 /// ## Schema overview
 ///
 /// Nine tables are created on first launch (version 24):
-/// - `products` – product data fetched from Open Food Facts.
-/// - `inventories` – named pantries (e.g. "Home", "Work").
-/// - `inventory` – instances of products the user has added to a pantry.
-/// - `feedback_queue` – offline queue for GitHub issue reports.
-/// - `product_submission_queue` – offline queue for OFF product submissions.
-/// - `prices` – purchase price observations per barcode.
-/// - `shopping_list` – items the user intends to buy.
-/// - `stores` – saved store names for autocomplete.
-/// - `firebase_cache_meta` – Firestore cache sync metadata.
+/// - products – product data fetched from Open Food Facts.
+/// - inventories – named pantries (e.g. "Home", "Work").
+/// - inventory – instances of products the user has added to a pantry.
+/// - feedback_queue – offline queue for GitHub issue reports.
+/// - product_submission_queue – offline queue for OFF product submissions.
+/// - prices – purchase price observations per barcode.
+/// - shopping_list – items the user intends to buy.
+/// - stores – saved store names for autocomplete.
+/// - firebase_cache_meta – Firestore cache sync metadata.
 ///
 /// ## Delegation
 ///
@@ -68,32 +68,32 @@ class DatabaseHelper {
 
   Database? _database;
 
-  /// DAO for the `products` table.
+  /// DAO for the products table.
   final ProductDao productDao = const ProductDao();
 
-  /// DAO for the `inventory` table.
+  /// DAO for the inventory table.
   final InventoryDao inventoryDao = const InventoryDao();
 
-  /// DAO for the `inventories` table.
+  /// DAO for the inventories table.
   final InventoriesDao inventoriesDao = const InventoriesDao();
 
-  /// DAO for the `feedback_queue` table.
+  /// DAO for the feedback_queue table.
   final FeedbackQueueDao feedbackQueueDao = const FeedbackQueueDao();
 
-  /// DAO for the `product_submission_queue` table.
+  /// DAO for the product_submission_queue table.
   final ProductSubmissionQueueDao productSubmissionQueueDao =
       const ProductSubmissionQueueDao();
 
-  /// DAO for the `prices` table.
+  /// DAO for the prices table.
   final PriceDao priceDao = const PriceDao();
 
-  /// DAO for the `shopping_list` table.
+  /// DAO for the shopping_list table.
   final ShoppingListDao shoppingListDao = const ShoppingListDao();
 
-  /// DAO for the `stores` table.
+  /// DAO for the stores table.
   final StoreDao storeDao = const StoreDao();
 
-  /// DAO for the `firebase_cache_meta` table.
+  /// DAO for the firebase_cache_meta table.
   final FirebaseCacheMetaDao firebaseCacheMetaDao =
       const FirebaseCacheMetaDao();
 
@@ -561,7 +561,7 @@ class DatabaseHelper {
   /// Returns only products fetched from the Open Food Facts API.
   ///
   /// These are safe to flush and re‑fetch. Products entered manually
-  /// (`source = 'manual'`) are excluded.
+  /// (source = 'manual') are excluded.
   Future<List<Product>> getCachedProducts() async {
     final db = await database;
     return productDao.getBySource(db, 'api');
@@ -569,7 +569,7 @@ class DatabaseHelper {
 
   /// Deletes all API‑fetched products from the local cache.
   ///
-  /// Products with [Product.source] `'manual'` are kept. Used during app
+  /// Products with [Product.source] 'manual' are kept. Used during app
   /// update and manual cache flush so that user‑entered data is never lost.
   ///
   /// Foreign key enforcement is temporarily disabled because inventory rows
@@ -592,7 +592,7 @@ class DatabaseHelper {
     }
   }
 
-  /// Deletes every product from the `products` table.
+  /// Deletes every product from the products table.
   ///
   /// Intended for teardown in integration tests only. Production code
   /// should call [clearCachedProducts] instead.
@@ -759,7 +759,7 @@ class DatabaseHelper {
 
   /// Returns the most recent [InventoryItem.dateAdded] epoch across all items.
   ///
-  /// Returns `null` if the inventory table is empty.
+  /// Returns null if the inventory table is empty.
   Future<int?> getLastAddDate() async {
     final db = await database;
     return inventoryDao.getLastAddDate(db);
@@ -831,7 +831,7 @@ class DatabaseHelper {
     return priceDao.insert(db, price);
   }
 
-  /// Returns the price with the given [id], or `null` if not found.
+  /// Returns the price with the given [id], or null if not found.
   Future<Price?> getPriceById(int id) async {
     final db = await database;
     return priceDao.getById(db, id);
@@ -848,7 +848,7 @@ class DatabaseHelper {
     return priceDao.listByBarcode(db, barcode, limit: limit, offset: offset);
   }
 
-  /// Returns the most recent price for the given [barcode], or `null`.
+  /// Returns the most recent price for the given [barcode], or null.
   Future<Price?> getLatestPrice(String barcode) async {
     final db = await database;
     return priceDao.getLatest(db, barcode);

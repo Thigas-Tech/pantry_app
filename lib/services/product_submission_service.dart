@@ -8,9 +8,9 @@ import 'package:pantry_app/utils/logger.dart';
 /// Coordinates the submission of a manually entered product to Open Food Facts.
 ///
 /// The flow is:
-/// 1. Submit product metadata via the legacy API (`/cgi/product_jqm2.pl`).
+/// 1. Submit product metadata via the legacy API (/cgi/product_jqm2.pl).
 /// 2. Upload local photos (nutrition table, ingredients, front) via
-///    `/cgi/product_image_upload.pl`.
+///    /cgi/product_image_upload.pl.
 /// 3. Update the product's submission status on success/failure and
 ///    persist to the local database.
 /// 4. On network failure, queue the barcode in the

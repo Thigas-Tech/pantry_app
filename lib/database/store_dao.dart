@@ -4,7 +4,7 @@ import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `stores` table.
+/// Data-access layer for the stores table.
 ///
 /// All methods receive a [Database] instance so they can be used
 /// independently of [DatabaseHelper] in tests.
@@ -12,7 +12,7 @@ class StoreDao {
   /// Creates a [StoreDao].
   const StoreDao();
 
-  /// Creates the `stores` table.
+  /// Creates the stores table.
   Future<void> createTable(Database db) async {
     await db.execute('''
       CREATE TABLE stores (
@@ -44,7 +44,7 @@ class StoreDao {
   ///
   /// The name is trimmed and truncated to 100 characters. Returns the
   /// existing store's [Store.id] if a case-insensitive match exists;
-  /// otherwise inserts and returns the new row ID. Returns `-1` if the
+  /// otherwise inserts and returns the new row ID. Returns -1 if the
   /// trimmed name is empty.
   Future<int> insert(Database db, String name) async {
     final trimmed = name.trim();

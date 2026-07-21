@@ -3,7 +3,7 @@ import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `prices` table.
+/// Data-access layer for the prices table.
 ///
 /// All methods receive a [Database] instance so they can be used
 /// independently of [DatabaseHelper] in tests.
@@ -65,7 +65,7 @@ class PriceDao {
     }
   }
 
-  /// Returns the price with the given [id], or `null` if not found.
+  /// Returns the price with the given [id], or null if not found.
   Future<Price?> getById(Database db, int id) async {
     try {
       final result = await db.query(
@@ -105,7 +105,7 @@ class PriceDao {
     }
   }
 
-  /// Returns the most recent price for the given [barcode], or `null`
+  /// Returns the most recent price for the given [barcode], or null
   /// if none exist.
   Future<Price?> getLatest(Database db, String barcode) async {
     try {
@@ -199,7 +199,7 @@ class PriceDao {
   /// product in the given inventory, summed together. Currency conversion
   /// is not applied here — the caller should convert via CurrencyService.
   ///
-  /// Returns `null` when no items in the inventory have prices.
+  /// Returns null when no items in the inventory have prices.
   Future<double?> totalInventoryValue(Database db, int inventoryId) async {
     final result = await db.rawQuery(
       '''
@@ -221,8 +221,8 @@ class PriceDao {
   }
 
   /// Returns the total inventory value broken down by currency, using the
-  /// most recent price per distinct product. Each row contains `currency`
-  /// and `subtotal` columns.
+  /// most recent price per distinct product. Each row contains currency
+  /// and subtotal columns.
   ///
   /// When all prices use the same currency, this returns a single row.
   /// When no items have prices, this returns an empty list.
@@ -252,7 +252,7 @@ class PriceDao {
   /// Returns the most recent price per distinct product in the inventory,
   /// with currency, for currency-aware averaging by the caller.
   ///
-  /// Returns a list of maps with `price`, `currency` keys.
+  /// Returns a list of maps with price, currency keys.
   Future<List<Map<String, dynamic>>> latestPricesWithCurrency(
     Database db,
     int inventoryId,
@@ -278,7 +278,7 @@ class PriceDao {
   /// Returns the average of the most recent price for each distinct product
   /// in the given inventory.
   ///
-  /// Returns `null` when no items in the inventory have prices.
+  /// Returns null when no items in the inventory have prices.
   Future<double?> averageItemPrice(Database db, int inventoryId) async {
     final result = await db.rawQuery(
       '''
@@ -334,7 +334,7 @@ class PriceDao {
 
   /// Deletes price rows older than the given [retentionDays].
   ///
-  /// Only deletes when [retentionDays] is positive. A value of `0` means
+  /// Only deletes when [retentionDays] is positive. A value of 0 means
   /// keep prices forever (no deletion).
   Future<int> deleteStale(Database db, int retentionDays) async {
     if (retentionDays <= 0) return 0;
@@ -356,7 +356,7 @@ class PriceDao {
   /// in the given [inventoryId].
   ///
   /// Uses the latest price per product barcode, then groups by month of the
-  /// purchase date. Returns raw rows `{month, total}` in base currency.
+  /// purchase date. Returns raw rows {month, total} in base currency.
   Future<List<Map<String, dynamic>>> monthlyExpenditure(
     Database db, {
     required int inventoryId,
@@ -400,7 +400,7 @@ class PriceDao {
   /// [inventoryId].
   ///
   /// Uses the latest price per product barcode, then groups by store.
-  /// Returns raw rows `{store, total, item_count}`.
+  /// Returns raw rows {store, total, item_count}.
   Future<List<Map<String, dynamic>>> storeSpending(
     Database db, {
     required int inventoryId,
@@ -446,7 +446,7 @@ class PriceDao {
   /// Joins the prices and products tables on barcode, maps Nutri-Score grades
   /// (a-e) to numeric values (5-1), and averages per store.
   /// Stores with no priced products or null grades are excluded.
-  /// Returns raw rows `{store, avg_score}`.
+  /// Returns raw rows {store, avg_score}.
   Future<List<Map<String, dynamic>>> nutriscoreByStore(
     Database db, {
     required int inventoryId,

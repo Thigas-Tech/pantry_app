@@ -59,7 +59,7 @@ class ProduceServingPresets {
   /// Returns serving sizes for [produceName], case-insensitive.
   ///
   /// First tries exact match, then strips "Organic" prefix if present,
-  /// then tries substring match against preset keys. Returns `null` only
+  /// then tries substring match against preset keys. Returns null only
   /// if no match is found at all.
   static Map<String, double>? forName(String produceName) {
     final lower = produceName.toLowerCase().trim();
@@ -85,7 +85,7 @@ class ProduceServingPresets {
 
   /// Total grams for [size] × [quantity].
   ///
-  /// Returns `null` if [produceName] or [size] is not found.
+  /// Returns null if [produceName] or [size] is not found.
   static double? totalWeight(
     String produceName,
     String size, {
@@ -101,7 +101,7 @@ class ProduceServingPresets {
   /// Total nutrition value for [size] × [quantity].
   ///
   /// [per100g] is the nutrient value per 100g (e.g., 52 kcal).
-  /// Returns `null` if [produceName] or [size] is not found.
+  /// Returns null if [produceName] or [size] is not found.
   static double? nutrition(
     String produceName,
     String size,

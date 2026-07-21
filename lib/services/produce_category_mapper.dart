@@ -202,8 +202,8 @@ class ProduceCategoryMapper {
   /// 2. Strip "organic " prefix and retry
   /// 3. Substring match
   ///
-  /// Returns the fallback `'Fruits and vegetables based foods'` when no
-  /// match is found. Returns `null` for empty names.
+  /// Returns the fallback 'Fruits and vegetables based foods' when no
+  /// match is found. Returns null for empty names.
   static String? forName(String produceName) {
     final lower = produceName.toLowerCase().trim();
     if (lower.isEmpty) return null;

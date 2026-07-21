@@ -37,8 +37,8 @@ import 'package:pantry_app/services/usda_api_client.dart';
 ///
 /// ## Usage
 ///
-/// Typically accessed via `ref.read(productRepositoryProvider)` in async
-/// callbacks (like the scan flow) or via `ref.watch(productRepositoryProvider)`
+/// Typically accessed via ref.read(productRepositoryProvider) in async
+/// callbacks (like the scan flow) or via ref.watch(productRepositoryProvider)
 /// in widgets that need to call repository methods inside [FutureBuilder]s.
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   final db = ref.read(databaseProvider);

@@ -7,7 +7,7 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `products` table.
+/// Data-access layer for the products table.
 ///
 /// All methods receive a [Database] instance so they can be used
 /// independently of [DatabaseHelper] in tests.
@@ -111,7 +111,7 @@ class ProductDao {
 
   /// Looks up a single product by its barcode.
   ///
-  /// Returns `null` if no product with the given barcode exists.
+  /// Returns null if no product with the given barcode exists.
   Future<Product?> get(Database db, String barcode) async {
     try {
       final result = await db.query(
@@ -148,9 +148,9 @@ class ProductDao {
   /// Searches the products table by name or barcode.
   ///
   /// The search is accent- and case-insensitive because both the query
-  /// and the stored `search_text` column are normalized identically.
+  /// and the stored search_text column are normalized identically.
   ///
-  /// **Filtering**: uses `LIKE '%escaped%'` on the indexed `search_text`
+  /// **Filtering**: uses LIKE '%escaped%' on the indexed search_text
   /// column to quickly narrow candidates.
   Future<List<Product>> search(
     Database db,
@@ -218,7 +218,7 @@ class ProductDao {
   /// Returns counts of products grouped by Nutri-Score grade.
   ///
   /// Only API-sourced products with a non-null Nutri-Score are included.
-  /// The returned map uses grade strings as keys (e.g. `'a'`, `'b'`).
+  /// The returned map uses grade strings as keys (e.g. 'a', 'b').
   Future<Map<String, int>> nutriscoreDistribution(Database db) async {
     final rows = await db.rawQuery('''
       SELECT nutriscore_grade, COUNT(*) as cnt
@@ -250,7 +250,7 @@ class ProductDao {
     );
   }
 
-  /// Returns counts of products grouped by source (`api` / `manual`).
+  /// Returns counts of products grouped by source (api / manual).
   Future<Map<String, int>> sourceDistribution(Database db) async {
     final rows = await db.rawQuery('''
       SELECT source, COUNT(*) as cnt
@@ -264,8 +264,8 @@ class ProductDao {
 
   /// Returns counts of local photos attached to products.
   ///
-  /// The returned map has keys `total`, `nutrition`, `ingredients`,
-  /// `product`.
+  /// The returned map has keys total, nutrition, ingredients,
+  /// product.
   Future<Map<String, int>> photoCompleteness(Database db) async {
     final rows = await db.rawQuery('''
       SELECT
@@ -289,7 +289,7 @@ class ProductDao {
 
   /// Returns counts of OFF photo URLs available for products.
   ///
-  /// Only products with `source = 'api'` are counted (manual products are
+  /// Only products with source = 'api' are counted (manual products are
   /// never on OFF). The returned map uses the same keys as
   /// [photoCompleteness].
   Future<Map<String, int>> offPhotoCompleteness(Database db) async {

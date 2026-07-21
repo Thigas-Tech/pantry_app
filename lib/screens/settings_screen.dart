@@ -880,8 +880,8 @@ class SettingsScreen extends ConsumerWidget {
 
   /// Shows the notification rationale dialog on first permission request.
   ///
-  /// Returns `true` if the user tapped "Allow" (or rationale was already
-  /// shown), `false` if the user tapped "Not now".
+  /// Returns true if the user tapped "Allow" (or rationale was already
+  /// shown), false if the user tapped "Not now".
   Future<bool> _showPermissionRationaleIfNeeded(
     BuildContext context,
     AppLocalizations l10n,

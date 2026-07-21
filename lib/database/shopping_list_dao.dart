@@ -3,7 +3,7 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Data-access layer for the `shopping_list` table.
+/// Data-access layer for the shopping_list table.
 ///
 /// All methods receive a [Database] instance so they can be used
 /// independently of [DatabaseHelper] in tests.
@@ -11,7 +11,7 @@ class ShoppingListDao {
   /// Creates a [ShoppingListDao].
   const ShoppingListDao();
 
-  /// Creates the `shopping_list` table.
+  /// Creates the shopping_list table.
   Future<void> createTable(Database db) async {
     await db.execute('''
       CREATE TABLE shopping_list (
@@ -327,7 +327,7 @@ class ShoppingListDao {
     }
   }
 
-  /// Returns the item with the given [id], or `null`.
+  /// Returns the item with the given [id], or null.
   Future<ShoppingItem?> getById(Database db, int id) async {
     try {
       final result = await db.query(
@@ -346,7 +346,7 @@ class ShoppingListDao {
   /// Deletes all purchased items, optionally scoped to an inventory.
   ///
   /// When [inventoryId] is non-null, only purchased items belonging to
-  /// that inventory are deleted. When `null`, all purchased items across
+  /// that inventory are deleted. When null, all purchased items across
   /// all inventories are cleared (backward‑compatible default).
   /// Returns the number of rows deleted.
   Future<int> clearPurchased(Database db, {int? inventoryId}) async {
@@ -373,7 +373,7 @@ class ShoppingListDao {
   /// scoped to an inventory.
   ///
   /// When [inventoryId] is non-null, only pending items in that inventory
-  /// are marked. When `null`, items across all inventories are marked
+  /// are marked. When null, items across all inventories are marked
   /// (used by NFC-e receipt scanning where a receipt may span multiple
   /// pantries).
   Future<int> markPurchasedByBarcode(

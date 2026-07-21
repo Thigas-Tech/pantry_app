@@ -15,7 +15,7 @@ abstract class Store with _$Store {
     /// Auto-increment primary key.
     required int id,
 
-    /// Human-readable store name (e.g. `'Walmart'`, `'Costco'`).
+    /// Human-readable store name (e.g. 'Walmart', 'Costco').
     required String name,
   }) = _Store;
 }

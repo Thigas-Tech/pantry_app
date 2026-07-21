@@ -176,12 +176,12 @@ final FutureProvider<PantryStats> statsProvider =
 
 /// Returns a broad parent category from OFF hierarchy data.
 ///
-/// When [hierarchyJson] is available, prefers Portuguese tags (`pt:`) over
-/// English (`en:`) so that users get locale‑appropriate names when OFF data
+/// When [hierarchyJson] is available, prefers Portuguese tags (pt:) over
+/// English (en:) so that users get locale‑appropriate names when OFF data
 /// includes them. For each language group, picks the second‑to‑last entry
-/// (e.g. `en:eggs` from `[en:products, en:eggs-and-their-products,
-/// en:eggs, en:chicken-eggs]`). When no hierarchy is available, falls back
-/// to the first non‑language‑tagged word of [rawCategory]. Returns `null`
+/// (e.g. en:eggs from en:products, en:eggs-and-their-products,
+/// en:eggs, en:chicken-eggs). When no hierarchy is available, falls back
+/// to the first non‑language‑tagged word of [rawCategory]. Returns null
 /// when both inputs are unavailable.
 String? parentCategory(String? rawCategory, String? hierarchyJson) {
   if (hierarchyJson != null && hierarchyJson.isNotEmpty) {
