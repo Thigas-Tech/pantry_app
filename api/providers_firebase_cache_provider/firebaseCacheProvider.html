@@ -62,12 +62,12 @@
         
 <section class="desc markdown">
   <p>Provides the singleton <a href="../services_firebase_cache_service/FirebaseCacheService-class.html">FirebaseCacheService</a> instance.</p>
-<p>When <a href="../config/AppConfig/firebaseEnabled.html">AppConfig.firebaseEnabled</a> is <code>true</code>, the provider attempts to
+<p>When <a href="../config/AppConfig/firebaseEnabled.html">AppConfig.firebaseEnabled</a> is true, the provider attempts to
 initialise a <a href="../services_firebase_firestore_client_adapter/FirebaseFirestoreClientAdapter-class.html">FirebaseFirestoreClientAdapter</a> wrapping
-<a href="https://pub.dev/documentation/cloud_firestore/5.6.12/cloud_firestore/FirebaseFirestore/instance.html">FirebaseFirestore.instance</a>. If that call fails (e.g. missing
-<code>google-services.json</code>), the cache service is created with
+<a href="https://pub.dev/documentation/cloud_firestore/6.7.1/cloud_firestore/FirebaseFirestore/instance.html">FirebaseFirestore.instance</a>. If that call fails (e.g. missing
+google-services.json), the cache service is created with
 <a href="../services_firebase_cache_service/FirebaseCacheService/isAvailable.html">FirebaseCacheService.isAvailable</a> is false and all operations are no-ops.</p>
-<p>When <a href="../config/AppConfig/firebaseEnabled.html">AppConfig.firebaseEnabled</a> is <code>false</code> (default), the cache service
+<p>When <a href="../config/AppConfig/firebaseEnabled.html">AppConfig.firebaseEnabled</a> is false (default), the cache service
 is created in disabled mode without any Firebase interaction.</p>
 <h2 id="dependencies">Dependencies</h2>
 <ul>

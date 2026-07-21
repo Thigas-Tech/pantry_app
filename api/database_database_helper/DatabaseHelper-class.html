@@ -64,15 +64,15 @@ or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
 <p>Nine tables are created on first launch (version 24):</p>
 <ul>
-<li><code>products</code> – product data fetched from Open Food Facts.</li>
-<li><code>inventories</code> – named pantries (e.g. "Home", "Work").</li>
-<li><code>inventory</code> – instances of products the user has added to a pantry.</li>
-<li><code>feedback_queue</code> – offline queue for GitHub issue reports.</li>
-<li><code>product_submission_queue</code> – offline queue for OFF product submissions.</li>
-<li><code>prices</code> – purchase price observations per barcode.</li>
-<li><code>shopping_list</code> – items the user intends to buy.</li>
-<li><code>stores</code> – saved store names for autocomplete.</li>
-<li><code>firebase_cache_meta</code> – Firestore cache sync metadata.</li>
+<li>products – product data fetched from Open Food Facts.</li>
+<li>inventories – named pantries (e.g. "Home", "Work").</li>
+<li>inventory – instances of products the user has added to a pantry.</li>
+<li>feedback_queue – offline queue for GitHub issue reports.</li>
+<li>product_submission_queue – offline queue for OFF product submissions.</li>
+<li>prices – purchase price observations per barcode.</li>
+<li>shopping_list – items the user intends to buy.</li>
+<li>stores – saved store names for autocomplete.</li>
+<li>firebase_cache_meta – Firestore cache sync metadata.</li>
 </ul>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
@@ -134,7 +134,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>feedback_queue</code> table.
+  DAO for the feedback_queue table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -146,7 +146,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>firebase_cache_meta</code> table.
+  DAO for the firebase_cache_meta table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -170,7 +170,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>inventories</code> table.
+  DAO for the inventories table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -182,7 +182,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>inventory</code> table.
+  DAO for the inventory table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -194,7 +194,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>prices</code> table.
+  DAO for the prices table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -206,7 +206,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>products</code> table.
+  DAO for the products table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -218,7 +218,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>product_submission_queue</code> table.
+  DAO for the product_submission_queue table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -242,7 +242,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>shopping_list</code> table.
+  DAO for the shopping_list table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -254,7 +254,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  DAO for the <code>stores</code> table.
+  DAO for the stores table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -289,7 +289,7 @@ used for local storage.</li>
 
 </dt>
 <dd>
-  Deletes every product from the <code>products</code> table.
+  Deletes every product from the products table.
   
 
 </dd>
@@ -567,7 +567,7 @@ ordered by expiry date (oldest first).
 
 </dt>
 <dd>
-  Returns the most recent price for the given <code>barcode</code>, or <code>null</code>.
+  Returns the most recent price for the given <code>barcode</code>, or null.
   
 
 </dd>
@@ -619,7 +619,7 @@ ordered by expiry date (oldest first).
 
 </dt>
 <dd>
-  Returns the price with the given <code>id</code>, or <code>null</code> if not found.
+  Returns the price with the given <code>id</code>, or null if not found.
   
 
 </dd>

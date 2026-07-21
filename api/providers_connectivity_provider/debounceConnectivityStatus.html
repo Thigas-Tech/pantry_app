@@ -66,13 +66,13 @@
 <section class="desc markdown">
   <p>Debounces offline transitions on a connectivity status stream.</p>
 <p>When the source stream emits <a href="https://pub.dev/documentation/internet_connection_checker/3.0.1/internet_connection_checker/InternetConnectionStatus.html">InternetConnectionStatus.disconnected</a>,
-this transformer does <strong>not</strong> immediately emit <code>false</code>. Instead, it
+this transformer does <strong>not</strong> immediately emit false. Instead, it
 waits for <code>debounceDuration</code>. If the source emits
 <a href="https://pub.dev/documentation/internet_connection_checker/3.0.1/internet_connection_checker/InternetConnectionStatus.html">InternetConnectionStatus.connected</a> before the timer elapses, the
 offline event is suppressed entirely (the timer is cancelled).</p>
 <p>Reconnection events (disconnected → connected) are emitted immediately
 — there is no debounce on the upward transition.</p>
-<p>The debounce window is reset on each successive <code>disconnected</code> event
+<p>The debounce window is reset on each successive disconnected event
 while a timer is already running.</p>
 </section>
 

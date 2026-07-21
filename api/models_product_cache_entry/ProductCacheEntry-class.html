@@ -55,7 +55,7 @@
 
     
 <section class="desc markdown">
-  <p>Firestore document for the <code>product_cache/{barcode}</code> collection.</p>
+  <p>Firestore document for the product_cache/{barcode} collection.</p>
 <p>Stores OFF (Open Food Facts) barcoded product data in a shared cloud
 cache so that multiple devices can benefit from a single API fetch.
 Each document is keyed by the product's barcode (EAN-13, UPC, etc.).</p>
@@ -71,10 +71,10 @@ Firestore because they are local-only or transient:</p>
 <li><a href="../models_product/Product/nutritionImagePath.html">Product.nutritionImagePath</a>, <a href="../models_product/Product/ingredientsImagePath.html">Product.ingredientsImagePath</a>,
 <a href="../models_product/Product/productImagePath.html">Product.productImagePath</a> (local file paths, not portable across
 devices)</li>
-<li><a href="../models_product/Product/source.html">Product.source</a> (always <code>'api'</code> for OFF products; irrelevant for
+<li><a href="../models_product/Product/source.html">Product.source</a> (always 'api' for OFF products; irrelevant for
 cache)</li>
 <li><a href="../models_product/Product/submissionStatus.html">Product.submissionStatus</a> (transient submission state, not cacheable)</li>
-<li><a href="../models_product/Product/productType.html">Product.productType</a> (all entries in <code>product_cache</code> are implicitly
+<li><a href="../models_product/Product/productType.html">Product.productType</a> (all entries in product_cache are implicitly
 barcoded)</li>
 <li><a href="../models_product/Product/pluCode.html">Product.pluCode</a> (only applies to produce, never to OFF barcoded
 items)</li>

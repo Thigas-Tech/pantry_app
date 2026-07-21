@@ -165,11 +165,11 @@ test/                  # Unit and widget tests
 <li><strong>Tests</strong> — add tests for ALL new code using <code>mocktail</code></li>
 <li><strong>Localization</strong> — all user-visible strings go in <code>lib/l10n/app_en.arb</code></li>
 <li><strong>Code generation</strong> — after changing models or ARB files, run <code>build_runner</code> and <code>flutter gen-l10n</code></li>
-<li><strong>Zero lint issues</strong> — <code>flutter analyze</code> must report zero issues before committing</li>
+<li><strong>Zero lint issues</strong> — <code>dart analyze</code> must report zero issues before committing</li>
 <li><strong>All tests pass</strong> — <code>flutter test --concurrency=2</code> must pass before committing</li>
 </ol>
 <h3 id="running-checks">Running checks</h3>
-<pre class="language-bash"><code class="language-bash">flutter analyze                      # Lint + static analysis
+<pre class="language-bash"><code class="language-bash">dart analyze                         # Lint + static analysis
 flutter test --concurrency=2         # All tests
 flutter test --concurrency=2 --coverage  # With coverage
 </code></pre>

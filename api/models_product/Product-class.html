@@ -56,19 +56,19 @@
     
 <section class="desc markdown">
   <p>Represents a cached product from Open Food Facts.</p>
-<p>Each <a href="../models_product/Product-class.html">Product</a> corresponds to a row in the <code>products</code> table. Unlike
+<p>Each <a href="../models_product/Product-class.html">Product</a> corresponds to a row in the products table. Unlike
 <a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a>, which tracks a specific instance of a product in the
 user's pantry, this class holds <strong>static product information</strong> — data that
 rarely changes and is shared by all instances of the same barcode.</p>
 <h2 id="identity">Identity</h2>
 <p>The <code>barcode</code> field is the <strong>primary key</strong>. It is the unique identifier
 used to fetch the product from the Open Food Facts API and to join with
-the <code>inventory</code> table.</p>
+the inventory table.</p>
 <h2 id="nutrition">Nutrition</h2>
 <p>All nutrition values (energy, protein, carbs, fat, fiber, salt) follow the
 Open Food Facts convention: they represent the amount <strong>per 100 g</strong> (or
 100 ml) of the product. The unit is always grams, except for energy which
-is kilocalories (kcal). These fields may be <code>null</code> if the data was not
+is kilocalories (kcal). These fields may be null if the data was not
 available from the API.</p>
 <h2 id="source-and-freshness">Source and freshness</h2>
 <ul>
@@ -89,7 +89,7 @@ returns a new instance.</p>
 product data.</li>
 <li><a href="https://pub.dev/packages/freezed">freezed</a>
 — the code‑generation package that provides immutability, <code>copyWith</code>,
-<code>==</code>, <code>hashCode</code>, and JSON serialisation.</li>
+==, <code>hashCode</code>, and JSON serialisation.</li>
 </ul>
 </section>
 

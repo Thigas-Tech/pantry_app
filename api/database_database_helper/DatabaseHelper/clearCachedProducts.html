@@ -63,7 +63,7 @@
     
 <section class="desc markdown">
   <p>Deletes all API‑fetched products from the local cache.</p>
-<p>Products with <code>Product.source</code> <code>'manual'</code> are kept. Used during app
+<p>Products with <code>Product.source</code> 'manual' are kept. Used during app
 update and manual cache flush so that user‑entered data is never lost.</p>
 <p>Foreign key enforcement is temporarily disabled because inventory rows
 and prices legitimately survive cache flushes (they are LEFT JOINed).

@@ -56,8 +56,8 @@
 <section class="desc markdown">
   <p>HTTP client for the Open Prices community API.</p>
 <h2 id="base-url">Base URL</h2>
-<p>Production: <code>https://prices.openfoodfacts.org/api/v1</code>
-Pre-production: <code>https://prices.openfoodfacts.net/api/v1</code></p>
+<p>Production: <a href="https://prices.openfoodfacts.org/api/v1">https://prices.openfoodfacts.org/api/v1</a>
+Pre-production: <a href="https://prices.openfoodfacts.net/api/v1">https://prices.openfoodfacts.net/api/v1</a></p>
 <h2 id="authentication">Authentication</h2>
 <p>Most read endpoints are public. Write endpoints require a Bearer token
 generated from an Open Food Facts account. The token is read from
@@ -66,13 +66,13 @@ generated from an Open Food Facts account. The token is read from
 <p><strong>How to get a token:</strong></p>
 <ol>
 <li>Create/Log in at <a href="https://world.openfoodfacts.org">https://world.openfoodfacts.org</a></li>
-<li>Post to <code>https://prices.openfoodfacts.org/api/v1/auth/token</code> with
+<li>Post to <a href="https://prices.openfoodfacts.org/api/v1/auth/token">https://prices.openfoodfacts.org/api/v1/auth/token</a> with
 your OFF credentials to generate an Open Prices token.</li>
 </ol>
 <h2 id="error-handling">Error handling</h2>
 <p>Network errors and non-2xx responses are caught and returned as
 <a href="../services_open_prices_api_client/FetchPricesResult-class.html">FetchPricesResult</a> with an empty list, or <a href="../services_open_prices_api_client/SubmitPriceResult-class.html">SubmitPriceResult</a> with
-<code>success = false</code>. No exceptions are thrown.</p>
+success = false. No exceptions are thrown.</p>
 <p>Reference: <a href="https://openfoodfacts.github.io/open-prices/guides/API/">https://openfoodfacts.github.io/open-prices/guides/API/</a></p>
 </section>
 

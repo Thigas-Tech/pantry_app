@@ -57,8 +57,8 @@
   <p>Low-level Firestore client for product and produce caches.</p>
 <p>Wraps two Firestore collections:</p>
 <ul>
-<li><code>produce_cache/{name}</code> -- USDA produce data (ProduceCacheEntry)</li>
-<li><code>product_cache/{barcode}</code> -- OFF barcoded product data (ProductCacheEntry)</li>
+<li>produce_cache/{name} -- USDA produce data (ProduceCacheEntry)</li>
+<li>product_cache/{barcode} -- OFF barcoded product data (ProductCacheEntry)</li>
 </ul>
 <h2 id="graceful-degradation">Graceful degradation</h2>
 <p>When <a href="../services_firebase_cache_client/FirebaseCacheClient/isAvailable.html">isAvailable</a> is false, all get* methods return null and all set*

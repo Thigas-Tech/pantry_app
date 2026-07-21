@@ -68,7 +68,7 @@ data from the source APIs.</li>
 </ol>
 <h2 id="graceful-degradation">Graceful degradation</h2>
 <p>Every public method guards with <a href="../services_firebase_cache_service/FirebaseCacheService/isAvailable.html">isAvailable</a>. When Firebase is unavailable
-(no <code>google-services.json</code>, disabled feature flag, or runtime error) the
+(no google-services.json, disabled feature flag, or runtime error) the
 lookup methods bypass Firestore entirely and call the source API directly.</p>
 <p>See <a href="../services_firebase_cache_client/FirebaseCacheClient-class.html">FirebaseCacheClient</a> for the low-level Firestore abstraction and
 <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a> for the SQLite metadata layer.</p>

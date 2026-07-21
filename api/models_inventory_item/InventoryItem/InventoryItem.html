@@ -81,12 +81,12 @@ or have sensible defaults.</p>
   &#47;&#47;&#47; The barcode of the product (e.g. EAN‑13, UPC).
   &#47;&#47;&#47;
   &#47;&#47;&#47; This is a foreign key referencing [Product.barcode] and must match an
-  &#47;&#47;&#47; existing product in the `products` table (or be added to it).
+  &#47;&#47;&#47; existing product in the products table (or be added to it).
   required String barcode,
 
   &#47;&#47;&#47; The auto‑generated primary key from the database.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Set to `null` for items that have not yet been inserted. After
+  &#47;&#47;&#47; Set to null for items that have not yet been inserted. After
   &#47;&#47;&#47; [DatabaseHelper.insertInventoryItem] returns, the generated ID is
   &#47;&#47;&#47; available in the returned integer (the caller should update this field
   &#47;&#47;&#47; if needed).
@@ -95,18 +95,18 @@ or have sensible defaults.</p>
   &#47;&#47;&#47; The quantity of the item, expressed in the given [unit].
   &#47;&#47;&#47;
   &#47;&#47;&#47; The value is stored as a [double] to support fractional quantities
-  &#47;&#47;&#47; (e.g., `0.5` for half a pack). Defaults to `1`.
+  &#47;&#47;&#47; (e.g., 0.5 for half a pack). Defaults to 1.
   @Default(1) double quantity,
 
   &#47;&#47;&#47; The unit of measurement for [quantity].
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Common values: `&#39;pieces&#39;`, `&#39;g&#39;`, `&#39;kg&#39;`, `&#39;ml&#39;`, `&#39;L&#39;`.
-  &#47;&#47;&#47; Defaults to `&#39;pieces&#39;`.
+  &#47;&#47;&#47; Common values: &#39;pieces&#39;, &#39;g&#39;, &#39;kg&#39;, &#39;ml&#39;, &#39;L&#39;.
+  &#47;&#47;&#47; Defaults to &#39;pieces&#39;.
   @Default(&#39;pieces&#39;) String unit,
 
-  &#47;&#47;&#47; The expiry date in ISO 8601 format (`YYYY-MM-DD`).
+  &#47;&#47;&#47; The expiry date in ISO 8601 format (YYYY-MM-DD).
   &#47;&#47;&#47;
-  &#47;&#47;&#47; May be `null` if the user has not set an expiry date. When present,
+  &#47;&#47;&#47; May be null if the user has not set an expiry date. When present,
   &#47;&#47;&#47; the date is treated as the last day the item is safe to consume
   &#47;&#47;&#47; (inclusive).
   &#47;&#47;&#47;
@@ -116,8 +116,8 @@ or have sensible defaults.</p>
 
   &#47;&#47;&#47; The storage location of the item.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Common values: `&#39;pantry&#39;`, `&#39;fridge&#39;`, `&#39;freezer&#39;`.
-  &#47;&#47;&#47; Defaults to `&#39;pantry&#39;`.
+  &#47;&#47;&#47; Common values: &#39;pantry&#39;, &#39;fridge&#39;, &#39;freezer&#39;.
+  &#47;&#47;&#47; Defaults to &#39;pantry&#39;.
   @Default(&#39;pantry&#39;) String location,
 
   &#47;&#47;&#47; Optional free‑form notes about this item.
@@ -132,14 +132,14 @@ or have sensible defaults.</p>
 
   &#47;&#47;&#47; The ID of the inventory (pantry) this item belongs to.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; This is a foreign key referencing the `inventories` table.
-  &#47;&#47;&#47; Defaults to `1` (the default &quot;Home&quot; inventory).
+  &#47;&#47;&#47; This is a foreign key referencing the inventories table.
+  &#47;&#47;&#47; Defaults to 1 (the default &quot;Home&quot; inventory).
   @JsonKey(name: &#39;inventory_id&#39;) @Default(1) int inventoryId,
 
   &#47;&#47;&#47; The weight in grams of one serving unit.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Only meaningful for produce items added in unit mode (e.g. `182` for
-  &#47;&#47;&#47; &quot;1 medium apple&quot;). `null` for weight-mode items, non-produce items,
+  &#47;&#47;&#47; Only meaningful for produce items added in unit mode (e.g. 182 for
+  &#47;&#47;&#47; &quot;1 medium apple&quot;). null for weight-mode items, non-produce items,
   &#47;&#47;&#47; and legacy items without serving data.
   @JsonKey(name: &#39;serving_weight_g&#39;) double? servingWeightG,
 }) = _InventoryItem;</code></pre>

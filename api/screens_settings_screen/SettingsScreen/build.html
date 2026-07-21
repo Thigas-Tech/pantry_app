@@ -138,6 +138,7 @@ Widget build(BuildContext context, WidgetRef ref) {
                 ref
                     .read(settingsProvider.notifier)
                     .setAmoledDarkMode(value: value);
+
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -263,6 +264,7 @@ Widget build(BuildContext context, WidgetRef ref) {
                 ref
                     .read(settingsProvider.notifier)
                     .setNotificationsEnabled(value: value);
+
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -304,6 +306,7 @@ Widget build(BuildContext context, WidgetRef ref) {
                 ref
                     .read(settingsProvider.notifier)
                     .setInactivityReminderEnabled(value: value);
+
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -366,6 +369,7 @@ Widget build(BuildContext context, WidgetRef ref) {
                 ref
                     .read(settingsProvider.notifier)
                     .setPriceTrackingEnabled(value: value);
+
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -395,6 +399,7 @@ Widget build(BuildContext context, WidgetRef ref) {
                 ref
                     .read(settingsProvider.notifier)
                     .setPricesHidden(value: value);
+
                 if (context.mounted) {
                   SnackbarHelper.showInfo(
                     context,
@@ -420,6 +425,7 @@ Widget build(BuildContext context, WidgetRef ref) {
                 ref
                     .read(settingsProvider.notifier)
                     .setOpenPricesSyncEnabled(value: value);
+
               },
             ),
             if (settings.openPricesSyncEnabled) ...[

@@ -84,8 +84,8 @@ the repository is created <strong>once</strong> and reused for the entire app se
 The repository itself holds no mutable state; it delegates all storage to
 the database and all network requests to the SDK adapter.</p>
 <h2 id="usage">Usage</h2>
-<p>Typically accessed via <code>ref.read(productRepositoryProvider)</code> in async
-callbacks (like the scan flow) or via <code>ref.watch(productRepositoryProvider)</code>
+<p>Typically accessed via ref.read(productRepositoryProvider) in async
+callbacks (like the scan flow) or via ref.watch(productRepositoryProvider)
 in widgets that need to call repository methods inside <a href="https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html">FutureBuilder</a>s.</p>
 </section>
 

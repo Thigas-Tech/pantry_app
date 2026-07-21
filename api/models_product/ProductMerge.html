@@ -69,7 +69,7 @@ is kept. This prevents pull-to-refresh from silently wiping data.</li>
 <li><strong>Local-only fields are never touched</strong> — <code>source</code>,
 <code>submissionStatus</code>, <code>nutritionImagePath</code>, <code>ingredientsImagePath</code>, and
 <code>productImagePath</code> are preserved exactly as-is.</li>
-<li><strong>Name sentinel</strong> — if the API returns <code>'Unknown'</code> (the default when
+<li><strong>Name sentinel</strong> — if the API returns 'Unknown' (the default when
 the real name is missing), the cached name is kept.</li>
 </ul>
 <h2 id="manual-merge-rules-mergefrommanual">Manual merge rules (<a href="../models_product/ProductMerge/mergeFromManual.html">mergeFromManual</a>)</h2>
@@ -80,9 +80,9 @@ so they override the cached API data.</li>
 <code>nutriscoreNotApplicableCategory</code>, <code>offNutritionImageUrl</code>,
 <code>offIngredientsImageUrl</code>, <code>offProductImageUrl</code>, <code>categoriesHierarchy</code>
 from the cache are kept because the manual form does not provide them.</li>
-<li><strong>Local-only fields are never touched</strong> — <code>source</code> stays <code>'manual'</code>,
+<li><strong>Local-only fields are never touched</strong> — <code>source</code> stays 'manual',
 <code>submissionStatus</code> is preserved from the existing cache if it was
-<code>submitted</code>.</li>
+submitted.</li>
 <li><strong>Empty/nulled user fields</strong> — if the user left a field empty on the
 manual form but the cache has a value, the cache value is kept.</li>
 </ul>

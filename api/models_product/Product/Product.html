@@ -109,12 +109,12 @@ and may not be present for every product.</p>
   required String name,
 
   &#47;&#47;&#47; The brand name(s), often comma-separated when multiple brands exist
-  &#47;&#47;&#47; (e.g. `&quot;Ferrero&quot;`, `&quot;Nestle, Nespresso&quot;`).
+  &#47;&#47;&#47; (e.g. &quot;Ferrero&quot;, &quot;Nestle, Nespresso&quot;).
   String? brand,
 
   &#47;&#47;&#47; A URL to the product&#39;s front image on the Open Food Facts CDN.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; May be `null` if no image has been uploaded for this product.
+  &#47;&#47;&#47; May be null if no image has been uploaded for this product.
   String? imageUrl,
 
   &#47;&#47;&#47; OFF CDN URL for the nutrition facts table image, if available.
@@ -131,15 +131,15 @@ and may not be present for every product.</p>
 
   &#47;&#47;&#47; The OFF taxonomy hierarchy for this product, from broadest to
   &#47;&#47;&#47; most specific. Each entry is a language-prefixed tag
-  &#47;&#47;&#47; (e.g. `en:eggs`, `en:chicken-eggs`).
+  &#47;&#47;&#47; (e.g. en:eggs, en:chicken-eggs).
   &#47;&#47;&#47;
-  &#47;&#47;&#47; May be `null` for manually entered products or when OFF has no
+  &#47;&#47;&#47; May be null for manually entered products or when OFF has no
   &#47;&#47;&#47; taxonomy data.
   List&lt;String&gt;? categoriesHierarchy,
 
   &#47;&#47;&#47; The product category as assigned by the Open Food Facts community.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Often a comma-separated hierarchy (e.g. `&quot;Spreads, Sweet spreads&quot;`).
+  &#47;&#47;&#47; Often a comma-separated hierarchy (e.g. &quot;Spreads, Sweet spreads&quot;).
   &#47;&#47;&#47; Used in the add-to-inventory screen to suggest a default expiry date
   &#47;&#47;&#47; based on the category (e.g., dairy -&gt; +7 days).
   String? category,
@@ -147,17 +147,17 @@ and may not be present for every product.</p>
   &#47;&#47;&#47; The full ingredients list as plain text.
   &#47;&#47;&#47;
   &#47;&#47;&#47; Currently stored as a single string, exactly as returned by the API.
-  &#47;&#47;&#47; In the future this could be migrated to a separate `ingredients` table
+  &#47;&#47;&#47; In the future this could be migrated to a separate ingredients table
   &#47;&#47;&#47; to enable allergen filtering or per-ingredient search.
   String? ingredients,
 
-  &#47;&#47;&#47; The suggested serving size, typically with a unit (e.g. `&quot;15 g&quot;`,
-  &#47;&#47;&#47; `&quot;1 cookie (28 g)&quot;`).
+  &#47;&#47;&#47; The suggested serving size, typically with a unit (e.g. &quot;15 g&quot;,
+  &#47;&#47;&#47; &quot;1 cookie (28 g)&quot;).
   String? servingSize,
 
   &#47;&#47;&#47; Energy content in **kilocalories per 100 g** (or 100 ml).
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Sourced from `nutriments.energy-kcal_100g` in the API response.
+  &#47;&#47;&#47; Sourced from nutriments.energy-kcal_100g in the API response.
   double? energyKcal,
 
   &#47;&#47;&#47; Protein content in **grams per 100 g** (or 100 ml).
@@ -182,40 +182,40 @@ and may not be present for every product.</p>
   &#47;&#47;&#47; submitted by the user.
   int? lastSynced,
 
-  &#47;&#47;&#47; The Nutri-Score grade of the product (`&#39;a&#39;` through `&#39;e&#39;`), or `null`
-  &#47;&#47;&#47; if the data is unavailable. May also be `&#39;not-applicable&#39;` when the
+  &#47;&#47;&#47; The Nutri-Score grade of the product (&#39;a&#39; through &#39;e&#39;), or null
+  &#47;&#47;&#47; if the data is unavailable. May also be &#39;not-applicable&#39; when the
   &#47;&#47;&#47; Nutri-Score system does not apply to this product category (e.g. food
   &#47;&#47;&#47; additives).
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
+  &#47;&#47;&#47; Sourced from nutrition_grade_fr in the Open Food Facts v3 API via
   &#47;&#47;&#47; the SDK&#39;s off.Product.nutriscore field.
   String? nutriscoreGrade,
 
   &#47;&#47;&#47; The product category that makes Nutri-Score not applicable, if any.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; This is present only when [nutriscoreGrade] is `&#39;not-applicable&#39;` and
-  &#47;&#47;&#47; explains why (e.g. `&#39;en:food-additives&#39;`).
+  &#47;&#47;&#47; This is present only when [nutriscoreGrade] is &#39;not-applicable&#39; and
+  &#47;&#47;&#47; explains why (e.g. &#39;en:food-additives&#39;).
   &#47;&#47;&#47;
   &#47;&#47;&#47; Note: the official Dart SDK does not expose the
-  &#47;&#47;&#47; `nutriscore_data.nutriscore_not_applicable_for_category` field, so
+  &#47;&#47;&#47; nutriscore_data.nutriscore_not_applicable_for_category field, so
   &#47;&#47;&#47; this value is only populated when reading from the local database
   &#47;&#47;&#47; for previously cached products.
   String? nutriscoreNotApplicableCategory,
 
   &#47;&#47;&#47; The origin of this product record.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; - `&#39;api&#39;` — fetched from Open Food Facts (can be safely flushed and
+  &#47;&#47;&#47; - &#39;api&#39; — fetched from Open Food Facts (can be safely flushed and
   &#47;&#47;&#47;   re-fetched).
-  &#47;&#47;&#47; - `&#39;manual&#39;` — entered by the user via the add-product screen
+  &#47;&#47;&#47; - &#39;manual&#39; — entered by the user via the add-product screen
   &#47;&#47;&#47;   (must never be deleted by a cache flush).
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Defaults to `&#39;api&#39;` because most products come from the OFF
+  &#47;&#47;&#47; Defaults to &#39;api&#39; because most products come from the OFF
   &#47;&#47;&#47; integration. The add-product screen overrides it to
-  &#47;&#47;&#47; `&#39;manual&#39;`.
+  &#47;&#47;&#47; &#39;manual&#39;.
   @Default(&#39;api&#39;) String source,
 
   &#47;&#47;&#47; The locale code of the language used when this product was fetched
-  &#47;&#47;&#47; from Open Food Facts (e.g. `&#39;en&#39;`, `&#39;fr&#39;`, `&#39;pt&#39;`).
+  &#47;&#47;&#47; from Open Food Facts (e.g. &#39;en&#39;, &#39;fr&#39;, &#39;pt&#39;).
   &#47;&#47;&#47;
   &#47;&#47;&#47; This represents the language *requested* by the client, not necessarily
   &#47;&#47;&#47; the language *returned* — OFF silently falls back to English if the
@@ -229,19 +229,19 @@ and may not be present for every product.</p>
   &#47;&#47;&#47; Local file path to a photo of the nutrition facts table.
   &#47;&#47;&#47;
   &#47;&#47;&#47; Populated when the user captures a photo on the manual-entry screen.
-  &#47;&#47;&#47; Stored as a stable path inside `&lt;app-documents&gt;&#47;product_images&#47;`.
+  &#47;&#47;&#47; Stored as a stable path inside app-documents&#47;product_images&#47;.
   String? nutritionImagePath,
 
   &#47;&#47;&#47; Local file path to a photo of the ingredients list.
   &#47;&#47;&#47;
   &#47;&#47;&#47; Populated when the user captures a photo on the manual-entry screen.
-  &#47;&#47;&#47; Stored as a stable path inside `&lt;app-documents&gt;&#47;product_images&#47;`.
+  &#47;&#47;&#47; Stored as a stable path inside app-documents&#47;product_images&#47;.
   String? ingredientsImagePath,
 
   &#47;&#47;&#47; Local file path to a photo of the product packaging &#47; front.
   &#47;&#47;&#47;
   &#47;&#47;&#47; Populated when the user captures a photo on the manual-entry screen.
-  &#47;&#47;&#47; Stored as a stable path inside `&lt;app-documents&gt;&#47;product_images&#47;`.
+  &#47;&#47;&#47; Stored as a stable path inside app-documents&#47;product_images&#47;.
   String? productImagePath,
 
   &#47;&#47;&#47; The submission status of this product to Open Food Facts.
@@ -253,10 +253,10 @@ and may not be present for every product.</p>
   @Default(productSubmissionNotSubmitted) String submissionStatus,
 
   &#47;&#47;&#47; The PLU (Price Look-Up) code for this product, if it is a fresh
-  &#47;&#47;&#47; produce item (e.g. `&#39;4011&#39;` for Banana, `&#39;4032&#39;` for Apple).
+  &#47;&#47;&#47; produce item (e.g. &#39;4011&#39; for Banana, &#39;4032&#39; for Apple).
   &#47;&#47;&#47;
   &#47;&#47;&#47; Only meaningful when [productType] is [ProductType.produce]. 4-digit
-  &#47;&#47;&#47; codes are standard PLU codes; 5-digit codes starting with `&#39;9&#39;`
+  &#47;&#47;&#47; codes are standard PLU codes; 5-digit codes starting with &#39;9&#39;
   &#47;&#47;&#47; indicate organic produce. This field is nullable for barcoded and
   &#47;&#47;&#47; custom products.
   String? pluCode,

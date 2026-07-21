@@ -65,12 +65,12 @@ in the constructor for testing.  When omitted they default to the real
 <h2 id="read-vs-write-users">Read vs write users</h2>
 <ul>
 <li><a href="../services_off_adapter/OffAdapter/getByBarcode.html">getByBarcode</a> and <a href="../services_off_adapter/OffAdapter/searchProducts.html">searchProducts</a> use a test user
-(<code>smoothie-app/strawberrybanana</code>), following the convention
+(smoothie-app/strawberrybanana), following the convention
 established by the official smooth-app. OFF does not require
 authentication for read operations.</li>
 <li><a href="../services_off_adapter/OffAdapter/submitProduct.html">submitProduct</a> and <a href="../services_off_adapter/OffAdapter/uploadProductImage.html">uploadProductImage</a> use the credentials
 configured in <a href="../config/AppConfig/offUserId.html">AppConfig.offUserId</a> and <a href="../config/AppConfig/offPassword.html">AppConfig.offPassword</a>,
-or return <code>false</code> if no credentials are set.</li>
+or return false if no credentials are set.</li>
 </ul>
 </section>
 

@@ -66,10 +66,10 @@
 <section class="desc markdown">
   <p>Retrieves all inventory rows joined with product metadata for a
 specific <code>inventoryId</code>.</p>
-<p>Uses a <code>LEFT JOIN</code> on <code>products</code> so that inventory items remain visible
+<p>Uses a LEFT JOIN on products so that inventory items remain visible
 even when their product record has been deleted (e.g. after a cache
 flush). When the product is missing, product fields such as
-<code>product_name</code> will be <code>NULL</code> and should be handled by the UI (e.g.
+product_name will be NULL and should be handled by the UI (e.g.
 falling back to the barcode).</p>
 </section>
 

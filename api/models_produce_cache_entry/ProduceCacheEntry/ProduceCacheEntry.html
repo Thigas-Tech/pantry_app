@@ -81,16 +81,16 @@ sensible defaults matching an empty or unknown produce item.</p>
   <pre class="language-dart"><code class="language-dart">const factory ProduceCacheEntry({
   &#47;&#47;&#47; USDA FDC (FoodData Central) ID for this produce item.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Set to `0` when the FDC ID is not known (e.g. from fallback data).
+  &#47;&#47;&#47; Set to 0 when the FDC ID is not known (e.g. from fallback data).
   required int fdcId,
 
   &#47;&#47;&#47; Lowercase English produce name used as the Firestore document ID
-  &#47;&#47;&#47; (e.g. `&quot;apple&quot;`, `&quot;banana&quot;`).
+  &#47;&#47;&#47; (e.g. &quot;apple&quot;, &quot;banana&quot;).
   required String name,
 
   &#47;&#47;&#47; Nutrition per 100 g, keyed by nutrient name.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; Known keys: `energyKcal`, `proteinG`, `carbsG`, `fatG`, `fiberG`.
+  &#47;&#47;&#47; Known keys: energyKcal, proteinG, carbsG, fatG, fiberG.
   &#47;&#47;&#47; An empty map means no nutrition data is available.
   required Map&lt;String, double&gt; nutrition,
 
@@ -103,13 +103,13 @@ sensible defaults matching an empty or unknown produce item.</p>
   &#47;&#47;&#47; Epoch timestamp (ms) of when this entry should be refreshed next.
   required int nextRefreshAt,
 
-  &#47;&#47;&#47; Localized names keyed by locale code (e.g. `{&quot;pt&quot;: &quot;Maca&quot;}`).
+  &#47;&#47;&#47; Localized names keyed by locale code (e.g. {&quot;pt&quot;: &quot;Maca&quot;}).
   @Default({}) Map&lt;String, String&gt; localizedNames,
 
   &#47;&#47;&#47; PLU (Price Look-Up) codes associated with this produce item.
   @Default(&lt;String&gt;[]) List&lt;String&gt; pluCodes,
 
-  &#47;&#47;&#47; The USDA food category (e.g. `&quot;Fruits and Fruit Juices&quot;`).
+  &#47;&#47;&#47; The USDA food category (e.g. &quot;Fruits and Fruit Juices&quot;).
   @JsonKey(includeIfNull: false) String? category,
 
   &#47;&#47;&#47; Suggested serving size in grams. Null when unknown.

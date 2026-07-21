@@ -54,7 +54,7 @@
 
     
 <section class="desc markdown">
-  <p>Data-access layer for the <code>firebase_cache_meta</code> table.</p>
+  <p>Data-access layer for the firebase_cache_meta table.</p>
 <p>Tracks which products have been cached in Firestore and when each
 document needs its next refresh (180-day rolling cycle).</p>
 </section>
@@ -134,7 +134,7 @@ document needs its next refresh (180-day rolling cycle).</p>
 
 </dt>
 <dd>
-  Creates the <code>firebase_cache_meta</code> table with indexes.
+  Creates the firebase_cache_meta table with indexes.
   
 
 </dd>
@@ -148,7 +148,7 @@ document needs its next refresh (180-day rolling cycle).</p>
 </dt>
 <dd>
   Retrieves a single entry by <code>cacheKey</code>.
-Returns <code>null</code> when the key does not exist.
+Returns null when the key does not exist.
   
 
 </dd>
@@ -174,7 +174,7 @@ Returns <code>null</code> when the key does not exist.
 
 </dt>
 <dd>
-  Returns all entries where <code>next_refresh_at &lt; [nowInMs]</code>.
+  Returns all entries where next_refresh_at &lt; <code>nowInMs</code>.
   
 
 </dd>

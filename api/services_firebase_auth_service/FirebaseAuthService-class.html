@@ -56,13 +56,13 @@
 <section class="desc markdown">
   <p><a href="../services_auth_service/AuthService-class.html">AuthService</a> implementation backed by Firebase Authentication.</p>
 <p>Uses FirebaseAuth for anonymous sign-in and streams auth state changes.
-All failures are caught and logged — the service returns <code>null</code> instead of
+All failures are caught and logged — the service returns null instead of
 throwing, following the app's graceful degradation pattern.</p>
 <h2 id="future-migration">Future migration</h2>
 <p>To add Google sign-in, add a method:</p>
 <pre class="language-dart"><code class="language-dart">Future&lt;AuthUser?&gt; signInWithGoogle() async { ... }
 </code></pre>
-<p>and use <code>FirebaseAuth.instance.currentUser!.linkWithCredential</code> to preserve
+<p>and use FirebaseAuth.instance.currentUser!.linkWithCredential to preserve
 anonymous data under the permanent account.</p>
 </section>
 
@@ -93,7 +93,7 @@ anonymous data under the permanent account.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="FirebaseAuthService.new" class="callable">
-          <span class="name"><a href="../services_firebase_auth_service/FirebaseAuthService/FirebaseAuthService.html">FirebaseAuthService</a></span><span class="signature">(<span class="parameter" id="param-_auth"><span class="type-annotation"><a href="https://pub.dev/documentation/firebase_auth/5.7.0/firebase_auth/FirebaseAuth-class.html">FirebaseAuth</a></span> <span class="parameter-name">_auth</span></span>)</span>
+          <span class="name"><a href="../services_firebase_auth_service/FirebaseAuthService/FirebaseAuthService.html">FirebaseAuthService</a></span><span class="signature">(<span class="parameter" id="param-_auth"><span class="type-annotation"><a href="https://pub.dev/documentation/firebase_auth/6.5.6/firebase_auth/FirebaseAuth-class.html">FirebaseAuth</a></span> <span class="parameter-name">_auth</span></span>)</span>
         </dt>
         <dd>
           Creates a <a href="../services_firebase_auth_service/FirebaseAuthService-class.html">FirebaseAuthService</a> implementing <a href="../services_auth_service/AuthService-class.html">AuthService</a> using the
@@ -114,7 +114,7 @@ given Firebase Auth instance.
 
 </dt>
 <dd>
-  Stream that emits the current <code>AuthUser</code> or <code>null</code> when signed out.
+  Stream that emits the current <code>AuthUser</code> or null when signed out.
   <div class="features"><span class="feature">no setter</span><span class="feature">override</span></div>
 
 </dd>
@@ -126,7 +126,7 @@ given Firebase Auth instance.
 
 </dt>
 <dd>
-  The currently signed-in user, or <code>null</code> if not signed in.
+  The currently signed-in user, or null if not signed in.
   <div class="features"><span class="feature">no setter</span><span class="feature">override</span></div>
 
 </dd>
@@ -198,7 +198,7 @@ given Firebase Auth instance.
 
 </dt>
 <dd>
-  Signs in anonymously and returns an <a href="../models_auth_user/AuthUser-class.html">AuthUser</a> on success, or <code>null</code> on
+  Signs in anonymously and returns an <a href="../models_auth_user/AuthUser-class.html">AuthUser</a> on success, or null on
 failure (network error, Firebase misconfiguration, etc.).
   <div class="features"><span class="feature">override</span></div>
 

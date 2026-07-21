@@ -68,7 +68,7 @@
   <p>Adds a produce item to the inventory, fetching nutrition data from the
 USDA API when available and falling back to hardcoded data.</p>
 <p><code>produceName</code> is the display name of the produce (e.g. "Apple"). The
-item will be stored with a synthetic barcode <code>produce-$produceName</code>
+item will be stored with a synthetic barcode produce-$produceName
 and a default quantity of 150 g (overridable via <code>quantity</code>).</p>
 <p>If a product row for the synthetic barcode already exists in the local
 cache, the USDA / fallback lookup is skipped entirely.</p>

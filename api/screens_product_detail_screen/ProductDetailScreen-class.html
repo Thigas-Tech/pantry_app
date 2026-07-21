@@ -72,7 +72,7 @@ and creates the item inside the active pantry.</li>
 <h2 id="state">State</h2>
 <p>The screen is a <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/ConsumerStatefulWidget-class.html">ConsumerStatefulWidget</a> because it needs to rebuild the
 inventory list after adding, editing, or deleting an item. A simple
-counter <code>_inventoryVersion</code> is incremented after every mutation; it is
+counter _inventoryVersion is incremented after every mutation; it is
 used as the <a href="https://api.flutter.dev/flutter/foundation/ValueKey-class.html">ValueKey</a> of the <a href="https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html">FutureBuilder</a> so that the future is
 re‑evaluated and the list refreshes.</p>
 <h2 id="expiry-suggestions">Expiry suggestions</h2>

@@ -57,8 +57,8 @@
   <p>A read‑only view that joins an <a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a> with its corresponding
 <a href="../models_product/Product-class.html">Product</a> metadata and inventory details.</p>
 <p>This class is <strong>not</strong> persisted directly. Instead, it is built on the fly
-by <a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">DatabaseHelper.getInventoryWithProduct</a> using a <code>LEFT JOIN</code> on
-<code>products</code> and an <code>INNER JOIN</code> on <code>inventories</code>. The <code>LEFT JOIN</code> ensures
+by <a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">DatabaseHelper.getInventoryWithProduct</a> using a LEFT JOIN on
+products and an INNER JOIN on inventories. The LEFT JOIN ensures
 inventory items remain visible even after a cache flush deletes their
 product records. It provides all the data needed by the home screen to
 display a single inventory card, avoiding the need for multiple separate
@@ -132,7 +132,7 @@ update the underlying <a href="../models_inventory_item/InventoryItem-class.html
 
 </dt>
 <dd>
-  The expiry date in ISO 8601 format (<code>YYYY-MM-DD</code>), if set.
+  The expiry date in ISO 8601 format (YYYY-MM-DD), if set.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -192,7 +192,7 @@ update the underlying <a href="../models_inventory_item/InventoryItem-class.html
 
 </dt>
 <dd>
-  The storage location (e.g. <code>'pantry'</code>, <code>'fridge'</code>, <code>'freezer'</code>).
+  The storage location (e.g. 'pantry', 'fridge', 'freezer').
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -216,7 +216,7 @@ update the underlying <a href="../models_inventory_item/InventoryItem-class.html
 
 </dt>
 <dd>
-  The Nutri-Score grade of the product (<code>'a'</code> through <code>'e'</code>), or <code>null</code>
+  The Nutri-Score grade of the product ('a' through 'e'), or null
 if unavailable.
   <div class="features"><span class="feature">final</span></div>
 
@@ -230,7 +230,7 @@ if unavailable.
 </dt>
 <dd>
   The product category that makes Nutri-Score not applicable, if any
-(e.g. <code>'en:food-additives'</code>).
+(e.g. 'en:food-additives').
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -242,7 +242,7 @@ if unavailable.
 
 </dt>
 <dd>
-  The product category from the <code>products</code> table (e.g. <code>'Spreads'</code>).
+  The product category from the products table (e.g. 'Spreads').
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -266,7 +266,7 @@ if unavailable.
 
 </dt>
 <dd>
-  The product name from the <code>products</code> table, for display purposes.
+  The product name from the products table, for display purposes.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -278,7 +278,7 @@ if unavailable.
 
 </dt>
 <dd>
-  The normalized search text from the <code>products</code> table.
+  The normalized search text from the products table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -290,7 +290,7 @@ if unavailable.
 
 </dt>
 <dd>
-  The product type (<code>barcoded</code>, <code>produce</code>, or <code>custom</code>).
+  The product type (barcoded, produce, or custom).
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -326,7 +326,7 @@ if unavailable.
 
 </dt>
 <dd>
-  The unit of measurement for <a href="../models_inventory_with_product/InventoryWithProduct/quantity.html">quantity</a> (e.g. <code>'pcs'</code>, <code>'g'</code>).
+  The unit of measurement for <a href="../models_inventory_with_product/InventoryWithProduct/quantity.html">quantity</a> (e.g. 'pcs', 'g').
   <div class="features"><span class="feature">final</span></div>
 
 </dd>

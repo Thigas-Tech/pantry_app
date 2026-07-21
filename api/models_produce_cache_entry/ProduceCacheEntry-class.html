@@ -55,10 +55,10 @@
 
     
 <section class="desc markdown">
-  <p>Firestore document for the <code>produce_cache/{name}</code> collection.</p>
+  <p>Firestore document for the produce_cache/{name} collection.</p>
 <p>Stores USDA produce nutrition data in a shared cloud cache so that
 multiple devices can benefit from a single API fetch. Each document
-is keyed by the lowercase English produce name (e.g. <code>apple</code>).</p>
+is keyed by the lowercase English produce name (e.g. apple).</p>
 <h2 id="refresh-cycle">Refresh cycle</h2>
 <p>Every document carries a <code>createdAt</code> (set once) and a
 <code>nextRefreshAt</code> that is <code>lastRefreshedAt</code> + 180 days. The refresh

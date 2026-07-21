@@ -92,10 +92,10 @@ the database row (e.g., a product may not have an image URL).</p>
   &#47;&#47;&#47; The quantity of this inventory item, in [unit].
   required this.quantity,
 
-  &#47;&#47;&#47; The unit of measurement (e.g. `&#39;pcs&#39;`, `&#39;g&#39;`).
+  &#47;&#47;&#47; The unit of measurement (e.g. &#39;pcs&#39;, &#39;g&#39;).
   required this.unit,
 
-  &#47;&#47;&#47; The storage location (e.g. `&#39;pantry&#39;`, `&#39;fridge&#39;`).
+  &#47;&#47;&#47; The storage location (e.g. &#39;pantry&#39;, &#39;fridge&#39;).
   required this.location,
 
   &#47;&#47;&#47; The ID of the inventory this item belongs to.
@@ -104,7 +104,7 @@ the database row (e.g., a product may not have an image URL).</p>
   &#47;&#47;&#47; The auto‑generated primary key of the inventory row.
   this.id,
 
-  &#47;&#47;&#47; The expiry date in ISO 8601 format (`YYYY-MM-DD`), or `null`.
+  &#47;&#47;&#47; The expiry date in ISO 8601 format (YYYY-MM-DD), or null.
   this.expiryDate,
 
   &#47;&#47;&#47; Free‑form notes the user may have added.
@@ -113,11 +113,11 @@ the database row (e.g., a product may not have an image URL).</p>
   &#47;&#47;&#47; Epoch timestamp (milliseconds) when the item was first added.
   this.dateAdded,
 
-  &#47;&#47;&#47; The product name from the `products` table.
+  &#47;&#47;&#47; The product name from the products table.
   &#47;&#47;&#47;
-  &#47;&#47;&#47; May be `null` if the product record was deleted (e.g. after a cache
-  &#47;&#47;&#47; flush) — the `LEFT JOIN` in the query still returns the inventory row
-  &#47;&#47;&#47; with `NULL` product columns.
+  &#47;&#47;&#47; May be null if the product record was deleted (e.g. after a cache
+  &#47;&#47;&#47; flush) — the LEFT JOIN in the query still returns the inventory row
+  &#47;&#47;&#47; with NULL product columns.
   this.productName,
 
   &#47;&#47;&#47; A URL to the product’s front image from Open Food Facts.
@@ -126,28 +126,28 @@ the database row (e.g., a product may not have an image URL).</p>
   &#47;&#47;&#47; The name of the inventory this item belongs to.
   this.inventoryName,
 
-  &#47;&#47;&#47; The Nutri-Score grade from the `products` table (e.g. `&#39;a&#39;`–`&#39;e&#39;`).
-  &#47;&#47;&#47; May be `&#39;not-applicable&#39;` when the Nutri-Score system does not apply.
+  &#47;&#47;&#47; The Nutri-Score grade from the products table (e.g. &#39;a&#39;–&#39;e&#39;).
+  &#47;&#47;&#47; May be &#39;not-applicable&#39; when the Nutri-Score system does not apply.
   this.nutriscoreGrade,
 
   &#47;&#47;&#47; The category that makes Nutri-Score not applicable, if any
-  &#47;&#47;&#47; (e.g. `&#39;en:food-additives&#39;`).
+  &#47;&#47;&#47; (e.g. &#39;en:food-additives&#39;).
   this.nutriscoreNotApplicableCategory,
 
-  &#47;&#47;&#47; The product category from the `products` table (e.g. `&#39;Spreads&#39;`).
+  &#47;&#47;&#47; The product category from the products table (e.g. &#39;Spreads&#39;).
   &#47;&#47;&#47;
-  &#47;&#47;&#47; May be `null` if the product record was deleted or the category
+  &#47;&#47;&#47; May be null if the product record was deleted or the category
   &#47;&#47;&#47; was not set. Used for category filter chips on the home screen.
   this.productCategory,
 
-  &#47;&#47;&#47; The normalized search text from the `products` table.
+  &#47;&#47;&#47; The normalized search text from the products table.
   this.productSearchText,
 
-  &#47;&#47;&#47; The product type (`barcoded`, `produce`, or `custom`).
+  &#47;&#47;&#47; The product type (barcoded, produce, or custom).
   &#47;&#47;&#47;
-  &#47;&#47;&#47; May be `null` if the product record was deleted (e.g. after a cache
-  &#47;&#47;&#47; flush) — the `LEFT JOIN` in the query still returns the inventory row
-  &#47;&#47;&#47; with `NULL` product columns.
+  &#47;&#47;&#47; May be null if the product record was deleted (e.g. after a cache
+  &#47;&#47;&#47; flush) — the LEFT JOIN in the query still returns the inventory row
+  &#47;&#47;&#47; with NULL product columns.
   this.productType,
 });</code></pre>
 </section>

@@ -54,7 +54,7 @@
 
     
 <section class="desc markdown">
-  <p>Data-access layer for the <code>prices</code> table.</p>
+  <p>Data-access layer for the prices table.</p>
 <p>All methods receive a <a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a> instance so they can be used
 independently of <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> in tests.</p>
 </section>
@@ -201,7 +201,7 @@ deleted.
 
 </dt>
 <dd>
-  Returns the price with the given <code>id</code>, or <code>null</code> if not found.
+  Returns the price with the given <code>id</code>, or null if not found.
   
 
 </dd>
@@ -227,7 +227,7 @@ deleted.
 
 </dt>
 <dd>
-  Returns the most recent price for the given <code>barcode</code>, or <code>null</code>
+  Returns the most recent price for the given <code>barcode</code>, or null
 if none exist.
   
 
@@ -406,8 +406,8 @@ is not applied here — the caller should convert via CurrencyService.
 </dt>
 <dd>
   Returns the total inventory value broken down by currency, using the
-most recent price per distinct product. Each row contains <code>currency</code>
-and <code>subtotal</code> columns.
+most recent price per distinct product. Each row contains currency
+and subtotal columns.
   
 
 </dd>
