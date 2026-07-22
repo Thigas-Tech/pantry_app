@@ -7,11 +7,11 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
+import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/plu_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
-import 'package:pantry_app/screens/product_detail_screen.dart';
 
 /// A unified input screen for barcodes and produce PLU codes.
 ///
@@ -23,8 +23,13 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 /// Automatically navigates to [ProductDetailScreen] when a barcode or PLU
 /// code is successfully resolved via [scannerCameraProvider].
 class ScannerScreen extends ConsumerStatefulWidget {
+  /// Creates a [ScannerScreen] widget.
+  ///
+  /// [pluService] can be injected for testing. When omitted, a default
+  /// [PluService] instance is used.
   const ScannerScreen({this.pluService, super.key});
 
+  /// The PLU code-to-name lookup service.
   final PluService? pluService;
 
   @override
@@ -80,19 +85,23 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
 
   void _submitBarcode(String barcode) {
     logInfo('Manual barcode submitted: $barcode');
-    ref.read(scannerCameraProvider.notifier).resolveBarcode(barcode);
+    unawaited(
+      ref.read(scannerCameraProvider.notifier).resolveBarcode(barcode),
+    );
   }
 
   void _submitPlu(String pluCode, String produceName) {
     logInfo('PLU submitted: $pluCode — $produceName');
     final l10n = AppLocalizations.of(context)!;
-    ref
-        .read(scannerCameraProvider.notifier)
-        .resolvePlu(
-          pluCode: pluCode,
-          produceName: produceName,
-          languageCode: l10n.localeName,
-        );
+    unawaited(
+      ref
+          .read(scannerCameraProvider.notifier)
+          .resolvePlu(
+            pluCode: pluCode,
+            produceName: produceName,
+            languageCode: l10n.localeName,
+          ),
+    );
   }
 
   @override

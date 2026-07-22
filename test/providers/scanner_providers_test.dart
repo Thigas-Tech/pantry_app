@@ -11,22 +11,17 @@ import '../helpers/pump_app.dart';
 
 /// Fake [ScannerCamera] that skips platform controller creation.
 class FakeScannerCamera extends ScannerCamera {
-  bool retryCalled = false;
-
   @override
   ScannerCameraState build() => const ScannerCameraState();
 
   @override
   Future<void> requestPermission() async {
-    retryCalled = true;
-    state = state.copyWith(cameraError: null, clearError: true);
+    state = state.copyWith(clearError: true);
   }
 
   @override
   Future<void> retryScanner() async {
-    retryCalled = true;
     state = state.copyWith(
-      cameraError: null,
       isStreaming: false,
       scannerKey: state.scannerKey + 1,
       clearError: true,
@@ -72,7 +67,7 @@ void main() {
       const error = MobileScannerException(
         errorCode: MobileScannerErrorCode.genericError,
       );
-      final state = ScannerCameraState(cameraError: error);
+      const state = ScannerCameraState(cameraError: error);
       final cleared = state.copyWith(clearError: true);
       expect(cleared.cameraError, isNull);
     });
@@ -85,7 +80,7 @@ void main() {
 
     test('ScanResolved holds a Product', () {
       const product = Product(barcode: '123', name: 'Test');
-      final resolved = ScanResolved(product);
+      const resolved = ScanResolved(product);
       expect(resolved, isA<ScanResolution>());
       expect(resolved.product.barcode, '123');
     });
@@ -107,7 +102,7 @@ void main() {
       container = ProviderContainer(
         overrides: [
           productRepositoryProvider.overrideWithValue(mockRepo),
-          scannerCameraProvider.overrideWith(() => FakeScannerCamera()),
+          scannerCameraProvider.overrideWith(FakeScannerCamera.new),
         ],
       );
     });
@@ -123,11 +118,10 @@ void main() {
       expect(state.showOverlay, false);
     });
 
-    test('permission grant restarts scanner', () async {
+    test('permission grant clears camera error', () async {
       final notifier =
           container.read(scannerCameraProvider.notifier) as FakeScannerCamera;
       await notifier.requestPermission();
-      expect(notifier.retryCalled, true);
       expect(container.read(scannerCameraProvider).cameraError, isNull);
     });
 
@@ -143,10 +137,8 @@ void main() {
 
       final state = container.read(scannerCameraProvider);
       expect(state.scanResolution, isA<ScanResolved>());
-      expect(
-        (state.scanResolution as ScanResolved).product.barcode,
-        barcode,
-      );
+      final resolved = state.scanResolution! as ScanResolved;
+      expect(resolved.product.barcode, barcode);
     });
 
     test('resolveBarcode handles ProductNotFoundException', () async {
@@ -160,10 +152,8 @@ void main() {
 
       final state = container.read(scannerCameraProvider);
       expect(state.scanResolution, isA<ScanFailed>());
-      expect(
-        (state.scanResolution as ScanFailed).message,
-        'PRODUCT_NOT_FOUND',
-      );
+      final failed = state.scanResolution! as ScanFailed;
+      expect(failed.message, 'PRODUCT_NOT_FOUND');
     });
 
     test('resolveBarcode handles generic exceptions', () async {
@@ -177,21 +167,21 @@ void main() {
 
       final state = container.read(scannerCameraProvider);
       expect(state.scanResolution, isA<ScanFailed>());
-      expect(
-        (state.scanResolution as ScanFailed).message,
-        contains('Network error'),
-      );
+      final failed = state.scanResolution! as ScanFailed;
+      expect(failed.message, contains('Network error'));
     });
 
     test('resolveBarcode ignores duplicate calls while resolving', () async {
       const barcode = '5012345678900';
       when(
         () => mockRepo.getProduct(barcode),
-      ).thenAnswer((_) async => Product(barcode: barcode, name: 'Test'));
+      ).thenAnswer((_) async => const Product(barcode: barcode, name: 'Test'));
 
       final notifier = container.read(scannerCameraProvider.notifier);
-      notifier.resolveBarcode(barcode);
+      // First call puts state in ScanResolving; second should be ignored.
+      final first = notifier.resolveBarcode(barcode);
       await notifier.resolveBarcode(barcode);
+      await first;
 
       final state = container.read(scannerCameraProvider);
       expect(state.scanResolution, isA<ScanResolved>());

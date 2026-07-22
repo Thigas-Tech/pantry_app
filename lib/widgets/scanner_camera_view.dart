@@ -19,17 +19,18 @@ import 'package:permission_handler/permission_handler.dart';
 /// Renders the camera preview, animated overlay (only when streaming),
 /// and error content when an error occurs.
 class ScannerCameraView extends ConsumerStatefulWidget {
-  /// Called when the user switches to manual barcode entry.
-  final VoidCallback onSwitchToManual;
-
-  /// Called when the user switches to PLU code entry.
-  final VoidCallback onSwitchToPlu;
-
+  /// Creates a [ScannerCameraView] widget.
   const ScannerCameraView({
     required this.onSwitchToManual,
     required this.onSwitchToPlu,
     super.key,
   });
+
+  /// Called when the user switches to manual barcode entry.
+  final VoidCallback onSwitchToManual;
+
+  /// Called when the user switches to PLU code entry.
+  final VoidCallback onSwitchToPlu;
 
   @override
   ConsumerState<ScannerCameraView> createState() => _ScannerCameraViewState();

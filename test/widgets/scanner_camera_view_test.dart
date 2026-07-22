@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
@@ -27,18 +26,16 @@ void main() {
       final effectiveController = controller ?? createFakeController();
       await pumpApp(
         tester,
-        ProviderScope(
-          overrides: [
-            mobileScannerControllerProvider.overrideWithValue(
-              effectiveController,
-            ),
-            scannerCameraProvider.overrideWithValue(state),
-          ],
-          child: ScannerCameraView(
-            onSwitchToManual: () {},
-            onSwitchToPlu: () {},
-          ),
+        ScannerCameraView(
+          onSwitchToManual: () {},
+          onSwitchToPlu: () {},
         ),
+        overrides: [
+          mobileScannerControllerProvider.overrideWithValue(
+            effectiveController,
+          ),
+          scannerCameraProvider.overrideWithValue(state),
+        ],
         settle: false,
       );
       await tester.pump();
@@ -65,8 +62,8 @@ void main() {
     testWidgets('shows error content when camera has error', (tester) async {
       await pumpCameraView(
         tester,
-        state: ScannerCameraState(
-          cameraError: const MobileScannerException(
+        state: const ScannerCameraState(
+          cameraError: MobileScannerException(
             errorCode: MobileScannerErrorCode.genericError,
           ),
         ),
@@ -84,8 +81,8 @@ void main() {
     testWidgets('shows permission denied error content', (tester) async {
       await pumpCameraView(
         tester,
-        state: ScannerCameraState(
-          cameraError: const MobileScannerException(
+        state: const ScannerCameraState(
+          cameraError: MobileScannerException(
             errorCode: MobileScannerErrorCode.permissionDenied,
           ),
         ),

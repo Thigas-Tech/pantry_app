@@ -24,19 +24,26 @@ sealed class ScanResolution {
 
 /// A resolution attempt is in progress (loading state).
 class ScanResolving extends ScanResolution {
+  /// Creates a [ScanResolving] state.
   const ScanResolving();
 }
 
 /// A barcode or PLU was successfully resolved to a [Product].
 class ScanResolved extends ScanResolution {
-  final Product product;
+  /// Creates a [ScanResolved] state with the resolved [product].
   const ScanResolved(this.product);
+
+  /// The resolved product.
+  final Product product;
 }
 
 /// A barcode or PLU resolution attempt failed.
 class ScanFailed extends ScanResolution {
-  final String message;
+  /// Creates a [ScanFailed] state with an error [message].
   const ScanFailed(this.message);
+
+  /// The error message describing why resolution failed.
+  final String message;
 }
 
 // ---------------------------------------------------------------------------
@@ -45,6 +52,16 @@ class ScanFailed extends ScanResolution {
 
 /// Immutable state for the scanner camera preview and scan resolution.
 class ScannerCameraState {
+  /// Creates a [ScannerCameraState] with the given values.
+  const ScannerCameraState({
+    this.isStreaming = false,
+    this.isStarting = false,
+    this.cameraError,
+    this.torchState = TorchState.unavailable,
+    this.scannerKey = 0,
+    this.scanResolution,
+  });
+
   /// Whether the camera preview is actively streaming.
   final bool isStreaming;
 
@@ -66,15 +83,7 @@ class ScannerCameraState {
   /// Whether the overlay should be drawn on top of the camera preview.
   bool get showOverlay => isStreaming && cameraError == null;
 
-  const ScannerCameraState({
-    this.isStreaming = false,
-    this.isStarting = false,
-    this.cameraError,
-    this.torchState = TorchState.unavailable,
-    this.scannerKey = 0,
-    this.scanResolution,
-  });
-
+  /// Creates a copy of this state with the given fields replaced.
   ScannerCameraState copyWith({
     bool? isStreaming,
     bool? isStarting,
@@ -105,17 +114,19 @@ class ScannerCameraState {
 /// Provides a [MobileScannerController] for the scanner camera.
 ///
 /// Created lazily and disposed when the provider is no longer watched
-/// (auto-dispose). The controller is created with [autoStart] `false` so
+/// (auto-dispose). The controller is created with `autoStart` `false` so
 /// that permission is checked before calling [MobileScannerController.start].
-final mobileScannerControllerProvider =
-    Provider.autoDispose<MobileScannerController>((ref) {
-      final controller = MobileScannerController(
-        autoStart: false,
-        autoZoom: true,
-      );
-      ref.onDispose(() => controller.dispose());
-      return controller;
-    });
+final Provider<MobileScannerController> mobileScannerControllerProvider =
+    Provider.autoDispose<MobileScannerController>(
+      (ref) {
+        final controller = MobileScannerController(
+          autoStart: false,
+          autoZoom: true,
+        );
+        ref.onDispose(controller.dispose);
+        return controller;
+      },
+    );
 
 // ---------------------------------------------------------------------------
 // Notifier
@@ -123,7 +134,7 @@ final mobileScannerControllerProvider =
 
 /// Notifier that manages the scanner camera lifecycle and scan resolution.
 ///
-/// Owns the [MobileScannerController] (created with [autoStart] `false`),
+/// Owns the [MobileScannerController] (created with `autoStart` `false`),
 /// tracks camera streaming state, handles permission requests, and resolves
 /// barcodes/PLU codes via [productRepositoryProvider].
 @riverpod
@@ -144,14 +155,6 @@ class ScannerCamera extends _$ScannerCamera {
     unawaited(_checkPermission());
 
     return const ScannerCameraState();
-  }
-
-  /// The underlying [MobileScannerController] used by the camera widget.
-  MobileScannerController get controller {
-    if (_controller == null) {
-      throw StateError('ScannerCamera provider has been disposed');
-    }
-    return _controller!;
   }
 
   void _onControllerState() {
@@ -191,7 +194,7 @@ class ScannerCamera extends _$ScannerCamera {
       final result = await Permission.camera.request();
       if (result.isGranted) {
         logInfo('Camera permission granted after request');
-        state = state.copyWith(cameraError: null, clearError: true);
+        state = state.copyWith(clearError: true);
         await _startController();
       } else if (result.isPermanentlyDenied) {
         logWarning('Camera permission permanently denied after request');
@@ -215,11 +218,10 @@ class ScannerCamera extends _$ScannerCamera {
   }
 
   /// Retries scanner after an error: clears error state, increments
-  /// [scannerKey] so the [MobileScanner] widget recreates itself, and
+  /// the scanner key so the [MobileScanner] widget recreates itself, and
   /// restarts the controller.
   Future<void> retryScanner() async {
     state = state.copyWith(
-      cameraError: null,
       isStreaming: false,
       scannerKey: state.scannerKey + 1,
       clearError: true,
@@ -235,7 +237,7 @@ class ScannerCamera extends _$ScannerCamera {
     try {
       await _controller!.start();
       logInfo('Camera controller started successfully');
-    } catch (e) {
+    } on Exception catch (e) {
       logWarning('Camera controller failed to start: $e');
     }
   }
@@ -245,7 +247,7 @@ class ScannerCamera extends _$ScannerCamera {
     logInfo('Toggling torch');
     try {
       await _controller?.toggleTorch();
-    } catch (e) {
+    } on Exception catch (e) {
       logWarning('Torch toggle failed: $e');
     }
   }
