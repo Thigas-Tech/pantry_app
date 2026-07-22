@@ -73,8 +73,8 @@
     
 <section class="desc markdown">
   <p>The ID of the inventory (pantry) this item belongs to.</p>
-<p>This is a foreign key referencing the <code>inventories</code> table.
-Defaults to <code>1</code> (the default "Home" inventory).</p>
+<p>This is a foreign key referencing the inventories table.
+Defaults to 1 (the default "Home" inventory).</p>
 </section>
 
     
@@ -82,8 +82,8 @@ Defaults to <code>1</code> (the default "Home" inventory).</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@JsonKey(name: &#39;date_added&#39;) int? get dateAdded;&#47;&#47;&#47; The ID of the inventory (pantry) this item belongs to.
 &#47;&#47;&#47;
-&#47;&#47;&#47; This is a foreign key referencing the `inventories` table.
-&#47;&#47;&#47; Defaults to `1` (the default &quot;Home&quot; inventory).
+&#47;&#47;&#47; This is a foreign key referencing the inventories table.
+&#47;&#47;&#47; Defaults to 1 (the default &quot;Home&quot; inventory).
 @JsonKey(name: &#39;inventory_id&#39;) int get inventoryId;</code></pre>
 </section>
 

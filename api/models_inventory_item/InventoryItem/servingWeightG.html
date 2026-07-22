@@ -73,8 +73,8 @@
     
 <section class="desc markdown">
   <p>The weight in grams of one serving unit.</p>
-<p>Only meaningful for produce items added in unit mode (e.g. <code>182</code> for
-"1 medium apple"). <code>null</code> for weight-mode items, non-produce items,
+<p>Only meaningful for produce items added in unit mode (e.g. 182 for
+"1 medium apple"). null for weight-mode items, non-produce items,
 and legacy items without serving data.</p>
 </section>
 
@@ -83,8 +83,8 @@ and legacy items without serving data.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@JsonKey(name: &#39;inventory_id&#39;) int get inventoryId;&#47;&#47;&#47; The weight in grams of one serving unit.
 &#47;&#47;&#47;
-&#47;&#47;&#47; Only meaningful for produce items added in unit mode (e.g. `182` for
-&#47;&#47;&#47; &quot;1 medium apple&quot;). `null` for weight-mode items, non-produce items,
+&#47;&#47;&#47; Only meaningful for produce items added in unit mode (e.g. 182 for
+&#47;&#47;&#47; &quot;1 medium apple&quot;). null for weight-mode items, non-produce items,
 &#47;&#47;&#47; and legacy items without serving data.
 @JsonKey(name: &#39;serving_weight_g&#39;) double? get servingWeightG;</code></pre>
 </section>

@@ -68,9 +68,9 @@
     
 <section class="desc markdown">
   <p>The PLU (Price Look-Up) code for this product, if it is a fresh
-produce item (e.g. <code>'4011'</code> for Banana, <code>'4032'</code> for Apple).</p>
+produce item (e.g. '4011' for Banana, '4032' for Apple).</p>
 <p>Only meaningful when <code>productType</code> is <a href="../../models_product_type/ProductType.html">ProductType.produce</a>. 4-digit
-codes are standard PLU codes; 5-digit codes starting with <code>'9'</code>
+codes are standard PLU codes; 5-digit codes starting with '9'
 indicate organic produce. This field is nullable for barcoded and
 custom products.</p>
 </section>
@@ -79,10 +79,10 @@ custom products.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">String get submissionStatus;&#47;&#47;&#47; The PLU (Price Look-Up) code for this product, if it is a fresh
-&#47;&#47;&#47; produce item (e.g. `&#39;4011&#39;` for Banana, `&#39;4032&#39;` for Apple).
+&#47;&#47;&#47; produce item (e.g. &#39;4011&#39; for Banana, &#39;4032&#39; for Apple).
 &#47;&#47;&#47;
 &#47;&#47;&#47; Only meaningful when [productType] is [ProductType.produce]. 4-digit
-&#47;&#47;&#47; codes are standard PLU codes; 5-digit codes starting with `&#39;9&#39;`
+&#47;&#47;&#47; codes are standard PLU codes; 5-digit codes starting with &#39;9&#39;
 &#47;&#47;&#47; indicate organic produce. This field is nullable for barcoded and
 &#47;&#47;&#47; custom products.
 String? get pluCode;</code></pre>

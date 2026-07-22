@@ -68,10 +68,10 @@
     
 <section class="desc markdown">
   <p>The product category that makes Nutri-Score not applicable, if any.</p>
-<p>This is present only when <code>nutriscoreGrade</code> is <code>'not-applicable'</code> and
-explains why (e.g. <code>'en:food-additives'</code>).</p>
+<p>This is present only when <code>nutriscoreGrade</code> is 'not-applicable' and
+explains why (e.g. 'en:food-additives').</p>
 <p>Note: the official Dart SDK does not expose the
-<code>nutriscore_data.nutriscore_not_applicable_for_category</code> field, so
+nutriscore_data.nutriscore_not_applicable_for_category field, so
 this value is only populated when reading from the local database
 for previously cached products.</p>
 </section>
@@ -81,11 +81,11 @@ for previously cached products.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">String? get nutriscoreGrade;&#47;&#47;&#47; The product category that makes Nutri-Score not applicable, if any.
 &#47;&#47;&#47;
-&#47;&#47;&#47; This is present only when [nutriscoreGrade] is `&#39;not-applicable&#39;` and
-&#47;&#47;&#47; explains why (e.g. `&#39;en:food-additives&#39;`).
+&#47;&#47;&#47; This is present only when [nutriscoreGrade] is &#39;not-applicable&#39; and
+&#47;&#47;&#47; explains why (e.g. &#39;en:food-additives&#39;).
 &#47;&#47;&#47;
 &#47;&#47;&#47; Note: the official Dart SDK does not expose the
-&#47;&#47;&#47; `nutriscore_data.nutriscore_not_applicable_for_category` field, so
+&#47;&#47;&#47; nutriscore_data.nutriscore_not_applicable_for_category field, so
 &#47;&#47;&#47; this value is only populated when reading from the local database
 &#47;&#47;&#47; for previously cached products.
 String? get nutriscoreNotApplicableCategory;</code></pre>

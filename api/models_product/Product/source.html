@@ -69,14 +69,14 @@
 <section class="desc markdown">
   <p>The origin of this product record.</p>
 <ul>
-<li><code>'api'</code> — fetched from Open Food Facts (can be safely flushed and
+<li>'api' — fetched from Open Food Facts (can be safely flushed and
 re-fetched).</li>
-<li><code>'manual'</code> — entered by the user via the add-product screen
+<li>'manual' — entered by the user via the add-product screen
 (must never be deleted by a cache flush).</li>
 </ul>
-<p>Defaults to <code>'api'</code> because most products come from the OFF
+<p>Defaults to 'api' because most products come from the OFF
 integration. The add-product screen overrides it to
-<code>'manual'</code>.</p>
+'manual'.</p>
 </section>
 
     
@@ -84,14 +84,14 @@ integration. The add-product screen overrides it to
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">String? get nutriscoreNotApplicableCategory;&#47;&#47;&#47; The origin of this product record.
 &#47;&#47;&#47;
-&#47;&#47;&#47; - `&#39;api&#39;` — fetched from Open Food Facts (can be safely flushed and
+&#47;&#47;&#47; - &#39;api&#39; — fetched from Open Food Facts (can be safely flushed and
 &#47;&#47;&#47;   re-fetched).
-&#47;&#47;&#47; - `&#39;manual&#39;` — entered by the user via the add-product screen
+&#47;&#47;&#47; - &#39;manual&#39; — entered by the user via the add-product screen
 &#47;&#47;&#47;   (must never be deleted by a cache flush).
 &#47;&#47;&#47;
-&#47;&#47;&#47; Defaults to `&#39;api&#39;` because most products come from the OFF
+&#47;&#47;&#47; Defaults to &#39;api&#39; because most products come from the OFF
 &#47;&#47;&#47; integration. The add-product screen overrides it to
-&#47;&#47;&#47; `&#39;manual&#39;`.
+&#47;&#47;&#47; &#39;manual&#39;.
 String get source;</code></pre>
 </section>
 

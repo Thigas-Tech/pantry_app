@@ -61,14 +61,14 @@
         </section>
         
 <section class="desc markdown">
-  <p>Provides the count of inventory items in the active inventory.</p>
+  <p>Provides the count of inventory items in the active pantry.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">final inventoryCountProvider = FutureProvider&lt;int&gt;((ref) async {
-  final items = await ref.watch(inventoryWithProductProvider.future);
+  final items = await ref.watch(pantryProvider.future);
   return items.length;
 });</code></pre>
 </section>

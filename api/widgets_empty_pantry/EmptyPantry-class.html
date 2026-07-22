@@ -54,11 +54,8 @@
 
     
 <section class="desc markdown">
-  <p>An inviting empty‑state illustration shown when the pantry has no items.</p>
-<p>Displays a large kitchen icon, a title, a subtitle, and a button that
-triggers the scanning flow. This widget can be replaced later with a
-Lottie animation or a custom illustration without changing the home
-screen code.</p>
+  <p>Placeholder shown when the active inventory has no items.</p>
+<p>Displays a prompt to scan or add the first product.</p>
 </section>
 
 
@@ -95,7 +92,7 @@ screen code.</p>
           <span class="name"><a href="../widgets_empty_pantry/EmptyPantry/EmptyPantry.html">EmptyPantry</a></span><span class="signature">({<span class="parameter" id="param-onScan"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onScan</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
-          Creates an <a href="../widgets_empty_pantry/EmptyPantry-class.html">EmptyPantry</a> widget.
+          Creates an <a href="../widgets_empty_pantry/EmptyPantry-class.html">EmptyPantry</a> with a callback to open the action sheet.
             <div class="constructor-modifier features">const</div>
         </dd>
     </dl>
@@ -137,7 +134,7 @@ screen code.</p>
 
 </dt>
 <dd>
-  Callback invoked when the user taps the scan button.
+  Called when the user taps the scan-first-product button.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>

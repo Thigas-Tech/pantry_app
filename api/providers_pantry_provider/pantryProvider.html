@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the inventoryWithProductProvider property from the inventory_provider library, for the Dart programming language.">
-  <title>inventoryWithProductProvider property - inventory_provider library - Dart API</title>
+  <meta name="description" content="API docs for the pantryProvider property from the pantry_provider library, for the Dart programming language.">
+  <title>pantryProvider property - pantry_provider library - Dart API</title>
 
 
   
@@ -25,10 +25,10 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">pantry_app</a></li>
-    <li><a href="../providers_inventory_provider/">providers&#47;inventory_provider.dart</a></li>
-    <li class="self-crumb">inventoryWithProductProvider property</li>
+    <li><a href="../providers_pantry_provider/">providers&#47;pantry_provider.dart</a></li>
+    <li class="self-crumb">pantryProvider property</li>
   </ol>
-  <div class="self-name">inventoryWithProductProvider</div>
+  <div class="self-name">pantryProvider</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,46 +45,31 @@
   <div
       id="dartdoc-main-content"
       class="main-content"
-      data-above-sidebar="providers_inventory_provider&#47;providers_inventory_provider-library-sidebar.html"
+      data-above-sidebar="providers_pantry_provider&#47;providers_pantry_provider-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-top-level-property">inventoryWithProductProvider</span> top-level property 
+<h1><span class="kind-top-level-property">pantryProvider</span> top-level property 
  
 </h1></div>
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_with_product/InventoryWithProduct-class.html">InventoryWithProduct</a></span>&gt;</span></span>&gt;</span>
-          <span class="name ">inventoryWithProductProvider</span>
+          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncNotifierProvider-class.html">AsyncNotifierProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_pantry_provider/Pantry-class.html">Pantry</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_with_product/InventoryWithProduct-class.html">InventoryWithProduct</a></span>&gt;</span></span>&gt;</span>
+          <span class="name ">pantryProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
         </section>
         
 <section class="desc markdown">
   <p>Provides the joined list of inventory items for the currently active
-inventory.</p>
-<p>This <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a> is watched by the HomeScreen to display the pantry
-contents grouped by expiry status. It reads the active inventory ID from
-<a href="../providers_active_inventory_provider/activeInventoryProvider.html">activeInventoryProvider</a> and calls <a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">DatabaseHelper.getInventoryWithProduct</a>
-with that ID.</p>
-<h2 id="reactivity">Reactivity</h2>
-<p>The provider is not reactive to database changes. It must be explicitly
-invalidated via <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef/invalidate.html">WidgetRef.invalidate</a> after every inventory mutation
-(add, update, delete, move).</p>
+pantry. Watched by the home screen and invalidated after mutations.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final inventoryWithProductProvider = FutureProvider&lt;List&lt;InventoryWithProduct&gt;&gt;(
-  (ref) async {
-    final activeId = ref.watch&lt;int&gt;(activeInventoryProvider);
-    final db = ref.watch(databaseProvider);
-    final rows = await db.getInventoryWithProduct(inventoryId: activeId);
-    final result = rows.map(InventoryWithProduct.fromMap).toList();
-    return result;
-  },
-);</code></pre>
+  <pre class="language-dart"><code class="language-dart">final pantryProvider =
+    AsyncNotifierProvider&lt;Pantry, List&lt;InventoryWithProduct&gt;&gt;(Pantry.new);</code></pre>
 </section>
 
 
@@ -99,11 +84,11 @@ invalidated via <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/fl
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">pantry_app</a></li>
-    <li><a href="../providers_inventory_provider/">inventory_provider</a></li>
-    <li class="self-crumb">inventoryWithProductProvider property</li>
+    <li><a href="../providers_pantry_provider/">pantry_provider</a></li>
+    <li class="self-crumb">pantryProvider property</li>
 </ol>
 
-    <h5>inventory_provider library</h5>
+    <h5>pantry_provider library</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-left-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
