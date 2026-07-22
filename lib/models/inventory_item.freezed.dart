@@ -18,24 +18,24 @@ mixin _$InventoryItem {
 /// The barcode of the product (e.g. EAN‑13, UPC).
 ///
 /// This is a foreign key referencing [Product.barcode] and must match an
-/// existing product in the `products` table (or be added to it).
+/// existing product in the products table (or be added to it).
  String get barcode;/// The auto‑generated primary key from the database.
 ///
-/// Set to `null` for items that have not yet been inserted. After
+/// Set to null for items that have not yet been inserted. After
 /// [DatabaseHelper.insertInventoryItem] returns, the generated ID is
 /// available in the returned integer (the caller should update this field
 /// if needed).
  int? get id;/// The quantity of the item, expressed in the given [unit].
 ///
 /// The value is stored as a [double] to support fractional quantities
-/// (e.g., `0.5` for half a pack). Defaults to `1`.
+/// (e.g., 0.5 for half a pack). Defaults to 1.
  double get quantity;/// The unit of measurement for [quantity].
 ///
-/// Common values: `'pieces'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
-/// Defaults to `'pieces'`.
- String get unit;/// The expiry date in ISO 8601 format (`YYYY-MM-DD`).
+/// Common values: 'pieces', 'g', 'kg', 'ml', 'L'.
+/// Defaults to 'pieces'.
+ String get unit;/// The expiry date in ISO 8601 format (YYYY-MM-DD).
 ///
-/// May be `null` if the user has not set an expiry date. When present,
+/// May be null if the user has not set an expiry date. When present,
 /// the date is treated as the last day the item is safe to consume
 /// (inclusive).
 ///
@@ -43,8 +43,8 @@ mixin _$InventoryItem {
 /// expiring soon / good categories.
 @JsonKey(name: 'expiry_date') String? get expiryDate;/// The storage location of the item.
 ///
-/// Common values: `'pantry'`, `'fridge'`, `'freezer'`.
-/// Defaults to `'pantry'`.
+/// Common values: 'pantry', 'fridge', 'freezer'.
+/// Defaults to 'pantry'.
  String get location;/// Optional free‑form notes about this item.
  String? get notes;/// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was first added.
@@ -53,12 +53,12 @@ mixin _$InventoryItem {
 /// database cleanup routine to purge old entries after 60 days.
 @JsonKey(name: 'date_added') int? get dateAdded;/// The ID of the inventory (pantry) this item belongs to.
 ///
-/// This is a foreign key referencing the `inventories` table.
-/// Defaults to `1` (the default "Home" inventory).
+/// This is a foreign key referencing the inventories table.
+/// Defaults to 1 (the default "Home" inventory).
 @JsonKey(name: 'inventory_id') int get inventoryId;/// The weight in grams of one serving unit.
 ///
-/// Only meaningful for produce items added in unit mode (e.g. `182` for
-/// "1 medium apple"). `null` for weight-mode items, non-produce items,
+/// Only meaningful for produce items added in unit mode (e.g. 182 for
+/// "1 medium apple"). null for weight-mode items, non-produce items,
 /// and legacy items without serving data.
 @JsonKey(name: 'serving_weight_g') double? get servingWeightG;
 /// Create a copy of InventoryItem
@@ -269,11 +269,11 @@ class _InventoryItem implements InventoryItem {
 /// The barcode of the product (e.g. EAN‑13, UPC).
 ///
 /// This is a foreign key referencing [Product.barcode] and must match an
-/// existing product in the `products` table (or be added to it).
+/// existing product in the products table (or be added to it).
 @override final  String barcode;
 /// The auto‑generated primary key from the database.
 ///
-/// Set to `null` for items that have not yet been inserted. After
+/// Set to null for items that have not yet been inserted. After
 /// [DatabaseHelper.insertInventoryItem] returns, the generated ID is
 /// available in the returned integer (the caller should update this field
 /// if needed).
@@ -281,16 +281,16 @@ class _InventoryItem implements InventoryItem {
 /// The quantity of the item, expressed in the given [unit].
 ///
 /// The value is stored as a [double] to support fractional quantities
-/// (e.g., `0.5` for half a pack). Defaults to `1`.
+/// (e.g., 0.5 for half a pack). Defaults to 1.
 @override@JsonKey() final  double quantity;
 /// The unit of measurement for [quantity].
 ///
-/// Common values: `'pieces'`, `'g'`, `'kg'`, `'ml'`, `'L'`.
-/// Defaults to `'pieces'`.
+/// Common values: 'pieces', 'g', 'kg', 'ml', 'L'.
+/// Defaults to 'pieces'.
 @override@JsonKey() final  String unit;
-/// The expiry date in ISO 8601 format (`YYYY-MM-DD`).
+/// The expiry date in ISO 8601 format (YYYY-MM-DD).
 ///
-/// May be `null` if the user has not set an expiry date. When present,
+/// May be null if the user has not set an expiry date. When present,
 /// the date is treated as the last day the item is safe to consume
 /// (inclusive).
 ///
@@ -299,8 +299,8 @@ class _InventoryItem implements InventoryItem {
 @override@JsonKey(name: 'expiry_date') final  String? expiryDate;
 /// The storage location of the item.
 ///
-/// Common values: `'pantry'`, `'fridge'`, `'freezer'`.
-/// Defaults to `'pantry'`.
+/// Common values: 'pantry', 'fridge', 'freezer'.
+/// Defaults to 'pantry'.
 @override@JsonKey() final  String location;
 /// Optional free‑form notes about this item.
 @override final  String? notes;
@@ -312,13 +312,13 @@ class _InventoryItem implements InventoryItem {
 @override@JsonKey(name: 'date_added') final  int? dateAdded;
 /// The ID of the inventory (pantry) this item belongs to.
 ///
-/// This is a foreign key referencing the `inventories` table.
-/// Defaults to `1` (the default "Home" inventory).
+/// This is a foreign key referencing the inventories table.
+/// Defaults to 1 (the default "Home" inventory).
 @override@JsonKey(name: 'inventory_id') final  int inventoryId;
 /// The weight in grams of one serving unit.
 ///
-/// Only meaningful for produce items added in unit mode (e.g. `182` for
-/// "1 medium apple"). `null` for weight-mode items, non-produce items,
+/// Only meaningful for produce items added in unit mode (e.g. 182 for
+/// "1 medium apple"). null for weight-mode items, non-produce items,
 /// and legacy items without serving data.
 @override@JsonKey(name: 'serving_weight_g') final  double? servingWeightG;
 

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 
-/// An inviting empty‑state illustration shown when the pantry has no items.
+/// Placeholder shown when the active inventory has no items.
 ///
-/// Displays a large kitchen icon, a title, a subtitle, and a button that
-/// triggers the scanning flow. This widget can be replaced later with a
-/// Lottie animation or a custom illustration without changing the home
-/// screen code.
+/// Displays a prompt to scan or add the first product.
 class EmptyPantry extends StatelessWidget {
-  /// Creates an [EmptyPantry] widget.
+  /// Creates an [EmptyPantry] with a callback to open the action sheet.
   const EmptyPantry({required this.onScan, super.key});
 
-  /// Callback invoked when the user taps the scan button.
+  /// Called when the user taps the scan-first-product button.
   final VoidCallback onScan;
 
   @override
@@ -35,7 +32,7 @@ class EmptyPantry extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onScan,
-              icon: const Icon(Icons.qr_code_scanner),
+              icon: const Icon(Icons.add),
               label: Text(l10n.scanFirstProduct),
             ),
           ],

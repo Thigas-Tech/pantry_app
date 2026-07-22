@@ -717,5 +717,13 @@
   "notificationRationaleTitle": "Notifications help you keep track",
   "notificationRationaleBody": "Pantry uses notifications to:\n\n- Remind you when food is about to expire\n- Nudge you to add products regularly\n- Confirm that test notifications work\n\nYou can change this anytime in Settings.",
   "notificationRationaleAllow": "Allow",
-  "notificationRationaleNotNow": "Not now"
+  "notificationRationaleNotNow": "Not now",
+  "addProduct": "Add product",
+  "addProductSubtitle": "Search by barcode or name",
+  "registerRecipe": "Register a recipe",
+  "registerRecipeSubtitle": "Bulk-remove used items",
+  "scanBarcodeSubtitle": "Snap or type a barcode",
+  "marketTrip": "Market trip",
+  "marketTripSubtitle": "Scan items in sequence",
+  "comingSoon": "Coming soon"
 }

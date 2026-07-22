@@ -19,8 +19,7 @@ import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/inventory_provider.dart'
-    show inventoryWithProductProvider;
+import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
@@ -31,7 +30,7 @@ class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class MockOffAdapter extends Mock implements OffAdapter {}
 
-/// A helper widget that watches [inventoryWithProductProvider] and counts
+/// A helper widget that watches [pantryProvider] and counts
 /// rebuilds so test assertions can detect when the provider is invalidated.
 class _ProviderWatcher extends ConsumerWidget {
   const _ProviderWatcher({
@@ -44,7 +43,7 @@ class _ProviderWatcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(inventoryWithProductProvider);
+    ref.watch(pantryProvider);
     recomputeCount.value++;
     return child;
   }
@@ -622,7 +621,7 @@ void main() {
 
   group('invalidation on navigation return', () {
     testWidgets(
-      're-queries inventoryWithProductProvider after returning from '
+      're-queries pantryProvider after returning from '
       'ProductDetailScreen',
       (tester) async {
         final mockRepo = createMockProductRepository();

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
@@ -14,8 +16,9 @@ class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 
   @override
   void setActiveInventory(int newValue) {}
-
 }
+
+class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 InventoryWithProduct _testItem(
   String name, {
@@ -67,12 +70,46 @@ void main() {
       _testItem('Canned Beans', barcode: '4'),
     ];
 
+    final mockDb = _MockDatabaseHelper();
+    when(mockDb.getInventories).thenAnswer(
+      (_) async => [
+        {'id': 1, 'name': 'Home'},
+      ],
+    );
+    when(
+      () => mockDb.getInventoryWithProduct(
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer(
+      (_) async => items.map((e) {
+        return {
+          'id': e.id,
+          'barcode': e.barcode,
+          'quantity': e.quantity,
+          'unit': e.unit,
+          'expiry_date': e.expiryDate,
+          'location': e.location,
+          'notes': null,
+          'date_added': null,
+          'inventory_id': e.inventoryId,
+          'product_name': e.productName,
+          'product_image_url': null,
+          'inventory_name': 'Home',
+          'nutriscore_grade': null,
+          'nutriscore_not_applicable_category': null,
+          'product_category': null,
+          'product_search_text': null,
+          'product_type': null,
+        };
+      }).toList(),
+    );
+
     await pumpApp(
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
       overrides: [
-        inventoryWithProductProvider.overrideWith((ref) => items),
+        databaseProvider.overrideWithValue(mockDb),
         inventoryListProvider.overrideWith(
           (ref) => <Map<String, dynamic>>[
             {'id': 1, 'name': 'Home'},

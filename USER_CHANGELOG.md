@@ -6,6 +6,8 @@
   after clearing your local cache.
 - Your selected pantry is now remembered across app restarts.
 - Fixed a rare crash when navigating back from some screens.
+- Fixed a rare startup crash that could occur when the product cache refreshes
+  during the first frame.
 
 ## [0.0.8]
 

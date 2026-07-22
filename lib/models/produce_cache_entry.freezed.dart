@@ -17,19 +17,19 @@ mixin _$ProduceCacheEntry {
 
 /// USDA FDC (FoodData Central) ID for this produce item.
 ///
-/// Set to `0` when the FDC ID is not known (e.g. from fallback data).
+/// Set to 0 when the FDC ID is not known (e.g. from fallback data).
  int get fdcId;/// Lowercase English produce name used as the Firestore document ID
-/// (e.g. `"apple"`, `"banana"`).
+/// (e.g. "apple", "banana").
  String get name;/// Nutrition per 100 g, keyed by nutrient name.
 ///
-/// Known keys: `energyKcal`, `proteinG`, `carbsG`, `fatG`, `fiberG`.
+/// Known keys: energyKcal, proteinG, carbsG, fatG, fiberG.
 /// An empty map means no nutrition data is available.
  Map<String, double> get nutrition;/// Epoch timestamp (ms) of when this entry was first created.
  int get createdAt;/// Epoch timestamp (ms) of when this entry was last refreshed.
  int get lastRefreshedAt;/// Epoch timestamp (ms) of when this entry should be refreshed next.
- int get nextRefreshAt;/// Localized names keyed by locale code (e.g. `{"pt": "Maca"}`).
+ int get nextRefreshAt;/// Localized names keyed by locale code (e.g. {"pt": "Maca"}).
  Map<String, String> get localizedNames;/// PLU (Price Look-Up) codes associated with this produce item.
- List<String> get pluCodes;/// The USDA food category (e.g. `"Fruits and Fruit Juices"`).
+ List<String> get pluCodes;/// The USDA food category (e.g. "Fruits and Fruit Juices").
 @JsonKey(includeIfNull: false) String? get category;/// Suggested serving size in grams. Null when unknown.
 @JsonKey(includeIfNull: false) double? get servingSizeG;/// Schema version for forward compatibility.
  int get schemaVersion;
@@ -241,19 +241,19 @@ class _ProduceCacheEntry extends ProduceCacheEntry {
 
 /// USDA FDC (FoodData Central) ID for this produce item.
 ///
-/// Set to `0` when the FDC ID is not known (e.g. from fallback data).
+/// Set to 0 when the FDC ID is not known (e.g. from fallback data).
 @override final  int fdcId;
 /// Lowercase English produce name used as the Firestore document ID
-/// (e.g. `"apple"`, `"banana"`).
+/// (e.g. "apple", "banana").
 @override final  String name;
 /// Nutrition per 100 g, keyed by nutrient name.
 ///
-/// Known keys: `energyKcal`, `proteinG`, `carbsG`, `fatG`, `fiberG`.
+/// Known keys: energyKcal, proteinG, carbsG, fatG, fiberG.
 /// An empty map means no nutrition data is available.
  final  Map<String, double> _nutrition;
 /// Nutrition per 100 g, keyed by nutrient name.
 ///
-/// Known keys: `energyKcal`, `proteinG`, `carbsG`, `fatG`, `fiberG`.
+/// Known keys: energyKcal, proteinG, carbsG, fatG, fiberG.
 /// An empty map means no nutrition data is available.
 @override Map<String, double> get nutrition {
   if (_nutrition is EqualUnmodifiableMapView) return _nutrition;
@@ -267,9 +267,9 @@ class _ProduceCacheEntry extends ProduceCacheEntry {
 @override final  int lastRefreshedAt;
 /// Epoch timestamp (ms) of when this entry should be refreshed next.
 @override final  int nextRefreshAt;
-/// Localized names keyed by locale code (e.g. `{"pt": "Maca"}`).
+/// Localized names keyed by locale code (e.g. {"pt": "Maca"}).
  final  Map<String, String> _localizedNames;
-/// Localized names keyed by locale code (e.g. `{"pt": "Maca"}`).
+/// Localized names keyed by locale code (e.g. {"pt": "Maca"}).
 @override@JsonKey() Map<String, String> get localizedNames {
   if (_localizedNames is EqualUnmodifiableMapView) return _localizedNames;
   // ignore: implicit_dynamic_type
@@ -285,7 +285,7 @@ class _ProduceCacheEntry extends ProduceCacheEntry {
   return EqualUnmodifiableListView(_pluCodes);
 }
 
-/// The USDA food category (e.g. `"Fruits and Fruit Juices"`).
+/// The USDA food category (e.g. "Fruits and Fruit Juices").
 @override@JsonKey(includeIfNull: false) final  String? category;
 /// Suggested serving size in grams. Null when unknown.
 @override@JsonKey(includeIfNull: false) final  double? servingSizeG;

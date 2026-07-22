@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$Store {
 
 /// Auto-increment primary key.
- int get id;/// Human-readable store name (e.g. `'Walmart'`, `'Costco'`).
+ int get id;/// Human-readable store name (e.g. 'Walmart', 'Costco').
  String get name;
 /// Create a copy of Store
 /// with the given fields replaced by the non-null parameter values.
@@ -214,7 +214,7 @@ class _Store implements Store {
 
 /// Auto-increment primary key.
 @override final  int id;
-/// Human-readable store name (e.g. `'Walmart'`, `'Costco'`).
+/// Human-readable store name (e.g. 'Walmart', 'Costco').
 @override final  String name;
 
 /// Create a copy of Store

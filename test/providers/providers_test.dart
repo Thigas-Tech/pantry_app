@@ -9,6 +9,7 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -123,7 +124,7 @@ void main() {
     });
   });
 
-  group('inventoryWithProductProvider', () {
+  group('pantryProvider', () {
     test('returns joined rows for the active inventory', () async {
       /// Override [databaseProvider] with a mock, then switch the active
       /// inventory to 2.
@@ -164,8 +165,7 @@ void main() {
       // Simulate switching to inventory 2 (Work).
       container.read(activeInventoryProvider.notifier).setActiveInventory(2);
 
-
-      final items = await container.read(inventoryWithProductProvider.future);
+      final items = await container.read(pantryProvider.future);
       expect(items.length, 1);
       final item = items.first;
       expect(item.inventoryId, 2);

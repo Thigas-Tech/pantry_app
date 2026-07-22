@@ -15,20 +15,20 @@ T _$identity<T>(T value) => value;
 mixin _$ShoppingItem {
 
 /// Free-form product name or the linked product's name.
- String get name;/// The linked product barcode, or `null` for free-text items.
+ String get name;/// The linked product barcode, or null for free-text items.
  String? get barcode;/// Desired quantity to purchase. Defaults to 1.0.
- double get quantity;/// Unit for [quantity] (e.g. `'pieces'`, `'g'`, `'ml'`).
+ double get quantity;/// Unit for [quantity] (e.g. 'pieces', 'g', 'ml').
  String get unit;/// Whether this item has been purchased.
  bool get isPurchased;/// Auto-increment primary key.
- int? get id;/// Target pantry for move-to-inventory, or `null` if not set.
+ int? get id;/// Target pantry for move-to-inventory, or null if not set.
  int? get inventoryId;/// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was added to the shopping list.
  int? get dateAdded;/// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was marked as purchased.
- int? get datePurchased;/// Price entered while shopping, or `null` if no price was set.
- double? get priceAmount;/// ISO 4217 currency code for [priceAmount] (e.g. `'USD'`, `'BRL'`).
+ int? get datePurchased;/// Price entered while shopping, or null if no price was set.
+ double? get priceAmount;/// ISO 4217 currency code for [priceAmount] (e.g. 'USD', 'BRL').
  String? get priceCurrency;/// Store where the item was or will be purchased.
- String? get priceStore;/// Local file path to a photo of the price tag, or `null` if none.
+ String? get priceStore;/// Local file path to a photo of the price tag, or null if none.
  String? get pricePhotoPath;
 /// Create a copy of ShoppingItem
 /// with the given fields replaced by the non-null parameter values.
@@ -238,17 +238,17 @@ class _ShoppingItem implements ShoppingItem {
 
 /// Free-form product name or the linked product's name.
 @override final  String name;
-/// The linked product barcode, or `null` for free-text items.
+/// The linked product barcode, or null for free-text items.
 @override final  String? barcode;
 /// Desired quantity to purchase. Defaults to 1.0.
 @override@JsonKey() final  double quantity;
-/// Unit for [quantity] (e.g. `'pieces'`, `'g'`, `'ml'`).
+/// Unit for [quantity] (e.g. 'pieces', 'g', 'ml').
 @override@JsonKey() final  String unit;
 /// Whether this item has been purchased.
 @override@JsonKey() final  bool isPurchased;
 /// Auto-increment primary key.
 @override final  int? id;
-/// Target pantry for move-to-inventory, or `null` if not set.
+/// Target pantry for move-to-inventory, or null if not set.
 @override final  int? inventoryId;
 /// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was added to the shopping list.
@@ -256,13 +256,13 @@ class _ShoppingItem implements ShoppingItem {
 /// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was marked as purchased.
 @override final  int? datePurchased;
-/// Price entered while shopping, or `null` if no price was set.
+/// Price entered while shopping, or null if no price was set.
 @override final  double? priceAmount;
-/// ISO 4217 currency code for [priceAmount] (e.g. `'USD'`, `'BRL'`).
+/// ISO 4217 currency code for [priceAmount] (e.g. 'USD', 'BRL').
 @override final  String? priceCurrency;
 /// Store where the item was or will be purchased.
 @override final  String? priceStore;
-/// Local file path to a photo of the price tag, or `null` if none.
+/// Local file path to a photo of the price tag, or null if none.
 @override final  String? pricePhotoPath;
 
 /// Create a copy of ShoppingItem

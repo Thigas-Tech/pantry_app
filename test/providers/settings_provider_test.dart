@@ -38,7 +38,6 @@ void main() {
             const Settings(
               notificationsEnabled: false,
             ),
-
           );
       expect(container.read(settingsProvider).notificationsEnabled, false);
 
@@ -51,7 +50,6 @@ void main() {
       container
           .read(settingsProvider.notifier)
           .replace(
-
             const Settings(
               notificationsEnabled: false,
               retentionDays: 90,
@@ -77,7 +75,6 @@ void main() {
       container
           .read(settingsProvider.notifier)
           .replace(
-
             const Settings(
               notificationsEnabled: false,
               retentionDays: 45,

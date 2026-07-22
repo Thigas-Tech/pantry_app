@@ -168,17 +168,17 @@ test/
 
 ## 3. Modified Files
 
-| File | Change Type | Specific Change |
-|------|-------------|-----------------|
-| `pubspec.yaml` | Add dependencies | `firebase_core: ^3.12.0`, `cloud_firestore: ^5.6.0` |
-| `lib/config.dart` | Add getter | `static bool get firebaseEnabled` |
-| `.env.example` | Add key | `FIREBASE_ENABLED=false` |
-| `lib/database/database_helper.dart` | Add table + migration | Version 24: create `firebase_cache_meta` table. Expose `FirebaseCacheMetaDao` as public final field. Add table creation in `_onCreate`. |
-| `lib/services/firebase_cache_client.dart` | Abstract interface | `FirestoreClient`, `FirestoreDocument`, `FirestoreSnapshot` interfaces for testability |
-| `lib/services/firebase_firestore_client_adapter.dart` | NEW | Concrete `FirestoreClient` backed by `FirebaseFirestore` |
-| `lib/services/product_repository.dart` | New param + two integration points | 1. Constructor: optional `FirebaseCacheService?`. 2. `getProduct()`: insert Firebase check after local cache miss, before OFF API call. 3. `_resolveProduceProduct()`: insert Firebase check before USDA call. |
-| `lib/providers/product_repository_provider.dart` | Wire new dependency | Add `firebaseCacheProvider` read, pass to `ProductRepository` |
-| `lib/main.dart` | Init + scheduling | 1. Conditional `Firebase.initializeApp()` in `main()`. 2. Call `refreshStaleEntries()` in `_runPostInitTasks()`. |
+| File                                                  | Change Type                        | Specific Change                                                                                                                                                                                                |
+| ----------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pubspec.yaml`                                        | Add dependencies                   | `firebase_core: ^3.12.0`, `cloud_firestore: ^5.6.0`                                                                                                                                                            |
+| `lib/config.dart`                                     | Add getter                         | `static bool get firebaseEnabled`                                                                                                                                                                              |
+| `.env.example`                                        | Add key                            | `FIREBASE_ENABLED=false`                                                                                                                                                                                       |
+| `lib/database/database_helper.dart`                   | Add table + migration              | Version 24: create `firebase_cache_meta` table. Expose `FirebaseCacheMetaDao` as public final field. Add table creation in `_onCreate`.                                                                        |
+| `lib/services/firebase_cache_client.dart`             | Abstract interface                 | `FirestoreClient`, `FirestoreDocument`, `FirestoreSnapshot` interfaces for testability                                                                                                                         |
+| `lib/services/firebase_firestore_client_adapter.dart` | NEW                                | Concrete `FirestoreClient` backed by `FirebaseFirestore`                                                                                                                                                       |
+| `lib/services/product_repository.dart`                | New param + two integration points | 1. Constructor: optional `FirebaseCacheService?`. 2. `getProduct()`: insert Firebase check after local cache miss, before OFF API call. 3. `_resolveProduceProduct()`: insert Firebase check before USDA call. |
+| `lib/providers/product_repository_provider.dart`      | Wire new dependency                | Add `firebaseCacheProvider` read, pass to `ProductRepository`                                                                                                                                                  |
+| `lib/main.dart`                                       | Init + scheduling                  | 1. Conditional `Firebase.initializeApp()` in `main()`. 2. Call `refreshStaleEntries()` in `_runPostInitTasks()`.                                                                                               |
 
 ---
 
@@ -484,16 +484,16 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
 
 The following `Product` fields are NOT stored in Firestore because they are local-only or transient:
 
-| Field | Reason for Exclusion |
-|-------|---------------------|
-| `nutritionImagePath` | Local file path, not portable |
-| `ingredientsImagePath` | Local file path, not portable |
-| `productImagePath` | Local file path, not portable |
-| `source` | Always `'api'` for OFF products; irrelevant for cache |
-| `submissionStatus` | Transient submission state, not cacheable |
-| `productType` | All entries in `product_cache` are implicitly `barcoded` |
-| `pluCode` | Only applies to produce |
-| `lastSynced` | Replaced by `lastRefreshedAt` in the cache entry |
+| Field                  | Reason for Exclusion                                     |
+| ---------------------- | -------------------------------------------------------- |
+| `nutritionImagePath`   | Local file path, not portable                            |
+| `ingredientsImagePath` | Local file path, not portable                            |
+| `productImagePath`     | Local file path, not portable                            |
+| `source`               | Always `'api'` for OFF products; irrelevant for cache    |
+| `submissionStatus`     | Transient submission state, not cacheable                |
+| `productType`          | All entries in `product_cache` are implicitly `barcoded` |
+| `pluCode`              | Only applies to produce                                  |
+| `lastSynced`           | Replaced by `lastRefreshedAt` in the cache entry         |
 
 ---
 
@@ -1569,6 +1569,7 @@ Future<void> _refreshFirebaseCache() async {
 ```
 
 The 8-second delay ensures the refresh runs after:
+
 - Database initialization (frame 0)
 - Database cleanup (200ms)
 - Feedback queue flush (400ms)
@@ -1588,37 +1589,37 @@ All tests follow the existing codebase conventions: `mocktail` for mocks, `sqfli
 
 **File**: `test/models/produce_cache_entry_test.dart` (10 tests)
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 1 | `fromJson deserializes valid map` | All fields correctly parsed from a representative JSON map |
-| 2 | `toJson serializes to expected map` | Round-trip: toJson -> fromJson -> same object |
-| 3 | `fromProduct creates entry with 180-day nextRefreshAt` | `nextRefreshAt - lastRefreshedAt == 180 * 86400000` (within 100ms tolerance) |
-| 4 | `fromProduct sets createdAt == lastRefreshedAt == now` | All three timestamps are within 100ms of each other |
-| 5 | `fromProduct copies nutrition fields` | Maps energyKcal, proteinG, carbsG, fatG, fiberG from Product |
-| 6 | `fromProduct handles null nutrition gracefully` | Empty nutrition map when all fields are null |
-| 7 | `fromProduct preserves category` | Category string transferred from Product |
-| 8 | `toProduct creates valid Product` | Returns Product with correct barcode, name, ProductType.produce |
-| 9 | `toProduct handles empty nutrition` | All nutrition fields are null on the resulting Product |
-| 10 | `withRefreshedData preserves createdAt` | Created entry, refreshed, createdAt matches original |
+| #   | Test Name                                              | What It Verifies                                                             |
+| --- | ------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| 1   | `fromJson deserializes valid map`                      | All fields correctly parsed from a representative JSON map                   |
+| 2   | `toJson serializes to expected map`                    | Round-trip: toJson -> fromJson -> same object                                |
+| 3   | `fromProduct creates entry with 180-day nextRefreshAt` | `nextRefreshAt - lastRefreshedAt == 180 * 86400000` (within 100ms tolerance) |
+| 4   | `fromProduct sets createdAt == lastRefreshedAt == now` | All three timestamps are within 100ms of each other                          |
+| 5   | `fromProduct copies nutrition fields`                  | Maps energyKcal, proteinG, carbsG, fatG, fiberG from Product                 |
+| 6   | `fromProduct handles null nutrition gracefully`        | Empty nutrition map when all fields are null                                 |
+| 7   | `fromProduct preserves category`                       | Category string transferred from Product                                     |
+| 8   | `toProduct creates valid Product`                      | Returns Product with correct barcode, name, ProductType.produce              |
+| 9   | `toProduct handles empty nutrition`                    | All nutrition fields are null on the resulting Product                       |
+| 10  | `withRefreshedData preserves createdAt`                | Created entry, refreshed, createdAt matches original                         |
 
 ### 12.2 Step 2: `ProductCacheEntry` tests
 
 **File**: `test/models/product_cache_entry_test.dart` (12 tests)
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 1 | `fromJson deserializes valid map` | All fields correctly parsed |
-| 2 | `toJson produces expected map` | Round-trip: toJson -> fromJson -> same object |
-| 3 | `fromProduct creates entry with 180-day nextRefreshAt` | `nextRefreshAt - lastRefreshedAt == 180 * 86400000` |
-| 4 | `fromProduct copies all relevant fields` | barcode, name, brand, nutrition, category, categoriesHierarchy, ingredients, servingSize, nutriscoreGrade, image URLs, languageCode |
-| 5 | `fromProduct excludes local-only fields` | `nutritionImagePath`, `submissionStatus`, `source` NOT present in toJson output |
-| 6 | `toProduct reconstructs equivalent Product` | Round-trip: Product -> fromProduct -> toProduct -> same fields (except local-only) |
-| 7 | `toProduct sets lastSynced to approx now` | Within 100ms of current time |
-| 8 | `fromProduct handles null nutrition fields` | Null fields omitted from output map |
-| 9 | `fromProduct handles null image URLs` | Null image URLs produce null in output |
-| 10 | `fromProduct handles null categoriesHierarchy` | Handles null list gracefully |
-| 11 | `fromProduct handles null ingredients` | ingredients field is null in output |
-| 12 | `withRefreshedData preserves createdAt` | Created entry, refreshed, createdAt matches original |
+| #   | Test Name                                              | What It Verifies                                                                                                                    |
+| --- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `fromJson deserializes valid map`                      | All fields correctly parsed                                                                                                         |
+| 2   | `toJson produces expected map`                         | Round-trip: toJson -> fromJson -> same object                                                                                       |
+| 3   | `fromProduct creates entry with 180-day nextRefreshAt` | `nextRefreshAt - lastRefreshedAt == 180 * 86400000`                                                                                 |
+| 4   | `fromProduct copies all relevant fields`               | barcode, name, brand, nutrition, category, categoriesHierarchy, ingredients, servingSize, nutriscoreGrade, image URLs, languageCode |
+| 5   | `fromProduct excludes local-only fields`               | `nutritionImagePath`, `submissionStatus`, `source` NOT present in toJson output                                                     |
+| 6   | `toProduct reconstructs equivalent Product`            | Round-trip: Product -> fromProduct -> toProduct -> same fields (except local-only)                                                  |
+| 7   | `toProduct sets lastSynced to approx now`              | Within 100ms of current time                                                                                                        |
+| 8   | `fromProduct handles null nutrition fields`            | Null fields omitted from output map                                                                                                 |
+| 9   | `fromProduct handles null image URLs`                  | Null image URLs produce null in output                                                                                              |
+| 10  | `fromProduct handles null categoriesHierarchy`         | Handles null list gracefully                                                                                                        |
+| 11  | `fromProduct handles null ingredients`                 | ingredients field is null in output                                                                                                 |
+| 12  | `withRefreshedData preserves createdAt`                | Created entry, refreshed, createdAt matches original                                                                                |
 
 ### 12.3 Step 3: `FirebaseCacheMetaDao` tests
 
@@ -1626,22 +1627,22 @@ All tests follow the existing codebase conventions: `mocktail` for mocks, `sqfli
 
 **Setup**: `sqfliteFfiInit()` in `setUpAll`, in-memory database via `DatabaseHelper.withPath(inMemoryDatabasePath)`.
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 1 | `upsert creates row for barcoded type` | Row exists with correct cache_key, cache_type='barcoded' |
-| 2 | `upsert creates row for produce type` | cache_key starts with 'produce:', cache_type='produce' |
-| 3 | `upsert overwrites existing row` | Insert same key with new data, verified via get |
-| 4 | `get retrieves by cache_key` | Returns correct row |
-| 5 | `get returns null for missing key` | Non-existent key returns null |
-| 6 | `getStaleEntries returns entries with past next_refresh_at` | Entries with `next_refresh_at < now` are returned |
-| 7 | `getStaleEntries excludes future entries` | Entries with `next_refresh_at >= now` are NOT returned |
-| 8 | `getStaleEntries filters by cacheType` | Only matching type returned |
-| 9 | `getAllKeys returns all cache keys` | Count and content verify |
-| 10 | `getAllKeys filters by cacheType` | Only matching type keys returned |
-| 11 | `remove deletes the entry` | Row gone, get returns null |
-| 12 | `updateRefreshTimestamps updates only time columns` | Other columns (cache_key, cache_type, fdc_id) unchanged |
-| 13 | `count returns correct total` | 3 entries of type 'barcoded' + 2 of 'produce' = 5 total |
-| 14 | `count filters by cacheType` | 3 for 'barcoded', 2 for 'produce' |
+| #   | Test Name                                                   | What It Verifies                                         |
+| --- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| 1   | `upsert creates row for barcoded type`                      | Row exists with correct cache_key, cache_type='barcoded' |
+| 2   | `upsert creates row for produce type`                       | cache_key starts with 'produce:', cache_type='produce'   |
+| 3   | `upsert overwrites existing row`                            | Insert same key with new data, verified via get          |
+| 4   | `get retrieves by cache_key`                                | Returns correct row                                      |
+| 5   | `get returns null for missing key`                          | Non-existent key returns null                            |
+| 6   | `getStaleEntries returns entries with past next_refresh_at` | Entries with `next_refresh_at < now` are returned        |
+| 7   | `getStaleEntries excludes future entries`                   | Entries with `next_refresh_at >= now` are NOT returned   |
+| 8   | `getStaleEntries filters by cacheType`                      | Only matching type returned                              |
+| 9   | `getAllKeys returns all cache keys`                         | Count and content verify                                 |
+| 10  | `getAllKeys filters by cacheType`                           | Only matching type keys returned                         |
+| 11  | `remove deletes the entry`                                  | Row gone, get returns null                               |
+| 12  | `updateRefreshTimestamps updates only time columns`         | Other columns (cache_key, cache_type, fdc_id) unchanged  |
+| 13  | `count returns correct total`                               | 3 entries of type 'barcoded' + 2 of 'produce' = 5 total  |
+| 14  | `count filters by cacheType`                                | 3 for 'barcoded', 2 for 'produce'                        |
 
 ### 12.4 Step 4: `FirebaseCacheClient` tests
 
@@ -1649,24 +1650,24 @@ All tests follow the existing codebase conventions: `mocktail` for mocks, `sqfli
 
 **Setup**: Mock FirebaseFirestore, CollectionReference, DocumentReference, DocumentSnapshot.
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 1 | `getProduce returns entry when doc exists` | Returns ProduceCacheEntry with correct fields |
-| 2 | `getProduce returns null when doc missing` | Document exists=false -> null |
-| 3 | `getProduce returns null when not available` | isAvailable=false -> null |
-| 4 | `getProduce returns null on Firestore error` | Exception thrown -> null (graceful) |
-| 5 | `setProduce writes to Firestore and returns true` | Verify correct collection/doc path, return true |
-| 6 | `setProduce returns false when not available` | isAvailable=false -> false |
-| 7 | `setProduce returns false on Firestore error` | Exception on set -> false |
-| 8 | `getProduct (barcoded) returns entry when doc exists` | Returns ProductCacheEntry |
-| 9 | `getProduct returns null on miss / unavailable / error` | All three paths return null |
-| 10 | `setProduct writes to Firestore and returns true` | Verify correct collection/doc path |
-| 11 | `deleteProduce calls delete on correct doc` | Verify correct Firestore path called |
-| 12 | `deleteProduct calls delete on correct doc` | Verify correct Firestore path called |
-| 13 | `isAvailable true when firestore injected and enabled` | Both conditions met |
-| 14 | `isAvailable false when enabled=false` | Feature flag off |
-| 15 | `isAvailable false when firestore=null` | No Firebase instance |
-| 16 | `_produceCollection and _productCollection are correct` | Verify collection names match expectations |
+| #   | Test Name                                               | What It Verifies                                |
+| --- | ------------------------------------------------------- | ----------------------------------------------- |
+| 1   | `getProduce returns entry when doc exists`              | Returns ProduceCacheEntry with correct fields   |
+| 2   | `getProduce returns null when doc missing`              | Document exists=false -> null                   |
+| 3   | `getProduce returns null when not available`            | isAvailable=false -> null                       |
+| 4   | `getProduce returns null on Firestore error`            | Exception thrown -> null (graceful)             |
+| 5   | `setProduce writes to Firestore and returns true`       | Verify correct collection/doc path, return true |
+| 6   | `setProduce returns false when not available`           | isAvailable=false -> false                      |
+| 7   | `setProduce returns false on Firestore error`           | Exception on set -> false                       |
+| 8   | `getProduct (barcoded) returns entry when doc exists`   | Returns ProductCacheEntry                       |
+| 9   | `getProduct returns null on miss / unavailable / error` | All three paths return null                     |
+| 10  | `setProduct writes to Firestore and returns true`       | Verify correct collection/doc path              |
+| 11  | `deleteProduce calls delete on correct doc`             | Verify correct Firestore path called            |
+| 12  | `deleteProduct calls delete on correct doc`             | Verify correct Firestore path called            |
+| 13  | `isAvailable true when firestore injected and enabled`  | Both conditions met                             |
+| 14  | `isAvailable false when enabled=false`                  | Feature flag off                                |
+| 15  | `isAvailable false when firestore=null`                 | No Firebase instance                            |
+| 16  | `_produceCollection and _productCollection are correct` | Verify collection names match expectations      |
 
 ### 12.5 Step 5: `FirebaseCacheService` tests
 
@@ -1676,57 +1677,57 @@ All tests follow the existing codebase conventions: `mocktail` for mocks, `sqfli
 
 #### Lookup tests for `resolveBarcodedProduct`:
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 1 | **Firebase hit**: returns Product, no OFF call | Firebase returns entry -> converted to Product -> cached locally + meta updated -> OFF never called |
-| 2 | **Firebase miss, OFF hit**: returns Product, caches in Firebase | Firebase returns null -> OFF returns Product -> product cached in Firebase + local + meta |
-| 3 | **Both miss**: returns null | Firebase null, OFF throws ProductNotFoundException -> null |
-| 4 | **Firebase unavailable**: skips to OFF immediately | isAvailable=false -> directly calls OFF |
-| 5 | **Firebase get throws**: falls through to OFF | Firestore exception -> OFF called as fallback |
-| 6 | **Firebase set throws after OFF success**: still returns Product | Firestore write failure logged but product still returned (local cache works) |
+| #   | Test Name                                                        | What It Verifies                                                                                    |
+| --- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 1   | **Firebase hit**: returns Product, no OFF call                   | Firebase returns entry -> converted to Product -> cached locally + meta updated -> OFF never called |
+| 2   | **Firebase miss, OFF hit**: returns Product, caches in Firebase  | Firebase returns null -> OFF returns Product -> product cached in Firebase + local + meta           |
+| 3   | **Both miss**: returns null                                      | Firebase null, OFF throws ProductNotFoundException -> null                                          |
+| 4   | **Firebase unavailable**: skips to OFF immediately               | isAvailable=false -> directly calls OFF                                                             |
+| 5   | **Firebase get throws**: falls through to OFF                    | Firestore exception -> OFF called as fallback                                                       |
+| 6   | **Firebase set throws after OFF success**: still returns Product | Firestore write failure logged but product still returned (local cache works)                       |
 
 #### Lookup tests for `resolveProduceProduct`:
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 7 | **Firebase hit**: returns Product, no USDA call | Firebase returns entry -> converted -> cached locally -> USDA not called |
-| 8 | **Firebase miss, USDA hit**: returns Product, caches in Firebase | Firebase null -> USDA returns -> cached in Firebase + local + meta |
-| 9 | **Both miss**: returns null | Firebase null, USDA returns empty -> null |
-| 10 | **Firebase unavailable**: skips to USDA | isAvailable=false -> directly calls USDA |
-| 11 | **USDA returns product with null nutrition**: still cached | Nutrition fields null -> entry created with empty nutrition map -> product returned |
+| #   | Test Name                                                        | What It Verifies                                                                    |
+| --- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 7   | **Firebase hit**: returns Product, no USDA call                  | Firebase returns entry -> converted -> cached locally -> USDA not called            |
+| 8   | **Firebase miss, USDA hit**: returns Product, caches in Firebase | Firebase null -> USDA returns -> cached in Firebase + local + meta                  |
+| 9   | **Both miss**: returns null                                      | Firebase null, USDA returns empty -> null                                           |
+| 10  | **Firebase unavailable**: skips to USDA                          | isAvailable=false -> directly calls USDA                                            |
+| 11  | **USDA returns product with null nutrition**: still cached       | Nutrition fields null -> entry created with empty nutrition map -> product returned |
 
 #### Refresh tests:
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 12 | **No stale entries**: returns 0 | Meta query returns empty -> no API calls -> returns 0 |
-| 13 | **One stale barcoded**: refreshes successfully | OFF called -> Firestore updated -> meta timestamps updated -> returns 1 |
-| 14 | **One stale produce**: refreshes successfully | USDA called -> Firestore updated -> meta timestamps updated -> returns 1 |
-| 15 | **Multiple stale (mixed types)**: all refreshed sequentially | 3 entries, each with 500ms delay, all succeed -> returns 3 |
-| 16 | **Stale, API fails (network)**: skipped, continues | OFF/USDA throws -> entry skipped (nextRefreshAt unchanged) -> continues to next -> returns count of successes |
-| 17 | **Stale, API fails (not found)**: skipped | ProductNotFoundException -> entry skipped -> continues |
-| 18 | **createdAt preserved on refresh** | Original createdAt value persists after refresh call |
-| 19 | **maxBatchSize respected** | 25 stale entries, maxBatchSize=20 -> only 20 processed |
-| 20 | **Firebase unavailable during refresh**: returns 0 | isAvailable=false -> no operations -> returns 0 |
+| #   | Test Name                                                    | What It Verifies                                                                                              |
+| --- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| 12  | **No stale entries**: returns 0                              | Meta query returns empty -> no API calls -> returns 0                                                         |
+| 13  | **One stale barcoded**: refreshes successfully               | OFF called -> Firestore updated -> meta timestamps updated -> returns 1                                       |
+| 14  | **One stale produce**: refreshes successfully                | USDA called -> Firestore updated -> meta timestamps updated -> returns 1                                      |
+| 15  | **Multiple stale (mixed types)**: all refreshed sequentially | 3 entries, each with 500ms delay, all succeed -> returns 3                                                    |
+| 16  | **Stale, API fails (network)**: skipped, continues           | OFF/USDA throws -> entry skipped (nextRefreshAt unchanged) -> continues to next -> returns count of successes |
+| 17  | **Stale, API fails (not found)**: skipped                    | ProductNotFoundException -> entry skipped -> continues                                                        |
+| 18  | **createdAt preserved on refresh**                           | Original createdAt value persists after refresh call                                                          |
+| 19  | **maxBatchSize respected**                                   | 25 stale entries, maxBatchSize=20 -> only 20 processed                                                        |
+| 20  | **Firebase unavailable during refresh**: returns 0           | isAvailable=false -> no operations -> returns 0                                                               |
 
 #### Edge case tests:
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 21 | **Produce entry with empty name**: returns null | Empty/whitespace input -> null |
-| 22 | **Concurrent lookup and refresh**: no errors | Lookup reads current state while refresh writes -> no crash, no deadlock |
+| #   | Test Name                                       | What It Verifies                                                         |
+| --- | ----------------------------------------------- | ------------------------------------------------------------------------ |
+| 21  | **Produce entry with empty name**: returns null | Empty/whitespace input -> null                                           |
+| 22  | **Concurrent lookup and refresh**: no errors    | Lookup reads current state while refresh writes -> no crash, no deadlock |
 
 ### 12.6 Step 6: `ProductRepository` integration tests
 
 **File**: Existing `test/services/product_repository_test.dart` extended (+5 tests)
 
-| # | Test Name | What It Verifies |
-|---|-----------|------------------|
-| 1 | `getProduct checks Firebase after local miss` | FirebaseCacheService.resolveBarcodedProduct called when local cache returns null |
-| 2 | `getProduct does not call Firebase on local hit` | Local cache returns product -> Firebase NOT called |
-| 3 | `getProduct falls through to OFF when Firebase miss` | Firebase returns null -> OFF API called |
-| 4 | `resolveProduceProduct checks Firebase before USDA` | Firebase called first when firebaseCache is available |
-| 5 | `resolveProduceProduct does not call Firebase when unavailable` | Firebase not available -> directly calls USDA |
+| #   | Test Name                                                       | What It Verifies                                                                 |
+| --- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| 1   | `getProduct checks Firebase after local miss`                   | FirebaseCacheService.resolveBarcodedProduct called when local cache returns null |
+| 2   | `getProduct does not call Firebase on local hit`                | Local cache returns product -> Firebase NOT called                               |
+| 3   | `getProduct falls through to OFF when Firebase miss`            | Firebase returns null -> OFF API called                                          |
+| 4   | `resolveProduceProduct checks Firebase before USDA`             | Firebase called first when firebaseCache is available                            |
+| 5   | `resolveProduceProduct does not call Firebase when unavailable` | Firebase not available -> directly calls USDA                                    |
 
 ---
 
@@ -1919,12 +1920,12 @@ service cloud.firestore {
 
 **Security rule rationale:**
 
-| Rule | Rationale |
-|------|-----------|
-| `read: if true` | Nutrition data is public information. No auth required to read. This also enables anonymous users (first-time app users) to benefit from the cache. |
-| `create: if request.auth != null` | Only authenticated users can add new data. Prevents anonymous abuse. |
+| Rule                              | Rationale                                                                                                                                                             |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read: if true`                   | Nutrition data is public information. No auth required to read. This also enables anonymous users (first-time app users) to benefit from the cache.                   |
+| `create: if request.auth != null` | Only authenticated users can add new data. Prevents anonymous abuse.                                                                                                  |
 | `lastRefreshedAt` check on update | Prevents accidentally overwriting fresh data with stale data. If two devices refresh the same document simultaneously, the one with the newer `lastRefreshedAt` wins. |
-| Required fields on create | Enforces document schema at the Firestore level. Prevents malformed documents. |
+| Required fields on create         | Enforces document schema at the Firestore level. Prevents malformed documents.                                                                                        |
 
 ---
 
@@ -1932,73 +1933,73 @@ service cloud.firestore {
 
 ### 15.1 Firebase configuration and initialization
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 1 | **No `google-services.json`** — app crashes on `Firebase.initializeApp()` | High | Wrapped in try/catch in `main.dart`. If init fails, `firebaseEnabled` flag stays false. `FirebaseCacheClient.isAvailable` returns false. App works exactly as today. |
-| 2 | **Firestore init succeeds but first read/write fails** (bad rules, wrong project) | Medium | Every `FirebaseCacheClient` method catches `FirebaseException` and returns `null`/`false`. Graceful degradation. |
-| 3 | **`FIREBASE_ENABLED=true` but no `.env` entry** | Low | `AppConfig.firebaseEnabled` returns `false` (?? operator). Safe default. |
-| 4 | **Firebase configured for wrong platform** (e.g., Android project on iOS) | Medium | `Firebase.initializeApp()` throws `FirebaseException`. Caught at startup. Feature flag degrades. |
+| #   | Pitfall                                                                           | Severity | Mitigation                                                                                                                                                           |
+| --- | --------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **No `google-services.json`** — app crashes on `Firebase.initializeApp()`         | High     | Wrapped in try/catch in `main.dart`. If init fails, `firebaseEnabled` flag stays false. `FirebaseCacheClient.isAvailable` returns false. App works exactly as today. |
+| 2   | **Firestore init succeeds but first read/write fails** (bad rules, wrong project) | Medium   | Every `FirebaseCacheClient` method catches `FirebaseException` and returns `null`/`false`. Graceful degradation.                                                     |
+| 3   | **`FIREBASE_ENABLED=true` but no `.env` entry**                                   | Low      | `AppConfig.firebaseEnabled` returns `false` (?? operator). Safe default.                                                                                             |
+| 4   | **Firebase configured for wrong platform** (e.g., Android project on iOS)         | Medium   | `Firebase.initializeApp()` throws `FirebaseException`. Caught at startup. Feature flag degrades.                                                                     |
 
 ### 15.2 Cache consistency and staleness
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 5 | **OFF product data changes between refreshes** (ingredients updated, image replaced) | Low | 180-day refresh will pick up changes. Data is typically stable for OFF. Users who need instant freshness can use pull-to-refresh (existing `refreshInventoryProducts` flow, which hits OFF API directly). |
-| 6 | **USDA produce data changes** (rare, but possible with new nutritional research) | Low | 180-day refresh picks up changes. USDA Foundation Foods are well-established and rarely change. |
-| 7 | **Firestore doc deleted manually** (from Firebase Console) | Low | On next lookup, `getProduce`/`getProduct` returns null. Falls through to source API. Re-creates doc. SQLite meta table still references it -> next refresh cycle re-creates the Firestore doc. |
-| 8 | **Stale data served because app hasn't been opened in 200 days** | Low | On first startup after 200 days, ALL entries are stale. `refreshStaleEntries` refreshes up to 20 per run. Remaining entries refresh on subsequent startups. During the transition period, stale but valid data is served (better than no data). |
+| #   | Pitfall                                                                              | Severity | Mitigation                                                                                                                                                                                                                                      |
+| --- | ------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 5   | **OFF product data changes between refreshes** (ingredients updated, image replaced) | Low      | 180-day refresh will pick up changes. Data is typically stable for OFF. Users who need instant freshness can use pull-to-refresh (existing `refreshInventoryProducts` flow, which hits OFF API directly).                                       |
+| 6   | **USDA produce data changes** (rare, but possible with new nutritional research)     | Low      | 180-day refresh picks up changes. USDA Foundation Foods are well-established and rarely change.                                                                                                                                                 |
+| 7   | **Firestore doc deleted manually** (from Firebase Console)                           | Low      | On next lookup, `getProduce`/`getProduct` returns null. Falls through to source API. Re-creates doc. SQLite meta table still references it -> next refresh cycle re-creates the Firestore doc.                                                  |
+| 8   | **Stale data served because app hasn't been opened in 200 days**                     | Low      | On first startup after 200 days, ALL entries are stale. `refreshStaleEntries` refreshes up to 20 per run. Remaining entries refresh on subsequent startups. During the transition period, stale but valid data is served (better than no data). |
 
 ### 15.3 Refresh mechanics
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 9 | **App killed during refresh** | Low | Unprocessed entries retain old `nextRefreshAt`. On next startup, `refreshStaleEntries` picks them up. Already-refreshed entries have new timestamps. No partial state corruption because each entry is processed independently in a try/catch. |
-| 10 | **Refresh hits USDA rate limit** (360 req/min) | Medium | 500ms delay = 2 req/sec = 120 req/min. Well under limit. Even in worst case (batch of 20), it takes ~10 seconds = 20 requests. |
-| 11 | **Refresh hits OFF rate limit** (unknown, but typically generous) | Low | Same 500ms delay pattern. If OFF returns 429, the entry fails and is skipped. Retried next startup. |
-| 12 | **Hundreds of stale entries on first launch** (after months without opening) | Low | Max batch of 20 per run. Remaining entries refresh over subsequent app launches. Each batch takes ~10 seconds. Users won't notice since it runs in the background. |
-| 13 | **`createdAt` gets overwritten on refresh** | Medium | Explicitly preserved: refresh reads existing Firestore doc, extracts `createdAt`, passes it to `fromProduct`. Test #18 verifies this. |
+| #   | Pitfall                                                                      | Severity | Mitigation                                                                                                                                                                                                                                     |
+| --- | ---------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 9   | **App killed during refresh**                                                | Low      | Unprocessed entries retain old `nextRefreshAt`. On next startup, `refreshStaleEntries` picks them up. Already-refreshed entries have new timestamps. No partial state corruption because each entry is processed independently in a try/catch. |
+| 10  | **Refresh hits USDA rate limit** (360 req/min)                               | Medium   | 500ms delay = 2 req/sec = 120 req/min. Well under limit. Even in worst case (batch of 20), it takes ~10 seconds = 20 requests.                                                                                                                 |
+| 11  | **Refresh hits OFF rate limit** (unknown, but typically generous)            | Low      | Same 500ms delay pattern. If OFF returns 429, the entry fails and is skipped. Retried next startup.                                                                                                                                            |
+| 12  | **Hundreds of stale entries on first launch** (after months without opening) | Low      | Max batch of 20 per run. Remaining entries refresh over subsequent app launches. Each batch takes ~10 seconds. Users won't notice since it runs in the background.                                                                             |
+| 13  | **`createdAt` gets overwritten on refresh**                                  | Medium   | Explicitly preserved: refresh reads existing Firestore doc, extracts `createdAt`, passes it to `fromProduct`. Test #18 verifies this.                                                                                                          |
 
 ### 15.4 Race conditions
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 14 | **User scans barcode while refresh is updating same Firestore doc** | Low | `resolveBarcodedProduct` reads Firestore. If refresh hasn't written yet, reads current data. If refresh has written, reads new data. No inconsistency because refresh writes complete documents atomically. |
-| 15 | **Two app instances refresh the same document simultaneously** | Low | Last-writer-wins with `set()`. Since both instances fetch from the same source API (OFF/USDA), the data is identical. The `lastRefreshedAt` timestamp ensures the later write has a slightly later timestamp. |
-| 16 | **Lookup writes SQLite while refresh reads SQLite** (different rows) | Low | SQLite handles concurrent reads/writes via its internal lock. Even if they touch the same row, the lookup is a simple read (no transaction) and the refresh is a write. sqflite serializes these. |
-| 17 | **User adds produce while refresh is processing** | Low | `addProduceToInventory` calls `_resolveProduceProduct` which reads Firebase. The refresh writes USDA data. Both are idempotent operations that don't interfere. |
+| #   | Pitfall                                                              | Severity | Mitigation                                                                                                                                                                                                    |
+| --- | -------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 14  | **User scans barcode while refresh is updating same Firestore doc**  | Low      | `resolveBarcodedProduct` reads Firestore. If refresh hasn't written yet, reads current data. If refresh has written, reads new data. No inconsistency because refresh writes complete documents atomically.   |
+| 15  | **Two app instances refresh the same document simultaneously**       | Low      | Last-writer-wins with `set()`. Since both instances fetch from the same source API (OFF/USDA), the data is identical. The `lastRefreshedAt` timestamp ensures the later write has a slightly later timestamp. |
+| 16  | **Lookup writes SQLite while refresh reads SQLite** (different rows) | Low      | SQLite handles concurrent reads/writes via its internal lock. Even if they touch the same row, the lookup is a simple read (no transaction) and the refresh is a write. sqflite serializes these.             |
+| 17  | **User adds produce while refresh is processing**                    | Low      | `addProduceToInventory` calls `_resolveProduceProduct` which reads Firebase. The refresh writes USDA data. Both are idempotent operations that don't interfere.                                               |
 
 ### 15.5 Data integrity
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 18 | **PLU codes not stored in produce cache entry** (defaults to empty list) | Low | `PluService` is the authoritative PLU source. The cache entry's `pluCodes` is supplementary. Future enhancement: populate during refresh by matching name against `PluService`. |
-| 19 | **Local-only Product fields not in Firestore** (`nutritionImagePath`, `submissionStatus`, etc.) | None by design | These fields are intentionally excluded from `ProductCacheEntry`. `toProduct()` sets them to defaults. The local SQLite `products` table is the authoritiative store for these fields. |
-| 20 | **Product name differs between OFF and cached Firestore version** | Low | The cache stores whatever OFF returned. If OFF updates the name, the 180-day refresh picks it up. Meanwhile, the old name is still valid for the user's inventory (they added it with that name). |
-| 21 | **`source` field on cached Product**: Firebase cache entries set `source: 'manual'` | Low | This is consistent with existing produce handling (`_resolveProduceProduct` sets `source: 'manual'`). The `source` field indicates "this product came from a fallback source, not OFF API." Barcoded products from Firebase will also have `source: 'api'` after the OFF API call in step 3. |
+| #   | Pitfall                                                                                         | Severity       | Mitigation                                                                                                                                                                                                                                                                                   |
+| --- | ----------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 18  | **PLU codes not stored in produce cache entry** (defaults to empty list)                        | Low            | `PluService` is the authoritative PLU source. The cache entry's `pluCodes` is supplementary. Future enhancement: populate during refresh by matching name against `PluService`.                                                                                                              |
+| 19  | **Local-only Product fields not in Firestore** (`nutritionImagePath`, `submissionStatus`, etc.) | None by design | These fields are intentionally excluded from `ProductCacheEntry`. `toProduct()` sets them to defaults. The local SQLite `products` table is the authoritiative store for these fields.                                                                                                       |
+| 20  | **Product name differs between OFF and cached Firestore version**                               | Low            | The cache stores whatever OFF returned. If OFF updates the name, the 180-day refresh picks it up. Meanwhile, the old name is still valid for the user's inventory (they added it with that name).                                                                                            |
+| 21  | **`source` field on cached Product**: Firebase cache entries set `source: 'manual'`             | Low            | This is consistent with existing produce handling (`_resolveProduceProduct` sets `source: 'manual'`). The `source` field indicates "this product came from a fallback source, not OFF API." Barcoded products from Firebase will also have `source: 'api'` after the OFF API call in step 3. |
 
 ### 15.6 Firestore costs
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 22 | **Firestore read cost scales with user base** | Medium | Each produce/product lookup that misses the local `products` table but hits Firebase costs 1 Firestore read. For a typical session (adding 10 items to inventory), this is 10 reads. Free tier is 50K/day. |
-| 23 | **Firestore write cost from 180-day refresh** | Low | ~1 write per unique product every 180 days. For a user with 100 unique products, that's ~200 writes/year = ~0.55/day. Free tier is 20K/day. |
-| 24 | **`refreshStaleEntries` querying Firestore for each stale entry** | Low | The method does NOT scan Firestore. It queries SQLite `firebase_cache_meta` (free), then does one Firestore `get` (to read `createdAt`) and one `set` per stale entry. For a batch of 20, that's 20 reads + 20 writes. |
+| #   | Pitfall                                                           | Severity | Mitigation                                                                                                                                                                                                             |
+| --- | ----------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 22  | **Firestore read cost scales with user base**                     | Medium   | Each produce/product lookup that misses the local `products` table but hits Firebase costs 1 Firestore read. For a typical session (adding 10 items to inventory), this is 10 reads. Free tier is 50K/day.             |
+| 23  | **Firestore write cost from 180-day refresh**                     | Low      | ~1 write per unique product every 180 days. For a user with 100 unique products, that's ~200 writes/year = ~0.55/day. Free tier is 20K/day.                                                                            |
+| 24  | **`refreshStaleEntries` querying Firestore for each stale entry** | Low      | The method does NOT scan Firestore. It queries SQLite `firebase_cache_meta` (free), then does one Firestore `get` (to read `createdAt`) and one `set` per stale entry. For a batch of 20, that's 20 reads + 20 writes. |
 
 ### 15.7 Privacy
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 25 | **Firestore stores product barcodes** — could be used to track what users scan | Low | Barcodes are public information (anyone can look up a barcode on OFF). Nutrition data is public. No PII is stored. The Firestore rules require auth for writes but allow public reads, which is standard for shared-cache patterns. |
-| 26 | **Firestore stores produce names** — could indicate dietary preferences | Low | Produce names like "Apple", "Banana" are not PII. No user-specific data (UID, device ID, location) is stored in the cache documents. |
+| #   | Pitfall                                                                        | Severity | Mitigation                                                                                                                                                                                                                          |
+| --- | ------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 25  | **Firestore stores product barcodes** — could be used to track what users scan | Low      | Barcodes are public information (anyone can look up a barcode on OFF). Nutrition data is public. No PII is stored. The Firestore rules require auth for writes but allow public reads, which is standard for shared-cache patterns. |
+| 26  | **Firestore stores produce names** — could indicate dietary preferences        | Low      | Produce names like "Apple", "Banana" are not PII. No user-specific data (UID, device ID, location) is stored in the cache documents.                                                                                                |
 
 ### 15.8 Testing
 
-| # | Pitfall | Severity | Mitigation |
-|---|---------|----------|------------|
-| 27 | **Mocking FirebaseFirestore is complex** | Medium | The `FirebaseCacheClient` constructor accepts `dynamic firestore`, making it trivial to inject mocks. The mock just needs to support `collection().doc().get()` and `collection().doc().set()` — three levels of method chaining. mocktail handles this with `when().thenAnswer()`. |
-| 28 | **Time-sensitive tests** (timestamps, 180-day calculations) | Low | Use `clock` package or inject a time source. In practice, asserting with tolerances (e.g., within 100ms) is sufficient. |
-| 29 | **In-memory SQLite for DAO tests** | None | Already the established pattern in the codebase (`sqflite_common_ffi` + `inMemoryDatabasePath`). |
-| 30 | **Existing test suite regression** | High | Run `flutter test --concurrency=2` before and after changes. Ensure all existing tests still pass. The integration is additive (new optional parameter, new optional checks) so no existing test should break. |
+| #   | Pitfall                                                     | Severity | Mitigation                                                                                                                                                                                                                                                                          |
+| --- | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 27  | **Mocking FirebaseFirestore is complex**                    | Medium   | The `FirebaseCacheClient` constructor accepts `dynamic firestore`, making it trivial to inject mocks. The mock just needs to support `collection().doc().get()` and `collection().doc().set()` — three levels of method chaining. mocktail handles this with `when().thenAnswer()`. |
+| 28  | **Time-sensitive tests** (timestamps, 180-day calculations) | Low      | Use `clock` package or inject a time source. In practice, asserting with tolerances (e.g., within 100ms) is sufficient.                                                                                                                                                             |
+| 29  | **In-memory SQLite for DAO tests**                          | None     | Already the established pattern in the codebase (`sqflite_common_ffi` + `inMemoryDatabasePath`).                                                                                                                                                                                    |
+| 30  | **Existing test suite regression**                          | High     | Run `flutter test --concurrency=2` before and after changes. Ensure all existing tests still pass. The integration is additive (new optional parameter, new optional checks) so no existing test should break.                                                                      |
 
 ---
 
@@ -2006,72 +2007,72 @@ service cloud.firestore {
 
 ### Phase 1: Models and DAO (database layer)
 
-| Step | Action | Files |
-|------|--------|-------|
-| 1.1 | Write `ProduceCacheEntry` model + tests | `lib/models/produce_cache_entry.dart`, `test/models/produce_cache_entry_test.dart` |
-| 1.2 | Write `ProductCacheEntry` model + tests | `lib/models/product_cache_entry.dart`, `test/models/product_cache_entry_test.dart` |
-| 1.3 | Write `FirebaseCacheMetaDao` + tests | `lib/database/firebase_cache_meta_dao.dart`, `test/database/firebase_cache_meta_dao_test.dart` |
-| 1.4 | Add v24 migration + DAO property to `DatabaseHelper` + migration test | `lib/database/database_helper.dart`, extend `test/database/database_helper_test.dart` |
-| 1.5 | Run `dart run build_runner build --delete-conflicting-outputs` | Generate `.g.dart` and `.freezed.dart` files |
-| 1.6 | Run `flutter test --concurrency=2` | Pass: 14 DAO tests + 22 model tests + 1 migration test |
+| Step | Action                                                                | Files                                                                                          |
+| ---- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 1.1  | Write `ProduceCacheEntry` model + tests                               | `lib/models/produce_cache_entry.dart`, `test/models/produce_cache_entry_test.dart`             |
+| 1.2  | Write `ProductCacheEntry` model + tests                               | `lib/models/product_cache_entry.dart`, `test/models/product_cache_entry_test.dart`             |
+| 1.3  | Write `FirebaseCacheMetaDao` + tests                                  | `lib/database/firebase_cache_meta_dao.dart`, `test/database/firebase_cache_meta_dao_test.dart` |
+| 1.4  | Add v24 migration + DAO property to `DatabaseHelper` + migration test | `lib/database/database_helper.dart`, extend `test/database/database_helper_test.dart`          |
+| 1.5  | Run `dart run build_runner build --delete-conflicting-outputs`        | Generate `.g.dart` and `.freezed.dart` files                                                   |
+| 1.6  | Run `flutter test --concurrency=2`                                    | Pass: 14 DAO tests + 22 model tests + 1 migration test                                         |
 
 ### Phase 2: Firestore client
 
-| Step | Action | Files |
-|------|--------|-------|
-| 2.1 | Write `FirebaseCacheClient` + tests (mock Firestore) | `lib/services/firebase_cache_client.dart`, `test/services/firebase_cache_client_test.dart` |
-| 2.2 | Run `flutter test --concurrency=2` | Pass: 16 client tests |
+| Step | Action                                               | Files                                                                                      |
+| ---- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 2.1  | Write `FirebaseCacheClient` + tests (mock Firestore) | `lib/services/firebase_cache_client.dart`, `test/services/firebase_cache_client_test.dart` |
+| 2.2  | Run `flutter test --concurrency=2`                   | Pass: 16 client tests                                                                      |
 
 ### Phase 3: Cache service
 
-| Step | Action | Files |
-|------|--------|-------|
-| 3.1 | Write `FirebaseCacheService` + tests (mock all deps) | `lib/services/firebase_cache_service.dart`, `test/services/firebase_cache_service_test.dart` |
-| 3.2 | Run `flutter test --concurrency=2` | Pass: 22 service tests |
+| Step | Action                                               | Files                                                                                        |
+| ---- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| 3.1  | Write `FirebaseCacheService` + tests (mock all deps) | `lib/services/firebase_cache_service.dart`, `test/services/firebase_cache_service_test.dart` |
+| 3.2  | Run `flutter test --concurrency=2`                   | Pass: 22 service tests                                                                       |
 
 ### Phase 4: Integration
 
-| Step | Action | Files |
-|------|--------|-------|
-| 4.1 | Add `firebaseCache` parameter to `ProductRepository` | `lib/services/product_repository.dart` |
-| 4.2 | Modify `getProduct` to check Firebase before OFF API | `lib/services/product_repository.dart` |
-| 4.3 | Modify `_resolveProduceProduct` to check Firebase before USDA | `lib/services/product_repository.dart` |
-| 4.4 | Extend `product_repository_test.dart` with integration tests | `test/services/product_repository_test.dart` |
-| 4.5 | Write `firebaseCacheProvider` | `lib/providers/firebase_cache_provider.dart` |
-| 4.6 | Wire provider into `productRepositoryProvider` | `lib/providers/product_repository_provider.dart` |
-| 4.7 | Run `flutter test --concurrency=2` | Pass: all 5 integration tests + no regressions |
+| Step | Action                                                        | Files                                            |
+| ---- | ------------------------------------------------------------- | ------------------------------------------------ |
+| 4.1  | Add `firebaseCache` parameter to `ProductRepository`          | `lib/services/product_repository.dart`           |
+| 4.2  | Modify `getProduct` to check Firebase before OFF API          | `lib/services/product_repository.dart`           |
+| 4.3  | Modify `_resolveProduceProduct` to check Firebase before USDA | `lib/services/product_repository.dart`           |
+| 4.4  | Extend `product_repository_test.dart` with integration tests  | `test/services/product_repository_test.dart`     |
+| 4.5  | Write `firebaseCacheProvider`                                 | `lib/providers/firebase_cache_provider.dart`     |
+| 4.6  | Wire provider into `productRepositoryProvider`                | `lib/providers/product_repository_provider.dart` |
+| 4.7  | Run `flutter test --concurrency=2`                            | Pass: all 5 integration tests + no regressions   |
 
 ### Phase 5: App initialization
 
-| Step | Action | Files |
-|------|--------|-------|
-| 5.1 | Add `firebaseEnabled` to `AppConfig` + `.env.example` | `lib/config.dart`, `.env.example` |
-| 5.2 | Add `firebase_core` and `cloud_firestore` to `pubspec.yaml` | `pubspec.yaml` |
-| 5.3 | Run `flutter pub get` | Resolve dependencies |
-| 5.4 | Add Firebase init + background refresh scheduling to `main.dart` | `lib/main.dart` |
-| 5.5 | Run `flutter analyze --fatal-infos --fatal-warnings` | Zero warnings |
-| 5.6 | Run `flutter test --concurrency=2` | All ~60+ tests pass |
+| Step | Action                                                           | Files                             |
+| ---- | ---------------------------------------------------------------- | --------------------------------- |
+| 5.1  | Add `firebaseEnabled` to `AppConfig` + `.env.example`            | `lib/config.dart`, `.env.example` |
+| 5.2  | Add `firebase_core` and `cloud_firestore` to `pubspec.yaml`      | `pubspec.yaml`                    |
+| 5.3  | Run `flutter pub get`                                            | Resolve dependencies              |
+| 5.4  | Add Firebase init + background refresh scheduling to `main.dart` | `lib/main.dart`                   |
+| 5.5  | Run `dart analyze --fatal-infos --fatal-warnings`                | Zero warnings                     |
+| 5.6  | Run `flutter test --concurrency=2`                               | All ~60+ tests pass               |
 
 ### Phase 6: Firebase project setup (manual, parallel)
 
-| Step | Action | Notes |
-|------|--------|-------|
-| 6.1 | Create Firebase project in Firebase Console | Use existing Google account |
-| 6.2 | Enable Firestore (native mode, choose region) | us-central1 recommended for lowest latency |
-| 6.3 | Deploy security rules from Section 14 | Via Firebase Console or `firebase deploy --only firestore:rules` |
-| 6.4 | Run `flutterfire configure` | Generates `google-services.json`, `firebase_options.dart` |
-| 6.5 | Add `FIREBASE_ENABLED=true` to `.env` on device | Enable caching |
+| Step | Action                                          | Notes                                                            |
+| ---- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| 6.1  | Create Firebase project in Firebase Console     | Use existing Google account                                      |
+| 6.2  | Enable Firestore (native mode, choose region)   | us-central1 recommended for lowest latency                       |
+| 6.3  | Deploy security rules from Section 14           | Via Firebase Console or `firebase deploy --only firestore:rules` |
+| 6.4  | Run `flutterfire configure`                     | Generates `google-services.json`, `firebase_options.dart`        |
+| 6.5  | Add `FIREBASE_ENABLED=true` to `.env` on device | Enable caching                                                   |
 
 ### Phase 7: QA
 
-| Step | Action | Expected Result |
-|------|--------|-----------------|
-| 7.1 | `flutter run` on emulator | App starts without Firebase crash |
-| 7.2 | Scan a barcode | Product cached in `product_cache/{barcode}` in Firestore Console |
-| 7.3 | Add "Apple" to inventory | Entry appears in `produce_cache/apple` in Firestore Console |
-| 7.4 | Kill app, reopen, check logs | `refreshStaleEntries` runs after 8 seconds |
-| 7.5 | Turn off network, scan same barcode again | Served from local SQLite (existing behaviour, unchanged) |
-| 7.6 | Turn off network, add "Banana" (new produce) | Falls through to hardcoded fallback (existing behaviour, unchanged) |
+| Step | Action                                       | Expected Result                                                     |
+| ---- | -------------------------------------------- | ------------------------------------------------------------------- |
+| 7.1  | `flutter run` on emulator                    | App starts without Firebase crash                                   |
+| 7.2  | Scan a barcode                               | Product cached in `product_cache/{barcode}` in Firestore Console    |
+| 7.3  | Add "Apple" to inventory                     | Entry appears in `produce_cache/apple` in Firestore Console         |
+| 7.4  | Kill app, reopen, check logs                 | `refreshStaleEntries` runs after 8 seconds                          |
+| 7.5  | Turn off network, scan same barcode again    | Served from local SQLite (existing behaviour, unchanged)            |
+| 7.6  | Turn off network, add "Banana" (new produce) | Falls through to hardcoded fallback (existing behaviour, unchanged) |
 
 ---
 
@@ -2089,7 +2090,7 @@ FIREBASE_ENABLED=false
 - Actually, let me be precise: the provider is always created, but with `isAvailable: false`
 - All cache operations resolve to no-ops immediately
 - All tests pass without any Firebase setup
-- Full `flutter analyze` and `flutter test` pass
+- Full `dart analyze` and `flutter test` pass
 - Safe to merge at any time — zero risk, zero new runtime dependencies activated
 
 ### Phase B — Firebase project setup (parallel, independent)
@@ -2124,16 +2125,17 @@ FIREBASE_ENABLED=true
 
 ### Estimated costs per user per month
 
-| Operation | Frequency | Firestore Ops | Cost Tier |
-|-----------|-----------|---------------|-----------|
-| **Lookup (read)** | ~2 per add-to-inventory session, ~20 sessions/month = 40 reads | 40 reads | Free |
-| **New product cache (write)** | ~10 new products/month | 10 writes | Free |
-| **180-day refresh** | 100 entries / 6 months = ~17 entries/month | 17 reads + 17 writes | Free |
-| **Total** | | ~40 reads + ~27 writes/month | Free tier (50K reads, 20K writes/day) |
+| Operation                     | Frequency                                                      | Firestore Ops                | Cost Tier                             |
+| ----------------------------- | -------------------------------------------------------------- | ---------------------------- | ------------------------------------- |
+| **Lookup (read)**             | ~2 per add-to-inventory session, ~20 sessions/month = 40 reads | 40 reads                     | Free                                  |
+| **New product cache (write)** | ~10 new products/month                                         | 10 writes                    | Free                                  |
+| **180-day refresh**           | 100 entries / 6 months = ~17 entries/month                     | 17 reads + 17 writes         | Free                                  |
+| **Total**                     |                                                                | ~40 reads + ~27 writes/month | Free tier (50K reads, 20K writes/day) |
 
 ### Scaling
 
 Even at 10,000 users, the cache layer would generate:
+
 - **Reads**: 10,000 x 40 = 400,000 reads/month = ~13,333 reads/day (well under 50K/day free tier)
 - **Writes**: 10,000 x 27 = 270,000 writes/month = ~9,000 writes/day (well under 20K/day free tier)
 
@@ -2152,31 +2154,31 @@ Even at 10,000 users, the cache layer would generate:
 
 ## Appendix: Key Constants
 
-| Constant | Value | Location |
-|----------|-------|----------|
-| 180-day interval | `180 * 24 * 60 * 60 * 1000` = 15,552,000,000 ms | `_refreshIntervalMs` in both models and `FirebaseCacheService` |
-| Max batch size | 20 | `_defaultMaxBatchSize` in `FirebaseCacheService` |
-| Refresh delay | 500 ms | `_refreshDelay` in `FirebaseCacheService` |
-| Startup refresh delay | 8 seconds | `main.dart` `_runPostInitTasks()` |
-| Firestore collection (produce) | `produce_cache` | `FirebaseCacheClient._produceCollection` |
-| Firestore collection (product) | `product_cache` | `FirebaseCacheClient._productCollection` |
-| Produce cache key prefix | `produce:` | `FirebaseCacheService` |
-| Database version | 24 | `DatabaseHelper._initDatabase()` |
+| Constant                       | Value                                           | Location                                                       |
+| ------------------------------ | ----------------------------------------------- | -------------------------------------------------------------- |
+| 180-day interval               | `180 * 24 * 60 * 60 * 1000` = 15,552,000,000 ms | `_refreshIntervalMs` in both models and `FirebaseCacheService` |
+| Max batch size                 | 20                                              | `_defaultMaxBatchSize` in `FirebaseCacheService`               |
+| Refresh delay                  | 500 ms                                          | `_refreshDelay` in `FirebaseCacheService`                      |
+| Startup refresh delay          | 8 seconds                                       | `main.dart` `_runPostInitTasks()`                              |
+| Firestore collection (produce) | `produce_cache`                                 | `FirebaseCacheClient._produceCollection`                       |
+| Firestore collection (product) | `product_cache`                                 | `FirebaseCacheClient._productCollection`                       |
+| Produce cache key prefix       | `produce:`                                      | `FirebaseCacheService`                                         |
+| Database version               | 24                                              | `DatabaseHelper._initDatabase()`                               |
 
 ---
 
 ## Appendix: Glossary
 
-| Term | Definition |
-|------|------------|
-| **Firestore** | Google Cloud Firestore, a NoSQL document database used as the shared remote cache |
-| **Firebase** | Google's mobile development platform; we use Firebase Auth (future) and Firestore |
-| **OFF** | Open Food Facts, the primary data source for barcoded products |
-| **USDA** | United States Department of Agriculture, FoodData Central API, source for produce nutrition data |
-| **PLU code** | Price Look-Up code, the 4-5 digit number on produce stickers (e.g., 4011 for banana) |
-| **`firebase_cache_meta`** | SQLite table that tracks which products have Firestore cache entries and when they need refresh |
-| **`product_cache`** | Firestore collection storing OFF barcoded product data, keyed by barcode |
-| **`produce_cache`** | Firestore collection storing USDA produce data, keyed by canonical English name |
-| **180-day refresh** | Per-document rolling refresh: each Firestore document is re-fetched from its source API 180 days after its last refresh |
-| **Stale entry** | A `firebase_cache_meta` row where `next_refresh_at < now` |
-| **Graceful degradation** | When Firebase is unavailable, the app continues working exactly as before (OFF API + USDA API + hardcoded fallbacks) |
+| Term                      | Definition                                                                                                              |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Firestore**             | Google Cloud Firestore, a NoSQL document database used as the shared remote cache                                       |
+| **Firebase**              | Google's mobile development platform; we use Firebase Auth (future) and Firestore                                       |
+| **OFF**                   | Open Food Facts, the primary data source for barcoded products                                                          |
+| **USDA**                  | United States Department of Agriculture, FoodData Central API, source for produce nutrition data                        |
+| **PLU code**              | Price Look-Up code, the 4-5 digit number on produce stickers (e.g., 4011 for banana)                                    |
+| **`firebase_cache_meta`** | SQLite table that tracks which products have Firestore cache entries and when they need refresh                         |
+| **`product_cache`**       | Firestore collection storing OFF barcoded product data, keyed by barcode                                                |
+| **`produce_cache`**       | Firestore collection storing USDA produce data, keyed by canonical English name                                         |
+| **180-day refresh**       | Per-document rolling refresh: each Firestore document is re-fetched from its source API 180 days after its last refresh |
+| **Stale entry**           | A `firebase_cache_meta` row where `next_refresh_at < now`                                                               |
+| **Graceful degradation**  | When Firebase is unavailable, the app continues working exactly as before (OFF API + USDA API + hardcoded fallbacks)    |
