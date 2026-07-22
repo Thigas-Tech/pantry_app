@@ -18,8 +18,6 @@ import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
-import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -528,25 +526,15 @@ void main() {
   });
 
   testWidgets(
-    'FAB scanner flow: barcode returns, navigates to product detail',
+    'FAB scanner flow: opens the scanner screen',
     (tester) async {
-      final mockRepo = createMockProductRepository();
-      const product = Product(barcode: '123', name: 'Test');
-      when(() => mockRepo.getProduct('123')).thenAnswer((_) async => product);
-      when(
-        () => mockRepo.getInventoryForBarcode(
-          any(),
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async => <InventoryItem>[]);
-
       final mockDb = _createMockDb();
       await pumpApp(
         tester,
         const HomeScreen(),
         imageCacheMock: mockImageCache,
         overrides: [
-          ..._homeScreenOverrides(mockDb: mockDb, mockRepo: mockRepo),
+          ..._homeScreenOverrides(mockDb: mockDb),
           hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         ],
       );
@@ -558,19 +546,12 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(ScannerScreen), findsOneWidget);
-
-      tester
-          .state<NavigatorState>(find.byType(Navigator))
-          .pop(const BarcodeResult('123'));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-
-      expect(find.byType(ProductDetailScreen), findsOneWidget);
-      expect(find.text('Test'), findsOneWidget);
     },
   );
 
-  testWidgets('FAB scanner flow: null result does nothing', (tester) async {
+  testWidgets('FAB scanner flow: leaving scanner returns to home', (
+    tester,
+  ) async {
     final mockDb = _createMockDb();
     await pumpApp(
       tester,
@@ -590,47 +571,20 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(ScannerScreen), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    // Trigger the scanner confirmation dialog via maybePop
+    final nav = tester.state<NavigatorState>(find.byType(Navigator));
+    unawaited(nav.maybePop());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Stop scanning?'), findsOneWidget);
+
+    // Tap Leave to dismiss the scanner
+    await tester.tap(find.widgetWithText(TextButton, 'Leave'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.byType(ProductDetailScreen), findsNothing);
+    expect(find.byType(ScannerScreen), findsNothing);
     expect(find.byType(HomeScreen), findsOneWidget);
-  });
-
-  testWidgets('FAB scanner flow: product not found shows snackbar', (
-    tester,
-  ) async {
-    final mockRepo = createMockProductRepository();
-    when(
-      () => mockRepo.getProduct('123'),
-    ).thenThrow(ProductNotFoundException('product not found'));
-
-    final mockDb = _createMockDb();
-    await pumpApp(
-      tester,
-      const HomeScreen(),
-      imageCacheMock: mockImageCache,
-      overrides: [
-        ..._homeScreenOverrides(mockDb: mockDb, mockRepo: mockRepo),
-        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
-      ],
-    );
-
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Scan Barcode'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    tester
-        .state<NavigatorState>(find.byType(Navigator))
-        .pop(const BarcodeResult('123'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.byType(HomeScreen), findsOneWidget);
-    expect(find.text('Product not found in database.'), findsOneWidget);
   });
 
   testWidgets('long-press enters selection mode and selects item', (

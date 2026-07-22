@@ -8,12 +8,27 @@ part of 'home_screen_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Notifier that manages ephemeral home screen UI state.
+///
+/// Owns selection mode, search query, produce loading state, and the
+/// overdue cache refresh gate. Persistent pantry data lives in
+/// [pantryProvider].
 
 @ProviderFor(HomeScreenController)
 final homeScreenControllerProvider = HomeScreenControllerProvider._();
 
+/// Notifier that manages ephemeral home screen UI state.
+///
+/// Owns selection mode, search query, produce loading state, and the
+/// overdue cache refresh gate. Persistent pantry data lives in
+/// [pantryProvider].
 final class HomeScreenControllerProvider
     extends $NotifierProvider<HomeScreenController, HomeScreenState> {
+  /// Notifier that manages ephemeral home screen UI state.
+  ///
+  /// Owns selection mode, search query, produce loading state, and the
+  /// overdue cache refresh gate. Persistent pantry data lives in
+  /// [pantryProvider].
   HomeScreenControllerProvider._()
     : super(
         from: null,
@@ -42,7 +57,13 @@ final class HomeScreenControllerProvider
 }
 
 String _$homeScreenControllerHash() =>
-    r'01b2c76d24ec91d8ab770a110db3f04485c016db';
+    r'cd64346f5f6ee1bb54a09f6a24f061bbe5b37270';
+
+/// Notifier that manages ephemeral home screen UI state.
+///
+/// Owns selection mode, search query, produce loading state, and the
+/// overdue cache refresh gate. Persistent pantry data lives in
+/// [pantryProvider].
 
 abstract class _$HomeScreenController extends $Notifier<HomeScreenState> {
   HomeScreenState build();
