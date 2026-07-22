@@ -21,22 +21,22 @@ mixin _$ProductCacheEntry {
  int get createdAt;/// Epoch timestamp (ms) of when this entry was last refreshed.
  int get lastRefreshedAt;/// Epoch timestamp (ms) of when this entry should be refreshed next.
  int get nextRefreshAt;/// The brand name(s), often comma-separated.
-@JsonKey(includeIfNull: false) String? get brand;/// The product category (e.g. `"Spreads, Sweet spreads"`).
+@JsonKey(includeIfNull: false) String? get brand;/// The product category (e.g. "Spreads, Sweet spreads").
 @JsonKey(includeIfNull: false) String? get category;/// The OFF taxonomy hierarchy, broadest to most specific.
 @JsonKey(includeIfNull: false) List<String>? get categoriesHierarchy;/// The full ingredients list as plain text.
-@JsonKey(includeIfNull: false) String? get ingredients;/// The suggested serving size (e.g. `"15 g"`).
+@JsonKey(includeIfNull: false) String? get ingredients;/// The suggested serving size (e.g. "15 g").
 @JsonKey(includeIfNull: false) String? get servingSize;/// Energy in kilocalories per 100 g.
 @JsonKey(includeIfNull: false) double? get energyKcal;/// Protein in grams per 100 g.
 @JsonKey(includeIfNull: false) double? get proteinG;/// Carbohydrates in grams per 100 g.
 @JsonKey(includeIfNull: false) double? get carbsG;/// Fat in grams per 100 g.
 @JsonKey(includeIfNull: false) double? get fatG;/// Fiber in grams per 100 g.
 @JsonKey(includeIfNull: false) double? get fiberG;/// Salt in grams per 100 g.
-@JsonKey(includeIfNull: false) double? get saltG;/// The Nutri-Score grade (`'a'` through `'e'`), or `'not-applicable'`.
+@JsonKey(includeIfNull: false) double? get saltG;/// The Nutri-Score grade ('a' through 'e'), or 'not-applicable'.
 @JsonKey(includeIfNull: false) String? get nutriscoreGrade;/// URL to the product's front image on the OFF CDN.
 @JsonKey(includeIfNull: false) String? get imageUrl;/// URL to the nutrition facts table image on the OFF CDN.
 @JsonKey(includeIfNull: false) String? get offNutritionImageUrl;/// URL to the ingredients list image on the OFF CDN.
 @JsonKey(includeIfNull: false) String? get offIngredientsImageUrl;/// URL to the product packaging image on the OFF CDN.
-@JsonKey(includeIfNull: false) String? get offProductImageUrl;/// The locale used when fetching this product (e.g. `'en'`, `'pt'`).
+@JsonKey(includeIfNull: false) String? get offProductImageUrl;/// The locale used when fetching this product (e.g. 'en', 'pt').
  String get languageCode;/// Schema version for forward compatibility.
  int get schemaVersion;
 /// Create a copy of ProductCacheEntry
@@ -269,7 +269,7 @@ class _ProductCacheEntry extends ProductCacheEntry {
 @override final  int nextRefreshAt;
 /// The brand name(s), often comma-separated.
 @override@JsonKey(includeIfNull: false) final  String? brand;
-/// The product category (e.g. `"Spreads, Sweet spreads"`).
+/// The product category (e.g. "Spreads, Sweet spreads").
 @override@JsonKey(includeIfNull: false) final  String? category;
 /// The OFF taxonomy hierarchy, broadest to most specific.
  final  List<String>? _categoriesHierarchy;
@@ -284,7 +284,7 @@ class _ProductCacheEntry extends ProductCacheEntry {
 
 /// The full ingredients list as plain text.
 @override@JsonKey(includeIfNull: false) final  String? ingredients;
-/// The suggested serving size (e.g. `"15 g"`).
+/// The suggested serving size (e.g. "15 g").
 @override@JsonKey(includeIfNull: false) final  String? servingSize;
 /// Energy in kilocalories per 100 g.
 @override@JsonKey(includeIfNull: false) final  double? energyKcal;
@@ -298,7 +298,7 @@ class _ProductCacheEntry extends ProductCacheEntry {
 @override@JsonKey(includeIfNull: false) final  double? fiberG;
 /// Salt in grams per 100 g.
 @override@JsonKey(includeIfNull: false) final  double? saltG;
-/// The Nutri-Score grade (`'a'` through `'e'`), or `'not-applicable'`.
+/// The Nutri-Score grade ('a' through 'e'), or 'not-applicable'.
 @override@JsonKey(includeIfNull: false) final  String? nutriscoreGrade;
 /// URL to the product's front image on the OFF CDN.
 @override@JsonKey(includeIfNull: false) final  String? imageUrl;
@@ -308,7 +308,7 @@ class _ProductCacheEntry extends ProductCacheEntry {
 @override@JsonKey(includeIfNull: false) final  String? offIngredientsImageUrl;
 /// URL to the product packaging image on the OFF CDN.
 @override@JsonKey(includeIfNull: false) final  String? offProductImageUrl;
-/// The locale used when fetching this product (e.g. `'en'`, `'pt'`).
+/// The locale used when fetching this product (e.g. 'en', 'pt').
 @override@JsonKey() final  String languageCode;
 /// Schema version for forward compatibility.
 @override@JsonKey() final  int schemaVersion;

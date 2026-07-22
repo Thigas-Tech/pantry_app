@@ -6,15 +6,15 @@
 
 **Root cause summary:**
 
-| Problem | Root cause |
-|---|---|
-| 23 tests fail with `Binding has not yet been initialized` | `ActiveInventoryNotifier.build()` calls `SharedPreferences.getInstance()` (crash in plain `test()` without binding) |
-| Firestore writes return `PERMISSION_DENIED` | Anonymous auth not enabled in Firebase Console → `signInAnonymously()` fails with `CONFIGURATION_NOT_FOUND` → `request.auth == null` → rules deny writes |
-| `setState() called during build` — UncontrolledProviderScope | Known riverpod issue: `TickerMode.didChangeDependencies` resumes provider subscriptions during build phase, triggering `scheduleRefresh` |
+| Problem                                                      | Root cause                                                                                                                                               |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 23 tests fail with `Binding has not yet been initialized`    | `ActiveInventoryNotifier.build()` calls `SharedPreferences.getInstance()` (crash in plain `test()` without binding)                                      |
+| Firestore writes return `PERMISSION_DENIED`                  | Anonymous auth not enabled in Firebase Console → `signInAnonymously()` fails with `CONFIGURATION_NOT_FOUND` → `request.auth == null` → rules deny writes |
+| `setState() called during build` — UncontrolledProviderScope | Known riverpod issue: `TickerMode.didChangeDependencies` resumes provider subscriptions during build phase, triggering `scheduleRefresh`                 |
 
 ## Global Constraints
 
-- `flutter analyze --fatal-infos --fatal-warnings` must pass with zero issues on every commit
+- `dart analyze --fatal-infos --fatal-warnings` must pass with zero issues on every commit
 - Never add `// ignore:` or `// ignore_for_file:` — fix the underlying issue
 - All user-visible strings in `lib/l10n/app_en.arb` — never hardcode English
 - Existing passing tests must not regress
@@ -24,10 +24,12 @@
 ### Task 1: Fix 23 failing price_provider_test.dart tests
 
 **Files:**
+
 - Modify: `test/providers/price_provider_test.dart:28-36`
 - No other files touched
 
 **Interfaces:**
+
 - Consumes: `ActiveInventoryNotifier` (reads `SharedPreferences` in build)
 - Consumes: `MockPriceRepository` (already mocked)
 - Produces: All 23 tests pass
@@ -88,10 +90,12 @@ git commit -m "fix: mock SharedPreferences in price_provider_test to fix 23 bind
 ### Task 2: Enable Anonymous Authentication in Firebase Console
 
 **Files:**
+
 - Modify: `firebase.json` — add `auth` provider config
 - No Dart/Flutter code changes
 
 **Interfaces:**
+
 - Consumes: Firebase project `pantry-app-c5c36` (already configured via `firebase.json`)
 - Produces: `signInAnonymously()` succeeds in `main.dart:79`, Firestore writes pass with `request.auth != null`
 
@@ -146,6 +150,7 @@ Expected log line: `[INFO] Anonymous auth initialized` (currently shows `[WARN] 
 - [ ] **Step 6: Add a product and verify Firestore write succeeds**
 
 From the app UI, add a product (barcoded or produce). Expected log:
+
 - `[INFO] Firebase initialized successfully`
 - `[INFO] Anonymous auth initialized`
 - No `PERMISSION_DENIED` warnings — `setProduct` / `setProduce` logs the barcode without the warning
@@ -158,6 +163,7 @@ git commit -m "fix: enable anonymous Firebase Auth to resolve Firestore PERMISSI
 ```
 
 **Edge case / Pitfall:** The `firebase deploy --only auth` command requires `firebase-tools` CLI. If not installed:
+
 ```bash
 npm install -g firebase-tools
 ```
@@ -173,10 +179,12 @@ npm install -g firebase-tools
 ### Task 3: Silence `setState() called during build` riverpod warning (non-critical)
 
 **Files:**
+
 - Modify: `lib/providers/active_inventory_provider.dart:52` — defer state changes via microtask
 - No other files
 
 **Interfaces:**
+
 - Consumes: `ActiveInventoryNotifier` (same class, no API changes)
 - Produces: No `setState() called during build` in logs when navigating back
 
@@ -187,6 +195,7 @@ npm install -g firebase-tools
 In `lib/providers/active_inventory_provider.dart`:
 
 Current:
+
 ```dart
       final exists = inventories.any((i) => i['id'] == targetId);
       if (exists) {
@@ -198,6 +207,7 @@ Current:
 ```
 
 Replace with:
+
 ```dart
       final exists = inventories.any((i) => i['id'] == targetId);
       if (exists) {
@@ -209,12 +219,14 @@ Replace with:
 ```
 
 Also wrap the same line further down:
+
 ```dart
       unawaited(prefs.setInt('active_inventory_id', resolvedId));
       state = resolvedId;
 ```
 
 Replace with:
+
 ```dart
       unawaited(prefs.setInt('active_inventory_id', resolvedId));
       scheduleMicrotask(() => state = resolvedId);
@@ -223,7 +235,7 @@ Replace with:
 - [ ] **Step 2: Run analyze to verify no issues**
 
 ```bash
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 ```
 
 Expected: `No issues found!`
@@ -274,6 +286,7 @@ flutter run --debug
 ```
 
 Add "Apple" (or any produce). Verify logs show:
+
 ```
 [INFO] Searching USDA for "Apple"
 [INFO] USDA: N results for "Apple"
@@ -285,6 +298,7 @@ Add "Apple" (or any produce). Verify logs show:
 Open https://console.firebase.google.com/project/pantry-app-c5c36/firestore/data
 
 Verify:
+
 - `produce_cache/{name}` document exists (e.g. `produce_cache/apple`)
 - `product_cache/{barcode}` document exists (if barcoded product was added)
 - Each document has the required fields: `fdcId`, `name`, `nutrition`, `createdAt`, `lastRefreshedAt`, `nextRefreshAt` (for produce) or `barcode`, `name`, `createdAt`, `lastRefreshedAt`, `nextRefreshAt` (for barcoded)
@@ -300,7 +314,7 @@ Remove the product from local SQLite (or modify the data). Restart the app. The 
 - [ ] **Step 5: Run full verification suite**
 
 ```bash
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
 ```
 

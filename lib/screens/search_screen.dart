@@ -12,8 +12,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/inventory_provider.dart'
-    show inventoryWithProductProvider;
+import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -210,14 +209,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     try {
       await repo.cacheProduct(product);
       final newId = await repo.addInventoryItem(item);
-      ref.invalidate(inventoryWithProductProvider);
+      ref.invalidate(pantryProvider);
       if (!mounted) return;
       SnackbarHelper.showUndo(
         context,
         l10n.addToPantry,
         () async {
           await repo.deleteInventoryItem(newId);
-          ref.invalidate(inventoryWithProductProvider);
+          ref.invalidate(pantryProvider);
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.removedFromPantry);
           }
@@ -443,7 +442,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                   builder: (_) => ProductDetailScreen(product: product),
                 ),
               );
-              ref.invalidate(inventoryWithProductProvider);
+              ref.invalidate(pantryProvider);
             },
             onLongPress: () => _showLongPressMenu(product),
           ),

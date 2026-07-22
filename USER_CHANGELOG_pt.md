@@ -6,6 +6,8 @@
   consultas repetidas mais rapidas mesmo apos limpar o cache local.
 - Sua despensa selecionada agora e lembrada entre as reinicializacoes do app.
 - Corrigida uma travada rara ao navegar de volta de algumas telas.
+- Corrigida uma travada rara na inicializacao que podia ocorrer quando o cache
+  de produtos era atualizado durante o primeiro quadro.
 
 ## [0.0.8]
 

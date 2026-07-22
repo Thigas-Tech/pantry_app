@@ -14,6 +14,9 @@
   first available inventory or reseeds default).
 - Riverpod setState during build on back-navigation.
 - Bottom sheet safe area padding on gesture navigation.
+- Deferred `pantryProvider` invalidation in `refreshIfOverdue` to a microtask
+  to prevent "setState during build" when the overdue cache refresh completes
+  during the initial frame. (`lib/providers/home_screen_controller.dart`)
 
 ## [0.0.8] - 2026-07-16
 

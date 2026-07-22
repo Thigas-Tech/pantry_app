@@ -28,6 +28,7 @@ flutter pub get
 ```
 
 **Edge cases:**
+
 - [P1] If Firebase packages fail to resolve, check SDK constraints in pubspec.yaml (requires Dart 3.2+)
 - [P3] `FIREBASE_ENABLED` flag in `.env` keeps everything off by default, so missing `google-services.json` won't crash development builds
 
@@ -36,6 +37,7 @@ flutter pub get
 **File**: `lib/config.dart`
 
 Add:
+
 ```dart
 static bool get firebaseEnabled =>
     dotenv.env['FIREBASE_ENABLED']?.toLowerCase() == 'true';
@@ -44,6 +46,7 @@ static bool get firebaseEnabled =>
 **File**: `.env.example`
 
 Add:
+
 ```
 FIREBASE_ENABLED=false
 ```
@@ -52,10 +55,10 @@ FIREBASE_ENABLED=false
 
 The `firebase_core` and `cloud_firestore` packages may trigger `unused_import` or
 `depend_on_referenced_packages` lint rules in the provider file where we use
-`dynamic firestore`. No changes expected, but run `flutter analyze` to confirm:
+`dynamic firestore`. No changes expected, but run `dart analyze` to confirm:
 
 ```bash
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 ```
 
 ### [x] 0.4 Verify test infrastructure
@@ -77,6 +80,7 @@ All existing tests must pass before any new code is added.
 **Reference**: FIREBASE_CACHE_PLAN.md Section 5.1
 
 **Implementation checklist:**
+
 - [x] Freezed class with all fields from Section 5.1
 - [x] `fromJson` / `toJson` (json_serializable via `.g.dart`)
 - [x] `extension ProduceCacheEntryConversions` with:
@@ -85,12 +89,14 @@ All existing tests must pass before any new code is added.
   - [x] `withRefreshedData()` — preserves `createdAt` during refresh [P13]
 
 **Key details:**
+
 - `nutrition` field is `Map<String, double>` — keys are `energyKcal`, `proteinG`, `carbsG`, `fatG`, `fiberG`
 - `pluCodes` defaults to `[]`, `localizedNames` defaults to `{}`, `schemaVersion` defaults to `1`
 - `_produceRefreshIntervalMs = 180 * 24 * 60 * 60 * 1000`
 - Only include fields that make sense in a shared cache (no local file paths)
 
 **Run after completion:**
+
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 flutter test --concurrency=2
@@ -103,6 +109,7 @@ flutter test --concurrency=2
 **Reference**: FIREBASE_CACHE_PLAN.md Section 5.2
 
 **Implementation checklist:**
+
 - [x] Freezed class with all fields from Section 5.2
 - [x] `fromJson` / `toJson`
 - [x] `extension ProductCacheEntryConversions` with:
@@ -111,10 +118,12 @@ flutter test --concurrency=2
   - [x] `withRefreshedData()` — preserves `createdAt` [P13]
 
 **Fields excluded from cache** (local-only, not stored in Firestore):
+
 - `nutritionImagePath`, `ingredientsImagePath`, `productImagePath`
 - `source`, `submissionStatus`, `productType`, `pluCode`, `lastSynced`
 
 **Run after completion:**
+
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 flutter test --concurrency=2
@@ -123,16 +132,19 @@ flutter test --concurrency=2
 ### [x] 1.3 Write model tests
 
 **Files**:
+
 - `test/models/produce_cache_entry_test.dart` — 10 tests (Section 12.1)
 - `test/models/product_cache_entry_test.dart` — 12 tests (Section 12.2)
 
 **Test both files:**
+
 ```bash
 flutter test test/models/produce_cache_entry_test.dart
 flutter test test/models/product_cache_entry_test.dart
 ```
 
 **Edge cases to cover:**
+
 - Nutrition fields being null on the source Product -> empty map in cache entry [P8]
 - Round-trip: Product -> entry -> Product produces correct barcode and product type
 - Timestamps are within 100ms tolerance (not exact equality due to clock granularity)
@@ -149,6 +161,7 @@ flutter test test/models/product_cache_entry_test.dart
 **Reference**: FIREBASE_CACHE_PLAN.md Section 6
 
 **Implementation checklist:**
+
 - [ ] `const` constructor (follows existing DAO pattern)
 - [ ] `createTable(Database db)` — CREATE TABLE IF NOT EXISTS + indexes
 - [ ] `upsert(db, cacheKey, cacheType, {fdcId, lastRefreshedAt, nextRefreshAt})` — ConflictAlgorithm.replace
@@ -157,12 +170,14 @@ flutter test test/models/product_cache_entry_test.dart
 - [ ] `getAllKeys(db, {cacheType})` — list of cache_key strings
 - [ ] `remove(db, cacheKey)`
 - [ ] `updateRefreshTimestamps(db, cacheKey, {lastRefreshedAt, nextRefreshAt})` — UPDATE only time columns [P12]
-- [ ] `count(db, {cacheType})` — SELECT COUNT(*)
+- [ ] `count(db, {cacheType})` — SELECT COUNT(\*)
 
 **Naming convention**: SQLite columns use `snake_case` (matching existing tables):
+
 - `cache_key`, `cache_type`, `fdc_id`, `last_refreshed_at`, `next_refresh_at`
 
 **Run after completion:**
+
 ```bash
 flutter test test/database/firebase_cache_meta_dao_test.dart
 ```
@@ -172,6 +187,7 @@ flutter test test/database/firebase_cache_meta_dao_test.dart
 **File**: `test/database/firebase_cache_meta_dao_test.dart` — 14 tests (Section 12.3)
 
 **Setup pattern** (follow existing test conventions):
+
 ```dart
 setUpAll(() {
   sqfliteFfiInit();
@@ -186,6 +202,7 @@ setUp(() async {
 ```
 
 **Key test scenarios:**
+
 - Mixed barcoded + produce entries with correct type discrimination
 - Stale query boundary: entry with `next_refresh_at == now - 1ms` vs `now + 1ms`
 - `updateRefreshTimestamps` does NOT overwrite `cache_key`, `cache_type`, or `fdc_id`
@@ -223,6 +240,7 @@ flutter test test/database/firebase_cache_meta_dao_test.dart
 there too (not just the migration), so that fresh installs get version 24 directly.
 
 **Run after completion:**
+
 ```bash
 flutter test --concurrency=2
 ```
@@ -232,6 +250,7 @@ flutter test --concurrency=2
 **Add to**: `test/database/database_helper_test.dart` (Section 13)
 
 **Test:**
+
 - Create v23 database with full schema + sample data
 - Open with v24 DatabaseHelper
 - Verify `firebase_cache_meta` table exists in `sqlite_master`
@@ -240,11 +259,13 @@ flutter test --concurrency=2
 - Insert a row into `firebase_cache_meta`, verify it persists
 
 **Run:**
+
 ```bash
 flutter test test/database/database_helper_test.dart
 ```
 
 **Edge cases:**
+
 - [P5] Migration from v23 where some v23 data already has `product_type = 'produce'` — verify no data loss
 - Idempotency: re-running the migration (e.g., on a v24 database opened again) doesn't throw
 - The `CREATE TABLE IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS` must not error on re-run
@@ -260,6 +281,7 @@ flutter test test/database/database_helper_test.dart
 **Reference**: FIREBASE_CACHE_PLAN.md Section 7
 
 **Implementation checklist:**
+
 - [ ] Constructor with `dynamic firestore` and `bool enabled` parameters
 - [ ] `isAvailable` getter: `_firestore != null && _enabled`
 - [ ] `getProduce(String name)` -> `Future<ProduceCacheEntry?>`
@@ -270,6 +292,7 @@ flutter test test/database/database_helper_test.dart
 - [ ] `deleteProduct(String barcode)` -> `Future<void>`
 
 **Graceful degradation contract** [P2]:
+
 - When `isAvailable == false`: `get*` returns `null`, `set*` returns `false`, `delete*` is no-op
 - When a Firestore exception occurs: `get*` returns `null`, `set*` returns `false`
 - Every method logs a warning on failure
@@ -280,6 +303,7 @@ of `FirebaseFirestore` when the feature flag is off. The actual runtime type wil
 `FirebaseFirestore` when Firebase is configured.
 
 **Run after completion:**
+
 ```bash
 flutter test test/services/firebase_cache_client_test.dart
 ```
@@ -298,12 +322,14 @@ class MockDocumentSnapshot extends Mock implements DocumentSnapshot {}
 ```
 
 Register fallback values in `setUpAll`:
+
 ```dart
 registerFallbackValue(ProduceCacheEntry(...));
 registerFallbackValue(ProductCacheEntry(...));
 ```
 
 **Key test scenarios:**
+
 - Document exists with valid data -> returns deserialized entry
 - Document does not exist (doc.exists == false) -> null
 - Firestore throws `FirebaseException` -> null (logged)
@@ -328,12 +354,14 @@ flutter test test/services/firebase_cache_client_test.dart
 **Implementation checklist:**
 
 **Constructor:**
+
 - [x] Parameters: `DatabaseHelper db`, `FirebaseCacheClient firebaseClient`, `UsdaApiClient usdaClient`, `OffAdapter offAdapter`, `FirebaseCacheMetaDao? metaDao`
 - [x] `isAvailable` getter delegate to `_firebaseClient.isAvailable`
 
 **Lookup methods:**
 
 `resolveBarcodedProduct(String barcode, {required String languageCode})`:
+
 - [x] Check `isAvailable` before any Firebase operations [P4]
 - [x] Try Firebase `_firebaseClient.getProduct(barcode)` — if hit: insert into SQLite, upsert meta, return Product
 - [x] On Firebase miss/exception: call `_offAdapter.getByBarcode(barcode, languageCode: lang)`
@@ -342,6 +370,7 @@ flutter test test/services/firebase_cache_client_test.dart
 - [x] On OFF network error: return null, log warning
 
 `resolveProduceProduct(String produceName)`:
+
 - [x] Validate input (empty/whitespace -> null)
 - [x] Normalize to lowercase for cache key
 - [x] Try Firebase `_firebaseClient.getProduce(lowerName)` — if hit: `toProduct()`, cache locally, upsert meta, return
@@ -352,6 +381,7 @@ flutter test test/services/firebase_cache_client_test.dart
 **Cache write methods:**
 
 `cacheBarcodedProduct(Product product)` (fire-and-forget):
+
 - [x] Check `isAvailable`, return early if false [P4]
 - [x] `ProductCacheEntryConversions.fromProduct(product)` -> entry
 - [x] `_firebaseClient.setProduct(entry)`
@@ -359,12 +389,14 @@ flutter test test/services/firebase_cache_client_test.dart
 - [x] Catch all exceptions, log warning, never rethrow [P2]
 
 `cacheProduceProduct(Product product, String produceName, {int? fdcId})` (fire-and-forget):
+
 - [x] Same pattern as barcoded version
 - [x] Cache key = `'produce:$lowerName'`
 
 **Refresh methods:**
 
 `refreshStaleEntries({int maxBatchSize = 20})`:
+
 - [x] Check `isAvailable`, return 0 if false [P4]
 - [x] Get stale entries from `_metaDao.getStaleEntries(db, nowInMs: now)`
 - [x] Return 0 if empty
@@ -374,6 +406,7 @@ flutter test test/services/firebase_cache_client_test.dart
 - [x] Return count of successes
 
 `_refreshProduceEntry(Database db, String cacheKey)`:
+
 - [x] Extract name from `produce:<name>` prefix
 - [x] Call `_usdaClient.searchFood(name)`
 - [x] If empty, return false (leave `nextRefreshAt` unchanged — retry next time)
@@ -384,6 +417,7 @@ flutter test test/services/firebase_cache_client_test.dart
 - [x] `_db.insertProduct(localProduct)` — update local cache too
 
 `_refreshBarcodedEntry(Database db, String cacheKey)`:
+
 - [x] Call `_offAdapter.getByBarcode(cacheKey)`
 - [x] Handle `ProductNotFoundException` — return false (entry not retried, as product may have been removed)
 - [x] Read existing Firestore entry to preserve `createdAt` [P13]
@@ -393,19 +427,21 @@ flutter test test/services/firebase_cache_client_test.dart
 **Helper methods:**
 
 `_upsertMeta(cacheKey, cacheType, {fdcId})`:
+
 - [x] Get database
 - [x] Calculate `nextRefreshAt = now + 180 days`
 - [x] `_metaDao.upsert(...)`
 - [x] Catch, log, never rethrow
 
 **Critical design decisions:**
+
 - Fire-and-forget cache writes (no await in the lookup path) — the lookup returns as soon as the source API responds, caching happens in the background [P14]
 - Refresh does NOT use fire-and-forget — it awaits each step because the entire point is to update the cache
 - `nextRefreshAt` is NOT updated on refresh failure — the entry stays stale and will be retried [P16, P17]
 - `createdAt` is ALWAYS preserved — only `lastRefreshedAt` and `nextRefreshAt` change [P13]
 
 ```bash
-flutter analyze
+dart analyze
 flutter test test/services/firebase_cache_service_test.dart
 ```
 
@@ -414,6 +450,7 @@ flutter test test/services/firebase_cache_service_test.dart
 **File**: `test/services/firebase_cache_service_test.dart` — 22 tests (Section 12.5)
 
 **Mock setup:**
+
 ```dart
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 class MockFirebaseCacheClient extends Mock implements FirebaseCacheClient {}
@@ -423,6 +460,7 @@ class MockFirebaseCacheMetaDao extends Mock implements FirebaseCacheMetaDao {}
 ```
 
 Register fallback values in `setUpAll`:
+
 ```dart
 registerFallbackValue(ProduceCacheEntry(...));
 registerFallbackValue(ProductCacheEntry(...));
@@ -463,6 +501,7 @@ flutter test test/services/firebase_cache_service_test.dart
 **Changes:**
 
 1. Add optional parameter to constructor:
+
    ```dart
    final FirebaseCacheService? _firebaseCache;
 
@@ -510,6 +549,7 @@ if (_firebaseCache != null && _firebaseCache.isAvailable) {
 ```
 
 **Edge cases:**
+
 - [P4] `_firebaseCache` can be null (feature flag off) — skip Firebase entirely
 - [P2] If Firebase throws, it's caught, logged, and we fall through to OFF API
 - The existing `_db.insertProduct(remote)` in the OFF API path is complemented by the fire-and-forget in `resolveBarcodedProduct`
@@ -542,6 +582,7 @@ if (_firebaseCache != null) {
 ```
 
 **Edge cases:**
+
 - [P4] Firebase unavailable -> skip to USDA
 - Firebase returns Product with null nutrition -> still returned (caller expects this — existing USDA path can also return null nutrition)
 - `resolveProduceProduct` normalizes to lowercase internally, so "Apple" and "apple" both hit the same cache key
@@ -552,6 +593,7 @@ if (_firebaseCache != null) {
 (Firebase section in `product_repository_test.dart`)
 
 **New mock:**
+
 ```dart
 class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
 ```
@@ -618,6 +660,7 @@ final firebaseCacheProvider = Provider<FirebaseCacheService>((ref) {
 ```
 
 **Edge cases:**
+
 - [P1] If `FirebaseFirestore.instance` throws (no `google-services.json` or wrong project), the try/catch catches it and the client is created with `isAvailable: false`
 - [P3] When `firebaseEnabled == false`, `firestore` stays `null`, client is disabled
 
@@ -644,7 +687,7 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 ```
 
 ```bash
-flutter analyze
+dart analyze
 flutter test --concurrency=2
 ```
 
@@ -672,6 +715,7 @@ if (AppConfig.firebaseEnabled) {
 ```
 
 **Edge cases:**
+
 - [P1] `Firebase.initializeApp()` throws on missing `google-services.json` -> caught, logged, app continues
 - [P4] `DefaultFirebaseOptions.currentPlatform` requires `firebase_options.dart` generated by `flutterfire configure`. If the file doesn't exist, the import itself will error — so this should only be compiled when `FIREBASE_ENABLED=true` or we use conditional imports.
   - **Solution**: Wrap in `if (AppConfig.firebaseEnabled)` which is a runtime check. But the import will still fail at compile time if the file doesn't exist.
@@ -745,6 +789,7 @@ Future<void> _refreshFirebaseCache() async {
 ```
 
 **Edge cases:**
+
 - [P9] If the user closes the app during refresh, unprocessed entries stay stale and will be retried next startup
 - [P12] Large stale entry counts are handled by `maxBatchSize: 20` — no need to worry about long-running operations blocking startup
 - The 8-second delay avoids competing with `_scheduleCacheRefresh`, `_runDatabaseCleanup`, `_flushFeedbackQueue`, `_schedulePostInitNotifications`, and `_flushProductSubmissionQueue` for network bandwidth
@@ -752,7 +797,7 @@ Future<void> _refreshFirebaseCache() async {
 ### [x] 7.3 Verify compile
 
 ```bash
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 ```
 
 Must pass with zero warnings.
@@ -789,6 +834,7 @@ flutterfire configure --project=<your-project-id>
 ```
 
 This generates:
+
 - `android/app/google-services.json`
 - `ios/Runner/GoogleService-Info.plist` (if iOS is configured)
 - `lib/firebase_options.dart`
@@ -827,7 +873,7 @@ Run on emulator or device:
 ### [ ] 9.1 Run full analysis and tests
 
 ```bash
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
 ```
 
@@ -879,7 +925,7 @@ Run these in order as each phase completes:
 ```bash
 # Phase 0
 flutter pub get
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
 
 # Phase 1
@@ -902,18 +948,18 @@ flutter test test/services/product_repository_test.dart
 flutter test --concurrency=2
 
 # Phase 6
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
 
 # Phase 7
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
 
 # Phase 8 (manual QA)
 flutter build apk --debug
 
 # Phase 9 (pre-commit)
-flutter analyze --fatal-infos --fatal-warnings
+dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
 bash scripts/check_stale_info.sh
 ```
@@ -922,35 +968,35 @@ bash scripts/check_stale_info.sh
 
 ## Quick reference: Edge cases by phase
 
-| Phase | Relevant Pitfalls |
-|-------|-------------------|
-| 0 — Scaffolding (done) | P1, P3 |
-| 1 — Models (done) | P8, P13, P19 |
-| 2 — Database (done) | P5, P12 |
-| 3 — Firestore Client (done) | P2, P4 |
-| 4 — Cache Service (done) | P2, P4, P9, P10, P11, P12, P13, P14, P15, P16, P17 |
-| 5 — Repository Integration (done) | P2, P4 |
-| 6 — Providers (done) | P1, P3, P4 |
-| 7 — App Init (done) | P1, P4, P9, P12 |
-| 8 — Firebase Setup | P1, P4 |
+| Phase                             | Relevant Pitfalls                                  |
+| --------------------------------- | -------------------------------------------------- |
+| 0 — Scaffolding (done)            | P1, P3                                             |
+| 1 — Models (done)                 | P8, P13, P19                                       |
+| 2 — Database (done)               | P5, P12                                            |
+| 3 — Firestore Client (done)       | P2, P4                                             |
+| 4 — Cache Service (done)          | P2, P4, P9, P10, P11, P12, P13, P14, P15, P16, P17 |
+| 5 — Repository Integration (done) | P2, P4                                             |
+| 6 — Providers (done)              | P1, P3, P4                                         |
+| 7 — App Init (done)               | P1, P4, P9, P12                                    |
+| 8 — Firebase Setup                | P1, P4                                             |
 
 ## Quick reference: Pitfall descriptions
 
-| ID | Pitfall | Mitigation |
-|----|---------|------------|
-| P1 | No `google-services.json` | Try/catch in `main.dart`, `isAvailable` stays false |
-| P2 | Firestore read/write throws | Every method catches `FirebaseException`, returns null/false |
-| P3 | `FIREBASE_ENABLED=true` but no .env entry | `??` operator defaults to false |
-| P4 | Firebase unavailable at runtime | `isAvailable` check before every operation |
-| P5 | Migration from v23 with produce data | Verify data intact in migration test |
-| P8 | Source Product has null nutrition | Empty nutrition map, null fields on toProduct |
-| P9 | App killed during refresh | Unprocessed entries retry next startup |
-| P10 | USDA rate limit (360 req/min) | 500ms delay = 2 req/sec = 120 req/min |
-| P11 | OFF rate limit | Same 500ms delay, 429 triggers skip+retry |
-| P12 | Hundreds of stale entries | Max 20 per run, rest retry next startup |
-| P13 | `createdAt` overwritten on refresh | Explicitly read and preserve old value |
-| P14 | Lookup vs refresh race on same doc | Firebase `set()` is atomic, last-writer-wins |
+| ID  | Pitfall                                       | Mitigation                                                   |
+| --- | --------------------------------------------- | ------------------------------------------------------------ |
+| P1  | No `google-services.json`                     | Try/catch in `main.dart`, `isAvailable` stays false          |
+| P2  | Firestore read/write throws                   | Every method catches `FirebaseException`, returns null/false |
+| P3  | `FIREBASE_ENABLED=true` but no .env entry     | `??` operator defaults to false                              |
+| P4  | Firebase unavailable at runtime               | `isAvailable` check before every operation                   |
+| P5  | Migration from v23 with produce data          | Verify data intact in migration test                         |
+| P8  | Source Product has null nutrition             | Empty nutrition map, null fields on toProduct                |
+| P9  | App killed during refresh                     | Unprocessed entries retry next startup                       |
+| P10 | USDA rate limit (360 req/min)                 | 500ms delay = 2 req/sec = 120 req/min                        |
+| P11 | OFF rate limit                                | Same 500ms delay, 429 triggers skip+retry                    |
+| P12 | Hundreds of stale entries                     | Max 20 per run, rest retry next startup                      |
+| P13 | `createdAt` overwritten on refresh            | Explicitly read and preserve old value                       |
+| P14 | Lookup vs refresh race on same doc            | Firebase `set()` is atomic, last-writer-wins                 |
 | P15 | Two instances refresh same doc simultaneously | Data is identical (same source API), timestamps differ by ms |
-| P16 | Refresh: API fails (no results) | nextRefreshAt unchanged, retried next time |
-| P17 | Refresh: API fails (network error) | nextRefreshAt unchanged, retried next time |
-| P19 | Local-only Product fields not in Firestore | Intentionally excluded from cache entry model |
+| P16 | Refresh: API fails (no results)               | nextRefreshAt unchanged, retried next time                   |
+| P17 | Refresh: API fails (network error)            | nextRefreshAt unchanged, retried next time                   |
+| P19 | Local-only Product fields not in Firestore    | Intentionally excluded from cache entry model                |

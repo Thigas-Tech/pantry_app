@@ -136,7 +136,6 @@ void main() {
       expect(item.barcode, isEmpty);
       verifyNever(() => mockDb.getProduct(any()));
       verifyNever(() => mockRepo.getProduct(any()));
-
     });
   });
 }

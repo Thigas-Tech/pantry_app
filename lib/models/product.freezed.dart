@@ -23,10 +23,10 @@ mixin _$Product {
 /// In rare cases the API may return an empty string; the repository
 /// should handle that gracefully.
  String get name;/// The brand name(s), often comma-separated when multiple brands exist
-/// (e.g. `"Ferrero"`, `"Nestle, Nespresso"`).
+/// (e.g. "Ferrero", "Nestle, Nespresso").
  String? get brand;/// A URL to the product's front image on the Open Food Facts CDN.
 ///
-/// May be `null` if no image has been uploaded for this product.
+/// May be null if no image has been uploaded for this product.
  String? get imageUrl;/// OFF CDN URL for the nutrition facts table image, if available.
 ///
 /// Used by the photo-completeness stats screen to compare local user
@@ -35,25 +35,25 @@ mixin _$Product {
  String? get offIngredientsImageUrl;/// OFF CDN URL for the product front/packaging image, if available.
  String? get offProductImageUrl;/// The OFF taxonomy hierarchy for this product, from broadest to
 /// most specific. Each entry is a language-prefixed tag
-/// (e.g. `en:eggs`, `en:chicken-eggs`).
+/// (e.g. en:eggs, en:chicken-eggs).
 ///
-/// May be `null` for manually entered products or when OFF has no
+/// May be null for manually entered products or when OFF has no
 /// taxonomy data.
  List<String>? get categoriesHierarchy;/// The product category as assigned by the Open Food Facts community.
 ///
-/// Often a comma-separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
+/// Often a comma-separated hierarchy (e.g. "Spreads, Sweet spreads").
 /// Used in the add-to-inventory screen to suggest a default expiry date
 /// based on the category (e.g., dairy -> +7 days).
  String? get category;/// The full ingredients list as plain text.
 ///
 /// Currently stored as a single string, exactly as returned by the API.
-/// In the future this could be migrated to a separate `ingredients` table
+/// In the future this could be migrated to a separate ingredients table
 /// to enable allergen filtering or per-ingredient search.
- String? get ingredients;/// The suggested serving size, typically with a unit (e.g. `"15 g"`,
-/// `"1 cookie (28 g)"`).
+ String? get ingredients;/// The suggested serving size, typically with a unit (e.g. "15 g",
+/// "1 cookie (28 g)").
  String? get servingSize;/// Energy content in **kilocalories per 100 g** (or 100 ml).
 ///
-/// Sourced from `nutriments.energy-kcal_100g` in the API response.
+/// Sourced from nutriments.energy-kcal_100g in the API response.
  double? get energyKcal;/// Protein content in **grams per 100 g** (or 100 ml).
  double? get proteinG;/// Carbohydrate content in **grams per 100 g** (or 100 ml).
  double? get carbsG;/// Fat content in **grams per 100 g** (or 100 ml).
@@ -64,34 +64,34 @@ mixin _$Product {
 ///
 /// Set automatically when the product is fetched from the API or
 /// submitted by the user.
- int? get lastSynced;/// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
-/// if the data is unavailable. May also be `'not-applicable'` when the
+ int? get lastSynced;/// The Nutri-Score grade of the product ('a' through 'e'), or null
+/// if the data is unavailable. May also be 'not-applicable' when the
 /// Nutri-Score system does not apply to this product category (e.g. food
 /// additives).
 ///
-/// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
+/// Sourced from nutrition_grade_fr in the Open Food Facts v3 API via
 /// the SDK's off.Product.nutriscore field.
  String? get nutriscoreGrade;/// The product category that makes Nutri-Score not applicable, if any.
 ///
-/// This is present only when [nutriscoreGrade] is `'not-applicable'` and
-/// explains why (e.g. `'en:food-additives'`).
+/// This is present only when [nutriscoreGrade] is 'not-applicable' and
+/// explains why (e.g. 'en:food-additives').
 ///
 /// Note: the official Dart SDK does not expose the
-/// `nutriscore_data.nutriscore_not_applicable_for_category` field, so
+/// nutriscore_data.nutriscore_not_applicable_for_category field, so
 /// this value is only populated when reading from the local database
 /// for previously cached products.
  String? get nutriscoreNotApplicableCategory;/// The origin of this product record.
 ///
-/// - `'api'` — fetched from Open Food Facts (can be safely flushed and
+/// - 'api' — fetched from Open Food Facts (can be safely flushed and
 ///   re-fetched).
-/// - `'manual'` — entered by the user via the add-product screen
+/// - 'manual' — entered by the user via the add-product screen
 ///   (must never be deleted by a cache flush).
 ///
-/// Defaults to `'api'` because most products come from the OFF
+/// Defaults to 'api' because most products come from the OFF
 /// integration. The add-product screen overrides it to
-/// `'manual'`.
+/// 'manual'.
  String get source;/// The locale code of the language used when this product was fetched
-/// from Open Food Facts (e.g. `'en'`, `'fr'`, `'pt'`).
+/// from Open Food Facts (e.g. 'en', 'fr', 'pt').
 ///
 /// This represents the language *requested* by the client, not necessarily
 /// the language *returned* — OFF silently falls back to English if the
@@ -103,15 +103,15 @@ mixin _$Product {
  String get languageCode;/// Local file path to a photo of the nutrition facts table.
 ///
 /// Populated when the user captures a photo on the manual-entry screen.
-/// Stored as a stable path inside `<app-documents>/product_images/`.
+/// Stored as a stable path inside app-documents/product_images/.
  String? get nutritionImagePath;/// Local file path to a photo of the ingredients list.
 ///
 /// Populated when the user captures a photo on the manual-entry screen.
-/// Stored as a stable path inside `<app-documents>/product_images/`.
+/// Stored as a stable path inside app-documents/product_images/.
  String? get ingredientsImagePath;/// Local file path to a photo of the product packaging / front.
 ///
 /// Populated when the user captures a photo on the manual-entry screen.
-/// Stored as a stable path inside `<app-documents>/product_images/`.
+/// Stored as a stable path inside app-documents/product_images/.
  String? get productImagePath;/// The submission status of this product to Open Food Facts.
 ///
 /// - [productSubmissionNotSubmitted] — not yet submitted (default).
@@ -119,10 +119,10 @@ mixin _$Product {
 /// - [productSubmissionSubmitted] — successfully submitted.
 /// - [productSubmissionFailed] — submission failed; retry possible.
  String get submissionStatus;/// The PLU (Price Look-Up) code for this product, if it is a fresh
-/// produce item (e.g. `'4011'` for Banana, `'4032'` for Apple).
+/// produce item (e.g. '4011' for Banana, '4032' for Apple).
 ///
 /// Only meaningful when [productType] is [ProductType.produce]. 4-digit
-/// codes are standard PLU codes; 5-digit codes starting with `'9'`
+/// codes are standard PLU codes; 5-digit codes starting with '9'
 /// indicate organic produce. This field is nullable for barcoded and
 /// custom products.
  String? get pluCode;/// The classification of this product.
@@ -363,11 +363,11 @@ class _Product implements Product {
 /// should handle that gracefully.
 @override final  String name;
 /// The brand name(s), often comma-separated when multiple brands exist
-/// (e.g. `"Ferrero"`, `"Nestle, Nespresso"`).
+/// (e.g. "Ferrero", "Nestle, Nespresso").
 @override final  String? brand;
 /// A URL to the product's front image on the Open Food Facts CDN.
 ///
-/// May be `null` if no image has been uploaded for this product.
+/// May be null if no image has been uploaded for this product.
 @override final  String? imageUrl;
 /// OFF CDN URL for the nutrition facts table image, if available.
 ///
@@ -380,16 +380,16 @@ class _Product implements Product {
 @override final  String? offProductImageUrl;
 /// The OFF taxonomy hierarchy for this product, from broadest to
 /// most specific. Each entry is a language-prefixed tag
-/// (e.g. `en:eggs`, `en:chicken-eggs`).
+/// (e.g. en:eggs, en:chicken-eggs).
 ///
-/// May be `null` for manually entered products or when OFF has no
+/// May be null for manually entered products or when OFF has no
 /// taxonomy data.
  final  List<String>? _categoriesHierarchy;
 /// The OFF taxonomy hierarchy for this product, from broadest to
 /// most specific. Each entry is a language-prefixed tag
-/// (e.g. `en:eggs`, `en:chicken-eggs`).
+/// (e.g. en:eggs, en:chicken-eggs).
 ///
-/// May be `null` for manually entered products or when OFF has no
+/// May be null for manually entered products or when OFF has no
 /// taxonomy data.
 @override List<String>? get categoriesHierarchy {
   final value = _categoriesHierarchy;
@@ -401,22 +401,22 @@ class _Product implements Product {
 
 /// The product category as assigned by the Open Food Facts community.
 ///
-/// Often a comma-separated hierarchy (e.g. `"Spreads, Sweet spreads"`).
+/// Often a comma-separated hierarchy (e.g. "Spreads, Sweet spreads").
 /// Used in the add-to-inventory screen to suggest a default expiry date
 /// based on the category (e.g., dairy -> +7 days).
 @override final  String? category;
 /// The full ingredients list as plain text.
 ///
 /// Currently stored as a single string, exactly as returned by the API.
-/// In the future this could be migrated to a separate `ingredients` table
+/// In the future this could be migrated to a separate ingredients table
 /// to enable allergen filtering or per-ingredient search.
 @override final  String? ingredients;
-/// The suggested serving size, typically with a unit (e.g. `"15 g"`,
-/// `"1 cookie (28 g)"`).
+/// The suggested serving size, typically with a unit (e.g. "15 g",
+/// "1 cookie (28 g)").
 @override final  String? servingSize;
 /// Energy content in **kilocalories per 100 g** (or 100 ml).
 ///
-/// Sourced from `nutriments.energy-kcal_100g` in the API response.
+/// Sourced from nutriments.energy-kcal_100g in the API response.
 @override final  double? energyKcal;
 /// Protein content in **grams per 100 g** (or 100 ml).
 @override final  double? proteinG;
@@ -434,37 +434,37 @@ class _Product implements Product {
 /// Set automatically when the product is fetched from the API or
 /// submitted by the user.
 @override final  int? lastSynced;
-/// The Nutri-Score grade of the product (`'a'` through `'e'`), or `null`
-/// if the data is unavailable. May also be `'not-applicable'` when the
+/// The Nutri-Score grade of the product ('a' through 'e'), or null
+/// if the data is unavailable. May also be 'not-applicable' when the
 /// Nutri-Score system does not apply to this product category (e.g. food
 /// additives).
 ///
-/// Sourced from `nutrition_grade_fr` in the Open Food Facts v3 API via
+/// Sourced from nutrition_grade_fr in the Open Food Facts v3 API via
 /// the SDK's off.Product.nutriscore field.
 @override final  String? nutriscoreGrade;
 /// The product category that makes Nutri-Score not applicable, if any.
 ///
-/// This is present only when [nutriscoreGrade] is `'not-applicable'` and
-/// explains why (e.g. `'en:food-additives'`).
+/// This is present only when [nutriscoreGrade] is 'not-applicable' and
+/// explains why (e.g. 'en:food-additives').
 ///
 /// Note: the official Dart SDK does not expose the
-/// `nutriscore_data.nutriscore_not_applicable_for_category` field, so
+/// nutriscore_data.nutriscore_not_applicable_for_category field, so
 /// this value is only populated when reading from the local database
 /// for previously cached products.
 @override final  String? nutriscoreNotApplicableCategory;
 /// The origin of this product record.
 ///
-/// - `'api'` — fetched from Open Food Facts (can be safely flushed and
+/// - 'api' — fetched from Open Food Facts (can be safely flushed and
 ///   re-fetched).
-/// - `'manual'` — entered by the user via the add-product screen
+/// - 'manual' — entered by the user via the add-product screen
 ///   (must never be deleted by a cache flush).
 ///
-/// Defaults to `'api'` because most products come from the OFF
+/// Defaults to 'api' because most products come from the OFF
 /// integration. The add-product screen overrides it to
-/// `'manual'`.
+/// 'manual'.
 @override@JsonKey() final  String source;
 /// The locale code of the language used when this product was fetched
-/// from Open Food Facts (e.g. `'en'`, `'fr'`, `'pt'`).
+/// from Open Food Facts (e.g. 'en', 'fr', 'pt').
 ///
 /// This represents the language *requested* by the client, not necessarily
 /// the language *returned* — OFF silently falls back to English if the
@@ -477,17 +477,17 @@ class _Product implements Product {
 /// Local file path to a photo of the nutrition facts table.
 ///
 /// Populated when the user captures a photo on the manual-entry screen.
-/// Stored as a stable path inside `<app-documents>/product_images/`.
+/// Stored as a stable path inside app-documents/product_images/.
 @override final  String? nutritionImagePath;
 /// Local file path to a photo of the ingredients list.
 ///
 /// Populated when the user captures a photo on the manual-entry screen.
-/// Stored as a stable path inside `<app-documents>/product_images/`.
+/// Stored as a stable path inside app-documents/product_images/.
 @override final  String? ingredientsImagePath;
 /// Local file path to a photo of the product packaging / front.
 ///
 /// Populated when the user captures a photo on the manual-entry screen.
-/// Stored as a stable path inside `<app-documents>/product_images/`.
+/// Stored as a stable path inside app-documents/product_images/.
 @override final  String? productImagePath;
 /// The submission status of this product to Open Food Facts.
 ///
@@ -497,10 +497,10 @@ class _Product implements Product {
 /// - [productSubmissionFailed] — submission failed; retry possible.
 @override@JsonKey() final  String submissionStatus;
 /// The PLU (Price Look-Up) code for this product, if it is a fresh
-/// produce item (e.g. `'4011'` for Banana, `'4032'` for Apple).
+/// produce item (e.g. '4011' for Banana, '4032' for Apple).
 ///
 /// Only meaningful when [productType] is [ProductType.produce]. 4-digit
-/// codes are standard PLU codes; 5-digit codes starting with `'9'`
+/// codes are standard PLU codes; 5-digit codes starting with '9'
 /// indicate organic produce. This field is nullable for barcoded and
 /// custom products.
 @override final  String? pluCode;

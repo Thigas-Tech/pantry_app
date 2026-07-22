@@ -10,7 +10,7 @@ import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
-import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -207,7 +207,7 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                     );
                     if (context.mounted) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ref.invalidate(inventoryWithProductProvider);
+                        ref.invalidate(pantryProvider);
                       });
                     }
                   } on FetchFailedException {

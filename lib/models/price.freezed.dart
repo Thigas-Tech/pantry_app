@@ -16,9 +16,9 @@ mixin _$Price {
 
 /// The product barcode this price is associated with.
  String get barcode;/// The monetary amount (taxes included).
- double get price;/// ISO 4217 currency code (e.g. `'BRL'`, `'USD'`, `'EUR'`).
+ double get price;/// ISO 4217 currency code (e.g. 'BRL', 'USD', 'EUR').
 ///
-/// Defaults to `'USD'`; auto-detected from locale on first launch.
+/// Defaults to 'USD'; auto-detected from locale on first launch.
  String get currency;/// Auto-increment primary key.
  int? get id;/// Free-form store or supermarket name.
  String? get store;/// Whether this is a discounted / sale price.
@@ -34,7 +34,7 @@ mixin _$Price {
 /// - [priceSyncFailed] — sync failed.
  String get syncStatus;/// Remote ID on Open Prices after successful sync.
  int? get openPricesId;/// OpenStreetMap node/way ID for the store location.
- String? get locationOsmId;/// OpenStreetMap location type (`NODE`, `WAY`, or `RELATION`).
+ String? get locationOsmId;/// OpenStreetMap location type (NODE, WAY, or RELATION).
  String? get locationOsmType;/// NFC-e receipt series (reserved for future tax receipt integration).
  String? get receiptSeries;/// NFC-e receipt number (reserved for future tax receipt integration).
  String? get receiptNumber;/// NFC-e line-item index (reserved for future tax receipt integration).
@@ -256,9 +256,9 @@ class _Price implements Price {
 @override final  String barcode;
 /// The monetary amount (taxes included).
 @override final  double price;
-/// ISO 4217 currency code (e.g. `'BRL'`, `'USD'`, `'EUR'`).
+/// ISO 4217 currency code (e.g. 'BRL', 'USD', 'EUR').
 ///
-/// Defaults to `'USD'`; auto-detected from locale on first launch.
+/// Defaults to 'USD'; auto-detected from locale on first launch.
 @override@JsonKey() final  String currency;
 /// Auto-increment primary key.
 @override final  int? id;
@@ -283,7 +283,7 @@ class _Price implements Price {
 @override final  int? openPricesId;
 /// OpenStreetMap node/way ID for the store location.
 @override final  String? locationOsmId;
-/// OpenStreetMap location type (`NODE`, `WAY`, or `RELATION`).
+/// OpenStreetMap location type (NODE, WAY, or RELATION).
 @override final  String? locationOsmType;
 /// NFC-e receipt series (reserved for future tax receipt integration).
 @override final  String? receiptSeries;

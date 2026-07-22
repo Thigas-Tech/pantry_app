@@ -315,7 +315,7 @@ void main() {
           ),
           onRetry: () {},
           onSwitchToManual: () => manualCalled = true,
-            onSwitchToPlu: () {},
+          onSwitchToPlu: () {},
           onOpenSettings: () {},
         ),
       );
@@ -346,7 +346,7 @@ void main() {
           ),
           onRetry: () => retryCalled = true,
           onSwitchToManual: () => manualCalled = true,
-            onSwitchToPlu: () {},
+          onSwitchToPlu: () {},
           onOpenSettings: () {},
         ),
       );
@@ -379,7 +379,7 @@ void main() {
           ),
           onRetry: () {},
           onSwitchToManual: () {},
-            onSwitchToPlu: () {},
+          onSwitchToPlu: () {},
           onOpenSettings: () {},
         ),
       );

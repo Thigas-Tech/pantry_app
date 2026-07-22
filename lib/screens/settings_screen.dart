@@ -12,8 +12,8 @@ import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
-import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
@@ -351,7 +351,6 @@ class SettingsScreen extends ConsumerWidget {
                   ref
                       .read(settingsProvider.notifier)
                       .setOpenPricesSyncEnabled(value: value);
-
                 },
               ),
               if (settings.openPricesSyncEnabled) ...[
@@ -826,12 +825,12 @@ class SettingsScreen extends ConsumerWidget {
         await repo.setLastRefreshTime();
         if (!context.mounted) return;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(inventoryWithProductProvider);
+          ref.invalidate(pantryProvider);
         });
       } else {
         logInfo('Offline — products will appear with barcode as name');
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(inventoryWithProductProvider);
+          ref.invalidate(pantryProvider);
         });
       }
 

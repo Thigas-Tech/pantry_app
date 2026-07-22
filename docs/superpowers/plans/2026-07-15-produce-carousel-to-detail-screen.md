@@ -4,7 +4,7 @@
 
 **Goal:** Change the produce quick-add carousel from directly inserting an inventory item (150 g) to resolving the product, navigating to ProductDetailScreen, and defaulting to unit mode in AddToInventoryScreen.
 
-**Architecture:** Add a public `resolveProduceProduct` method to ProductRepository (no side effects). Add `loadingItems` param to QuickAddProduce to show a spinner on chips being resolved. Refactor HomeScreen._handleQuickProduceAdd to resolve → navigate → record purchase. Default AddToInventoryScreen to unit mode for produce. Pass productType through ProductDetailScreen → AddToInventoryScreen.
+**Architecture:** Add a public `resolveProduceProduct` method to ProductRepository (no side effects). Add `loadingItems` param to QuickAddProduce to show a spinner on chips being resolved. Refactor HomeScreen.\_handleQuickProduceAdd to resolve → navigate → record purchase. Default AddToInventoryScreen to unit mode for produce. Pass productType through ProductDetailScreen → AddToInventoryScreen.
 
 **Tech Stack:** Flutter, Riverpod, mocktail, freezed
 
@@ -15,7 +15,7 @@
 - All test files use mocktail
 - `///` doc comments on every public API member
 - Every code change that alters behavior includes or updates tests
-- Run `flutter analyze --fatal-infos --fatal-warnings` before committing
+- Run `dart analyze --fatal-infos --fatal-warnings` before committing
 - Run `flutter test --concurrency=2` before committing
 
 ---
@@ -23,10 +23,12 @@
 ### Task 1: Add `resolveProduceProduct` public method to ProductRepository
 
 **Files:**
+
 - Modify: `lib/services/product_repository.dart:242-287`
 - Test: `test/services/product_repository_test.dart`
 
 **Interfaces:**
+
 - Consumes: `ProductRepository._resolveProduceProduct(String, String)` (private, exists)
 - Produces: `ProductRepository.resolveProduceProduct(String produceName) → Future<Product>` — generates barcode `produce-$produceName` and delegates to `_resolveProduceProduct`
 
@@ -93,9 +95,11 @@ Note: `createMockProductRepository()` returns a `MockProductRepository` where ev
 - [ ] **Step 3: Run tests to verify they fail**
 
 Run:
+
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 test/services/product_repository_test.dart 2>&1 | tail -30
 ```
+
 Expected: Tests exist but the real method isn't implemented yet → tests pass because the mock already handles them. So actually the tests we wrote test the mock, not the real implementation. Let me reconsider — we need integration-level tests that use the real ProductRepository with mocked dependencies, OR we accept that the mock-level tests validate the contract, and add a small integration test.
 
 Actually, looking at the existing test file, `createMockProductRepository()` returns a `MockProductRepository` — just a mock. The existing tests in that file also use mocks. The real `ProductRepository` tests that need the DB are integration tests. For the scope of this task, we should:
@@ -137,15 +141,17 @@ Place this immediately before `addProduceToInventory` (around line 192).
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 test/services/product_repository_test.dart 2>&1 | tail -30
 ```
+
 Expected: All tests pass.
 
 - [ ] **Step 6: Run analyze and commit**
 
 ```bash
-cd /home/thiago/Projects/pantry_app && flutter analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
+cd /home/thiago/Projects/pantry_app && dart analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
 ```
 
 Commit:
+
 ```bash
 git add lib/services/product_repository.dart test/services/product_repository_test.dart
 git commit -m "feat: add resolveProduceProduct public method to ProductRepository"
@@ -156,10 +162,12 @@ git commit -m "feat: add resolveProduceProduct public method to ProductRepositor
 ### Task 2: Add loading state to QuickAddProduce widget
 
 **Files:**
+
 - Modify: `lib/widgets/quick_add_produce.dart`
 - Create: `test/widgets/quick_add_produce_test.dart`
 
 **Interfaces:**
+
 - Consumes: `Set<String> loadingItems` parameter from parent (HomeScreen)
 - Produces: Widget that shows `CircularProgressIndicator` on chips in loadingItems
 
@@ -268,6 +276,7 @@ void main() {
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 test/widgets/quick_add_produce_test.dart 2>&1 | tail -30
 ```
+
 Expected: Compilation error because `loadingItems` parameter doesn't exist yet.
 
 - [ ] **Step 4: Update QuickAddProduce widget**
@@ -340,15 +349,17 @@ class QuickAddProduce extends StatelessWidget {
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 test/widgets/quick_add_produce_test.dart 2>&1 | tail -30
 ```
+
 Expected: All 4 tests pass.
 
 - [ ] **Step 6: Run full analyze and commit**
 
 ```bash
-cd /home/thiago/Projects/pantry_app && flutter analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
+cd /home/thiago/Projects/pantry_app && dart analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
 ```
 
 Commit:
+
 ```bash
 git add lib/widgets/quick_add_produce.dart test/widgets/quick_add_produce_test.dart
 git commit -m "feat: add loading state to QuickAddProduce chips"
@@ -359,10 +370,12 @@ git commit -m "feat: add loading state to QuickAddProduce chips"
 ### Task 3: Refactor HomeScreen carousel to navigate to ProductDetailScreen
 
 **Files:**
+
 - Modify: `lib/screens/home_screen.dart`
 - Modify: `test/screens/home_screen_test.dart`
 
 **Interfaces:**
+
 - Consumes: `ProductRepository.resolveProduceProduct(String)` (Task 1)
 - Consumes: `QuickAddProduce(loadingItems: ...)` (Task 2)
 - Consumes: `ProductDetailScreen(product: Product)` (existing)
@@ -560,6 +573,7 @@ Check the existing imports - we need to ensure `ProductType`, `Completer` are im
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 test/screens/home_screen_test.dart 2>&1 | tail -40
 ```
+
 Expected: Tests fail because `_handleQuickProduceAdd` still calls `addProduceToInventory` directly.
 
 - [ ] **Step 4: Update HomeScreen**
@@ -620,16 +634,18 @@ QuickAddProduce(
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 test/screens/home_screen_test.dart 2>&1 | tail -40
 ```
+
 Expected: All carousel tests pass.
 
 - [ ] **Step 6: Run full test suite and analyze**
 
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 2>&1 | tail -10
-cd /home/thiago/Projects/pantry_app && flutter analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
+cd /home/thiago/Projects/pantry_app && dart analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
 ```
 
 Commit:
+
 ```bash
 git add lib/screens/home_screen.dart test/screens/home_screen_test.dart
 git commit -m "feat: produce carousel navigates to ProductDetailScreen with loading state"
@@ -640,10 +656,12 @@ git commit -m "feat: produce carousel navigates to ProductDetailScreen with load
 ### Task 4: Default AddToInventoryScreen to unit mode for produce + pass productType
 
 **Files:**
+
 - Modify: `lib/screens/add_to_inventory_screen.dart`
 - Modify: `lib/screens/product_detail_screen.dart`
 
 **Interfaces:**
+
 - Consumes: `AddToInventoryScreen(productType: ...)` constructor parameter (already exists)
 - Consumes: `ProductDetailScreen.widget.product.productType` (already exists on Product model)
 
@@ -734,6 +752,7 @@ void main() {
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 test/screens/add_to_inventory_screen_test.dart 2>&1 | tail -40
 ```
+
 Expected: Tests fail because the default is still weight mode.
 
 - [ ] **Step 3: Update AddToInventoryScreen default**
@@ -797,10 +816,11 @@ cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 2>&1 | tail 
 - [ ] **Step 6: Run analyze and commit**
 
 ```bash
-cd /home/thiago/Projects/pantry_app && flutter analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
+cd /home/thiago/Projects/pantry_app && dart analyze --fatal-infos --fatal-warnings 2>&1 | tail -10
 ```
 
 Commit:
+
 ```bash
 git add lib/screens/add_to_inventory_screen.dart lib/screens/product_detail_screen.dart test/screens/add_to_inventory_screen_test.dart
 git commit -m "feat: default produce to unit mode in AddToInventoryScreen"
@@ -815,13 +835,15 @@ git commit -m "feat: default produce to unit mode in AddToInventoryScreen"
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter test --concurrency=2 2>&1 | tail -20
 ```
+
 Expected: All tests pass (zero failures).
 
 - [ ] **Run full static analysis**
 
 ```bash
-cd /home/thiago/Projects/pantry_app && flutter analyze --fatal-infos --fatal-warnings 2>&1 | tail -20
+cd /home/thiago/Projects/pantry_app && dart analyze --fatal-infos --fatal-warnings 2>&1 | tail -20
 ```
+
 Expected: No issues found.
 
 - [ ] **Run debug build**
@@ -829,6 +851,7 @@ Expected: No issues found.
 ```bash
 cd /home/thiago/Projects/pantry_app && flutter build apk --debug 2>&1 | tail -10
 ```
+
 Expected: Build successful.
 
 - [ ] **Commit final state**
