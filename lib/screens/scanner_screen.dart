@@ -60,10 +60,12 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       case ScanFailed(:final message) when message == 'PRODUCT_NOT_FOUND':
         final l10n = AppLocalizations.of(context)!;
         SnackbarHelper.showWarning(context, l10n.productNotFound);
+        ref.read(scannerCameraProvider.notifier).clearResolution();
       case ScanFailed(:final message):
         logWarning('Scan resolution failed: $message');
         final l10n = AppLocalizations.of(context)!;
         SnackbarHelper.showError(context, l10n.scanFailed);
+        ref.read(scannerCameraProvider.notifier).clearResolution();
       case ScanResolving():
         break;
     }

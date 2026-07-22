@@ -1,10 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
+
+/// Fake [ScannerCamera] that skips platform controller creation.
+class _FakeScannerCamera extends ScannerCamera {
+  @override
+  ScannerCameraState build() => const ScannerCameraState();
+}
 
 void main() {
   group('ScannerScreen', () {
@@ -165,5 +177,44 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(ScannerScreen), findsNothing);
     });
+
+    testWidgets(
+      'scan failed clears scan resolution so barcode detection works again',
+      (
+        tester,
+      ) async {
+        SharedPreferences.setMockInitialValues({});
+        final mockRepo = createMockProductRepository();
+        when(() => mockRepo.getProduct(any())).thenThrow(
+          ProductNotFoundException('any'),
+        );
+
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+        final notifier = container.read(scannerCameraProvider.notifier);
+
+        // Trigger a barcode scan that will fail (product not found)
+        await notifier.resolveBarcode('9999999999999');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        // After ScanFailed is handled, scanResolution must be cleared so the
+        // next barcode detection is not blocked by the null guard.
+        expect(container.read(scannerCameraProvider).scanResolution, isNull);
+      },
+    );
   });
 }
