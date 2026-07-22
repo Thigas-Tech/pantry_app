@@ -40,8 +40,6 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _animationController;
 
-  bool _hasScanned = false;
-
   @override
   void initState() {
     super.initState();
@@ -75,7 +73,6 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
       final status = await Permission.camera.status;
       if (status.isGranted) {
         logInfo('Permission granted upon resume — retrying scanner');
-        _hasScanned = false;
         await ref.read(scannerCameraProvider.notifier).retryScanner();
       }
     } on Exception catch (e) {
@@ -84,18 +81,13 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
   }
 
   void _onBarcodeDetected(BarcodeCapture capture) {
-    if (_hasScanned) {
-      logInfo('Scan already in progress — ignoring duplicate');
-      return;
-    }
     if (capture.barcodes.isEmpty) return;
     final barcode = capture.barcodes.first.rawValue;
     if (barcode == null) return;
 
     final state = ref.read(scannerCameraProvider);
-    if (state.scanResolution is ScanResolving) return;
+    if (state.scanResolution != null) return;
 
-    _hasScanned = true;
     logInfo('Barcode scanned: $barcode');
     unawaited(HapticFeedback.mediumImpact());
     unawaited(
