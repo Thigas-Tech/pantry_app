@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the resolveBarcode method from the ScannerCamera class, for the Dart programming language.">
+  <title>resolveBarcode method - ScannerCamera class - scanner_providers library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../providers_scanner_providers/">providers&#47;scanner_providers.dart</a></li>
+    <li><a href="../../providers_scanner_providers/ScannerCamera-class.html">ScannerCamera</a></li>
+    <li class="self-crumb">resolveBarcode method</li>
+  </ol>
+  <div class="self-name">resolveBarcode</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="providers_scanner_providers&#47;ScannerCamera-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">resolveBarcode</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">resolveBarcode</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="resolveBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
+<li><span class="parameter" id="resolveBarcode-param-timeout"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">timeout</span> = <span class="default-value">const Duration(seconds: 15)</span>, </span></li>
+</ol>})
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Resolves a <code>barcode</code> via <a href="../../providers_product_repository_provider/productRepositoryProvider.html">productRepositoryProvider</a>.</p>
+<p>Sets <a href="../../providers_scanner_providers/ScanResolved-class.html">ScanResolved</a> on success or <a href="../../providers_scanner_providers/ScanFailed-class.html">ScanFailed</a> on failure. Calls while
+a resolution is already in progress are silently ignored.</p>
+<p>If resolution takes longer than <code>timeout</code>, a <a href="https://api.flutter.dev/flutter/dart-async/TimeoutException-class.html">TimeoutException</a> is
+caught and <a href="../../providers_scanner_providers/ScanFailed-class.html">ScanFailed</a> with message <code>'TIMEOUT'</code> is emitted.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; resolveBarcode(
+  String barcode, {
+  Duration timeout = const Duration(seconds: 15),
+}) async {
+  if (state.scanResolution != null) return;
+  logInfo(&#39;Resolving barcode: $barcode&#39;);
+  state = state.copyWith(scanResolution: const ScanResolving());
+  try {
+    final repo = ref.read(productRepositoryProvider);
+    final product = await repo.getProduct(barcode).timeout(timeout);
+    logInfo(&#39;Barcode resolved: ${product.name}&#39;);
+    state = state.copyWith(scanResolution: ScanResolved(product));
+  } on ProductNotFoundException {
+    logInfo(&#39;Product not found for barcode: $barcode&#39;);
+    state = state.copyWith(
+      scanResolution: const ScanFailed(&#39;PRODUCT_NOT_FOUND&#39;),
+    );
+  } on TimeoutException {
+    logWarning(&#39;Barcode resolution timed out: $barcode&#39;);
+    state = state.copyWith(scanResolution: const ScanFailed(&#39;TIMEOUT&#39;));
+  } on Exception catch (e) {
+    logError(&#39;Barcode resolution failed: $e&#39;);
+    state = state.copyWith(scanResolution: ScanFailed(e.toString()));
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../providers_scanner_providers/">scanner_providers</a></li>
+    <li><a href="../../providers_scanner_providers/ScannerCamera-class.html">ScannerCamera</a></li>
+    <li class="self-crumb">resolveBarcode method</li>
+</ol>
+
+    <h5>ScannerCamera class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.8+4
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

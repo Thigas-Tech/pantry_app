@@ -57,12 +57,12 @@
   <p>A unified input screen for barcodes and produce PLU codes.</p>
 <p>Offers three modes:</p>
 <ul>
-<li>Camera scanner via <a href="https://pub.dev/documentation/mobile_scanner/7.4.0/mobile_scanner/MobileScanner-class.html">MobileScanner</a> for barcodes.</li>
+<li>Camera scanner via <a href="../widgets_scanner_camera_view/ScannerCameraView-class.html">ScannerCameraView</a> for barcodes.</li>
 <li>Manual barcode text entry.</li>
 <li>PLU code entry via numeric keypad for produce without barcodes.</li>
 </ul>
-<p>Returns a <a href="../services_scan_result/ScanResult-class.html">ScanResult</a> via <a href="https://api.flutter.dev/flutter/widgets/Navigator/pop.html">Navigator.pop</a>. The user is prompted for
-confirmation before navigating away with no result.</p>
+<p>Automatically navigates to <a href="../screens_product_detail_screen/ProductDetailScreen-class.html">ProductDetailScreen</a> when a barcode or PLU
+code is successfully resolved via <a href="../providers_scanner_providers/scannerCameraProvider.html">scannerCameraProvider</a>.</p>
 </section>
 
 
@@ -76,6 +76,7 @@ confirmation before navigating away with no result.</p>
         <li><a href="https://api.flutter.dev/flutter/foundation/DiagnosticableTree-class.html">DiagnosticableTree</a></li>
         <li><a href="https://api.flutter.dev/flutter/widgets/Widget-class.html">Widget</a></li>
         <li><a href="https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html">StatefulWidget</a></li>
+        <li><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/ConsumerStatefulWidget-class.html">ConsumerStatefulWidget</a></li>
       <li>ScannerScreen</li>
     </ul>
   </dd>
@@ -141,7 +142,7 @@ confirmation before navigating away with no result.</p>
 
 </dt>
 <dd>
-  The PLU code→name lookup service.
+  The PLU code-to-name lookup service.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -168,8 +169,8 @@ confirmation before navigating away with no result.</p>
     <h2>Methods</h2>
     <dl class="callables">
         <dt id="createElement" class="callable inherited">
-  <span class="name"><a href="https://api.flutter.dev/flutter/widgets/StatefulWidget/createElement.html">createElement</a></span><span class="signature">(<wbr>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/widgets/StatefulElement-class.html">StatefulElement</a></span>
+  <span class="name"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/ConsumerStatefulWidget/createElement.html">createElement</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; ConsumerStatefulElement</span>
   </span>
   
 
@@ -182,7 +183,7 @@ confirmation before navigating away with no result.</p>
 
         <dt id="createState" class="callable">
   <span class="name"><a href="../screens_scanner_screen/ScannerScreen/createState.html">createState</a></span><span class="signature">(<wbr>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/widgets/State-class.html">State</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../screens_scanner_screen/ScannerScreen-class.html">ScannerScreen</a></span>&gt;</span></span>
+    <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/ConsumerState-class.html">ConsumerState</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../screens_scanner_screen/ScannerScreen-class.html">ScannerScreen</a></span>&gt;</span></span>
   </span>
   
 
