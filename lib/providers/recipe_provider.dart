@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
 import 'package:pantry_app/database/recipe_ingredient_dao.dart';
 import 'package:pantry_app/models/recipe.dart';
-import 'package:pantry_app/models/recipe_history_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';

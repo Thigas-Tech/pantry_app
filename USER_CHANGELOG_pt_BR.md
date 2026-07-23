@@ -1,5 +1,25 @@
 # Registro de alteracoes do usuario
 
+## [0.0.10]
+
+- Tela de detalhes da receita: veja ingredientes, instrucoes e custo de
+  qualquer receita. Toque em uma receita na lista para abri-la.
+- "Fiz esta receita": marque uma receita como feita — os ingredientes sao
+  deduzidos automaticamente da sua despensa (primeiro os mais antigos).
+  Avisos de falta impedem o cozimento quando nao ha estoque suficiente.
+  Acao desfeita via undo.
+- Historico de receitas: toda vez que voce cozinha uma receita, fica
+  registrado permanentemente.
+- Olho: alternar visibilidade de precos nas telas de lista e detalhes da
+  receita, igual nas telas inicial e de estatisticas.
+
+## [0.0.9]
+
+- Registro de receitas: salve receitas com ingredientes e instrucoes,
+  auto-preenchidas a partir da sua despensa. Visualize, edite e exclua receitas.
+- Custo da receita: veja quanto cada receita custa, mais a media de todas as
+  receitas. Os custos usam sua configuracao de moeda.
+
 ## [0.0.8+4]
 
 - Os dados dos produtos agora sao armazenados em cache na nuvem, tornando as

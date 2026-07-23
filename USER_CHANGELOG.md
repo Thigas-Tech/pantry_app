@@ -1,5 +1,23 @@
 # User Changelog
 
+## [0.0.10]
+
+- Recipe detail screen: view full ingredients, instructions, and cost of any
+  recipe. Tap a recipe in the list to open it.
+- "I made this": mark a recipe as cooked — ingredients are automatically
+  deducted from your pantry (oldest first). Shortage warnings prevent
+  cooking when you don't have enough stock. Undo supported.
+- Recipe history: every time you cook a recipe, it's logged permanently.
+- Eye icon: toggle price visibility on the recipe list and detail screens,
+  just like the home and stats screens.
+
+## [0.0.9]
+
+- Recipe registration: save recipes with ingredients and instructions,
+  auto-populated from your pantry. View, edit, and delete recipes.
+- Recipe cost: see how much each recipe costs, plus the average across all
+  recipes. Costs use your currency setting.
+
 ## [0.0.8+4]
 
 - Product data is now cached in the cloud, making repeat lookups faster even
