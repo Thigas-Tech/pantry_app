@@ -123,6 +123,18 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(scannerCameraProvider, (prev, next) {
+      final wasStreaming = prev?.isStreaming ?? false;
+      if (!wasStreaming &&
+          next.isStreaming &&
+          next.cameraError == null &&
+          mounted) {
+        if (!_animationController.isAnimating) {
+          unawaited(_animationController.repeat(reverse: true));
+        }
+      }
+    });
+
     final cameraState = ref.watch(scannerCameraProvider);
     final controller = ref.watch(mobileScannerControllerProvider);
     final l10n = AppLocalizations.of(context)!;
