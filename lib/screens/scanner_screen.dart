@@ -55,7 +55,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     switch (resolution) {
       case ScanResolved(:final product):
         logInfo('Scan resolved: ${product.name}');
-        ref.read(scannerCameraProvider.notifier).clearResolution();
         unawaited(_navigateToProduct(product));
       case ScanFailed(:final message) when message == 'PRODUCT_NOT_FOUND':
         final l10n = AppLocalizations.of(context)!;
@@ -79,7 +78,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
         builder: (_) => ProductDetailScreen(product: product),
       ),
     );
-    logInfo('Returned from ProductDetailScreen — invalidating pantry');
+    logInfo('Returned from ProductDetailScreen — clearing resolution');
+    ref.read(scannerCameraProvider.notifier).clearResolution();
     await Future.microtask(
       () => ref.invalidate(pantryProvider),
     );

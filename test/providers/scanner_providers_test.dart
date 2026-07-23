@@ -187,6 +187,29 @@ void main() {
       expect(state.scanResolution, isA<ScanResolved>());
     });
 
+    test('resolveBarcode ignored when ScanResolved is already set', () async {
+      const barcode = '5012345678900';
+      const product = Product(barcode: barcode, name: 'Test');
+      when(
+        () => mockRepo.getProduct(barcode),
+      ).thenAnswer((_) async => product);
+
+      final notifier = container.read(scannerCameraProvider.notifier);
+      await notifier.resolveBarcode(barcode);
+      expect(
+        container.read(scannerCameraProvider).scanResolution,
+        isA<ScanResolved>(),
+      );
+
+      // Second resolve must be a no-op when ScanResolved is active.
+      await notifier.resolveBarcode('9999999999999');
+      final state = container.read(scannerCameraProvider);
+      expect(state.scanResolution, isA<ScanResolved>());
+      final resolved = state.scanResolution! as ScanResolved;
+      // Verify the product is still from the first call, not overwritten.
+      expect(resolved.product.barcode, barcode);
+    });
+
     test('clearResolution resets scan resolution', () async {
       const barcode = '5012345678900';
       const product = Product(barcode: barcode, name: 'Test');

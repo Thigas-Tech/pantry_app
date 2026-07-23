@@ -257,7 +257,7 @@ class ScannerCamera extends _$ScannerCamera {
   /// Sets [ScanResolved] on success or [ScanFailed] on failure. Calls while
   /// a resolution is already in progress are silently ignored.
   Future<void> resolveBarcode(String barcode) async {
-    if (state.scanResolution is ScanResolving) return;
+    if (state.scanResolution != null) return;
     logInfo('Resolving barcode: $barcode');
     state = state.copyWith(scanResolution: const ScanResolving());
     try {
@@ -286,7 +286,7 @@ class ScannerCamera extends _$ScannerCamera {
     required String produceName,
     required String languageCode,
   }) async {
-    if (state.scanResolution is ScanResolving) return;
+    if (state.scanResolution != null) return;
     logInfo('Resolving PLU: $pluCode ($produceName)');
     state = state.copyWith(scanResolution: const ScanResolving());
     try {
