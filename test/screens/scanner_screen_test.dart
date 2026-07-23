@@ -16,6 +16,19 @@ import '../helpers/pump_app.dart';
 class _FakeScannerCamera extends ScannerCamera {
   @override
   ScannerCameraState build() => const ScannerCameraState();
+
+  @override
+  Future<void> stopCamera() async {
+    state = state.copyWith(isStreaming: false);
+  }
+
+  @override
+  Future<void> resolveBarcode(
+    String barcode, {
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    // No-op for widget tests — avoids real resolution.
+  }
 }
 
 void main() {
@@ -116,6 +129,160 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
 
         expect(find.text('Enter PLU Code'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'manual entry accepts 6-digit input (UPC-E length)',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await tester.enterText(find.byType(TextField), '123456');
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Submit'));
+        await tester.pump();
+
+        // Should NOT show invalid-barcode warning
+        expect(
+          find.text('Enter a valid barcode number.'),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets(
+      'manual entry rejects 3-digit input',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await tester.enterText(find.byType(TextField), '123');
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Submit'));
+        await tester.pump();
+
+        expect(
+          find.text('Enter a valid barcode number.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'switching from camera to manual stops the camera',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+
+        // Start streaming
+        final notifier = container.read(scannerCameraProvider.notifier);
+        final camState = container.read(scannerCameraProvider);
+        notifier.state = camState.copyWith(isStreaming: true);
+        await tester.pump();
+        expect(container.read(scannerCameraProvider).isStreaming, true);
+
+        // Switch to manual entry
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+
+        expect(container.read(scannerCameraProvider).isStreaming, false);
+      },
+    );
+
+    testWidgets(
+      'switching from camera to PLU stops the camera',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+
+        final notifier = container.read(scannerCameraProvider.notifier);
+        final camState = container.read(scannerCameraProvider);
+        notifier.state = camState.copyWith(isStreaming: true);
+        await tester.pump();
+        expect(container.read(scannerCameraProvider).isStreaming, true);
+
+        // Switch to PLU entry
+        await tester.tap(find.byIcon(Icons.dialpad));
+        await tester.pump();
+
+        expect(container.read(scannerCameraProvider).isStreaming, false);
+      },
+    );
+
+    testWidgets(
+      'switching from manual back to camera retries the scanner',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+        final initialKey = container.read(scannerCameraProvider).scannerKey;
+
+        // Switch to manual then back to camera
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.camera_alt));
+        await tester.pump();
+
+        // retryScanner increments scannerKey
+        expect(
+          container.read(scannerCameraProvider).scannerKey,
+          greaterThan(initialKey),
+        );
       },
     );
 

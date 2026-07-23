@@ -433,7 +433,7 @@
   "includeDeviceInfo": "Incluir informações do dispositivo",
   "ingredientsOriginal": "Show original ingredients",
   "ingredientsTranslated": "Show translated ingredients",
-  "invalidBarcode": "Digite um c\u00F3digo de barras v\u00E1lido (8-13 d\u00EDgitos).",
+  "invalidBarcode": "Digite um c\u00F3digo de barras v\u00E1lido.",
   "invalidPriceAmount": "Digite um valor de pre\u00E7o v\u00E1lido",
   "issueCreate": "Criar issue",
   "issueDescription": "Descrição",

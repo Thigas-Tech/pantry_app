@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/off_adapter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 
@@ -27,7 +31,14 @@ class FakeScannerCamera extends ScannerCamera {
       clearError: true,
     );
   }
+
+  @override
+  Future<void> stopCamera() async {
+    state = state.copyWith(isStreaming: false);
+  }
 }
+
+class MockOffAdapter extends Mock implements OffAdapter {}
 
 void main() {
   group('ScannerCameraState', () {
@@ -95,13 +106,16 @@ void main() {
   group('ScannerCameraProvider', () {
     late ProviderContainer container;
     late MockProductRepository mockRepo;
+    late MockOffAdapter mockOff;
 
     setUp(() {
       SharedPreferences.setMockInitialValues({});
       mockRepo = createMockProductRepository();
+      mockOff = MockOffAdapter();
       container = ProviderContainer(
         overrides: [
           productRepositoryProvider.overrideWithValue(mockRepo),
+          apiServiceProvider.overrideWithValue(mockOff),
           scannerCameraProvider.overrideWith(FakeScannerCamera.new),
         ],
       );
@@ -210,6 +224,115 @@ void main() {
       expect(resolved.product.barcode, barcode);
     });
 
+    test(
+      'resolveBarcode timeout sets ScanFailed with TIMEOUT message',
+      () async {
+        const barcode = '5012345678900';
+        final completer = Completer<Product>();
+        when(() => mockRepo.getProduct(barcode)).thenAnswer(
+          (_) => completer.future,
+        );
+
+        // Keep provider alive during the async gap.
+        final sub = container.listen<ScannerCameraState>(
+          scannerCameraProvider,
+          (_, __) {},
+        );
+        addTearDown(sub.close);
+        final notifier = container.read(scannerCameraProvider.notifier);
+        await notifier.resolveBarcode(
+          barcode,
+          timeout: const Duration(milliseconds: 100),
+        );
+
+        final state = container.read(scannerCameraProvider);
+        expect(state.scanResolution, isA<ScanFailed>());
+        expect(
+          (state.scanResolution! as ScanFailed).message,
+          'TIMEOUT',
+        );
+      },
+    );
+
+    test('after timeout, clearResolution unblocks scanner', () async {
+      const barcode = '5012345678900';
+      final completer = Completer<Product>();
+      when(() => mockRepo.getProduct(barcode)).thenAnswer(
+        (_) => completer.future,
+      );
+
+      final sub = container.listen<ScannerCameraState>(
+        scannerCameraProvider,
+        (_, __) {},
+      );
+      addTearDown(sub.close);
+      final notifier = container.read(scannerCameraProvider.notifier);
+      await notifier.resolveBarcode(
+        barcode,
+        timeout: const Duration(milliseconds: 100),
+      );
+      notifier.clearResolution();
+
+      expect(container.read(scannerCameraProvider).scanResolution, isNull);
+    });
+
+    test('resolvePlu succeeds and sets ScanResolved', () async {
+      const pluCode = '4011';
+      const produceName = 'Banana';
+      when(
+        () => mockOff.searchProducts(
+          produceName,
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenAnswer(
+        (_) async => [const Product(barcode: '000', name: 'Banana')],
+      );
+
+      final notifier = container.read(scannerCameraProvider.notifier);
+      await notifier.resolvePlu(
+        pluCode: pluCode,
+        produceName: produceName,
+        languageCode: 'en',
+      );
+
+      final state = container.read(scannerCameraProvider);
+      expect(state.scanResolution, isA<ScanResolved>());
+      final resolved = state.scanResolution! as ScanResolved;
+      expect(resolved.product.pluCode, pluCode);
+    });
+
+    test('resolvePlu timeout sets ScanFailed with TIMEOUT', () async {
+      const pluCode = '4011';
+      const produceName = 'Banana';
+      final completer = Completer<List<Product>>();
+      when(
+        () => mockOff.searchProducts(
+          produceName,
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenAnswer((_) => completer.future);
+
+      final sub = container.listen<ScannerCameraState>(
+        scannerCameraProvider,
+        (_, __) {},
+      );
+      addTearDown(sub.close);
+      final notifier = container.read(scannerCameraProvider.notifier);
+      await notifier.resolvePlu(
+        pluCode: pluCode,
+        produceName: produceName,
+        languageCode: 'en',
+        timeout: const Duration(milliseconds: 100),
+      );
+
+      final state = container.read(scannerCameraProvider);
+      expect(state.scanResolution, isA<ScanFailed>());
+      expect(
+        (state.scanResolution! as ScanFailed).message,
+        'TIMEOUT',
+      );
+    });
+
     test('clearResolution resets scan resolution', () async {
       const barcode = '5012345678900';
       const product = Product(barcode: barcode, name: 'Test');
@@ -238,6 +361,18 @@ void main() {
       expect(
         container.read(scannerCameraProvider).scannerKey,
         greaterThan(initialKey),
+      );
+    });
+
+    test('stopCamera sets isStreaming to false', () async {
+      final notifier = container.read(scannerCameraProvider.notifier);
+      // Simulate streaming state
+      final current = container.read(scannerCameraProvider);
+      notifier.state = current.copyWith(isStreaming: true);
+      await notifier.stopCamera();
+      expect(
+        container.read(scannerCameraProvider).isStreaming,
+        false,
       );
     });
   });

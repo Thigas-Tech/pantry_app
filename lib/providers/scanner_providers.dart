@@ -242,6 +242,18 @@ class ScannerCamera extends _$ScannerCamera {
     }
   }
 
+  /// Stops the camera controller to save resources when the user switches
+  /// to manual or PLU entry mode.
+  Future<void> stopCamera() async {
+    logInfo('Stopping camera controller');
+    try {
+      await _controller?.stop();
+      state = state.copyWith(isStreaming: false);
+    } on Exception catch (e) {
+      logWarning('Failed to stop camera: $e');
+    }
+  }
+
   /// Toggles the camera torch on / off.
   Future<void> toggleTorch() async {
     logInfo('Toggling torch');
@@ -256,13 +268,19 @@ class ScannerCamera extends _$ScannerCamera {
   ///
   /// Sets [ScanResolved] on success or [ScanFailed] on failure. Calls while
   /// a resolution is already in progress are silently ignored.
-  Future<void> resolveBarcode(String barcode) async {
+  ///
+  /// If resolution takes longer than [timeout], a [TimeoutException] is
+  /// caught and [ScanFailed] with message `'TIMEOUT'` is emitted.
+  Future<void> resolveBarcode(
+    String barcode, {
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
     if (state.scanResolution != null) return;
     logInfo('Resolving barcode: $barcode');
     state = state.copyWith(scanResolution: const ScanResolving());
     try {
       final repo = ref.read(productRepositoryProvider);
-      final product = await repo.getProduct(barcode);
+      final product = await repo.getProduct(barcode).timeout(timeout);
       logInfo('Barcode resolved: ${product.name}');
       state = state.copyWith(scanResolution: ScanResolved(product));
     } on ProductNotFoundException {
@@ -270,6 +288,9 @@ class ScannerCamera extends _$ScannerCamera {
       state = state.copyWith(
         scanResolution: const ScanFailed('PRODUCT_NOT_FOUND'),
       );
+    } on TimeoutException {
+      logWarning('Barcode resolution timed out: $barcode');
+      state = state.copyWith(scanResolution: const ScanFailed('TIMEOUT'));
     } on Exception catch (e) {
       logError('Barcode resolution failed: $e');
       state = state.copyWith(scanResolution: ScanFailed(e.toString()));
@@ -281,20 +302,26 @@ class ScannerCamera extends _$ScannerCamera {
   /// Sets [ScanResolved] with an enriched produce product on success, or
   /// [ScanFailed] with `'PLU_NOT_FOUND'` when the OFF search returns no
   /// results.
+  ///
+  /// If resolution takes longer than [timeout], a [TimeoutException] is
+  /// caught and [ScanFailed] with message `'TIMEOUT'` is emitted.
   Future<void> resolvePlu({
     required String pluCode,
     required String produceName,
     required String languageCode,
+    Duration timeout = const Duration(seconds: 15),
   }) async {
     if (state.scanResolution != null) return;
     logInfo('Resolving PLU: $pluCode ($produceName)');
     state = state.copyWith(scanResolution: const ScanResolving());
     try {
       final api = ref.read(apiServiceProvider);
-      final results = await api.searchProducts(
-        produceName,
-        languageCode: languageCode,
-      );
+      final results = await api
+          .searchProducts(
+            produceName,
+            languageCode: languageCode,
+          )
+          .timeout(timeout);
       if (results.isNotEmpty) {
         final best = results.firstWhere(
           (p) => p.name.toLowerCase().contains(produceName.toLowerCase()),
@@ -312,6 +339,9 @@ class ScannerCamera extends _$ScannerCamera {
           scanResolution: const ScanFailed('PLU_NOT_FOUND'),
         );
       }
+    } on TimeoutException {
+      logWarning('PLU resolution timed out: $pluCode ($produceName)');
+      state = state.copyWith(scanResolution: const ScanFailed('TIMEOUT'));
     } on Exception catch (e) {
       logError('PLU resolution failed: $e');
       state = state.copyWith(scanResolution: ScanFailed(e.toString()));

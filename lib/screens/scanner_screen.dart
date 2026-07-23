@@ -150,6 +150,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
         pluService: _pluService,
         onSwitchToCamera: () {
           logInfo('Switched to camera scanner from PLU');
+          unawaited(ref.read(scannerCameraProvider.notifier).retryScanner());
           setState(() {
             _showPluEntry = false;
             _showManualEntry = false;
@@ -162,6 +163,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       return _ManualEntryView(
         onSwitchToCamera: () {
           logInfo('Switched to camera scanner');
+          unawaited(ref.read(scannerCameraProvider.notifier).retryScanner());
           setState(() => _showManualEntry = false);
         },
         onSubmitBarcode: _submitBarcode,
@@ -170,10 +172,12 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     return ScannerCameraView(
       onSwitchToManual: () {
         logInfo('Switched to manual entry');
+        unawaited(ref.read(scannerCameraProvider.notifier).stopCamera());
         setState(() => _showManualEntry = true);
       },
       onSwitchToPlu: () {
         logInfo('Switched to PLU entry');
+        unawaited(ref.read(scannerCameraProvider.notifier).stopCamera());
         setState(() => _showPluEntry = true);
       },
     );
@@ -201,7 +205,7 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
 
   void _submit() {
     final text = _controller.text.trim();
-    if (text.isEmpty || text.length < 8 || !RegExp(r'^\d+$').hasMatch(text)) {
+    if (text.isEmpty || text.length < 4 || !RegExp(r'^\d+$').hasMatch(text)) {
       final l10n = AppLocalizations.of(context)!;
       SnackbarHelper.showWarning(context, l10n.invalidBarcode);
       return;

@@ -74,6 +74,10 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
       if (status.isGranted) {
         logInfo('Permission granted upon resume — retrying scanner');
         await ref.read(scannerCameraProvider.notifier).retryScanner();
+      } else if (mounted) {
+        logInfo('Permission still denied after resume — showing hint');
+        final l10n = AppLocalizations.of(context)!;
+        SnackbarHelper.showWarning(context, l10n.cameraPermissionDenied);
       }
     } on Exception catch (e) {
       logWarning('Resume retry failed: $e');
