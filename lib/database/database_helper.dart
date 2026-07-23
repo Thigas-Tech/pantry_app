@@ -5,11 +5,17 @@ import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/database/product_submission_queue_dao.dart';
+import 'package:pantry_app/database/recipe_dao.dart';
+import 'package:pantry_app/database/recipe_history_dao.dart';
+import 'package:pantry_app/database/recipe_ingredient_dao.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/database/store_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/models/recipe_history_entry.dart';
+import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -30,7 +36,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Nine tables are created on first launch (version 24):
+/// Twelve tables are created on first launch (version 26):
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -40,13 +46,16 @@ import 'package:sqflite/sqflite.dart';
 /// - shopping_list – items the user intends to buy.
 /// - stores – saved store names for autocomplete.
 /// - firebase_cache_meta – Firestore cache sync metadata.
+/// - recipes – user-created recipes.
+/// - recipe_ingredients – ingredients linked to a recipe.
 ///
 /// ## Delegation
 ///
 /// CRUD operations are delegated to dedicated DAO classes:
 /// [ProductDao], [InventoryDao], [InventoriesDao], [PriceDao],
 /// [ShoppingListDao], [StoreDao], [FeedbackQueueDao],
-/// [ProductSubmissionQueueDao], [FirebaseCacheMetaDao].
+/// [ProductSubmissionQueueDao], [FirebaseCacheMetaDao],
+/// [RecipeDao], [RecipeIngredientDao].
 ///
 /// See also:
 /// - [sqflite](https://pub.dev/packages/sqflite) — the SQLite plugin
@@ -97,6 +106,15 @@ class DatabaseHelper {
   final FirebaseCacheMetaDao firebaseCacheMetaDao =
       const FirebaseCacheMetaDao();
 
+  /// DAO for the recipes table.
+  final RecipeDao recipeDao = const RecipeDao();
+
+  /// DAO for the recipe_ingredients table.
+  final RecipeIngredientDao recipeIngredientDao = const RecipeIngredientDao();
+
+  /// DAO for the recipe_history table.
+  final RecipeHistoryDao recipeHistoryDao = const RecipeHistoryDao();
+
   /// The lazily‑opened database instance.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -110,7 +128,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 24,
+        version: 26,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -210,6 +228,12 @@ class DatabaseHelper {
     await _createStoresTable(db);
 
     await firebaseCacheMetaDao.createTable(db);
+
+    await recipeDao.createTable(db);
+
+    await recipeIngredientDao.createTable(db);
+
+    await recipeHistoryDao.createTable(db);
 
     await inventoriesDao.seedDefault(db);
 
@@ -519,6 +543,25 @@ class DatabaseHelper {
         logInfo('Migration to version 24 (firebase_cache_meta) completed');
       } on Exception catch (e) {
         logWarning('Migration v24 failed: $e');
+      }
+    }
+    if (oldVersion < 25) {
+      try {
+        await recipeDao.createTable(db);
+        await recipeIngredientDao.createTable(db);
+        logInfo(
+          'Migration to version 25 (recipes + recipe_ingredients) completed',
+        );
+      } on Exception catch (e) {
+        logWarning('Migration v25 failed: $e');
+      }
+    }
+    if (oldVersion < 26) {
+      try {
+        await recipeHistoryDao.createTable(db);
+        logInfo('Migration to version 26 (recipe_history) completed');
+      } on Exception catch (e) {
+        logWarning('Migration v26 failed: $e');
       }
     }
     logInfo('Database upgrade completed');
@@ -1005,5 +1048,178 @@ class DatabaseHelper {
   Future<List<Store>> getAllStores() async {
     final db = await database;
     return storeDao.getAll(db);
+  }
+
+  // ---- Recipe (delegating to RecipeDao + RecipeIngredientDao) -------
+
+  /// Inserts a new recipe and returns its row ID.
+  Future<int> insertRecipe(Recipe recipe) async {
+    final db = await database;
+    return recipeDao.insert(db, recipe);
+  }
+
+  /// Returns the recipe with the given [id], or null.
+  Future<Recipe?> getRecipe(int id) async {
+    final db = await database;
+    return recipeDao.get(db, id);
+  }
+
+  /// Returns all recipes, ordered by updated_at descending.
+  Future<List<Recipe>> getAllRecipes() async {
+    final db = await database;
+    return recipeDao.listAll(db);
+  }
+
+  /// Updates an existing recipe. Returns rows affected.
+  Future<int> updateRecipe(Recipe recipe) async {
+    final db = await database;
+    return recipeDao.update(db, recipe);
+  }
+
+  /// Deletes the recipe with the given [id]. Returns rows deleted.
+  Future<int> deleteRecipe(int id) async {
+    final db = await database;
+    return recipeDao.delete(db, id);
+  }
+
+  /// Returns the total number of recipes.
+  Future<int> getRecipeCount() async {
+    final db = await database;
+    return recipeDao.count(db);
+  }
+
+  /// Inserts a recipe ingredient and returns its row ID.
+  Future<int> insertRecipeIngredient(RecipeIngredient ingredient) async {
+    final db = await database;
+    return recipeIngredientDao.insert(db, ingredient);
+  }
+
+  /// Returns all ingredients for the given [recipeId].
+  Future<List<RecipeIngredient>> getRecipeIngredients(int recipeId) async {
+    final db = await database;
+    return recipeIngredientDao.listByRecipeId(db, recipeId);
+  }
+
+  /// Deletes all ingredients for the given [recipeId]. Returns rows deleted.
+  Future<int> deleteRecipeIngredients(int recipeId) async {
+    final db = await database;
+    return recipeIngredientDao.deleteByRecipeId(db, recipeId);
+  }
+
+  /// Inserts a recipe and its ingredients in a single transaction.
+  ///
+  /// Returns the generated recipe id on success. If any insert fails the
+  /// entire transaction is rolled back.
+  Future<int> insertRecipeWithIngredients(
+    Recipe recipe,
+    List<RecipeIngredient> ingredients,
+  ) async {
+    final db = await database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final stamped = recipe.createdAt == 0
+        ? recipe.copyWith(createdAt: now)
+        : recipe;
+    final finalRecipe = stamped.updatedAt == 0
+        ? stamped.copyWith(updatedAt: now)
+        : stamped;
+    final recipeMap = recipeDao.toMap(finalRecipe);
+    // Remove id so SQLite auto-generates it.
+    recipeMap.remove('id');
+
+    return db.transaction<int>((txn) async {
+      final recipeId = await txn.insert('recipes', recipeMap);
+      for (final ingredient in ingredients) {
+        final ingMap = recipeIngredientDao.toMap(
+          ingredient.copyWith(recipeId: recipeId),
+        );
+        ingMap.remove('id');
+        await txn.insert('recipe_ingredients', ingMap);
+      }
+      return recipeId;
+    });
+  }
+
+  /// Updates a recipe and replaces all of its ingredients in a single
+  /// transaction.
+  ///
+  /// Old ingredients are deleted and the new [ingredients] list is inserted.
+  /// If any step fails the entire transaction is rolled back.
+  Future<void> updateRecipeWithIngredients(
+    Recipe recipe,
+    List<RecipeIngredient> ingredients,
+  ) async {
+    final db = await database;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    // Preserve original createdAt.
+    final existing = await recipeDao.get(db, recipe.id!);
+    final preserved = existing?.createdAt ?? recipe.createdAt;
+    final updated = recipe.copyWith(createdAt: preserved, updatedAt: now);
+    final recipeMap = recipeDao.toMap(updated);
+
+    return db.transaction((txn) async {
+      await txn.update(
+        'recipes',
+        recipeMap,
+        where: 'id = ?',
+        whereArgs: [recipe.id],
+      );
+      await txn.delete(
+        'recipe_ingredients',
+        where: 'recipe_id = ?',
+        whereArgs: [recipe.id],
+      );
+      for (final ingredient in ingredients) {
+        final ingMap = recipeIngredientDao.toMap(
+          ingredient.copyWith(recipeId: recipe.id!),
+        );
+        ingMap.remove('id');
+        await txn.insert('recipe_ingredients', ingMap);
+      }
+    });
+  }
+
+  // ---- Recipe History (delegating to RecipeHistoryDao) -------
+
+  /// Inserts a recipe history entry and returns its row ID.
+  Future<int> insertRecipeHistory(RecipeHistoryEntry entry) async {
+    final db = await database;
+    return recipeHistoryDao.insert(db, entry);
+  }
+
+  /// Returns all history entries for the given [recipeId], newest first.
+  Future<List<RecipeHistoryEntry>> getRecipeHistory(int recipeId) async {
+    final db = await database;
+    return recipeHistoryDao.getByRecipeId(db, recipeId);
+  }
+
+  /// Returns all history entries made at or after [sinceMillis].
+  Future<List<RecipeHistoryEntry>> getRecentRecipeHistory(
+    int sinceMillis,
+  ) async {
+    final db = await database;
+    return recipeHistoryDao.getRecent(db, sinceMillis);
+  }
+
+  /// Deletes the history entry with the given [historyId].
+  Future<void> deleteRecipeHistory(int historyId) async {
+    final db = await database;
+    return recipeHistoryDao.deleteById(db, historyId);
+  }
+
+  // ---- FEFO inventory query -------
+
+  /// Returns inventory rows matching [barcode] in the given [inventoryId],
+  /// ordered by expiry_date ASC (nulls last) for FEFO deduction.
+  Future<List<Map<String, dynamic>>> getInventoryRowsByBarcode({
+    required String barcode,
+    required int inventoryId,
+  }) async {
+    final db = await database;
+    return db.rawQuery(
+      'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
+      ' ORDER BY expiry_date ASC NULLS LAST',
+      [barcode, inventoryId],
+    );
   }
 }
