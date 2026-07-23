@@ -236,7 +236,7 @@ void main() {
         // Keep provider alive during the async gap.
         final sub = container.listen<ScannerCameraState>(
           scannerCameraProvider,
-          (_, __) {},
+          (_, _) {},
         );
         addTearDown(sub.close);
         final notifier = container.read(scannerCameraProvider.notifier);
@@ -263,7 +263,7 @@ void main() {
 
       final sub = container.listen<ScannerCameraState>(
         scannerCameraProvider,
-        (_, __) {},
+        (_, _) {},
       );
       addTearDown(sub.close);
       final notifier = container.read(scannerCameraProvider.notifier);
@@ -314,7 +314,7 @@ void main() {
 
       final sub = container.listen<ScannerCameraState>(
         scannerCameraProvider,
-        (_, __) {},
+        (_, _) {},
       );
       addTearDown(sub.close);
       final notifier = container.read(scannerCameraProvider.notifier);
