@@ -5,9 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
-import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/home_screen_controller.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
@@ -18,10 +16,7 @@ import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
-import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/scan_result.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
-import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
@@ -233,102 +228,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Future<void> _scanBarcode(BuildContext context, WidgetRef ref) async {
     final navigator = Navigator.of(context);
-    final result = await navigator.push<ScanResult>(
+    await navigator.push<void>(
       MaterialPageRoute(builder: (_) => const ScannerScreen()),
     );
-    if (result == null) return;
-    if (!context.mounted) return;
-
-    switch (result) {
-      case BarcodeResult(:final barcode):
-        await _handleBarcodeResult(context, ref, barcode);
-      case PluResult(:final pluCode, :final produceName):
-        await _handlePluResult(context, ref, pluCode, produceName);
-    }
-  }
-
-  Future<void> _handleBarcodeResult(
-    BuildContext context,
-    WidgetRef ref,
-    String barcode,
-  ) async {
-    final navigator = Navigator.of(context);
-    final repo = ref.read(productRepositoryProvider);
-    try {
-      final product = await repo.getProduct(barcode);
-      if (mounted) {
-        await navigator.push<void>(
-          MaterialPageRoute(
-            builder: (_) => ProductDetailScreen(product: product),
-          ),
-        );
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(pantryProvider);
-        });
-      }
-    } on Exception catch (e) {
-      logWarning('Scan failed for $barcode: $e');
-      if (!context.mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      if (e is ProductNotFoundException) {
-        SnackbarHelper.showWarning(context, l10n.productNotFound);
-      } else {
-        SnackbarHelper.showError(context, l10n.scanFailed);
-      }
-    }
-  }
-
-  Future<void> _handlePluResult(
-    BuildContext context,
-    WidgetRef ref,
-    String pluCode,
-    String produceName,
-  ) async {
-    logInfo('PLU result: $pluCode — $produceName');
-    final navigator = Navigator.of(context);
-    final languageCode = Localizations.localeOf(context).languageCode;
-
-    try {
-      final api = ref.read(apiServiceProvider);
-      final results = await api.searchProducts(
-        produceName,
-        languageCode: languageCode,
-      );
-      if (results.isNotEmpty) {
-        final best = results.firstWhere(
-          (p) => p.name.toLowerCase().contains(produceName.toLowerCase()),
-          orElse: () => results.first,
-        );
-        final enriched = best.copyWith(
-          productType: ProductType.produce,
-          pluCode: pluCode,
-        );
-        if (mounted) {
-          await navigator.push<void>(
-            MaterialPageRoute(
-              builder: (_) => ProductDetailScreen(product: enriched),
-            ),
-          );
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.invalidate(pantryProvider);
-          });
-        }
-        return;
-      }
-    } on Exception catch (e) {
-      logWarning('OFF search failed for $produceName: $e');
-    }
-
-    if (mounted) {
-      await navigator.push<void>(
-        MaterialPageRoute(
-          builder: (_) => const SearchScreen(),
-        ),
-      );
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.invalidate(pantryProvider);
-      });
-    }
   }
 
   @override

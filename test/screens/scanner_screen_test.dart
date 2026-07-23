@@ -1,15 +1,40 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/widgets/scanner_camera_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
+
+/// Fake [ScannerCamera] that skips platform controller creation.
+class _FakeScannerCamera extends ScannerCamera {
+  @override
+  ScannerCameraState build() => const ScannerCameraState();
+
+  @override
+  Future<void> stopCamera() async {
+    state = state.copyWith(isStreaming: false);
+  }
+
+  @override
+  Future<void> resolveBarcode(
+    String barcode, {
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    // No-op for widget tests — avoids real resolution.
+  }
+}
 
 void main() {
   group('ScannerScreen', () {
     testWidgets(
-      'initial state shows loading indicator, manual entry, and torch button',
+      'initial state shows ScannerCameraView with edit and torch buttons',
       (
         tester,
       ) async {
@@ -22,9 +47,8 @@ void main() {
 
         expect(find.text('Scan Barcode'), findsOneWidget);
         expect(find.byIcon(Icons.edit), findsOneWidget);
-        expect(find.byIcon(Icons.flash_off), findsOneWidget);
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
-        expect(find.byType(CustomPaint), findsWidgets);
+        expect(find.byIcon(Icons.dialpad), findsOneWidget);
+        expect(find.byType(ScannerCameraView), findsOneWidget);
       },
     );
 
@@ -47,7 +71,7 @@ void main() {
       expect(find.widgetWithText(ElevatedButton, 'Submit'), findsOneWidget);
     });
 
-    testWidgets('manual entry: empty submit does not pop', (tester) async {
+    testWidgets('manual entry: empty submit shows warning', (tester) async {
       await pumpApp(
         tester,
         const ScannerScreen(),
@@ -63,145 +87,204 @@ void main() {
       expect(find.byType(ScannerScreen), findsOneWidget);
     });
 
-    testWidgets('manual entry: submit with barcode pops the route', (
-      tester,
-    ) async {
-      await pumpApp(
+    testWidgets(
+      'manual entry: camera button switches back to camera view',
+      (
         tester,
-        const ScannerScreen(),
-        settle: false,
-      );
-      await tester.pump();
-      await tester.tap(find.byIcon(Icons.edit));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      ) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          settle: false,
+        );
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
 
-      await tester.enterText(find.byType(TextField), '123456789');
-      await tester.pump();
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Submit'));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+        expect(find.text('Enter Barcode'), findsOneWidget);
 
-      expect(find.byType(ScannerScreen), findsNothing);
-    });
+        await tester.tap(find.byIcon(Icons.camera_alt));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
 
-    testWidgets('manual entry: camera button switches back to camera view', (
-      tester,
-    ) async {
-      await pumpApp(
+        expect(find.text('Scan Barcode'), findsOneWidget);
+        expect(find.byIcon(Icons.edit), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'manual entry: PLU button from camera switches to PLU view',
+      (
         tester,
-        const ScannerScreen(),
-        settle: false,
-      );
-      await tester.pump();
-      await tester.tap(find.byIcon(Icons.edit));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      ) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          settle: false,
+        );
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.dialpad));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.text('Enter Barcode'), findsOneWidget);
+        expect(find.text('Enter PLU Code'), findsOneWidget);
+      },
+    );
 
-      await tester.tap(find.byIcon(Icons.camera_alt));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-
-      expect(find.text('Scan Barcode'), findsOneWidget);
-      expect(find.byIcon(Icons.edit), findsOneWidget);
-    });
-
-    testWidgets('successful barcode scan pops the route with barcode value', (
-      tester,
-    ) async {
-      await pumpApp(
-        tester,
-        const ScannerScreen(),
-        settle: false,
-      );
-      await tester.pump();
-
-      final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-
-      // Simulate a barcode detection
-      scanner.onDetect!(
-        const BarcodeCapture(
-          barcodes: [
-            Barcode(
-              rawValue: '1234567890123',
-              format: BarcodeFormat.ean13,
-            ),
+    testWidgets(
+      'manual entry accepts 6-digit input (UPC-E length)',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
           ],
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ScannerScreen), findsNothing);
-    });
-    testWidgets('camera error shows error view and hides torch', (
-      tester,
-    ) async {
-      await pumpApp(
-        tester,
-        const ScannerScreen(),
-        settle: false,
-      );
-      await tester.pump();
-
-      // Torch button visible in normal mode
-      expect(find.byIcon(Icons.flash_off), findsOneWidget);
-
-      // Trigger error via the controller listener path
-      // In tests, the controller never emits an error naturally,
-      // so we simulate by calling the errorBuilder callback directly
-      final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-      scanner.errorBuilder!(
-        tester.element(find.byType(MobileScanner)),
-        const MobileScannerException(
-          errorCode: MobileScannerErrorCode.genericError,
-        ),
-      );
-
-      // Process post-frame callback (setState) and rebuild
-      await tester.pump();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
-      // The error scaffold replaces the scanner scaffold,
-      // so the torch button should no longer be visible
-      expect(find.byIcon(Icons.flash_off), findsNothing);
-      // Error text should be visible from the error scaffold body
-      expect(
-        find.textContaining('unexpected error occurred'),
-        findsWidgets,
-      );
-    });
-    testWidgets('retry button clears error and shows scanner with torch', (
-      tester,
-    ) async {
-      await pumpApp(
-        tester,
-        const ScannerScreen(),
-        settle: false,
-      );
-      await tester.pump();
-
-      // Wait for natural controller error
-      await tester.pump();
-      await tester.pump();
-
-      // Retry button should be visible (generic error)
-      final retryButton = find.text('Retry');
-      if (retryButton.evaluate().isNotEmpty) {
-        await tester.tap(retryButton);
+          settle: false,
+        );
         await tester.pump();
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await tester.enterText(find.byType(TextField), '123456');
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Submit'));
         await tester.pump();
 
-        expect(find.text('Retry'), findsNothing);
-        expect(find.byType(MobileScanner), findsOneWidget);
-        expect(find.byIcon(Icons.flash_off), findsOneWidget);
-      }
-      // If the error is not generic (e.g. permissionDenied),
-      // the retry button won't be shown, which is also valid.
-    });
+        // Should NOT show invalid-barcode warning
+        expect(
+          find.text('Enter a valid barcode number.'),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets(
+      'manual entry rejects 3-digit input',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        await tester.enterText(find.byType(TextField), '123');
+        await tester.tap(find.widgetWithText(ElevatedButton, 'Submit'));
+        await tester.pump();
+
+        expect(
+          find.text('Enter a valid barcode number.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets(
+      'switching from camera to manual stops the camera',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+
+        // Start streaming
+        final notifier = container.read(scannerCameraProvider.notifier);
+        final camState = container.read(scannerCameraProvider);
+        notifier.state = camState.copyWith(isStreaming: true);
+        await tester.pump();
+        expect(container.read(scannerCameraProvider).isStreaming, true);
+
+        // Switch to manual entry
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+
+        expect(container.read(scannerCameraProvider).isStreaming, false);
+      },
+    );
+
+    testWidgets(
+      'switching from camera to PLU stops the camera',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+
+        final notifier = container.read(scannerCameraProvider.notifier);
+        final camState = container.read(scannerCameraProvider);
+        notifier.state = camState.copyWith(isStreaming: true);
+        await tester.pump();
+        expect(container.read(scannerCameraProvider).isStreaming, true);
+
+        // Switch to PLU entry
+        await tester.tap(find.byIcon(Icons.dialpad));
+        await tester.pump();
+
+        expect(container.read(scannerCameraProvider).isStreaming, false);
+      },
+    );
+
+    testWidgets(
+      'switching from manual back to camera retries the scanner',
+      (tester) async {
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+        final initialKey = container.read(scannerCameraProvider).scannerKey;
+
+        // Switch to manual then back to camera
+        await tester.tap(find.byIcon(Icons.edit));
+        await tester.pump();
+
+        await tester.tap(find.byIcon(Icons.camera_alt));
+        await tester.pump();
+
+        // retryScanner increments scannerKey
+        expect(
+          container.read(scannerCameraProvider).scannerKey,
+          greaterThan(initialKey),
+        );
+      },
+    );
 
     testWidgets('back navigation shows confirmation dialog', (
       tester,
@@ -261,137 +344,44 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(ScannerScreen), findsNothing);
     });
-  });
 
-  group('ScannerErrorContent', () {
     testWidgets(
-      'permissionDenied shows Open Settings and manual entry buttons',
+      'scan failed clears scan resolution so barcode detection works again',
       (
         tester,
       ) async {
-        var settingsCalled = false;
-        var manualCalled = false;
+        SharedPreferences.setMockInitialValues({});
+        final mockRepo = createMockProductRepository();
+        when(() => mockRepo.getProduct(any())).thenThrow(
+          ProductNotFoundException('any'),
+        );
 
         await pumpApp(
           tester,
-          ScannerErrorContent(
-            exception: const MobileScannerException(
-              errorCode: MobileScannerErrorCode.permissionDenied,
-            ),
-            onRetry: () {},
-            onSwitchToManual: () => manualCalled = true,
-            onSwitchToPlu: () {},
-            onOpenSettings: () => settingsCalled = true,
-          ),
+          const ScannerScreen(),
+          overrides: [
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
         );
+        await tester.pump();
 
-        expect(
-          find.text('Camera permission denied. Grant access in Settings.'),
-          findsOneWidget,
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
         );
-        expect(find.text('Open Settings'), findsOneWidget);
-        expect(find.text('Enter barcode manually'), findsOneWidget);
-        expect(find.byIcon(Icons.settings), findsOneWidget);
-        expect(find.byIcon(Icons.edit), findsOneWidget);
+        final notifier = container.read(scannerCameraProvider.notifier);
 
-        await tester.tap(find.text('Open Settings'));
-        expect(settingsCalled, isTrue);
+        // Trigger a barcode scan that will fail (product not found)
+        await notifier.resolveBarcode('9999999999999');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
 
-        await tester.tap(find.text('Enter barcode manually'));
-        expect(manualCalled, isTrue);
+        // After ScanFailed is handled, scanResolution must be cleared so the
+        // next barcode detection is not blocked by the null guard.
+        expect(container.read(scannerCameraProvider).scanResolution, isNull);
       },
     );
-
-    testWidgets('unsupported shows manual entry button only', (
-      tester,
-    ) async {
-      var manualCalled = false;
-
-      await pumpApp(
-        tester,
-        ScannerErrorContent(
-          exception: const MobileScannerException(
-            errorCode: MobileScannerErrorCode.unsupported,
-          ),
-          onRetry: () {},
-          onSwitchToManual: () => manualCalled = true,
-          onSwitchToPlu: () {},
-          onOpenSettings: () {},
-        ),
-      );
-
-      expect(
-        find.text('Camera not available on this device.'),
-        findsOneWidget,
-      );
-      expect(find.text('Enter barcode manually'), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsNothing);
-      expect(find.byIcon(Icons.refresh), findsNothing);
-
-      await tester.tap(find.text('Enter barcode manually'));
-      expect(manualCalled, isTrue);
-    });
-
-    testWidgets('genericError shows Retry and manual entry buttons', (
-      tester,
-    ) async {
-      var retryCalled = false;
-      var manualCalled = false;
-
-      await pumpApp(
-        tester,
-        ScannerErrorContent(
-          exception: const MobileScannerException(
-            errorCode: MobileScannerErrorCode.genericError,
-          ),
-          onRetry: () => retryCalled = true,
-          onSwitchToManual: () => manualCalled = true,
-          onSwitchToPlu: () {},
-          onOpenSettings: () {},
-        ),
-      );
-
-      expect(
-        find.text(
-          'An unexpected error occurred while starting the camera.',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Retry'), findsOneWidget);
-      expect(find.text('Enter barcode manually'), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsNothing);
-
-      await tester.tap(find.text('Retry'));
-      expect(retryCalled, isTrue);
-
-      await tester.tap(find.text('Enter barcode manually'));
-      expect(manualCalled, isTrue);
-    });
-
-    testWidgets('unknown error code falls back to generic error', (
-      tester,
-    ) async {
-      await pumpApp(
-        tester,
-        ScannerErrorContent(
-          exception: const MobileScannerException(
-            errorCode: MobileScannerErrorCode.controllerDisposed,
-          ),
-          onRetry: () {},
-          onSwitchToManual: () {},
-          onSwitchToPlu: () {},
-          onOpenSettings: () {},
-        ),
-      );
-
-      expect(
-        find.text(
-          'An unexpected error occurred while starting the camera.',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Retry'), findsOneWidget);
-      expect(find.byIcon(Icons.refresh), findsOneWidget);
-    });
   });
 }
