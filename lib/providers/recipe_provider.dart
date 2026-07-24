@@ -1,16 +1,27 @@
 import 'dart:convert';
 
+// The .autoDispose.family type is inferred from the value expression.
+// ignore_for_file: specify_nonobvious_property_types
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
 import 'package:pantry_app/database/recipe_ingredient_dao.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
+import 'package:pantry_app/models/recipe_nutrition.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/recipe_nutri_score_service.dart';
+import 'package:pantry_app/services/recipe_nutrition_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
 
 /// Provides a singleton [RecipeDao] instance.
 final recipeDaoProvider = Provider<RecipeDao>((ref) {
@@ -27,20 +38,20 @@ final _currencyServiceProvider = Provider<CurrencyService>((ref) {
 });
 
 /// Provides all recipes, ordered by updated_at descending.
-final allRecipesProvider = FutureProvider.autoDispose<List<Recipe>>((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.getAllRecipes();
-});
+final FutureProvider<List<Recipe>> allRecipesProvider =
+    FutureProvider.autoDispose<List<Recipe>>((ref) {
+      final db = ref.watch(databaseProvider);
+      return db.getAllRecipes();
+    });
 
 /// Provides ingredients for a specific recipe.
 final allRecipeIngredientsProvider = FutureProvider.autoDispose
-    .family<List<RecipeIngredient>, int>((
-      ref,
-      recipeId,
-    ) {
-      final db = ref.watch(databaseProvider);
-      return db.getRecipeIngredients(recipeId);
-    });
+    .family<List<RecipeIngredient>, int>(
+      (ref, recipeId) {
+        final db = ref.watch(databaseProvider);
+        return db.getRecipeIngredients(recipeId);
+      },
+    );
 
 /// Invalidates all recipe-related providers.
 ///
@@ -62,6 +73,8 @@ Future<void> saveRecipe(
   required List<RecipeIngredient> ingredients,
   int? existingRecipeId,
   String instructions = '',
+  int servings = 0,
+  String imagePath = '',
 }) async {
   if (name.trim().isEmpty) {
     throw ArgumentError('Recipe name is required');
@@ -75,6 +88,8 @@ Future<void> saveRecipe(
       id: existingRecipeId,
       name: name.trim(),
       instructions: instructions.trim(),
+      servings: servings,
+      imagePath: imagePath,
       updatedAt: now,
     );
     await db.updateRecipeWithIngredients(recipe, ingredients);
@@ -83,6 +98,8 @@ Future<void> saveRecipe(
     final recipe = Recipe(
       name: name.trim(),
       instructions: instructions.trim(),
+      servings: servings,
+      imagePath: imagePath,
       createdAt: now,
       updatedAt: now,
     );
@@ -100,6 +117,80 @@ Future<void> deleteRecipe(WidgetRef ref, int id) async {
   logInfo('Recipe $id deleted');
   invalidateRecipes(ref);
 }
+
+/// Provides aggregated nutrition data for a recipe.
+///
+/// Returns [RecipeNutrition] computed from the recipe's ingredients and their
+/// product nutrition data. Auto-disposes when no listener remains.
+final recipeNutritionProvider = FutureProvider.autoDispose
+    .family<RecipeNutrition?, int>(
+      (ref, recipeId) async {
+        final db = ref.watch(databaseProvider);
+        final repo = ref.read(productRepositoryProvider);
+        final ingredients = await db.getRecipeIngredients(recipeId);
+        if (ingredients.isEmpty) return null;
+
+        final recipe = await db.getRecipe(recipeId);
+        final servings = recipe?.servings ?? 0;
+
+        final barcodes = ingredients
+            .map((i) => i.barcode)
+            .where((b) => b != null && b.isNotEmpty)
+            .cast<String>()
+            .toSet()
+            .toList();
+
+        final productsByBarcode = <String, Product>{};
+        for (final barcode in barcodes) {
+          try {
+            final product = await repo.getProduct(barcode);
+            productsByBarcode[barcode] = product;
+          } on Exception catch (e) {
+            logWarning(
+              'Could not fetch product $barcode for recipe nutrition: $e',
+            );
+          }
+        }
+
+        final nutritionService = RecipeNutritionService();
+        return nutritionService.aggregate(
+          ingredients,
+          productsByBarcode,
+          servings: servings,
+        );
+      },
+    );
+
+/// Provides the Nutri-Score grade for a recipe.
+///
+/// Returns a grade letter ('A'–'E') or null if not enough ingredients have
+/// known scores.
+final recipeNutriScoreProvider = FutureProvider.autoDispose
+    .family<String?, int>(
+      (ref, recipeId) async {
+        final db = ref.watch(databaseProvider);
+        final ingredients = await db.getRecipeIngredients(recipeId);
+        if (ingredients.isEmpty) return null;
+
+        final barcodes = ingredients
+            .map((i) => i.barcode)
+            .where((b) => b != null && b.isNotEmpty)
+            .cast<String>()
+            .toSet()
+            .toList();
+
+        final productsByBarcode = <String, Product>{};
+        for (final barcode in barcodes) {
+          final product = await db.getProduct(barcode);
+          if (product != null) {
+            productsByBarcode[barcode] = product;
+          }
+        }
+
+        final scoreService = RecipeNutriScoreService();
+        return scoreService.compute(ingredients, productsByBarcode);
+      },
+    );
 
 /// Calculates the total cost of a recipe by summing ingredient prices.
 ///
@@ -161,6 +252,57 @@ Future<double> calculateAverageRecipeCost(WidgetRef ref) async {
   return totalCost / recipes.length;
 }
 
+/// Groups [ingredients] by barcode, sums quantities, normalizes units, and
+/// checks availability against inventory.
+///
+/// Returns a map of ingredient name -> deficit, or empty map if all
+/// ingredients are sufficiently stocked. Ingredients without a barcode are
+/// skipped.
+Future<Map<String, double>> checkIngredientShortages(
+  DatabaseHelper db,
+  List<RecipeIngredient> ingredients,
+  int activeInventoryId,
+) async {
+  final grouped = <String, _GroupedIngredient>{};
+  for (final ing in ingredients) {
+    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
+    grouped.putIfAbsent(
+      ing.barcode!,
+      () => _GroupedIngredient(name: ing.name, unit: ing.unit),
+    );
+    grouped[ing.barcode!]!.totalQuantity += ing.quantity;
+  }
+
+  final shortages = <String, double>{};
+  for (final entry in grouped.entries) {
+    final barcode = entry.key;
+    final grp = entry.value;
+    final rows = await db.getInventoryRowsByBarcode(
+      barcode: barcode,
+      inventoryId: activeInventoryId,
+    );
+    var available = 0.0;
+    for (final row in rows) {
+      final rowQty = (row['quantity']! as num).toDouble();
+      final rowUnit = row['unit'] as String? ?? 'pieces';
+      if (UnitConverter.areUnitsCompatible(grp.unit, rowUnit)) {
+        available += UnitConverter.convert(rowQty, rowUnit, grp.unit);
+      }
+    }
+    if (available < grp.totalQuantity) {
+      shortages[grp.name] = grp.totalQuantity - available;
+    }
+  }
+  return shortages;
+}
+
+class _GroupedIngredient {
+  _GroupedIngredient({required this.name, required this.unit});
+  final String name;
+  final String unit;
+  double totalQuantity = 0;
+}
+
 /// Returned by [cookRecipe] with data needed for undo.
 class CookResult {
   /// Creates a [CookResult].
@@ -210,28 +352,16 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
   final currencyService = CurrencyService();
   final baseCurrency = settings.baseCurrency;
 
-  if (ingredients.isEmpty) throw StateError('Recipe has no ingredients');
+  if (ingredients.isEmpty) throw const RecipeCookException({});
 
-  // Pre-flight validation
-  final shortages = <String, double>{};
-  for (final ing in ingredients) {
-    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
-    final rows = await db.getInventoryRowsByBarcode(
-      barcode: ing.barcode!,
-      inventoryId: activeInventoryId,
-    );
-    final available = rows.fold<double>(
-      0,
-      (sum, r) => sum + (r['quantity']! as num).toDouble(),
-    );
-    if (available < ing.quantity)
-      shortages[ing.name] = ing.quantity - available;
-  }
+  // Pre-flight validation with grouping and unit normalization
+  final shortages = await checkIngredientShortages(
+    db,
+    ingredients,
+    activeInventoryId,
+  );
   if (shortages.isNotEmpty) {
-    final details = shortages.entries
-        .map((e) => 'Not enough ${e.key}: need ${e.value} more')
-        .join('; ');
-    throw StateError(details);
+    throw RecipeCookException(shortages);
   }
 
   // Compute current cost
@@ -254,20 +384,41 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
   // Transaction: FEFO deduction + history
   final affectedRows = <InventoryRowSnapshot>[];
 
+  final grouped = <String, _GroupedIngredient>{};
+  for (final ing in ingredients) {
+    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
+    grouped.putIfAbsent(
+      ing.barcode!,
+      () => _GroupedIngredient(name: ing.name, unit: ing.unit),
+    );
+    grouped[ing.barcode!]!.totalQuantity += ing.quantity;
+  }
+
   return database
       .transaction<CookResult>((txn) async {
-        for (final ing in ingredients) {
-          if (ing.barcode == null || ing.barcode!.isEmpty) continue;
-          var remaining = ing.quantity;
+        for (final entry in grouped.entries) {
+          final barcode = entry.key;
+          var remaining = entry.value.totalQuantity;
           final rows = await txn.rawQuery(
             'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
             ' ORDER BY expiry_date ASC NULLS LAST',
-            [ing.barcode, activeInventoryId],
+            [barcode, activeInventoryId],
           );
           for (final row in rows) {
             if (remaining <= 0) break;
             final rowId = row['id']! as int;
             final rowQty = (row['quantity']! as num).toDouble();
+            final rowUnit = row['unit'] as String? ?? 'pieces';
+            final effectiveQty =
+                UnitConverter.areUnitsCompatible(
+                  entry.value.unit,
+                  rowUnit,
+                )
+                ? UnitConverter.convert(rowQty, rowUnit, entry.value.unit)
+                : rowQty;
+            final consumed = effectiveQty < remaining
+                ? effectiveQty
+                : remaining;
             affectedRows.add(
               InventoryRowSnapshot(
                 rowId: rowId,
@@ -275,22 +426,23 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
                 originalRow: Map<String, dynamic>.from(row),
               ),
             );
-            if (rowQty > remaining) {
+            final remainingInRowUnits =
+                rowQty - UnitConverter.convertBack(consumed, rowUnit);
+            if (remainingInRowUnits > 0.001) {
               await txn.update(
                 'inventory',
-                {'quantity': rowQty - remaining},
+                {'quantity': remainingInRowUnits},
                 where: 'id = ?',
                 whereArgs: [rowId],
               );
-              remaining = 0;
             } else {
               await txn.delete(
                 'inventory',
                 where: 'id = ?',
                 whereArgs: [rowId],
               );
-              remaining -= rowQty;
             }
+            remaining -= consumed;
           }
         }
 
