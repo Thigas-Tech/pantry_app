@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 
 /// Holds the result of [QuantityAndPantrySheet].
 class QuantityAndPantryResult {
@@ -29,10 +30,8 @@ class QuantityAndPantrySheet extends ConsumerStatefulWidget {
 
   /// Shows the sheet and returns the result, or null if cancelled.
   static Future<QuantityAndPantryResult?> show(BuildContext context) {
-    return showModalBottomSheet<QuantityAndPantryResult>(
+    return BottomSheetHelper.show<QuantityAndPantryResult>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
       builder: (_) => const QuantityAndPantrySheet._(),
     );
   }
@@ -71,10 +70,13 @@ class _QuantityAndPantrySheetState
       _selectedInventoryId = inventories.first['id'] as int;
     }
 
-    final bottomPad = MediaQuery.of(context).padding.bottom;
-    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad + keyboardHeight),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        16 + BottomSheetHelper.bottomInset(context),
+      ),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(

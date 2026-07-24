@@ -14,6 +14,7 @@ import 'package:pantry_app/providers/quick_add_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
@@ -194,8 +195,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 subtitle: Text(l10n.registerRecipeSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.comingSoon)),
+                  unawaited(
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) => const RecipeListScreen(),
+                      ),
+                    ),
                   );
                 },
               ),

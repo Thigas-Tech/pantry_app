@@ -32,6 +32,10 @@ abstract class PantryStats with _$PantryStats {
     @Default([]) List<MonthlySpending> monthlySpending,
     @Default([]) List<StoreSpending> storeSpending,
     @Default([]) List<StoreNutriscore> nutriscoreByStore,
+    @Default(0) int mealsCooked,
+    @Default(0) double totalRecipeCost,
+    @Default(0) double averageRecipeNutriScore,
+    @Default('') String mostCookedRecipe,
   }) = _PantryStats;
 }
 

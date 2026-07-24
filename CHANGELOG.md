@@ -21,6 +21,17 @@
   screen AppBars, using the existing `PriceVisibilityToggle` / `PriceMask`
   pattern. (`lib/screens/recipe_list_screen.dart`,
    `lib/screens/recipe_detail_screen.dart`)
+- **Duplicate ingredient merging**: when the same barcoded ingredient is added
+  twice to a recipe, the quantity is incremented instead of creating a new row.
+  (`lib/screens/recipe_form_screen.dart`)
+- **PriceMask in recipe list**: cost labels in recipe cards and the average cost
+  banner now respect the price visibility toggle via `PriceMask`.
+  (`lib/screens/recipe_list_screen.dart`)
+- **Search-powered ingredient picker**: "Search product" button in the recipe
+  form opens a bottom sheet that searches the local database and Open Food Facts
+  API by name or barcode. Tapping a result adds it as an ingredient.
+  (`lib/widgets/search_ingredient_sheet.dart`,
+   `lib/screens/recipe_form_screen.dart`)
 
 ## [0.0.9] — 2026-07-23
 

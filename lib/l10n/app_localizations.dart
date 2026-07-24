@@ -3051,7 +3051,7 @@ abstract class AppLocalizations {
   /// No description provided for @registerRecipeSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Bulk-remove used items'**
+  /// **'Save recipes with cost tracking'**
   String get registerRecipeSubtitle;
 
   /// No description provided for @scanBarcodeSubtitle.
@@ -3077,6 +3077,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get comingSoon;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get no;
+
+  /// No description provided for @recipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipes'**
+  String get recipes;
+
+  /// No description provided for @editRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit recipe'**
+  String get editRecipe;
+
+  /// No description provided for @recipeName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe name'**
+  String get recipeName;
+
+  /// No description provided for @recipeNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Chicken Sandwich'**
+  String get recipeNameHint;
+
+  /// No description provided for @recipeNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe name is required'**
+  String get recipeNameRequired;
+
+  /// No description provided for @recipeInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get recipeInstructions;
+
+  /// No description provided for @recipeInstructionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe how to prepare...'**
+  String get recipeInstructionsHint;
+
+  /// No description provided for @recipeIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get recipeIngredients;
+
+  /// No description provided for @ingredientName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredient name'**
+  String get ingredientName;
+
+  /// No description provided for @ingredientQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get ingredientQuantity;
+
+  /// No description provided for @ingredientUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get ingredientUnit;
+
+  /// No description provided for @addIngredient.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ingredient'**
+  String get addIngredient;
+
+  /// No description provided for @selectFromPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Select items from your pantry'**
+  String get selectFromPantry;
+
+  /// No description provided for @addSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Add selected'**
+  String get addSelected;
+
+  /// No description provided for @servings.
+  ///
+  /// In en, this message translates to:
+  /// **'Servings'**
+  String get servings;
+
+  /// No description provided for @servingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 4'**
+  String get servingsHint;
+
+  /// No description provided for @setServingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the number of servings in the recipe editor to see per-portion nutrition'**
+  String get setServingsHint;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get addPhoto;
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changePhoto;
+
+  /// No description provided for @costPerServing.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost per serving'**
+  String get costPerServing;
+
+  /// No description provided for @recipeNutritionPerServing.
+  ///
+  /// In en, this message translates to:
+  /// **'Per serving'**
+  String get recipeNutritionPerServing;
+
+  /// No description provided for @recipeNutriScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutri-Score'**
+  String get recipeNutriScore;
+
+  /// No description provided for @recipeNoIngredients.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe has no ingredients'**
+  String get recipeNoIngredients;
+
+  /// No description provided for @recipeShortage.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough {name}: need {amount} more'**
+  String recipeShortage(String name, double amount);
+
+  /// No description provided for @saveRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Save recipe'**
+  String get saveRecipe;
+
+  /// No description provided for @recipeSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe saved'**
+  String get recipeSaved;
+
+  /// No description provided for @recipeDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe deleted'**
+  String get recipeDeleted;
+
+  /// No description provided for @noRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipes yet'**
+  String get noRecipes;
+
+  /// No description provided for @noRecipesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register recipes to track costs and plan meals'**
+  String get noRecipesSubtitle;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChanges;
+
+  /// No description provided for @discardChangesConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Discard them?'**
+  String get discardChangesConfirm;
+
+  /// No description provided for @recipeCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe cost'**
+  String get recipeCost;
+
+  /// No description provided for @recipeCostUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get recipeCostUnknown;
+
+  /// No description provided for @recipeAverageCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Average recipe cost'**
+  String get recipeAverageCost;
+
+  /// No description provided for @ingredientCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} ingredient} other{{count} ingredients}}'**
+  String ingredientCount(num count);
+
+  /// No description provided for @deleteRecipeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this recipe?'**
+  String get deleteRecipeConfirm;
+
+  /// No description provided for @madeRecipe.
+  ///
+  /// In en, this message translates to:
+  /// **'I made this'**
+  String get madeRecipe;
+
+  /// No description provided for @cookRecipeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe made'**
+  String get cookRecipeSuccess;
+
+  /// No description provided for @recipeCookFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cook recipe'**
+  String get recipeCookFailed;
+
+  /// No description provided for @confirmDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get confirmDiscard;
+
+  /// No description provided for @confirmDiscardContent.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Are you sure you want to go back?'**
+  String get confirmDiscardContent;
+
+  /// No description provided for @searchProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Search product'**
+  String get searchProduct;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @noHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No cooking history yet'**
+  String get noHistory;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

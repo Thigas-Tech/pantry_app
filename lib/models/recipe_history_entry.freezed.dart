@@ -14,13 +14,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecipeHistoryEntry {
 
-/// Auto-increment primary key from the recipe_history table.
- int? get id;/// Foreign key referencing the cooked recipe.
+/// Foreign key referencing the cooked recipe.
  int get recipeId;/// Epoch millis timestamp of when the recipe was made.
- int get madeAt;/// Total recipe cost computed at cook time.
- double get costAtTime;/// JSON-encoded snapshot of `[{barcode, name, quantity, unit}]` at cook
+ int get madeAt;/// JSON-encoded snapshot of `[{barcode, name, quantity, unit}]` at cook
 /// time, so the entry is accurate even if the recipe changes later.
- String get ingredientSnapshot;
+ String get ingredientSnapshot;/// Auto-increment primary key from the recipe_history table.
+ int? get id;/// Total recipe cost computed at cook time.
+ double get costAtTime;
 /// Create a copy of RecipeHistoryEntry
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,16 +31,16 @@ $RecipeHistoryEntryCopyWith<RecipeHistoryEntry> get copyWith => _$RecipeHistoryE
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecipeHistoryEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.madeAt, madeAt) || other.madeAt == madeAt)&&(identical(other.costAtTime, costAtTime) || other.costAtTime == costAtTime)&&(identical(other.ingredientSnapshot, ingredientSnapshot) || other.ingredientSnapshot == ingredientSnapshot));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecipeHistoryEntry&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.madeAt, madeAt) || other.madeAt == madeAt)&&(identical(other.ingredientSnapshot, ingredientSnapshot) || other.ingredientSnapshot == ingredientSnapshot)&&(identical(other.id, id) || other.id == id)&&(identical(other.costAtTime, costAtTime) || other.costAtTime == costAtTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,recipeId,madeAt,costAtTime,ingredientSnapshot);
+int get hashCode => Object.hash(runtimeType,recipeId,madeAt,ingredientSnapshot,id,costAtTime);
 
 @override
 String toString() {
-  return 'RecipeHistoryEntry(id: $id, recipeId: $recipeId, madeAt: $madeAt, costAtTime: $costAtTime, ingredientSnapshot: $ingredientSnapshot)';
+  return 'RecipeHistoryEntry(recipeId: $recipeId, madeAt: $madeAt, ingredientSnapshot: $ingredientSnapshot, id: $id, costAtTime: $costAtTime)';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $RecipeHistoryEntryCopyWith<$Res>  {
   factory $RecipeHistoryEntryCopyWith(RecipeHistoryEntry value, $Res Function(RecipeHistoryEntry) _then) = _$RecipeHistoryEntryCopyWithImpl;
 @useResult
 $Res call({
- int? id, int recipeId, int madeAt, double costAtTime, String ingredientSnapshot
+ int recipeId, int madeAt, String ingredientSnapshot, int? id, double costAtTime
 });
 
 
@@ -68,14 +68,14 @@ class _$RecipeHistoryEntryCopyWithImpl<$Res>
 
 /// Create a copy of RecipeHistoryEntry
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? recipeId = null,Object? madeAt = null,Object? costAtTime = null,Object? ingredientSnapshot = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? recipeId = null,Object? madeAt = null,Object? ingredientSnapshot = null,Object? id = freezed,Object? costAtTime = null,}) {
   return _then(_self.copyWith(
-id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int?,recipeId: null == recipeId ? _self.recipeId : recipeId // ignore: cast_nullable_to_non_nullable
+recipeId: null == recipeId ? _self.recipeId : recipeId // ignore: cast_nullable_to_non_nullable
 as int,madeAt: null == madeAt ? _self.madeAt : madeAt // ignore: cast_nullable_to_non_nullable
-as int,costAtTime: null == costAtTime ? _self.costAtTime : costAtTime // ignore: cast_nullable_to_non_nullable
-as double,ingredientSnapshot: null == ingredientSnapshot ? _self.ingredientSnapshot : ingredientSnapshot // ignore: cast_nullable_to_non_nullable
-as String,
+as int,ingredientSnapshot: null == ingredientSnapshot ? _self.ingredientSnapshot : ingredientSnapshot // ignore: cast_nullable_to_non_nullable
+as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int?,costAtTime: null == costAtTime ? _self.costAtTime : costAtTime // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 
@@ -160,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  int recipeId,  int madeAt,  double costAtTime,  String ingredientSnapshot)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int recipeId,  int madeAt,  String ingredientSnapshot,  int? id,  double costAtTime)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RecipeHistoryEntry() when $default != null:
-return $default(_that.id,_that.recipeId,_that.madeAt,_that.costAtTime,_that.ingredientSnapshot);case _:
+return $default(_that.recipeId,_that.madeAt,_that.ingredientSnapshot,_that.id,_that.costAtTime);case _:
   return orElse();
 
 }
@@ -181,10 +181,10 @@ return $default(_that.id,_that.recipeId,_that.madeAt,_that.costAtTime,_that.ingr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  int recipeId,  int madeAt,  double costAtTime,  String ingredientSnapshot)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int recipeId,  int madeAt,  String ingredientSnapshot,  int? id,  double costAtTime)  $default,) {final _that = this;
 switch (_that) {
 case _RecipeHistoryEntry():
-return $default(_that.id,_that.recipeId,_that.madeAt,_that.costAtTime,_that.ingredientSnapshot);case _:
+return $default(_that.recipeId,_that.madeAt,_that.ingredientSnapshot,_that.id,_that.costAtTime);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +201,10 @@ return $default(_that.id,_that.recipeId,_that.madeAt,_that.costAtTime,_that.ingr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  int recipeId,  int madeAt,  double costAtTime,  String ingredientSnapshot)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int recipeId,  int madeAt,  String ingredientSnapshot,  int? id,  double costAtTime)?  $default,) {final _that = this;
 switch (_that) {
 case _RecipeHistoryEntry() when $default != null:
-return $default(_that.id,_that.recipeId,_that.madeAt,_that.costAtTime,_that.ingredientSnapshot);case _:
+return $default(_that.recipeId,_that.madeAt,_that.ingredientSnapshot,_that.id,_that.costAtTime);case _:
   return null;
 
 }
@@ -216,20 +216,20 @@ return $default(_that.id,_that.recipeId,_that.madeAt,_that.costAtTime,_that.ingr
 
 
 class _RecipeHistoryEntry implements RecipeHistoryEntry {
-  const _RecipeHistoryEntry({this.id, required this.recipeId, required this.madeAt, this.costAtTime = 0.0, required this.ingredientSnapshot});
+  const _RecipeHistoryEntry({required this.recipeId, required this.madeAt, required this.ingredientSnapshot, this.id, this.costAtTime = 0.0});
   
 
-/// Auto-increment primary key from the recipe_history table.
-@override final  int? id;
 /// Foreign key referencing the cooked recipe.
 @override final  int recipeId;
 /// Epoch millis timestamp of when the recipe was made.
 @override final  int madeAt;
-/// Total recipe cost computed at cook time.
-@override@JsonKey() final  double costAtTime;
 /// JSON-encoded snapshot of `[{barcode, name, quantity, unit}]` at cook
 /// time, so the entry is accurate even if the recipe changes later.
 @override final  String ingredientSnapshot;
+/// Auto-increment primary key from the recipe_history table.
+@override final  int? id;
+/// Total recipe cost computed at cook time.
+@override@JsonKey() final  double costAtTime;
 
 /// Create a copy of RecipeHistoryEntry
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +241,16 @@ _$RecipeHistoryEntryCopyWith<_RecipeHistoryEntry> get copyWith => __$RecipeHisto
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecipeHistoryEntry&&(identical(other.id, id) || other.id == id)&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.madeAt, madeAt) || other.madeAt == madeAt)&&(identical(other.costAtTime, costAtTime) || other.costAtTime == costAtTime)&&(identical(other.ingredientSnapshot, ingredientSnapshot) || other.ingredientSnapshot == ingredientSnapshot));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecipeHistoryEntry&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.madeAt, madeAt) || other.madeAt == madeAt)&&(identical(other.ingredientSnapshot, ingredientSnapshot) || other.ingredientSnapshot == ingredientSnapshot)&&(identical(other.id, id) || other.id == id)&&(identical(other.costAtTime, costAtTime) || other.costAtTime == costAtTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,recipeId,madeAt,costAtTime,ingredientSnapshot);
+int get hashCode => Object.hash(runtimeType,recipeId,madeAt,ingredientSnapshot,id,costAtTime);
 
 @override
 String toString() {
-  return 'RecipeHistoryEntry(id: $id, recipeId: $recipeId, madeAt: $madeAt, costAtTime: $costAtTime, ingredientSnapshot: $ingredientSnapshot)';
+  return 'RecipeHistoryEntry(recipeId: $recipeId, madeAt: $madeAt, ingredientSnapshot: $ingredientSnapshot, id: $id, costAtTime: $costAtTime)';
 }
 
 
@@ -261,7 +261,7 @@ abstract mixin class _$RecipeHistoryEntryCopyWith<$Res> implements $RecipeHistor
   factory _$RecipeHistoryEntryCopyWith(_RecipeHistoryEntry value, $Res Function(_RecipeHistoryEntry) _then) = __$RecipeHistoryEntryCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, int recipeId, int madeAt, double costAtTime, String ingredientSnapshot
+ int recipeId, int madeAt, String ingredientSnapshot, int? id, double costAtTime
 });
 
 
@@ -278,14 +278,14 @@ class __$RecipeHistoryEntryCopyWithImpl<$Res>
 
 /// Create a copy of RecipeHistoryEntry
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? recipeId = null,Object? madeAt = null,Object? costAtTime = null,Object? ingredientSnapshot = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? recipeId = null,Object? madeAt = null,Object? ingredientSnapshot = null,Object? id = freezed,Object? costAtTime = null,}) {
   return _then(_RecipeHistoryEntry(
-id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int?,recipeId: null == recipeId ? _self.recipeId : recipeId // ignore: cast_nullable_to_non_nullable
+recipeId: null == recipeId ? _self.recipeId : recipeId // ignore: cast_nullable_to_non_nullable
 as int,madeAt: null == madeAt ? _self.madeAt : madeAt // ignore: cast_nullable_to_non_nullable
-as int,costAtTime: null == costAtTime ? _self.costAtTime : costAtTime // ignore: cast_nullable_to_non_nullable
-as double,ingredientSnapshot: null == ingredientSnapshot ? _self.ingredientSnapshot : ingredientSnapshot // ignore: cast_nullable_to_non_nullable
-as String,
+as int,ingredientSnapshot: null == ingredientSnapshot ? _self.ingredientSnapshot : ingredientSnapshot // ignore: cast_nullable_to_non_nullable
+as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int?,costAtTime: null == costAtTime ? _self.costAtTime : costAtTime // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

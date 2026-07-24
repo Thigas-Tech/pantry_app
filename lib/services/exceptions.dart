@@ -22,3 +22,18 @@ class FetchFailedException implements Exception {
   @override
   String toString() => 'FetchFailedException: $message';
 }
+
+/// Thrown when there is insufficient stock in the inventory to cook a recipe.
+///
+/// [shortages] maps ingredient names to the additional quantity needed.
+class RecipeCookException implements Exception {
+  /// Creates a [RecipeCookException] with the given [shortages].
+  const RecipeCookException(this.shortages);
+
+  /// Ingredient names and the additional amount needed (quantity beyond
+  /// what is available).
+  final Map<String, double> shortages;
+
+  /// Whether shortages is empty.
+  bool get isEmpty => shortages.isEmpty;
+}

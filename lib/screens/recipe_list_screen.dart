@@ -12,6 +12,8 @@ import 'package:pantry_app/screens/recipe_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_form_screen.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 
 /// Displays all saved recipes with cost information.
@@ -164,10 +166,13 @@ class _AverageCostBanner extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const Spacer(),
-                Text(
-                  '$symbol${cost.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                PriceMask(
+                  formattedPrice: '$symbol${cost.toStringAsFixed(2)}',
+                  child: Text(
+                    '$symbol${cost.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -182,8 +187,8 @@ class _AverageCostBanner extends ConsumerWidget {
 /// A single recipe card showing name, ingredient count, and cost.
 class _RecipeCard extends ConsumerWidget {
   const _RecipeCard({
-    super.key,
     required this.recipe,
+    super.key,
   });
 
   final Recipe recipe;
@@ -204,7 +209,7 @@ class _RecipeCard extends ConsumerWidget {
         padding: const EdgeInsets.only(right: 16),
         child: const Icon(Icons.delete, color: Colors.white),
       ),
-      confirmDismiss: (direction) async {
+      confirmDismiss: (direction) {
         return showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -258,6 +263,8 @@ class _RecipeCard extends ConsumerWidget {
                 children: [
                   Text(l10n.ingredientCount(count)),
                   const SizedBox(width: 12),
+                  _RecipeNutriScoreBadge(recipeId: recipe.id!),
+                  const SizedBox(width: 8),
                   _RecipeCostLabel(
                     recipeId: recipe.id!,
                     currencySymbol: symbol,
@@ -281,6 +288,26 @@ class _RecipeCard extends ConsumerWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+/// A small Nutri-Score badge for a recipe card in the list.
+class _RecipeNutriScoreBadge extends ConsumerWidget {
+  const _RecipeNutriScoreBadge({required this.recipeId});
+
+  final int recipeId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncGrade = ref.watch(recipeNutriScoreProvider(recipeId));
+    return asyncGrade.when(
+      data: (grade) {
+        if (grade == null) return const SizedBox.shrink();
+        return NutriScoreBadge(grade: grade.toLowerCase(), size: 20);
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -312,10 +339,14 @@ class _RecipeCostLabel extends ConsumerWidget {
             ),
           );
         }
-        return Text(
-          '$currencySymbol${cost.toStringAsFixed(2)}',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
+        final formattedPrice = '$currencySymbol${cost.toStringAsFixed(2)}';
+        return PriceMask(
+          formattedPrice: formattedPrice,
+          child: Text(
+            formattedPrice,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         );
       },

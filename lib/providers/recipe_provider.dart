@@ -18,6 +18,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/recipe_nutri_score_service.dart';
 import 'package:pantry_app/services/recipe_nutrition_service.dart';
@@ -347,6 +348,17 @@ Future<Map<String, double>> checkIngredientShortages(
       final rowUnit = row['unit'] as String? ?? 'pieces';
       if (UnitConverter.areUnitsCompatible(grp.unit, rowUnit)) {
         available += UnitConverter.convert(rowQty, rowUnit, grp.unit);
+      } else {
+        final svG = _resolveServingWeightG(row, grp.name);
+        if (svG != null && svG > 0) {
+          final grpIsWeight = UnitConverter.areUnitsCompatible(grp.unit, 'g');
+          final rowIsWeight = UnitConverter.areUnitsCompatible(rowUnit, 'g');
+          if (grpIsWeight && !rowIsWeight) {
+            available += rowQty * svG;
+          } else if (!grpIsWeight && rowIsWeight) {
+            available += UnitConverter.convert(rowQty, rowUnit, 'g') / svG;
+          }
+        }
       }
     }
     if (available < grp.totalQuantity) {
@@ -361,6 +373,18 @@ class _GroupedIngredient {
   final String name;
   final String unit;
   double totalQuantity = 0;
+}
+
+/// Tries to resolve a per-piece serving weight in grams for an inventory row.
+///
+/// Checks the inventory row's serving_weight_g column first, then falls back
+/// to [ProduceServingPresets] using the ingredient name. Returns null when no
+/// serving weight can be determined.
+double? _resolveServingWeightG(Map<String, dynamic> row, String name) {
+  final fromRow = (row['serving_weight_g'] as num?)?.toDouble();
+  if (fromRow != null && fromRow > 0) return fromRow;
+  final presets = ProduceServingPresets.forName(name);
+  return presets?['Medium'] ?? presets?.values.firstOrNull;
 }
 
 /// Returned by [cookRecipe] with data needed for undo.
@@ -478,13 +502,45 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
             final rowId = row['id']! as int;
             final rowQty = (row['quantity']! as num).toDouble();
             final rowUnit = row['unit'] as String? ?? 'pieces';
-            final effectiveQty =
-                UnitConverter.areUnitsCompatible(
+            double effectiveQty;
+            double Function(double consumed) toRowUnits;
+            if (UnitConverter.areUnitsCompatible(
+              entry.value.unit,
+              rowUnit,
+            )) {
+              effectiveQty = UnitConverter.convert(
+                rowQty,
+                rowUnit,
+                entry.value.unit,
+              );
+              toRowUnits = (c) => UnitConverter.convertBack(c, rowUnit);
+            } else {
+              final svG = _resolveServingWeightG(row, entry.value.name);
+              if (svG != null && svG > 0) {
+                final entryIsWeight = UnitConverter.areUnitsCompatible(
                   entry.value.unit,
+                  'g',
+                );
+                final rowIsWeight = UnitConverter.areUnitsCompatible(
                   rowUnit,
-                )
-                ? UnitConverter.convert(rowQty, rowUnit, entry.value.unit)
-                : rowQty;
+                  'g',
+                );
+                if (!entryIsWeight && rowIsWeight) {
+                  effectiveQty =
+                      UnitConverter.convert(rowQty, rowUnit, 'g') / svG;
+                  toRowUnits = (c) => c * svG;
+                } else if (entryIsWeight && !rowIsWeight) {
+                  effectiveQty = rowQty * svG;
+                  toRowUnits = (c) => c / svG;
+                } else {
+                  effectiveQty = 0;
+                  toRowUnits = (_) => 0;
+                }
+              } else {
+                effectiveQty = 0;
+                toRowUnits = (_) => 0;
+              }
+            }
             final consumed = effectiveQty < remaining
                 ? effectiveQty
                 : remaining;
@@ -495,8 +551,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
                 originalRow: Map<String, dynamic>.from(row),
               ),
             );
-            final remainingInRowUnits =
-                rowQty - UnitConverter.convertBack(consumed, rowUnit);
+            final remainingInRowUnits = rowQty - toRowUnits(consumed);
             if (remainingInRowUnits > 0.001) {
               await txn.update(
                 'inventory',

@@ -12,6 +12,13 @@
   registrado permanentemente.
 - Olho: alternar visibilidade de precos nas telas de lista e detalhes da
   receita, igual nas telas inicial e de estatisticas.
+- Formulario de receita: adicionar o mesmo ingrediente duas vezes agora
+  aumenta a quantidade em vez de mostrar duas linhas separadas.
+- Visibilidade de precos agora tambem oculta custos nos cartoes da lista
+  de receitas e no banner de custo medio.
+- Pesquisar produto: um novo botao no formulario de receita permite
+  pesquisar no Open Food Facts e no banco de dados local por nome ou
+  codigo de barras para encontrar ingredientes.
 
 ## [0.0.9]
 

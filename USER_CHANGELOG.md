@@ -10,6 +10,12 @@
 - Recipe history: every time you cook a recipe, it's logged permanently.
 - Eye icon: toggle price visibility on the recipe list and detail screens,
   just like the home and stats screens.
+- Recipe form: adding the same ingredient twice now increases the quantity
+  instead of showing two separate rows.
+- Price visibility toggle now also hides costs in the recipe list cards and
+  the average cost banner.
+- Search product: a new button in the recipe form lets you search Open Food
+  Facts and your local database by name or barcode to find ingredients.
 
 ## [0.0.9]
 

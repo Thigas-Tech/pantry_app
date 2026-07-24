@@ -4,14 +4,14 @@ import 'package:pantry_app/models/recipe_history_entry.dart';
 void main() {
   group('RecipeHistoryEntry', () {
     test('creates with required fields', () {
-      final entry = RecipeHistoryEntry(
+      const entry = RecipeHistoryEntry(
         recipeId: 1,
         madeAt: 1000,
         ingredientSnapshot: '[]',
       );
       expect(entry.recipeId, 1);
       expect(entry.madeAt, 1000);
-      expect(entry.costAtTime, 0.0);
+      expect(entry.costAtTime, 0);
       expect(entry.ingredientSnapshot, '[]');
       expect(entry.id, isNull);
     });
@@ -38,7 +38,7 @@ void main() {
         madeAt: 1000,
         ingredientSnapshot: '[]',
       );
-      final copied = entry.copyWith(costAtTime: 10.0);
+      final copied = entry.copyWith(costAtTime: 10);
       expect(copied.id, 1);
       expect(copied.costAtTime, 10.0);
       expect(copied.ingredientSnapshot, '[]');

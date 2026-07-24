@@ -332,5 +332,116 @@ void main() {
         expect(shortages['Onion'], closeTo(2, 0.01));
       },
     );
+
+    test(
+      'converts produce pieces via servingWeightG from inventory row when'
+      ' barcode lookup finds no match',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'plu-12345',
+            inventoryId: 1,
+          ),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockDb.getInventoryRowsByProductName(
+            name: 'Onion',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {
+              'quantity': 150,
+              'unit': 'g',
+              'id': 1,
+              'serving_weight_g': 150.0,
+            },
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'plu-12345',
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
+      },
+    );
+
+    test(
+      'converts produce pieces via ProduceServingPresets fallback when'
+      ' inventory row has no servingWeightG',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'produce-Onion',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 150, 'unit': 'g', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
+      },
+    );
+
+    test(
+      'reports shortage when produce has no serving weight resolution',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'plu-99999',
+            inventoryId: 1,
+          ),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockDb.getInventoryRowsByProductName(
+            name: 'UnmatchedProduce',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 100, 'unit': 'g', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'UnmatchedProduce',
+            barcode: 'plu-99999',
+            quantity: 2,
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isNotEmpty);
+        expect(shortages['UnmatchedProduce'], closeTo(2, 0.01));
+      },
+    );
   });
 }

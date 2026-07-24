@@ -695,5 +695,35 @@
   "deleteRecipeConfirm": "Excluir esta receita?",
 
   "madeRecipe": "Fiz esta receita",
-  "cookRecipeSuccess": "Receita feita"
+  "cookRecipeSuccess": "Receita feita",
+  "recipeCookFailed": "Erro ao preparar receita",
+
+  "confirmDiscard": "Descartar alteracoes?",
+  "confirmDiscardContent": "Voce tem alteracoes nao salvas. Tem certeza que deseja voltar?",
+
+  "searchProduct": "Pesquisar produto",
+  "servings": "Porcoes",
+  "servingsHint": "ex.: 4",
+  "setServingsHint": "Defina o numero de porcoes no editor da receita para ver a nutricao por porcao",
+  "addPhoto": "Adicionar foto",
+  "changePhoto": "Alterar foto",
+  "costPerServing": "Custo por porcao",
+  "recipeNutritionPerServing": "Por porcao",
+  "recipeNutriScore": "Nutri-Score",
+  "recipeNoIngredients": "A receita nao tem ingredientes",
+  "recipeShortage": "{name} insuficiente: precisa de mais {amount}",
+  "@recipeShortage": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Ovos"
+      },
+      "amount": {
+        "type": "double",
+        "example": "2.0"
+      }
+    }
+  },
+  "history": "Historico",
+  "noHistory": "Nenhum historico de preparo ainda"
 }
