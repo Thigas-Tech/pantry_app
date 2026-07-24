@@ -36,7 +36,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Twelve tables are created on first launch (version 26):
+/// Twelve tables are created on first launch (version 27):
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -128,7 +128,7 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 26,
+        version: 27,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -562,6 +562,19 @@ class DatabaseHelper {
         logInfo('Migration to version 26 (recipe_history) completed');
       } on Exception catch (e) {
         logWarning('Migration v26 failed: $e');
+      }
+    }
+    if (oldVersion < 27) {
+      try {
+        await db.execute(
+          'ALTER TABLE recipes ADD COLUMN servings INTEGER NOT NULL DEFAULT 0',
+        );
+        await db.execute(
+          "ALTER TABLE recipes ADD COLUMN image_path TEXT NOT NULL DEFAULT ''",
+        );
+        logInfo('Migration to version 27 (servings, image_path) completed');
+      } on Exception catch (e) {
+        logWarning('Migration v27 failed: $e');
       }
     }
     logInfo('Database upgrade completed');
@@ -1122,17 +1135,14 @@ class DatabaseHelper {
     final finalRecipe = stamped.updatedAt == 0
         ? stamped.copyWith(updatedAt: now)
         : stamped;
-    final recipeMap = recipeDao.toMap(finalRecipe);
-    // Remove id so SQLite auto-generates it.
-    recipeMap.remove('id');
+    final recipeMap = recipeDao.toMap(finalRecipe)..remove('id');
 
     return db.transaction<int>((txn) async {
       final recipeId = await txn.insert('recipes', recipeMap);
       for (final ingredient in ingredients) {
         final ingMap = recipeIngredientDao.toMap(
           ingredient.copyWith(recipeId: recipeId),
-        );
-        ingMap.remove('id');
+        )..remove('id');
         await txn.insert('recipe_ingredients', ingMap);
       }
       return recipeId;
@@ -1172,8 +1182,7 @@ class DatabaseHelper {
       for (final ingredient in ingredients) {
         final ingMap = recipeIngredientDao.toMap(
           ingredient.copyWith(recipeId: recipe.id!),
-        );
-        ingMap.remove('id');
+        )..remove('id');
         await txn.insert('recipe_ingredients', ingMap);
       }
     });
@@ -1220,6 +1229,22 @@ class DatabaseHelper {
       'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
       ' ORDER BY expiry_date ASC NULLS LAST',
       [barcode, inventoryId],
+    );
+  }
+
+  /// Returns inventory rows whose linked product name contains [name],
+  /// ordered by expiry_date ASC (nulls last) for FEFO deduction.
+  Future<List<Map<String, dynamic>>> getInventoryRowsByProductName({
+    required String name,
+    required int inventoryId,
+  }) async {
+    final db = await database;
+    return db.rawQuery(
+      'SELECT i.* FROM inventory i'
+      ' INNER JOIN products p ON p.barcode = i.barcode'
+      ' WHERE p.name LIKE ? AND i.inventory_id = ?'
+      ' ORDER BY i.expiry_date ASC NULLS LAST',
+      ['%$name%', inventoryId],
     );
   }
 }

@@ -261,5 +261,76 @@ void main() {
       final shortages = await checkIngredientShortages(mockDb, ingredients, 1);
       expect(shortages, isEmpty);
     });
+
+    test(
+      'falls back to product name match when barcode lookup is empty',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'plu-12345',
+            inventoryId: 1,
+          ),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockDb.getInventoryRowsByProductName(
+            name: 'Onion',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 5, 'unit': 'pieces', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'plu-12345',
+            quantity: 2,
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
+      },
+    );
+
+    test(
+      'reports shortage when both barcode and name lookup are empty',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'plu-67890',
+            inventoryId: 1,
+          ),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockDb.getInventoryRowsByProductName(
+            name: 'Onion',
+            inventoryId: 1,
+          ),
+        ).thenAnswer((_) async => []);
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'plu-67890',
+            quantity: 2,
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isNotEmpty);
+        expect(shortages['Onion'], closeTo(2, 0.01));
+      },
+    );
   });
 }

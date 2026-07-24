@@ -331,10 +331,16 @@ Future<Map<String, double>> checkIngredientShortages(
   for (final entry in grouped.entries) {
     final barcode = entry.key;
     final grp = entry.value;
-    final rows = await db.getInventoryRowsByBarcode(
+    var rows = await db.getInventoryRowsByBarcode(
       barcode: barcode,
       inventoryId: activeInventoryId,
     );
+    if (rows.isEmpty && grp.name.isNotEmpty) {
+      rows = await db.getInventoryRowsByProductName(
+        name: grp.name,
+        inventoryId: activeInventoryId,
+      );
+    }
     var available = 0.0;
     for (final row in rows) {
       final rowQty = (row['quantity']! as num).toDouble();
@@ -453,11 +459,20 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
         for (final entry in grouped.entries) {
           final barcode = entry.key;
           var remaining = entry.value.totalQuantity;
-          final rows = await txn.rawQuery(
+          var rows = await txn.rawQuery(
             'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
             ' ORDER BY expiry_date ASC NULLS LAST',
             [barcode, activeInventoryId],
           );
+          if (rows.isEmpty && entry.value.name.isNotEmpty) {
+            rows = await txn.rawQuery(
+              'SELECT i.* FROM inventory i'
+              ' INNER JOIN products p ON p.barcode = i.barcode'
+              ' WHERE p.name LIKE ? AND i.inventory_id = ?'
+              ' ORDER BY i.expiry_date ASC NULLS LAST',
+              ['%${entry.value.name}%', activeInventoryId],
+            );
+          }
           for (final row in rows) {
             if (remaining <= 0) break;
             final rowId = row['id']! as int;
