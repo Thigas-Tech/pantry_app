@@ -1,26 +1,33 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
-import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/screens/recipe_form_screen.dart';
+import 'package:pantry_app/screens/recipe_history_screen.dart';
 import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
-import 'recipe_form_screen.dart';
+import 'package:pantry_app/widgets/recipe_nutrition_table.dart';
 
 /// Displays a single recipe in read-only mode with ingredients, instructions,
 /// cost, and a prominent "I made this" action that deducts ingredients from
 /// inventory and logs the event to recipe_history.
 class RecipeDetailScreen extends ConsumerStatefulWidget {
   /// Creates a [RecipeDetailScreen] for the given [recipeId].
-  const RecipeDetailScreen({super.key, required this.recipeId});
+  const RecipeDetailScreen({required this.recipeId, super.key});
 
   /// The id of the recipe to display.
   final int recipeId;
@@ -31,7 +38,6 @@ class RecipeDetailScreen extends ConsumerStatefulWidget {
 
 class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   Recipe? _recipe;
-  List<RecipeIngredient> _ingredients = [];
   bool _isLoading = true;
   bool _isCooking = false;
 
@@ -45,10 +51,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     final db = ref.read(databaseProvider);
     final recipe = await db.getRecipe(widget.recipeId);
     final ingredients = await db.getRecipeIngredients(widget.recipeId);
+    logInfo(
+      'Recipe ${widget.recipeId} loaded: ${recipe?.name ?? 'null'} '
+      '(${ingredients.length} ingredients)',
+    );
     if (!mounted) return;
     setState(() {
       _recipe = recipe;
-      _ingredients = ingredients;
       _isLoading = false;
     });
   }
@@ -56,8 +65,10 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   Future<void> _cook() async {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isCooking = true);
+    logInfo('Cooking recipe ${widget.recipeId}...');
     try {
       final result = await cookRecipe(ref, widget.recipeId);
+      logInfo('Recipe ${widget.recipeId} cooked successfully');
       if (!mounted) return;
       SnackbarHelper.showUndo(
         context,
@@ -98,11 +109,20 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       );
       if (!mounted) return;
       setState(() => _isCooking = false);
-    } on StateError catch (e) {
+    } on RecipeCookException catch (e) {
+      logException('Failed to cook recipe ${widget.recipeId}', e, null);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      final msg = e.isEmpty
+          ? l10n.recipeNoIngredients
+          : e.shortages.entries
+                .map((entry) => l10n.recipeShortage(entry.key, entry.value))
+                .join('\n');
+      SnackbarHelper.showError(context, msg);
+      setState(() => _isCooking = false);
+    } on Exception catch (e, st) {
+      logException('Failed to cook recipe ${widget.recipeId}', e, st);
+      if (!mounted) return;
+      SnackbarHelper.showError(context, l10n.recipeCookFailed);
       setState(() => _isCooking = false);
     }
   }
@@ -135,6 +155,22 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
               );
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              unawaited(
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => RecipeHistoryScreen(
+                      recipeId: widget.recipeId,
+                      recipeName: _recipe?.name ?? '',
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: _isLoading
@@ -144,17 +180,80 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(
-                  l10n.recipeIngredients,
-                  style: Theme.of(context).textTheme.titleMedium,
+                Consumer(
+                  builder: (context, ref, _) {
+                    final asyncData = ref.watch(
+                      recipeIngredientsWithProductsProvider(widget.recipeId),
+                    );
+                    return asyncData.when(
+                      data: (data) {
+                        final grouped = <String, _DisplayIngredient>{};
+                        for (final item in data) {
+                          final key =
+                              item.ingredient.barcode ?? item.ingredient.name;
+                          final existing = grouped[key];
+                          if (existing != null) {
+                            grouped[key] = existing.copyWith(
+                              totalQuantity:
+                                  existing.totalQuantity +
+                                  item.ingredient.quantity,
+                            );
+                          } else {
+                            grouped[key] = _DisplayIngredient(
+                              name: item.ingredient.name,
+                              totalQuantity: item.ingredient.quantity,
+                              unit: item.ingredient.unit,
+                              barcode: item.ingredient.barcode,
+                              product: item.product,
+                            );
+                          }
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${grouped.length} ${l10n.recipeIngredients}',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            ...grouped.values.map(
+                              (g) => ListTile(
+                                dense: true,
+                                leading: _buildIngredientImage(
+                                  g.product?.imageUrl,
+                                  g.barcode,
+                                ),
+                                title: Text(
+                                  '${g.totalQuantity} x ${g.name}',
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      loading: () => Text(
+                        l10n.recipeIngredients,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      error: (_, _) => Text(
+                        l10n.recipeIngredients,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(height: 8),
-                ..._ingredients.map(
-                  (ing) => ListTile(
-                    dense: true,
-                    title: Text('${ing.quantity} x ${ing.name}'),
+                const Divider(),
+                _NutritionSection(recipeId: widget.recipeId),
+                if (_recipe!.servings == 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      l10n.setServingsHint,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                   ),
-                ),
                 const Divider(),
                 if (_recipe!.instructions.isNotEmpty) ...[
                   Text(
@@ -170,21 +269,49 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   builder: (context, snapshot) {
                     final cost = snapshot.data ?? 0.0;
                     final formatted = '$symbol${cost.toStringAsFixed(2)}';
-                    return Row(
+                    final servings = _recipe!.servings;
+                    final perServing = servings > 0 ? cost / servings : 0.0;
+                    final perServingFormatted = perServing > 0
+                        ? '$symbol${perServing.toStringAsFixed(2)}'
+                        : null;
+                    return Column(
                       children: [
-                        Text(
-                          l10n.recipeCost,
-                          style: Theme.of(context).textTheme.titleSmall,
+                        Row(
+                          children: [
+                            Text(
+                              l10n.recipeCost,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const Spacer(),
+                            PriceMask(
+                              formattedPrice: formatted,
+                              child: Text(
+                                formatted,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
                         ),
-                        const Spacer(),
-                        PriceMask(
-                          formattedPrice: formatted,
-                          child: Text(
-                            formatted,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                        if (perServingFormatted != null) ...[
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                l10n.costPerServing,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              const Spacer(),
+                              PriceMask(
+                                formattedPrice: perServingFormatted,
+                                child: Text(
+                                  perServingFormatted,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
+                        ],
                       ],
                     );
                   },
@@ -211,6 +338,129 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildIngredientImage(String? imageUrl, String? barcode) {
+    if (imageUrl == null || barcode == null) {
+      return _fallbackIngredientIcon();
+    }
+    final imageCache = ref.read(imageCacheProvider);
+    return FutureBuilder<String?>(
+      future: imageCache.cacheImage(imageUrl, barcode),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
+          return ClipOval(
+            child: Image.file(
+              File(snapshot.data!),
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _fallbackIngredientIcon(),
+            ),
+          );
+        }
+        return ClipOval(
+          child: Image.network(
+            imageUrl,
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return const CircleAvatar(
+                radius: 20,
+                child: CircularProgressIndicator(),
+              );
+            },
+            errorBuilder: (_, _, _) => _fallbackIngredientIcon(),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _fallbackIngredientIcon() {
+    return const CircleAvatar(radius: 20, child: Icon(Icons.fastfood));
+  }
+}
+
+class _DisplayIngredient {
+  const _DisplayIngredient({
+    required this.name,
+    required this.totalQuantity,
+    required this.unit,
+    this.barcode,
+    this.product,
+  });
+
+  final String name;
+  final String? barcode;
+  final double totalQuantity;
+  final String unit;
+  final Product? product;
+
+  _DisplayIngredient copyWith({double? totalQuantity}) => _DisplayIngredient(
+    name: name,
+    totalQuantity: totalQuantity ?? this.totalQuantity,
+    unit: unit,
+    barcode: barcode,
+    product: product,
+  );
+}
+
+/// Displays the aggregated nutrition table and Nutri-Score badge for a recipe.
+class _NutritionSection extends ConsumerWidget {
+  const _NutritionSection({required this.recipeId});
+
+  final int recipeId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final nutritionAsync = ref.watch(recipeNutritionProvider(recipeId));
+    final nutriscoreAsync = ref.watch(recipeNutriScoreProvider(recipeId));
+
+    return nutritionAsync.when(
+      data: (nutrition) {
+        if (nutrition == null) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Text(
+                  l10n.nutritionInfo,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                nutriscoreAsync.when(
+                  data: (grade) {
+                    if (grade == null) return const SizedBox.shrink();
+                    return Row(
+                      children: [
+                        Text(
+                          l10n.recipeNutriScore,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(width: 8),
+                        NutriScoreBadge(grade: grade.toLowerCase()),
+                      ],
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            RecipeNutritionTable(nutrition: nutrition),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

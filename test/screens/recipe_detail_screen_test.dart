@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/recipe_detail_screen.dart';
+import 'package:pantry_app/services/product_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../helpers/pump_app.dart';
@@ -29,9 +32,26 @@ void main() {
 
   late Database db;
   late MockDatabaseHelper mockDb;
+  late ProductRepository mockRepo;
 
   setUp(() async {
     mockDb = MockDatabaseHelper();
+    mockRepo = MockProductRepository();
+    when(
+      () =>
+          mockRepo.getProduct(any(), languageCode: any(named: 'languageCode')),
+    ).thenAnswer(
+      (_) async => const Product(
+        barcode: '',
+        name: '',
+        source: 'manual',
+      ),
+    );
+    when(mockRepo.isCacheOverdue).thenAnswer((_) async => false);
+    when(mockRepo.getLastRefreshTime).thenAnswer((_) async => null);
+    when(
+      () => mockRepo.getProductFromCache(any()),
+    ).thenAnswer((_) async => null);
     db = await databaseFactory.openDatabase(inMemoryDatabasePath);
     SharedPreferences.setMockInitialValues({});
 
@@ -45,7 +65,7 @@ void main() {
     );
     when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
       (_) async => [
-        const RecipeIngredient(recipeId: 1, name: 'Eggs', quantity: 2.0),
+        const RecipeIngredient(recipeId: 1, name: 'Eggs', quantity: 2),
       ],
     );
   });
@@ -61,6 +81,7 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        productRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
   }
@@ -79,13 +100,19 @@ void main() {
     testWidgets('shows I made this button', (tester) async {
       await pumpDetailScreen(tester);
 
-      expect(find.text('I made this'), findsOneWidget);
+      expect(find.text('I made this', skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('shows Edit button in AppBar', (tester) async {
       await pumpDetailScreen(tester);
 
       expect(find.byIcon(Icons.edit), findsOneWidget);
+    });
+
+    testWidgets('shows History button in AppBar', (tester) async {
+      await pumpDetailScreen(tester);
+
+      expect(find.byIcon(Icons.history), findsOneWidget);
     });
   });
 }

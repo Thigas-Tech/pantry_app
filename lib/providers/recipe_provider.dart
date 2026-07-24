@@ -18,6 +18,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/recipe_nutri_score_service.dart';
 import 'package:pantry_app/services/recipe_nutrition_service.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -158,6 +159,59 @@ final recipeNutritionProvider = FutureProvider.autoDispose
           productsByBarcode,
           servings: servings,
         );
+      },
+    );
+
+/// A record pairing a [RecipeIngredient] with its optional [Product].
+///
+/// The product is null if the ingredient has no barcode or the product is not
+/// in the local database.
+typedef IngredientWithProduct = ({
+  RecipeIngredient ingredient,
+  Product? product,
+});
+
+/// Provides ingredients with their product data (including image URL).
+///
+/// Fetches each ingredient's product via [ProductRepository] so that images
+/// are available for display. Ingredients without a barcode get a null
+/// product.
+final recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
+    .family<List<IngredientWithProduct>, int>(
+      (ref, recipeId) async {
+        final db = ref.watch(databaseProvider);
+        final repo = ref.read(productRepositoryProvider);
+        final ingredients = await db.getRecipeIngredients(recipeId);
+
+        final barcodes = ingredients
+            .map((i) => i.barcode)
+            .where((b) => b != null && b.isNotEmpty)
+            .cast<String>()
+            .toSet()
+            .toList();
+
+        final productsByBarcode = <String, Product>{};
+        for (final barcode in barcodes) {
+          try {
+            final product = await repo.getProduct(barcode);
+            productsByBarcode[barcode] = product;
+          } on Exception catch (e) {
+            logWarning(
+              'Could not fetch product $barcode for ingredient image: $e',
+            );
+          }
+        }
+
+        return ingredients
+            .map(
+              (ing) => (
+                ingredient: ing,
+                product: ing.barcode != null
+                    ? productsByBarcode[ing.barcode]
+                    : null,
+              ),
+            )
+            .toList();
       },
     );
 
