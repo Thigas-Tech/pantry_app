@@ -59,12 +59,13 @@ jobs:
           CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
           FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
         run: |
-          ./scripts/inject_env.sh \
-            "${OFF_USER_ID:-}" \
-            "${OFF_PASSWORD:-}" \
-            "${CONTACT_EMAIL:-pantry-app@example.com}" \
-            "false" \
-            "${FEEDBACK_TOKEN:-}"
+          cat >.env <<EOF
+          OFF_USER_ID=${OFF_USER_ID:-}
+          OFF_PASSWORD=${OFF_PASSWORD:-}
+          CONTACT_EMAIL=${CONTACT_EMAIL:-pantry-app@example.com}
+          USE_OFF_STAGING=false
+          FEEDBACK_TOKEN=${FEEDBACK_TOKEN:-}
+          EOF
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: dart analyze
@@ -116,12 +117,13 @@ jobs:
           CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
           FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
         run: |
-          ./scripts/inject_env.sh \
-            "${OFF_USER_ID:-}" \
-            "${OFF_PASSWORD:-}" \
-            "${CONTACT_EMAIL:-pantry-app@example.com}" \
-            "false" \
-            "${FEEDBACK_TOKEN:-}"
+          cat >.env <<EOF
+          OFF_USER_ID=${OFF_USER_ID:-}
+          OFF_PASSWORD=${OFF_PASSWORD:-}
+          CONTACT_EMAIL=${CONTACT_EMAIL:-pantry-app@example.com}
+          USE_OFF_STAGING=false
+          FEEDBACK_TOKEN=${FEEDBACK_TOKEN:-}
+          EOF
       - name: Create google-services.json
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
