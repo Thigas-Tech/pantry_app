@@ -19,6 +19,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
+import 'package:pantry_app/services/produce_barcode.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/recipe_nutri_score_service.dart';
@@ -336,7 +337,7 @@ Future<Map<String, double>> checkIngredientShortages(
 
   final shortages = <String, double>{};
   for (final entry in grouped.entries) {
-    final barcode = entry.key;
+    final barcode = normalizeProduceBarcode(entry.key);
     final grp = entry.value;
     var rows = await db.getInventoryRowsByBarcode(
       barcode: barcode,
@@ -489,7 +490,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
   return database
       .transaction<CookResult>((txn) async {
         for (final entry in grouped.entries) {
-          final barcode = entry.key;
+          final barcode = normalizeProduceBarcode(entry.key);
           var remaining = entry.value.totalQuantity;
           var rows = await txn.rawQuery(
             'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
@@ -497,12 +498,13 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
             [barcode, activeInventoryId],
           );
           if (rows.isEmpty && entry.value.name.isNotEmpty) {
+            final normalizedName = entry.value.name.trim().toLowerCase();
             rows = await txn.rawQuery(
               'SELECT i.* FROM inventory i'
               ' INNER JOIN products p ON p.barcode = i.barcode'
-              ' WHERE p.name LIKE ? AND i.inventory_id = ?'
+              ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
               ' ORDER BY i.expiry_date ASC NULLS LAST',
-              ['%${entry.value.name}%', activeInventoryId],
+              ['%$normalizedName%', activeInventoryId],
             );
           }
           for (final row in rows) {

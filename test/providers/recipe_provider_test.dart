@@ -381,7 +381,7 @@ void main() {
       () async {
         when(
           () => mockDb.getInventoryRowsByBarcode(
-            barcode: 'produce-Onion',
+            barcode: 'produce-onion',
             inventoryId: 1,
           ),
         ).thenAnswer(
@@ -450,7 +450,7 @@ void main() {
       () async {
         when(
           () => mockDb.getInventoryRowsByBarcode(
-            barcode: 'produce-Onion',
+            barcode: 'produce-onion',
             inventoryId: 1,
           ),
         ).thenAnswer(
@@ -480,7 +480,7 @@ void main() {
       () async {
         when(
           () => mockDb.getInventoryRowsByBarcode(
-            barcode: 'produce-Onion',
+            barcode: 'produce-onion',
             inventoryId: 1,
           ),
         ).thenAnswer(
@@ -513,7 +513,7 @@ void main() {
       () async {
         when(
           () => mockDb.getInventoryRowsByBarcode(
-            barcode: 'produce-UnknownSpice',
+            barcode: 'produce-unknownspice',
             inventoryId: 1,
           ),
         ).thenAnswer(
@@ -537,6 +537,112 @@ void main() {
         );
         expect(shortages, isNotEmpty);
         expect(shortages['UnknownSpice'], closeTo(3, 0.01));
+      },
+    );
+
+    test(
+      'matches produce barcode with different casing after normalization',
+      () async {
+        // Recipe ingredient has 'produce-Onion' but the inventory has
+        // 'produce-onion' (normalized form). The lookup uses the normalized
+        // barcode so it should match without falling back to name search.
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'produce-onion',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 5, 'unit': 'pieces', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+            quantity: 2,
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
+      },
+    );
+
+    test(
+      'matches produce barcode with spaces after normalization',
+      () async {
+        // Recipe ingredient has 'produce-Organic Banana' but the inventory
+        // has 'produce-organic_banana' (normalized form). The lookup should
+        // match via barcode normalization without falling back to name search.
+        // Ensure the fallback is NOT called.
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'produce-organic_banana',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 3, 'unit': 'pieces', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Organic Banana',
+            barcode: 'produce-Organic Banana',
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
+      },
+    );
+
+    test(
+      'falls back to name search when normalized barcode still has no'
+      ' match',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'produce-apple',
+            inventoryId: 1,
+          ),
+        ).thenAnswer((_) async => []);
+        when(
+          () => mockDb.getInventoryRowsByProductName(
+            name: 'Apple',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 10, 'unit': 'pieces', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Apple',
+            barcode: 'produce-Apple',
+            quantity: 5,
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
       },
     );
   });

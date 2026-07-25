@@ -8,6 +8,7 @@ import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/produce_barcode.dart';
 import 'package:pantry_app/services/produce_category_mapper.dart';
 import 'package:pantry_app/services/produce_nutrition_fallback.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
@@ -241,7 +242,7 @@ class ProductRepository {
     if (produceName.trim().isEmpty) {
       throw ArgumentError('produceName must not be empty');
     }
-    final barcode = 'produce-$produceName';
+    final barcode = produceBarcode(produceName);
     return _resolveProduceProduct(produceName, barcode);
   }
 
@@ -273,7 +274,7 @@ class ProductRepository {
       throw ArgumentError('produceName must not be empty');
     }
 
-    final barcode = 'produce-$produceName';
+    final barcode = produceBarcode(produceName);
 
     final existingProduct = await _db.getProduct(barcode);
     if (existingProduct == null) {

@@ -8,6 +8,7 @@ import 'package:pantry_app/models/product_cache_entry.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/firebase_cache_client.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/produce_barcode.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
@@ -114,7 +115,7 @@ class FirebaseCacheService {
         final cached = await _firebaseClient.getProduce(lowerName);
         if (cached != null) {
           final product = cached.toProduct(
-            barcode: 'produce-${_capitalize(trimmed)}',
+            barcode: produceBarcode(produceName),
           );
           await _db.insertProduct(product);
           await _upsertMeta('produce:$lowerName', 'produce');
@@ -262,7 +263,7 @@ class FirebaseCacheService {
     await _firebaseClient.setProduce(entry);
 
     final localProduct = entry.toProduct(
-      barcode: 'produce-${_capitalize(name)}',
+      barcode: produceBarcode(name),
     );
     await _db.insertProduct(localProduct);
 
@@ -344,11 +345,5 @@ class FirebaseCacheService {
     } on Exception catch (e) {
       logWarning('_upsertMeta failed for $cacheKey: $e');
     }
-  }
-
-  /// Capitalizes the first letter of [s].
-  static String _capitalize(String s) {
-    if (s.isEmpty) return s;
-    return '${s[0].toUpperCase()}${s.substring(1)}';
   }
 }
