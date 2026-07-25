@@ -71,10 +71,8 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">static Future&lt;QuantityAndPantryResult?&gt; show(BuildContext context) {
-  return showModalBottomSheet&lt;QuantityAndPantryResult&gt;(
+  return BottomSheetHelper.show&lt;QuantityAndPantryResult&gt;(
     context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
     builder: (_) =&gt; const QuantityAndPantrySheet._(),
   );
 }</code></pre>

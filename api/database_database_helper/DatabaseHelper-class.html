@@ -62,7 +62,7 @@ database operations use the same connection.</p>
 constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
 or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
-<p>Nine tables are created on first launch (version 24):</p>
+<p>Twelve tables are created on first launch (version 27):</p>
 <ul>
 <li>products – product data fetched from Open Food Facts.</li>
 <li>inventories – named pantries (e.g. "Home", "Work").</li>
@@ -73,12 +73,15 @@ or a temporary file.</p>
 <li>shopping_list – items the user intends to buy.</li>
 <li>stores – saved store names for autocomplete.</li>
 <li>firebase_cache_meta – Firestore cache sync metadata.</li>
+<li>recipes – user-created recipes.</li>
+<li>recipe_ingredients – ingredients linked to a recipe.</li>
 </ul>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
 <a href="../database_product_dao/ProductDao-class.html">ProductDao</a>, <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>, <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a>, <a href="../database_price_dao/PriceDao-class.html">PriceDao</a>,
 <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a>, <a href="../database_store_dao/StoreDao-class.html">StoreDao</a>, <a href="../database_feedback_queue_dao/FeedbackQueueDao-class.html">FeedbackQueueDao</a>,
-<a href="../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>, <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>.</p>
+<a href="../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>, <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>,
+<a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a>, <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a>.</p>
 <p>See also:</p>
 <ul>
 <li><a href="https://pub.dev/packages/sqflite">sqflite</a> — the SQLite plugin
@@ -219,6 +222,42 @@ used for local storage.</li>
 </dt>
 <dd>
   DAO for the product_submission_queue table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="recipeDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/recipeDao.html">recipeDao</a></span>
+  <span class="signature">&#8594; <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the recipes table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="recipeHistoryDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/recipeHistoryDao.html">recipeHistoryDao</a></span>
+  <span class="signature">&#8594; <a href="../database_recipe_history_dao/RecipeHistoryDao-class.html">RecipeHistoryDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the recipe_history table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="recipeIngredientDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/recipeIngredientDao.html">recipeIngredientDao</a></span>
+  <span class="signature">&#8594; <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the recipe_ingredients table.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -386,6 +425,45 @@ inventory.
 
 </dd>
 
+        <dt id="deleteRecipe" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteRecipe.html">deleteRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="deleteRecipe-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes the recipe with the given <code>id</code>. Returns rows deleted.
+  
+
+</dd>
+
+        <dt id="deleteRecipeHistory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteRecipeHistory.html">deleteRecipeHistory</a></span><span class="signature">(<wbr><span class="parameter" id="deleteRecipeHistory-param-historyId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">historyId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes the history entry with the given <code>historyId</code>.
+  
+
+</dd>
+
+        <dt id="deleteRecipeIngredients" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteRecipeIngredients.html">deleteRecipeIngredients</a></span><span class="signature">(<wbr><span class="parameter" id="deleteRecipeIngredients-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes all ingredients for the given <code>recipeId</code>. Returns rows deleted.
+  
+
+</dd>
+
         <dt id="deleteShoppingItem" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteShoppingItem.html">deleteShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="deleteShoppingItem-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -421,6 +499,19 @@ inventory.
 </dt>
 <dd>
   Returns all cached products.
+  
+
+</dd>
+
+        <dt id="getAllRecipes" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getAllRecipes.html">getAllRecipes</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe/Recipe-class.html">Recipe</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all recipes, ordered by updated_at descending.
   
 
 </dd>
@@ -529,6 +620,34 @@ optionally filtered by location.
 <dd>
   Returns all inventory entries for a specific barcode and <code>inventoryId</code>,
 ordered by expiry date (oldest first).
+  
+
+</dd>
+
+        <dt id="getInventoryRowsByBarcode" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getInventoryRowsByBarcode.html">getInventoryRowsByBarcode</a></span><span class="signature">(<wbr>{<span class="parameter" id="getInventoryRowsByBarcode-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="getInventoryRowsByBarcode-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns inventory rows matching <code>barcode</code> in the given <code>inventoryId</code>,
+ordered by expiry_date ASC (nulls last) for FEFO deduction.
+  
+
+</dd>
+
+        <dt id="getInventoryRowsByProductName" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getInventoryRowsByProductName.html">getInventoryRowsByProductName</a></span><span class="signature">(<wbr>{<span class="parameter" id="getInventoryRowsByProductName-param-name"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="getInventoryRowsByProductName-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns inventory rows whose linked product name contains <code>name</code>,
+ordered by expiry_date ASC (nulls last) for FEFO deduction.
   
 
 </dd>
@@ -730,6 +849,71 @@ descending.
 
 </dd>
 
+        <dt id="getRecentRecipeHistory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getRecentRecipeHistory.html">getRecentRecipeHistory</a></span><span class="signature">(<wbr><span class="parameter" id="getRecentRecipeHistory-param-sinceMillis"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">sinceMillis</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_history_entry/RecipeHistoryEntry-class.html">RecipeHistoryEntry</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all history entries made at or after <code>sinceMillis</code>.
+  
+
+</dd>
+
+        <dt id="getRecipe" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getRecipe.html">getRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="getRecipe-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe/Recipe-class.html">Recipe</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the recipe with the given <code>id</code>, or null.
+  
+
+</dd>
+
+        <dt id="getRecipeCount" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getRecipeCount.html">getRecipeCount</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the total number of recipes.
+  
+
+</dd>
+
+        <dt id="getRecipeHistory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getRecipeHistory.html">getRecipeHistory</a></span><span class="signature">(<wbr><span class="parameter" id="getRecipeHistory-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_history_entry/RecipeHistoryEntry-class.html">RecipeHistoryEntry</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all history entries for the given <code>recipeId</code>, newest first.
+  
+
+</dd>
+
+        <dt id="getRecipeIngredients" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getRecipeIngredients.html">getRecipeIngredients</a></span><span class="signature">(<wbr><span class="parameter" id="getRecipeIngredients-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns all ingredients for the given <code>recipeId</code>.
+  
+
+</dd>
+
         <dt id="getShoppingList" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/getShoppingList.html">getShoppingList</a></span><span class="signature">(<wbr>{<span class="parameter" id="getShoppingList-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
@@ -819,6 +1003,58 @@ that has the same barcode and inventoryId.
 </dt>
 <dd>
   Inserts a product into the local cache (upsert).
+  
+
+</dd>
+
+        <dt id="insertRecipe" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertRecipe.html">insertRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="insertRecipe-param-recipe"><span class="type-annotation"><a href="../models_recipe/Recipe-class.html">Recipe</a></span> <span class="parameter-name">recipe</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a new recipe and returns its row ID.
+  
+
+</dd>
+
+        <dt id="insertRecipeHistory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertRecipeHistory.html">insertRecipeHistory</a></span><span class="signature">(<wbr><span class="parameter" id="insertRecipeHistory-param-entry"><span class="type-annotation"><a href="../models_recipe_history_entry/RecipeHistoryEntry-class.html">RecipeHistoryEntry</a></span> <span class="parameter-name">entry</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a recipe history entry and returns its row ID.
+  
+
+</dd>
+
+        <dt id="insertRecipeIngredient" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertRecipeIngredient.html">insertRecipeIngredient</a></span><span class="signature">(<wbr><span class="parameter" id="insertRecipeIngredient-param-ingredient"><span class="type-annotation"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span> <span class="parameter-name">ingredient</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a recipe ingredient and returns its row ID.
+  
+
+</dd>
+
+        <dt id="insertRecipeWithIngredients" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/insertRecipeWithIngredients.html">insertRecipeWithIngredients</a></span><span class="signature">(<wbr><span class="parameter" id="insertRecipeWithIngredients-param-recipe"><span class="type-annotation"><a href="../models_recipe/Recipe-class.html">Recipe</a></span> <span class="parameter-name">recipe</span>, </span><span class="parameter" id="insertRecipeWithIngredients-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Inserts a recipe and its ingredients in a single transaction.
   
 
 </dd>
@@ -976,6 +1212,33 @@ scoped to an inventory.
 </dt>
 <dd>
   Updates an existing price row.
+  
+
+</dd>
+
+        <dt id="updateRecipe" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/updateRecipe.html">updateRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="updateRecipe-param-recipe"><span class="type-annotation"><a href="../models_recipe/Recipe-class.html">Recipe</a></span> <span class="parameter-name">recipe</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates an existing recipe. Returns rows affected.
+  
+
+</dd>
+
+        <dt id="updateRecipeWithIngredients" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/updateRecipeWithIngredients.html">updateRecipeWithIngredients</a></span><span class="signature">(<wbr><span class="parameter" id="updateRecipeWithIngredients-param-recipe"><span class="type-annotation"><a href="../models_recipe/Recipe-class.html">Recipe</a></span> <span class="parameter-name">recipe</span>, </span><span class="parameter" id="updateRecipeWithIngredients-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates a recipe and replaces all of its ingredients in a single
+transaction.
   
 
 </dd>

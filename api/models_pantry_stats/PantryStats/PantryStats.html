@@ -75,6 +75,10 @@
 <li><span class="parameter" id="param-monthlySpending"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>([])</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_pantry_stats/MonthlySpending-class.html">MonthlySpending</a></span>&gt;</span></span> <span class="parameter-name">monthlySpending</span>, </span></li>
 <li><span class="parameter" id="param-storeSpending"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>([])</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_pantry_stats/StoreSpending-class.html">StoreSpending</a></span>&gt;</span></span> <span class="parameter-name">storeSpending</span>, </span></li>
 <li><span class="parameter" id="param-nutriscoreByStore"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>([])</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_pantry_stats/StoreNutriscore-class.html">StoreNutriscore</a></span>&gt;</span></span> <span class="parameter-name">nutriscoreByStore</span>, </span></li>
+<li><span class="parameter" id="param-mealsCooked"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">mealsCooked</span>, </span></li>
+<li><span class="parameter" id="param-totalRecipeCost"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalRecipeCost</span>, </span></li>
+<li><span class="parameter" id="param-averageRecipeNutriScore"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">averageRecipeNutriScore</span>, </span></li>
+<li><span class="parameter" id="param-mostCookedRecipe"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(&#39;&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">mostCookedRecipe</span>, </span></li>
 </ol>})
     </section>
     
@@ -108,6 +112,10 @@
   @Default([]) List&lt;MonthlySpending&gt; monthlySpending,
   @Default([]) List&lt;StoreSpending&gt; storeSpending,
   @Default([]) List&lt;StoreNutriscore&gt; nutriscoreByStore,
+  @Default(0) int mealsCooked,
+  @Default(0) double totalRecipeCost,
+  @Default(0) double averageRecipeNutriScore,
+  @Default(&#39;&#39;) String mostCookedRecipe,
 }) = _PantryStats;</code></pre>
 </section>
 

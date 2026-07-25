@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the RecipeNutrition class from the recipe_nutrition library, for the Dart programming language.">
+  <title>RecipeNutrition class - recipe_nutrition library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../models_recipe_nutrition/">models&#47;recipe_nutrition.dart</a></li>
+    <li class="self-crumb">RecipeNutrition class</li>
+  </ol>
+  <div class="self-name">RecipeNutrition</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="models_recipe_nutrition&#47;models_recipe_nutrition-library-sidebar.html"
+    data-below-sidebar="models_recipe_nutrition&#47;RecipeNutrition-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">RecipeNutrition</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Aggregated nutrition data for a recipe.</p>
+<p>Contains total, per-100g, and (when servings &gt; 0) per-serving nutrient
+values computed from the recipe's ingredient list.</p>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="RecipeNutrition.new" class="callable">
+          <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/RecipeNutrition.html">RecipeNutrition</a></span><span class="signature">({<span class="parameter" id="param-totalWeightG"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalWeightG</span>, </span><span class="parameter" id="param-totalEnergyKcal"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalEnergyKcal</span>, </span><span class="parameter" id="param-totalProteinG"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalProteinG</span>, </span><span class="parameter" id="param-totalCarbsG"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalCarbsG</span>, </span><span class="parameter" id="param-totalFatG"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalFatG</span>, </span><span class="parameter" id="param-totalFiberG"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalFiberG</span>, </span><span class="parameter" id="param-totalSaltG"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalSaltG</span>, </span><span class="parameter" id="param-totalSugarsG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalSugarsG</span> = <span class="default-value">0</span>, </span><span class="parameter" id="param-totalSaturatedFatG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">totalSaturatedFatG</span> = <span class="default-value">0</span>, </span><span class="parameter" id="param-servings"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">servings</span> = <span class="default-value">0</span></span>})</span>
+        </dt>
+        <dd>
+          Creates a <a href="../models_recipe_nutrition/RecipeNutrition-class.html">RecipeNutrition</a>.
+            <div class="constructor-modifier features">const</div>
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="per100gCarbsG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gCarbsG.html">per100gCarbsG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Carbohydrates per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="per100gEnergyKcal" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gEnergyKcal.html">per100gEnergyKcal</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Energy per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="per100gFatG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gFatG.html">per100gFatG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Fat per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="per100gFiberG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gFiberG.html">per100gFiberG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Fibre per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="per100gProteinG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gProteinG.html">per100gProteinG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Protein per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="per100gSaltG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gSaltG.html">per100gSaltG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Salt per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="per100gSaturatedFatG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gSaturatedFatG.html">per100gSaturatedFatG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Saturated fat per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="per100gSugarsG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/per100gSugarsG.html">per100gSugarsG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Sugars per 100 g.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingCarbsG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingCarbsG.html">perServingCarbsG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Carbohydrates per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingEnergyKcal" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingEnergyKcal.html">perServingEnergyKcal</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Energy per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingFatG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingFatG.html">perServingFatG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Fat per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingFiberG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingFiberG.html">perServingFiberG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Fibre per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingProteinG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingProteinG.html">perServingProteinG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Protein per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingSaltG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingSaltG.html">perServingSaltG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Salt per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingSaturatedFatG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingSaturatedFatG.html">perServingSaturatedFatG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Saturated fat per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="perServingSugarsG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/perServingSugarsG.html">perServingSugarsG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Sugars per serving (0 if servings unknown).
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="servings" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/servings.html">servings</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd>
+  Number of servings (0 = unknown).
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalCarbsG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalCarbsG.html">totalCarbsG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total carbohydrates in grams.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalEnergyKcal" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalEnergyKcal.html">totalEnergyKcal</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total energy in kcal.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalFatG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalFatG.html">totalFatG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total fat in grams.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalFiberG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalFiberG.html">totalFiberG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total fibre in grams.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalProteinG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalProteinG.html">totalProteinG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total protein in grams.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalSaltG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalSaltG.html">totalSaltG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total salt in grams.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalSaturatedFatG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalSaturatedFatG.html">totalSaturatedFatG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total saturated fat in grams (0 if not available from products).
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalSugarsG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalSugarsG.html">totalSugarsG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total sugars in grams (0 if not available from products).
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="totalWeightG" class="property">
+  <span class="name"><a href="../models_recipe_nutrition/RecipeNutrition/totalWeightG.html">totalWeightG</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>
+  
+
+</dt>
+<dd>
+  Total weight of all ingredients in grams.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../models_recipe_nutrition/">recipe_nutrition</a></li>
+    <li class="self-crumb">RecipeNutrition class</li>
+</ol>
+
+    <h5>recipe_nutrition library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.8+4
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
