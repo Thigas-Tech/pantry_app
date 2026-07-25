@@ -533,6 +533,25 @@ infrastructure or external server hosting are listed last.
   - **User changes interval in Settings**: Cancel existing re-engagement
     notification and reschedule with new interval.
 
+- [x] **Recipe registration** — create named recipes with ingredient lists
+  (linked to products in inventory), instructions, and cost calculation
+  using the user's base currency setting. Database migration v25/v26.
+  (`lib/models/recipe.dart`, `lib/screens/recipe_form_screen.dart`,
+  `lib/screens/recipe_list_screen.dart`)
+- [x] **Recipe detail screen** — read-only view with ingredient list,
+  instructions, cost (maskable via eye icon), and "I made this" button.
+  (`lib/screens/recipe_detail_screen.dart`)
+- [x] **"I made this" (cook) flow** — marks recipe as cooked, deducts
+  ingredients from inventory (FEFO), logs immutable history entry.
+  Shortage warnings and undo support.
+  (`lib/providers/recipe_provider.dart`)
+- [x] **Recipe history** — immutable cook-event logging via `recipe_history`
+  table and DAO. (`lib/database/recipe_history_dao.dart`)
+- [x] **Search-powered ingredient picker** — bottom sheet that searches
+  local DB and OFF API by name/barcode. Adds result as ingredient.
+  (`lib/widgets/search_ingredient_sheet.dart`)
+- [x] **Duplicate ingredient merging** — same barcode added twice increments
+  quantity instead of duplicate row.
 - [ ] **Recipe recommendation notifications from pantry** — generate
   personalised recipe suggestions based on the user's current inventory:
   "Hey, how about making a chicken sandwich today? You have all the
@@ -914,10 +933,10 @@ infrastructure or external server hosting are listed last.
 
 ### Database migrations
 
-- [x] **DB migrations through v24** -- schema is at version 24 with all
-  planned migrations (feedback_queue, prices, shopping_list, search_text,
-  language_code, product_submission_queue, stores). Further version bumps
-  for new features still needed.
+- [x] **DB migrations through v30** -- schema is at version 30 with all
+  planned migrations including firebase_cache_meta (v24), recipe tables (v25,
+  v26), and subsequent schema evolution. Further version bumps for new
+  features still needed.
 
 ---
 

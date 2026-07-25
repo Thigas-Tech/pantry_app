@@ -1,6 +1,6 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 24)
+### 2.1 Schema (version 30)
 
 Nine tables:
 
@@ -48,7 +48,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v24).
+- `_onUpgrade` handles version bumps (currently v1 -> v30).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -77,6 +77,12 @@ Version history:
 | v21 -> v22 | Added `serving_weight_g REAL` to `inventory` for produce serving sizes |
 | v22 -> v23 | Backfill `category` for produce items with default "Fruits and vegetables based foods" |
 | v23 -> v24 | Added `firebase_cache_meta` table for Firestore cache sync tracking |
+| v24 -> v25 | Added `recipes` and `recipe_ingredients` tables |
+| v25 -> v26 | Added `recipe_history` table |
+| v26 -> v27 | Skipped (intended columns already present in v25 CREATE TABLE) |
+| v27 -> v28 | Normalize produce barcodes (lowercase, trim, spaces to underscores) across all tables |
+| v28 -> v29 | Added unique index on `inventory(barcode, inventory_id)`, deduplicated existing rows |
+| v29 -> v30 | Added `search_text` column on `recipes` + indexes on name/created_at/updated_at |
 
 ### 2.4 Connectivity layer
 

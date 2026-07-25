@@ -886,7 +886,7 @@ flutter build apk --debug
 ### [ ] 9.3 Check for stale documentation
 
 ```bash
-bash scripts/check_stale_info.sh
+dart analyze --fatal-infos --fatal-warnings
 ```
 
 ### [ ] 9.4 Update ARCHITECTURE docs
@@ -961,7 +961,7 @@ flutter build apk --debug
 # Phase 9 (pre-commit)
 dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
-bash scripts/check_stale_info.sh
+dart analyze --fatal-infos --fatal-warnings
 ```
 
 ---

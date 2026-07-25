@@ -1,4 +1,4 @@
-/// @file ComingSoonScreen smoke tests.
+/// @file ComingSoonScreen tests.
 ///
 /// Verifies the screen renders its [AppBar] and [ComingSoonView] body
 /// with the provided [String] title, [String] subtitle, and [IconData] icon.

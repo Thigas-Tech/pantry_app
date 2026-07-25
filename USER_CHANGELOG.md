@@ -1,7 +1,5 @@
 # User Changelog
 
-## [0.0.10]
-
 - Recipe detail screen: view full ingredients, instructions, and cost of any
   recipe. Tap a recipe in the list to open it.
 - "I made this": mark a recipe as cooked — ingredients are automatically
@@ -16,9 +14,6 @@
   the average cost banner.
 - Search product: a new button in the recipe form lets you search Open Food
   Facts and your local database by name or barcode to find ingredients.
-
-## [0.0.9]
-
 - Recipe registration: save recipes with ingredients and instructions,
   auto-populated from your pantry. View, edit, and delete recipes.
 - Recipe cost: see how much each recipe costs, plus the average across all
@@ -36,6 +31,7 @@
 ## [0.0.8]
 
 ### Fixed
+
 - USDA nutrition data for produce items now loads correctly (was returning 403 due to incorrect API key placement).
 - Produce items no longer cause "refresh failed" warnings during pull-to-refresh.
 - Portuguese translation for "apple" corrected from "Maca" to "Maçã".
@@ -43,16 +39,19 @@
 - Keyboard no longer hides bottom sheet content when entering data.
 
 ### Added
+
 - Produce items now show a green leaf icon in search results and the shopping list sheet instead of a barcode fallback.
 - "What's New" sheet now shows changelog in Portuguese or Brazilian Portuguese when the app language is set accordingly.
 
 ### Changed
+
 - Produce names are now properly localized in inventory cards and product detail screens.
 - Changelog system simplified. In-app changelog now reads directly from a user-facing file with no parsing or cleaning needed.
 
 ## [0.0.7]
 
 ### Fixed
+
 - Price calculator formatter no longer shows leading zeros.
 - Bottom sheets no longer obscured by the system navigation bar.
 - Keyboard no longer hides bottom sheet content.
@@ -60,6 +59,7 @@
 ## [0.0.6]
 
 ### Added
+
 - Expiry notifications now show product names instead of barcodes.
 - Shopping list suggests products from your pantry.
 - New stats charts: monthly spending, spending by store, Nutri-Score by store.
@@ -73,22 +73,26 @@
 - Persistent store autocomplete when entering prices.
 
 ### Fixed
+
 - Shopping list items are scoped to the active inventory.
 - No duplicate items when moving to your pantry.
 
 ## [0.0.5]
 
 ### Fixed
+
 - Translation leak on the product detail page.
 - Camera scanner no longer gets stuck in an error loop.
 - Torch/flashlight toggle added to the scanner.
 - User feedback when a barcode scan fails.
 
 ### Added
+
 - Tap-to-focus and auto-zoom on the scanner.
 - Scanner overlay pauses when app is backgrounded to save battery.
 
 ### Changed
+
 - Notifications initialize earlier, preventing missed reminders.
 - Better connectivity handling at startup.
 - Mixed-currency prices are now converted properly.
@@ -101,6 +105,7 @@
 ## [0.0.4]
 
 ### Added
+
 - Shopping list as a new tab in the bottom navigation bar.
 - Price tracking for products with currency conversion.
 - AMOLED dark mode for power savings on compatible screens.
@@ -109,12 +114,14 @@
 - Manual testing guide for QA.
 
 ### Changed
+
 - Search screen upgraded to Material 3 search bar.
 - Accent-insensitive search for better product discovery.
 - Notification service rewritten for reliability.
 - Doc comments now use square bracket references for better navigation.
 
 ### Fixed
+
 - Feedback form now supports multiple screenshot attachments.
 - Untranslated strings on stats and feedback screens are now localized.
 - Inventory switcher redesigned with Nutri-Score badge.
@@ -123,6 +130,7 @@
 ## [0.0.3]
 
 ### Added
+
 - Stats screen with Nutri-Score charts, category and location breakdowns.
 - ComingSoonView placeholder widgets for future features.
 - Product thumbnails in search results.
@@ -130,6 +138,7 @@
 - GitHub Wiki for API documentation.
 
 ### Fixed
+
 - Product detail images now respect screen resolution.
 - Chart labels visible in dark mode.
 - Search now matches OFF website results more accurately.
@@ -138,6 +147,7 @@
 ## [0.0.2]
 
 ### Added
+
 - Long-press to select inventory items for batch operations.
 - Batch move items between pantries.
 - Swipe between bottom navigation tabs.
@@ -147,6 +157,7 @@
 - Pull-to-refresh on stats screen.
 
 ### Fixed
+
 - Search now handles accented characters correctly.
 - No more crashes from search screen after disposal.
 - No more double background refresh on startup.
@@ -154,26 +165,31 @@
 ## [0.0.1]
 
 ### Added
+
 - Autocomplete search with product thumbnails.
 - Accent-insensitive search.
 - Pinch-to-zoom on product photos.
 - Settings screen grouped into sections.
 
 ### Nutri-Score
+
 - Grey dash badge for non-applicable products.
 - Tooltip explaining why Nutri-Score is not applicable.
 
 ### Batch delete
+
 - Multi-select checkboxes on inventory cards.
 - Delete confirmation with undo.
 
 ### Quick quantity adjustment
+
 - Plus and minus buttons on inventory tiles.
 - Tap quantity to type a value directly.
 
 ## [0.1.0] -- Initial release (MVP)
 
 ### Core
+
 - Barcode scanning via device camera.
 - Open Food Facts product lookup.
 - Offline-first local caching.
@@ -181,14 +197,17 @@
 - Nutrition table and ingredients list.
 
 ### Product management
+
 - Add products to inventory with quantity, unit, and location.
 - Manual product entry when barcode is unknown.
 - Product submission to Open Food Facts.
 
 ### UI
+
 - Dark mode support.
 - Settings screen with theme and notification preferences.
 
 ### Multi-inventory
+
 - Named pantries (Home, Work, Camping).
 - Per-pantry inventory views and stats.

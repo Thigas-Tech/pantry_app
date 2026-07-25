@@ -8,15 +8,13 @@ Run BEFORE every local commit. Fix ALL issues:
   flutter test --concurrency=2
   flutter build apk --debug
   dart doc .
-  scripts/check_stale_info.sh
   # If FEATURE_FREEZE.md is checked, verify only fixes + polish are included.
   grep -q '[x] feature_freeze' FEATURE_FREEZE.md && \
     echo "FEATURE FREEZE ACTIVE — only bug fixes and polish allowed" || true
 
 ## Pre-merge gate (run BEFORE creating a PR or converting draft to ready)
 
-  1. Run smoke test: scripts/run_smoke_test.sh
-  2. Push: git push -u origin <branch>
+  1. Push: git push -u origin <branch>
   3. Open a draft PR to trigger GitHub Actions.
   4. Verify ALL CI checks pass:
      - CI / Run static testing       (lint + formatting)
@@ -35,7 +33,7 @@ Run BEFORE every local commit. Fix ALL issues:
 
   Notes:
     - Feedback -> GitHub requires FEEDBACK_TOKEN in .env
-    - Reference test product data in agents_docs/off_test_products.*
+    - Reference test product data in docs/superpowers/agents/off_test_products.*
 
 ## Post-commit gate
 
@@ -61,7 +59,7 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 1. Follow every rule. No exceptions.
 2. Check [TODO.md] before starting new work.
 3. /// doc comments on every public class, constructor, field, and method.
-   These feed the public GitHub Wiki (see agents_docs/wiki.md). Write them
+   These feed the public GitHub Wiki (see docs/superpowers/agents/wiki.md). Write them
    as proper sentences — they are the user-facing API documentation.
 4. Tests for ALL new code. Use mocktail. Place in test/ subdirectory.
 5. After freezed or l10n changes: dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n
@@ -73,48 +71,21 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 11. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
 12. Never ! on SQL aggregate results. Use ?? fallback instead.
 13. Keep all markdown files ([README.md], [ARCHITECTURE/INDEX.md], [CHANGELOG.md],
-    [TODO.md], `agents_docs/*.md`) and `///` doc comments in sync with the
+    [TODO.md], `docs/superpowers/agents/*.md`) and `///` doc comments in sync with the
     codebase. After every feature, fix, or refactor, audit the affected docs
     in the same PR. When asked to find stale information, first consult
-    `agents_docs/stale_info_checklist.md`.
+    `docs/superpowers/agents/stale_info_checklist.md`.
 14. Never overwrite .env. It is gitignored and contains credentials.
-    - scripts/inject_env.sh uses `cat >.env` which truncates — never run it
-      locally. It is only for CI (build, deploy workflows).
     - Never echo/redirect into .env from scripts or ad-hoc commands.
     - If .env is missing or empty, copy .env.example and fill in real values.
     - FEEDBACK_TOKEN is a GitHub PAT with repo scope. Create at
       https://github.com/settings/tokens (classic) or
       https://github.com/settings/tokens?type=beta (fine-grained).
 
-## Pre-push gate (run BEFORE every push)
-
-Run `scripts/install-hooks.sh` once after cloning the repo to install the
-client-side hooks. The stale-info check will then fire automatically on
-every `git push`. Use `git push --no-verify` to bypass.
-
-### Automatic (git hook)
-
-  - `scripts/check_stale_info.sh` runs on every `git push`, catching:
-    - Wrong concurrency flag (`--concurrency=8` vs `--concurrency=2`)
-    - Wrong retention-days in workflow files
-    - Non-existent provider names in docs
-    - Removed-dependency names (dio, connectivity_plus)
-    - Removed-feature references (CSV import/export, quality_gate.sh)
-  - Instant (< 1 s). Exit code 0 = pass, nonzero = fail.
-
-### Manual steps
-
-  1. Run smoke test: `scripts/run_smoke_test.sh`
-      (integration_test/smoke_test.dart — app startup + 5 main tabs)
-     Emulator-required. ~10 s on warm emulator, ~3 min first run.
-  2. Audit stale docs: if `agents_docs/stale_info_checklist.md` hot spots
-     are triggered by this branch, open the file and check the affected
-     sections.
-
 ## Development workflow
 
 - Branch from main: git checkout -b feat/description
-- Implement -> pre-commit gate -> pre-push gate -> push
+- Implement -> pre-commit gate -> push
 - Open draft PR -> wait for CI -> convert to ready -> merge
 - Never commit directly to main.
 - After merge: git checkout main && git pull
@@ -141,5 +112,5 @@ Read these when implementing specific features:
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
 - Project architecture -> ARCHITECTURE/INDEX.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
-- Project-specific guides and testing procedures -> agents_docs/ directory
+- Project-specific guides and testing procedures -> docs/superpowers/agents/ directory
   (read the relevant file for each task)

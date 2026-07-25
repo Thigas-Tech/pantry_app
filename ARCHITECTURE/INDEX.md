@@ -13,4 +13,4 @@ An offline-first Flutter application for managing pantry inventory and expiry da
 - [Localization](LOCALIZATION.md)
 - [Testing Strategy](TESTING.md)
 - [Performance & Footprint](PERFORMANCE.md)
-- [Monetization Plans](../agents_docs/monetization.md)
+- [Monetization Plans](../docs/superpowers/agents/monetization.md)

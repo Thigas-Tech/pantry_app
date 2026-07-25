@@ -76,7 +76,7 @@ User scans barcode
 
 ### 3.4 Ad service (AdMob) — [Planned]
 
-> **Not yet implemented.** See `agents_docs/monetization.md` for the full
+> **Not yet implemented.** See `docs/superpowers/agents/monetization.md` for the full
 > deferred implementation plan.
 
 - Planned: `google_mobile_ads` for banner and native ads across free tier screens.
@@ -85,7 +85,7 @@ User scans barcode
 
 ### 3.5 Donation and subscription service (Play Billing) — [Planned]
 
-> **Not yet implemented.** See `agents_docs/monetization.md` for the full
+> **Not yet implemented.** See `docs/superpowers/agents/monetization.md` for the full
 > deferred implementation plan.
 
 - Planned: `in_app_purchase` plugin wrapping Google Play Billing.

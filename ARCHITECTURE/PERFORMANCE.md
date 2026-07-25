@@ -112,9 +112,6 @@ All workflows use SHA-pinned actions for supply-chain security. Dependabot
 updates GitHub Action versions monthly. Runner: `ubuntu-latest` for QA and
 build, `macos-latest` for emulator-based workloads (E2E, Flashlight, Perfetto).
 
-Helper script in `scripts/`:
-- `inject_env.sh` — creates `.env` from GitHub secrets for build-time config injection
-
 ### 11.10 Performance measurement
 
 The CI pipeline integrates automated performance profiling:
