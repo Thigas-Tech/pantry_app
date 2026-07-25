@@ -58,7 +58,7 @@ jobs:
           FEEDBACK_ENABLED: ${{ vars.FEEDBACK_ENABLED || 'true' }}
           OPEN_PRICES_TOKEN: ${{ secrets.OPEN_PRICES_TOKEN }}
           USDA_API_KEY: ${{ secrets.USDA_API_KEY }}
-          FIREBASE_ENABLED: ${{ vars.FIREBASE_ENABLED || 'false' }}
+          FIREBASE_ENABLED: ${{ vars.FIREBASE_ENABLED || 'true' }}
         run: |
           env \
             | grep -E '^(OFF_USER_ID|OFF_PASSWORD|CONTACT_EMAIL|FEEDBACK_TOKEN|USE_OFF_STAGING|GITHUB_OWNER|GITHUB_REPO|FEEDBACK_ENABLED|OPEN_PRICES_TOKEN|USDA_API_KEY|FIREBASE_ENABLED)=' \
