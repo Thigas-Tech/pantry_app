@@ -502,7 +502,7 @@ void main() {
 
   group('resolveProduceProduct', () {
     const produceName = 'Apple';
-    const produceBarcode = 'produce-Apple';
+    const produceBarcode = 'produce-apple';
 
     test('returns product with synthetic barcode and produce type', () async {
       when(() => mockDb.getProduct(produceBarcode)).thenAnswer(
@@ -539,7 +539,7 @@ void main() {
     );
 
     test('returns "Vegetables" category for Broccoli', () async {
-      when(() => mockDb.getProduct('produce-Broccoli')).thenAnswer(
+      when(() => mockDb.getProduct('produce-broccoli')).thenAnswer(
         (_) async => null,
       );
       when(() => mockUsda.searchFood('Broccoli')).thenAnswer(
@@ -575,7 +575,7 @@ void main() {
   });
 
   group('addProduceToInventory', () {
-    const produceBarcode = 'produce-Apple';
+    const produceBarcode = 'produce-apple';
     const produceName = 'Apple';
 
     setUp(() {
@@ -682,7 +682,7 @@ void main() {
     test(
       'creates minimal product when USDA empty and no fallback data',
       () async {
-        when(() => mockDb.getProduct('produce-UnknownFruit')).thenAnswer(
+        when(() => mockDb.getProduct('produce-unknownfruit')).thenAnswer(
           (_) async => null,
         );
         when(() => mockUsda.searchFood('UnknownFruit')).thenAnswer(
@@ -700,7 +700,7 @@ void main() {
                   () => mockDb.insertProduct(captureAny()),
                 ).captured.first
                 as Product;
-        expect(captured.barcode, 'produce-UnknownFruit');
+        expect(captured.barcode, 'produce-unknownfruit');
         expect(captured.energyKcal, isNull);
         expect(captured.productType, ProductType.produce);
         verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
@@ -860,7 +860,7 @@ void main() {
 
     group('resolveProduceProduct', () {
       const produceName = 'Apple';
-      const produceBarcode = 'produce-Apple';
+      const produceBarcode = 'produce-apple';
 
       test(
         'checks Firebase before USDA when resolving produce',
@@ -911,7 +911,7 @@ void main() {
     });
 
     group('addProduceToInventory', () {
-      const produceBarcode = 'produce-Apple';
+      const produceBarcode = 'produce-apple';
       const produceName = 'Apple';
 
       setUp(() {

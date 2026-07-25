@@ -857,4 +857,204 @@ void main() {
       },
     );
   });
+
+  group('getInventoryRowsByProductName', () {
+    test('matches case-insensitively', () async {
+      await db.insertProduct(
+        const Product(
+          barcode: 'produce-apple',
+          name: 'Apple',
+          source: 'manual',
+        ),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'produce-apple'),
+      );
+
+      // Search with different case than the stored name.
+      final rows = await db.getInventoryRowsByProductName(
+        name: 'APPLE',
+        inventoryId: 1,
+      );
+      expect(rows, hasLength(1));
+      expect(rows.first['barcode'], 'produce-apple');
+    });
+
+    test('matches with whitespace differences', () async {
+      await db.insertProduct(
+        const Product(
+          barcode: 'produce-organic_banana',
+          name: 'Organic Banana',
+          source: 'manual',
+        ),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'produce-organic_banana'),
+      );
+
+      // Search with extra whitespace.
+      final rows = await db.getInventoryRowsByProductName(
+        name: '  Organic Banana  ',
+        inventoryId: 1,
+      );
+      expect(rows, hasLength(1));
+    });
+
+    test('returns empty for non-matching name', () async {
+      await db.insertProduct(
+        const Product(barcode: '001', name: 'Milk'),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: '001'),
+      );
+
+      final rows = await db.getInventoryRowsByProductName(
+        name: 'Bread',
+        inventoryId: 1,
+      );
+      expect(rows, isEmpty);
+    });
+  });
+
+  group('Migration v28 — produce barcode normalization', () {
+    test('normalizes produce barcodes in all tables', () async {
+      final tempDir = Directory.systemTemp.createTempSync('pantry_v28_');
+      final v27Path = '${tempDir.path}/pantry.db';
+
+      // Create a v27 database with core tables + unnormalized produce barcodes.
+      final v27Db = await openDatabase(
+        v27Path,
+        version: 27,
+        onCreate: (db, _) async {
+          await db.execute('''
+            CREATE TABLE products (
+              barcode TEXT PRIMARY KEY,
+              name TEXT NOT NULL,
+              product_type TEXT NOT NULL DEFAULT 'barcoded',
+              source TEXT NOT NULL DEFAULT 'api',
+              language_code TEXT NOT NULL DEFAULT 'en',
+              submission_status TEXT NOT NULL DEFAULT 'not_submitted'
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE inventory (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT NOT NULL,
+              quantity REAL DEFAULT 1,
+              unit TEXT DEFAULT 'pieces',
+              inventory_id INTEGER NOT NULL DEFAULT 1
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE recipe_ingredients (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              recipe_id INTEGER NOT NULL,
+              name TEXT NOT NULL,
+              barcode TEXT
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE prices (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT NOT NULL,
+              price REAL NOT NULL,
+              currency TEXT NOT NULL,
+              date_added INTEGER NOT NULL
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE shopping_list (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              barcode TEXT,
+              name TEXT NOT NULL
+            )
+          ''');
+          // Seed data with unnormalized produce barcodes
+          await db.insert('products', {
+            'barcode': 'produce-Apple',
+            'name': 'Apple',
+            'product_type': 'produce',
+          });
+          await db.insert('products', {
+            'barcode': 'produce-Organic Banana',
+            'name': 'Organic Banana',
+            'product_type': 'produce',
+          });
+          await db.insert('inventory', {
+            'barcode': 'produce-Apple',
+            'inventory_id': 1,
+          });
+          await db.insert('recipe_ingredients', {
+            'recipe_id': 1,
+            'name': 'Apple',
+            'barcode': 'produce-Apple',
+          });
+          await db.insert('prices', {
+            'barcode': 'produce-Apple',
+            'price': 1.99,
+            'currency': 'USD',
+            'date_added': 1000,
+          });
+          await db.insert('shopping_list', {
+            'barcode': 'produce-Organic Banana',
+            'name': 'Organic Banana',
+          });
+        },
+      );
+      await v27Db.close();
+
+      // Open with current DatabaseHelper — migration runs.
+      final dbHelper = DatabaseHelper.withPath(v27Path);
+      final migratedDb = await dbHelper.database;
+
+      // Verify products table normalization.
+      final products = await migratedDb.rawQuery(
+        'SELECT barcode, name FROM products ORDER BY name',
+      );
+      expect(products.length, 2);
+      expect(products[0]['barcode'], 'produce-apple');
+      expect(products[1]['barcode'], 'produce-organic_banana');
+
+      // Verify inventory table normalization.
+      final inv = await migratedDb.rawQuery(
+        "SELECT barcode FROM inventory WHERE barcode LIKE 'produce-%'",
+      );
+      expect(inv.length, 1);
+      expect(inv.first['barcode'], 'produce-apple');
+
+      // Verify recipe_ingredients normalization.
+      final ri = await migratedDb.rawQuery(
+        "SELECT barcode FROM recipe_ingredients WHERE barcode LIKE 'produce-%'",
+      );
+      expect(ri.length, 1);
+      expect(ri.first['barcode'], 'produce-apple');
+
+      // Verify prices normalization.
+      final prices = await migratedDb.rawQuery(
+        "SELECT barcode FROM prices WHERE barcode LIKE 'produce-%'",
+      );
+      expect(prices.length, 1);
+      expect(prices.first['barcode'], 'produce-apple');
+
+      // Verify shopping_list normalization.
+      final sl = await migratedDb.rawQuery(
+        "SELECT barcode FROM shopping_list WHERE barcode LIKE 'produce-%'",
+      );
+      expect(sl.length, 1);
+      expect(sl.first['barcode'], 'produce-organic_banana');
+
+      // Verify migration is idempotent.
+      await migratedDb.close();
+      final dbHelper2 = DatabaseHelper.withPath(v27Path);
+      final migratedDb2 = await dbHelper2.database;
+      final doubleNormalized = await migratedDb2.rawQuery(
+        "SELECT barcode FROM products WHERE barcode LIKE 'produce-%' "
+        "AND barcode != 'produce-' || LOWER(TRIM(SUBSTR(barcode, 9)))",
+      );
+      expect(doubleNormalized, isEmpty);
+
+      await migratedDb2.close();
+      tempDir.deleteSync(recursive: true);
+    });
+  });
 }

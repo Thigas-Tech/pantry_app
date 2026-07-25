@@ -36,7 +36,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Twelve tables are created on first launch (version 27):
+/// Twelve tables are created on first launch (version 28):
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -128,12 +128,15 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 27,
+        version: 28,
         onConfigure: (db) async {
-          await db.execute('PRAGMA foreign_keys = ON');
+          await db.execute('PRAGMA foreign_keys = OFF');
         },
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
+        onOpen: (db) async {
+          await db.execute('PRAGMA foreign_keys = ON');
+        },
       );
       logInfo('Database opened successfully');
       return db;
@@ -564,17 +567,24 @@ class DatabaseHelper {
         logWarning('Migration v26 failed: $e');
       }
     }
-    if (oldVersion < 27) {
+    if (oldVersion < 28) {
       try {
-        await db.execute(
-          'ALTER TABLE recipes ADD COLUMN servings INTEGER NOT NULL DEFAULT 0',
+        const normalizeSql =
+            "barcode = 'produce-'"
+            " || REPLACE(LOWER(TRIM(SUBSTR(barcode, 9))), ' ', '_')"
+            " WHERE barcode LIKE 'produce-%'";
+
+        await db.rawUpdate('UPDATE products SET $normalizeSql');
+        await db.rawUpdate('UPDATE inventory SET $normalizeSql');
+        await db.rawUpdate('UPDATE recipe_ingredients SET $normalizeSql');
+        await db.rawUpdate('UPDATE prices SET $normalizeSql');
+        await db.rawUpdate('UPDATE shopping_list SET $normalizeSql');
+
+        logInfo(
+          'Migration to version 28 (normalize produce barcodes) completed',
         );
-        await db.execute(
-          "ALTER TABLE recipes ADD COLUMN image_path TEXT NOT NULL DEFAULT ''",
-        );
-        logInfo('Migration to version 27 (servings, image_path) completed');
       } on Exception catch (e) {
-        logWarning('Migration v27 failed: $e');
+        logWarning('Migration v28 failed: $e');
       }
     }
     logInfo('Database upgrade completed');
@@ -1234,17 +1244,22 @@ class DatabaseHelper {
 
   /// Returns inventory rows whose linked product name contains [name],
   /// ordered by expiry_date ASC (nulls last) for FEFO deduction.
+  ///
+  /// The search is case-insensitive and trims the input to reduce false
+  /// negatives from whitespace mismatch. This is a fallback when exact
+  /// barcode lookup returns no results.
   Future<List<Map<String, dynamic>>> getInventoryRowsByProductName({
     required String name,
     required int inventoryId,
   }) async {
     final db = await database;
+    final normalized = name.trim().toLowerCase();
     return db.rawQuery(
       'SELECT i.* FROM inventory i'
       ' INNER JOIN products p ON p.barcode = i.barcode'
-      ' WHERE p.name LIKE ? AND i.inventory_id = ?'
+      ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
       ' ORDER BY i.expiry_date ASC NULLS LAST',
-      ['%$name%', inventoryId],
+      ['%$normalized%', inventoryId],
     );
   }
 }
