@@ -7,7 +7,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 /// Returns a unique in-memory database path for each call so that sqflite
 /// does not share state across tests.
 String _uniqueDbPath() =>
-    '$inMemoryDatabasePath${DateTime.now().microsecondsSinceEpoch}${_counter++}';
+    '$inMemoryDatabasePath'
+    '${DateTime.now().microsecondsSinceEpoch}${_counter++}';
 int _counter = 0;
 
 void main() {
@@ -17,7 +18,7 @@ void main() {
   });
 
   group('v29 inventory unique index', () {
-    Future<Database> _buildV28Db() async {
+    Future<Database> buildV28Db() async {
       final db = await databaseFactory.openDatabase(_uniqueDbPath());
       // Run all migrations up to v28 to ensure we have the full schema.
       final runner = MigrationRunner(allMigrations());
@@ -53,7 +54,7 @@ void main() {
     }
 
     test('creates the unique index and deduplicates', () async {
-      final db = await _buildV28Db();
+      final db = await buildV28Db();
 
       // Run v29 migration.
       final runner = MigrationRunner(allMigrations());
@@ -61,14 +62,14 @@ void main() {
 
       // Verify index exists.
       final indexes = await db.rawQuery(
-        "SELECT name FROM sqlite_master"
+        'SELECT name FROM sqlite_master'
         " WHERE type='index' AND name='idx_inventory_barcode_inventory_id'",
       );
       expect(indexes, isNotEmpty);
 
       // Verify duplicate was removed (only 1 row left).
       final rows = await db.rawQuery(
-        "SELECT count(*) AS cnt FROM inventory"
+        'SELECT count(*) AS cnt FROM inventory'
         " WHERE barcode = 'test' AND inventory_id = 1",
       );
       final count = Sqflite.firstIntValue(rows) ?? 0;
@@ -76,16 +77,17 @@ void main() {
 
       // Verify the remaining row has the max id (latest insert).
       final remaining = await db.rawQuery(
-        "SELECT quantity FROM inventory"
+        'SELECT quantity FROM inventory'
         " WHERE barcode = 'test' AND inventory_id = 1",
       );
-      expect((remaining.first['quantity'] as num).toDouble(), 2.0);
+      final quantity = remaining.first['quantity']!;
+      expect((quantity as num).toDouble(), 2.0);
 
       await db.close();
     });
 
     test('is idempotent when run twice', () async {
-      final db = await _buildV28Db();
+      final db = await buildV28Db();
 
       // Run v29 twice.
       final runner = MigrationRunner(allMigrations());
@@ -94,7 +96,7 @@ void main() {
 
       // No errors on second run. Index still exists.
       final indexes = await db.rawQuery(
-        "SELECT name FROM sqlite_master"
+        'SELECT name FROM sqlite_master'
         " WHERE type='index' AND name='idx_inventory_barcode_inventory_id'",
       );
       expect(indexes, hasLength(1));

@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 /// Runs a list of [Migration]s in order during database upgrade.
 ///
 /// The runner:
-/// - Only runs migrations with [Migration.version] > [oldVersion]
+/// - Only runs migrations with a version in the upgrade window
 /// - Catches per-migration errors, logs them, and continues
 /// - Returns a summary of which versions succeeded / failed
 class MigrationRunner {
@@ -16,6 +16,9 @@ class MigrationRunner {
   final List<Migration> migrations;
 
   /// Runs every migration whose version is <= [newVersion] and > [oldVersion].
+  ///
+  /// The upgrade window: migrations with a version greater than [oldVersion]
+  /// and less than or equal to [newVersion] are applied.
   ///
   /// Returns a [MigrationResult] describing the outcome.
   Future<MigrationResult> run(
@@ -79,11 +82,13 @@ sealed class MigrationStatus {
 
 /// The migration ran and completed without error.
 class MigrationStatusSuccess extends MigrationStatus {
+  /// Creates a success status.
   const MigrationStatusSuccess();
 }
 
 /// The migration ran but threw an exception.
 class MigrationStatusFailure extends MigrationStatus {
+  /// Creates a failure status with the given [error] message.
   const MigrationStatusFailure(this.error);
 
   /// The exception message from the failed migration.

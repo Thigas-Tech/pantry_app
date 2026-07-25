@@ -1,5 +1,4 @@
 import 'package:pantry_app/database/migrations/migration.dart';
-import 'package:pantry_app/database/migrations/v1_initial_schema.dart';
 import 'package:pantry_app/database/migrations/v10_categories_hierarchy.dart';
 import 'package:pantry_app/database/migrations/v11_feedback_queue.dart';
 import 'package:pantry_app/database/migrations/v12_prices_table.dart';
@@ -10,7 +9,7 @@ import 'package:pantry_app/database/migrations/v16_product_submission_queue.dart
 import 'package:pantry_app/database/migrations/v17_search_text.dart';
 import 'package:pantry_app/database/migrations/v18_shopping_list_price_fields.dart';
 import 'package:pantry_app/database/migrations/v19_stores_table.dart';
-import 'package:pantry_app/database/migrations/v2_inventories.dart';
+import 'package:pantry_app/database/migrations/v1_initial_schema.dart';
 import 'package:pantry_app/database/migrations/v20_backfill_inventory_id.dart';
 import 'package:pantry_app/database/migrations/v21_plu_and_product_type.dart';
 import 'package:pantry_app/database/migrations/v22_serving_weight_g.dart';
@@ -21,8 +20,9 @@ import 'package:pantry_app/database/migrations/v26_recipe_history.dart';
 import 'package:pantry_app/database/migrations/v27_skipped.dart';
 import 'package:pantry_app/database/migrations/v28_normalize_produce_barcodes.dart';
 import 'package:pantry_app/database/migrations/v29_inventory_unique_index.dart';
-import 'package:pantry_app/database/migrations/v3_normalize_units.dart';
+import 'package:pantry_app/database/migrations/v2_inventories.dart';
 import 'package:pantry_app/database/migrations/v30_recipe_indexes_and_search.dart';
+import 'package:pantry_app/database/migrations/v3_normalize_units.dart';
 import 'package:pantry_app/database/migrations/v4_nutriscore_grade.dart';
 import 'package:pantry_app/database/migrations/v5_nutriscore_not_applicable.dart';
 import 'package:pantry_app/database/migrations/v6_source_column.dart';

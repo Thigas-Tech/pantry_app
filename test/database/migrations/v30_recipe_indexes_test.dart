@@ -11,7 +11,7 @@ void main() {
   });
 
   group('v30 recipe indexes and search', () {
-    Future<Database> _buildV29Db() async {
+    Future<Database> buildV29Db() async {
       final db = await databaseFactory.openDatabase(inMemoryDatabasePath);
       final runner = MigrationRunner(allMigrations());
       await runner.run(db, 0, 29);
@@ -30,7 +30,7 @@ void main() {
     }
 
     test('adds recipe indexes', () async {
-      final db = await _buildV29Db();
+      final db = await buildV29Db();
 
       final runner = MigrationRunner(allMigrations());
       await runner.run(db, 29, 30);
@@ -42,7 +42,7 @@ void main() {
         'idx_recipes_updated_at',
       ]) {
         final result = await db.rawQuery(
-          "SELECT name FROM sqlite_master"
+          'SELECT name FROM sqlite_master'
           " WHERE type='index' AND name='$idx'",
         );
         expect(result, isNotEmpty, reason: 'Index $idx should exist');
@@ -52,7 +52,7 @@ void main() {
     });
 
     test('adds search_text column to recipes', () async {
-      final db = await _buildV29Db();
+      final db = await buildV29Db();
 
       final runner = MigrationRunner(allMigrations());
       await runner.run(db, 29, 30);
@@ -66,7 +66,7 @@ void main() {
     });
 
     test('backfills search_text for existing recipes', () async {
-      final db = await _buildV29Db();
+      final db = await buildV29Db();
 
       final runner = MigrationRunner(allMigrations());
       await runner.run(db, 29, 30);
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('is idempotent when run twice', () async {
-      final db = await _buildV29Db();
+      final db = await buildV29Db();
 
       final runner = MigrationRunner(allMigrations());
       await runner.run(db, 29, 30);
@@ -93,7 +93,7 @@ void main() {
 
       // No crash. Indexes still present.
       final indexes = await db.rawQuery(
-        "SELECT name FROM sqlite_master"
+        'SELECT name FROM sqlite_master'
         " WHERE type='index' AND name LIKE 'idx_recipes_%'",
       );
       expect(indexes, hasLength(3));
@@ -102,7 +102,7 @@ void main() {
     });
 
     test('RecipeDao.search returns results', () async {
-      final db = await _buildV29Db();
+      final db = await buildV29Db();
 
       await MigrationRunner(allMigrations()).run(db, 29, 30);
 

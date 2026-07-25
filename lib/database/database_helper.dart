@@ -3,6 +3,7 @@ import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/migrations/all_migrations.dart';
+import 'package:pantry_app/database/migrations/migration.dart';
 import 'package:pantry_app/database/migrations/migration_runner.dart';
 import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';

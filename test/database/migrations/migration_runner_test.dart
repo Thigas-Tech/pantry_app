@@ -31,7 +31,7 @@ class _FailingMigration extends Migration {
   int get version => 3;
 
   @override
-  Future<void> up(Database db) async {
+  Future<void> up(Database db) {
     throw Exception('Intentional failure');
   }
 }
@@ -54,7 +54,7 @@ void main() {
       await runner.run(db, 1, 2);
 
       final columns = await db.rawQuery("PRAGMA table_info('test_table')");
-      final columnNames = columns.map((c) => c['name'] as String).toList();
+      final columnNames = columns.map((c) => c['name'] as String?).toList();
       expect(columnNames, contains('name'));
 
       await db.close();
@@ -77,7 +77,7 @@ void main() {
       expect(result.nothingToUpgrade, isFalse);
 
       final columns = await db.rawQuery("PRAGMA table_info('test_table')");
-      final columnNames = columns.map((c) => c['name'] as String).toList();
+      final columnNames = columns.map((c) => c['name'] as String?).toList();
       expect(columnNames, contains('name'));
 
       await db.close();
@@ -102,29 +102,18 @@ void main() {
 
       final runner = MigrationRunner([
         _TestMigrationV1(),
-        _FailingMigration(),
-        _TestMigrationV2(),
-      ]);
-
-      // Run from v0 to v3. v1 succeeds, v3 (the failing one) should fail,
-      // v2... wait, versions should be 1, 2, 3 but the _FailingMigration has
-      // version 3. So v2 should also run. Let me re-order.
-
-      // Actually let's use the correct setup
-      final runner2 = MigrationRunner([
-        _TestMigrationV1(),
         _TestMigrationV2(),
         _FailingMigration(),
       ]);
 
-      final result = await runner2.run(db, 0, 3);
+      final result = await runner.run(db, 0, 3);
 
       expect(result.succeeded, containsAll([1, 2]));
       expect(result.failed, contains(3));
 
       // v1 and v2 changes should be visible.
       final columns = await db.rawQuery("PRAGMA table_info('test_table')");
-      final columnNames = columns.map((c) => c['name'] as String).toList();
+      final columnNames = columns.map((c) => c['name'] as String?).toList();
       expect(columnNames, contains('id'));
       expect(columnNames, contains('name'));
 

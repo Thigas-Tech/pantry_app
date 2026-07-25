@@ -1,3 +1,4 @@
+import 'package:pantry_app/database/migrations/migration_runner.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// A single database migration step.
