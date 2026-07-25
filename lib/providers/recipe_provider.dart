@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 // The .autoDispose.family type is inferred from the value expression.
@@ -134,6 +135,7 @@ Future<void> deleteRecipe(WidgetRef ref, int id) async {
 final recipeNutritionProvider = FutureProvider.autoDispose
     .family<RecipeNutrition?, int>(
       (ref, recipeId) async {
+        ref.keepAlive();
         final db = ref.watch(databaseProvider);
         final repo = ref.read(productRepositoryProvider);
         final ingredients = await db.getRecipeIngredients(recipeId);
@@ -187,6 +189,7 @@ typedef IngredientWithProduct = ({
 final recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
     .family<List<IngredientWithProduct>, int>(
       (ref, recipeId) async {
+        ref.keepAlive();
         final db = ref.watch(databaseProvider);
         final repo = ref.read(productRepositoryProvider);
         final ingredients = await db.getRecipeIngredients(recipeId);
@@ -230,6 +233,7 @@ final recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
 final recipeNutriScoreProvider = FutureProvider.autoDispose
     .family<String?, int>(
       (ref, recipeId) async {
+        ref.keepAlive();
         final db = ref.watch(databaseProvider);
         final ingredients = await db.getRecipeIngredients(recipeId);
         if (ingredients.isEmpty) return null;
@@ -609,10 +613,14 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
         );
       })
       .then((result) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          invalidateRecipes(ref);
-          ref.invalidate(pantryProvider);
-        });
+        unawaited(
+          Future.microtask(() {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              invalidateRecipes(ref);
+              ref.invalidate(pantryProvider);
+            });
+          }),
+        );
         return result;
       });
 }
