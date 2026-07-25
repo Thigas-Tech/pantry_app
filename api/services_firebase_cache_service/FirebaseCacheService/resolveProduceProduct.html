@@ -83,7 +83,7 @@
       final cached = await _firebaseClient.getProduce(lowerName);
       if (cached != null) {
         final product = cached.toProduct(
-          barcode: &#39;produce-${_capitalize(trimmed)}&#39;,
+          barcode: produceBarcode(produceName),
         );
         await _db.insertProduct(product);
         await _upsertMeta(&#39;produce:$lowerName&#39;, &#39;produce&#39;);

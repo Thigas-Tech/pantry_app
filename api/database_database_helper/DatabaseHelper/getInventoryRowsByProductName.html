@@ -66,6 +66,9 @@
 <section class="desc markdown">
   <p>Returns inventory rows whose linked product name contains <code>name</code>,
 ordered by expiry_date ASC (nulls last) for FEFO deduction.</p>
+<p>The search is case-insensitive and trims the input to reduce false
+negatives from whitespace mismatch. This is a fallback when exact
+barcode lookup returns no results.</p>
 </section>
 
 
@@ -77,12 +80,13 @@ ordered by expiry_date ASC (nulls last) for FEFO deduction.</p>
   required int inventoryId,
 }) async {
   final db = await database;
+  final normalized = name.trim().toLowerCase();
   return db.rawQuery(
     &#39;SELECT i.* FROM inventory i&#39;
     &#39; INNER JOIN products p ON p.barcode = i.barcode&#39;
-    &#39; WHERE p.name LIKE ? AND i.inventory_id = ?&#39;
+    &#39; WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?&#39;
     &#39; ORDER BY i.expiry_date ASC NULLS LAST&#39;,
-    [&#39;%$name%&#39;, inventoryId],
+    [&#39;%$normalized%&#39;, inventoryId],
   );
 }</code></pre>
 </section>

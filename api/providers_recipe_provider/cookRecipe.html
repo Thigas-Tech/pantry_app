@@ -126,7 +126,7 @@ insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-c
   return database
       .transaction&lt;CookResult&gt;((txn) async {
         for (final entry in grouped.entries) {
-          final barcode = entry.key;
+          final barcode = normalizeProduceBarcode(entry.key);
           var remaining = entry.value.totalQuantity;
           var rows = await txn.rawQuery(
             &#39;SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?&#39;
@@ -134,12 +134,13 @@ insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-c
             [barcode, activeInventoryId],
           );
           if (rows.isEmpty &amp;&amp; entry.value.name.isNotEmpty) {
+            final normalizedName = entry.value.name.trim().toLowerCase();
             rows = await txn.rawQuery(
               &#39;SELECT i.* FROM inventory i&#39;
               &#39; INNER JOIN products p ON p.barcode = i.barcode&#39;
-              &#39; WHERE p.name LIKE ? AND i.inventory_id = ?&#39;
+              &#39; WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?&#39;
               &#39; ORDER BY i.expiry_date ASC NULLS LAST&#39;,
-              [&#39;%${entry.value.name}%&#39;, activeInventoryId],
+              [&#39;%$normalizedName%&#39;, activeInventoryId],
             );
           }
           for (final row in rows) {

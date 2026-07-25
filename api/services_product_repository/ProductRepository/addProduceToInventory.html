@@ -96,7 +96,7 @@ cache, the USDA / fallback lookup is skipped entirely.</p>
     throw ArgumentError(&#39;produceName must not be empty&#39;);
   }
 
-  final barcode = &#39;produce-$produceName&#39;;
+  final barcode = produceBarcode(produceName);
 
   final existingProduct = await _db.getProduct(barcode);
   if (existingProduct == null) {

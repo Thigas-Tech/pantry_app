@@ -81,7 +81,7 @@ the database or create an inventory item.</p>
   if (produceName.trim().isEmpty) {
     throw ArgumentError(&#39;produceName must not be empty&#39;);
   }
-  final barcode = &#39;produce-$produceName&#39;;
+  final barcode = produceBarcode(produceName);
   return _resolveProduceProduct(produceName, barcode);
 }</code></pre>
 </section>
