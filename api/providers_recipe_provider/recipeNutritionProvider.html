@@ -72,6 +72,7 @@ product nutrition data. Auto-disposes when no listener remains.</p>
   <pre class="language-dart"><code class="language-dart">final recipeNutritionProvider = FutureProvider.autoDispose
     .family&lt;RecipeNutrition?, int&gt;(
       (ref, recipeId) async {
+        ref.keepAlive();
         final db = ref.watch(databaseProvider);
         final repo = ref.read(productRepositoryProvider);
         final ingredients = await db.getRecipeIngredients(recipeId);

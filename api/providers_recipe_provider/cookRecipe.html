@@ -245,10 +245,14 @@ insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-c
         );
       })
       .then((result) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          invalidateRecipes(ref);
-          ref.invalidate(pantryProvider);
-        });
+        unawaited(
+          Future.microtask(() {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              invalidateRecipes(ref);
+              ref.invalidate(pantryProvider);
+            });
+          }),
+        );
         return result;
       });
 }</code></pre>

@@ -72,6 +72,7 @@ known scores.</p>
   <pre class="language-dart"><code class="language-dart">final recipeNutriScoreProvider = FutureProvider.autoDispose
     .family&lt;String?, int&gt;(
       (ref, recipeId) async {
+        ref.keepAlive();
         final db = ref.watch(databaseProvider);
         final ingredients = await db.getRecipeIngredients(recipeId);
         if (ingredients.isEmpty) return null;

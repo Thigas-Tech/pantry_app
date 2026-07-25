@@ -63,6 +63,9 @@
     
 <section class="desc markdown">
   <p>Refreshes all inventory products for the active inventory.</p>
+<p>Invalidates self after the next frame to avoid build-phase crashes when
+the invalidation chain is triggered during a widget build cycle (e.g.
+TickerMode.didChangeDependencies resuming paused subscriptions).</p>
 </section>
 
 
@@ -74,7 +77,9 @@
   final repo = ref.read(productRepositoryProvider);
   await repo.refreshInventoryProducts(activeId);
   await repo.setLastRefreshTime();
-  ref.invalidateSelf();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    ref.invalidateSelf();
+  });
 }</code></pre>
 </section>
 
