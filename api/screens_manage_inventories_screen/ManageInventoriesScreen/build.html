@@ -120,7 +120,9 @@ Widget build(BuildContext context, WidgetRef ref) {
       loading: () =&gt; const Center(child: CircularProgressIndicator()),
       error: (err, _) =&gt; ErrorView(
         message: l10n.inventoryLoadFailed,
-        onRetry: () =&gt; ref.invalidate(inventoryListProvider),
+        onRetry: () =&gt; WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(inventoryListProvider);
+        }),
       ),
       data: (list) {
         if (list.isEmpty) {

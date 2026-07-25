@@ -76,7 +76,9 @@
   for (final id in state.selectedIds) {
     await db.deleteInventoryItem(id);
   }
-  ref.invalidate(pantryProvider);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    ref.invalidate(pantryProvider);
+  });
   exitSelectionMode();
 }</code></pre>
 </section>
