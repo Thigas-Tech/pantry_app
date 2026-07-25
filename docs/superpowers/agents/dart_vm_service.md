@@ -109,11 +109,11 @@ to a running debug session and produces a health report. Run it with:
 dart run tools/vm_health_check.dart ws://127.0.0.1:XXXXX/SECRET=/
 ```
 
-Or use the convenience wrapper that starts the emulator and extracts the URI
-automatically:
+Or use `curl` directly against the VM Service URI printed by `flutter run`:
 
 ```bash
-bash scripts/health_check.sh
+curl -s "http://127.0.0.1:8181/api/v1/health" 2>/dev/null || \
+  echo "Adjust host:port to match the VM Service URI from flutter run output"
 ```
 
 ## Common pitfalls

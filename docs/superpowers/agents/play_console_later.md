@@ -2,7 +2,7 @@
 
 Complete these steps when Google Play document verification finishes.
 
-All detailed context is in `agents_docs/playstore.md`. This file is the
+All detailed context is in `docs/superpowers/agents/playstore.md`. This file is the
 step-by-step checklist only.
 
 ## 1. Google Play Console
@@ -100,5 +100,5 @@ on:
 ## 7. Clean Up
 
 - [ ] Remove the reminder block at the top of `TODO.md`
-- [ ] Optionally delete this file (`agents_docs/play_console_later.md`)
-  since all info is also in `agents_docs/playstore.md`
+- [ ] Optionally delete this file (`docs/superpowers/agents/play_console_later.md`)
+  since all info is also in `docs/superpowers/agents/playstore.md`

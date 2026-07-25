@@ -25,7 +25,7 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | `ARCHITECTURE/UI_STRUCTURE.md` — screen/widget tree | Screen widget tree changes |
 | `ARCHITECTURE/PERFORMANCE.md` — CI/CD pipeline table (section 11.8) | Workflow added, renamed, or trigger changed |
 | `ARCHITECTURE/INDEX.md` — design decisions | New pattern adopted or old one abandoned |
-| `agents_docs/monetization.md` | Any monetization features implemented or deferred |
+| `docs/superpowers/agents/monetization.md` | Any monetization features implemented or deferred |
 
 ## 3. `TODO.md`
 
@@ -63,18 +63,16 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | Provider doc comments | Provider type changed (e.g. `Provider` -> `FutureProvider`) |
 | Screen doc comments | Widget tree or navigation flow changed |
 
-## 7. `agents_docs/*.md`
+## 7. `docs/superpowers/agents/*.md` and `docs/superpowers/plans/*.md`
 
 | File | Staleness trigger |
 |---|---|---|
 | `playstore.md` | CI/CD deploy workflow changed |
 | `play_console_later.md` | Play Console verification complete |
-| `emulator_instructions.md` | Smoke test script or AVD config changed |
-| `manual_testing_guide.md` | Smoke test, emulator script, or AVD config changed |
 | `FEATURE_FREEZE.md` | Feature freeze checkbox added or removed |
 | `wiki.md` | Wiki CI workflow changed |
-| `FIREBASE_CACHE_PLAN.md` | Architecture diagram changes, schema version bumped, new cache tier added |
-| `FIREBASE_CACHE_TODO.md` | Any Firebase-related feature or fix committed |
+| `docs/superpowers/plans/firebase_cache_plan.md` | Architecture diagram changes, schema version bumped, new cache tier added |
+| `docs/superpowers/plans/firebase_cache_todo.md` | Any Firebase-related feature or fix committed |
 
 ---
 
@@ -82,7 +80,7 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 
 These patterns reappear frequently. Search for them when auditing:
 
-- **Removed feature mentioned as current**: CSV import/export, Dio, `quality_gate.sh`, `exportData()`
+- **Removed feature mentioned as current**: CSV import/export, Dio, `exportData()`
 - **Non-existent provider listed**: `adServiceProvider`, `donationServiceProvider`, `firebaseServiceProvider`, `cloudBackupServiceProvider`, `backupStatusProvider`, `isProProvider`, `isAdFreeProvider` (note: `firebaseCacheProvider`, `authServiceProvider`, and `authStateProvider` now exist)
 - **Implemented feature marked `[ ]`**: Check `TODO.md` against actual source files
 - **Contradictory `[Unreleased]` entries**: Earlier changelog sections may describe the true current state
@@ -91,4 +89,4 @@ These patterns reappear frequently. Search for them when auditing:
 - **Wrong artifact retention**: 7 days vs 90 days
 - **Deploy workflow described as active**: Tag trigger may be commented out
 - **ARCHITECTURE.md referenced as flat file**: Was restructured to `ARCHITECTURE/INDEX.md` directory. Search for bare `ARCHITECTURE.md` references across all `.md` files
-- **Bottom sheet without system nav bar padding**: Search for `showModalBottomSheet` in `lib/widgets/` and verify each one has `MediaQuery.of(context).padding.bottom` or equivalent. See `agents_docs/bottom_sheet_safe_area.md` for the pattern.
+- **Bottom sheet without system nav bar padding**: Search for `showModalBottomSheet` in `lib/widgets/` and verify each one has `MediaQuery.of(context).padding.bottom` or equivalent. See `docs/superpowers/agents/bottom_sheet_safe_area.md` for the pattern.
