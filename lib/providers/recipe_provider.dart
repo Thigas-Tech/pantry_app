@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 // The .autoDispose.family type is inferred from the value expression.
 // ignore_for_file: specify_nonobvious_property_types
 
@@ -11,10 +13,12 @@ import 'package:pantry_app/database/recipe_dao.dart';
 import 'package:pantry_app/database/recipe_ingredient_dao.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/models/recipe_cache_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/recipe_nutrition.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -63,10 +67,14 @@ final allRecipeIngredientsProvider = FutureProvider.autoDispose
 /// Call this after every mutation so the UI refreshes. Invalidation is
 /// deferred to the next frame via [WidgetsBinding.addPostFrameCallback] to
 /// prevent build-phase crashes when called from async gaps (e.g. database
-/// transactions).
+/// transactions). The [BuildContext.mounted] guard prevents crashes when the
+/// widget has been disposed before the callback fires, such as during widget
+/// tests.
 void invalidateRecipes(WidgetRef ref) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    ref.invalidate(allRecipesProvider);
+    if (ref.context.mounted) {
+      ref.invalidate(allRecipesProvider);
+    }
   });
 }
 
@@ -91,6 +99,7 @@ Future<void> saveRecipe(
   }
 
   final db = ref.read(databaseProvider);
+  final cache = ref.read(firebaseCacheProvider);
   final now = DateTime.now().millisecondsSinceEpoch;
 
   if (existingRecipeId != null) {
@@ -104,6 +113,7 @@ Future<void> saveRecipe(
     );
     await db.updateRecipeWithIngredients(recipe, ingredients);
     logInfo('Recipe $existingRecipeId updated: $name');
+    unawaited(cache.cacheRecipe(recipe, ingredients));
   } else {
     final recipe = Recipe(
       name: name.trim(),
@@ -113,8 +123,14 @@ Future<void> saveRecipe(
       createdAt: now,
       updatedAt: now,
     );
-    await db.insertRecipeWithIngredients(recipe, ingredients);
+    final newId = await db.insertRecipeWithIngredients(recipe, ingredients);
     logInfo('Recipe created: $name');
+    unawaited(
+      cache.cacheRecipe(
+        recipe.copyWith(id: newId),
+        ingredients,
+      ),
+    );
   }
 
   invalidateRecipes(ref);
@@ -123,9 +139,26 @@ Future<void> saveRecipe(
 /// Deletes a recipe by [id]. Invalidates providers on success.
 Future<void> deleteRecipe(WidgetRef ref, int id) async {
   final db = ref.read(databaseProvider);
+  final recipe = await db.getRecipe(id);
   await db.deleteRecipe(id);
   logInfo('Recipe $id deleted');
+  if (recipe != null) {
+    final cache = ref.read(firebaseCacheProvider);
+    unawaited(
+      cache.deleteSharedRecipe(
+        _computeSharedRecipeId(recipe.name, recipe.createdAt),
+      ),
+    );
+  }
   invalidateRecipes(ref);
+}
+
+/// Computes the shared recipe cache key for a local recipe, matching
+/// the hash produced by [RecipeCacheEntryConversions.fromRecipe].
+String _computeSharedRecipeId(String name, int createdAt) {
+  final bytes = utf8.encode('$name:$createdAt');
+  final digest = sha256.convert(bytes);
+  return digest.toString();
 }
 
 /// Provides aggregated nutrition data for a recipe.

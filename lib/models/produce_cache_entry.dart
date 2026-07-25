@@ -1,12 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pantry_app/firebase_cache_config.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 
 part 'produce_cache_entry.freezed.dart';
 part 'produce_cache_entry.g.dart';
-
-/// 180 days in milliseconds.
-const int _produceRefreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 
 /// Firestore document for the produce_cache/{name} collection.
 ///
@@ -101,7 +99,7 @@ extension ProduceCacheEntryConversions on ProduceCacheEntry {
       },
       createdAt: createdAt ?? now,
       lastRefreshedAt: now,
-      nextRefreshAt: now + _produceRefreshIntervalMs,
+      nextRefreshAt: now + produceRefreshIntervalMs,
       category: product.category,
     );
   }

@@ -2,9 +2,13 @@ import 'dart:async';
 
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
+import 'package:pantry_app/firebase_cache_config.dart';
 import 'package:pantry_app/models/produce_cache_entry.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_cache_entry.dart';
+import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/models/recipe_cache_entry.dart';
+import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/firebase_cache_client.dart';
 import 'package:pantry_app/services/off_adapter.dart';
@@ -12,9 +16,6 @@ import 'package:pantry_app/services/produce_barcode.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
-
-/// 180 days in milliseconds — same interval used by the cache entry models.
-const int _refreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 
 /// Orchestrator that coordinates between Firestore, local SQLite, and the
 /// source APIs (USDA for produce, OFF for barcoded products).
@@ -218,9 +219,11 @@ class FirebaseCacheService {
       final cacheType = row['cache_type'] as String;
 
       try {
-        final refreshed = cacheType == 'produce'
-            ? await _refreshProduceEntry(db, cacheKey)
-            : await _refreshBarcodedEntry(db, cacheKey);
+        final refreshed = switch (cacheType) {
+          'produce' => await _refreshProduceEntry(db, cacheKey),
+          'recipe' => await _refreshRecipeEntry(db, cacheKey),
+          _ => await _refreshBarcodedEntry(db, cacheKey),
+        };
         if (refreshed) {
           successCount++;
         }
@@ -271,7 +274,7 @@ class FirebaseCacheService {
       db,
       cacheKey,
       lastRefreshedAt: now,
-      nextRefreshAt: now + _refreshIntervalMs,
+      nextRefreshAt: now + productRefreshIntervalMs,
     );
 
     return true;
@@ -315,10 +318,81 @@ class FirebaseCacheService {
       db,
       cacheKey,
       lastRefreshedAt: now,
-      nextRefreshAt: now + _refreshIntervalMs,
+      nextRefreshAt: now + productRefreshIntervalMs,
     );
 
     return true;
+  }
+
+  /// Refreshes a stale recipe entry by updating its timestamps on the
+  /// given [Database].
+  ///
+  /// Since recipes are user-generated (no external API), refresh means
+  /// extending the 180-day window so the entry stays discoverable.
+  Future<bool> _refreshRecipeEntry(Database db, String cacheKey) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    try {
+      await _metaDao.updateRefreshTimestamps(
+        db,
+        cacheKey,
+        lastRefreshedAt: now,
+        nextRefreshAt: now + recipeRefreshIntervalMs,
+      );
+      return true;
+    } on Exception catch (e) {
+      logWarning('_refreshRecipeEntry failed for $cacheKey: $e');
+      return false;
+    }
+  }
+
+  // =================================================================
+  //  Recipe cache methods
+  // =================================================================
+
+  /// Writes a [Recipe] and its [RecipeIngredient] list to the Firebase
+  /// cache (fire-and-forget).
+  ///
+  /// The recipe is anonymized via [RecipeCacheEntryConversions.fromRecipe]
+  /// — no local DB IDs, user IDs, or file paths are stored. Errors are
+  /// caught and logged.
+  Future<void> cacheRecipe(
+    Recipe recipe,
+    List<RecipeIngredient> ingredients, {
+    String? imageUrl,
+  }) async {
+    if (!isAvailable) return;
+    try {
+      final entry = RecipeCacheEntryConversions.fromRecipe(
+        recipe,
+        ingredients,
+        imageUrl: imageUrl,
+      );
+      await _firebaseClient.setRecipe(entry);
+      await _upsertMeta(entry.recipeId, 'recipe');
+    } on Exception catch (e) {
+      logWarning('cacheRecipe failed: $e');
+    }
+  }
+
+  /// Deletes a shared [RecipeCacheEntry] from Firebase and its metadata.
+  Future<void> deleteSharedRecipe(String recipeId) async {
+    if (!isAvailable) return;
+    try {
+      await _firebaseClient.deleteRecipe(recipeId);
+      final db = await _db.database;
+      await _metaDao.remove(db, recipeId);
+    } on Exception catch (e) {
+      logWarning('deleteSharedRecipe failed: $e');
+    }
+  }
+
+  /// Returns paginated [RecipeCacheEntry] values from the Firebase cache.
+  Future<List<RecipeCacheEntry>> getSharedRecipes({
+    int limit = 20,
+    String? startAfter,
+  }) async {
+    if (!isAvailable) return [];
+    return _firebaseClient.listRecipes(limit: limit, startAfter: startAfter);
   }
 
   // =================================================================
@@ -339,7 +413,7 @@ class FirebaseCacheService {
         cacheKey,
         cacheType,
         lastRefreshedAt: now,
-        nextRefreshAt: now + _refreshIntervalMs,
+        nextRefreshAt: now + productRefreshIntervalMs,
         fdcId: fdcId,
       );
     } on Exception catch (e) {

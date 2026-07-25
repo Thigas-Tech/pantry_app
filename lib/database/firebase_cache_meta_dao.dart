@@ -1,3 +1,4 @@
+import 'package:pantry_app/firebase_cache_config.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -8,6 +9,9 @@ import 'package:sqflite/sqflite.dart';
 class FirebaseCacheMetaDao {
   /// Creates a [FirebaseCacheMetaDao].
   const FirebaseCacheMetaDao();
+
+  /// Cache key for the global inventory refresh timestamp entry.
+  static const String globalRefreshKey = '__global_refresh__';
 
   /// Creates the firebase_cache_meta table with indexes.
   Future<void> createTable(Database db) async {
@@ -141,6 +145,26 @@ class FirebaseCacheMetaDao {
       whereArgs: [cacheKey],
     );
   }
+
+  /// Records the current time as the last global inventory refresh.
+  ///
+  /// Uses [globalRefreshKey] as the cache key with
+  /// [inventoryRefreshOverdueDays] converted to milliseconds. This replaces
+  /// the old SharedPreferences-based staleness tracking.
+  Future<void> setGlobalRefreshTime(Database db) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await upsert(
+      db,
+      globalRefreshKey,
+      'global_refresh',
+      lastRefreshedAt: now,
+      nextRefreshAt: now + inventoryRefreshOverdueDays * 24 * 60 * 60 * 1000,
+    );
+  }
+
+  /// Returns the global inventory refresh row, or null if never set.
+  Future<Map<String, dynamic>?> getGlobalRefreshTime(Database db) =>
+      get(db, globalRefreshKey);
 
   /// Counts entries, optionally filtered by [cacheType].
   Future<int> count(

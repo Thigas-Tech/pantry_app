@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:pantry_app/models/produce_cache_entry.dart';
 import 'package:pantry_app/models/product_cache_entry.dart';
+import 'package:pantry_app/models/recipe_cache_entry.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// Minimal Firestore-like interface that [FirebaseCacheClient] depends on.
@@ -13,8 +14,30 @@ abstract class FirestoreClient {
   /// [documentPath].
   FirestoreDocument doc(String collectionPath, String documentPath);
 
+  /// Returns a collection reference for the given [collectionPath].
+  FirestoreCollection collection(String collectionPath);
+
   /// Whether this client is available for operations.
   bool get isAvailable;
+}
+
+/// Minimal Firestore collection-like interface for paginated queries.
+///
+/// Supports ordering, limiting, and cursor-based pagination through
+/// [startAfter]. Implementations are immutable — each method returns a new
+/// [FirestoreCollection] with the modifier applied.
+abstract class FirestoreCollection {
+  /// Orders results by [field], descending when [descending] is true.
+  FirestoreCollection orderBy(String field, {bool descending = false});
+
+  /// Limits results to [count] documents.
+  FirestoreCollection limit(int count);
+
+  /// Starts results after the document with the given [documentId].
+  FirestoreCollection startAfter(String documentId);
+
+  /// Fetches documents matching the current query modifiers.
+  Future<List<FirestoreSnapshot>> get();
 }
 
 /// Minimal Firestore document-like interface.
@@ -70,6 +93,10 @@ class FirebaseCacheClient {
   /// Firestore collection name for OFF barcoded product cache documents.
   @visibleForTesting
   static const String productCollection = 'product_cache';
+
+  /// Firestore collection name for anonymized recipe cache documents.
+  @visibleForTesting
+  static const String recipeCollection = 'recipe_cache';
 
   /// Whether Firebase operations are available.
   bool get isAvailable => _firestore != null && _enabled;
@@ -165,6 +192,80 @@ class FirebaseCacheClient {
       await _firestore!.doc(productCollection, barcode).delete();
     } on Exception catch (e) {
       logWarning('Firestore deleteProduct failed for "$barcode": $e');
+    }
+  }
+
+  // =================================================================
+  //  Recipe cache
+  // =================================================================
+
+  /// Fetches a recipe entry from Firestore by [recipeId].
+  ///
+  /// Returns null on miss, on unavailable Firebase, or on any Firestore error.
+  Future<RecipeCacheEntry?> getRecipe(String recipeId) async {
+    if (!isAvailable) return null;
+    try {
+      final doc = await _firestore!.doc(recipeCollection, recipeId).get();
+      if (!doc.exists) return null;
+      final data = doc.data();
+      if (data == null) return null;
+      return RecipeCacheEntry.fromJson(data);
+    } on Exception catch (e) {
+      logWarning('Firestore getRecipe failed for "$recipeId": $e');
+      return null;
+    }
+  }
+
+  /// Stores a recipe entry in Firestore.
+  ///
+  /// Returns true on success, false on unavailable or error.
+  Future<bool> setRecipe(RecipeCacheEntry entry) async {
+    if (!isAvailable) return false;
+    try {
+      await _firestore!
+          .doc(recipeCollection, entry.recipeId)
+          .set(entry.toJson());
+      return true;
+    } on Exception catch (e) {
+      logWarning('Firestore setRecipe failed for "${entry.recipeId}": $e');
+      return false;
+    }
+  }
+
+  /// Deletes a recipe entry from Firestore.
+  Future<void> deleteRecipe(String recipeId) async {
+    if (!isAvailable) return;
+    try {
+      await _firestore!.doc(recipeCollection, recipeId).delete();
+    } on Exception catch (e) {
+      logWarning('Firestore deleteRecipe failed for "$recipeId": $e');
+    }
+  }
+
+  /// Lists [RecipeCacheEntry] values from Firestore, ordered by createdAt
+  /// descending.
+  ///
+  /// Pagination is supported via [int] limit (default 20) and a [String]
+  /// startAfter value (the recipeId of the last entry from the previous
+  /// page). Returns an empty list on unavailable or error.
+  Future<List<RecipeCacheEntry>> listRecipes({
+    int limit = 20,
+    String? startAfter,
+  }) async {
+    if (!isAvailable) return [];
+    try {
+      var query = _firestore!
+          .collection(recipeCollection)
+          .orderBy('createdAt', descending: true)
+          .limit(limit);
+      if (startAfter != null) {
+        query = query.startAfter(startAfter);
+      }
+      final docs = await query.get();
+      return docs.map((doc) => RecipeCacheEntry.fromJson(doc.data()!)).toList();
+    } on Exception catch (e) {
+      logWarning('Firestore listRecipes failed: $e');
+      return [];
     }
   }
 }

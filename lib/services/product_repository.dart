@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
+import 'package:pantry_app/firebase_cache_config.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
@@ -13,7 +15,6 @@ import 'package:pantry_app/services/produce_category_mapper.dart';
 import 'package:pantry_app/services/produce_nutrition_fallback.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// The central data access point that implements the offline‑first pattern.
 ///
@@ -50,15 +51,15 @@ class ProductRepository {
   /// fetch nutrition data for produce items from the USDA FoodData Central
   /// API when a product is not already cached locally.
   ///
-  /// If [SharedPreferences] is provided it is used for refresh‑time
-  /// tracking; otherwise
-  /// [SharedPreferences] is lazily obtained from the singleton instance.
+  /// The [FirebaseCacheMetaDao] is the single source of truth for
+  /// cache-staleness tracking (replacing the old SharedPreferences-based
+  /// approach).
   ProductRepository(
     this._db,
     this._api, {
+    required this._metaDao,
     this._fallbackApi,
     this._usdaClient,
-    this._prefs,
     this._firebaseCache,
   });
 
@@ -66,14 +67,8 @@ class ProductRepository {
   final OffAdapter _api;
   final OffAdapter? _fallbackApi;
   final UsdaApiClient? _usdaClient;
-  final SharedPreferences? _prefs;
   final FirebaseCacheService? _firebaseCache;
-
-  Future<SharedPreferences> get _sharedPrefs async =>
-      _prefs ?? await SharedPreferences.getInstance();
-
-  static const _lastRefreshKey = 'last_product_refresh';
-  static const _cacheOverdueDays = 5;
+  final FirebaseCacheMetaDao _metaDao;
 
   /// Returns the current application locale as a two-letter language code.
   ///
@@ -539,37 +534,43 @@ class ProductRepository {
   /// Records the current time as the last successful product refresh.
   ///
   /// Used together with [isCacheOverdue] to trigger automatic background
-  /// refreshes after [cacheOverdueDays] of inactivity.
+  /// refreshes after [cacheOverdueDays] of inactivity. Delegates to
+  /// [FirebaseCacheMetaDao.setGlobalRefreshTime], which is the single source
+  /// of truth for cache staleness.
   Future<void> setLastRefreshTime() async {
-    final prefs = await _sharedPrefs;
-    await prefs.setString(
-      _lastRefreshKey,
-      DateTime.now().toIso8601String(),
-    );
+    final db = await _db.database;
+    await _metaDao.setGlobalRefreshTime(db);
     logInfo('Last refresh time updated');
   }
 
   /// Returns the stored last‑refresh timestamp, or null if no refresh has
-  /// ever been recorded.
+  /// ever been recorded. Reads from [FirebaseCacheMetaDao] instead of
+  /// SharedPreferences.
   Future<DateTime?> getLastRefreshTime() async {
-    final prefs = await _sharedPrefs;
-    final raw = prefs.getString(_lastRefreshKey);
+    final db = await _db.database;
+    final entry = await _metaDao.getGlobalRefreshTime(db);
+    if (entry == null) return null;
+    final raw = entry['last_refreshed_at'] as int?;
     if (raw == null) return null;
-    return DateTime.tryParse(raw);
+    return DateTime.fromMillisecondsSinceEpoch(raw);
   }
 
   /// The number of days after which the cached product data is considered
   /// stale and a background refresh should be scheduled.
-  int get cacheOverdueDays => _cacheOverdueDays;
+  int get cacheOverdueDays => inventoryRefreshOverdueDays;
 
   /// Returns true when the last refresh timestamp is missing or older than
   /// [cacheOverdueDays] days.
   ///
-  /// Used at app startup and on the home screen to decide whether to fire a
-  /// background refresh.
+  /// Queries [FirebaseCacheMetaDao] for the global refresh entry instead of
+  /// reading from local preferences. When the entry is missing or its
+  /// `nextRefreshAt` column has passed, the cache is considered overdue.
   Future<bool> isCacheOverdue() async {
-    final lastRefresh = await getLastRefreshTime();
-    if (lastRefresh == null) return true;
-    return DateTime.now().difference(lastRefresh).inDays >= _cacheOverdueDays;
+    final db = await _db.database;
+    final entry = await _metaDao.getGlobalRefreshTime(db);
+    if (entry == null) return true;
+    final nextRefreshAt = entry['next_refresh_at'] as int?;
+    if (nextRefreshAt == null) return true;
+    return DateTime.now().millisecondsSinceEpoch >= nextRefreshAt;
   }
 }
