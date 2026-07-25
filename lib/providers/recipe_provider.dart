@@ -3,6 +3,7 @@ import 'dart:convert';
 // The .autoDispose.family type is inferred from the value expression.
 // ignore_for_file: specify_nonobvious_property_types
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
@@ -57,9 +58,14 @@ final allRecipeIngredientsProvider = FutureProvider.autoDispose
 
 /// Invalidates all recipe-related providers.
 ///
-/// Call this after every mutation so the UI refreshes.
+/// Call this after every mutation so the UI refreshes. Invalidation is
+/// deferred to the next frame via [WidgetsBinding.addPostFrameCallback] to
+/// prevent build-phase crashes when called from async gaps (e.g. database
+/// transactions).
 void invalidateRecipes(WidgetRef ref) {
-  ref.invalidate(allRecipesProvider);
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    ref.invalidate(allRecipesProvider);
+  });
 }
 
 /// Saves a recipe — creates a new one or updates an existing one.
@@ -357,6 +363,8 @@ Future<Map<String, double>> checkIngredientShortages(
             available += rowQty * svG;
           } else if (!grpIsWeight && rowIsWeight) {
             available += UnitConverter.convert(rowQty, rowUnit, 'g') / svG;
+          } else if (!grpIsWeight && !rowIsWeight) {
+            available += rowQty;
           }
         }
       }
@@ -532,6 +540,9 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
                 } else if (entryIsWeight && !rowIsWeight) {
                   effectiveQty = rowQty * svG;
                   toRowUnits = (c) => c / svG;
+                } else if (!entryIsWeight && !rowIsWeight) {
+                  effectiveQty = rowQty;
+                  toRowUnits = (c) => c;
                 } else {
                   effectiveQty = 0;
                   toRowUnits = (_) => 0;
@@ -596,8 +607,10 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
         );
       })
       .then((result) {
-        invalidateRecipes(ref);
-        ref.invalidate(pantryProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          invalidateRecipes(ref);
+          ref.invalidate(pantryProvider);
+        });
         return result;
       });
 }

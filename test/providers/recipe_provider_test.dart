@@ -443,5 +443,101 @@ void main() {
         expect(shortages['UnmatchedProduce'], closeTo(2, 0.01));
       },
     );
+
+    test(
+      'converts produce via size label unit (e.g. Medium) when ingredient'
+      ' unit is pieces',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'produce-Onion',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 2, 'unit': 'Medium', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
+      },
+    );
+
+    test(
+      'converts produce via size label unit when ingredient unit is weight',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'produce-Onion',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 2, 'unit': 'Medium', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+            quantity: 150,
+            unit: 'g',
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isEmpty);
+      },
+    );
+
+    test(
+      'reports shortage when size label unit has no serving weight'
+      ' resolution',
+      () async {
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: 'produce-UnknownSpice',
+            inventoryId: 1,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 2, 'unit': 'Medium', 'id': 1},
+          ],
+        );
+
+        final ingredients = [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'UnknownSpice',
+            barcode: 'produce-UnknownSpice',
+            quantity: 3,
+          ),
+        ];
+        final shortages = await checkIngredientShortages(
+          mockDb,
+          ingredients,
+          1,
+        );
+        expect(shortages, isNotEmpty);
+        expect(shortages['UnknownSpice'], closeTo(3, 0.01));
+      },
+    );
   });
 }
