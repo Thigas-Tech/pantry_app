@@ -103,7 +103,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
               whereArgs: [result.historyEntryId],
             );
           });
-          ref.invalidate(pantryProvider);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.invalidate(pantryProvider);
+          });
           invalidateRecipes(ref);
         },
       );

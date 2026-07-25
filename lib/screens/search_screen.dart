@@ -209,14 +209,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
     try {
       await repo.cacheProduct(product);
       final newId = await repo.addInventoryItem(item);
-      ref.invalidate(pantryProvider);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(pantryProvider);
+      });
       if (!mounted) return;
       SnackbarHelper.showUndo(
         context,
         l10n.addToPantry,
         () async {
           await repo.deleteInventoryItem(newId);
-          ref.invalidate(pantryProvider);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.invalidate(pantryProvider);
+          });
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.removedFromPantry);
           }
@@ -442,7 +446,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
                   builder: (_) => ProductDetailScreen(product: product),
                 ),
               );
-              ref.invalidate(pantryProvider);
+              if (!context.mounted) return;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ref.invalidate(pantryProvider);
+              });
             },
             onLongPress: () => _showLongPressMenu(product),
           ),

@@ -65,7 +65,10 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => ErrorView(
                 message: error.toString(),
-                onRetry: () => ref.invalidate(statsProvider),
+                onRetry: () =>
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ref.invalidate(statsProvider);
+                    }),
               ),
             ),
     );
@@ -108,7 +111,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        ref.invalidate(statsProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(statsProvider);
+        });
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),

@@ -314,7 +314,9 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     final storeId = await db.storeDao.insert(await db.database, result);
 
     if (storeId >= 0) {
-      ref.invalidate(storesProvider);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(storesProvider);
+      });
       _storeCtrl.text = result;
       _autocompleteCtrl?.text = result;
       if (mounted) {
@@ -378,7 +380,9 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     try {
       final db = ref.read(databaseProvider);
       await db.storeDao.insert(await db.database, name);
-      ref.invalidate(storesProvider);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(storesProvider);
+      });
     } on Exception {
       // Silently ignore — store list will catch up on next open.
     }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -117,7 +118,9 @@ class HomeScreenController extends _$HomeScreenController {
     for (final id in state.selectedIds) {
       await db.deleteInventoryItem(id);
     }
-    ref.invalidate(pantryProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(pantryProvider);
+    });
     exitSelectionMode();
   }
 
@@ -131,7 +134,9 @@ class HomeScreenController extends _$HomeScreenController {
       state.selectedIds.toList(),
       targetInventoryId,
     );
-    ref.invalidate(pantryProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(pantryProvider);
+    });
     exitSelectionMode();
   }
 
@@ -180,9 +185,11 @@ class HomeScreenController extends _$HomeScreenController {
       final activeId = ref.read(activeInventoryProvider);
       await repo.refreshInventoryProducts(activeId);
       await repo.setLastRefreshTime();
-      // Defer invalidation to the next microtask so that any pending
+      // Defer invalidation to the next frame so that any pending
       // build phase completes before dependent providers recompute.
-      await Future.microtask(() => ref.invalidate(pantryProvider));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(pantryProvider);
+      });
     } on Exception catch (e) {
       logWarning('Overdue cache check failed: $e');
     }

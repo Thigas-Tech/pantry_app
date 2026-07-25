@@ -340,7 +340,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, _) => ErrorView(
                 message: l10n.inventoryLoadFailed,
-                onRetry: () => ref.invalidate(pantryProvider),
+                onRetry: () =>
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ref.invalidate(pantryProvider);
+                    }),
               ),
               data: (items) {
                 if (items.isEmpty && !controller.selectionMode) {
@@ -501,7 +504,9 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
         final repo = ref.read(productRepositoryProvider);
         await repo.refreshInventoryProducts(activeId);
         await repo.setLastRefreshTime();
-        ref.invalidate(pantryProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(pantryProvider);
+        });
       },
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 12),

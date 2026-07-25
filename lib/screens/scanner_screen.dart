@@ -80,9 +80,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     );
     logInfo('Returned from ProductDetailScreen — clearing resolution');
     ref.read(scannerCameraProvider.notifier).clearResolution();
-    await Future.microtask(
-      () => ref.invalidate(pantryProvider),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(pantryProvider);
+    });
   }
 
   void _submitBarcode(String barcode) {
