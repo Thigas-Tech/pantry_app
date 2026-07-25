@@ -2,6 +2,8 @@ import 'package:pantry_app/database/feedback_queue_dao.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
+import 'package:pantry_app/database/migrations/all_migrations.dart';
+import 'package:pantry_app/database/migrations/migration_runner.dart';
 import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/database/product_submission_queue_dao.dart';
@@ -19,7 +21,6 @@ import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/search_utils.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -115,6 +116,12 @@ class DatabaseHelper {
   /// DAO for the recipe_history table.
   final RecipeHistoryDao recipeHistoryDao = const RecipeHistoryDao();
 
+  /// The current database schema version.
+  ///
+  /// Increment this when adding a new [Migration]. Must match the highest
+  /// version in [allMigrations].
+  static const int databaseVersion = 30;
+
   /// The lazily‑opened database instance.
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -128,13 +135,15 @@ class DatabaseHelper {
     try {
       final db = await openDatabase(
         dbPath,
-        version: 28,
+        version: databaseVersion,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = OFF');
         },
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
+        onDowngrade: onDatabaseDowngradeDelete,
         onOpen: (db) async {
+          await _checkIntegrity(db);
           await db.execute('PRAGMA foreign_keys = ON');
         },
       );
@@ -149,6 +158,22 @@ class DatabaseHelper {
   Future<String> _getDefaultPath() async {
     final documentsDir = await getApplicationDocumentsDirectory();
     return join(documentsDir.path, 'pantry.db');
+  }
+
+  /// Runs `PRAGMA quick_check` on the database after open.
+  ///
+  /// Logs a warning when corruption is detected. This is a non-fatal check
+  /// -- the app continues even if the integrity check reports issues.
+  Future<void> _checkIntegrity(Database db) async {
+    try {
+      final result = await db.rawQuery('PRAGMA quick_check');
+      final status = result.first.values.first as String? ?? '';
+      if (status != 'ok') {
+        logWarning('Database integrity check failed: $status');
+      }
+    } on Exception catch (e) {
+      logWarning('Integrity check query failed: $e');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -285,309 +310,19 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     logInfo('Database upgrade: $oldVersion → $newVersion');
-
-    if (oldVersion < 2) {
-      await inventoriesDao.createTable(db);
-
-      await db.execute(
-        'ALTER TABLE inventory ADD COLUMN inventory_id INTEGER',
+    final result = await MigrationRunner(allMigrations()).run(
+      db,
+      oldVersion,
+      newVersion,
+    );
+    if (result.isSuccess) {
+      logInfo('Database upgrade completed successfully');
+    } else {
+      logWarning(
+        'Database upgrade completed with failures: '
+        '${result.failed}',
       );
-
-      final homeId = await inventoriesDao.seedDefault(db);
-
-      await db.update(
-        'inventory',
-        {'inventory_id': homeId},
-        where: 'inventory_id IS NULL',
-      );
-
-      logInfo('Migration to version 2 completed');
     }
-    if (oldVersion < 3) {
-      await db.rawUpdate(
-        "UPDATE inventory SET unit = 'pieces' WHERE unit = 'pcs'",
-      );
-      logInfo('Migration to version 3 completed');
-    }
-    if (oldVersion < 4) {
-      await db.execute(
-        'ALTER TABLE products ADD COLUMN nutriscore_grade TEXT',
-      );
-      logInfo('Migration to version 4 completed');
-    }
-    if (oldVersion < 5) {
-      await db.execute(
-        'ALTER TABLE products ADD COLUMN nutriscore_not_applicable_category '
-        'TEXT',
-      );
-      logInfo('Migration to version 5 completed');
-    }
-    if (oldVersion < 6) {
-      await db.execute(
-        "ALTER TABLE products ADD COLUMN source TEXT NOT NULL DEFAULT 'api'",
-      );
-      logInfo('Migration to version 6 completed');
-    }
-    if (oldVersion < 7) {
-      await db.execute(
-        'ALTER TABLE products ADD COLUMN nutrition_image_path TEXT',
-      );
-      await db.execute(
-        'ALTER TABLE products ADD COLUMN ingredients_image_path TEXT',
-      );
-      await db.execute(
-        'ALTER TABLE products ADD COLUMN product_image_path TEXT',
-      );
-      logInfo('Migration to version 7 completed');
-    }
-    if (oldVersion < 8) {
-      await db.execute(
-        'ALTER TABLE products ADD COLUMN submission_status '
-        "TEXT NOT NULL DEFAULT 'not_submitted'",
-      );
-      logInfo('Migration to version 8 completed');
-    }
-    if (oldVersion < 9) {
-      try {
-        await db.execute(
-          'ALTER TABLE products ADD COLUMN off_nutrition_image_url TEXT',
-        );
-        await db.execute(
-          'ALTER TABLE products ADD COLUMN off_ingredients_image_url TEXT',
-        );
-        await db.execute(
-          'ALTER TABLE products ADD COLUMN off_product_image_url TEXT',
-        );
-        logInfo('Migration to version 9 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v9 failed (columns may already exist): $e');
-      }
-    }
-    if (oldVersion < 10) {
-      try {
-        await db.execute(
-          'ALTER TABLE products ADD COLUMN categories_hierarchy TEXT',
-        );
-        logInfo('Migration to version 10 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v10 failed (column may already exist): $e');
-      }
-    }
-    if (oldVersion < 11) {
-      await feedbackQueueDao.createTable(db);
-      logInfo('Migration to version 11 completed');
-    }
-    if (oldVersion < 12) {
-      await _createPricesTable(db);
-      logInfo('Migration to version 12 completed');
-    }
-    if (oldVersion < 13) {
-      await _createShoppingListTable(db);
-      logInfo('Migration to version 13 completed');
-    }
-    if (oldVersion < 14) {
-      try {
-        await db.execute(
-          'CREATE INDEX IF NOT EXISTS idx_inventory_date_added'
-          ' ON inventory(date_added)',
-        );
-        logInfo('Migration to version 14 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v14 failed (table may not exist): $e');
-      }
-    }
-    if (oldVersion < 15) {
-      try {
-        await db.execute(
-          'ALTER TABLE products ADD COLUMN language_code TEXT'
-          " NOT NULL DEFAULT 'en'",
-        );
-        logInfo('Migration to version 15 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v15 failed (column may already exist): $e');
-      }
-    }
-    if (oldVersion < 16) {
-      try {
-        await productSubmissionQueueDao.createTable(db);
-        logInfo('Migration to version 16 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v16 failed: $e');
-      }
-    }
-    if (oldVersion < 17) {
-      try {
-        await db.execute('ALTER TABLE products ADD COLUMN search_text TEXT');
-        final allProducts = await productDao.all(db);
-        await db.transaction((txn) async {
-          for (final product in allProducts) {
-            await txn.update(
-              'products',
-              {'search_text': buildSearchText(product)},
-              where: 'barcode = ?',
-              whereArgs: [product.barcode],
-            );
-          }
-        });
-        await db.execute(
-          'CREATE INDEX IF NOT EXISTS idx_search_text ON products(search_text)',
-        );
-        logInfo('Migration to version 17 (search_text column) completed');
-      } on Exception catch (e) {
-        logWarning('Migration v17 failed: $e');
-      }
-    }
-    if (oldVersion < 18) {
-      try {
-        await db.execute(
-          'ALTER TABLE shopping_list ADD COLUMN price_amount REAL',
-        );
-        await db.execute(
-          'ALTER TABLE shopping_list ADD COLUMN price_currency TEXT',
-        );
-        await db.execute(
-          'ALTER TABLE shopping_list ADD COLUMN price_store TEXT',
-        );
-        await db.execute(
-          'ALTER TABLE shopping_list ADD COLUMN price_photo_path TEXT',
-        );
-        await db.execute(
-          'CREATE INDEX IF NOT EXISTS idx_shopping_inventory_id'
-          ' ON shopping_list(inventory_id)',
-        );
-        logInfo('Migration to version 18 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v18 failed (columns may already exist): $e');
-      }
-    }
-    if (oldVersion < 19) {
-      try {
-        await _createStoresTable(db);
-
-        await db.execute(
-          'INSERT OR IGNORE INTO stores (name)'
-          ' SELECT DISTINCT TRIM(store) FROM prices'
-          " WHERE store IS NOT NULL AND TRIM(store) != ''",
-        );
-        await db.execute(
-          'INSERT OR IGNORE INTO stores (name)'
-          ' SELECT DISTINCT TRIM(price_store) FROM shopping_list'
-          " WHERE price_store IS NOT NULL AND TRIM(price_store) != ''",
-        );
-
-        logInfo('Migration to version 19 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v19 failed: $e');
-      }
-    }
-    if (oldVersion < 20) {
-      try {
-        final minId = await db.rawQuery(
-          'SELECT COALESCE('
-          '(SELECT id FROM inventories ORDER BY id ASC LIMIT 1),'
-          ' 1'
-          ') AS result',
-        );
-        final defaultId = minId.first['result'] as int? ?? 1;
-        await db.rawUpdate(
-          'UPDATE shopping_list SET inventory_id = ?'
-          ' WHERE inventory_id IS NULL',
-          [defaultId],
-        );
-        logInfo(
-          'Migration to version 20 completed'
-          ' (backfilled null inventory_id to $defaultId)',
-        );
-      } on Exception catch (e) {
-        logWarning('Migration v20 failed: $e');
-      }
-    }
-    if (oldVersion < 21) {
-      try {
-        await db.execute('ALTER TABLE products ADD COLUMN plu_code TEXT');
-        await db.execute(
-          'ALTER TABLE products ADD COLUMN product_type TEXT'
-          " NOT NULL DEFAULT 'barcoded'",
-        );
-        logInfo('Migration to version 21 completed');
-      } on Exception catch (e) {
-        logWarning('Migration v21 failed (columns may already exist): $e');
-      }
-    }
-    if (oldVersion < 22) {
-      try {
-        await db.execute(
-          'ALTER TABLE inventory ADD COLUMN serving_weight_g REAL',
-        );
-        logInfo('Migration to version 22 completed');
-      } on Exception catch (e) {
-        logWarning(
-          'Migration v22 failed (column may already exist): $e',
-        );
-      }
-    }
-    if (oldVersion < 23) {
-      try {
-        await db.rawUpdate(
-          "UPDATE products SET category = 'Fruits and vegetables based foods'"
-          " WHERE product_type = 'produce' AND category IS NULL",
-        );
-        logInfo(
-          'Migration to version 23 completed'
-          ' (backfilled produce category)',
-        );
-      } on Exception catch (e) {
-        logWarning('Migration v23 failed: $e');
-      }
-    }
-    if (oldVersion < 24) {
-      try {
-        await firebaseCacheMetaDao.createTable(db);
-        logInfo('Migration to version 24 (firebase_cache_meta) completed');
-      } on Exception catch (e) {
-        logWarning('Migration v24 failed: $e');
-      }
-    }
-    if (oldVersion < 25) {
-      try {
-        await recipeDao.createTable(db);
-        await recipeIngredientDao.createTable(db);
-        logInfo(
-          'Migration to version 25 (recipes + recipe_ingredients) completed',
-        );
-      } on Exception catch (e) {
-        logWarning('Migration v25 failed: $e');
-      }
-    }
-    if (oldVersion < 26) {
-      try {
-        await recipeHistoryDao.createTable(db);
-        logInfo('Migration to version 26 (recipe_history) completed');
-      } on Exception catch (e) {
-        logWarning('Migration v26 failed: $e');
-      }
-    }
-    if (oldVersion < 28) {
-      try {
-        const normalizeSql =
-            "barcode = 'produce-'"
-            " || REPLACE(LOWER(TRIM(SUBSTR(barcode, 9))), ' ', '_')"
-            " WHERE barcode LIKE 'produce-%'";
-
-        await db.rawUpdate('UPDATE products SET $normalizeSql');
-        await db.rawUpdate('UPDATE inventory SET $normalizeSql');
-        await db.rawUpdate('UPDATE recipe_ingredients SET $normalizeSql');
-        await db.rawUpdate('UPDATE prices SET $normalizeSql');
-        await db.rawUpdate('UPDATE shopping_list SET $normalizeSql');
-
-        logInfo(
-          'Migration to version 28 (normalize produce barcodes) completed',
-        );
-      } on Exception catch (e) {
-        logWarning('Migration v28 failed: $e');
-      }
-    }
-    logInfo('Database upgrade completed');
   }
 
   // --------------------- Product (delegating to ProductDao) -------
