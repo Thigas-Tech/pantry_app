@@ -27,6 +27,13 @@ class FirebaseFirestoreClientAdapter implements FirestoreClient {
       _firestore.collection(collectionPath).doc(documentPath),
     );
   }
+
+  @override
+  FirestoreCollection collection(String collectionPath) {
+    return _FirebaseFirestoreCollectionAdapter(
+      _firestore.collection(collectionPath),
+    );
+  }
 }
 
 /// Concrete [FirestoreDocument] backed by a [DocumentReference].
@@ -59,4 +66,40 @@ class _FirebaseFirestoreSnapshotAdapter implements FirestoreSnapshot {
 
   @override
   Map<String, dynamic>? data() => _snapshot.data() as Map<String, dynamic>?;
+}
+
+/// Concrete [FirestoreCollection] backed by a [Query] (from
+/// [CollectionReference]).
+class _FirebaseFirestoreCollectionAdapter implements FirestoreCollection {
+  _FirebaseFirestoreCollectionAdapter(this._query);
+
+  Query _query;
+
+  @override
+  FirestoreCollection orderBy(String field, {bool descending = false}) {
+    _query = _query.orderBy(field, descending: descending);
+    return this;
+  }
+
+  @override
+  FirestoreCollection limit(int count) {
+    _query = _query.limit(count);
+    return this;
+  }
+
+  @override
+  FirestoreCollection startAfter(String documentId) {
+    _query = _query.startAfter([documentId]);
+    return this;
+  }
+
+  @override
+  Future<List<FirestoreSnapshot>> get() async {
+    final snapshot = await _query.get();
+    return snapshot.docs
+        .map(
+          (doc) => _FirebaseFirestoreSnapshotAdapter(doc) as FirestoreSnapshot,
+        )
+        .toList();
+  }
 }

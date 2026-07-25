@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
@@ -9,7 +10,7 @@ import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
@@ -19,6 +20,10 @@ class MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
 class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
 
+class MockFirebaseCacheMetaDao extends Mock implements FirebaseCacheMetaDao {}
+
+class FakeDatabase extends Fake implements Database {}
+
 void main() {
   late ProductRepository repository;
   late MockDatabaseHelper mockDb;
@@ -26,7 +31,12 @@ void main() {
   late MockOffAdapter fallbackApi;
   late MockUsdaApiClient mockUsda;
   late MockFirebaseCacheService mockFirebaseCache;
+  late MockFirebaseCacheMetaDao mockMetaDao;
   late ProductRepository fbRepo;
+
+  setUpAll(() {
+    registerFallbackValue(FakeDatabase());
+  });
 
   setUp(() {
     mockDb = MockDatabaseHelper();
@@ -34,12 +44,15 @@ void main() {
     fallbackApi = MockOffAdapter();
     mockUsda = MockUsdaApiClient();
     mockFirebaseCache = MockFirebaseCacheService();
+    mockMetaDao = MockFirebaseCacheMetaDao();
+    when(() => mockDb.database).thenAnswer((_) async => FakeDatabase());
     when(() => mockFirebaseCache.isAvailable).thenReturn(true);
     repository = ProductRepository(
       mockDb,
       mockApi,
       fallbackApi: fallbackApi,
       usdaClient: mockUsda,
+      metaDao: mockMetaDao,
     );
     fbRepo = ProductRepository(
       mockDb,
@@ -47,6 +60,7 @@ void main() {
       fallbackApi: fallbackApi,
       usdaClient: mockUsda,
       firebaseCache: mockFirebaseCache,
+      metaDao: mockMetaDao,
     );
     registerFallbackValue(const Product(barcode: '', name: ''));
     registerFallbackValue(const InventoryItem(barcode: ''));
@@ -91,7 +105,11 @@ void main() {
       '(no fallback)',
       () {
         /// Without a fallback API, a not‑found error is rethrown directly.
-        final repoNoFallback = ProductRepository(mockDb, mockApi);
+        final repoNoFallback = ProductRepository(
+          mockDb,
+          mockApi,
+          metaDao: mockMetaDao,
+        );
         when(
           () => mockDb.getProduct(testBarcode),
         ).thenAnswer((_) async => null);
@@ -352,11 +370,6 @@ void main() {
   });
 
   group('refreshInventoryProducts', () {
-    setUp(() {
-      // Static mock values so the lonely InventoryItem gets a non-null id.
-      SharedPreferences.setMockInitialValues({});
-    });
-
     test('returns 0 when inventory has no items', () async {
       when(
         () => mockDb.getInventoryItems(inventoryId: 1),
@@ -468,33 +481,72 @@ void main() {
   });
 
   group('refresh time tracking', () {
-    setUp(() {
-      SharedPreferences.setMockInitialValues({});
-    });
-
     test('getLastRefreshTime returns null when never set', () async {
+      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
+        (_) async => null,
+      );
+
       final time = await repository.getLastRefreshTime();
       expect(time, isNull);
     });
 
-    test('getLastRefreshTime / setLastRefreshTime round-trips', () async {
-      await repository.setLastRefreshTime();
+    test('getLastRefreshTime returns DateTime when set', () async {
+      final now = DateTime.now();
+      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
+        (_) async => <String, dynamic>{
+          'cache_key': '__global_refresh__',
+          'cache_type': 'global_refresh',
+          'last_refreshed_at': now.millisecondsSinceEpoch,
+          'next_refresh_at':
+              now.millisecondsSinceEpoch + 5 * 24 * 60 * 60 * 1000,
+        },
+      );
+
       final time = await repository.getLastRefreshTime();
       expect(time, isNotNull);
-      // Should be within the last 5 seconds.
       expect(
-        DateTime.now().difference(time!).inSeconds,
+        now.difference(time!).inSeconds,
         lessThan(5),
       );
     });
 
     test('isCacheOverdue returns true when never refreshed', () async {
+      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
+        (_) async => null,
+      );
+
+      final overdue = await repository.isCacheOverdue();
+      expect(overdue, isTrue);
+    });
+
+    test('isCacheOverdue returns true when past overdue days', () async {
+      final staleTime = DateTime.now().subtract(const Duration(days: 6));
+      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
+        (_) async => <String, dynamic>{
+          'cache_key': '__global_refresh__',
+          'cache_type': 'global_refresh',
+          'last_refreshed_at': staleTime.millisecondsSinceEpoch,
+          'next_refresh_at':
+              staleTime.millisecondsSinceEpoch + 5 * 24 * 60 * 60 * 1000,
+        },
+      );
+
       final overdue = await repository.isCacheOverdue();
       expect(overdue, isTrue);
     });
 
     test('isCacheOverdue returns false when just refreshed', () async {
-      await repository.setLastRefreshTime();
+      final now = DateTime.now();
+      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
+        (_) async => <String, dynamic>{
+          'cache_key': '__global_refresh__',
+          'cache_type': 'global_refresh',
+          'last_refreshed_at': now.millisecondsSinceEpoch,
+          'next_refresh_at':
+              now.millisecondsSinceEpoch + 5 * 24 * 60 * 60 * 1000,
+        },
+      );
+
       final overdue = await repository.isCacheOverdue();
       expect(overdue, isFalse);
     });
@@ -896,6 +948,7 @@ void main() {
             mockDb,
             mockApi,
             usdaClient: mockUsda,
+            metaDao: mockMetaDao,
           );
           when(
             () => mockUsda.searchFood(produceName),

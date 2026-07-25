@@ -49,5 +49,6 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
     api,
     usdaClient: UsdaApiClient(),
     firebaseCache: firebaseCache,
+    metaDao: db.firebaseCacheMetaDao,
   );
 });

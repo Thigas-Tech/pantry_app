@@ -3,7 +3,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-/// 180 days in milliseconds (matches _produceRefreshIntervalMs).
+/// 180 days in milliseconds.
 const int _refreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 
 void main() {
@@ -401,6 +401,150 @@ void main() {
 
       expect(await dao.count(db, cacheType: 'barcoded'), 3);
       expect(await dao.count(db, cacheType: 'produce'), 2);
+    });
+  });
+
+  group('global refresh', () {
+    const globalCacheKey = '__global_refresh__';
+
+    test(
+      'setGlobalRefreshTime creates entry with correct key and type',
+      () async {
+        final db = await dbHelper.database;
+        await dao.setGlobalRefreshTime(db);
+
+        final row = await dao.get(db, globalCacheKey);
+        expect(row, isNotNull);
+        expect(row!['cache_key'], globalCacheKey);
+        expect(row['cache_type'], 'global_refresh');
+        expect(row['last_refreshed_at'], greaterThan(0));
+        expect(
+          row['next_refresh_at'],
+          greaterThan(row['last_refreshed_at'] as int),
+        );
+      },
+    );
+
+    test('getGlobalRefreshTime returns entry after set', () async {
+      final db = await dbHelper.database;
+      await dao.setGlobalRefreshTime(db);
+
+      final entry = await dao.getGlobalRefreshTime(db);
+      expect(entry, isNotNull);
+      expect(entry!['cache_key'], globalCacheKey);
+    });
+
+    test('getGlobalRefreshTime returns null when never set', () async {
+      final db = await dbHelper.database;
+      final entry = await dao.getGlobalRefreshTime(db);
+      expect(entry, isNull);
+    });
+
+    test('setGlobalRefreshTime replaces existing entry', () async {
+      final db = await dbHelper.database;
+      await dao.setGlobalRefreshTime(db);
+      final first = await dao.getGlobalRefreshTime(db);
+      final firstTime = first!['last_refreshed_at'] as int;
+
+      await Future<void>.delayed(const Duration(milliseconds: 2));
+      await dao.setGlobalRefreshTime(db);
+      final second = await dao.getGlobalRefreshTime(db);
+      final secondTime = second!['last_refreshed_at'] as int;
+
+      expect(secondTime, greaterThan(firstTime));
+    });
+  });
+
+  group('recipe cache_type', () {
+    test('upsert and get with cache_type = recipe', () async {
+      final db = await dbHelper.database;
+      await dao.upsert(
+        db,
+        'recipe:abc123',
+        'recipe',
+        lastRefreshedAt: 100,
+        nextRefreshAt: 200,
+      );
+
+      final row = await dao.get(db, 'recipe:abc123');
+      expect(row, isNotNull);
+      expect(row!['cache_key'], 'recipe:abc123');
+      expect(row['cache_type'], 'recipe');
+    });
+
+    test('count filters by recipe cache type', () async {
+      final db = await dbHelper.database;
+      await dao.upsert(
+        db,
+        'recipe:r1',
+        'recipe',
+        lastRefreshedAt: 1,
+        nextRefreshAt: 2,
+      );
+      await dao.upsert(
+        db,
+        'recipe:r2',
+        'recipe',
+        lastRefreshedAt: 3,
+        nextRefreshAt: 4,
+      );
+      await dao.upsert(
+        db,
+        'b1',
+        'barcoded',
+        lastRefreshedAt: 5,
+        nextRefreshAt: 6,
+      );
+
+      expect(await dao.count(db, cacheType: 'recipe'), 2);
+    });
+
+    test('getStaleEntries filters by recipe cache type', () async {
+      final db = await dbHelper.database;
+      const now = 1000;
+      await dao.upsert(
+        db,
+        'recipe:stale',
+        'recipe',
+        lastRefreshedAt: 100,
+        nextRefreshAt: now - 1,
+      );
+      await dao.upsert(
+        db,
+        'recipe:fresh',
+        'recipe',
+        lastRefreshedAt: now,
+        nextRefreshAt: now + 1000,
+      );
+      await dao.upsert(
+        db,
+        'b1',
+        'barcoded',
+        lastRefreshedAt: 100,
+        nextRefreshAt: now - 1,
+      );
+
+      final staleRecipes = await dao.getStaleEntries(
+        db,
+        cacheType: 'recipe',
+        nowInMs: now,
+      );
+      expect(staleRecipes, hasLength(1));
+      expect(staleRecipes.first['cache_key'], 'recipe:stale');
+    });
+
+    test('remove deletes recipe entry', () async {
+      final db = await dbHelper.database;
+      await dao.upsert(
+        db,
+        'recipe:delete',
+        'recipe',
+        lastRefreshedAt: 1,
+        nextRefreshAt: 2,
+      );
+      expect(await dao.get(db, 'recipe:delete'), isNotNull);
+      await dao.remove(db, 'recipe:delete');
+      expect(await dao.get(db, 'recipe:delete'), isNull);
     });
   });
 }

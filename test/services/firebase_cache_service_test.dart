@@ -6,6 +6,9 @@ import 'package:pantry_app/models/produce_cache_entry.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_cache_entry.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/models/recipe_cache_entry.dart';
+import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/firebase_cache_client.dart';
 import 'package:pantry_app/services/firebase_cache_service.dart';
@@ -98,6 +101,19 @@ void main() {
         nextRefreshAt: 0,
       ),
     );
+    registerFallbackValue(
+      const RecipeCacheEntry(
+        recipeId: '',
+        name: '',
+        instructions: '',
+        servings: 0,
+        ingredients: [],
+        createdAt: 0,
+        lastRefreshedAt: 0,
+        nextRefreshAt: 0,
+      ),
+    );
+    registerFallbackValue(<RecipeCacheEntry>[]);
   });
 
   setUp(() async {
@@ -651,6 +667,149 @@ void main() {
 
       when(() => mockClient.isAvailable).thenReturn(false);
       expect(service.isAvailable, false);
+    });
+  });
+
+  group('cacheRecipe', () {
+    const recipe = Recipe(
+      name: 'Test Recipe',
+      instructions: 'Mix.',
+      servings: 2,
+      createdAt: 5000,
+    );
+    const ingredients = [
+      RecipeIngredient(
+        recipeId: 0,
+        name: 'Sugar',
+        barcode: '123',
+        quantity: 100,
+        unit: 'g',
+      ),
+    ];
+
+    test('writes to firestore and upserts metadata', () async {
+      when(() => mockClient.setRecipe(any())).thenAnswer((_) async => true);
+
+      await service.cacheRecipe(recipe, ingredients);
+
+      verify(() => mockClient.setRecipe(any())).called(1);
+      verify(
+        () => mockMetaDao.upsert(
+          any(),
+          any(),
+          'recipe',
+          lastRefreshedAt: any(named: 'lastRefreshedAt'),
+          nextRefreshAt: any(named: 'nextRefreshAt'),
+          fdcId: any(named: 'fdcId'),
+        ),
+      ).called(1);
+    });
+
+    test('no-op when firebase client is unavailable', () async {
+      when(() => mockClient.isAvailable).thenReturn(false);
+
+      await service.cacheRecipe(recipe, ingredients);
+
+      verifyNever(() => mockClient.setRecipe(any()));
+      verifyNever(
+        () => mockMetaDao.upsert(
+          any(),
+          any(),
+          any(),
+          lastRefreshedAt: any(named: 'lastRefreshedAt'),
+          nextRefreshAt: any(named: 'nextRefreshAt'),
+        ),
+      );
+    });
+
+    test('succeeds even when metadata upsert fails', () async {
+      when(() => mockClient.setRecipe(any())).thenAnswer((_) async => true);
+      when(
+        () => mockMetaDao.upsert(
+          any(),
+          any(),
+          any(),
+          lastRefreshedAt: any(named: 'lastRefreshedAt'),
+          nextRefreshAt: any(named: 'nextRefreshAt'),
+          fdcId: any(named: 'fdcId'),
+        ),
+      ).thenThrow(Exception('DB error'));
+
+      await service.cacheRecipe(recipe, ingredients);
+
+      verify(() => mockClient.setRecipe(any())).called(1);
+    });
+
+    test('cacheRecipe uses imageUrl when provided', () async {
+      when(() => mockClient.setRecipe(any())).thenAnswer((_) async => true);
+
+      await service.cacheRecipe(
+        recipe,
+        ingredients,
+        imageUrl: 'https://example.com/photo.jpg',
+      );
+
+      final captured =
+          verify(() => mockClient.setRecipe(captureAny())).captured.first
+              as RecipeCacheEntry;
+      expect(captured.imageUrl, 'https://example.com/photo.jpg');
+    });
+  });
+
+  group('deleteSharedRecipe', () {
+    const recipeId = 'recipe:abc123';
+
+    test('deletes from firestore and removes metadata', () async {
+      when(() => mockClient.deleteRecipe(recipeId)).thenAnswer((_) async {});
+      when(() => mockMetaDao.remove(any(), recipeId)).thenAnswer((_) async {});
+
+      await service.deleteSharedRecipe(recipeId);
+
+      verify(() => mockClient.deleteRecipe(recipeId)).called(1);
+      verify(() => mockMetaDao.remove(any(), recipeId)).called(1);
+    });
+
+    test('no-op when firebase client is unavailable', () async {
+      when(() => mockClient.isAvailable).thenReturn(false);
+
+      await service.deleteSharedRecipe(recipeId);
+
+      verifyNever(() => mockClient.deleteRecipe(any()));
+      verifyNever(() => mockMetaDao.remove(any(), any()));
+    });
+  });
+
+  group('getSharedRecipes', () {
+    test('returns recipes from firebase client', () async {
+      final expected = [
+        const RecipeCacheEntry(
+          recipeId: 'r1',
+          name: 'Recipe 1',
+          instructions: '',
+          servings: 1,
+          ingredients: [],
+          createdAt: 100,
+          lastRefreshedAt: 100,
+          nextRefreshAt: 1000,
+        ),
+      ];
+      when(
+        () => mockClient.listRecipes(
+          startAfter: any(named: 'startAfter'),
+        ),
+      ).thenAnswer((_) async => expected);
+
+      final results = await service.getSharedRecipes();
+
+      expect(results, hasLength(1));
+      expect(results.first.recipeId, 'r1');
+    });
+
+    test('returns empty list when firebase unavailable', () async {
+      when(() => mockClient.isAvailable).thenReturn(false);
+
+      final results = await service.getSharedRecipes();
+      expect(results, isEmpty);
     });
   });
 }

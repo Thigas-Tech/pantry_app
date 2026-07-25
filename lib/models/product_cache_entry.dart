@@ -1,11 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pantry_app/firebase_cache_config.dart';
 import 'package:pantry_app/models/product.dart';
 
 part 'product_cache_entry.freezed.dart';
 part 'product_cache_entry.g.dart';
-
-/// 180 days in milliseconds.
-const int _productRefreshIntervalMs = 180 * 24 * 60 * 60 * 1000;
 
 /// Firestore document for the product_cache/{barcode} collection.
 ///
@@ -140,7 +138,7 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       name: product.name,
       createdAt: createdAt ?? now,
       lastRefreshedAt: now,
-      nextRefreshAt: now + _productRefreshIntervalMs,
+      nextRefreshAt: now + productRefreshIntervalMs,
       brand: product.brand,
       category: product.category,
       categoriesHierarchy: product.categoriesHierarchy,
