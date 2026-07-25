@@ -166,6 +166,19 @@ Returns null when the key does not exist.
 
 </dd>
 
+        <dt id="getGlobalRefreshTime" class="callable">
+  <span class="name"><a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao/getGlobalRefreshTime.html">getGlobalRefreshTime</a></span><span class="signature">(<wbr><span class="parameter" id="getGlobalRefreshTime-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the global inventory refresh row, or null if never set.
+  
+
+</dd>
+
         <dt id="getStaleEntries" class="callable">
   <span class="name"><a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao/getStaleEntries.html">getStaleEntries</a></span><span class="signature">(<wbr><span class="parameter" id="getStaleEntries-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="getStaleEntries-param-nowInMs"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">nowInMs</span>, </span><span class="parameter" id="getStaleEntries-param-cacheType"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">cacheType</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
@@ -201,6 +214,19 @@ Returns null when the key does not exist.
 </dt>
 <dd>
   Deletes an entry by <code>cacheKey</code>.
+  
+
+</dd>
+
+        <dt id="setGlobalRefreshTime" class="callable">
+  <span class="name"><a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao/setGlobalRefreshTime.html">setGlobalRefreshTime</a></span><span class="signature">(<wbr><span class="parameter" id="setGlobalRefreshTime-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Records the current time as the last global inventory refresh.
   
 
 </dd>
@@ -271,6 +297,23 @@ Returns null when the key does not exist.
     
     
 
+  <section class="summary offset-anchor" id="constants">
+    <h2>Constants</h2>
+    <dl class="properties">
+        <dt id="globalRefreshKey" class="constant">
+    <span class="name "><a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao/globalRefreshKey-constant.html">globalRefreshKey</a></span>
+  <span class="signature">&#8594; const <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd>
+  Cache key for the global inventory refresh timestamp entry.
+  
+
+</dd>
+
+    </dl>
+  </section>
   </div> <!-- /.main-content -->
   <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
     <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->

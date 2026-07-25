@@ -73,8 +73,17 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteRecipe(WidgetRef ref, int id) async {
   final db = ref.read(databaseProvider);
+  final recipe = await db.getRecipe(id);
   await db.deleteRecipe(id);
   logInfo(&#39;Recipe $id deleted&#39;);
+  if (recipe != null) {
+    final cache = ref.read(firebaseCacheProvider);
+    unawaited(
+      cache.deleteSharedRecipe(
+        _computeSharedRecipeId(recipe.name, recipe.createdAt),
+      ),
+    );
+  }
   invalidateRecipes(ref);
 }</code></pre>
 </section>

@@ -64,7 +64,9 @@
 <section class="desc markdown">
   <p>Records the current time as the last successful product refresh.</p>
 <p>Used together with <a href="../../services_product_repository/ProductRepository/isCacheOverdue.html">isCacheOverdue</a> to trigger automatic background
-refreshes after <a href="../../services_product_repository/ProductRepository/cacheOverdueDays.html">cacheOverdueDays</a> of inactivity.</p>
+refreshes after <a href="../../services_product_repository/ProductRepository/cacheOverdueDays.html">cacheOverdueDays</a> of inactivity. Delegates to
+<a href="../../database_firebase_cache_meta_dao/FirebaseCacheMetaDao/setGlobalRefreshTime.html">FirebaseCacheMetaDao.setGlobalRefreshTime</a>, which is the single source
+of truth for cache staleness.</p>
 </section>
 
 
@@ -72,11 +74,8 @@ refreshes after <a href="../../services_product_repository/ProductRepository/cac
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; setLastRefreshTime() async {
-  final prefs = await _sharedPrefs;
-  await prefs.setString(
-    _lastRefreshKey,
-    DateTime.now().toIso8601String(),
-  );
+  final db = await _db.database;
+  await _metaDao.setGlobalRefreshTime(db);
   logInfo(&#39;Last refresh time updated&#39;);
 }</code></pre>
 </section>

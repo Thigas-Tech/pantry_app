@@ -165,6 +165,46 @@ lookup methods bypass Firestore entirely and call the source API directly.</p>
 
 </dd>
 
+        <dt id="cacheRecipe" class="callable">
+  <span class="name"><a href="../services_firebase_cache_service/FirebaseCacheService/cacheRecipe.html">cacheRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="cacheRecipe-param-recipe"><span class="type-annotation"><a href="../models_recipe/Recipe-class.html">Recipe</a></span> <span class="parameter-name">recipe</span>, </span><span class="parameter" id="cacheRecipe-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, {</span><span class="parameter" id="cacheRecipe-param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Writes a <a href="../models_recipe/Recipe-class.html">Recipe</a> and its <a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a> list to the Firebase
+cache (fire-and-forget).
+  
+
+</dd>
+
+        <dt id="deleteSharedRecipe" class="callable">
+  <span class="name"><a href="../services_firebase_cache_service/FirebaseCacheService/deleteSharedRecipe.html">deleteSharedRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="deleteSharedRecipe-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes a shared <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a> from Firebase and its metadata.
+  
+
+</dd>
+
+        <dt id="getSharedRecipes" class="callable">
+  <span class="name"><a href="../services_firebase_cache_service/FirebaseCacheService/getSharedRecipes.html">getSharedRecipes</a></span><span class="signature">(<wbr>{<span class="parameter" id="getSharedRecipes-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">limit</span> = <span class="default-value">20</span>, </span><span class="parameter" id="getSharedRecipes-param-startAfter"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">startAfter</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns paginated <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a> values from the Firebase cache.
+  
+
+</dd>
+
         <dt id="noSuchMethod" class="callable inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
     <span class="returntype parameter">&#8594; dynamic</span>

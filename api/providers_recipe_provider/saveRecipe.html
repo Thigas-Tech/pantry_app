@@ -94,6 +94,7 @@ provided, the recipe and its ingredients are updated.</p>
   }
 
   final db = ref.read(databaseProvider);
+  final cache = ref.read(firebaseCacheProvider);
   final now = DateTime.now().millisecondsSinceEpoch;
 
   if (existingRecipeId != null) {
@@ -107,6 +108,7 @@ provided, the recipe and its ingredients are updated.</p>
     );
     await db.updateRecipeWithIngredients(recipe, ingredients);
     logInfo(&#39;Recipe $existingRecipeId updated: $name&#39;);
+    unawaited(cache.cacheRecipe(recipe, ingredients));
   } else {
     final recipe = Recipe(
       name: name.trim(),
@@ -116,8 +118,14 @@ provided, the recipe and its ingredients are updated.</p>
       createdAt: now,
       updatedAt: now,
     );
-    await db.insertRecipeWithIngredients(recipe, ingredients);
+    final newId = await db.insertRecipeWithIngredients(recipe, ingredients);
     logInfo(&#39;Recipe created: $name&#39;);
+    unawaited(
+      cache.cacheRecipe(
+        recipe.copyWith(id: newId),
+        ingredients,
+      ),
+    );
   }
 
   invalidateRecipes(ref);

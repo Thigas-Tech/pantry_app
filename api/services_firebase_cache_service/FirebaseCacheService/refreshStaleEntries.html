@@ -97,9 +97,11 @@ reduce the risk of rate limiting.</p>
     final cacheType = row[&#39;cache_type&#39;] as String;
 
     try {
-      final refreshed = cacheType == &#39;produce&#39;
-          ? await _refreshProduceEntry(db, cacheKey)
-          : await _refreshBarcodedEntry(db, cacheKey);
+      final refreshed = switch (cacheType) {
+        &#39;produce&#39; =&gt; await _refreshProduceEntry(db, cacheKey),
+        &#39;recipe&#39; =&gt; await _refreshRecipeEntry(db, cacheKey),
+        _ =&gt; await _refreshBarcodedEntry(db, cacheKey),
+      };
       if (refreshed) {
         successCount++;
       }

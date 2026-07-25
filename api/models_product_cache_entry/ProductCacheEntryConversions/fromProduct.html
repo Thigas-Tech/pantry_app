@@ -86,7 +86,7 @@ If <code>createdAt</code> is omitted it is set to <code>lastRefreshedAt</code>.<
     name: product.name,
     createdAt: createdAt ?? now,
     lastRefreshedAt: now,
-    nextRefreshAt: now + _productRefreshIntervalMs,
+    nextRefreshAt: now + productRefreshIntervalMs,
     brand: product.brand,
     category: product.category,
     categoriesHierarchy: product.categoriesHierarchy,

@@ -64,8 +64,9 @@
 <section class="desc markdown">
   <p>Returns true when the last refresh timestamp is missing or older than
 <a href="../../services_product_repository/ProductRepository/cacheOverdueDays.html">cacheOverdueDays</a> days.</p>
-<p>Used at app startup and on the home screen to decide whether to fire a
-background refresh.</p>
+<p>Queries <a href="../../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a> for the global refresh entry instead of
+reading from local preferences. When the entry is missing or its
+<code>nextRefreshAt</code> column has passed, the cache is considered overdue.</p>
 </section>
 
 
@@ -73,9 +74,12 @@ background refresh.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; isCacheOverdue() async {
-  final lastRefresh = await getLastRefreshTime();
-  if (lastRefresh == null) return true;
-  return DateTime.now().difference(lastRefresh).inDays &gt;= _cacheOverdueDays;
+  final db = await _db.database;
+  final entry = await _metaDao.getGlobalRefreshTime(db);
+  if (entry == null) return true;
+  final nextRefreshAt = entry[&#39;next_refresh_at&#39;] as int?;
+  if (nextRefreshAt == null) return true;
+  return DateTime.now().millisecondsSinceEpoch &gt;= nextRefreshAt;
 }</code></pre>
 </section>
 

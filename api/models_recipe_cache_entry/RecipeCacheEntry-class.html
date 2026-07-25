@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the RecipeCacheEntry class from the recipe_cache_entry library, for the Dart programming language.">
+  <title>RecipeCacheEntry class - recipe_cache_entry library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../models_recipe_cache_entry/">models&#47;recipe_cache_entry.dart</a></li>
+    <li class="self-crumb">RecipeCacheEntry class</li>
+  </ol>
+  <div class="self-name">RecipeCacheEntry</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="models_recipe_cache_entry&#47;models_recipe_cache_entry-library-sidebar.html"
+    data-below-sidebar="models_recipe_cache_entry&#47;RecipeCacheEntry-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">RecipeCacheEntry</span> class 
+    <a href="https://dart.dev/language/class-modifiers#abstract" class="feature feature-abstract" title="This type can not be directly constructed.">abstract</a>
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Firestore document for the recipe_cache/{recipeId} collection.</p>
+<p>Stores an anonymized, cross-device shareable snapshot of a user's
+recipe. No PII (user ID, device ID, local file paths) is stored.</p>
+<p><code>recipeId</code> is a SHA-256 hex hash derived from the original recipe's
+name and createdAt, ensuring deterministic, collision-resistant IDs
+that cannot be traced back to the local SQLite database.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+
+        
+        
+
+
+        
+  <dt>Available extensions</dt>
+  <dd><ul class="comma-separated clazz-relationships">
+      <li><a href="../models_recipe_cache_entry/RecipeCacheEntryConversions.html">RecipeCacheEntryConversions</a></li>
+      <li><a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns.html">RecipeCacheEntryPatterns</a></li>
+  </ul></dd>
+        
+  <dt>Annotations</dt>
+  <dd>
+    <ul class="annotation-list clazz-relationships">
+        <li>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/freezed-constant.html">freezed</a></li>
+    </ul>
+  </dd>
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="RecipeCacheEntry.new" class="callable">
+          <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/RecipeCacheEntry.html">RecipeCacheEntry</a></span><span class="signature">({<span class="parameter" id="param-recipeId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">recipeId</span>, </span><span class="parameter" id="param-name"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-instructions"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">instructions</span>, </span><span class="parameter" id="param-servings"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">servings</span>, </span><span class="parameter" id="param-ingredients"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson)</span> <span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient_cache/RecipeIngredientCache-class.html">RecipeIngredientCache</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-createdAt"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">createdAt</span>, </span><span class="parameter" id="param-lastRefreshedAt"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">lastRefreshedAt</span>, </span><span class="parameter" id="param-nextRefreshAt"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">nextRefreshAt</span>, </span><span class="parameter" id="param-imageUrl"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(includeIfNull: false)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-schemaVersion"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(1)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">schemaVersion</span></span>})</span>
+        </dt>
+        <dd>
+          Creates a <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a> with all required fields.
+            <div class="constructor-modifier features">const</div>
+            <div class="constructor-modifier features">factory</div>
+        </dd>
+        <dt id="RecipeCacheEntry.fromJson" class="callable">
+          <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/RecipeCacheEntry.fromJson.html">RecipeCacheEntry.fromJson</a></span><span class="signature">(<span class="parameter" id="fromJson-param-json"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span> <span class="parameter-name">json</span></span>)</span>
+        </dt>
+        <dd>
+          Deserializes from a JSON map.
+            <div class="constructor-modifier features">factory</div>
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="copyWith" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/copyWith.html">copyWith</a></span>
+  <span class="signature">&#8594; $RecipeCacheEntryCopyWith<span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd class="inherited">
+  Create a copy of RecipeCacheEntry
+with the given fields replaced by the non-null parameter values.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="createdAt" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/createdAt.html">createdAt</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Epoch ms of first creation (copied from original recipe).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="imageUrl" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/imageUrl.html">imageUrl</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  Optional Firebase Storage URL for the recipe photo.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="ingredients" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/ingredients.html">ingredients</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient_cache/RecipeIngredientCache-class.html">RecipeIngredientCache</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd class="inherited">
+  Anonymized ingredient list (no local IDs).
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="instructions" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/instructions.html">instructions</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Free-text preparation instructions.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="lastRefreshedAt" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/lastRefreshedAt.html">lastRefreshedAt</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Epoch ms of last refresh.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="name" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/name.html">name</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Recipe display name.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="nextRefreshAt" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/nextRefreshAt.html">nextRefreshAt</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Epoch ms of next scheduled refresh.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="recipeId" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/recipeId.html">recipeId</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  SHA-256 hex hash (name + createdAt), used as Firestore doc ID.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="schemaVersion" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/schemaVersion.html">schemaVersion</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Schema version for forward compatibility.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="servings" class="property inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/servings.html">servings</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  Number of servings this recipe yields.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="map" class="callable">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns/map.html">map</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="map-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-value"><span class="type-annotation">_RecipeCacheEntry</span> <span class="parameter-name">value</span></span>)</span>)
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a>,
+        provided by the <a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns.html">RecipeCacheEntryPatterns</a> extension</span>
+      </p>
+  A <code>switch</code>-like method, using callbacks.
+  
+
+</dd>
+
+        <dt id="mapOrNull" class="callable">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns/mapOrNull.html">mapOrNull</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="mapOrNull-param-$default"><span class="type-annotation">TResult?</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-value"><span class="type-annotation">_RecipeCacheEntry</span> <span class="parameter-name">value</span></span>)?</span>)
+    <span class="returntype parameter">&#8594; TResult?</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a>,
+        provided by the <a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns.html">RecipeCacheEntryPatterns</a> extension</span>
+      </p>
+  A variant of <code>map</code> that fallback to returning <code>null</code>.
+  
+
+</dd>
+
+        <dt id="maybeMap" class="callable">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns/maybeMap.html">maybeMap</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="maybeMap-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-value"><span class="type-annotation">_RecipeCacheEntry</span> <span class="parameter-name">value</span></span>)?, {</span><span class="parameter" id="maybeMap-param-orElse"><span>required</span> <span class="type-annotation">TResult</span> <span class="parameter-name">orElse</span>()</span>})
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a>,
+        provided by the <a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns.html">RecipeCacheEntryPatterns</a> extension</span>
+      </p>
+  A variant of <code>map</code> that fallback to returning <code>orElse</code>.
+  
+
+</dd>
+
+        <dt id="maybeWhen" class="callable">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns/maybeWhen.html">maybeWhen</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="maybeWhen-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">recipeId</span>, </span><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-instructions"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">instructions</span>, </span><span class="parameter" id="param-servings"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">servings</span>, </span><span class="parameter" id="param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient_cache/RecipeIngredientCache-class.html">RecipeIngredientCache</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-createdAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">createdAt</span>, </span><span class="parameter" id="param-lastRefreshedAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">lastRefreshedAt</span>, </span><span class="parameter" id="param-nextRefreshAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">nextRefreshAt</span>, </span><span class="parameter" id="param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-schemaVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">schemaVersion</span></span>)?, {</span><span class="parameter" id="maybeWhen-param-orElse"><span>required</span> <span class="type-annotation">TResult</span> <span class="parameter-name">orElse</span>()</span>})
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a>,
+        provided by the <a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns.html">RecipeCacheEntryPatterns</a> extension</span>
+      </p>
+  A variant of <code>when</code> that fallback to an <code>orElse</code> callback.
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toJson" class="callable inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/toJson.html">toJson</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Serializes this RecipeCacheEntry to a JSON map.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="toRecipe" class="callable">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntryConversions/toRecipe.html">toRecipe</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="../models_recipe/Recipe-class.html">Recipe</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a>,
+        provided by the <a href="../models_recipe_cache_entry/RecipeCacheEntryConversions.html">RecipeCacheEntryConversions</a> extension</span>
+      </p>
+  Converts this cache entry back to a local <a href="../models_recipe/Recipe-class.html">Recipe</a>.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="when" class="callable">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns/when.html">when</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="when-param-$default"><span class="type-annotation">TResult</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">recipeId</span>, </span><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-instructions"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">instructions</span>, </span><span class="parameter" id="param-servings"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">servings</span>, </span><span class="parameter" id="param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient_cache/RecipeIngredientCache-class.html">RecipeIngredientCache</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-createdAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">createdAt</span>, </span><span class="parameter" id="param-lastRefreshedAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">lastRefreshedAt</span>, </span><span class="parameter" id="param-nextRefreshAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">nextRefreshAt</span>, </span><span class="parameter" id="param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-schemaVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">schemaVersion</span></span>)</span>)
+    <span class="returntype parameter">&#8594; TResult</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a>,
+        provided by the <a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns.html">RecipeCacheEntryPatterns</a> extension</span>
+      </p>
+  A <code>switch</code>-like method, using callbacks.
+  
+
+</dd>
+
+        <dt id="whenOrNull" class="callable">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns/whenOrNull.html">whenOrNull</a></span><span class="signature">&lt;<wbr><span class="type-parameter">TResult extends <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span>&gt;</span><span class="signature">(<wbr><span class="parameter" id="whenOrNull-param-$default"><span class="type-annotation">TResult?</span> <span class="parameter-name">$default</span>(<span class="parameter" id="param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">recipeId</span>, </span><span class="parameter" id="param-name"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="param-instructions"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">instructions</span>, </span><span class="parameter" id="param-servings"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">servings</span>, </span><span class="parameter" id="param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient_cache/RecipeIngredientCache-class.html">RecipeIngredientCache</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="param-createdAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">createdAt</span>, </span><span class="parameter" id="param-lastRefreshedAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">lastRefreshedAt</span>, </span><span class="parameter" id="param-nextRefreshAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">nextRefreshAt</span>, </span><span class="parameter" id="param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span><span class="parameter" id="param-schemaVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">schemaVersion</span></span>)?</span>)
+    <span class="returntype parameter">&#8594; TResult?</span>
+  </span>
+  
+
+</dt>
+<dd>
+      <p class="from-extension">
+        <span>Available on <a href="../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a>,
+        provided by the <a href="../models_recipe_cache_entry/RecipeCacheEntryPatterns.html">RecipeCacheEntryPatterns</a> extension</span>
+      </p>
+  A variant of <code>when</code> that fallback to returning <code>null</code>
+  
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="../models_recipe_cache_entry/RecipeCacheEntry/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../models_recipe_cache_entry/">recipe_cache_entry</a></li>
+    <li class="self-crumb">RecipeCacheEntry class</li>
+</ol>
+
+    <h5>recipe_cache_entry library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.8+4
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
