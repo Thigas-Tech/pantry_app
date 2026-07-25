@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
@@ -26,12 +27,18 @@ class Pantry extends AsyncNotifier<List<InventoryWithProduct>> {
   }
 
   /// Refreshes all inventory products for the active inventory.
+  ///
+  /// Invalidates self after the next frame to avoid build-phase crashes when
+  /// the invalidation chain is triggered during a widget build cycle (e.g.
+  /// TickerMode.didChangeDependencies resuming paused subscriptions).
   Future<void> refresh() async {
     final activeId = ref.read(activeInventoryProvider);
     final repo = ref.read(productRepositoryProvider);
     await repo.refreshInventoryProducts(activeId);
     await repo.setLastRefreshTime();
-    ref.invalidateSelf();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidateSelf();
+    });
   }
 }
 
