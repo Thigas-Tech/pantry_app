@@ -1593,7 +1593,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get registerRecipe => 'Registrar receita';
 
   @override
-  String get registerRecipeSubtitle => 'Remover itens usados em lote';
+  String get registerRecipeSubtitle => 'Salvar receitas com controle de custo';
 
   @override
   String get scanBarcodeSubtitle => 'Escanear ou digitar código';
@@ -1606,6 +1606,154 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get comingSoon => 'Em breve';
+
+  @override
+  String get yes => 'Sim';
+
+  @override
+  String get no => 'Não';
+
+  @override
+  String get recipes => 'Receitas';
+
+  @override
+  String get editRecipe => 'Editar receita';
+
+  @override
+  String get recipeName => 'Nome da receita';
+
+  @override
+  String get recipeNameHint => 'Ex.: Sanduíche de frango';
+
+  @override
+  String get recipeNameRequired => 'O nome da receita é obrigatório';
+
+  @override
+  String get recipeInstructions => 'Instruções';
+
+  @override
+  String get recipeInstructionsHint => 'Descreva como preparar...';
+
+  @override
+  String get recipeIngredients => 'Ingredientes';
+
+  @override
+  String get ingredientName => 'Nome do ingrediente';
+
+  @override
+  String get ingredientQuantity => 'Qtd';
+
+  @override
+  String get ingredientUnit => 'Unidade';
+
+  @override
+  String get addIngredient => 'Adicionar ingrediente';
+
+  @override
+  String get selectFromPantry => 'Selecione itens da sua despensa';
+
+  @override
+  String get addSelected => 'Adicionar selecionados';
+
+  @override
+  String get servings => 'Porcoes';
+
+  @override
+  String get servingsHint => 'ex.: 4';
+
+  @override
+  String get setServingsHint => 'Defina o numero de porcoes no editor da receita para ver a nutricao por porcao';
+
+  @override
+  String get addPhoto => 'Adicionar foto';
+
+  @override
+  String get changePhoto => 'Alterar foto';
+
+  @override
+  String get costPerServing => 'Custo por porcao';
+
+  @override
+  String get recipeNutritionPerServing => 'Por porcao';
+
+  @override
+  String get recipeNutriScore => 'Nutri-Score';
+
+  @override
+  String get recipeNoIngredients => 'A receita nao tem ingredientes';
+
+  @override
+  String recipeShortage(String name, double amount) {
+    return '$name insuficiente: precisa de mais $amount';
+  }
+
+  @override
+  String get saveRecipe => 'Salvar receita';
+
+  @override
+  String get recipeSaved => 'Receita salva';
+
+  @override
+  String get recipeDeleted => 'Receita excluída';
+
+  @override
+  String get noRecipes => 'Nenhuma receita ainda';
+
+  @override
+  String get noRecipesSubtitle => 'Registre receitas para controlar custos e planejar refeições';
+
+  @override
+  String get discardChanges => 'Descartar alterações?';
+
+  @override
+  String get discardChangesConfirm => 'Você tem alterações não salvas. Descartá-las?';
+
+  @override
+  String get recipeCost => 'Custo da receita';
+
+  @override
+  String get recipeCostUnknown => 'Desconhecido';
+
+  @override
+  String get recipeAverageCost => 'Custo médio das receitas';
+
+  @override
+  String ingredientCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredientes',
+      one: '$count ingrediente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteRecipeConfirm => 'Excluir esta receita?';
+
+  @override
+  String get madeRecipe => 'Fiz esta receita';
+
+  @override
+  String get cookRecipeSuccess => 'Receita feita';
+
+  @override
+  String get recipeCookFailed => 'Erro ao preparar receita';
+
+  @override
+  String get confirmDiscard => 'Descartar alteracoes?';
+
+  @override
+  String get confirmDiscardContent => 'Tem alteracoes nao salvas. Tem certeza que deseja voltar?';
+
+  @override
+  String get searchProduct => 'Pesquisar produto';
+
+  @override
+  String get history => 'Historico';
+
+  @override
+  String get noHistory => 'Nenhum historico de preparo ainda';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -3167,7 +3315,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get registerRecipe => 'Registrar receita';
 
   @override
-  String get registerRecipeSubtitle => 'Remover itens usados em lote';
+  String get registerRecipeSubtitle => 'Salvar receitas com controle de custo';
 
   @override
   String get scanBarcodeSubtitle => 'Escanear ou digitar código';
@@ -3180,4 +3328,152 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get comingSoon => 'Em breve';
+
+  @override
+  String get yes => 'Sim';
+
+  @override
+  String get no => 'Não';
+
+  @override
+  String get recipes => 'Receitas';
+
+  @override
+  String get editRecipe => 'Editar receita';
+
+  @override
+  String get recipeName => 'Nome da receita';
+
+  @override
+  String get recipeNameHint => 'Ex.: Sanduíche de frango';
+
+  @override
+  String get recipeNameRequired => 'O nome da receita é obrigatório';
+
+  @override
+  String get recipeInstructions => 'Instruções';
+
+  @override
+  String get recipeInstructionsHint => 'Descreva como preparar...';
+
+  @override
+  String get recipeIngredients => 'Ingredientes';
+
+  @override
+  String get ingredientName => 'Nome do ingrediente';
+
+  @override
+  String get ingredientQuantity => 'Qtd';
+
+  @override
+  String get ingredientUnit => 'Unidade';
+
+  @override
+  String get addIngredient => 'Adicionar ingrediente';
+
+  @override
+  String get selectFromPantry => 'Selecione itens da sua despensa';
+
+  @override
+  String get addSelected => 'Adicionar selecionados';
+
+  @override
+  String get servings => 'Porcoes';
+
+  @override
+  String get servingsHint => 'ex.: 4';
+
+  @override
+  String get setServingsHint => 'Defina o numero de porcoes no editor da receita para ver a nutricao por porcao';
+
+  @override
+  String get addPhoto => 'Adicionar foto';
+
+  @override
+  String get changePhoto => 'Alterar foto';
+
+  @override
+  String get costPerServing => 'Custo por porcao';
+
+  @override
+  String get recipeNutritionPerServing => 'Por porcao';
+
+  @override
+  String get recipeNutriScore => 'Nutri-Score';
+
+  @override
+  String get recipeNoIngredients => 'A receita nao tem ingredientes';
+
+  @override
+  String recipeShortage(String name, double amount) {
+    return '$name insuficiente: precisa de mais $amount';
+  }
+
+  @override
+  String get saveRecipe => 'Salvar receita';
+
+  @override
+  String get recipeSaved => 'Receita salva';
+
+  @override
+  String get recipeDeleted => 'Receita excluída';
+
+  @override
+  String get noRecipes => 'Nenhuma receita ainda';
+
+  @override
+  String get noRecipesSubtitle => 'Registre receitas para controlar custos e planejar refeições';
+
+  @override
+  String get discardChanges => 'Descartar alterações?';
+
+  @override
+  String get discardChangesConfirm => 'Você tem alterações não salvas. Descartá-las?';
+
+  @override
+  String get recipeCost => 'Custo da receita';
+
+  @override
+  String get recipeCostUnknown => 'Desconhecido';
+
+  @override
+  String get recipeAverageCost => 'Custo médio das receitas';
+
+  @override
+  String ingredientCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredientes',
+      one: '$count ingrediente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteRecipeConfirm => 'Excluir esta receita?';
+
+  @override
+  String get madeRecipe => 'Fiz esta receita';
+
+  @override
+  String get cookRecipeSuccess => 'Receita feita';
+
+  @override
+  String get recipeCookFailed => 'Erro ao preparar receita';
+
+  @override
+  String get confirmDiscard => 'Descartar alteracoes?';
+
+  @override
+  String get confirmDiscardContent => 'Voce tem alteracoes nao salvas. Tem certeza que deseja voltar?';
+
+  @override
+  String get searchProduct => 'Pesquisar produto';
+
+  @override
+  String get history => 'Historico';
+
+  @override
+  String get noHistory => 'Nenhum historico de preparo ainda';
 }

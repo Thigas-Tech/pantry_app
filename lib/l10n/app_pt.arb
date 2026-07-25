@@ -675,9 +675,71 @@
   "addProduct": "Adicionar produto",
   "addProductSubtitle": "Buscar por código de barras ou nome",
   "registerRecipe": "Registrar receita",
-  "registerRecipeSubtitle": "Remover itens usados em lote",
+  "registerRecipeSubtitle": "Salvar receitas com controle de custo",
   "scanBarcodeSubtitle": "Escanear ou digitar código",
   "marketTrip": "Ida ao mercado",
   "marketTripSubtitle": "Escanear itens em sequencia",
-  "comingSoon": "Em breve"
+  "comingSoon": "Em breve",
+  "yes": "Sim",
+  "no": "Não",
+  "recipes": "Receitas",
+  "editRecipe": "Editar receita",
+  "recipeName": "Nome da receita",
+  "recipeNameHint": "Ex.: Sanduíche de frango",
+  "recipeNameRequired": "O nome da receita é obrigatório",
+  "recipeInstructions": "Instruções",
+  "recipeInstructionsHint": "Descreva como preparar...",
+  "recipeIngredients": "Ingredientes",
+  "ingredientName": "Nome do ingrediente",
+  "ingredientQuantity": "Qtd",
+  "ingredientUnit": "Unidade",
+  "addIngredient": "Adicionar ingrediente",
+  "fromYourPantry": "Da sua despensa",
+  "selectFromPantry": "Selecione itens da sua despensa",
+  "addSelected": "Adicionar selecionados",
+  "saveRecipe": "Salvar receita",
+  "recipeSaved": "Receita salva",
+  "recipeDeleted": "Receita excluída",
+  "noRecipes": "Nenhuma receita ainda",
+  "noRecipesSubtitle": "Registre receitas para controlar custos e planejar refeições",
+  "discardChanges": "Descartar alterações?",
+  "discardChangesConfirm": "Você tem alterações não salvas. Descartá-las?",
+  "recipeCost": "Custo da receita",
+  "recipeCostUnknown": "Desconhecido",
+  "recipeAverageCost": "Custo médio das receitas",
+  "ingredientCount": "{count, plural, one{{count} ingrediente} other{{count} ingredientes}}",
+  "deleteRecipeConfirm": "Excluir esta receita?",
+
+  "madeRecipe": "Fiz esta receita",
+  "cookRecipeSuccess": "Receita feita",
+  "recipeCookFailed": "Erro ao preparar receita",
+
+  "confirmDiscard": "Descartar alteracoes?",
+  "confirmDiscardContent": "Tem alteracoes nao salvas. Tem certeza que deseja voltar?",
+
+  "searchProduct": "Pesquisar produto",
+  "servings": "Porcoes",
+  "servingsHint": "ex.: 4",
+  "setServingsHint": "Defina o numero de porcoes no editor da receita para ver a nutricao por porcao",
+  "addPhoto": "Adicionar foto",
+  "changePhoto": "Alterar foto",
+  "costPerServing": "Custo por porcao",
+  "recipeNutritionPerServing": "Por porcao",
+  "recipeNutriScore": "Nutri-Score",
+  "recipeNoIngredients": "A receita nao tem ingredientes",
+  "recipeShortage": "{name} insuficiente: precisa de mais {amount}",
+  "@recipeShortage": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Ovos"
+      },
+      "amount": {
+        "type": "double",
+        "example": "2.0"
+      }
+    }
+  },
+  "history": "Historico",
+  "noHistory": "Nenhum historico de preparo ainda"
 }

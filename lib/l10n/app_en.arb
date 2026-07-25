@@ -721,9 +721,72 @@
   "addProduct": "Add product",
   "addProductSubtitle": "Search by barcode or name",
   "registerRecipe": "Register a recipe",
-  "registerRecipeSubtitle": "Bulk-remove used items",
+  "registerRecipeSubtitle": "Save recipes with cost tracking",
   "scanBarcodeSubtitle": "Snap or type a barcode",
   "marketTrip": "Market trip",
   "marketTripSubtitle": "Scan items in sequence",
-  "comingSoon": "Coming soon"
+  "comingSoon": "Coming soon",
+  "yes": "Yes",
+  "no": "No",
+  "recipes": "Recipes",
+  "editRecipe": "Edit recipe",
+  "recipeName": "Recipe name",
+  "recipeNameHint": "e.g. Chicken Sandwich",
+  "recipeNameRequired": "Recipe name is required",
+  "recipeInstructions": "Instructions",
+  "recipeInstructionsHint": "Describe how to prepare...",
+  "recipeIngredients": "Ingredients",
+  "ingredientName": "Ingredient name",
+  "ingredientQuantity": "Qty",
+  "ingredientUnit": "Unit",
+  "addIngredient": "Add ingredient",
+  "fromYourPantry": "From your pantry",
+  "selectFromPantry": "Select items from your pantry",
+  "addSelected": "Add selected",
+  "servings": "Servings",
+  "servingsHint": "e.g. 4",
+  "setServingsHint": "Set the number of servings in the recipe editor to see per-portion nutrition",
+  "addPhoto": "Add photo",
+  "changePhoto": "Change photo",
+  "costPerServing": "Cost per serving",
+  "recipeNutritionPerServing": "Per serving",
+  "recipeNutriScore": "Nutri-Score",
+  "recipeNoIngredients": "Recipe has no ingredients",
+  "recipeShortage": "Not enough {name}: need {amount} more",
+  "@recipeShortage": {
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Eggs"
+      },
+      "amount": {
+        "type": "double",
+        "example": "2.0"
+      }
+    }
+  },
+  "saveRecipe": "Save recipe",
+  "recipeSaved": "Recipe saved",
+  "recipeDeleted": "Recipe deleted",
+  "noRecipes": "No recipes yet",
+  "noRecipesSubtitle": "Register recipes to track costs and plan meals",
+  "discardChanges": "Discard changes?",
+  "discardChangesConfirm": "You have unsaved changes. Discard them?",
+  "recipeCost": "Recipe cost",
+  "recipeCostUnknown": "Unknown",
+  "recipeAverageCost": "Average recipe cost",
+  "ingredientCount": "{count, plural, one{{count} ingredient} other{{count} ingredients}}",
+
+  "deleteRecipeConfirm": "Delete this recipe?",
+
+  "madeRecipe": "I made this",
+  "cookRecipeSuccess": "Recipe made",
+  "recipeCookFailed": "Failed to cook recipe",
+
+  "confirmDiscard": "Discard changes?",
+  "confirmDiscardContent": "You have unsaved changes. Are you sure you want to go back?",
+
+  "searchProduct": "Search product",
+  "history": "History",
+  "noHistory": "No cooking history yet"
 }

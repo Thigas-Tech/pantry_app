@@ -16,6 +16,7 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
@@ -349,7 +350,7 @@ void main() {
     expect(find.byType(SearchScreen), findsOneWidget);
   });
 
-  testWidgets('action sheet stub options show coming soon snackbar', (
+  testWidgets('action sheet register recipe navigates to RecipeListScreen', (
     tester,
   ) async {
     final mockDb = _createMockDb();
@@ -366,7 +367,7 @@ void main() {
     await tester.tap(find.text('Register a recipe'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Coming soon'), findsOneWidget);
+    expect(find.byType(RecipeListScreen), findsOneWidget);
   });
 
   testWidgets('shows stock count badges with item counts', (tester) async {

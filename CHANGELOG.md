@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.0.10] — 2026-07-23
+
+### Added
+- **Recipe detail screen**: read-only view of a recipe with ingredient list,
+  instructions, cost (maskable via eye icon), and a prominent "I made this"
+  button. Tapping a recipe in the list now opens the detail screen instead
+  of jumping directly to edit mode.
+  (`lib/screens/recipe_detail_screen.dart`)
+- **"I made this" (cook) flow**: marks a recipe as cooked, deducts
+  ingredients from inventory using FEFO (first-expired-first-out), and
+  logs an immutable history entry. Shortage warnings prevent cooking when
+  stock is insufficient. Undo support via SnackbarHelper.
+  (`lib/providers/recipe_provider.dart` — `cookRecipe`)
+- **Recipe history**: new `recipe_history` table (database migration v26),
+  freezed model and DAO for immutable cook-event logging.
+  (`lib/models/recipe_history_entry.dart`,
+   `lib/database/recipe_history_dao.dart`)
+- **Price visibility toggle**: eye icon added to the recipe list and detail
+  screen AppBars, using the existing `PriceVisibilityToggle` / `PriceMask`
+  pattern. (`lib/screens/recipe_list_screen.dart`,
+   `lib/screens/recipe_detail_screen.dart`)
+- **Duplicate ingredient merging**: when the same barcoded ingredient is added
+  twice to a recipe, the quantity is incremented instead of creating a new row.
+  (`lib/screens/recipe_form_screen.dart`)
+- **PriceMask in recipe list**: cost labels in recipe cards and the average cost
+  banner now respect the price visibility toggle via `PriceMask`.
+  (`lib/screens/recipe_list_screen.dart`)
+- **Search-powered ingredient picker**: "Search product" button in the recipe
+  form opens a bottom sheet that searches the local database and Open Food Facts
+  API by name or barcode. Tapping a result adds it as an ingredient.
+  (`lib/widgets/search_ingredient_sheet.dart`,
+   `lib/screens/recipe_form_screen.dart`)
+
+## [0.0.9] — 2026-07-23
+
+### Added
+- **Recipe registration**: new `recipes` and `recipe_ingredients` tables
+  (migration v25). Freezed models with DAOs, providers, and cost calculation
+  using the user's base currency setting. RecipeFormScreen for create/edit,
+  RecipeListScreen for browsing with swipe-to-delete. Auto-populate
+  ingredients from current inventory. Average recipe cost banner.
+  (`lib/models/recipe.dart`, `lib/models/recipe_ingredient.dart`,
+   `lib/database/recipe_dao.dart`, `lib/database/recipe_ingredient_dao.dart`,
+   `lib/providers/recipe_provider.dart`, `lib/screens/recipe_form_screen.dart`,
+   `lib/screens/recipe_list_screen.dart`, fixes #156)
+
 ## [0.0.8+4] — 2026-07-18
 
 ### Added

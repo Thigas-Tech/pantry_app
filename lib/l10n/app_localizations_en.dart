@@ -1593,7 +1593,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerRecipe => 'Register a recipe';
 
   @override
-  String get registerRecipeSubtitle => 'Bulk-remove used items';
+  String get registerRecipeSubtitle => 'Save recipes with cost tracking';
 
   @override
   String get scanBarcodeSubtitle => 'Snap or type a barcode';
@@ -1606,4 +1606,152 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoon => 'Coming soon';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get no => 'No';
+
+  @override
+  String get recipes => 'Recipes';
+
+  @override
+  String get editRecipe => 'Edit recipe';
+
+  @override
+  String get recipeName => 'Recipe name';
+
+  @override
+  String get recipeNameHint => 'e.g. Chicken Sandwich';
+
+  @override
+  String get recipeNameRequired => 'Recipe name is required';
+
+  @override
+  String get recipeInstructions => 'Instructions';
+
+  @override
+  String get recipeInstructionsHint => 'Describe how to prepare...';
+
+  @override
+  String get recipeIngredients => 'Ingredients';
+
+  @override
+  String get ingredientName => 'Ingredient name';
+
+  @override
+  String get ingredientQuantity => 'Qty';
+
+  @override
+  String get ingredientUnit => 'Unit';
+
+  @override
+  String get addIngredient => 'Add ingredient';
+
+  @override
+  String get selectFromPantry => 'Select items from your pantry';
+
+  @override
+  String get addSelected => 'Add selected';
+
+  @override
+  String get servings => 'Servings';
+
+  @override
+  String get servingsHint => 'e.g. 4';
+
+  @override
+  String get setServingsHint => 'Set the number of servings in the recipe editor to see per-portion nutrition';
+
+  @override
+  String get addPhoto => 'Add photo';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get costPerServing => 'Cost per serving';
+
+  @override
+  String get recipeNutritionPerServing => 'Per serving';
+
+  @override
+  String get recipeNutriScore => 'Nutri-Score';
+
+  @override
+  String get recipeNoIngredients => 'Recipe has no ingredients';
+
+  @override
+  String recipeShortage(String name, double amount) {
+    return 'Not enough $name: need $amount more';
+  }
+
+  @override
+  String get saveRecipe => 'Save recipe';
+
+  @override
+  String get recipeSaved => 'Recipe saved';
+
+  @override
+  String get recipeDeleted => 'Recipe deleted';
+
+  @override
+  String get noRecipes => 'No recipes yet';
+
+  @override
+  String get noRecipesSubtitle => 'Register recipes to track costs and plan meals';
+
+  @override
+  String get discardChanges => 'Discard changes?';
+
+  @override
+  String get discardChangesConfirm => 'You have unsaved changes. Discard them?';
+
+  @override
+  String get recipeCost => 'Recipe cost';
+
+  @override
+  String get recipeCostUnknown => 'Unknown';
+
+  @override
+  String get recipeAverageCost => 'Average recipe cost';
+
+  @override
+  String ingredientCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ingredients',
+      one: '$count ingredient',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteRecipeConfirm => 'Delete this recipe?';
+
+  @override
+  String get madeRecipe => 'I made this';
+
+  @override
+  String get cookRecipeSuccess => 'Recipe made';
+
+  @override
+  String get recipeCookFailed => 'Failed to cook recipe';
+
+  @override
+  String get confirmDiscard => 'Discard changes?';
+
+  @override
+  String get confirmDiscardContent => 'You have unsaved changes. Are you sure you want to go back?';
+
+  @override
+  String get searchProduct => 'Search product';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get noHistory => 'No cooking history yet';
 }
