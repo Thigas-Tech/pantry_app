@@ -871,26 +871,26 @@ Run on emulator or device:
 
 ## Phase 9: Pre-Commit Gate
 
-### [ ] 9.1 Run full analysis and tests
+### [x] 9.1 Run full analysis and tests
 
 ```bash
 dart analyze --fatal-infos --fatal-warnings
 flutter test --concurrency=2
 ```
 
-### [ ] 9.2 Run build smoke test
+### [x] 9.2 Run build smoke test
 
 ```bash
 flutter build apk --debug
 ```
 
-### [ ] 9.3 Check for stale documentation
+### [x] 9.3 Check for stale documentation
 
 ```bash
 dart analyze --fatal-infos --fatal-warnings
 ```
 
-### [ ] 9.4 Update ARCHITECTURE docs
+### [x] 9.4 Update ARCHITECTURE docs
 
 After the feature is complete and working:
 
@@ -903,17 +903,17 @@ After the feature is complete and working:
 
 ## Phase 10: Post-Commit
 
-### [ ] 10.1 Update CHANGELOG.md
+### [x] 10.1 Update CHANGELOG.md
 
 Add entry describing the Firebase cache feature.
 
-### [ ] 10.2 Update USER_CHANGELOG.md and translations
+### [x] 10.2 Update USER_CHANGELOG.md and translations
 
 Add user-facing entry: "Faster product lookups through cloud cache"
 
 Translate to `USER_CHANGELOG_pt.md` and `USER_CHANGELOG_pt_BR.md`.
 
-### [ ] 10.3 Update TODO.md
+### [x] 10.3 Update TODO.md
 
 Mark the Firebase setup item as completed in TODO.md.
 
