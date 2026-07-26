@@ -2,13 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 
 /// A horizontal scrollable list of produce item chips for quick adding.
 ///
 /// Each chip shows a produce name. Tapping a chip invokes
 /// [onProduceSelected] with the produce name, and triggers haptic feedback.
-/// Chips whose name is present in [loadingItems] display a small
-/// [CircularProgressIndicator] and are disabled.
+/// Chips whose name is present in [loadingItems] display a small inline
+/// spinner alongside the produce name and are disabled to prevent
+/// duplicate taps while the product is being resolved.
 class QuickAddProduce extends StatelessWidget {
   /// Creates a [QuickAddProduce] carousel.
   const QuickAddProduce({
@@ -26,8 +28,8 @@ class QuickAddProduce extends StatelessWidget {
 
   /// The set of produce names currently being resolved.
   ///
-  /// Chips with names in this set show a [CircularProgressIndicator] and
-  /// are disabled to prevent duplicate taps.
+  /// Chips with names in this set show a small inline spinner and are
+  /// disabled to prevent duplicate taps.
   final Set<String> loadingItems;
 
   @override
@@ -45,17 +47,25 @@ class QuickAddProduce extends StatelessWidget {
           final name = items[index];
           final isLoading = loadingItems.contains(name);
           return ActionChip(
-            label: isLoading
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
+            label: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isLoading) ...[
+                  ProgressIndicatorHelper.build(
+                    size: 14,
+                    strokeWidth: 2,
+                  ),
+                  const SizedBox(width: 4),
+                ],
+                Flexible(
+                  child: Text(
                     name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
+              ],
+            ),
             onPressed: isLoading
                 ? null
                 : () {
