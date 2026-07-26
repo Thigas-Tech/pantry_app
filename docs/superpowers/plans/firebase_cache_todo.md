@@ -162,15 +162,15 @@ flutter test test/models/product_cache_entry_test.dart
 
 **Implementation checklist:**
 
-- [ ] `const` constructor (follows existing DAO pattern)
-- [ ] `createTable(Database db)` — CREATE TABLE IF NOT EXISTS + indexes
-- [ ] `upsert(db, cacheKey, cacheType, {fdcId, lastRefreshedAt, nextRefreshAt})` — ConflictAlgorithm.replace
-- [ ] `get(db, cacheKey)` -> `Map<String, dynamic>?`
-- [ ] `getStaleEntries(db, {cacheType, required nowInMs})` — query `next_refresh_at < nowInMs`, ordered ASC
-- [ ] `getAllKeys(db, {cacheType})` — list of cache_key strings
-- [ ] `remove(db, cacheKey)`
-- [ ] `updateRefreshTimestamps(db, cacheKey, {lastRefreshedAt, nextRefreshAt})` — UPDATE only time columns [P12]
-- [ ] `count(db, {cacheType})` — SELECT COUNT(\*)
+- [x] `const` constructor (follows existing DAO pattern)
+- [x] `createTable(Database db)` — CREATE TABLE IF NOT EXISTS + indexes
+- [x] `upsert(db, cacheKey, cacheType, {fdcId, lastRefreshedAt, nextRefreshAt})` — ConflictAlgorithm.replace
+- [x] `get(db, cacheKey)` -> `Map<String, dynamic>?`
+- [x] `getStaleEntries(db, {cacheType, required nowInMs})` — query `next_refresh_at < nowInMs`, ordered ASC
+- [x] `getAllKeys(db, {cacheType})` — list of cache_key strings
+- [x] `remove(db, cacheKey)`
+- [x] `updateRefreshTimestamps(db, cacheKey, {lastRefreshedAt, nextRefreshAt})` — UPDATE only time columns [P12]
+- [x] `count(db, {cacheType})` — SELECT COUNT(\*)
 
 **Naming convention**: SQLite columns use `snake_case` (matching existing tables):
 
@@ -184,7 +184,7 @@ flutter test test/database/firebase_cache_meta_dao_test.dart
 
 ### [x] 2.2 Write DAO tests
 
-**File**: `test/database/firebase_cache_meta_dao_test.dart` — 14 tests (Section 12.3)
+**File**: `test/database/firebase_cache_meta_dao_test.dart` — 23 tests (Section 12.3)
 
 **Setup pattern** (follow existing test conventions):
 
@@ -205,6 +205,7 @@ setUp(() async {
 
 - Mixed barcoded + produce entries with correct type discrimination
 - Stale query boundary: entry with `next_refresh_at == now - 1ms` vs `now + 1ms`
+- Ordering: stale entries are returned sorted by `next_refresh_at` ASC
 - `updateRefreshTimestamps` does NOT overwrite `cache_key`, `cache_type`, or `fdc_id`
 - Count per type is accurate
 
