@@ -717,6 +717,12 @@ abstract class AppLocalizations {
   /// **'Could not create inventory.'**
   String get couldNotCreateInventory;
 
+  /// No description provided for @couldNotResolveProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load product details.'**
+  String get couldNotResolveProduct;
+
   /// No description provided for @couldNotRenameInventory.
   ///
   /// In en, this message translates to:

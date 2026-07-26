@@ -68,11 +68,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       );
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(pantryProvider);
+          ref
+            ..invalidate(pantryProvider)
+            ..invalidate(quickAddItemsProvider);
         });
       }
     } else if (mounted) {
-      SnackbarHelper.showError(context, l10n.couldNotCreateInventory);
+      SnackbarHelper.showError(context, l10n.couldNotResolveProduct);
     }
   }
 

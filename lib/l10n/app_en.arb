@@ -172,6 +172,7 @@
     }
   },
   "couldNotCreateInventory": "Could not create inventory.",
+  "couldNotResolveProduct": "Could not load product details.",
   "couldNotRenameInventory": "Could not rename inventory.",
   "couldNotDeleteInventory": "Could not delete inventory.",
   "networkError": "Network error. Please check your connection.",

@@ -167,6 +167,7 @@
     }
   },
   "couldNotCreateInventory": "Não foi possível criar a despensa.",
+  "couldNotResolveProduct": "Não foi possível carregar os detalhes do produto.",
   "couldNotRenameInventory": "Não foi possível renomear a despensa.",
   "couldNotDeleteInventory": "Não foi possível excluir a despensa.",
   "networkError": "Erro de rede. Verifique sua conexão.",

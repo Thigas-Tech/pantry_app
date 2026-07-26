@@ -346,6 +346,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get couldNotCreateInventory => 'Não foi possível criar a despensa.';
 
   @override
+  String get couldNotResolveProduct =>
+      'Não foi possível carregar os detalhes do produto.';
+
+  @override
   String get couldNotRenameInventory => 'Não foi possível renomear a despensa.';
 
   @override
@@ -2153,6 +2157,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get couldNotCreateInventory => 'Não foi possível criar a despensa.';
+
+  @override
+  String get couldNotResolveProduct =>
+      'Não foi possível carregar os detalhes do produto.';
 
   @override
   String get couldNotRenameInventory => 'Não foi possível renomear a despensa.';
