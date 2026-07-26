@@ -117,7 +117,7 @@ Widget build(BuildContext context, WidgetRef ref) {
   return Scaffold(
     appBar: AppBar(title: Text(l10n.manageInventories)),
     body: inventoriesAsync.when(
-      loading: () =&gt; const Center(child: CircularProgressIndicator()),
+      loading: () =&gt; Center(child: ProgressIndicatorHelper.build()),
       error: (err, _) =&gt; ErrorView(
         message: l10n.inventoryLoadFailed,
         onRetry: () =&gt; WidgetsBinding.instance.addPostFrameCallback((_) {
