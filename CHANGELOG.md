@@ -2,6 +2,14 @@
 
 ## To be released:
 
+### Changed
+
+- **Progress indicators**: all 22 `CircularProgressIndicator` and
+  `LinearProgressIndicator` instances across 15 files now use
+  `ProgressIndicatorHelper.build()` for consistent defaults and
+  centralized theming. No visual or behavioural changes.
+  (`lib/utils/progress_indicator_helper.dart`)
+
 ### Added
 
 - **Recipe detail screen**: read-only view of a recipe with ingredient list,

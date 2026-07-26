@@ -17,6 +17,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
@@ -335,7 +336,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 
   Widget _buildResults(AppLocalizations l10n, ThemeData theme) {
     if (_isSearching) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: ProgressIndicatorHelper.build());
     }
 
     if (!_hasSearched) {

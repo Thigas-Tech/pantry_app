@@ -10,6 +10,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/search_ingredient_sheet.dart';
 
@@ -347,7 +348,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
           ),
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: ProgressIndicatorHelper.build())
             : Form(
                 key: _formKey,
                 child: ListView(
@@ -553,11 +554,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _isSaving ? null : _save,
           icon: _isSaving
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
+              ? ProgressIndicatorHelper.build(size: 18, strokeWidth: 2)
               : const Icon(Icons.save),
           label: Text(_isSaving ? l10n.save : l10n.saveRecipe),
         ),

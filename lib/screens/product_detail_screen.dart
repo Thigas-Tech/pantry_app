@@ -25,6 +25,7 @@ import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/nutrition_table.dart';
@@ -182,7 +183,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                                   (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
                                     return Center(
-                                      child: CircularProgressIndicator(
+                                      child: ProgressIndicatorHelper.build(
                                         value:
                                             loadingProgress
                                                     .expectedTotalBytes !=
@@ -320,7 +321,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               future: inventoryFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: ProgressIndicatorHelper.build());
                 }
                 if (snapshot.hasError) {
                   logError('Error fetching inventory: ${snapshot.error}');
@@ -611,11 +612,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         onDeleted: _retrySubmission,
       ),
       productSubmissionPending => Chip(
-        avatar: const SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+        avatar: ProgressIndicatorHelper.build(size: 16, strokeWidth: 2),
         label: Text(l10n.submissionPending),
       ),
       _ => Chip(

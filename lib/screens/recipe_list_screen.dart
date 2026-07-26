@@ -11,6 +11,7 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/recipe_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_form_screen.dart';
 import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
@@ -54,7 +55,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
 
           return recipesAsync.when(
             data: (recipes) => _buildContent(context, l10n, recipes, ref),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => Center(child: ProgressIndicatorHelper.build()),
             error: (e, _) => Center(child: Text('$e')),
           );
         },
