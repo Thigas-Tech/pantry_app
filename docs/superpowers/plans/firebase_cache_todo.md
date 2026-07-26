@@ -283,14 +283,14 @@ flutter test test/database/database_helper_test.dart
 
 **Implementation checklist:**
 
-- [ ] Constructor with `dynamic firestore` and `bool enabled` parameters
-- [ ] `isAvailable` getter: `_firestore != null && _enabled`
-- [ ] `getProduce(String name)` -> `Future<ProduceCacheEntry?>`
-- [ ] `setProduce(ProduceCacheEntry entry)` -> `Future<bool>`
-- [ ] `deleteProduce(String name)` -> `Future<void>`
-- [ ] `getProduct(String barcode)` -> `Future<ProductCacheEntry?>`
-- [ ] `setProduct(ProductCacheEntry entry)` -> `Future<bool>`
-- [ ] `deleteProduct(String barcode)` -> `Future<void>`
+- [x] Constructor with `dynamic firestore` and `bool enabled` parameters
+- [x] `isAvailable` getter: `_firestore != null && _enabled`
+- [x] `getProduce(String name)` -> `Future<ProduceCacheEntry?>`
+- [x] `setProduce(ProduceCacheEntry entry)` -> `Future<bool>`
+- [x] `deleteProduce(String name)` -> `Future<void>`
+- [x] `getProduct(String barcode)` -> `Future<ProductCacheEntry?>`
+- [x] `setProduct(ProductCacheEntry entry)` -> `Future<bool>`
+- [x] `deleteProduct(String barcode)` -> `Future<void>`
 
 **Graceful degradation contract** [P2]:
 
@@ -311,7 +311,7 @@ flutter test test/services/firebase_cache_client_test.dart
 
 ### [x] 3.2 Write Firestore client tests
 
-**File**: `test/services/firebase_cache_client_test.dart` — 16 tests (Section 12.4)
+**File**: `test/services/firebase_cache_client_test.dart` — 34 tests (Section 12.4)
 
 **Mocking strategy:**
 
