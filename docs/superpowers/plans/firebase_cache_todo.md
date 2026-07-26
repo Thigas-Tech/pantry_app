@@ -810,14 +810,14 @@ Must pass with zero warnings.
 These steps are done by a developer with Firebase Console access, in parallel with
 the code changes. They do not block merging (feature flag is off).
 
-### [ ] 8.1 Create Firebase project
+### [x] 8.1 Create Firebase project
 
 1. Go to https://console.firebase.google.com
 2. Create a new project (or use an existing one)
 3. Enable Firestore (Native mode)
 4. Choose a region (us-central1 recommended for lowest latency)
 
-### [ ] 8.2 Deploy Firestore security rules
+### [x] 8.2 Deploy Firestore security rules
 
 Copy rules from FIREBASE_CACHE_PLAN.md Section 14 and deploy:
 
@@ -827,7 +827,7 @@ firebase deploy --only firestore:rules
 
 Or paste directly in the Firebase Console > Firestore > Rules tab.
 
-### [ ] 8.3 Run `flutterfire configure`
+### [x] 8.3 Run `flutterfire configure`
 
 ```bash
 dart pub global activate flutterfire_cli
@@ -840,7 +840,7 @@ This generates:
 - `ios/Runner/GoogleService-Info.plist` (if iOS is configured)
 - `lib/firebase_options.dart`
 
-### [ ] 8.4 Add Android SHA fingerprints (optional, for Google Sign-In future)
+### [x] 8.4 Add Android SHA fingerprints (optional, for Google Sign-In future)
 
 If Google Sign-In is planned, add the debug keystore SHA-1 to Firebase Console >
 Project Settings > General > Your apps > Android app > Add fingerprint:
@@ -849,13 +849,13 @@ Project Settings > General > Your apps > Android app > Add fingerprint:
 keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
 ```
 
-### [ ] 8.5 Enable Firebase in .env
+### [x] 8.5 Enable Firebase in .env
 
 ```env
 FIREBASE_ENABLED=true
 ```
 
-### [ ] 8.6 Verify end-to-end
+### [x] 8.6 Verify end-to-end
 
 Run on emulator or device:
 
