@@ -10,8 +10,22 @@
   centralized theming. No visual or behavioural changes.
   (`lib/utils/progress_indicator_helper.dart`)
 
+### Fixed
+
+- **Produce carousel error message**: changed "Could not create inventory." to
+  "Could not load product details." since the new flow resolves and navigates
+  instead of directly creating inventory. (`lib/l10n/app_en.arb`)
+- **Produce carousel invalidation chain**: now also invalidates
+  `quickAddItemsProvider` after returning from `ProductDetailScreen`, ensuring
+  the carousel reflects updated purchase counts.
+  (`lib/screens/home_screen.dart`)
+
 ### Added
 
+- **Produce carousel test coverage**: barcode assertion verifies the correct
+  product is passed to `ProductDetailScreen`; pop-back round-trip verifies the
+  home screen survives navigation return without errors.
+  (`test/screens/home_screen_test.dart`)
 - **Recipe detail screen**: read-only view of a recipe with ingredient list,
   instructions, cost (maskable via eye icon), and a prominent "I made this"
   button. Tapping a recipe in the list now opens the detail screen instead

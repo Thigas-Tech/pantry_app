@@ -710,6 +710,15 @@ void main() {
 
         verify(() => mockRepo.resolveProduceProduct('Apple')).called(1);
         expect(find.byType(ProductDetailScreen), findsOneWidget);
+        final detailScreen = tester.widget<ProductDetailScreen>(
+          find.byType(ProductDetailScreen),
+        );
+        expect(detailScreen.product.barcode, 'produce-Apple');
+
+        // Pop back to home screen to verify invalidation doesn't crash
+        Navigator.of(tester.element(find.byType(ProductDetailScreen))).pop();
+        await tester.pumpAndSettle();
+        expect(find.byType(HomeScreen), findsOneWidget);
       },
     );
 
@@ -761,7 +770,7 @@ void main() {
       await tester.tap(find.text('Apple'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Could not create inventory.'), findsOneWidget);
+      expect(find.text('Could not load product details.'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 

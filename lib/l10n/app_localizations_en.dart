@@ -344,6 +344,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotCreateInventory => 'Could not create inventory.';
 
   @override
+  String get couldNotResolveProduct => 'Could not load product details.';
+
+  @override
   String get couldNotRenameInventory => 'Could not rename inventory.';
 
   @override
