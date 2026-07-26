@@ -6,6 +6,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 
@@ -27,7 +28,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.manageInventories)),
       body: inventoriesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(child: ProgressIndicatorHelper.build()),
         error: (err, _) => ErrorView(
           message: l10n.inventoryLoadFailed,
           onRetry: () => WidgetsBinding.instance.addPostFrameCallback((_) {

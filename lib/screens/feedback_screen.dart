@@ -11,6 +11,7 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 
@@ -266,11 +267,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     return FilledButton.icon(
       onPressed: _isSubmitting ? null : () => _submit(l10n),
       icon: _isSubmitting
-          ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
+          ? ProgressIndicatorHelper.build(size: 18, strokeWidth: 2)
           : const Icon(Icons.send),
       label: Text(_isSubmitting ? l10n.sending : l10n.issueCreate),
     );

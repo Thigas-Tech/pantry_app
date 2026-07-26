@@ -7,6 +7,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/scanner_error_content.dart';
 import 'package:pantry_app/widgets/scanner_overlay_painter.dart';
@@ -104,10 +105,10 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
   }
 
   Widget _buildPlaceholder(BuildContext context) {
-    return const ColoredBox(
+    return ColoredBox(
       color: Colors.black87,
       child: Center(
-        child: CircularProgressIndicator(color: Colors.white),
+        child: ProgressIndicatorHelper.build(color: Colors.white),
       ),
     );
   }

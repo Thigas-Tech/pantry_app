@@ -13,6 +13,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 
 /// A bottom sheet for adding items to the shopping list.
@@ -332,7 +333,7 @@ class _AddToShoppingListSheetState
     final inventoryProducts = ref.watch(inventoryProductsProvider);
 
     if (_isSearching) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: ProgressIndicatorHelper.build());
     }
     if (_searchController.text.trim().isEmpty) {
       return _buildInitialState(l10n, theme, inventoryProducts);

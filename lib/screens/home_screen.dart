@@ -18,6 +18,7 @@ import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
@@ -337,7 +338,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
           Expanded(
             child: pantryAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => Center(child: ProgressIndicatorHelper.build()),
               error: (err, _) => ErrorView(
                 message: l10n.inventoryLoadFailed,
                 onRetry: () =>

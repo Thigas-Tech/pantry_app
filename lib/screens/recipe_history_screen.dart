@@ -6,6 +6,7 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 
 /// Displays the cooking history for a specific recipe.
 ///
@@ -70,7 +71,7 @@ class _RecipeHistoryScreenState extends ConsumerState<RecipeHistoryScreen> {
         title: Text('${widget.recipeName} - ${l10n.history}'),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: ProgressIndicatorHelper.build())
           : _entries.isEmpty
           ? Center(child: Text(l10n.noHistory))
           : RefreshIndicator(

@@ -11,6 +11,7 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
 import 'package:pantry_app/screens/coming_soon_screen.dart';
 import 'package:pantry_app/utils/nutriscore.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
@@ -62,7 +63,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
           ? _buildBody(context, l10n, previousStats, ref)
           : statsAsync.when(
               data: (stats) => _buildBody(context, l10n, stats, ref),
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => Center(child: ProgressIndicatorHelper.build()),
               error: (error, _) => ErrorView(
                 message: error.toString(),
                 onRetry: () =>
@@ -566,7 +567,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
+                    child: ProgressIndicatorHelper.build(
+                      type: ProgressIndicatorType.linear,
                       value: entry.value / maxCount,
                       minHeight: 10,
                       backgroundColor:
@@ -957,7 +959,8 @@ Widget _buildNutriscoreByStore(
                 flex: 2,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
+                  child: ProgressIndicatorHelper.build(
+                    type: ProgressIndicatorType.linear,
                     value: ratio,
                     backgroundColor: theme.colorScheme.surfaceContainerHighest,
                     color: color,

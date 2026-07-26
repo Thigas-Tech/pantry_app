@@ -6,6 +6,7 @@ import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart'
@@ -65,7 +66,7 @@ class PriceHistoryScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Center(child: ProgressIndicatorHelper.build()),
         error: (error, _) => Center(child: Text(error.toString())),
       ),
     );

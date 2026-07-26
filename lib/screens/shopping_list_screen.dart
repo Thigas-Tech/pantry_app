@@ -9,6 +9,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
@@ -247,7 +248,7 @@ class _ShoppingListBody extends ConsumerWidget {
 
     final isLoading = pendingAsync.isLoading || purchasedAsync.isLoading;
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: ProgressIndicatorHelper.build());
     }
 
     final pending = pendingAsync.asData?.value ?? [];

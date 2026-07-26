@@ -16,6 +16,7 @@ import 'package:pantry_app/screens/recipe_history_screen.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
@@ -176,7 +177,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: ProgressIndicatorHelper.build())
           : _recipe == null
           ? Center(child: Text(l10n.noRecipes))
           : ListView(
@@ -324,12 +325,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _isCooking ? null : _cook,
                     icon: _isCooking
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                        ? ProgressIndicatorHelper.build(
+                            size: 18,
+                            strokeWidth: 2,
                           )
                         : const Icon(Icons.restaurant),
                     label: Text(l10n.madeRecipe),
@@ -370,9 +368,9 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             fit: BoxFit.cover,
             loadingBuilder: (context, child, progress) {
               if (progress == null) return child;
-              return const CircleAvatar(
+              return CircleAvatar(
                 radius: 20,
-                child: CircularProgressIndicator(),
+                child: ProgressIndicatorHelper.build(),
               );
             },
             errorBuilder: (_, _, _) => _fallbackIngredientIcon(),

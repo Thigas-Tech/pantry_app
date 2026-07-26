@@ -10,6 +10,7 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 
 /// A bottom sheet that lets the user search for products by name or barcode.
@@ -138,9 +139,9 @@ class _SearchIngredientSheetState extends ConsumerState<SearchIngredientSheet> {
             ),
           ),
           if (_isSearching)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: CircularProgressIndicator(),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ProgressIndicatorHelper.build(),
             )
           else if (_results.isNotEmpty)
             Flexible(
