@@ -116,6 +116,38 @@ void main() {
   });
 
   group('getStaleEntries', () {
+    test('returns entries ordered by next_refresh_at ASC', () async {
+      final db = await dbHelper.database;
+      await dao.upsert(
+        db,
+        'mid',
+        'barcoded',
+        lastRefreshedAt: 100,
+        nextRefreshAt: 200,
+      );
+      await dao.upsert(
+        db,
+        'late',
+        'barcoded',
+        lastRefreshedAt: 100,
+        nextRefreshAt: 300,
+      );
+      await dao.upsert(
+        db,
+        'early',
+        'barcoded',
+        lastRefreshedAt: 100,
+        nextRefreshAt: 100,
+      );
+      const now = 400;
+      final stale = await dao.getStaleEntries(db, nowInMs: now);
+      expect(stale, hasLength(3));
+      expect(
+        stale.map((r) => r['cache_key'] as String).toList(),
+        orderedEquals(['early', 'mid', 'late']),
+      );
+    });
+
     test('returns entries with past next_refresh_at', () async {
       final db = await dbHelper.database;
       const now = 1000000;
