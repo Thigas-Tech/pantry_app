@@ -624,6 +624,126 @@ void main() {
       verifyNever(() => mockDb.insertInventoryItem(any()));
       verifyNever(() => mockDb.insertOrMergeInventoryItem(any()));
     });
+
+    test('throws ArgumentError for whitespace-only name', () {
+      expect(
+        () => repository.resolveProduceProduct('  '),
+        throwsArgumentError,
+      );
+    });
+
+    test('enriches product with USDA data when available', () async {
+      when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+      final usdaProduct = Product(
+        barcode: '',
+        name: 'Apple',
+        energyKcal: 52,
+        proteinG: 0.3,
+        carbsG: 13.8,
+        fatG: 0.2,
+        fiberG: 2.4,
+        source: 'manual',
+        productType: ProductType.produce,
+        lastSynced: DateTime.now().millisecondsSinceEpoch,
+      );
+      when(() => mockUsda.searchFood('Apple')).thenAnswer(
+        (_) async => [usdaProduct],
+      );
+
+      final product = await repository.resolveProduceProduct('Apple');
+
+      expect(product.barcode, 'produce-apple');
+      expect(product.name, 'Apple');
+      expect(product.energyKcal, 52);
+      expect(product.productType, ProductType.produce);
+      expect(product.source, 'manual');
+      expect(product.category, 'Fruit');
+    });
+
+    test(
+      'falls back to hardcoded nutrition when USDA throws',
+      () async {
+        when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+        when(() => mockUsda.searchFood('Apple')).thenThrow(
+          Exception('USDA API unavailable'),
+        );
+
+        final product = await repository.resolveProduceProduct('Apple');
+
+        expect(product.barcode, 'produce-apple');
+        expect(product.energyKcal, closeTo(52, 1));
+        expect(product.category, 'Fruit');
+      },
+    );
+
+    test(
+      'returns minimal product with null nutrition for unknown produce',
+      () async {
+        when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+        when(() => mockUsda.searchFood('Tofu')).thenAnswer(
+          (_) async => [],
+        );
+
+        final product = await repository.resolveProduceProduct('Tofu');
+
+        expect(product.barcode, 'produce-tofu');
+        expect(product.name, 'Tofu');
+        expect(product.energyKcal, isNull);
+        expect(product.proteinG, isNull);
+        expect(product.carbsG, isNull);
+        expect(product.fatG, isNull);
+        expect(product.fiberG, isNull);
+        expect(product.category, 'Fruits and vegetables based foods');
+      },
+    );
+
+    test('sets lastSynced to near-current time', () async {
+      when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+      when(() => mockUsda.searchFood('Apple')).thenAnswer(
+        (_) async => [],
+      );
+      final before = DateTime.now().millisecondsSinceEpoch;
+
+      final product = await repository.resolveProduceProduct('Apple');
+
+      expect(product.lastSynced, greaterThanOrEqualTo(before));
+      expect(
+        product.lastSynced,
+        lessThanOrEqualTo(
+          DateTime.now().millisecondsSinceEpoch + 5000,
+        ),
+      );
+    });
+
+    test('uses underscore in barcode for multi-word names', () async {
+      when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+      when(() => mockUsda.searchFood('Sweet Potato')).thenAnswer(
+        (_) async => [],
+      );
+
+      final product = await repository.resolveProduceProduct('Sweet Potato');
+
+      expect(product.barcode, 'produce-sweet_potato');
+      expect(product.category, 'Vegetables');
+    });
+
+    test(
+      'resolves produce with no Firebase or USDA available',
+      () async {
+        final minimalRepo = ProductRepository(
+          mockDb,
+          mockApi,
+          metaDao: mockMetaDao,
+        );
+        when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+
+        final product = await minimalRepo.resolveProduceProduct('Apple');
+
+        expect(product.barcode, 'produce-apple');
+        expect(product.energyKcal, closeTo(52, 1));
+        expect(product.productType, ProductType.produce);
+      },
+    );
   });
 
   group('addProduceToInventory', () {
@@ -958,6 +1078,27 @@ void main() {
 
           expect(product, isNotNull);
           expect(product.barcode, produceBarcode);
+          verify(() => mockUsda.searchFood(produceName)).called(1);
+        },
+      );
+
+      test(
+        'falls through to USDA when Firebase produce lookup throws',
+        () async {
+          when(
+            () => mockFirebaseCache.resolveProduceProduct(produceName),
+          ).thenThrow(Exception('Firestore down'));
+          when(() => mockUsda.searchFood(produceName)).thenAnswer(
+            (_) async => [],
+          );
+
+          final product = await fbRepo.resolveProduceProduct(produceName);
+
+          expect(product, isNotNull);
+          expect(product.barcode, produceBarcode);
+          verify(
+            () => mockFirebaseCache.resolveProduceProduct(produceName),
+          ).called(1);
           verify(() => mockUsda.searchFood(produceName)).called(1);
         },
       );
