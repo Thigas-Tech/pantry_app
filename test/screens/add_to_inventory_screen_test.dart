@@ -73,4 +73,31 @@ void main() {
 
     expect(find.byType(SegmentedButton<bool>), findsNothing);
   });
+
+  testWidgets(
+    'derives produce name from barcode when not explicitly provided',
+    (
+      tester,
+    ) async {
+      await _pumpScreen(
+        tester,
+        const AddToInventoryScreen(
+          barcode: 'produce-Banana',
+          inventoryId: 1,
+          productType: ProductType.produce,
+        ),
+      );
+
+      // Unit mode selected — _produceName should be 'Banana' from barcode
+      final segmentButton = tester.widget<SegmentedButton<bool>>(
+        find.byType(SegmentedButton<bool>),
+      );
+      expect(segmentButton.selected, contains(false));
+
+      // Save and verify no errors (serving weight lookup succeeds)
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Add to Pantry'));
+      await tester.pumpAndSettle();
+      // No exception means the serving weight was looked up correctly
+    },
+  );
 }

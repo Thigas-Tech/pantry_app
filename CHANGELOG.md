@@ -19,6 +19,10 @@
   `quickAddItemsProvider` after returning from `ProductDetailScreen`, ensuring
   the carousel reflects updated purchase counts.
   (`lib/screens/home_screen.dart`)
+- **AddToInventoryScreen serving weight lookup**: replaced hardcoded `'Apple'`
+  with the actual produce name from the product or barcode, so non-Apple items
+  (Banana, Tomato, etc.) get correct serving weights in unit mode.
+  (`lib/screens/add_to_inventory_screen.dart`)
 
 ### Added
 
