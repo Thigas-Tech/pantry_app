@@ -57,8 +57,9 @@
   <p>A horizontal scrollable list of produce item chips for quick adding.</p>
 <p>Each chip shows a produce name. Tapping a chip invokes
 <a href="../widgets_quick_add_produce/QuickAddProduce/onProduceSelected.html">onProduceSelected</a> with the produce name, and triggers haptic feedback.
-Chips whose name is present in <a href="../widgets_quick_add_produce/QuickAddProduce/loadingItems.html">loadingItems</a> display a small
-<a href="https://api.flutter.dev/flutter/material/CircularProgressIndicator-class.html">CircularProgressIndicator</a> and are disabled.</p>
+Chips whose name is present in <a href="../widgets_quick_add_produce/QuickAddProduce/loadingItems.html">loadingItems</a> display a small inline
+spinner alongside the produce name and are disabled to prevent
+duplicate taps while the product is being resolved.</p>
 </section>
 
 
