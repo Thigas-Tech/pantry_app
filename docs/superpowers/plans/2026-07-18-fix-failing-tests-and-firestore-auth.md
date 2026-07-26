@@ -36,7 +36,7 @@
 
 **Root cause:** `ActiveInventoryNotifier.build()` at `lib/providers/active_inventory_provider.dart:22` calls `unawaited(_validateAndLoad())`, which calls `SharedPreferences.getInstance()` at line 42. The `ProviderContainer` created in `setUp` triggers the notifier's `build()` which fails because `SharedPreferences.getInstance()` requires `WidgetsFlutterBinding` or mock values.
 
-- [ ] **Step 1: Add shared_preferences import and mock initial values in setUp**
+- [x] **Step 1: Add shared_preferences import and mock initial values in setUp**
 
 ```dart
 // In test/providers/price_provider_test.dart, add to imports:
@@ -58,7 +58,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 **Key detail:** `setUp` becomes async because `SharedPreferences.setMockInitialValues` is synchronous but `TestWidgetsFlutterBinding.ensureInitialized` must be awaited in some contexts. The fix uses `TestWidgetsFlutterBinding.ensureInitialized()` at the top of `setUp` and `SharedPreferences.setMockInitialValues({})` to provide fake prefs before the container is created.
 
-- [ ] **Step 2: Run tests to verify all 23 pass**
+- [x] **Step 2: Run tests to verify all 23 pass**
 
 ```bash
 flutter test --concurrency=2 test/providers/price_provider_test.dart
@@ -66,7 +66,7 @@ flutter test --concurrency=2 test/providers/price_provider_test.dart
 
 Expected: `All tests passed!` (no failures)
 
-- [ ] **Step 3: Run full test suite to verify no regression**
+- [x] **Step 3: Run full test suite to verify no regression**
 
 ```bash
 flutter test --concurrency=2
@@ -74,7 +74,7 @@ flutter test --concurrency=2
 
 Expected: The 23 failures are gone. Total should be 1028 pass (the previous 1005 + 23 now-passing price_provider tests = 1028), minus any auth tests that may have been added.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add test/providers/price_provider_test.dart
@@ -101,13 +101,13 @@ git commit -m "fix: mock SharedPreferences in price_provider_test to fix 23 bind
 
 **Root cause:** Anonymous auth provider not enabled in Firebase Console. `signInAnonymously()` at `lib/services/firebase_auth_service.dart:59` throws `[firebase_auth/unknown] CONFIGURATION_NOT_FOUND`. Without an authed user, Firestore rules at Task 3 deny writes.
 
-- [ ] **Step 1: Set active Firebase project**
+- [x] **Step 1: Set active Firebase project**
 
 ```bash
 firebase use pantry-app-c5c36
 ```
 
-- [ ] **Step 2: Initialize auth with anonymous provider in firebase.json**
+- [x] **Step 2: Initialize auth with anonymous provider in firebase.json**
 
 Run interactive init for auth, or manually write the config:
 
@@ -127,7 +127,7 @@ Add to `firebase.json`:
 
 > **Note:** The `firebase.json` currently has only the `"flutter"` key. We need to add the `"auth"` key alongside it.
 
-- [ ] **Step 3: Deploy the auth config**
+- [x] **Step 3: Deploy the auth config**
 
 ```bash
 firebase deploy --only auth
@@ -135,11 +135,11 @@ firebase deploy --only auth
 
 Expected output: `Deploy complete!` with the auth configuration uploaded.
 
-- [ ] **Step 4: Verify in Firebase Console**
+- [x] **Step 4: Verify in Firebase Console**
 
 Check https://console.firebase.google.com/project/pantry-app-c5c36/authentication/providers — Anonymous should show as **Enabled**.
 
-- [ ] **Step 5: Run app and verify auth works**
+- [x] **Step 5: Run app and verify auth works**
 
 ```bash
 flutter run --debug
@@ -147,7 +147,7 @@ flutter run --debug
 
 Expected log line: `[INFO] Anonymous auth initialized` (currently shows `[WARN] Firebase init/auth failed (graceful degradation)`).
 
-- [ ] **Step 6: Add a product and verify Firestore write succeeds**
+- [x] **Step 6: Add a product and verify Firestore write succeeds**
 
 From the app UI, add a product (barcoded or produce). Expected log:
 
@@ -155,7 +155,7 @@ From the app UI, add a product (barcoded or produce). Expected log:
 - `[INFO] Anonymous auth initialized`
 - No `PERMISSION_DENIED` warnings — `setProduct` / `setProduce` logs the barcode without the warning
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add firebase.json
@@ -190,7 +190,7 @@ npm install -g firebase-tools
 
 **Root cause:** `ActiveInventoryNotifier._validateAndLoad()` calls `state = targetId` (line 52/59) which triggers invalidation on all dependent providers. When the invalidation cascades during `TickerMode.didChangeDependencies` (triggered by route pop), the riverpod scheduler tries to `setState` on `UncontrolledProviderScope` during the build phase.
 
-- [ ] **Step 1: Wrap state assignments in microtask to defer invalidation**
+- [x] **Step 1: Wrap state assignments in microtask to defer invalidation**
 
 In `lib/providers/active_inventory_provider.dart`:
 
@@ -232,7 +232,7 @@ Replace with:
       scheduleMicrotask(() => state = resolvedId);
 ```
 
-- [ ] **Step 2: Run analyze to verify no issues**
+- [x] **Step 2: Run analyze to verify no issues**
 
 ```bash
 dart analyze --fatal-infos --fatal-warnings
@@ -240,7 +240,7 @@ dart analyze --fatal-infos --fatal-warnings
 
 Expected: `No issues found!`
 
-- [ ] **Step 3: Run full test suite**
+- [x] **Step 3: Run full test suite**
 
 ```bash
 flutter test --concurrency=2
@@ -248,7 +248,7 @@ flutter test --concurrency=2
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Run app and verify no `setState` errors on back navigation**
+- [x] **Step 4: Run app and verify no `setState` errors on back navigation**
 
 ```bash
 flutter run --debug
@@ -256,7 +256,7 @@ flutter run --debug
 
 Navigate to a detail screen, press back. Verify no `setState() called during build` in the logs.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add lib/providers/active_inventory_provider.dart
@@ -279,7 +279,7 @@ git commit -m "fix: defer state assignments in ActiveInventoryNotifier to preven
 
 After Tasks 1-3 are done, verify end-to-end that data reaches Firestore.
 
-- [ ] **Step 1: Run app and add a produce item**
+- [x] **Step 1: Run app and add a produce item**
 
 ```bash
 flutter run --debug
@@ -293,7 +293,7 @@ Add "Apple" (or any produce). Verify logs show:
 [INFO] Firestore setProduce succeeded (or no PERMISSION_DENIED)
 ```
 
-- [ ] **Step 2: Check Firebase Console Firestore data viewer**
+- [x] **Step 2: Check Firebase Console Firestore data viewer**
 
 Open https://console.firebase.google.com/project/pantry-app-c5c36/firestore/data
 
@@ -303,15 +303,15 @@ Verify:
 - `product_cache/{barcode}` document exists (if barcoded product was added)
 - Each document has the required fields: `fdcId`, `name`, `nutrition`, `createdAt`, `lastRefreshedAt`, `nextRefreshAt` (for produce) or `barcode`, `name`, `createdAt`, `lastRefreshedAt`, `nextRefreshAt` (for barcoded)
 
-- [ ] **Step 3: Add a barcoded product and verify**
+- [x] **Step 3: Add a barcoded product and verify**
 
 Scan a barcode or search by barcode. Verify the product is cached to both local SQLite and Firestore.
 
-- [ ] **Step 4: Verify cache reads work**
+- [x] **Step 4: Verify cache reads work**
 
 Remove the product from local SQLite (or modify the data). Restart the app. The next lookup should show `Firebase cache hit` and the product should be returned from Firestore without calling the source API.
 
-- [ ] **Step 5: Run full verification suite**
+- [x] **Step 5: Run full verification suite**
 
 ```bash
 dart analyze --fatal-infos --fatal-warnings
