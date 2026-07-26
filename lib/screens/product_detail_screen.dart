@@ -725,6 +725,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           suggestedExpiry: suggested,
           inventoryId: activeId,
           productType: widget.product.productType,
+          produceName: widget.product.name,
         ),
       ),
     );

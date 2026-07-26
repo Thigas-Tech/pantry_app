@@ -20,6 +20,7 @@ class AddToInventoryScreen extends StatefulWidget {
     this.existingItem,
     this.suggestedExpiry,
     this.productType,
+    this.produceName,
   });
 
   /// The product barcode this inventory item belongs to.
@@ -37,6 +38,12 @@ class AddToInventoryScreen extends StatefulWidget {
   /// The product type — controls whether the weight/unit toggle is shown.
   final ProductType? productType;
 
+  /// The display name of the product, used for serving weight lookups.
+  ///
+  /// When null for produce items, the name is extracted from the barcode
+  /// by stripping the `produce-` prefix.
+  final String? produceName;
+
   @override
   State<AddToInventoryScreen> createState() => _AddToInventoryScreenState();
 }
@@ -51,6 +58,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
 
   bool _produceIsWeightMode = true;
   String _selectedSize = 'Medium';
+  String _produceName = 'Apple';
 
   bool get _isProduce => widget.productType == ProductType.produce;
 
@@ -74,6 +82,11 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
               : null);
     _notes = existing?.notes ?? '';
     _produceIsWeightMode = !_isProduce;
+    _produceName =
+        widget.produceName ??
+        (widget.barcode.startsWith('produce-')
+            ? widget.barcode.substring(7)
+            : 'Apple');
     _syncCustomOptions();
   }
 
@@ -147,7 +160,9 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
 
     if (_isProduce && !_produceIsWeightMode) {
       unit = _selectedSize;
-      servingWeightG = ProduceServingPresets.forName('Apple')?[_selectedSize];
+      servingWeightG = ProduceServingPresets.forName(
+        _produceName,
+      )?[_selectedSize];
     } else if (_isProduce) {
       unit = 'g';
       servingWeightG = null;
