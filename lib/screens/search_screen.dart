@@ -21,6 +21,24 @@ import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
+/// Controls which subset of search results is shown.
+///
+/// Pass an instance to the SearchScreen constructor to activate filtering.
+enum SearchFilter {
+  /// No filtering — show all results.
+  all,
+
+  /// Only show produce items ([ProductType.produce]).
+  produce,
+
+  /// Only show barcoded items ([ProductType.barcoded]).
+  barcodedProducts,
+
+  /// Only show items already in the current inventory.
+  /// Implementation deferred to a follow-up issue.
+  inPantry,
+}
+
 /// A search‑focused tab that lets the user find products by name or
 /// barcode, querying both the local cache and the Open Food Facts API.
 ///
@@ -29,7 +47,17 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 /// excessive API calls.
 class SearchScreen extends ConsumerStatefulWidget {
   /// Creates a [SearchScreen] widget.
-  const SearchScreen({super.key});
+  ///
+  /// If [initialFilter] is provided, a filter dropdown is shown below the
+  /// search bar allowing the user to switch between result subsets.
+  const SearchScreen({this.initialFilter, super.key});
+
+  /// The filter to activate on first display, if any.
+  ///
+  /// When non-null a [DropdownButton] is rendered below the search bar.
+  /// The user can change the active filter at any time; switching to
+  /// [SearchFilter.all] disables filtering.
+  final SearchFilter? initialFilter;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -44,9 +72,31 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
   bool _hasSearched = false;
   int _requestId = 0;
   Timer? _graceTimer;
+  SearchFilter _activeFilter = SearchFilter.all;
 
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialFilter != null) {
+      _activeFilter = widget.initialFilter!;
+    }
+  }
+
+  List<_SearchResult> get _filteredResults {
+    if (_activeFilter == SearchFilter.all) return _results;
+    return _results.where((r) {
+      return switch (_activeFilter) {
+        SearchFilter.all => true,
+        SearchFilter.produce => r.product.productType == ProductType.produce,
+        SearchFilter.barcodedProducts =>
+          r.product.productType == ProductType.barcoded,
+        SearchFilter.inPantry => true,
+      };
+    }).toList();
+  }
 
   @override
   void dispose() {
@@ -328,6 +378,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
               textInputAction: TextInputAction.search,
             ),
           ),
+          if (widget.initialFilter != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Text(
+                    '${l10n.categoryLabel}: ',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  DropdownButton<SearchFilter>(
+                    value: _activeFilter,
+                    underline: const SizedBox(),
+                    isDense: true,
+                    items: [
+                      DropdownMenuItem(
+                        value: SearchFilter.all,
+                        child: Text(l10n.searchFilterAll),
+                      ),
+                      DropdownMenuItem(
+                        value: SearchFilter.produce,
+                        child: Text(l10n.searchFilterProduce),
+                      ),
+                      DropdownMenuItem(
+                        value: SearchFilter.barcodedProducts,
+                        child: Text(l10n.searchFilterBarcoded),
+                      ),
+                      DropdownMenuItem(
+                        value: SearchFilter.inPantry,
+                        enabled: false,
+                        child: Text(
+                          '${l10n.searchFilterInPantry} (coming soon)',
+                        ),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      if (v == null) return;
+                      setState(() => _activeFilter = v);
+                    },
+                  ),
+                ],
+              ),
+            ),
           Expanded(child: _buildResults(l10n, theme)),
         ],
       ),
@@ -361,7 +455,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
       );
     }
 
-    if (_results.isEmpty) {
+    if (_filteredResults.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -389,10 +483,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen>
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      itemCount: _results.length,
+      itemCount: _filteredResults.length,
       separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
-        final result = _results[index];
+        final result = _filteredResults[index];
         final product = result.product;
         return Dismissible(
           key: ValueKey('search-result-${product.barcode}'),

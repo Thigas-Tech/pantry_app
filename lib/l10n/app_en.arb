@@ -789,5 +789,27 @@
 
   "searchProduct": "Search product",
   "history": "History",
-  "noHistory": "No cooking history yet"
+  "noHistory": "No cooking history yet",
+
+  "onboardingPage1Title": "Scan Barcodes",
+  "onboardingPage1Desc": "Quickly add products to your pantry by scanning their barcodes with your camera.",
+  "onboardingPage1Cta": "Open Scanner",
+  "onboardingPage2Title": "Search Products",
+  "onboardingPage2Desc": "Browse millions of products from the Open Food Facts database to find exactly what you need.",
+  "onboardingPage2Cta": "Open Search",
+  "onboardingPage3Title": "Fresh Produce",
+  "onboardingPage3Desc": "Add common fruits and vegetables with a single tap. Perfect for bananas, apples, tomatoes, and more.",
+  "onboardingPage3Cta": "Add Produce",
+  "onboardingPage4Title": "Configure Your Pantry",
+  "onboardingPage4Desc": "Set up price tracking, currency, and data preferences to get the most out of Pantry.",
+  "onboardingPage4Cta": "Set Up",
+  "onboardingPage5Title": "Track Everything",
+  "onboardingPage5Desc": "Monitor expiry dates, track prices, create shopping lists, and reduce food waste.",
+  "onboardingPage5Cta": "Get Started",
+  "onboardingSkip": "Skip",
+  "onboardingBack": "Back",
+  "searchFilterAll": "All",
+  "searchFilterProduce": "Produce",
+  "searchFilterBarcoded": "Barcoded",
+  "searchFilterInPantry": "In Pantry"
 }

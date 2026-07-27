@@ -3,12 +3,16 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 
 /// Placeholder shown when the active inventory has no items.
 ///
-/// Displays a prompt to scan or add the first product.
+/// Renders a compact empty-state prompt with a single button to scan the
+/// first product.
 class EmptyPantry extends StatelessWidget {
   /// Creates an [EmptyPantry] with a callback to open the action sheet.
-  const EmptyPantry({required this.onScan, super.key});
+  const EmptyPantry({
+    required this.onScan,
+    super.key,
+  });
 
-  /// Called when the user taps the scan-first-product button.
+  /// Called when the user taps the scan button.
   final VoidCallback onScan;
 
   @override

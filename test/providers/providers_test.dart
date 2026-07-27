@@ -252,6 +252,58 @@ void main() {
     });
   });
 
+  group('totalInventoryCountProvider', () {
+    test('returns 0 when no inventories exist', () async {
+      final mockDb = MockDatabaseHelper();
+      when(mockDb.getInventories).thenAnswer((_) async => []);
+
+      container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final count = await container.read(totalInventoryCountProvider.future);
+      expect(count, 0);
+    });
+
+    test('sums items across multiple inventories', () async {
+      final mockDb = MockDatabaseHelper();
+      when(mockDb.getInventories).thenAnswer(
+        (_) async => [
+          {'id': 1, 'name': 'Home', 'created_at': 1},
+          {'id': 2, 'name': 'Work', 'created_at': 1},
+        ],
+      );
+      when(
+        () => mockDb.getInventoryWithProduct(inventoryId: 1),
+      ).thenAnswer(
+        (_) async => [
+          {'id': 1, 'barcode': '001', 'inventory_id': 1, 'product_name': 'A'},
+          {'id': 2, 'barcode': '002', 'inventory_id': 1, 'product_name': 'B'},
+        ],
+      );
+      when(
+        () => mockDb.getInventoryWithProduct(inventoryId: 2),
+      ).thenAnswer(
+        (_) async => [
+          {'id': 3, 'barcode': '003', 'inventory_id': 2, 'product_name': 'C'},
+        ],
+      );
+
+      container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final count = await container.read(totalInventoryCountProvider.future);
+      expect(count, 3);
+    });
+  });
+
   group('averageNutriscoreProvider', () {
     /// Verifies [averageNutriscoreProvider] returns null when none of
     /// the products have a NutriScore grade.

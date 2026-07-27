@@ -15,6 +15,23 @@ final inventoryCountProvider = FutureProvider<int>((ref) async {
   return items.length;
 });
 
+/// Provides the total count of inventory items across ALL inventories.
+///
+/// Used to detect the first item ever added to any pantry (0→1 transition)
+/// so the empty-pantry onboarding can auto-dismiss.
+final totalInventoryCountProvider = FutureProvider<int>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final inventories = await db.getInventories();
+  var total = 0;
+  for (final inv in inventories) {
+    final rows = await db.getInventoryWithProduct(
+      inventoryId: inv['id'] as int,
+    );
+    total += rows.length;
+  }
+  return total;
+});
+
 /// Provides the average Nutri-Score letter for the active inventory.
 ///
 /// Returns a grade ('a'–'e') or null if none of the products in the

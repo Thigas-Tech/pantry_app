@@ -3362,6 +3362,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No cooking history yet'**
   String get noHistory;
+
+  /// No description provided for @onboardingPage1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Barcodes'**
+  String get onboardingPage1Title;
+
+  /// No description provided for @onboardingPage1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickly add products to your pantry by scanning their barcodes with your camera.'**
+  String get onboardingPage1Desc;
+
+  /// No description provided for @onboardingPage1Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Scanner'**
+  String get onboardingPage1Cta;
+
+  /// No description provided for @onboardingPage2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Products'**
+  String get onboardingPage2Title;
+
+  /// No description provided for @onboardingPage2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse millions of products from the Open Food Facts database to find exactly what you need.'**
+  String get onboardingPage2Desc;
+
+  /// No description provided for @onboardingPage2Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Search'**
+  String get onboardingPage2Cta;
+
+  /// No description provided for @onboardingPage3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh Produce'**
+  String get onboardingPage3Title;
+
+  /// No description provided for @onboardingPage3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add common fruits and vegetables with a single tap. Perfect for bananas, apples, tomatoes, and more.'**
+  String get onboardingPage3Desc;
+
+  /// No description provided for @onboardingPage3Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Produce'**
+  String get onboardingPage3Cta;
+
+  /// No description provided for @onboardingPage4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Your Pantry'**
+  String get onboardingPage4Title;
+
+  /// No description provided for @onboardingPage4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up price tracking, currency, and data preferences to get the most out of Pantry.'**
+  String get onboardingPage4Desc;
+
+  /// No description provided for @onboardingPage4Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up'**
+  String get onboardingPage4Cta;
+
+  /// No description provided for @onboardingPage5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Everything'**
+  String get onboardingPage5Title;
+
+  /// No description provided for @onboardingPage5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.'**
+  String get onboardingPage5Desc;
+
+  /// No description provided for @onboardingPage5Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get onboardingPage5Cta;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get onboardingBack;
+
+  /// No description provided for @searchFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get searchFilterAll;
+
+  /// No description provided for @searchFilterProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce'**
+  String get searchFilterProduce;
+
+  /// No description provided for @searchFilterBarcoded.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcoded'**
+  String get searchFilterBarcoded;
+
+  /// No description provided for @searchFilterInPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'In Pantry'**
+  String get searchFilterInPantry;
 }
 
 class _AppLocalizationsDelegate

@@ -1815,6 +1815,74 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noHistory => 'Nenhum historico de preparo ainda';
+
+  @override
+  String get onboardingPage1Title => 'Escanear Codigos de Barras';
+
+  @override
+  String get onboardingPage1Desc =>
+      'Adicione rapidamente produtos a sua despensa escaneando os codigos de barras com a sua camera.';
+
+  @override
+  String get onboardingPage1Cta => 'Abrir Scanner';
+
+  @override
+  String get onboardingPage2Title => 'Pesquisar Produtos';
+
+  @override
+  String get onboardingPage2Desc =>
+      'Navegue por milhoes de produtos na base do Open Food Facts para encontrar exatamente o que precisa.';
+
+  @override
+  String get onboardingPage2Cta => 'Abrir Pesquisa';
+
+  @override
+  String get onboardingPage3Title => 'Produtos Frescos';
+
+  @override
+  String get onboardingPage3Desc =>
+      'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
+
+  @override
+  String get onboardingPage3Cta => 'Adicionar Produtos Frescos';
+
+  @override
+  String get onboardingPage4Title => 'Configurar Despensa';
+
+  @override
+  String get onboardingPage4Desc =>
+      'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
+
+  @override
+  String get onboardingPage4Cta => 'Configurar';
+
+  @override
+  String get onboardingPage5Title => 'Controle Tudo';
+
+  @override
+  String get onboardingPage5Desc =>
+      'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
+
+  @override
+  String get onboardingPage5Cta => 'Comecar';
+
+  @override
+  String get onboardingSkip => 'Pular';
+
+  @override
+  String get onboardingBack => 'Voltar';
+
+  @override
+  String get searchFilterAll => 'Todos';
+
+  @override
+  String get searchFilterProduce => 'Frescos';
+
+  @override
+  String get searchFilterBarcoded => 'Com Codigo';
+
+  @override
+  String get searchFilterInPantry => 'Na Despensa';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -3598,4 +3666,72 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get noHistory => 'Nenhum historico de preparo ainda';
+
+  @override
+  String get onboardingPage1Title => 'Escanear Codigos de Barras';
+
+  @override
+  String get onboardingPage1Desc =>
+      'Adicione rapidamente produtos a sua despensa escaneando os codigos de barras com sua camera.';
+
+  @override
+  String get onboardingPage1Cta => 'Abrir Scanner';
+
+  @override
+  String get onboardingPage2Title => 'Pesquisar Produtos';
+
+  @override
+  String get onboardingPage2Desc =>
+      'Navegue por milhoes de produtos na base do Open Food Facts para encontrar exatamente o que precisa.';
+
+  @override
+  String get onboardingPage2Cta => 'Abrir Pesquisa';
+
+  @override
+  String get onboardingPage3Title => 'Produtos Frescos';
+
+  @override
+  String get onboardingPage3Desc =>
+      'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
+
+  @override
+  String get onboardingPage3Cta => 'Adicionar Produtos Frescos';
+
+  @override
+  String get onboardingPage4Title => 'Configurar Despensa';
+
+  @override
+  String get onboardingPage4Desc =>
+      'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
+
+  @override
+  String get onboardingPage4Cta => 'Configurar';
+
+  @override
+  String get onboardingPage5Title => 'Controle Tudo';
+
+  @override
+  String get onboardingPage5Desc =>
+      'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
+
+  @override
+  String get onboardingPage5Cta => 'Comecar';
+
+  @override
+  String get onboardingSkip => 'Pular';
+
+  @override
+  String get onboardingBack => 'Voltar';
+
+  @override
+  String get searchFilterAll => 'Todos';
+
+  @override
+  String get searchFilterProduce => 'Frescos';
+
+  @override
+  String get searchFilterBarcoded => 'Com Codigo';
+
+  @override
+  String get searchFilterInPantry => 'Na Despensa';
 }
