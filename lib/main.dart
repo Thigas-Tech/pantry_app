@@ -23,6 +23,7 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
@@ -126,6 +127,17 @@ Future<void> main() async {
   // runApp so that any widget reading notificationServiceProvider on the
   // first frame sees an initialized (or gracefully-failed) service.
   appContainer = ProviderContainer();
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool(kOnboardingKey) ?? false;
+    appContainer
+        .read(onboardingProvider.notifier)
+        .initial(value: onboardingCompleted);
+    logInfo('Onboarding flag loaded: $onboardingCompleted');
+  } on Exception catch (e) {
+    logWarning('Failed to load onboarding flag before runApp: $e');
+  }
+
   try {
     final notifService = appContainer.read(notificationServiceProvider);
     await notifService.initialize(

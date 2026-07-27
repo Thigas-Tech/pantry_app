@@ -8,6 +8,7 @@ import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/home_screen_controller.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/quick_add_provider.dart';
@@ -24,6 +25,7 @@ import 'package:pantry_app/widgets/empty_pantry.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
+import 'package:pantry_app/widgets/onboarding_flow.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/quick_add_produce.dart';
 
@@ -257,6 +259,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final inventories = ref.watch(inventoryListProvider);
     final averageNutriscore = ref.watch(averageNutriscoreProvider).value;
     final quickAddItemsAsync = ref.watch(quickAddItemsProvider);
+    final onboardingComplete = ref.watch(onboardingProvider);
+
+    ref.listen(totalInventoryCountProvider, (prev, next) {
+      final prevValue = prev?.asData?.value ?? 0;
+      final nextValue = next.asData?.value ?? 0;
+      if (prevValue == 0 && nextValue > 0) {
+        unawaited(ref.read(onboardingProvider.notifier).markComplete());
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -350,6 +361,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
               data: (items) {
                 if (items.isEmpty && !controller.selectionMode) {
+                  if (!onboardingComplete) {
+                    return OnboardingFlow(
+                      onScanBarcode: () =>
+                          unawaited(_scanBarcode(context, ref)),
+                      onSearchProduct: () => unawaited(
+                        Navigator.of(context).push<void>(
+                          MaterialPageRoute(
+                            builder: (_) => const SearchScreen(),
+                          ),
+                        ),
+                      ),
+                      onAddProduce: () => unawaited(
+                        Navigator.of(context).push<void>(
+                          MaterialPageRoute(
+                            builder: (_) => const SearchScreen(
+                              initialFilter: SearchFilter.produce,
+                            ),
+                          ),
+                        ),
+                      ),
+                      onGetStarted: () =>
+                          ref.read(onboardingProvider.notifier).markComplete(),
+                    );
+                  }
                   return EmptyPantry(onScan: _showActionSheet);
                 }
                 return _InventoryList(
@@ -375,7 +410,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
         ],
       ),
-      floatingActionButton: controller.selectionMode
+      floatingActionButton: (controller.selectionMode || !onboardingComplete)
           ? null
           : FloatingActionButton(
               heroTag: null,

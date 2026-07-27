@@ -1801,4 +1801,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noHistory => 'No cooking history yet';
+
+  @override
+  String get onboardingPage1Title => 'Scan Barcodes';
+
+  @override
+  String get onboardingPage1Desc =>
+      'Quickly add products to your pantry by scanning their barcodes with your camera.';
+
+  @override
+  String get onboardingPage1Cta => 'Open Scanner';
+
+  @override
+  String get onboardingPage2Title => 'Search Products';
+
+  @override
+  String get onboardingPage2Desc =>
+      'Browse millions of products from the Open Food Facts database to find exactly what you need.';
+
+  @override
+  String get onboardingPage2Cta => 'Open Search';
+
+  @override
+  String get onboardingPage3Title => 'Fresh Produce';
+
+  @override
+  String get onboardingPage3Desc =>
+      'Add common fruits and vegetables with a single tap. Perfect for bananas, apples, tomatoes, and more.';
+
+  @override
+  String get onboardingPage3Cta => 'Add Produce';
+
+  @override
+  String get onboardingPage4Title => 'Configure Your Pantry';
+
+  @override
+  String get onboardingPage4Desc =>
+      'Set up price tracking, currency, and data preferences to get the most out of Pantry.';
+
+  @override
+  String get onboardingPage4Cta => 'Set Up';
+
+  @override
+  String get onboardingPage5Title => 'Track Everything';
+
+  @override
+  String get onboardingPage5Desc =>
+      'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.';
+
+  @override
+  String get onboardingPage5Cta => 'Get Started';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingBack => 'Back';
+
+  @override
+  String get searchFilterAll => 'All';
+
+  @override
+  String get searchFilterProduce => 'Produce';
+
+  @override
+  String get searchFilterBarcoded => 'Barcoded';
+
+  @override
+  String get searchFilterInPantry => 'In Pantry';
 }

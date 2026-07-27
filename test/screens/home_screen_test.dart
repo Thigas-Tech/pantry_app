@@ -13,6 +13,8 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/onboarding_provider.dart'
+    show OnboardingNotifier, onboardingProvider;
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -21,6 +23,7 @@ import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
+import 'package:pantry_app/widgets/onboarding_flow.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 
@@ -101,16 +104,28 @@ _MockDatabaseHelper _createMockDb({
 }
 
 /// Common overrides for HomeScreen tests. Mocks DB, inventory list, and repo.
+class FakeOnboardingNotifier extends OnboardingNotifier {
+  FakeOnboardingNotifier({required this.initialValue});
+  final bool initialValue;
+
+  @override
+  bool build() => initialValue;
+}
+
 List<Override> _homeScreenOverrides({
   required _MockDatabaseHelper mockDb,
   List<Map<String, dynamic>> inventories = const [],
   MockProductRepository? mockRepo,
   bool online = false,
   ActiveInventoryNotifier Function()? activeInventoryFactory,
+  bool onboardingComplete = false,
 }) {
   return [
     databaseProvider.overrideWithValue(mockDb),
     inventoryListProvider.overrideWith((ref) => inventories),
+    onboardingProvider.overrideWith(
+      () => FakeOnboardingNotifier(initialValue: onboardingComplete),
+    ),
     if (activeInventoryFactory != null)
       activeInventoryProvider.overrideWith(activeInventoryFactory)
     else
@@ -193,11 +208,28 @@ void main() {
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
-      overrides: _homeScreenOverrides(mockDb: mockDb),
+      overrides: _homeScreenOverrides(mockDb: mockDb, onboardingComplete: true),
     );
 
     expect(find.text('Your pantry is empty'), findsOneWidget);
   });
+
+  testWidgets(
+    'shows OnboardingFlow when inventory is empty and onboarding not complete',
+    (
+      tester,
+    ) async {
+      final mockDb = _createMockDb(items: [], inventories: []);
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: _homeScreenOverrides(mockDb: mockDb),
+      );
+
+      expect(find.byType(OnboardingFlow), findsOneWidget);
+    },
+  );
 
   testWidgets('shows inventory items grouped by expiry', (tester) async {
     final now = DateTime.now();
@@ -277,7 +309,7 @@ void main() {
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
-      overrides: _homeScreenOverrides(mockDb: mockDb),
+      overrides: _homeScreenOverrides(mockDb: mockDb, onboardingComplete: true),
     );
 
     expect(find.byType(FloatingActionButton), findsOneWidget);
@@ -315,7 +347,11 @@ void main() {
       const HomeScreen(),
       imageCacheMock: mockImageCache,
       overrides: [
-        ..._homeScreenOverrides(mockDb: mockDb, mockRepo: mockRepo),
+        ..._homeScreenOverrides(
+          mockDb: mockDb,
+          mockRepo: mockRepo,
+          onboardingComplete: true,
+        ),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
       ],
     );
@@ -338,7 +374,7 @@ void main() {
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
-      overrides: _homeScreenOverrides(mockDb: mockDb),
+      overrides: _homeScreenOverrides(mockDb: mockDb, onboardingComplete: true),
     );
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -358,7 +394,10 @@ void main() {
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
-      overrides: _homeScreenOverrides(mockDb: mockDb),
+      overrides: _homeScreenOverrides(
+        mockDb: mockDb,
+        onboardingComplete: true,
+      ),
     );
 
     await tester.tap(find.byType(FloatingActionButton));
@@ -535,7 +574,7 @@ void main() {
         const HomeScreen(),
         imageCacheMock: mockImageCache,
         overrides: [
-          ..._homeScreenOverrides(mockDb: mockDb),
+          ..._homeScreenOverrides(mockDb: mockDb, onboardingComplete: true),
           hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         ],
       );
@@ -559,7 +598,7 @@ void main() {
       const HomeScreen(),
       imageCacheMock: mockImageCache,
       overrides: [
-        ..._homeScreenOverrides(mockDb: mockDb),
+        ..._homeScreenOverrides(mockDb: mockDb, onboardingComplete: true),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
       ],
     );
@@ -848,6 +887,9 @@ void main() {
         productRepositoryProvider.overrideWithValue(mockRepo),
         hasConnectionProvider.overrideWith(
           (ref) => Future.value(true),
+        ),
+        onboardingProvider.overrideWith(
+          () => FakeOnboardingNotifier(initialValue: true),
         ),
       ],
     );
