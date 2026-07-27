@@ -137,6 +137,17 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   &#47;&#47; first frame sees an initialized (or gracefully-failed) service.
   appContainer = ProviderContainer();
   try {
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool(kOnboardingKey) ?? false;
+    appContainer
+        .read(onboardingProvider.notifier)
+        .initial(value: onboardingCompleted);
+    logInfo(&#39;Onboarding flag loaded: $onboardingCompleted&#39;);
+  } on Exception catch (e) {
+    logWarning(&#39;Failed to load onboarding flag before runApp: $e&#39;);
+  }
+
+  try {
     final notifService = appContainer.read(notificationServiceProvider);
     await notifService.initialize(
       onDidReceiveResponse: _handleNotificationTap,
