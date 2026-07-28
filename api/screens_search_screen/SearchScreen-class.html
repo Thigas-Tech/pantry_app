@@ -54,11 +54,9 @@
 
     
 <section class="desc markdown">
-  <p>A search‑focused tab that lets the user find products by name or
-barcode, querying both the local cache and the Open Food Facts API.</p>
-<p>Results are shown in a scrollable list; tapping a result navigates to
-<a href="../screens_product_detail_screen/ProductDetailScreen-class.html">ProductDetailScreen</a>. The search input is debounced (500 ms) to avoid
-excessive API calls.</p>
+  <p>A search screen that wraps <a href="../widgets_search_panel/SearchPanel-class.html">SearchPanel</a> in a standalone route.</p>
+<p>Used from onboarding flows and the FAB action sheet.
+For inline search on the home screen, <a href="../widgets_search_panel/SearchPanel-class.html">SearchPanel</a> is used directly.</p>
 </section>
 
 
@@ -93,7 +91,7 @@ excessive API calls.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="SearchScreen.new" class="callable">
-          <span class="name"><a href="../screens_search_screen/SearchScreen/SearchScreen.html">SearchScreen</a></span><span class="signature">({<span class="parameter" id="param-initialFilter"><span class="type-annotation"><a href="../screens_search_screen/SearchFilter.html">SearchFilter</a>?</span> <span class="parameter-name">initialFilter</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../screens_search_screen/SearchScreen/SearchScreen.html">SearchScreen</a></span><span class="signature">({<span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../screens_search_screen/SearchScreen-class.html">SearchScreen</a> widget.
@@ -103,7 +101,7 @@ excessive API calls.</p>
   </section>
     
   <section
-      class="summary offset-anchor"
+      class="summary offset-anchor inherited"
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
@@ -116,18 +114,6 @@ excessive API calls.</p>
 <dd class="inherited">
   The hash code for this object.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="initialFilter" class="property">
-  <span class="name"><a href="../screens_search_screen/SearchScreen/initialFilter.html">initialFilter</a></span>
-  <span class="signature">&#8594; <a href="../screens_search_screen/SearchFilter.html">SearchFilter</a>?</span>
-  
-
-</dt>
-<dd>
-  The filter to activate on first display, if any.
-  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
