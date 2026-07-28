@@ -1,5 +1,8 @@
 # User Changelog
 
+- Quantity auto-fill: when adding a packaged product to your inventory, the
+  quantity and unit fields are now automatically filled in from the product
+  label. You can still change them if needed.
 - inPantry indicator: search results from Packaged Products and Fresh Produce
   now show a pantry icon when you already own that product. A "In Pantry"
   filter chip lets you see only results already in your pantry. Swipe-to-add

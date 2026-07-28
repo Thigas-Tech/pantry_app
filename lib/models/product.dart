@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/utils/quantity_parser.dart';
 
 part 'product.freezed.dart';
 
@@ -124,6 +125,23 @@ abstract class Product with _$Product {
     /// The suggested serving size, typically with a unit (e.g. "15 g",
     /// "1 cookie (28 g)").
     String? servingSize,
+
+    /// The display quantity as printed on the packaging (e.g. "500 ml",
+    /// "3 x 150 g", "6 eggs").
+    ///
+    /// Sourced from the OFF API `quantity` field. When available, this is
+    /// used to pre-fill the amount and unit fields in the add-to-inventory
+    /// form. May be null for products that have no packaging data.
+    String? quantity,
+
+    /// The normalized numeric quantity in g or ml (e.g. `500` for "500 ml",
+    /// `450` for "3 x 150 g").
+    ///
+    /// Sourced from the OFF API `product_quantity` field. This is the total
+    /// quantity, not the per-unit value for multi-pack items. For pre-fill,
+    /// [QuantityParser] extracts the per-unit value from [quantity]
+    /// instead.
+    double? productQuantity,
 
     /// Energy content in **kilocalories per 100 g** (or 100 ml).
     ///
@@ -262,6 +280,8 @@ abstract class Product with _$Product {
       category: offProduct.categories,
       ingredients: offProduct.ingredientsText,
       servingSize: offProduct.servingSize,
+      quantity: offProduct.quantity,
+      productQuantity: offProduct.packagingQuantity,
       energyKcal: n?.getValue(
         off.Nutrient.energyKCal,
         off.PerSize.oneHundredGrams,
@@ -351,6 +371,8 @@ extension ProductMerge on Product {
       category: nonEmpty(api.category) ?? category,
       ingredients: nonEmpty(api.ingredients) ?? ingredients,
       servingSize: nonEmpty(api.servingSize) ?? servingSize,
+      quantity: nonEmpty(api.quantity) ?? quantity,
+      productQuantity: api.productQuantity ?? productQuantity,
       energyKcal: api.energyKcal ?? energyKcal,
       proteinG: api.proteinG ?? proteinG,
       carbsG: api.carbsG ?? carbsG,

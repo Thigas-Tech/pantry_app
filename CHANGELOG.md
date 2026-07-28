@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Quantity auto-fill from OFF**: when adding a product to inventory, the
+  quantity and unit are now pre-filled from the product's OFF data. A new
+  `QuantityParser` utility handles multi-pack strings ("3 x 150 g") by using
+  the per-unit value, and normalizes units (cl -> ml, etc.).
+  (`lib/utils/quantity_parser.dart`, `lib/screens/add_to_inventory_screen.dart`)
 - **SearchFilterNotifier provider**: `searchFilterProvider` — a
   `NotifierProvider<SearchFilterNotifier, SearchFilter>` that exposes the
   current [SearchFilter] via a shared Riverpod provider, with

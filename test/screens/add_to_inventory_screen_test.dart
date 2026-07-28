@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 
@@ -100,4 +102,146 @@ void main() {
       // No exception means the serving weight was looked up correctly
     },
   );
+
+  group('pre-fill from Product', () {
+    Product productWithQuantity({
+      double? productQuantity,
+      String? quantity,
+    }) {
+      return Product(
+        barcode: '123456789',
+        name: 'Test Product',
+        productQuantity: productQuantity,
+        quantity: quantity,
+      );
+    }
+
+    testWidgets('pre-fills quantity and unit from productQuantity', (
+      tester,
+    ) async {
+      final product = productWithQuantity(
+        productQuantity: 500,
+        quantity: '500 ml',
+      );
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          product: product,
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      final quantityField = tester.widget<TextField>(textFields.first);
+      expect(quantityField.controller?.text, '500.0');
+    });
+
+    testWidgets('pre-fills unit dropdown from product data', (tester) async {
+      final product = productWithQuantity(
+        productQuantity: 250,
+        quantity: '250 ml',
+      );
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          product: product,
+        ),
+      );
+
+      final dropdown = find.text('ml');
+      expect(dropdown, findsOneWidget);
+    });
+
+    testWidgets('pre-fills from parsed quantity string alone', (tester) async {
+      final product = productWithQuantity(quantity: '3 x 150 g');
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          product: product,
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      final quantityField = tester.widget<TextField>(textFields.first);
+      // Per-unit value from multi-pack: 150
+      expect(quantityField.controller?.text, '150.0');
+    });
+
+    testWidgets('leaves defaults when product has no quantity data', (
+      tester,
+    ) async {
+      final product = productWithQuantity();
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          product: product,
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      final quantityField = tester.widget<TextField>(textFields.first);
+      expect(quantityField.controller?.text, '1.0');
+    });
+
+    testWidgets('does not overwrite existing item values', (tester) async {
+      final product = productWithQuantity(
+        productQuantity: 500,
+        quantity: '500 ml',
+      );
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          product: product,
+          existingItem: const InventoryItem(
+            barcode: '123456789',
+            quantity: 7,
+            unit: 'kg',
+          ),
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      final quantityField = tester.widget<TextField>(textFields.first);
+      // Existing item value should be preserved
+      expect(quantityField.controller?.text, '7.0');
+    });
+
+    testWidgets('does not pre-fill for produce type', (tester) async {
+      final product = Product(
+        barcode: 'produce-Apple',
+        name: 'Apple',
+        productQuantity: 200,
+        quantity: '200 g',
+        productType: ProductType.produce,
+      );
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: 'produce-Apple',
+          inventoryId: 1,
+          productType: ProductType.produce,
+          product: product,
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      final quantityField = tester.widget<TextField>(textFields.first);
+      // Produce should use default quantity (1), not the product data
+      expect(quantityField.controller?.text, '1.0');
+    });
+  });
 }

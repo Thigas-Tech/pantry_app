@@ -15,7 +15,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecipeIngredientCache {
 
- String get name;@JsonKey(includeIfNull: false) String? get barcode; double get quantity; String get unit;
+/// Ingredient display name.
+ String get name;/// Optional product barcode for price/nutrition lookup.
+@JsonKey(includeIfNull: false) String? get barcode;/// Quantity, defaults to 1.
+ double get quantity;/// Unit of measurement, defaults to 'pieces'.
+ String get unit;
 /// Create a copy of RecipeIngredientCache
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -215,9 +219,13 @@ class _RecipeIngredientCache extends RecipeIngredientCache {
   const _RecipeIngredientCache({required this.name, @JsonKey(includeIfNull: false) this.barcode, this.quantity = 1.0, this.unit = 'pieces'}): super._();
   factory _RecipeIngredientCache.fromJson(Map<String, dynamic> json) => _$RecipeIngredientCacheFromJson(json);
 
+/// Ingredient display name.
 @override final  String name;
+/// Optional product barcode for price/nutrition lookup.
 @override@JsonKey(includeIfNull: false) final  String? barcode;
+/// Quantity, defaults to 1.
 @override@JsonKey() final  double quantity;
+/// Unit of measurement, defaults to 'pieces'.
 @override@JsonKey() final  String unit;
 
 /// Create a copy of RecipeIngredientCache

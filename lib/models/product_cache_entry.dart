@@ -71,6 +71,12 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// The suggested serving size (e.g. "15 g").
     @JsonKey(includeIfNull: false) String? servingSize,
 
+    /// The display quantity as printed on packaging (e.g. "500 ml").
+    @JsonKey(includeIfNull: false) String? quantity,
+
+    /// Normalized numeric product quantity in g or ml.
+    @JsonKey(includeIfNull: false) double? productQuantity,
+
     /// Energy in kilocalories per 100 g.
     @JsonKey(includeIfNull: false) double? energyKcal,
 
@@ -144,6 +150,8 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       categoriesHierarchy: product.categoriesHierarchy,
       ingredients: product.ingredients,
       servingSize: product.servingSize,
+      quantity: product.quantity,
+      productQuantity: product.productQuantity,
       energyKcal: product.energyKcal,
       proteinG: product.proteinG,
       carbsG: product.carbsG,
@@ -171,6 +179,8 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       categoriesHierarchy: categoriesHierarchy,
       ingredients: ingredients,
       servingSize: servingSize,
+      quantity: quantity,
+      productQuantity: productQuantity,
       energyKcal: energyKcal,
       proteinG: proteinG,
       carbsG: carbsG,
