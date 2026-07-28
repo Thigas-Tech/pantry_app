@@ -1,5 +1,9 @@
 # Registro de alteracoes do usuario
 
+- Preenchimento automatico de quantidade: ao adicionar um produto embalado a
+  sua despensa, os campos de quantidade e unidade sao preenchidos
+  automaticamente a partir do rotulo do produto. Voce ainda pode altera-los
+  se necessario.
 - Indicador na despensa: resultados de busca de Produtos Embalados e Produtos
   Frescos agora mostram um icone de despensa quando voce ja possui aquele
   produto. Um chip "Na Despensa" permite ver apenas resultados ja na sua

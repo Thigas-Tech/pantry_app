@@ -4,13 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/quantity_parser.dart';
 
 /// A form screen for creating or editing an inventory item.
 ///
-/// Supports custom units and locations via a dialog prompt.
+/// Supports custom units and locations via a dialog prompt. When a [product]
+/// is provided and no [existingItem] is set (create mode), the quantity and
+/// unit fields are pre-filled from the product's Open Food Facts data.
 class AddToInventoryScreen extends StatefulWidget {
   /// Creates an [AddToInventoryScreen].
   const AddToInventoryScreen({
@@ -21,6 +25,7 @@ class AddToInventoryScreen extends StatefulWidget {
     this.suggestedExpiry,
     this.productType,
     this.produceName,
+    this.product,
   });
 
   /// The product barcode this inventory item belongs to.
@@ -43,6 +48,14 @@ class AddToInventoryScreen extends StatefulWidget {
   /// When null for produce items, the name is extracted from the barcode
   /// by stripping the `produce-` prefix.
   final String? produceName;
+
+  /// The OFF product with quantity data used to pre-fill the amount and
+  /// unit fields in create mode (when [existingItem] is null).
+  ///
+  /// Only used for non-produce items. The values are parsed by
+  /// [QuantityParser] and applied as defaults — the user can still
+  /// override them.
+  final Product? product;
 
   @override
   State<AddToInventoryScreen> createState() => _AddToInventoryScreenState();
@@ -72,8 +85,8 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   void initState() {
     super.initState();
     final existing = widget.existingItem;
-    _quantity = existing?.quantity ?? 1;
-    _unit = existing?.unit ?? 'pieces';
+    _quantity = existing?.quantity ?? _prefillQuantity();
+    _unit = existing?.unit ?? _prefillUnit();
     _location = existing?.location ?? 'pantry';
     _expiryDate = existing?.expiryDate != null
         ? DateTime.tryParse(existing!.expiryDate!)
@@ -88,6 +101,35 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
             ? widget.barcode.substring(7)
             : 'Apple');
     _syncCustomOptions();
+  }
+
+  /// Pre-fills the quantity from the OFF product data.
+  ///
+  /// Only applies in create mode for non-produce items. Returns 1 (the
+  /// default) when no product data is available or the item is produce.
+  double _prefillQuantity() {
+    if (_isProduce || widget.product == null) return 1;
+    final parsed = QuantityParser.parse(
+      productQuantity: widget.product!.productQuantity,
+      quantity: widget.product!.quantity,
+    );
+    if (parsed != null && parsed.amount > 0) return parsed.amount;
+    return 1;
+  }
+
+  /// Pre-fills the unit from the OFF product data.
+  ///
+  /// Only applies in create mode for non-produce items. Returns 'pieces'
+  /// (the default) when no product data is available or the item is
+  /// produce.
+  String _prefillUnit() {
+    if (_isProduce || widget.product == null) return 'pieces';
+    final parsed = QuantityParser.parse(
+      productQuantity: widget.product!.productQuantity,
+      quantity: widget.product!.quantity,
+    );
+    if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
+    return 'pieces';
   }
 
   void _syncCustomOptions() {

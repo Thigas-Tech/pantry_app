@@ -57,7 +57,7 @@ final class HomeScreenControllerProvider
 }
 
 String _$homeScreenControllerHash() =>
-    r'cd64346f5f6ee1bb54a09f6a24f061bbe5b37270';
+    r'46d687977d91831ac553a0dfd9ad822ecbdcf6f3';
 
 /// Notifier that manages ephemeral home screen UI state.
 ///
