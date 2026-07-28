@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart';
 /// The verbose flag mirrors [kDebugMode] — true in debug builds, false
 /// in release and profile builds. This means [logInfo] and [logDebug] calls
 /// are tree-shaken from release binaries entirely.
-const bool _verbose = kDebugMode;
+const bool _verbose = true; //kDebugMode;
 
 // ANSI colour codes.
 const _reset = '\x1B[0m';

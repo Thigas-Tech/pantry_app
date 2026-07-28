@@ -508,7 +508,7 @@ void main() {
   });
 
   testWidgets(
-    'inline search restores normal view then navigates on result tap',
+    'inline search navigates on result tap and preserves search mode',
     (
       tester,
     ) async {
@@ -571,6 +571,17 @@ void main() {
       await tester.pump();
 
       expect(find.byType(ProductDetailScreen), findsOneWidget);
+
+      // Pop back — search mode should still be active
+      Navigator.of(
+        tester.element(find.byType(ProductDetailScreen)),
+      ).pop();
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(SearchBar), findsOneWidget);
+      expect(find.text('Local Milk'), findsOneWidget);
     },
   );
 
