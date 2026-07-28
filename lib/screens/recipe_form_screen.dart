@@ -5,14 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/screens/product_picker_screen.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
-import 'package:pantry_app/widgets/search_ingredient_sheet.dart';
 
 /// Tracks mutable state for a single ingredient row in the form.
 class _IngredientEntry {
@@ -237,7 +238,10 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
   }
 
   Future<void> _showProductSearch() async {
-    final product = await SearchIngredientSheet.show(context);
+    final product = await Navigator.push<Product>(
+      context,
+      MaterialPageRoute(builder: (_) => const ProductPickerScreen()),
+    );
     if (product != null && mounted) {
       _addIngredient(
         name: product.name,

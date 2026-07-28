@@ -18,7 +18,14 @@ class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   void setActiveInventory(int newValue) {}
 }
 
-class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
+class _MockDatabaseHelper extends Mock implements DatabaseHelper {
+  _MockDatabaseHelper() {
+    when(
+      () =>
+          getBarcodesInInventory(any(), inventoryId: any(named: 'inventoryId')),
+    ).thenAnswer((_) async => <String>{});
+  }
+}
 
 InventoryWithProduct _testItem(
   String name, {

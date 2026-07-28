@@ -1,5 +1,27 @@
 # User Changelog
 
+- inPantry indicator: search results from Packaged Products and Fresh Produce
+  now show a pantry icon when you already own that product. A "In Pantry"
+  filter chip lets you see only results already in your pantry. Swipe-to-add
+  shows a blue background for products you already own.
+- Recipes tab: Recipes now has its own tab in the bottom navigation bar.
+- Search source picker: choose between "Packaged Products", "Fresh Produce",
+  or your own pantry when searching. Now a compact dropdown instead of a
+  wide button group.
+- Search on home screen: tapping the search bar now opens an inline search
+  that replaces the home screen content. Tapping a result returns you to
+  your pantry before opening the product details. Press the back arrow or
+  hardware back key to exit search mode.
+- Recipe ingredient search: when registering a recipe, searching for a
+  product now opens a full-screen product finder with source and category
+  filters instead of a plain bottom sheet.
+- Search bar no longer shifts when search mode opens -- the back arrow
+  appears inside the search bar, keeping the app bar stable.
+- Not found in Packaged Products: when a product search returns no results,
+  you can now scan or type the barcode to try again. If the barcode still
+  is not found, you can save the product locally or see a preview of the
+  upcoming "Contribute to Open Food Facts" feature.
+
 - Recipe detail screen: view full ingredients, instructions, and cost of any
   recipe. Tap a recipe in the list to open it.
 - "I made this": mark a recipe as cooked — ingredients are automatically

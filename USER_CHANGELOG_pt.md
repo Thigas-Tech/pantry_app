@@ -1,5 +1,16 @@
 # Registro de alteracoes do usuario
 
+- Indicador na despensa: resultados de busca de Produtos Embalados e Produtos
+  Frescos agora mostram um icone de despensa quando voce ja possui aquele
+  produto. Um chip "Na Despensa" permite ver apenas resultados ja na sua
+  despensa. O deslizar para adicionar mostra um fundo azul para produtos que
+  voce ja possui.
+- Aba de receitas: Receitas agora tem sua propria aba na barra de navegacao inferior.
+- Seletor de fonte de busca: escolha entre "Produtos Embalados", "Produtos Frescos" ou sua despensa ao buscar. Agora eh um menu compacto.
+- Busca na tela inicial: tocar na barra de busca abre uma busca inline que substitui o conteudo da tela. Tocar em um resultado retorna a sua despensa antes de abrir os detalhes. Use a seta de voltar ou o botao fisico para sair do modo de busca.
+- Busca de ingredientes de receitas: ao registrar uma receita, buscar por um produto agora abre um seletor em tela cheia com filtros de fonte e categoria, em vez de apenas uma planilha simples.
+- A barra de busca nao desce mais quando o modo de busca e ativado -- a seta de voltar aparece dentro da propria barra, mantendo a barra superior estavel.
+- Nao encontrado em Produtos Embalados: quando a busca nao retorna resultados, voce pode escanear ou digitar o codigo de barras para tentar novamente. Se ainda nao for encontrado, voce pode salvar o produto localmente ou ver uma previa do recurso "Contribuir com Open Food Facts" em breve.
 - Tela de detalhes da receita: veja ingredientes, instrucoes e custo de
   qualquer receita. Toque em uma receita na lista para abri-la.
 - "Fiz esta receita": marque uma receita como feita — os ingredientes sao
