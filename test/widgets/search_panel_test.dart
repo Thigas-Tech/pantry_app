@@ -168,8 +168,8 @@ void main() {
               result = await Navigator.push<Product>(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => Scaffold(
-                    body: const SearchPanel(selectMode: true),
+                  builder: (_) => const Scaffold(
+                    body: SearchPanel(selectMode: true),
                   ),
                 ),
               );

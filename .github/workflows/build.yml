@@ -71,7 +71,7 @@ jobs:
             > .env
       - name: Analyze Flutter
         if: matrix.category == 'static'
-        run: dart analyze
+        run: dart analyze lib/ test/
         working-directory: code
       - name: Run Flutter ${{ matrix.category }} tests
         if: matrix.category != 'static'

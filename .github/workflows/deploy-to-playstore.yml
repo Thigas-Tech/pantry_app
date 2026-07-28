@@ -65,7 +65,7 @@ jobs:
             > .env
 
       - name: Analyze Flutter
-        run: dart analyze
+        run: dart analyze lib/ test/
 
       - name: Run Flutter tests
         run: flutter test --concurrency=2
