@@ -4,7 +4,7 @@
 
 Run BEFORE every local commit. Fix ALL issues:
   git fetch
-  dart analyze
+  dart analyze lib/ test/
   flutter test --concurrency=2
   flutter build apk --debug
   dart doc .

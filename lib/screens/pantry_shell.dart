@@ -8,7 +8,7 @@ import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
-import 'package:pantry_app/screens/search_screen.dart';
+import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/shopping_list_screen.dart';
 import 'package:pantry_app/screens/stats_screen.dart';
@@ -23,7 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Tabs:
 /// - **Home** — inventory dashboard with grouping by expiry status.
-/// - **Search** — product search by name or barcode.
+/// - **Recipes** — saved recipes with cost tracking.
 /// - **Stats** — inventory statistics.
 /// - **List** — shopping list of items to buy.
 /// - **Settings** — application preferences.
@@ -187,7 +187,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
             onPageChanged: (index) => setState(() => _selectedIndex = index),
             children: const [
               HomeScreen(),
-              SearchScreen(),
+              RecipeListScreen(),
               StatsScreen(),
               ShoppingListScreen(),
               SettingsScreen(),
@@ -214,9 +214,9 @@ class _PantryShellState extends ConsumerState<PantryShell> {
             label: l10n.navHome,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.search_outlined),
-            selectedIcon: const Icon(Icons.search),
-            label: l10n.navSearch,
+            icon: const Icon(Icons.restaurant_outlined),
+            selectedIcon: const Icon(Icons.restaurant),
+            label: l10n.navRecipes,
           ),
           NavigationDestination(
             icon: const Icon(Icons.bar_chart_outlined),

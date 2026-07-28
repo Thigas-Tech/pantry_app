@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/home_screen_controller.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
@@ -28,6 +29,7 @@ import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/quick_add_produce.dart';
+import 'package:pantry_app/widgets/search_panel.dart';
 
 /// The main pantry screen showing inventory items grouped by expiry.
 ///
@@ -43,6 +45,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with AutomaticKeepAliveClientMixin {
+  bool _isSearchActive = false;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -106,68 +110,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     ];
   }
 
-  Widget _buildSearchAnchor(
-    AppLocalizations l10n,
-    List<InventoryWithProduct> items,
-  ) {
-    final controller = ref.watch(homeScreenControllerProvider);
+  Widget _buildSearchBar(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-      child: SearchAnchor(
-        builder: (context, searchController) {
-          return SearchBar(
-            controller: searchController,
-            hintText: l10n.searchHint,
-            leading: const Padding(
-              padding: EdgeInsets.only(left: 12),
-              child: Icon(Icons.search),
-            ),
-            trailing: [
-              if (controller.searchQuery.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    searchController.clear();
-                    ref
-                        .read(homeScreenControllerProvider.notifier)
-                        .setSearchQuery('');
-                  },
-                ),
-            ],
-            onChanged: (v) => ref
-                .read(homeScreenControllerProvider.notifier)
-                .setSearchQuery(v),
-          );
-        },
-        suggestionsBuilder: (context, searchController) {
-          final query = searchController.text;
-          if (query.isEmpty) return [];
-
-          final q = query.toLowerCase();
-          final matched = <InventoryWithProduct>{};
-          for (final item in items) {
-            final searchText =
-                item.productSearchText ??
-                '${item.productName ?? ''} ${item.barcode}';
-            if (searchText.toLowerCase().contains(q)) {
-              matched.add(item);
-            }
-          }
-          return matched.take(20).map((item) {
-            return ListTile(
-              title: Text(item.productName ?? item.barcode),
-              subtitle: Text(item.barcode),
-              onTap: () {
-                searchController.closeView(item.productName ?? item.barcode);
-                ref
-                    .read(homeScreenControllerProvider.notifier)
-                    .setSearchQuery(item.productName ?? item.barcode);
-              },
-            );
-          });
-        },
+      child: SearchBar(
+        hintText: l10n.searchHint,
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 12),
+          child: Icon(Icons.search),
+        ),
+        onTap: () => setState(() => _isSearchActive = true),
       ),
     );
+  }
+
+  void _exitSearchMode() {
+    setState(() => _isSearchActive = false);
+  }
+
+  Future<void> _onHomeProductSelected(Product product) async {
+    if (!_isSearchActive) return;
+    setState(() => _isSearchActive = false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(
+        Navigator.of(context)
+            .push<void>(
+              MaterialPageRoute(
+                builder: (_) => ProductDetailScreen(product: product),
+              ),
+            )
+            .then((_) {
+              if (mounted) ref.invalidate(pantryProvider);
+            }),
+      );
+    });
   }
 
   void _showActionSheet() {
@@ -269,154 +246,163 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: controller.selectionMode
-            ? IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => ref
-                    .read(
-                      homeScreenControllerProvider.notifier,
-                    )
-                    .exitSelectionMode(),
-              )
-            : null,
-        title: controller.selectionMode
-            ? Text(l10n.selectedCount(controller.selectedIds.length))
-            : Text(l10n.myPantry),
-        actions: [
-          if (controller.selectionMode) ...[
-            if (controller.selectedIds.isNotEmpty) ...[
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () => ref
-                    .read(
-                      homeScreenControllerProvider.notifier,
-                    )
-                    .deleteSelected(),
-                tooltip: l10n.delete,
-              ),
-              IconButton(
-                icon: const Icon(Icons.drive_file_move_outline),
-                onPressed: () => _moveSelected(
-                  ref.read(homeScreenControllerProvider.notifier),
+    return PopScope(
+      canPop: !_isSearchActive,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _isSearchActive) {
+          _exitSearchMode();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: controller.selectionMode
+              ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => ref
+                      .read(
+                        homeScreenControllerProvider.notifier,
+                      )
+                      .exitSelectionMode(),
+                )
+              : null,
+          title: controller.selectionMode
+              ? Text(l10n.selectedCount(controller.selectedIds.length))
+              : Text(l10n.myPantry),
+          actions: [
+            if (controller.selectionMode) ...[
+              if (controller.selectedIds.isNotEmpty) ...[
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => ref
+                      .read(
+                        homeScreenControllerProvider.notifier,
+                      )
+                      .deleteSelected(),
+                  tooltip: l10n.delete,
                 ),
-                tooltip: l10n.moveToPantry,
-              ),
-            ],
-          ] else ...[
-            if (priceTrackingEnabled) const PriceVisibilityToggle(),
-            if (inventories.asData?.value != null) ...[
-              InventorySwitcherCard(
-                name: l10n.displayInventoryName(
-                  (inventories.asData!.value
-                              .cast<Map<String, dynamic>>()
-                              .firstWhere(
-                                (inv) =>
-                                    inv['id'] ==
-                                    ref.read(activeInventoryProvider),
-                                orElse: () => <String, dynamic>{
-                                  'name': l10n.myPantry,
-                                },
-                              )['name']
-                          as String?) ??
-                      l10n.myPantry,
+                IconButton(
+                  icon: const Icon(Icons.drive_file_move_outline),
+                  onPressed: () => _moveSelected(
+                    ref.read(homeScreenControllerProvider.notifier),
+                  ),
+                  tooltip: l10n.moveToPantry,
                 ),
-                nutriscoreGrade: averageNutriscore,
-                onTap: () async {
-                  final result = await Navigator.of(context).push<Object>(
-                    MaterialPageRoute(
-                      builder: (_) => const ManageInventoriesScreen(),
-                    ),
-                  );
-                  if (result == true && context.mounted) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ref.invalidate(pantryProvider);
-                    });
-                  }
-                },
-              ),
+              ],
+            ] else ...[
+              if (priceTrackingEnabled) const PriceVisibilityToggle(),
+              if (inventories.asData?.value != null) ...[
+                InventorySwitcherCard(
+                  name: l10n.displayInventoryName(
+                    (inventories.asData!.value
+                                .cast<Map<String, dynamic>>()
+                                .firstWhere(
+                                  (inv) =>
+                                      inv['id'] ==
+                                      ref.read(activeInventoryProvider),
+                                  orElse: () => <String, dynamic>{
+                                    'name': l10n.myPantry,
+                                  },
+                                )['name']
+                            as String?) ??
+                        l10n.myPantry,
+                  ),
+                  nutriscoreGrade: averageNutriscore,
+                  onTap: () async {
+                    final result = await Navigator.of(context).push<Object>(
+                      MaterialPageRoute(
+                        builder: (_) => const ManageInventoriesScreen(),
+                      ),
+                    );
+                    if (result == true && context.mounted) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        ref.invalidate(pantryProvider);
+                      });
+                    }
+                  },
+                ),
+              ],
             ],
           ],
-        ],
-      ),
-      body: Column(
-        children: [
-          if (!controller.selectionMode)
-            _buildSearchAnchor(l10n, pantryAsync.asData?.value ?? []),
-          if (!controller.selectionMode)
-            ..._buildProduceCarousel(
-              l10n,
-              quickAddItemsAsync.asData?.value ?? [],
-            ),
-          Expanded(
-            child: pantryAsync.when(
-              loading: () => Center(child: ProgressIndicatorHelper.build()),
-              error: (err, _) => ErrorView(
-                message: l10n.inventoryLoadFailed,
-                onRetry: () =>
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ref.invalidate(pantryProvider);
-                    }),
+        ),
+        body: _isSearchActive
+            ? SearchPanel(
+                onProductSelected: _onHomeProductSelected,
+                showBackButton: true,
+                onBack: _exitSearchMode,
+              )
+            : Column(
+                children: [
+                  if (!controller.selectionMode) _buildSearchBar(l10n),
+                  if (!controller.selectionMode)
+                    ..._buildProduceCarousel(
+                      l10n,
+                      quickAddItemsAsync.asData?.value ?? [],
+                    ),
+                  Expanded(
+                    child: pantryAsync.when(
+                      loading: () => Center(
+                        child: ProgressIndicatorHelper.build(),
+                      ),
+                      error: (err, _) => ErrorView(
+                        message: l10n.inventoryLoadFailed,
+                        onRetry: () =>
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              ref.invalidate(pantryProvider);
+                            }),
+                      ),
+                      data: (items) {
+                        if (items.isEmpty && !controller.selectionMode) {
+                          if (!onboardingComplete) {
+                            return OnboardingFlow(
+                              onScanBarcode: () =>
+                                  unawaited(_scanBarcode(context, ref)),
+                              onSearchProduct: () => unawaited(
+                                Navigator.of(context).push<void>(
+                                  MaterialPageRoute(
+                                    builder: (_) => const SearchScreen(),
+                                  ),
+                                ),
+                              ),
+                              onAddProduce: () => unawaited(
+                                Navigator.of(context).push<void>(
+                                  MaterialPageRoute(
+                                    builder: (_) => const SearchScreen(),
+                                  ),
+                                ),
+                              ),
+                              onGetStarted: () => ref
+                                  .read(onboardingProvider.notifier)
+                                  .markComplete(),
+                            );
+                          }
+                          return EmptyPantry(onScan: _showActionSheet);
+                        }
+                        return _InventoryList(
+                          items: items,
+                          onScan: _showActionSheet,
+                          expiringSoonDays: expiringSoonDays,
+                          selectionMode: controller.selectionMode,
+                          selectedIds: controller.selectedIds,
+                          onToggleSelection: (id) => ref
+                              .read(homeScreenControllerProvider.notifier)
+                              .toggleSelection(id),
+                          onLongPressItem: (id) => ref
+                              .read(homeScreenControllerProvider.notifier)
+                              .enterSelectionMode(id),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-              data: (items) {
-                if (items.isEmpty && !controller.selectionMode) {
-                  if (!onboardingComplete) {
-                    return OnboardingFlow(
-                      onScanBarcode: () =>
-                          unawaited(_scanBarcode(context, ref)),
-                      onSearchProduct: () => unawaited(
-                        Navigator.of(context).push<void>(
-                          MaterialPageRoute(
-                            builder: (_) => const SearchScreen(),
-                          ),
-                        ),
-                      ),
-                      onAddProduce: () => unawaited(
-                        Navigator.of(context).push<void>(
-                          MaterialPageRoute(
-                            builder: (_) => const SearchScreen(
-                              initialFilter: SearchFilter.produce,
-                            ),
-                          ),
-                        ),
-                      ),
-                      onGetStarted: () =>
-                          ref.read(onboardingProvider.notifier).markComplete(),
-                    );
-                  }
-                  return EmptyPantry(onScan: _showActionSheet);
-                }
-                return _InventoryList(
-                  items: items,
-                  onScan: _showActionSheet,
-                  expiringSoonDays: expiringSoonDays,
-                  selectionMode: controller.selectionMode,
-                  selectedIds: controller.selectedIds,
-                  searchQuery: controller.searchQuery,
-                  onToggleSelection: (id) => ref
-                      .read(
-                        homeScreenControllerProvider.notifier,
-                      )
-                      .toggleSelection(id),
-                  onLongPressItem: (id) => ref
-                      .read(
-                        homeScreenControllerProvider.notifier,
-                      )
-                      .enterSelectionMode(id),
-                );
-              },
-            ),
-          ),
-        ],
+        floatingActionButton: (controller.selectionMode || !onboardingComplete)
+            ? null
+            : FloatingActionButton(
+                heroTag: null,
+                onPressed: _showActionSheet,
+                child: const Icon(Icons.add),
+              ),
       ),
-      floatingActionButton: (controller.selectionMode || !onboardingComplete)
-          ? null
-          : FloatingActionButton(
-              heroTag: null,
-              onPressed: _showActionSheet,
-              child: const Icon(Icons.add),
-            ),
     );
   }
 
@@ -472,7 +458,6 @@ class _InventoryList extends ConsumerStatefulWidget {
     required this.items,
     required this.onScan,
     required this.expiringSoonDays,
-    required this.searchQuery,
     this.selectionMode = false,
     this.selectedIds = const {},
     this.onToggleSelection,
@@ -486,22 +471,13 @@ class _InventoryList extends ConsumerStatefulWidget {
   final Set<int> selectedIds;
   final void Function(int itemId)? onToggleSelection;
   final void Function(int itemId)? onLongPressItem;
-  final String searchQuery;
 
   @override
   ConsumerState<_InventoryList> createState() => _InventoryListState();
 }
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
-  List<InventoryWithProduct> get _filtered {
-    if (widget.searchQuery.isEmpty) return widget.items;
-    final q = widget.searchQuery.toLowerCase();
-    return widget.items.where((item) {
-      final searchText =
-          item.productSearchText ?? '${item.productName ?? ''} ${item.barcode}';
-      return searchText.toLowerCase().contains(q);
-    }).toList();
-  }
+  List<InventoryWithProduct> get _filtered => widget.items;
 
   List<InventoryWithProduct> get _expired =>
       _filtered.where((i) => isExpired(i.expiryDate)).toList();
@@ -586,7 +562,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
             _sectionHeader(l10n.good, Icons.check_circle_outline),
             ..._good.map(_buildCard),
           ],
-          if (_filtered.isEmpty && widget.searchQuery.isNotEmpty)
+          if (_filtered.isEmpty)
             Padding(
               padding: const EdgeInsets.all(24),
               child: Center(child: Text(l10n.noItemsMatch)),

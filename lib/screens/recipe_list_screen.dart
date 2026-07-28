@@ -29,9 +29,14 @@ class RecipeListScreen extends ConsumerStatefulWidget {
   ConsumerState<RecipeListScreen> createState() => _RecipeListScreenState();
 }
 
-class _RecipeListScreenState extends ConsumerState<RecipeListScreen> {
+class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(

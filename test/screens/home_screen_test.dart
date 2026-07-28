@@ -9,25 +9,42 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/models/search_filter.dart' show SearchSource;
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/onboarding_provider.dart'
     show OnboardingNotifier, onboardingProvider;
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
+import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
+import 'package:pantry_app/widgets/quick_add_produce.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 
-class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
+class _MockDatabaseHelper extends Mock implements DatabaseHelper {
+  _MockDatabaseHelper() {
+    when(
+      () =>
+          getBarcodesInInventory(any(), inventoryId: any(named: 'inventoryId')),
+    ).thenAnswer((_) async => <String>{});
+  }
+}
+
+class _MockOffAdapter extends Mock implements OffAdapter {}
+
+class _MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   int _lastSetValue = 1;
@@ -454,76 +471,147 @@ void main() {
     expect(find.textContaining('Added this week: 0'), findsOneWidget);
   });
 
-  testWidgets('search filters items and shows clear button', (tester) async {
-    final items = [
-      testItem('Milk', barcode: '111'),
-      testItem('Bread', barcode: '222', id: 2),
-    ];
-
-    final mockDb = _createMockDb(
-      items: items,
-      inventories: [
-        {'id': 1, 'name': 'Home'},
-      ],
-    );
+  testWidgets('search bar activates inline search mode', (tester) async {
+    registerFallbackValue(const Product(barcode: 'fallback', name: 'Fallback'));
+    registerFallbackValue(const InventoryItem(barcode: 'fallback'));
+    final mockDb = _createMockDb();
+    final mockApi = _MockOffAdapter();
+    when(
+      () => mockApi.searchProducts(
+        any(),
+        pageSize: any(named: 'pageSize'),
+      ),
+    ).thenAnswer((_) async => []);
     await pumpApp(
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
-      overrides: _homeScreenOverrides(
-        mockDb: mockDb,
-        inventories: [
-          {'id': 1, 'name': 'Home'},
-        ],
-      ),
+      overrides: [
+        ..._homeScreenOverrides(
+          mockDb: mockDb,
+          inventories: [
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+        apiServiceProvider.overrideWithValue(mockApi),
+        usdaApiClientProvider.overrideWithValue(_MockUsdaApiClient()),
+      ],
     );
 
-    expect(find.widgetWithText(InventoryCard, 'Milk'), findsOneWidget);
-    expect(find.widgetWithText(InventoryCard, 'Bread'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
 
-    final searchField = find.byType(TextField);
-    await tester.enterText(searchField, 'Milk');
-    await tester.pumpAndSettle();
-
-    expect(find.widgetWithText(InventoryCard, 'Milk'), findsOneWidget);
-    expect(find.widgetWithText(InventoryCard, 'Bread'), findsNothing);
-
-    expect(find.byIcon(Icons.clear), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.clear));
-    await tester.pumpAndSettle();
-
-    expect(find.widgetWithText(InventoryCard, 'Milk'), findsOneWidget);
-    expect(find.widgetWithText(InventoryCard, 'Bread'), findsOneWidget);
+    expect(find.byType(SearchBar), findsOneWidget);
+    expect(find.byType(DropdownButton<SearchSource>), findsOneWidget);
+    expect(find.byType(QuickAddProduce), findsNothing);
   });
 
-  testWidgets('shows no items match message when search yields empty', (
-    tester,
-  ) async {
-    final items = [testItem('Milk', barcode: '111')];
+  testWidgets(
+    'inline search restores normal view then navigates on result tap',
+    (
+      tester,
+    ) async {
+      registerFallbackValue(
+        const Product(barcode: 'fallback', name: 'Fallback'),
+      );
+      registerFallbackValue(const InventoryItem(barcode: 'fallback'));
+      final mockDb = _createMockDb();
+      final mockApi = _MockOffAdapter();
+      when(
+        () => mockApi.searchProducts(
+          any(),
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [
+          const Product(barcode: '001', name: 'Local Milk', brand: 'Brand A'),
+        ],
+      );
 
-    final mockDb = _createMockDb(
-      items: items,
-      inventories: [
-        {'id': 1, 'name': 'Home'},
-      ],
-    );
+      final mockRepo = createMockProductRepository();
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => []);
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          ..._homeScreenOverrides(
+            mockDb: mockDb,
+            inventories: [
+              {'id': 1, 'name': 'Home'},
+            ],
+            mockRepo: mockRepo,
+          ),
+          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+          apiServiceProvider.overrideWithValue(mockApi),
+          usdaApiClientProvider.overrideWithValue(_MockUsdaApiClient()),
+        ],
+      );
+
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pump();
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsOneWidget);
+
+      await tester.tap(find.text('Local Milk'));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(ProductDetailScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets('back button exits search mode', (tester) async {
+    registerFallbackValue(const Product(barcode: 'fallback', name: 'Fallback'));
+    registerFallbackValue(const InventoryItem(barcode: 'fallback'));
+    final mockDb = _createMockDb();
+    final mockApi = _MockOffAdapter();
+    when(
+      () => mockApi.searchProducts(
+        any(),
+        pageSize: any(named: 'pageSize'),
+      ),
+    ).thenAnswer((_) async => []);
     await pumpApp(
       tester,
       const HomeScreen(),
       imageCacheMock: mockImageCache,
-      overrides: _homeScreenOverrides(
-        mockDb: mockDb,
-        inventories: [
-          {'id': 1, 'name': 'Home'},
-        ],
-      ),
+      overrides: [
+        ..._homeScreenOverrides(
+          mockDb: mockDb,
+          inventories: [
+            {'id': 1, 'name': 'Home'},
+          ],
+        ),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+        apiServiceProvider.overrideWithValue(mockApi),
+        usdaApiClientProvider.overrideWithValue(_MockUsdaApiClient()),
+      ],
     );
 
-    await tester.enterText(find.byType(TextField), 'XYZ');
-    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
 
-    expect(find.text('No items match your search'), findsOneWidget);
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pump();
+
+    expect(find.byType(QuickAddProduce), findsOneWidget);
+    expect(find.byType(DropdownButton<SearchSource>), findsNothing);
   });
 
   testWidgets('inventory switcher popup selects a different inventory', (

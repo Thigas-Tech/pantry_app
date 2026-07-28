@@ -28,7 +28,7 @@ class OnboardingFlow extends StatefulWidget {
   /// Opens the product search screen.
   final VoidCallback onSearchProduct;
 
-  /// Opens the SearchScreen with a produce filter.
+  /// Opens the search screen.
   final VoidCallback onAddProduce;
 
   /// Completes the onboarding flow.

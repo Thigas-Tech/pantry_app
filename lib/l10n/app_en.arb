@@ -274,11 +274,21 @@
   "submissionError": "Failed to submit product. Tap to retry.",
   "navHome": "Home",
   "navSearch": "Search",
+  "navRecipes": "Recipes",
   "navStats": "Stats",
   "navSettings": "Settings",
   "searchTitle": "Search Products",
   "searchProductsHint": "Search for products by name or barcode",
   "noSearchResults": "No products found matching your search",
+  "productNotFoundSearch": "No products found in Packaged Products.",
+  "productNotFoundBarcodeHint": "Try scanning or entering the product\u2019s barcode.",
+  "productNotFoundOfflineHint": "Search requires an internet connection.",
+  "enterBarcodePrompt": "Type or paste a barcode number",
+  "productNotInDatabase": "This barcode is not registered with Open Food Facts.",
+  "productNotInDatabaseHint": "You can still use this product locally.",
+  "contributeToOffComingSoonTitle": "Coming Soon",
+  "contributeToOffComingSoonBody": "Direct product contribution to Open Food Facts is not yet available. A GitHub issue has been created to track this feature.",
+  "saveLocallyAction": "Save Locally",
   "totalItemsCount": "Total items: {count}",
   "@totalItemsCount": {
     "placeholders": {
@@ -427,7 +437,7 @@
   "logsPrivacyNote": "Logs may contain product names and timestamps.",
   "price": "Price",
   "prices": "Prices",
-  "addPrice": "Add price",
+  "addPrice": "Price saved",
   "editPrice": "Edit price",
   "deletePrice": "Delete price",
   "priceAdded": "Price added.",
@@ -531,38 +541,49 @@
   "addCustomItem": "Add custom item",
   "noProductsFound": "No products found. Try a custom item.",
   "backToSearch": "Back to search",
-  "addPrice": "Price saved",
   "removePrice": "Price removed",
   "shoppingTotal": "Total: {total}",
   "@shoppingTotal": {
     "placeholders": {
-      "total": {"type": "String"}
+      "total": {
+        "type": "String"
+      }
     }
   },
   "shoppingMixedCurrency": "{total}",
   "@shoppingMixedCurrency": {
     "placeholders": {
-      "total": {"type": "String"}
+      "total": {
+        "type": "String"
+      }
     }
   },
   "addToInventoryFromList": "Add to pantry",
   "addToInventoryConfirm": "Add {count} items to your pantry? Prices will be saved.{skipped, plural, =0{} =1{ 1 item without a barcode will stay in your list.} other{ {skipped} items without a barcode will stay in your list.}}",
   "@addToInventoryConfirm": {
     "placeholders": {
-      "count": {"type": "int"},
-      "skipped": {"type": "int"}
+      "count": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "itemsMovedToInventory": "{count, plural, =1{1 item added to pantry} other{{count} items added to pantry}}",
   "@itemsMovedToInventory": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "itemsSkippedNoBarcode": "{count, plural, =1{1 item left — add a barcode or create a product to move it} other{{count} items left — add a barcode or create a product to move them}}",
   "@itemsSkippedNoBarcode": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "addToPantryAfterPrice": "Add to your pantry?",
@@ -741,7 +762,6 @@
   "ingredientQuantity": "Qty",
   "ingredientUnit": "Unit",
   "addIngredient": "Add ingredient",
-  "fromYourPantry": "From your pantry",
   "selectFromPantry": "Select items from your pantry",
   "addSelected": "Add selected",
   "servings": "Servings",
@@ -777,20 +797,15 @@
   "recipeCostUnknown": "Unknown",
   "recipeAverageCost": "Average recipe cost",
   "ingredientCount": "{count, plural, one{{count} ingredient} other{{count} ingredients}}",
-
   "deleteRecipeConfirm": "Delete this recipe?",
-
   "madeRecipe": "I made this",
   "cookRecipeSuccess": "Recipe made",
   "recipeCookFailed": "Failed to cook recipe",
-
   "confirmDiscard": "Discard changes?",
   "confirmDiscardContent": "You have unsaved changes. Are you sure you want to go back?",
-
   "searchProduct": "Search product",
   "history": "History",
   "noHistory": "No cooking history yet",
-
   "onboardingPage1Title": "Scan Barcodes",
   "onboardingPage1Desc": "Quickly add products to your pantry by scanning their barcodes with your camera.",
   "onboardingPage1Cta": "Open Scanner",
@@ -808,8 +823,12 @@
   "onboardingPage5Cta": "Get Started",
   "onboardingSkip": "Skip",
   "onboardingBack": "Back",
-  "searchFilterAll": "All",
-  "searchFilterProduce": "Produce",
-  "searchFilterBarcoded": "Barcoded",
-  "searchFilterInPantry": "In Pantry"
+  "searchSourceLabel": "Search in",
+  "searchSourceOff": "Packaged Products",
+  "searchSourceUsda": "Fresh Produce",
+  "searchSourceInventory": "My Pantry",
+  "inPantryIndicator": "In Pantry",
+  "inPantryFilter": "In Pantry",
+  "inPantryEmpty": "No products in your pantry match this search",
+  "inPantrySwipeLabel": "Already in pantry"
 }

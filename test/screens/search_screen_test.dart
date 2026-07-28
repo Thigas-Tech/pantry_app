@@ -15,20 +15,32 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/models/search_filter.dart';
 
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/usda_api_client.dart';
 import '../helpers/pump_app.dart';
 
-class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+class MockDatabaseHelper extends Mock implements DatabaseHelper {
+  MockDatabaseHelper() {
+    when(
+      () =>
+          getBarcodesInInventory(any(), inventoryId: any(named: 'inventoryId')),
+    ).thenAnswer((_) async => <String>{});
+  }
+}
 
 class MockOffAdapter extends Mock implements OffAdapter {}
+
+class MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
 /// A helper widget that watches [pantryProvider] and counts
 /// rebuilds so test assertions can detect when the provider is invalidated.
@@ -52,6 +64,7 @@ class _ProviderWatcher extends ConsumerWidget {
 void main() {
   late MockDatabaseHelper mockDb;
   late MockOffAdapter mockApi;
+  late MockUsdaApiClient mockUsda;
 
   const localProduct = Product(
     barcode: '001',
@@ -78,6 +91,7 @@ void main() {
   setUp(() {
     mockDb = MockDatabaseHelper();
     mockApi = MockOffAdapter();
+    mockUsda = MockUsdaApiClient();
 
     when(() => mockDb.searchProducts(any())).thenAnswer((_) async => []);
     when(
@@ -92,16 +106,14 @@ void main() {
     WidgetTester tester, {
     List<Override> extraOverrides = const [],
     Widget Function(Widget)? wrap,
-    SearchFilter? initialFilter,
   }) async {
     await pumpApp(
       tester,
-      wrap != null
-          ? wrap(SearchScreen(initialFilter: initialFilter))
-          : SearchScreen(initialFilter: initialFilter),
+      wrap != null ? wrap(const SearchScreen()) : const SearchScreen(),
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         apiServiceProvider.overrideWithValue(mockApi),
+        usdaApiClientProvider.overrideWithValue(mockUsda),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         ...extraOverrides,
       ],
@@ -250,7 +262,9 @@ void main() {
   });
 
   group('empty state', () {
-    testWidgets('shows search_off icon when no results found', (tester) async {
+    testWidgets('shows product not found flow for OFF source', (
+      tester,
+    ) async {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'zzzzz');
@@ -259,10 +273,11 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(
-        find.text('No products found matching your search'),
+        find.text('No products found in Packaged Products.'),
         findsOneWidget,
       );
-      expect(find.byIcon(Icons.search_off), findsOneWidget);
+      expect(find.text('Scan Barcode'), findsOneWidget);
+      expect(find.text('Enter Barcode'), findsOneWidget);
     });
   });
 
@@ -688,118 +703,185 @@ void main() {
     );
   });
 
-  group('filter', () {
-    testWidgets('no dropdown when initialFilter is null', (tester) async {
+  group('source filter', () {
+    testWidgets('shows source dropdown by default', (tester) async {
       await pumpSearchScreen(tester);
 
-      expect(find.byType(DropdownButton<SearchFilter>), findsNothing);
+      expect(find.byType(DropdownButton<SearchSource>), findsOneWidget);
+      expect(find.text('Packaged Products'), findsOneWidget);
     });
 
-    testWidgets('dropdown visible with correct initial selection', (
+    testWidgets('switching source re-runs search for active query', (
       tester,
     ) async {
-      await pumpSearchScreen(tester, initialFilter: SearchFilter.produce);
-
-      expect(find.byType(DropdownButton<SearchFilter>), findsOneWidget);
-      expect(find.text('Produce'), findsOneWidget);
-    });
-
-    testWidgets('produce filter shows only produce results', (tester) async {
       when(
-        () => mockDb.searchProducts('carrot'),
-      ).thenAnswer((_) async => [produceProduct, localProduct]);
+        () => mockDb.searchProducts('milk'),
+      ).thenAnswer((_) async => [localProduct]);
       when(
         () => mockApi.searchProducts(
-          'carrot',
+          'milk',
           pageSize: any(named: 'pageSize'),
         ),
       ).thenAnswer((_) async => []);
+      when(() => mockUsda.searchFood(any())).thenAnswer((_) async => []);
 
-      await pumpSearchScreen(tester, initialFilter: SearchFilter.produce);
+      await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(SearchBar), 'carrot');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
-      // Carrot (produce) should be visible
-      expect(find.text('Carrot'), findsOneWidget);
-      // Milk (barcoded) should NOT be visible
+      expect(find.text('Local Milk'), findsOneWidget);
+
+      // Open the source dropdown and select USDA
+      await tester.tap(find.byType(DropdownButton<SearchSource>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Fresh Produce').last);
+      await tester.pumpAndSettle();
+
+      // OFF results are cleared, USDA source returns nothing
       expect(find.text('Local Milk'), findsNothing);
     });
+  });
 
-    testWidgets('barcoded filter shows only barcoded results', (tester) async {
-      when(
-        () => mockDb.searchProducts('carrot'),
-      ).thenAnswer((_) async => [produceProduct, localProduct]);
-      when(
-        () => mockApi.searchProducts(
-          'carrot',
-          pageSize: any(named: 'pageSize'),
-        ),
-      ).thenAnswer((_) async => []);
-
-      await pumpSearchScreen(
-        tester,
-        initialFilter: SearchFilter.barcodedProducts,
+  group('inPantry filter chip', () {
+    testWidgets('shows filter chip when results exist', (tester) async {
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [localProduct],
       );
-
-      await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.pump(const Duration(milliseconds: 550));
-      await tester.pump();
-
-      expect(find.text('Local Milk'), findsOneWidget);
-      expect(find.text('Carrot'), findsNothing);
-    });
-
-    testWidgets('all filter shows every result', (tester) async {
-      when(
-        () => mockDb.searchProducts('carrot'),
-      ).thenAnswer((_) async => [produceProduct, localProduct]);
       when(
         () => mockApi.searchProducts(
-          'carrot',
+          'milk',
           pageSize: any(named: 'pageSize'),
         ),
       ).thenAnswer((_) async => []);
+      when(
+        () => mockDb.getBarcodesInInventory(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => <String>{});
 
-      await pumpSearchScreen(tester, initialFilter: SearchFilter.all);
+      await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(SearchBar), 'carrot');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
-      expect(find.text('Carrot'), findsOneWidget);
-      expect(find.text('Local Milk'), findsOneWidget);
+      expect(find.text('In Pantry'), findsOneWidget);
     });
 
-    testWidgets('switching dropdown filter updates results', (tester) async {
-      when(
-        () => mockDb.searchProducts('carrot'),
-      ).thenAnswer((_) async => [produceProduct, localProduct]);
+    testWidgets('filter chip hidden when results empty', (tester) async {
+      await pumpSearchScreen(tester);
+
+      expect(find.text('In Pantry'), findsNothing);
+    });
+
+    testWidgets('activating filter hides non-pantry results', (tester) async {
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [localProduct],
+      );
       when(
         () => mockApi.searchProducts(
-          'carrot',
+          'milk',
           pageSize: any(named: 'pageSize'),
         ),
       ).thenAnswer((_) async => []);
+      when(
+        () => mockDb.getBarcodesInInventory(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => <String>{});
 
-      await pumpSearchScreen(tester, initialFilter: SearchFilter.all);
+      await pumpSearchScreen(tester);
 
-      await tester.enterText(find.byType(SearchBar), 'carrot');
+      await tester.enterText(find.byType(SearchBar), 'milk');
       await tester.pump(const Duration(milliseconds: 550));
       await tester.pump();
 
-      expect(find.text('Carrot'), findsOneWidget);
       expect(find.text('Local Milk'), findsOneWidget);
 
-      // Switch to produce filter
-      await tester.tap(find.byType(DropdownButton<SearchFilter>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Produce').last);
-      await tester.pumpAndSettle();
+      // Toggle filter chip on
+      await tester.tap(find.text('In Pantry'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Carrot'), findsOneWidget);
+      // Result is not in pantry, so it should be hidden
       expect(find.text('Local Milk'), findsNothing);
+      expect(
+        find.text('No products in your pantry match this search'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('deactivating filter shows all results again', (tester) async {
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [localProduct],
+      );
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+      when(
+        () => mockDb.getBarcodesInInventory(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => <String>{});
+
+      await pumpSearchScreen(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+
+      // Toggle filter on, then off
+      await tester.tap(find.text('In Pantry'));
+      await tester.pump();
+      await tester.tap(find.text('In Pantry'));
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsOneWidget);
+    });
+
+    testWidgets('filter resets on new search', (tester) async {
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [localProduct],
+      );
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+      when(
+        () => mockDb.getBarcodesInInventory(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => <String>{});
+
+      await pumpSearchScreen(tester);
+
+      // First search and activate filter
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+      await tester.tap(find.text('In Pantry'));
+      await tester.pump();
+
+      // Clear and search again
+      await tester.tap(find.byIcon(Icons.clear));
+      await tester.pump();
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.pump();
+
+      // Filter chip should be present but NOT selected (filter off)
+      expect(find.text('Local Milk'), findsOneWidget);
     });
   });
 }

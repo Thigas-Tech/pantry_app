@@ -2,6 +2,98 @@
 
 ## To be released:
 
+### Added
+
+- **SearchFilterNotifier provider**: `searchFilterProvider` — a
+  `NotifierProvider<SearchFilterNotifier, SearchFilter>` that exposes the
+  current [SearchFilter] via a shared Riverpod provider, with
+  `addListener`/`removeListener` for external callers.
+  (`lib/providers/search_filter_provider.dart`)
+- **SearchPanel widget**: reusable search UI extracted into
+  `lib/widgets/search_panel.dart`. Supports standalone usage (via
+  `SearchScreen` route), inline mode (embedded in `HomeScreen` with
+  `onProductSelected` callback), and picker mode (`selectMode` pops with the
+  selected product). (`lib/widgets/search_panel.dart`)
+- **SearchPanel picker support**: new `selectMode`, `autoFocus`,
+  `showBackButton`, and `onBack` parameters for flexible embedding.
+  (`lib/widgets/search_panel.dart`)
+- **ProductPickerScreen**: full-screen product picker wrapping `SearchPanel`
+  in select mode, used by the recipe form for ingredient selection.
+  (`lib/screens/product_picker_screen.dart`)
+- **SearchFilter.inPantry**: filters search results to show only products
+  already in the active inventory. (`lib/screens/search_screen.dart`)
+- **UsdaApiClient provider**: `usdaApiClientProvider` for injectable USDA
+  searches. (`lib/providers/usda_provider.dart`)
+- **NotFoundFlow widget**: progressive-disclosure flow shown when OFF search
+  returns no results. Guides users through barcode scanning, manual barcode
+  entry, and offers to contribute to OFF (stub) or save locally.
+  (`lib/widgets/not_found_flow.dart`, `lib/widgets/not_found_flow_test.dart`)
+
+### Changed
+
+ 
+- **inPantry search cross-reference**: search results from OFF and USDA are
+  now batch-checked against the active inventory. Results already in the
+  pantry show a kitchen icon indicator, and a "In Pantry" `FilterChip`
+  toggles the list to show only those results. Swipe-to-add background
+  turns blue (instead of green) for items already in the pantry.
+  (`lib/widgets/search_panel.dart`, `lib/database/database_helper.dart`)
+- **Category filter removed**: the `SearchFilter` dropdown (All, Produce,
+  Barcoded, In Pantry) was redundant with the source selector and has been
+  removed. The source dropdown (Packaged Products, Fresh Produce, My Pantry)
+  already determines the product category. The `searchFilterProvider` and
+  `SearchFilter` enum have been deleted.
+  (`lib/widgets/search_panel.dart`)
+
+
+- **Source filter labels**: renamed from API names to user-friendly labels
+  — "Open Food Facts" → "Packaged Products", "USDA" → "Fresh Produce".
+  (`lib/l10n/*.arb`)
+- **Source filter**: replaced oversized `SegmentedButton` with a compact
+  `DropdownButton` — no horizontal scrolling needed.
+  (`lib/widgets/search_panel.dart`)
+- **Home screen inline search**: home search bar is now functional — tapping
+  activates inline search mode, replacing home content with `SearchPanel`.
+  Tapping a result restores the normal view before navigating to
+  `ProductDetailScreen`. Back button / hardware back exits search mode.
+  (`lib/screens/home_screen.dart`)
+- **Home screen AppBar**: no longer changes when search mode activates
+  (back arrow moved into the search bar leading instead).
+  (`lib/screens/home_screen.dart`)
+- **Recipe ingredient search**: now uses `ProductPickerScreen` (backed by
+  `SearchPanel` with full source and category filters) instead of the
+  standalone `SearchIngredientSheet` bottom sheet.
+  (`lib/screens/recipe_form_screen.dart`)
+- **SearchScreen**: simplified to a thin wrapper around `SearchPanel`
+  (still used from onboarding and FAB entry points).
+  (`lib/screens/search_screen.dart`)
+- **Search empty state for OFF source**: now shows `NotFoundFlow` widget
+  with barcode scanning/entry options instead of a generic empty state.
+  (`lib/widgets/search_panel.dart`, `lib/widgets/not_found_flow.dart`)
+- **searchSourceLabel ARB**: removed trailing colon from value (code already
+  appends `': '`), fixing double-colon rendering.
+  (`lib/l10n/app_en.arb`, `app_pt.arb`, `app_pt_BR.arb`)
+- **Portuguese ARB translations**: filled in missing translations for
+  `searchSourceLabel`, `searchSourceInventory`, and added translations for
+  renamed source labels. (`lib/l10n/app_pt.arb`, `app_pt_BR.arb`)
+- **Shell navigation**: Recipes tab replaces Search in the bottom navigation bar
+  (new `navRecipes` ARB key). Search is now accessed from the home screen search
+  bar. (`lib/screens/pantry_shell.dart`, `lib/l10n/*.arb`)
+- **HomeScreenController**: removed `searchQuery` state and `setSearchQuery` /
+  `filterItems` methods (no longer used). (`lib/providers/home_screen_controller.dart`)
+- **RecipeListScreen**: added `AutomaticKeepAliveClientMixin` to preserve scroll
+  state when switching tabs. (`lib/screens/recipe_list_screen.dart`)
+- **SearchFilter enum**: moved to `lib/models/search_filter.dart` for shared
+  access. (`lib/models/search_filter.dart`)
+
+### Removed
+
+- **SearchIngredientSheet**: replaced by `ProductPickerScreen` backed by
+  `SearchPanel`. (`lib/widgets/search_ingredient_sheet.dart`)
+- **search_filter_provider**: removed `SearchFilterNotifier` and
+  `SearchSourceNotifier` — `SearchPanel` manages filter/source state locally.
+  (`lib/providers/search_filter_provider.dart`)
+
 ### Changed
 
 - **Progress indicators**: all 22 `CircularProgressIndicator` and

@@ -1057,4 +1057,81 @@ void main() {
       tempDir.deleteSync(recursive: true);
     });
   });
+
+  group('getBarcodesInInventory', () {
+    setUp(() async {
+      // Insert products first (FK constraint).
+      await db.insertProduct(
+        const Product(barcode: 'barcode1', name: 'Product 1'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'barcode2', name: 'Product 2'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'barcode3', name: 'Product 3'),
+      );
+
+      // Insert inventory items across two inventories.
+      final workId = await db.createInventory('Work');
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'barcode1'),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'barcode2'),
+      );
+      await db.insertInventoryItem(
+        InventoryItem(barcode: 'barcode3', inventoryId: workId),
+      );
+    });
+
+    test('returns matching barcodes for the active inventory', () async {
+      final result = await db.getBarcodesInInventory(
+        {'barcode1', 'barcode2', 'barcode3'},
+        inventoryId: 1,
+      );
+
+      expect(result, containsAll({'barcode1', 'barcode2'}));
+    });
+
+    test('returns empty set when no barcodes match', () async {
+      final result = await db.getBarcodesInInventory(
+        {'nonexistent'},
+        inventoryId: 1,
+      );
+
+      expect(result, isEmpty);
+    });
+
+    test('excludes barcodes in other inventories', () async {
+      final result = await db.getBarcodesInInventory(
+        {'barcode1', 'barcode2', 'barcode3'},
+        inventoryId: 1,
+      );
+
+      expect(result, isNot(contains('barcode3')));
+    });
+
+    test('handles empty input set', () async {
+      final result = await db.getBarcodesInInventory(
+        <String>{},
+        inventoryId: 1,
+      );
+
+      expect(result, isEmpty);
+    });
+
+    test('returns distinct barcodes when duplicates exist', () async {
+      // Insert a duplicate of barcode1.
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'barcode1'),
+      );
+
+      final result = await db.getBarcodesInInventory(
+        {'barcode1', 'barcode2'},
+        inventoryId: 1,
+      );
+
+      expect(result, hasLength(2));
+    });
+  });
 }

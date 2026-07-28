@@ -258,6 +258,7 @@
   "submissionError": "Falha ao enviar o produto. Toque pra tentar de novo.",
   "navHome": "Início",
   "navSearch": "Buscar",
+  "navRecipes": "Receitas",
   "navStats": "Estatísticas",
   "navSettings": "Config",
   "searchTitle": "Buscar Produtos",
@@ -345,7 +346,7 @@
   "priceHidden": "Preco oculto",
   "add": "Adicionar",
   "addAgain": "Adicionar de novo",
-  "addPrice": "Adicionar preco",
+  "addPrice": "Preco salvo",
   "addShoppingItem": "Adicionar item",
   "addToShoppingList": "Adicionar a lista de compras",
   "addToShoppingListTooltip": "Lista de compras",
@@ -353,38 +354,49 @@
   "addCustomItem": "Adicionar item personalizado",
   "noProductsFound": "Nenhum produto encontrado. Tente um item personalizado.",
   "backToSearch": "Voltar a busca",
-  "addPrice": "Preco salvo",
   "removePrice": "Preco removido",
   "shoppingTotal": "Total: {total}",
   "@shoppingTotal": {
     "placeholders": {
-      "total": {"type": "String"}
+      "total": {
+        "type": "String"
+      }
     }
   },
   "shoppingMixedCurrency": "{total}",
   "@shoppingMixedCurrency": {
     "placeholders": {
-      "total": {"type": "String"}
+      "total": {
+        "type": "String"
+      }
     }
   },
   "addToInventoryFromList": "Adicionar a despensa",
   "addToInventoryConfirm": "Adicionar {count} itens a sua despensa? Os precos serao salvos.{skipped, plural, =0{} =1{ 1 item sem codigo de barras ficara na lista.} other{ {skipped} itens sem codigo de barras ficarao na lista.}}",
   "@addToInventoryConfirm": {
     "placeholders": {
-      "count": {"type": "int"},
-      "skipped": {"type": "int"}
+      "count": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
     }
   },
   "itemsMovedToInventory": "{count, plural, =1{1 item adicionado a despensa} other{{count} itens adicionados a despensa}}",
   "@itemsMovedToInventory": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "itemsSkippedNoBarcode": "{count, plural, =1{1 item restante — adicione um codigo de barras ou crie um produto} other{{count} itens restantes — adicione um codigo de barras ou crie um produto}}",
   "@itemsSkippedNoBarcode": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "amoledDarkMode": "Modo escuro AMOLED",
@@ -434,8 +446,8 @@
   "includeDeviceInfo": "Incluir informações do dispositivo",
   "ingredientsOriginal": "Show original ingredients",
   "ingredientsTranslated": "Show translated ingredients",
-  "invalidBarcode": "Digite um c\u00F3digo de barras v\u00E1lido.",
-  "invalidPriceAmount": "Digite um valor de pre\u00E7o v\u00E1lido",
+  "invalidBarcode": "Digite um código de barras válido.",
+  "invalidPriceAmount": "Digite um valor de preço válido",
   "issueCreate": "Criar issue",
   "issueDescription": "Descrição",
   "issueDescriptionRequired": "Descrição obrigatória (mín. 10 caracteres)",
@@ -451,7 +463,7 @@
   "markPurchased": "Marcar como comprado",
   "moveToInventory": "Mover para despensa",
   "noPrices": "Nenhum preco registrado.",
-  "notes": "Observa\u00E7\u00F5es",
+  "notes": "Observações",
   "notificationDeniedWarning": "Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.",
   "notificationPermissionBody": "Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.",
   "notificationPermissionTitle": "Permissao de Notificacao Necessaria",
@@ -603,8 +615,8 @@
   "categorySodas": "Refrigerantes",
   "categoryWaters": "Águas",
   "categoryMeatAndProducts": "Carnes e derivados",
-  "categoryBreakfasts": "Caf\u00E9s da manh\u00E3",
-  "categoryBread": "P\u00E3o",
+  "categoryBreakfasts": "Cafés da manhã",
+  "categoryBread": "Pão",
   "categoryCakes": "Bolos",
   "categoryCereals": "Cereais",
   "categoryChocolate": "Chocolate",
@@ -613,10 +625,10 @@
   "categoryFish": "Peixe",
   "categoryFruit": "Fruta",
   "categoryFruits": "Frutas",
-  "categoryGrains": "Gr\u00E3os",
+  "categoryGrains": "Grãos",
   "categoryHotBeverages": "Bebidas quentes",
   "categoryLegumes": "Leguminosas",
-  "categoryOils": "\u00D3leos",
+  "categoryOils": "Óleos",
   "categoryPasta": "Massas",
   "categoryPoultry": "Aves",
   "categorySeeds": "Sementes",
@@ -625,14 +637,14 @@
   "categorySweetSpreads": "Pastas doces",
   "categoryVegetables": "Vegetais",
   "categoryBiscuitsAndCrackers": "Biscoitos e bolachas",
-  "categoryLegumeOils": "\u00D3leos de leguminosas",
+  "categoryLegumeOils": "Óleos de leguminosas",
   "categoryUhtMilks": "Leites UHT",
   "categoryCannedSardines": "Sardinhas enlatadas",
   "categoryCerealFlours": "Farinhas de cereais",
   "categoryCerealStarches": "Amidos de cereais",
   "categoryCerealsAndProducts": "Cereais e seus produtos",
-  "categoryDairies": "Latic\u00EDnios",
-  "categoryInstantBeverages": "Bebidas instant\u00E2neas",
+  "categoryDairies": "Laticínios",
+  "categoryInstantBeverages": "Bebidas instantâneas",
   "categoryMilkfat": "Gordura do leite",
   "categoryStarches": "Amidos",
   "fromYourPantry": "Da sua despensa",
@@ -679,7 +691,6 @@
   "ingredientQuantity": "Qtd",
   "ingredientUnit": "Unidade",
   "addIngredient": "Adicionar ingrediente",
-  "fromYourPantry": "Da sua despensa",
   "selectFromPantry": "Selecione itens da sua despensa",
   "addSelected": "Adicionar selecionados",
   "saveRecipe": "Salvar receita",
@@ -694,14 +705,11 @@
   "recipeAverageCost": "Custo médio das receitas",
   "ingredientCount": "{count, plural, one{{count} ingrediente} other{{count} ingredientes}}",
   "deleteRecipeConfirm": "Excluir esta receita?",
-
   "madeRecipe": "Fiz esta receita",
   "cookRecipeSuccess": "Receita feita",
   "recipeCookFailed": "Erro ao preparar receita",
-
   "confirmDiscard": "Descartar alteracoes?",
   "confirmDiscardContent": "Voce tem alteracoes nao salvas. Tem certeza que deseja voltar?",
-
   "searchProduct": "Pesquisar produto",
   "servings": "Porcoes",
   "servingsHint": "ex.: 4",
@@ -727,7 +735,6 @@
   },
   "history": "Historico",
   "noHistory": "Nenhum historico de preparo ainda",
-
   "onboardingPage1Title": "Escanear Codigos de Barras",
   "onboardingPage1Desc": "Adicione rapidamente produtos a sua despensa escaneando os codigos de barras com sua camera.",
   "onboardingPage1Cta": "Abrir Scanner",
@@ -745,8 +752,21 @@
   "onboardingPage5Cta": "Comecar",
   "onboardingSkip": "Pular",
   "onboardingBack": "Voltar",
-  "searchFilterAll": "Todos",
-  "searchFilterProduce": "Frescos",
-  "searchFilterBarcoded": "Com Codigo",
-  "searchFilterInPantry": "Na Despensa"
+  "searchSourceLabel": "Pesquisar em",
+  "searchSourceOff": "Produtos Embalados",
+  "searchSourceUsda": "Produtos Frescos",
+  "searchSourceInventory": "Minha Despensa",
+  "productNotFoundSearch": "Nenhum produto encontrado em Produtos Embalados.",
+  "productNotFoundBarcodeHint": "Tente escanear ou digitar o codigo de barras do produto.",
+  "productNotFoundOfflineHint": "A pesquisa requer conexao com a internet.",
+  "enterBarcodePrompt": "Digite ou cole um codigo de barras",
+  "productNotInDatabase": "Este codigo de barras nao esta registrado no Open Food Facts.",
+  "productNotInDatabaseHint": "Voce ainda pode usar este produto localmente.",
+  "contributeToOffComingSoonTitle": "Em Breve",
+  "contributeToOffComingSoonBody": "A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.",
+  "saveLocallyAction": "Salvar Localmente",
+  "inPantryIndicator": "Na Despensa",
+  "inPantryFilter": "Na Despensa",
+  "inPantryEmpty": "Nenhum produto na sua despensa corresponde a esta pesquisa",
+  "inPantrySwipeLabel": "Ja na despensa"
 }

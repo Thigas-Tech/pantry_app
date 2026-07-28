@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -10,7 +9,6 @@ import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/services/produce_purchase_tracker.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/search_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_screen_controller.g.dart';
@@ -21,7 +19,6 @@ class HomeScreenState {
   const HomeScreenState({
     this.selectionMode = false,
     this.selectedIds = const {},
-    this.searchQuery = '',
     this.loadingProduce = const {},
   });
 
@@ -31,9 +28,6 @@ class HomeScreenState {
   /// The set of selected inventory item IDs.
   final Set<int> selectedIds;
 
-  /// The current search query text.
-  final String searchQuery;
-
   /// Produce names currently being resolved (loading indicator shown).
   final Set<String> loadingProduce;
 
@@ -41,13 +35,11 @@ class HomeScreenState {
   HomeScreenState copyWith({
     bool? selectionMode,
     Set<int>? selectedIds,
-    String? searchQuery,
     Set<String>? loadingProduce,
   }) {
     return HomeScreenState(
       selectionMode: selectionMode ?? this.selectionMode,
       selectedIds: selectedIds ?? this.selectedIds,
-      searchQuery: searchQuery ?? this.searchQuery,
       loadingProduce: loadingProduce ?? this.loadingProduce,
     );
   }
@@ -62,11 +54,6 @@ class HomeScreenState {
 class HomeScreenController extends _$HomeScreenController {
   @override
   HomeScreenState build() => const HomeScreenState();
-
-  /// Updates the search query in state.
-  void setSearchQuery(String query) {
-    state = state.copyWith(searchQuery: query);
-  }
 
   /// Exits multi-selection mode and clears the selection.
   void exitSelectionMode() {
@@ -89,24 +76,6 @@ class HomeScreenController extends _$HomeScreenController {
     if (!state.selectionMode) {
       state = state.copyWith(selectionMode: true, selectedIds: {id});
     }
-  }
-
-  /// Filters [items] to those matching the current search query.
-  List<InventoryWithProduct> filterItems(List<InventoryWithProduct> items) {
-    if (state.searchQuery.isEmpty) return items;
-    final q = normalizeForSearch(state.searchQuery);
-    return items.where((item) {
-      final searchText =
-          item.productSearchText ??
-          normalizeForSearch(
-            [
-              item.productName,
-              item.barcode,
-              item.productCategory,
-            ].whereType<String>().join(' '),
-          );
-      return searchText.contains(q);
-    }).toList();
   }
 
   /// Deletes all selected inventory items from the database.

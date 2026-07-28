@@ -516,6 +516,26 @@ class DatabaseHelper {
     return inventoryDao.listByBarcode(db, barcode, inventoryId: inventoryId);
   }
 
+  /// Returns the set of barcodes from [barcodes] that have at least one
+  /// inventory entry in the given [inventoryId].
+  ///
+  /// Useful for batch-checking whether search results already exist in the
+  /// active pantry. Returns an empty set when [barcodes] is empty.
+  Future<Set<String>> getBarcodesInInventory(
+    Set<String> barcodes, {
+    required int inventoryId,
+  }) async {
+    if (barcodes.isEmpty) return {};
+    final placeholders = barcodes.map((_) => '?').join(',');
+    final db = await database;
+    final rows = await db.rawQuery(
+      'SELECT DISTINCT barcode FROM inventory '
+      'WHERE barcode IN ($placeholders) AND inventory_id = ?',
+      [...barcodes, inventoryId],
+    );
+    return rows.map((r) => r['barcode']! as String).toSet();
+  }
+
   /// Returns distinct product barcodes and names from the active inventory,
   /// limited to the most recent [limit] entries.
   Future<List<Map<String, dynamic>>> getDistinctProductsFromInventory({
