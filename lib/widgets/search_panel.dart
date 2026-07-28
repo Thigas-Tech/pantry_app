@@ -406,7 +406,9 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
           )
           .then((_) {
             if (!context.mounted) return;
-            ref.invalidate(pantryProvider);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.invalidate(pantryProvider);
+            });
           }),
     );
   }

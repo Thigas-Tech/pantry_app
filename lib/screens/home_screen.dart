@@ -130,21 +130,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Future<void> _onHomeProductSelected(Product product) async {
     if (!_isSearchActive) return;
-    setState(() => _isSearchActive = false);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(
-        Navigator.of(context)
-            .push<void>(
-              MaterialPageRoute(
-                builder: (_) => ProductDetailScreen(product: product),
-              ),
-            )
-            .then((_) {
-              if (mounted) ref.invalidate(pantryProvider);
-            }),
-      );
-    });
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => ProductDetailScreen(product: product),
+      ),
+    );
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.invalidate(pantryProvider);
+      });
+    }
   }
 
   void _showActionSheet() {
