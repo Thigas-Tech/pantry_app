@@ -43,6 +43,10 @@ import 'package:pantry_app/widgets/not_found_flow.dart';
 ///     ingredient selection.
 class SearchPanel extends ConsumerStatefulWidget {
   /// Creates a [SearchPanel].
+  ///
+  /// [searchDebounceDuration] controls how long to wait after the last
+  /// keystroke before triggering a search. Defaults to 2 seconds. Pressing
+  /// Enter in the search bar bypasses this delay.
   const SearchPanel({
     super.key,
     this.onProductSelected,
@@ -50,6 +54,7 @@ class SearchPanel extends ConsumerStatefulWidget {
     this.autoFocus = false,
     this.showBackButton = false,
     this.onBack,
+    this.searchDebounceDuration = const Duration(milliseconds: 2000),
   });
 
   /// Called when a product result is tapped, instead of pushing
@@ -69,6 +74,10 @@ class SearchPanel extends ConsumerStatefulWidget {
   /// Called when the back arrow is tapped (only when [showBackButton] is
   /// true).
   final VoidCallback? onBack;
+
+  /// How long to wait after the last keystroke before triggering a search.
+  /// Pressing Enter bypasses this delay.
+  final Duration searchDebounceDuration;
 
   @override
   ConsumerState<SearchPanel> createState() => _SearchPanelState();
@@ -109,7 +118,17 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
     }
     _requestId++;
     _filterInPantryOnly = false;
-    _debounce = Timer(const Duration(milliseconds: 500), () => _search(query));
+    _debounce = Timer(widget.searchDebounceDuration, () => _search(query));
+  }
+
+  void _onSearchSubmitted(String value) {
+    _debounce?.cancel();
+    _graceTimer?.cancel();
+    final query = value.trim();
+    if (query.isEmpty) return;
+    _requestId++;
+    _filterInPantryOnly = false;
+    unawaited(_search(query));
   }
 
   Future<void> _search(String query) async {
@@ -605,6 +624,7 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
                 ),
             ],
             onChanged: _onSearchChanged,
+            onSubmitted: _onSearchSubmitted,
             textInputAction: TextInputAction.search,
             autoFocus: widget.autoFocus,
           ),

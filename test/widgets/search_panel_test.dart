@@ -64,6 +64,7 @@ void main() {
 
   Future<void> pumpPanel(
     WidgetTester tester, {
+    Duration debounceDuration = const Duration(milliseconds: 2000),
     List<Override> extraOverrides = const [],
     void Function(Product)? onProductSelected,
   }) async {
@@ -71,6 +72,7 @@ void main() {
       tester,
       Scaffold(
         body: SearchPanel(
+          searchDebounceDuration: debounceDuration,
           onProductSelected: onProductSelected,
         ),
       ),
@@ -108,7 +110,7 @@ void main() {
       await pumpPanel(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -136,7 +138,7 @@ void main() {
       );
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       await tester.tap(find.text('Local Milk'));
@@ -191,7 +193,7 @@ void main() {
       await tester.pump();
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -209,7 +211,8 @@ void main() {
       await pumpPanel(tester);
 
       await tester.enterText(find.byType(SearchBar), 'unknownproduct');
-      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump(const Duration(milliseconds: 1100));
       await tester.pump();
 
       expect(find.byType(NotFoundFlow), findsOneWidget);
@@ -231,7 +234,8 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(SearchBar), 'unknownproduce');
-      await tester.pump(const Duration(milliseconds: 1600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump(const Duration(milliseconds: 1100));
       await tester.pump();
 
       expect(find.byType(NotFoundFlow), findsNothing);
@@ -265,7 +269,7 @@ void main() {
       await pumpPanel(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -294,11 +298,61 @@ void main() {
       await pumpPanel(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
       expect(find.byIcon(Icons.kitchen), findsNothing);
+    });
+  });
+
+  group('search debounce and Enter key', () {
+    testWidgets('triggers search immediately on Enter key press', (
+      tester,
+    ) async {
+      when(
+        () => mockDb.searchProducts('milk'),
+      ).thenAnswer((_) async => [localProduct]);
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpPanel(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsOneWidget);
+    });
+
+    testWidgets('debounce fires after configured duration', (tester) async {
+      when(
+        () => mockDb.searchProducts('milk'),
+      ).thenAnswer((_) async => [localProduct]);
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpPanel(
+        tester,
+        debounceDuration: const Duration(milliseconds: 50),
+      );
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      // Not yet past debounce
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(find.text('Local Milk'), findsNothing);
+      // Just past debounce
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.pump();
+      expect(find.text('Local Milk'), findsOneWidget);
     });
   });
 }

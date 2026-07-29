@@ -255,6 +255,28 @@ abstract class Product with _$Product {
     /// - [ProductType.produce] — identified by PLU code as fresh produce.
     /// - [ProductType.custom] — manually entered by the user.
     @Default(ProductType.barcoded) ProductType productType,
+
+    /// The `amount` from the first USDA foodPortion (e.g. `1.0` for a single
+    /// apple). Populated by [UsdaApiClient.enrichProductWithServingData].
+    ///
+    /// Only meaningful for produce items fetched from USDA. Null for OFF
+    /// products, manually entered items, or when USDA has no portion data.
+    double? usdaServingAmount,
+
+    /// The `measureUnit.name` from the first USDA foodPortion
+    /// (e.g. `"fruit"`, `"cup"`, `"medium"`).
+    ///
+    /// Only meaningful for produce items fetched from USDA. Null for OFF
+    /// products, manually entered items, or when USDA has no portion data.
+    String? usdaServingUnit,
+
+    /// The `gramWeight` from the first USDA foodPortion (e.g. `182.0` for a
+    /// medium apple). This is the primary pre-fill value via
+    /// [QuantityParser.parseUsda].
+    ///
+    /// Only meaningful for produce items fetched from USDA. Null for OFF
+    /// products, manually entered items, or when USDA has no portion data.
+    double? usdaGramWeight,
   }) = _Product;
 
   /// Creates a [Product] from an SDK [off.Product].
@@ -391,6 +413,9 @@ extension ProductMerge on Product {
           nonEmpty(api.nutriscoreNotApplicableCategory) ??
           nutriscoreNotApplicableCategory,
       lastSynced: api.lastSynced ?? lastSynced,
+      usdaServingAmount: api.usdaServingAmount ?? usdaServingAmount,
+      usdaServingUnit: api.usdaServingUnit ?? usdaServingUnit,
+      usdaGramWeight: api.usdaGramWeight ?? usdaGramWeight,
     );
   }
 

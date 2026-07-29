@@ -120,7 +120,7 @@ void main() {
       await tester.pump();
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);

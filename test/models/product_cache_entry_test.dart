@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_cache_entry.dart';
+import 'package:pantry_app/models/product_type.dart';
 
 /// Tests for [ProductCacheEntry] and [ProductCacheEntryConversions].
 void main() {
@@ -245,6 +246,21 @@ void main() {
         expect(entry.languageCode, 'fr');
       });
 
+      test('copies USDA serving fields from Product', () {
+        const product = Product(
+          barcode: 'plu-1750339',
+          name: 'Apple',
+          productType: ProductType.produce,
+          usdaServingAmount: 1.0,
+          usdaServingUnit: 'fruit',
+          usdaGramWeight: 182.0,
+        );
+        final entry = ProductCacheEntryConversions.fromProduct(product);
+        expect(entry.usdaServingAmount, 1.0);
+        expect(entry.usdaServingUnit, 'fruit');
+        expect(entry.usdaGramWeight, 182.0);
+      });
+
       test('preserves provided createdAt', () {
         const product = Product(
           barcode: '7622210449283',
@@ -304,6 +320,23 @@ void main() {
         expect(product.offNutritionImageUrl, isNull);
         expect(product.offIngredientsImageUrl, isNull);
         expect(product.offProductImageUrl, isNull);
+      });
+
+      test('preserves USDA serving fields in toProduct', () {
+        const entry = ProductCacheEntry(
+          barcode: 'plu-1750339',
+          name: 'Apple',
+          createdAt: 1700000000000,
+          lastRefreshedAt: 1700000000000,
+          nextRefreshAt: 1708754400000,
+          usdaServingAmount: 1.0,
+          usdaServingUnit: 'fruit',
+          usdaGramWeight: 182.0,
+        );
+        final product = entry.toProduct();
+        expect(product.usdaServingAmount, 1.0);
+        expect(product.usdaServingUnit, 'fruit');
+        expect(product.usdaGramWeight, 182.0);
       });
 
       test('handles null categoriesHierarchy', () {

@@ -115,6 +115,16 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
 
     /// Schema version for forward compatibility.
     @Default(1) int schemaVersion,
+
+    /// The `amount` from the first USDA foodPortion (e.g. `1.0`).
+    @JsonKey(includeIfNull: false) double? usdaServingAmount,
+
+    /// The `measureUnit.name` from the first USDA foodPortion
+    /// (e.g. `"fruit"`, `"cup"`).
+    @JsonKey(includeIfNull: false) String? usdaServingUnit,
+
+    /// The `gramWeight` from the first USDA foodPortion (e.g. `182.0`).
+    @JsonKey(includeIfNull: false) double? usdaGramWeight,
   }) = _ProductCacheEntry;
 
   /// Private constructor for use by the freezed-generated subclass.
@@ -164,6 +174,9 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       offIngredientsImageUrl: product.offIngredientsImageUrl,
       offProductImageUrl: product.offProductImageUrl,
       languageCode: product.languageCode,
+      usdaServingAmount: product.usdaServingAmount,
+      usdaServingUnit: product.usdaServingUnit,
+      usdaGramWeight: product.usdaGramWeight,
     );
   }
 
@@ -194,6 +207,9 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       offProductImageUrl: offProductImageUrl,
       languageCode: languageCode,
       lastSynced: DateTime.now().millisecondsSinceEpoch,
+      usdaServingAmount: usdaServingAmount,
+      usdaServingUnit: usdaServingUnit,
+      usdaGramWeight: usdaGramWeight,
     );
   }
 

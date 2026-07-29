@@ -102,6 +102,64 @@ void main() {
     });
   });
 
+  group('QuantityParser.parseUsda', () {
+    test('returns gramWeight and g when gramWeight is present', () {
+      final result = QuantityParser.parseUsda(
+        usdaGramWeight: 182.0,
+        usdaServingAmount: 1.0,
+      );
+      expect(result, isNotNull);
+      expect(result!.amount, 182.0);
+      expect(result.unit, 'g');
+    });
+
+    test('ignores usdaServingAmount when gramWeight is present', () {
+      final result = QuantityParser.parseUsda(
+        usdaGramWeight: 150.0,
+        usdaServingAmount: 99.0,
+      );
+      expect(result, isNotNull);
+      expect(result!.amount, 150.0);
+      expect(result.unit, 'g');
+    });
+
+    test('returns null when gramWeight is null', () {
+      final result = QuantityParser.parseUsda(
+        usdaServingAmount: 1.0,
+        usdaServingUnit: 'fruit',
+      );
+      expect(result, isNull);
+    });
+
+    test('returns null when gramWeight is zero', () {
+      final result = QuantityParser.parseUsda(usdaGramWeight: 0);
+      expect(result, isNull);
+    });
+
+    test('returns null when gramWeight is negative', () {
+      final result = QuantityParser.parseUsda(usdaGramWeight: -5);
+      expect(result, isNull);
+    });
+
+    test('returns null when all fields are null', () {
+      expect(QuantityParser.parseUsda(), isNull);
+    });
+
+    test('handles fractional gram weights', () {
+      final result = QuantityParser.parseUsda(usdaGramWeight: 0.5);
+      expect(result, isNotNull);
+      expect(result!.amount, closeTo(0.5, 0.001));
+      expect(result.unit, 'g');
+    });
+
+    test('handles large gram weights', () {
+      final result = QuantityParser.parseUsda(usdaGramWeight: 3000);
+      expect(result, isNotNull);
+      expect(result!.amount, 3000);
+      expect(result.unit, 'g');
+    });
+  });
+
   group('QuantityParser.normalizeUnit', () {
     test('normalizes g -> g', () {
       expect(QuantityParser.normalizeUnit('g'), 'g');

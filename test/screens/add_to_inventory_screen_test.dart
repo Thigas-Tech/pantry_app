@@ -220,7 +220,9 @@ void main() {
       expect(quantityField.controller?.text, '7.0');
     });
 
-    testWidgets('does not pre-fill for produce type', (tester) async {
+    testWidgets('does not pre-fill for produce type without USDA data', (
+      tester,
+    ) async {
       final product = Product(
         barcode: 'produce-Apple',
         name: 'Apple',
@@ -240,8 +242,187 @@ void main() {
 
       final textFields = find.byType(TextField);
       final quantityField = tester.widget<TextField>(textFields.first);
-      // Produce should use default quantity (1), not the product data
+      // Produce without USDA data should use default quantity (1)
       expect(quantityField.controller?.text, '1.0');
+    });
+
+    group('USDA pre-fill for produce', () {
+      Product produceWithUsda({
+        double? usdaGramWeight,
+        double? usdaServingAmount,
+        String? usdaServingUnit,
+      }) {
+        return Product(
+          barcode: 'produce-Apple',
+          name: 'Apple',
+          productType: ProductType.produce,
+          usdaGramWeight: usdaGramWeight,
+          usdaServingAmount: usdaServingAmount,
+          usdaServingUnit: usdaServingUnit,
+        );
+      }
+
+      testWidgets('pre-fills quantity from USDA gramWeight for produce', (
+        tester,
+      ) async {
+        final product = produceWithUsda(usdaGramWeight: 182.0);
+        await _pumpScreen(
+          tester,
+          AddToInventoryScreen(
+            barcode: 'produce-Apple',
+            inventoryId: 1,
+            productType: ProductType.produce,
+            product: product,
+          ),
+        );
+
+        final textFields = find.byType(TextField);
+        final quantityField = tester.widget<TextField>(textFields.first);
+        expect(quantityField.controller?.text, '182.0');
+      });
+
+      testWidgets('switches to weight mode when USDA gramWeight available', (
+        tester,
+      ) async {
+        final product = produceWithUsda(usdaGramWeight: 182.0);
+        await _pumpScreen(
+          tester,
+          AddToInventoryScreen(
+            barcode: 'produce-Apple',
+            inventoryId: 1,
+            productType: ProductType.produce,
+            product: product,
+          ),
+        );
+
+        final segmentButton = tester.widget<SegmentedButton<bool>>(
+          find.byType(SegmentedButton<bool>),
+        );
+        // weight mode = selected contains true
+        expect(segmentButton.selected, contains(true));
+      });
+
+      testWidgets('leaves default quantity when USDA has no gramWeight', (
+        tester,
+      ) async {
+        final product = produceWithUsda(usdaServingAmount: 1.0);
+        await _pumpScreen(
+          tester,
+          AddToInventoryScreen(
+            barcode: 'produce-Apple',
+            inventoryId: 1,
+            productType: ProductType.produce,
+            product: product,
+          ),
+        );
+
+        final textFields = find.byType(TextField);
+        final quantityField = tester.widget<TextField>(textFields.first);
+        expect(quantityField.controller?.text, '1.0');
+      });
+
+      testWidgets('remains in unit mode when USDA has no gramWeight', (
+        tester,
+      ) async {
+        final product = produceWithUsda(usdaServingAmount: 1.0);
+        await _pumpScreen(
+          tester,
+          AddToInventoryScreen(
+            barcode: 'produce-Apple',
+            inventoryId: 1,
+            productType: ProductType.produce,
+            product: product,
+          ),
+        );
+
+        final segmentButton = tester.widget<SegmentedButton<bool>>(
+          find.byType(SegmentedButton<bool>),
+        );
+        // unit mode = selected contains false
+        expect(segmentButton.selected, contains(false));
+      });
+
+      testWidgets('does not pre-fill from USDA when editing existing item', (
+        tester,
+      ) async {
+        final product = produceWithUsda(usdaGramWeight: 182.0);
+        await _pumpScreen(
+          tester,
+          AddToInventoryScreen(
+            barcode: 'produce-Apple',
+            inventoryId: 1,
+            productType: ProductType.produce,
+            product: product,
+            existingItem: const InventoryItem(
+              barcode: 'produce-Apple',
+              quantity: 3,
+              unit: 'g',
+            ),
+          ),
+        );
+
+        final textFields = find.byType(TextField);
+        final quantityField = tester.widget<TextField>(textFields.first);
+        expect(quantityField.controller?.text, '3.0');
+      });
+
+      testWidgets(
+        'pre-fills from OFF for non-produce even with USDA data on product',
+        (
+          tester,
+        ) async {
+          final product = Product(
+            barcode: '123456789',
+            name: 'Test',
+            productType: ProductType.barcoded,
+            productQuantity: 500,
+            quantity: '500 ml',
+            usdaGramWeight: 200,
+          );
+          await _pumpScreen(
+            tester,
+            AddToInventoryScreen(
+              barcode: '123456789',
+              inventoryId: 1,
+              productType: ProductType.barcoded,
+              product: product,
+            ),
+          );
+
+          final textFields = find.byType(TextField);
+          final quantityField = tester.widget<TextField>(textFields.first);
+          expect(quantityField.controller?.text, '500.0');
+        },
+      );
+
+      testWidgets(
+        'pre-fills from USDA for produce even with OFF data on product',
+        (
+          tester,
+        ) async {
+          final product = Product(
+            barcode: 'produce-Apple',
+            name: 'Apple',
+            productType: ProductType.produce,
+            productQuantity: 500,
+            quantity: '500 ml',
+            usdaGramWeight: 182.0,
+          );
+          await _pumpScreen(
+            tester,
+            AddToInventoryScreen(
+              barcode: 'produce-Apple',
+              inventoryId: 1,
+              productType: ProductType.produce,
+              product: product,
+            ),
+          );
+
+          final textFields = find.byType(TextField);
+          final quantityField = tester.widget<TextField>(textFields.first);
+          expect(quantityField.controller?.text, '182.0');
+        },
+      );
     });
   });
 }

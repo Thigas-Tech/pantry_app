@@ -256,5 +256,92 @@ void main() {
         expect(merged.servingSize, '50 g');
       });
     });
+
+    group('USDA serving fields', () {
+      test('usdaServingAmount defaults to null', () {
+        const product = Product(barcode: '1', name: 'Test');
+        expect(product.usdaServingAmount, isNull);
+      });
+
+      test('usdaGramWeight defaults to null', () {
+        const product = Product(barcode: '1', name: 'Test');
+        expect(product.usdaGramWeight, isNull);
+      });
+
+      test('usdaServingUnit defaults to null', () {
+        const product = Product(barcode: '1', name: 'Test');
+        expect(product.usdaServingUnit, isNull);
+      });
+
+      test('USDA fields can be set via constructor', () {
+        const product = Product(
+          barcode: '1',
+          name: 'Apple',
+          productType: ProductType.produce,
+          usdaServingAmount: 1.0,
+          usdaServingUnit: 'fruit',
+          usdaGramWeight: 182.0,
+        );
+        expect(product.usdaServingAmount, 1.0);
+        expect(product.usdaServingUnit, 'fruit');
+        expect(product.usdaGramWeight, 182.0);
+      });
+
+      test('copyWith preserves USDA fields', () {
+        const product = Product(
+          barcode: '1',
+          name: 'Apple',
+          usdaGramWeight: 182.0,
+        );
+        final updated = product.copyWith(usdaGramWeight: 200.0);
+        expect(updated.usdaGramWeight, 200.0);
+        expect(updated.name, 'Apple');
+      });
+
+      test('copyWith clears USDA fields when set to null', () {
+        const product = Product(
+          barcode: '1',
+          name: 'Apple',
+          usdaGramWeight: 182.0,
+          usdaServingUnit: 'fruit',
+        );
+        final updated = product.copyWith(
+          usdaGramWeight: null,
+          usdaServingUnit: null,
+        );
+        expect(updated.usdaGramWeight, isNull);
+        expect(updated.usdaServingUnit, isNull);
+      });
+
+      test('mergeFromApi preserves USDA fields when API has them', () {
+        const cached = Product(barcode: '1', name: 'Old');
+        const api = Product(
+          barcode: '1',
+          name: 'Apple',
+          usdaServingAmount: 1.0,
+          usdaGramWeight: 182.0,
+          usdaServingUnit: 'fruit',
+        );
+        final merged = cached.mergeFromApi(api);
+        expect(merged.usdaServingAmount, 1.0);
+        expect(merged.usdaGramWeight, 182.0);
+        expect(merged.usdaServingUnit, 'fruit');
+      });
+
+      test('mergeFromApi keeps cached USDA fields when API has none', () {
+        const cached = Product(
+          barcode: '1',
+          name: 'Apple',
+          usdaServingAmount: 1.0,
+          usdaGramWeight: 182.0,
+          usdaServingUnit: 'fruit',
+        );
+        const api = Product(barcode: '1', name: 'Apple');
+        final merged = cached.mergeFromApi(api);
+        expect(merged.usdaServingAmount, 1.0);
+        expect(merged.usdaGramWeight, 182.0);
+        expect(merged.usdaServingUnit, 'fruit');
+      });
+    });
   });
 }

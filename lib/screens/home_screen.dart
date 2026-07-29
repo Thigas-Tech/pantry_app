@@ -12,7 +12,6 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/quick_add_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -28,13 +27,12 @@ import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
-import 'package:pantry_app/widgets/quick_add_produce.dart';
 import 'package:pantry_app/widgets/search_panel.dart';
 
 /// The main pantry screen showing inventory items grouped by expiry.
 ///
-/// Displays a search bar, produce quick-add carousel, inventory switcher,
-/// and a scrollable list of inventory cards grouped by expiry status.
+/// Displays a search bar, inventory switcher, and a scrollable list of
+/// inventory cards grouped by expiry status.
 class HomeScreen extends ConsumerStatefulWidget {
   /// Creates a [HomeScreen].
   const HomeScreen({super.key});
@@ -58,56 +56,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         ref.read(homeScreenControllerProvider.notifier).refreshIfOverdue(),
       );
     });
-  }
-
-  Future<void> _handleQuickProduceAdd(String produceName) async {
-    final notifier = ref.read(homeScreenControllerProvider.notifier);
-    final l10n = AppLocalizations.of(context)!;
-
-    final product = await notifier.handleQuickProduceAdd(produceName);
-
-    if (product != null && mounted) {
-      await Navigator.of(context).push<void>(
-        MaterialPageRoute(
-          builder: (_) => ProductDetailScreen(product: product),
-        ),
-      );
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref
-            ..invalidate(pantryProvider)
-            ..invalidate(quickAddItemsProvider);
-        });
-      }
-    } else if (mounted) {
-      SnackbarHelper.showError(context, l10n.couldNotResolveProduct);
-    }
-  }
-
-  List<Widget> _buildProduceCarousel(
-    AppLocalizations l10n,
-    List<String> items,
-  ) {
-    final controller = ref.watch(homeScreenControllerProvider);
-    final localizedItems = items
-        .map((e) => l10n.localizeProduceName(e))
-        .toList();
-
-    String resolveCallbackName(String displayName) {
-      for (var i = 0; i < localizedItems.length; i++) {
-        if (localizedItems[i] == displayName) return items[i];
-      }
-      return displayName;
-    }
-
-    return [
-      QuickAddProduce(
-        items: localizedItems,
-        loadingItems: controller.loadingProduce,
-        onProduceSelected: (localizedName) =>
-            _handleQuickProduceAdd(resolveCallbackName(localizedName)),
-      ),
-    ];
   }
 
   Widget _buildSearchBar(AppLocalizations l10n) {
@@ -230,7 +178,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     final inventories = ref.watch(inventoryListProvider);
     final averageNutriscore = ref.watch(averageNutriscoreProvider).value;
-    final quickAddItemsAsync = ref.watch(quickAddItemsProvider);
     final onboardingComplete = ref.watch(onboardingProvider);
 
     ref.listen(totalInventoryCountProvider, (prev, next) {
@@ -328,11 +275,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             : Column(
                 children: [
                   if (!controller.selectionMode) _buildSearchBar(l10n),
-                  if (!controller.selectionMode)
-                    ..._buildProduceCarousel(
-                      l10n,
-                      quickAddItemsAsync.asData?.value ?? [],
-                    ),
                   Expanded(
                     child: pantryAsync.when(
                       loading: () => Center(

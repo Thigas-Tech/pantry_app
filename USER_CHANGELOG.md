@@ -3,6 +3,12 @@
 - Quantity auto-fill: when adding a packaged product to your inventory, the
   quantity and unit fields are now automatically filled in from the product
   label. You can still change them if needed.
+- Produce serving weight: when adding fresh produce to your inventory, the
+  quantity now defaults to the typical serving weight (e.g. 182 g for an
+  apple). You can still change or switch to unit mode.
+- Removed produce carousel from the home screen: the row of quick-add chips
+  (Apple, Banana, Tomato, etc.) below the search bar is no longer shown.
+  Use the search bar or FAB menu to find and add produce instead.
 - inPantry indicator: search results from Packaged Products and Fresh Produce
   now show a pantry icon when you already own that product. A "In Pantry"
   filter chip lets you see only results already in your pantry. Swipe-to-add

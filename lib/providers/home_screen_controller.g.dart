@@ -10,25 +10,22 @@ part of 'home_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Notifier that manages ephemeral home screen UI state.
 ///
-/// Owns selection mode, search query, produce loading state, and the
-/// overdue cache refresh gate. Persistent pantry data lives in
-/// [pantryProvider].
+/// Owns selection mode and the overdue cache refresh gate. Persistent pantry
+/// data lives in [pantryProvider].
 
 @ProviderFor(HomeScreenController)
 final homeScreenControllerProvider = HomeScreenControllerProvider._();
 
 /// Notifier that manages ephemeral home screen UI state.
 ///
-/// Owns selection mode, search query, produce loading state, and the
-/// overdue cache refresh gate. Persistent pantry data lives in
-/// [pantryProvider].
+/// Owns selection mode and the overdue cache refresh gate. Persistent pantry
+/// data lives in [pantryProvider].
 final class HomeScreenControllerProvider
     extends $NotifierProvider<HomeScreenController, HomeScreenState> {
   /// Notifier that manages ephemeral home screen UI state.
   ///
-  /// Owns selection mode, search query, produce loading state, and the
-  /// overdue cache refresh gate. Persistent pantry data lives in
-  /// [pantryProvider].
+  /// Owns selection mode and the overdue cache refresh gate. Persistent pantry
+  /// data lives in [pantryProvider].
   HomeScreenControllerProvider._()
     : super(
         from: null,
@@ -57,13 +54,12 @@ final class HomeScreenControllerProvider
 }
 
 String _$homeScreenControllerHash() =>
-    r'46d687977d91831ac553a0dfd9ad822ecbdcf6f3';
+    r'5058ab8adc180b082ef848e8ae288e4876e3e45c';
 
 /// Notifier that manages ephemeral home screen UI state.
 ///
-/// Owns selection mode, search query, produce loading state, and the
-/// overdue cache refresh gate. Persistent pantry data lives in
-/// [pantryProvider].
+/// Owns selection mode and the overdue cache refresh gate. Persistent pantry
+/// data lives in [pantryProvider].
 
 abstract class _$HomeScreenController extends $Notifier<HomeScreenState> {
   HomeScreenState build();

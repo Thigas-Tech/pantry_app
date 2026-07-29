@@ -168,7 +168,7 @@ void main() {
 
       final searchField = find.byType(SearchBar);
       await tester.enterText(searchField, 'milk');
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
       expect(find.text('Milk'), findsOneWidget);
@@ -614,7 +614,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(SearchBar), 'fail');
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
@@ -658,7 +658,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(SearchBar), 'fail');
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
@@ -714,7 +714,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(SearchBar), 'bread');
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('API Bread'));
@@ -752,7 +752,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(SearchBar), 'local');
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Local Milk'));
@@ -792,7 +792,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
       expect(find.text('Carrot'), findsOneWidget);
@@ -839,12 +839,46 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(SearchBar), 'bread');
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
       // Non-produce API items show cloud, no leaf.
       expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
       expect(find.byIcon(Icons.eco_outlined), findsNothing);
     });
+
+    testWidgets(
+      'triggers search on Enter key with custom debounce duration',
+      (tester) async {
+        when(() => mockDb.searchProducts('milk')).thenAnswer(
+          (_) async => [
+            const Product(barcode: '001', name: 'Local Milk', brand: 'Brand'),
+          ],
+        );
+
+        await pumpApp(
+          tester,
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => AddToShoppingListSheet.show(
+                context,
+                debounceDuration: const Duration(milliseconds: 50),
+              ),
+              child: const Text('Open'),
+            ),
+          ),
+          overrides: sheetOverrides(),
+        );
+
+        await tester.tap(find.text('Open'));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(SearchBar), 'milk');
+        await tester.testTextInput.receiveAction(TextInputAction.search);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Local Milk'), findsOneWidget);
+      },
+    );
   });
 }

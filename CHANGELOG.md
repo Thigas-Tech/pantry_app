@@ -9,6 +9,25 @@
   `QuantityParser` utility handles multi-pack strings ("3 x 150 g") by using
   the per-unit value, and normalizes units (cl -> ml, etc.).
   (`lib/utils/quantity_parser.dart`, `lib/screens/add_to_inventory_screen.dart`)
+- **Serving weight auto-fill for fresh produce from USDA**: when adding fresh
+  produce to inventory, the quantity is now pre-filled with the USDA serving
+  gram weight (e.g. 182 g for an apple). A new `parseUsda()` method on
+  `QuantityParser` and `enrichProductWithServingData()` on `UsdaApiClient`
+  fetch `foodPortions` from the USDA detail endpoint.
+  (`lib/services/usda_api_client.dart`,
+  `lib/services/product_repository.dart`)
+
+### Removed
+
+- **Produce quick-add carousel**: removed the horizontal row of produce chips
+  (Apple, Banana, Tomato, etc.) below the search bar on the home screen,
+  along with the associated `QuickAddProduce` widget,
+  `QuickAddProvider`, and `ProducePurchaseTracker` service. The carousel
+  was used for one-tap produce adding but is no longer needed now that
+  search works well. (`lib/widgets/quick_add_produce.dart`,
+  `lib/providers/quick_add_provider.dart`,
+  `lib/services/produce_purchase_tracker.dart`,
+  `lib/screens/home_screen.dart`)
 - **SearchFilterNotifier provider**: `searchFilterProvider` — a
   `NotifierProvider<SearchFilterNotifier, SearchFilter>` that exposes the
   current [SearchFilter] via a shared Riverpod provider, with

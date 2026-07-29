@@ -94,7 +94,10 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
               ? DateTime.tryParse(widget.suggestedExpiry!)
               : null);
     _notes = existing?.notes ?? '';
-    _produceIsWeightMode = !_isProduce;
+    _produceIsWeightMode =
+        !_isProduce ||
+        (widget.product?.usdaGramWeight != null &&
+            widget.product!.usdaGramWeight! > 0);
     _produceName =
         widget.produceName ??
         (widget.barcode.startsWith('produce-')
@@ -103,32 +106,59 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     _syncCustomOptions();
   }
 
-  /// Pre-fills the quantity from the OFF product data.
+  /// Pre-fills the quantity from product data.
   ///
-  /// Only applies in create mode for non-produce items. Returns 1 (the
-  /// default) when no product data is available or the item is produce.
+  /// For non-produce items, uses [QuantityParser.parse] with OFF data.
+  /// For produce items, uses [QuantityParser.parseUsda] with USDA
+  /// foodPortion data. Returns 1 (the default) when no data is available.
   double _prefillQuantity() {
-    if (_isProduce || widget.product == null) return 1;
-    final parsed = QuantityParser.parse(
-      productQuantity: widget.product!.productQuantity,
-      quantity: widget.product!.quantity,
-    );
-    if (parsed != null && parsed.amount > 0) return parsed.amount;
+    if (widget.product == null) return 1;
+
+    if (!_isProduce) {
+      final parsed = QuantityParser.parse(
+        productQuantity: widget.product!.productQuantity,
+        quantity: widget.product!.quantity,
+      );
+      if (parsed != null && parsed.amount > 0) return parsed.amount;
+    }
+
+    if (_isProduce) {
+      final parsed = QuantityParser.parseUsda(
+        usdaServingAmount: widget.product!.usdaServingAmount,
+        usdaServingUnit: widget.product!.usdaServingUnit,
+        usdaGramWeight: widget.product!.usdaGramWeight,
+      );
+      if (parsed != null && parsed.amount > 0) return parsed.amount;
+    }
+
     return 1;
   }
 
-  /// Pre-fills the unit from the OFF product data.
+  /// Pre-fills the unit from product data.
   ///
-  /// Only applies in create mode for non-produce items. Returns 'pieces'
-  /// (the default) when no product data is available or the item is
-  /// produce.
+  /// For non-produce items, uses [QuantityParser.parse] with OFF data.
+  /// For produce items, uses [QuantityParser.parseUsda] with USDA
+  /// foodPortion data. Returns 'pieces' when no data is available.
   String _prefillUnit() {
-    if (_isProduce || widget.product == null) return 'pieces';
-    final parsed = QuantityParser.parse(
-      productQuantity: widget.product!.productQuantity,
-      quantity: widget.product!.quantity,
-    );
-    if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
+    if (widget.product == null) return 'pieces';
+
+    if (!_isProduce) {
+      final parsed = QuantityParser.parse(
+        productQuantity: widget.product!.productQuantity,
+        quantity: widget.product!.quantity,
+      );
+      if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
+    }
+
+    if (_isProduce) {
+      final parsed = QuantityParser.parseUsda(
+        usdaServingAmount: widget.product!.usdaServingAmount,
+        usdaServingUnit: widget.product!.usdaServingUnit,
+        usdaGramWeight: widget.product!.usdaGramWeight,
+      );
+      if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
+    }
+
     return 'pieces';
   }
 

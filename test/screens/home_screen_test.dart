@@ -8,7 +8,6 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/search_filter.dart' show SearchSource;
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
@@ -29,7 +28,6 @@ import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
-import 'package:pantry_app/widgets/quick_add_produce.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 
@@ -504,7 +502,6 @@ void main() {
 
     expect(find.byType(SearchBar), findsOneWidget);
     expect(find.byType(DropdownButton<SearchSource>), findsOneWidget);
-    expect(find.byType(QuickAddProduce), findsNothing);
   });
 
   testWidgets(
@@ -559,7 +556,7 @@ void main() {
       await tester.pump();
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
       await tester.pump();
 
@@ -621,7 +618,6 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
 
-    expect(find.byType(QuickAddProduce), findsOneWidget);
     expect(find.byType(DropdownButton<SearchSource>), findsNothing);
   });
 
@@ -802,144 +798,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ProductDetailScreen), findsOneWidget);
-  });
-
-  group('quick-add produce carousel', () {
-    setUp(() {
-      SharedPreferences.setMockInitialValues({});
-    });
-
-    testWidgets(
-      'tapping produce chip resolves and navigates to ProductDetailScreen',
-      (tester) async {
-        final mockRepo = createMockProductRepository();
-        const product = Product(
-          barcode: 'produce-Apple',
-          name: 'Apple',
-          productType: ProductType.produce,
-          source: 'manual',
-        );
-        when(
-          () => mockRepo.resolveProduceProduct('Apple'),
-        ).thenAnswer((_) async => product);
-        when(
-          () => mockRepo.getInventoryForBarcode(
-            any(),
-            inventoryId: any(named: 'inventoryId'),
-          ),
-        ).thenAnswer((_) async => <InventoryItem>[]);
-
-        final mockDb = _createMockDb();
-        await pumpApp(
-          tester,
-          const HomeScreen(),
-          imageCacheMock: mockImageCache,
-          overrides: _homeScreenOverrides(mockDb: mockDb, mockRepo: mockRepo),
-        );
-
-        await tester.pump(const Duration(milliseconds: 100));
-        await tester.pump();
-
-        expect(find.text('Apple'), findsOneWidget);
-
-        await tester.tap(find.text('Apple'));
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
-
-        verify(() => mockRepo.resolveProduceProduct('Apple')).called(1);
-        expect(find.byType(ProductDetailScreen), findsOneWidget);
-        final detailScreen = tester.widget<ProductDetailScreen>(
-          find.byType(ProductDetailScreen),
-        );
-        expect(detailScreen.product.barcode, 'produce-Apple');
-
-        // Pop back to home screen to verify invalidation doesn't crash
-        Navigator.of(tester.element(find.byType(ProductDetailScreen))).pop();
-        await tester.pumpAndSettle();
-        expect(find.byType(HomeScreen), findsOneWidget);
-      },
-    );
-
-    testWidgets('shows loading spinner on tapped chip while resolving', (
-      tester,
-    ) async {
-      final mockRepo = createMockProductRepository();
-      final completer = Completer<Product>();
-      when(
-        () => mockRepo.resolveProduceProduct('Apple'),
-      ).thenAnswer((_) => completer.future);
-
-      final mockDb = _createMockDb();
-      await pumpApp(
-        tester,
-        const HomeScreen(),
-        imageCacheMock: mockImageCache,
-        overrides: _homeScreenOverrides(mockDb: mockDb, mockRepo: mockRepo),
-      );
-
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump();
-
-      await tester.tap(find.text('Apple'));
-      await tester.pump();
-
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('shows error snackbar when resolveProduceProduct fails', (
-      tester,
-    ) async {
-      final mockRepo = createMockProductRepository();
-      when(
-        () => mockRepo.resolveProduceProduct('Apple'),
-      ).thenThrow(Exception('Network error'));
-
-      final mockDb = _createMockDb();
-      await pumpApp(
-        tester,
-        const HomeScreen(),
-        imageCacheMock: mockImageCache,
-        overrides: _homeScreenOverrides(mockDb: mockDb, mockRepo: mockRepo),
-      );
-
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump();
-
-      await tester.tap(find.text('Apple'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Could not load product details.'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-    });
-
-    testWidgets('rapid tap same chip does not call resolve twice', (
-      tester,
-    ) async {
-      final mockRepo = createMockProductRepository();
-      final completer = Completer<Product>();
-      when(
-        () => mockRepo.resolveProduceProduct('Apple'),
-      ).thenAnswer((_) => completer.future);
-
-      final mockDb = _createMockDb();
-      await pumpApp(
-        tester,
-        const HomeScreen(),
-        imageCacheMock: mockImageCache,
-        overrides: _homeScreenOverrides(mockDb: mockDb, mockRepo: mockRepo),
-      );
-
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump();
-
-      await tester.tap(find.text('Apple'));
-      await tester.pump();
-
-      await tester.tap(find.byType(ActionChip).first);
-      await tester.pump();
-
-      verify(() => mockRepo.resolveProduceProduct('Apple')).called(1);
-    });
   });
 
   testWidgets('overdue cache refresh does not crash during init', (

@@ -4,6 +4,13 @@
   sua despensa, os campos de quantidade e unidade sao preenchidos
   automaticamente a partir do rotulo do produto. Voce ainda pode altera-los
   se necessario.
+- Porcao de produtos frescos: ao adicionar frutas ou vegetais a sua despensa,
+  a quantidade agora padrao e o peso da porcao tipica (por exemplo, 182 g
+  para uma maca). Voce ainda pode alterar ou mudar para o modo de unidade.
+- Removido o carrossel de produtos frescos da tela inicial: a linha de chips
+  de adicao rapida (Maca, Banana, Tomate, etc.) abaixo da barra de pesquisa
+  nao e mais exibida. Use a barra de pesquisa ou o menu do FAB para
+  encontrar e adicionar produtos frescos.
 - Indicador na despensa: resultados de busca de Produtos Embalados e Produtos
   Frescos agora mostram um icone de despensa quando voce ja possui aquele
   produto. Um chip "Na Despensa" permite ver apenas resultados ja na sua
