@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the handleQuickProduceAdd method from the HomeScreenController class, for the Dart programming language.">
-  <title>handleQuickProduceAdd method - HomeScreenController class - home_screen_controller library - Dart API</title>
+  <meta name="description" content="API docs for the enrichProductWithServingData method from the UsdaApiClient class, for the Dart programming language.">
+  <title>enrichProductWithServingData method - UsdaApiClient class - usda_api_client library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../providers_home_screen_controller/">providers&#47;home_screen_controller.dart</a></li>
-    <li><a href="../../providers_home_screen_controller/HomeScreenController-class.html">HomeScreenController</a></li>
-    <li class="self-crumb">handleQuickProduceAdd method</li>
+    <li><a href="../../services_usda_api_client/">services&#47;usda_api_client.dart</a></li>
+    <li><a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a></li>
+    <li class="self-crumb">enrichProductWithServingData method</li>
   </ol>
-  <div class="self-name">handleQuickProduceAdd</div>
+  <div class="self-name">enrichProductWithServingData</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,16 +46,16 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="providers_home_screen_controller&#47;HomeScreenController-class-sidebar.html"
+    data-above-sidebar="services_usda_api_client&#47;UsdaApiClient-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">handleQuickProduceAdd</span> method 
+<h1><span class="kind-method">enrichProductWithServingData</span> method 
 </h1></div>
 
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product/Product-class.html">Product</a>?</span>&gt;</span></span>
-<span class="name ">handleQuickProduceAdd</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="handleQuickProduceAdd-param-produceName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">produceName</span></span></li>
+<span class="name ">enrichProductWithServingData</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="enrichProductWithServingData-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span></li>
 </ol>)
 
       
@@ -63,37 +63,44 @@
     </section>
     
 <section class="desc markdown">
-  <p>Resolves a produce product by name.</p>
-<p>Returns the resolved <a href="../../models_product/Product-class.html">Product</a> on success, or <code>null</code> on failure.
-The caller is responsible for navigation.</p>
+  <p>Enriches a <a href="../../models_product/Product-class.html">Product</a> with USDA foodPortions data.</p>
+<p>Calls the detail endpoint for the given product. Only Foundation
+food items have foodPortions — SR Legacy items return <code>null</code>.
+Returns the enriched product or <code>null</code> when no portion data is
+available.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Product?&gt; handleQuickProduceAdd(String produceName) async {
-  if (state.loadingProduce.contains(produceName)) return null;
-  state = state.copyWith(
-    loadingProduce: {...state.loadingProduce, produceName},
+  <pre class="language-dart"><code class="language-dart">Future&lt;Product?&gt; enrichProductWithServingData(Product product) async {
+  final fdcIdStr = product.barcode.replaceFirst(&#39;plu-&#39;, &#39;&#39;);
+  final fdcId = int.tryParse(fdcIdStr);
+  if (fdcId == null) return null;
+
+  final details = await _fetchFoodDetails(fdcId);
+  if (details == null) return null;
+
+  final dataType = details[&#39;dataType&#39;] as String?;
+  if (dataType != &#39;Foundation&#39;) return null;
+
+  final portions = details[&#39;foodPortions&#39;] as List&lt;dynamic&gt;?;
+  if (portions == null || portions.isEmpty) return null;
+
+  final firstPortion = portions[0] as Map&lt;String, dynamic&gt;;
+  final amount = (firstPortion[&#39;amount&#39;] as num?)?.toDouble();
+  final gramWeight = (firstPortion[&#39;gramWeight&#39;] as num?)?.toDouble();
+  if (amount == null || gramWeight == null) return null;
+
+  final measureUnit = firstPortion[&#39;measureUnit&#39;] as Map&lt;String, dynamic&gt;?;
+  final unitName = measureUnit?[&#39;name&#39;] as String?;
+
+  return product.copyWith(
+    usdaServingAmount: amount,
+    usdaServingUnit: unitName,
+    usdaGramWeight: gramWeight,
   );
-
-  final repo = ref.read(productRepositoryProvider);
-
-  try {
-    final product = await repo.resolveProduceProduct(produceName);
-    state = state.copyWith(
-      loadingProduce: {...state.loadingProduce}..remove(produceName),
-    );
-    await ProducePurchaseTracker().recordPurchase(produceName);
-    return product;
-  } on Exception catch (e) {
-    logError(&#39;Failed to resolve produce product: $e&#39;);
-    state = state.copyWith(
-      loadingProduce: {...state.loadingProduce}..remove(produceName),
-    );
-    return null;
-  }
 }</code></pre>
 </section>
 
@@ -108,12 +115,12 @@ The caller is responsible for navigation.</p>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../providers_home_screen_controller/">home_screen_controller</a></li>
-    <li><a href="../../providers_home_screen_controller/HomeScreenController-class.html">HomeScreenController</a></li>
-    <li class="self-crumb">handleQuickProduceAdd method</li>
+    <li><a href="../../services_usda_api_client/">usda_api_client</a></li>
+    <li><a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a></li>
+    <li class="self-crumb">enrichProductWithServingData method</li>
 </ol>
 
-    <h5>HomeScreenController class</h5>
+    <h5>UsdaApiClient class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

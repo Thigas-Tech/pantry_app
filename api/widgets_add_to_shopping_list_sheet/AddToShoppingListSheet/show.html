@@ -55,8 +55,9 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a>?</span>&gt;</span></span>
-<span class="name ">show</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span></span></li>
-</ol>)
+<span class="name ">show</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, {</span></li>
+<li><span class="parameter" id="show-param-debounceDuration"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">debounceDuration</span> = <span class="default-value">const Duration(milliseconds: 2000)</span>, </span></li>
+</ol>})
 
       
 
@@ -71,10 +72,15 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static Future&lt;ShoppingItem?&gt; show(BuildContext context) {
+  <pre class="language-dart"><code class="language-dart">static Future&lt;ShoppingItem?&gt; show(
+  BuildContext context, {
+  Duration debounceDuration = const Duration(milliseconds: 2000),
+}) {
   return BottomSheetHelper.show&lt;ShoppingItem&gt;(
     context: context,
-    builder: (_) =&gt; const AddToShoppingListSheet._(),
+    builder: (_) =&gt; AddToShoppingListSheet._(
+      searchDebounceDuration: debounceDuration,
+    ),
   );
 }</code></pre>
 </section>

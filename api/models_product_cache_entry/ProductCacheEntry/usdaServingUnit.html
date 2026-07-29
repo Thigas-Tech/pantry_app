@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the toString method from the ProductCacheEntry class, for the Dart programming language.">
-  <title>toString method - ProductCacheEntry class - product_cache_entry library - Dart API</title>
+  <meta name="description" content="API docs for the usdaServingUnit property from the ProductCacheEntry class, for the Dart programming language.">
+  <title>usdaServingUnit property - ProductCacheEntry class - product_cache_entry library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../models_product_cache_entry/">models&#47;product_cache_entry.dart</a></li>
     <li><a href="../../models_product_cache_entry/ProductCacheEntry-class.html">ProductCacheEntry</a></li>
-    <li class="self-crumb">toString method</li>
+    <li class="self-crumb">usdaServingUnit property</li>
   </ol>
-  <div class="self-name">toString</div>
+  <div class="self-name">usdaServingUnit</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -49,50 +49,47 @@
     data-above-sidebar="models_product_cache_entry&#47;ProductCacheEntry-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">toString</span> method 
+<h1><span class="kind-property">usdaServingUnit</span> property 
 </h1></div>
 
+    
+
+    
+        
+  <section id="getter">
     <section class="multi-line-signature">
       
   <div>
     <ol class="annotation-list">
-        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+        <li>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(includeIfNull: false)</li>
     </ol>
   </div>
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-<span class="name ">toString</span>(<wbr>)
-
+      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+      get
+      <span class="name ">usdaServingUnit</span>
       <div class="features"><span class="feature">inherited</span></div>
 
     </section>
     
 <section class="desc markdown">
-  <p>A string representation of this object.</p>
-<p>Some classes have a default textual representation,
-often paired with a static <code>parse</code> function (like <a href="https://api.flutter.dev/flutter/dart-core/int/parse.html">int.parse</a>).
-These classes will provide the textual representation as
-their string representation.</p>
-<p>Other classes have no meaningful textual representation
-that a program will care about.
-Such classes will typically override <code>toString</code> to provide
-useful information when inspecting the object,
-mainly for debugging or logging.</p>
+  <p>The <code>measureUnit.name</code> from the first USDA foodPortion
+(e.g. <code>"fruit"</code>, <code>"cup"</code>).</p>
 </section>
-
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@override
-String toString() {
-  return &#39;ProductCacheEntry(barcode: $barcode, name: $name, createdAt: $createdAt, lastRefreshedAt: $lastRefreshedAt, nextRefreshAt: $nextRefreshAt, brand: $brand, category: $category, categoriesHierarchy: $categoriesHierarchy, ingredients: $ingredients, servingSize: $servingSize, quantity: $quantity, productQuantity: $productQuantity, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, nutriscoreGrade: $nutriscoreGrade, imageUrl: $imageUrl, offNutritionImageUrl: $offNutritionImageUrl, offIngredientsImageUrl: $offIngredientsImageUrl, offProductImageUrl: $offProductImageUrl, languageCode: $languageCode, schemaVersion: $schemaVersion, usdaServingAmount: $usdaServingAmount, usdaServingUnit: $usdaServingUnit, usdaGramWeight: $usdaGramWeight)&#39;;
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">@JsonKey(includeIfNull: false) double? get usdaServingAmount;&#47;&#47;&#47; The `measureUnit.name` from the first USDA foodPortion
+&#47;&#47;&#47; (e.g. `&quot;fruit&quot;`, `&quot;cup&quot;`).
+@JsonKey(includeIfNull: false) String? get usdaServingUnit;</code></pre>
 </section>
 
+  </section>
 
-  </div> <!-- /.main-content -->
-  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
-    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+
+</div> <!-- /.main-content -->
+<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+  <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
 <header id="header-search-sidebar" class="hidden-l">
   <form class="search-sidebar" role="search">
     <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
@@ -102,13 +99,13 @@ String toString() {
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../models_product_cache_entry/">product_cache_entry</a></li>
     <li><a href="../../models_product_cache_entry/ProductCacheEntry-class.html">ProductCacheEntry</a></li>
-    <li class="self-crumb">toString method</li>
+    <li class="self-crumb">usdaServingUnit property</li>
 </ol>
 
-    <h5>ProductCacheEntry class</h5>
-    <div id="dartdoc-sidebar-left-content"></div>
-  </div><!--/.sidebar-offcanvas-->
-  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  <h5>ProductCacheEntry class</h5>
+  <div id="dartdoc-sidebar-left-content"></div>
+</div><!--/.sidebar-offcanvas-->
+<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
 </div><!--/.sidebar-offcanvas-->
 </main>
 <footer>

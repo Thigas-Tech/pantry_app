@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the hashCode property from the Product class, for the Dart programming language.">
-  <title>hashCode property - Product class - product library - Dart API</title>
+  <meta name="description" content="API docs for the usdaServingUnit property from the Product class, for the Dart programming language.">
+  <title>usdaServingUnit property - Product class - product library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../models_product/">models&#47;product.dart</a></li>
     <li><a href="../../models_product/Product-class.html">Product</a></li>
-    <li class="self-crumb">hashCode property</li>
+    <li class="self-crumb">usdaServingUnit property</li>
   </ol>
-  <div class="self-name">hashCode</div>
+  <div class="self-name">usdaServingUnit</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -49,7 +49,7 @@
     data-above-sidebar="models_product&#47;Product-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-property">hashCode</span> property 
+<h1><span class="kind-property">usdaServingUnit</span> property 
 </h1></div>
 
     
@@ -59,52 +59,29 @@
   <section id="getter">
     <section class="multi-line-signature">
       
-  <div>
-    <ol class="annotation-list">
-        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
-    </ol>
-  </div>
-      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
       get
-      <span class="name ">hashCode</span>
+      <span class="name ">usdaServingUnit</span>
       <div class="features"><span class="feature">inherited</span></div>
 
     </section>
     
 <section class="desc markdown">
-  <p>The hash code for this object.</p>
-<p>A hash code is a single integer which represents the state of the object
-that affects <a href="../../models_product/Product/operator_equals.html">operator ==</a> comparisons.</p>
-<p>All objects have hash codes.
-The default hash code implemented by <a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>
-represents only the identity of the object,
-the same way as the default <a href="../../models_product/Product/operator_equals.html">operator ==</a> implementation only considers objects
-equal if they are identical (see <a href="https://api.flutter.dev/flutter/dart-core/identityHashCode.html">identityHashCode</a>).</p>
-<p>If <a href="../../models_product/Product/operator_equals.html">operator ==</a> is overridden to use the object state instead,
-the hash code must also be changed to represent that state,
-otherwise the object cannot be used in hash based data structures
-like the default <a href="https://api.flutter.dev/flutter/dart-core/Set-class.html">Set</a> and <a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a> implementations.</p>
-<p>Hash codes must be the same for objects that are equal to each other
-according to <a href="../../models_product/Product/operator_equals.html">operator ==</a>.
-The hash code of an object should only change if the object changes
-in a way that affects equality.
-There are no further requirements for the hash codes.
-They need not be consistent between executions of the same program
-and there are no distribution guarantees.</p>
-<p>Objects that are not equal are allowed to have the same hash code.
-It is even technically allowed that all instances have the same hash code,
-but if clashes happen too often,
-it may reduce the efficiency of hash-based data structures
-like <a href="https://api.flutter.dev/flutter/dart-collection/HashSet-class.html">HashSet</a> or <a href="https://api.flutter.dev/flutter/dart-collection/HashMap-class.html">HashMap</a>.</p>
-<p>If a subclass overrides <code>hashCode</code>, it should override the
-<a href="../../models_product/Product/operator_equals.html">operator ==</a> operator as well to maintain consistency.</p>
+  <p>The <code>measureUnit.name</code> from the first USDA foodPortion
+(e.g. <code>"fruit"</code>, <code>"cup"</code>, <code>"medium"</code>).</p>
+<p>Only meaningful for produce items fetched from USDA. Null for OFF
+products, manually entered items, or when USDA has no portion data.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@override
-int get hashCode =&gt; Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(categoriesHierarchy),category,ingredients,servingSize,quantity,productQuantity,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,languageCode,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus,pluCode,productType,usdaServingAmount,usdaServingUnit,usdaGramWeight]);</code></pre>
+  <pre class="language-dart"><code class="language-dart">double? get usdaServingAmount;&#47;&#47;&#47; The `measureUnit.name` from the first USDA foodPortion
+&#47;&#47;&#47; (e.g. `&quot;fruit&quot;`, `&quot;cup&quot;`, `&quot;medium&quot;`).
+&#47;&#47;&#47;
+&#47;&#47;&#47; Only meaningful for produce items fetched from USDA. Null for OFF
+&#47;&#47;&#47; products, manually entered items, or when USDA has no portion data.
+String? get usdaServingUnit;</code></pre>
 </section>
 
   </section>
@@ -122,7 +99,7 @@ int get hashCode =&gt; Object.hashAll([runtimeType,barcode,name,brand,imageUrl,o
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../models_product/">product</a></li>
     <li><a href="../../models_product/Product-class.html">Product</a></li>
-    <li class="self-crumb">hashCode property</li>
+    <li class="self-crumb">usdaServingUnit property</li>
 </ol>
 
   <h5>Product class</h5>

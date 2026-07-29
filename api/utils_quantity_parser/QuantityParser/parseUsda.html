@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the getTopPurchases method from the ProducePurchaseTracker class, for the Dart programming language.">
-  <title>getTopPurchases method - ProducePurchaseTracker class - produce_purchase_tracker library - Dart API</title>
+  <meta name="description" content="API docs for the parseUsda method from the QuantityParser class, for the Dart programming language.">
+  <title>parseUsda method - QuantityParser class - quantity_parser library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../services_produce_purchase_tracker/">services&#47;produce_purchase_tracker.dart</a></li>
-    <li><a href="../../services_produce_purchase_tracker/ProducePurchaseTracker-class.html">ProducePurchaseTracker</a></li>
-    <li class="self-crumb">getTopPurchases method</li>
+    <li><a href="../../utils_quantity_parser/">utils&#47;quantity_parser.dart</a></li>
+    <li><a href="../../utils_quantity_parser/QuantityParser-class.html">QuantityParser</a></li>
+    <li class="self-crumb">parseUsda static method</li>
   </ol>
-  <div class="self-name">getTopPurchases</div>
+  <div class="self-name">parseUsda</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,16 +46,18 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="services_produce_purchase_tracker&#47;ProducePurchaseTracker-class-sidebar.html"
+    data-above-sidebar="utils_quantity_parser&#47;QuantityParser-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">getTopPurchases</span> method 
+<h1><span class="kind-method">parseUsda</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>&gt;</span></span>
-<span class="name ">getTopPurchases</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="getTopPurchases-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">limit</span> = <span class="default-value">8</span>, </span></li>
+<span class="returntype"><a href="../../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>?</span>
+<span class="name ">parseUsda</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="parseUsda-param-usdaServingAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">usdaServingAmount</span>, </span></li>
+<li><span class="parameter" id="parseUsda-param-usdaServingUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">usdaServingUnit</span>, </span></li>
+<li><span class="parameter" id="parseUsda-param-usdaGramWeight"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">usdaGramWeight</span>, </span></li>
 </ol>})
 
       
@@ -63,40 +65,26 @@
     </section>
     
 <section class="desc markdown">
-  <p>Returns the top <code>limit</code> most frequently purchased produce items.</p>
+  <p>Parses USDA foodPortion data into a <a href="../../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>.</p>
+<p>Always uses <code>usdaGramWeight</code> when present and &gt; 0, returning it with
+unit <code>"g"</code>. This matches the design decision to pre-fill produce
+items in weight mode with gram weights from the USDA API.</p>
+<p>Returns <code>null</code> when no usable gram weight is available.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;String&gt;&gt; getTopPurchases({int limit = 8}) async {
-  final map = await _load();
-  if (map.isEmpty) return getDefaultList().take(limit).toList();
-
-  final sorted = map.entries.toList()
-    ..sort((a, b) =&gt; b.value.compareTo(a.value));
-
-  final result = sorted
-      .map((e) {
-        &#47;&#47; Capitalize first letter for display.
-        final name = e.key;
-        return name[0].toUpperCase() + name.substring(1);
-      })
-      .take(limit)
-      .toList();
-
-  &#47;&#47; Pad with defaults if we don&#39;t have enough history.
-  if (result.length &lt; limit) {
-    for (final d in getDefaultList()) {
-      if (result.length &gt;= limit) break;
-      if (!result.any((r) =&gt; r.toLowerCase() == d.toLowerCase())) {
-        result.add(d);
-      }
-    }
+  <pre class="language-dart"><code class="language-dart">static ParsedQuantity? parseUsda({
+  double? usdaServingAmount,
+  String? usdaServingUnit,
+  double? usdaGramWeight,
+}) {
+  if (usdaGramWeight != null &amp;&amp; usdaGramWeight &gt; 0) {
+    return ParsedQuantity(amount: usdaGramWeight, unit: &#39;g&#39;);
   }
-
-  return result;
+  return null;
 }</code></pre>
 </section>
 
@@ -111,12 +99,12 @@
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../services_produce_purchase_tracker/">produce_purchase_tracker</a></li>
-    <li><a href="../../services_produce_purchase_tracker/ProducePurchaseTracker-class.html">ProducePurchaseTracker</a></li>
-    <li class="self-crumb">getTopPurchases method</li>
+    <li><a href="../../utils_quantity_parser/">quantity_parser</a></li>
+    <li><a href="../../utils_quantity_parser/QuantityParser-class.html">QuantityParser</a></li>
+    <li class="self-crumb">parseUsda static method</li>
 </ol>
 
-    <h5>ProducePurchaseTracker class</h5>
+    <h5>QuantityParser class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

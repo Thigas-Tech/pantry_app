@@ -101,7 +101,7 @@ ingredient selection.</li>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="SearchPanel.new" class="callable">
-          <span class="name"><a href="../widgets_search_panel/SearchPanel/SearchPanel.html">SearchPanel</a></span><span class="signature">({<span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span>, </span><span class="parameter" id="param-onProductSelected"><span class="type-annotation">void</span> <span class="parameter-name">onProductSelected</span>(<span class="parameter" id="param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span>)?, </span><span class="parameter" id="param-selectMode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">selectMode</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-autoFocus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">autoFocus</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-showBackButton"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">showBackButton</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-onBack"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>?</span> <span class="parameter-name">onBack</span></span>})</span>
+          <span class="name"><a href="../widgets_search_panel/SearchPanel/SearchPanel.html">SearchPanel</a></span><span class="signature">({<span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span>, </span><span class="parameter" id="param-onProductSelected"><span class="type-annotation">void</span> <span class="parameter-name">onProductSelected</span>(<span class="parameter" id="param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span>)?, </span><span class="parameter" id="param-selectMode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">selectMode</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-autoFocus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">autoFocus</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-showBackButton"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">showBackButton</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-onBack"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>?</span> <span class="parameter-name">onBack</span>, </span><span class="parameter" id="param-searchDebounceDuration"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">searchDebounceDuration</span> = <span class="default-value">const Duration(milliseconds: 2000)</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../widgets_search_panel/SearchPanel-class.html">SearchPanel</a>.
@@ -186,6 +186,19 @@ true).
 <dd class="inherited">
   A representation of the runtime type of the object.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="searchDebounceDuration" class="property">
+  <span class="name"><a href="../widgets_search_panel/SearchPanel/searchDebounceDuration.html">searchDebounceDuration</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span>
+  
+
+</dt>
+<dd>
+  How long to wait after the last keystroke before triggering a search.
+Pressing Enter bypasses this delay.
+  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 

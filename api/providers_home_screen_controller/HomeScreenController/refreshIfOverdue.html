@@ -82,13 +82,11 @@ prevents setState during build errors.</p>
     final activeId = ref.read(activeInventoryProvider);
     await repo.refreshInventoryProducts(activeId);
     await repo.setLastRefreshTime();
-    &#47;&#47; Defer invalidation to the next frame so that any pending
-    &#47;&#47; build phase completes before dependent providers recompute.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(pantryProvider);
     });
-  } on Exception catch (e) {
-    logWarning(&#39;Overdue cache check failed: $e&#39;);
+  } on Exception catch (_) {
+    &#47;&#47; Overdue cache check is non-critical; failure is logged by the repo.
   }
 }</code></pre>
 </section>

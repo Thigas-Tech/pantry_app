@@ -79,6 +79,9 @@
 <li><span class="parameter" id="param-offProductImageUrl"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(includeIfNull: false)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">offProductImageUrl</span>, </span></li>
 <li><span class="parameter" id="param-languageCode"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(&#39;en&#39;)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span>, </span></li>
 <li><span class="parameter" id="param-schemaVersion"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(1)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">schemaVersion</span>, </span></li>
+<li><span class="parameter" id="param-usdaServingAmount"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(includeIfNull: false)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">usdaServingAmount</span>, </span></li>
+<li><span class="parameter" id="param-usdaServingUnit"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(includeIfNull: false)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">usdaServingUnit</span>, </span></li>
+<li><span class="parameter" id="param-usdaGramWeight"><span>@<a href="https://pub.dev/documentation/json_annotation/4.12.0/json_annotation/JsonKey/JsonKey.html">JsonKey</a>(includeIfNull: false)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">usdaGramWeight</span>, </span></li>
 </ol>})
     </section>
     
@@ -167,6 +170,16 @@ sensible defaults matching a minimal or unknown product.</p>
 
   &#47;&#47;&#47; Schema version for forward compatibility.
   @Default(1) int schemaVersion,
+
+  &#47;&#47;&#47; The `amount` from the first USDA foodPortion (e.g. `1.0`).
+  @JsonKey(includeIfNull: false) double? usdaServingAmount,
+
+  &#47;&#47;&#47; The `measureUnit.name` from the first USDA foodPortion
+  &#47;&#47;&#47; (e.g. `&quot;fruit&quot;`, `&quot;cup&quot;`).
+  @JsonKey(includeIfNull: false) String? usdaServingUnit,
+
+  &#47;&#47;&#47; The `gramWeight` from the first USDA foodPortion (e.g. `182.0`).
+  @JsonKey(includeIfNull: false) double? usdaGramWeight,
 }) = _ProductCacheEntry;</code></pre>
 </section>
 

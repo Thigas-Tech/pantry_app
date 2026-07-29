@@ -65,7 +65,10 @@
 <section class="desc markdown">
   <p>Searches for foods matching <code>query</code> and returns <a href="../../models_product/Product-class.html">Product</a> instances.</p>
 <p>Targets Foundation and SR Legacy food datasets for the most accurate
-nutrition data. Returns an empty list on any error (graceful degradation).</p>
+nutrition data. Filters out non-produce items (baked goods, dairy,
+fast food, etc.) and processed derivatives (canned, dried, powdered,
+etc.) keeping only raw, unprocessed produce.
+Returns an empty list on any error (graceful degradation).</p>
 <p>Nutrition values are already per 100g in the USDA datasets for most
 whole foods. Generated products use a synthetic barcode prefixed with
 'plu-' and have <a href="../../models_product_type/ProductType.html">ProductType.produce</a>.</p>
@@ -120,7 +123,7 @@ whole foods. Generated products use a synthetic barcode prefixed with
     final products = &lt;Product&gt;[];
     for (final food in foods) {
       final product = _parseFood(food as Map&lt;String, dynamic&gt;);
-      if (product != null) {
+      if (product != null &amp;&amp; _isRawUnprocessed(product.name)) {
         products.add(product);
       }
     }

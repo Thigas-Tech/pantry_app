@@ -61,11 +61,15 @@
 <li><span class="parameter" id="param-autoFocus"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">autoFocus</span> = <span class="default-value">false</span>, </span></li>
 <li><span class="parameter" id="param-showBackButton"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">showBackButton</span> = <span class="default-value">false</span>, </span></li>
 <li><span class="parameter" id="param-onBack"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>?</span> <span class="parameter-name">onBack</span>, </span></li>
+<li><span class="parameter" id="param-searchDebounceDuration"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">searchDebounceDuration</span> = <span class="default-value">const Duration(milliseconds: 2000)</span>, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../widgets_search_panel/SearchPanel-class.html">SearchPanel</a>.</p>
+<p><code>searchDebounceDuration</code> controls how long to wait after the last
+keystroke before triggering a search. Defaults to 2 seconds. Pressing
+Enter in the search bar bypasses this delay.</p>
 </section>
 
 
@@ -79,6 +83,7 @@
   this.autoFocus = false,
   this.showBackButton = false,
   this.onBack,
+  this.searchDebounceDuration = const Duration(milliseconds: 2000),
 });</code></pre>
 </section>
 
