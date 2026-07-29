@@ -88,6 +88,7 @@ already exists in the local cache (from a previous API fetch).</p>
     imageUrl: nonEmpty(manual.imageUrl) ?? imageUrl,
 
     &#47;&#47; Nutrition: user values win, but preserve cache when user left empty.
+    servingQuantity: manual.servingQuantity ?? servingQuantity,
     energyKcal: manual.energyKcal ?? energyKcal,
     proteinG: manual.proteinG ?? proteinG,
     carbsG: manual.carbsG ?? carbsG,
