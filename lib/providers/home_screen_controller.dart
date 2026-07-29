@@ -1,14 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
-import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/services/produce_purchase_tracker.dart';
-import 'package:pantry_app/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_screen_controller.g.dart';
@@ -19,7 +14,6 @@ class HomeScreenState {
   const HomeScreenState({
     this.selectionMode = false,
     this.selectedIds = const {},
-    this.loadingProduce = const {},
   });
 
   /// Whether multi-selection mode is active.
@@ -28,28 +22,22 @@ class HomeScreenState {
   /// The set of selected inventory item IDs.
   final Set<int> selectedIds;
 
-  /// Produce names currently being resolved (loading indicator shown).
-  final Set<String> loadingProduce;
-
   /// Returns a copy with the given fields replaced.
   HomeScreenState copyWith({
     bool? selectionMode,
     Set<int>? selectedIds,
-    Set<String>? loadingProduce,
   }) {
     return HomeScreenState(
       selectionMode: selectionMode ?? this.selectionMode,
       selectedIds: selectedIds ?? this.selectedIds,
-      loadingProduce: loadingProduce ?? this.loadingProduce,
     );
   }
 }
 
 /// Notifier that manages ephemeral home screen UI state.
 ///
-/// Owns selection mode, search query, produce loading state, and the
-/// overdue cache refresh gate. Persistent pantry data lives in
-/// [pantryProvider].
+/// Owns selection mode and the overdue cache refresh gate. Persistent pantry
+/// data lives in [pantryProvider].
 @riverpod
 class HomeScreenController extends _$HomeScreenController {
   @override
@@ -109,34 +97,6 @@ class HomeScreenController extends _$HomeScreenController {
     exitSelectionMode();
   }
 
-  /// Resolves a produce product by name.
-  ///
-  /// Returns the resolved [Product] on success, or `null` on failure.
-  /// The caller is responsible for navigation.
-  Future<Product?> handleQuickProduceAdd(String produceName) async {
-    if (state.loadingProduce.contains(produceName)) return null;
-    state = state.copyWith(
-      loadingProduce: {...state.loadingProduce, produceName},
-    );
-
-    final repo = ref.read(productRepositoryProvider);
-
-    try {
-      final product = await repo.resolveProduceProduct(produceName);
-      state = state.copyWith(
-        loadingProduce: {...state.loadingProduce}..remove(produceName),
-      );
-      await ProducePurchaseTracker().recordPurchase(produceName);
-      return product;
-    } on Exception catch (e) {
-      logError('Failed to resolve produce product: $e');
-      state = state.copyWith(
-        loadingProduce: {...state.loadingProduce}..remove(produceName),
-      );
-      return null;
-    }
-  }
-
   bool _hasCheckedOverdue = false;
 
   /// Checks whether the product cache is overdue and refreshes if so.
@@ -154,13 +114,11 @@ class HomeScreenController extends _$HomeScreenController {
       final activeId = ref.read(activeInventoryProvider);
       await repo.refreshInventoryProducts(activeId);
       await repo.setLastRefreshTime();
-      // Defer invalidation to the next frame so that any pending
-      // build phase completes before dependent providers recompute.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.invalidate(pantryProvider);
       });
-    } on Exception catch (e) {
-      logWarning('Overdue cache check failed: $e');
+    } on Exception catch (_) {
+      // Overdue cache check is non-critical; failure is logged by the repo.
     }
   }
 }

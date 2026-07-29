@@ -37,14 +37,25 @@ import 'package:pantry_app/utils/search_utils.dart';
 /// if (item != null) await addShoppingItem(ref, item);
 /// ```
 class AddToShoppingListSheet extends ConsumerStatefulWidget {
-  const AddToShoppingListSheet._();
+  const AddToShoppingListSheet._({
+    this.searchDebounceDuration = const Duration(milliseconds: 2000),
+  });
+
+  /// How long to wait after the last keystroke before triggering a search.
+  /// Pressing Enter bypasses this delay.
+  final Duration searchDebounceDuration;
 
   /// Shows the add-to-shopping-list bottom sheet and returns a
   /// [ShoppingItem], or null if cancelled.
-  static Future<ShoppingItem?> show(BuildContext context) {
+  static Future<ShoppingItem?> show(
+    BuildContext context, {
+    Duration debounceDuration = const Duration(milliseconds: 2000),
+  }) {
     return BottomSheetHelper.show<ShoppingItem>(
       context: context,
-      builder: (_) => const AddToShoppingListSheet._(),
+      builder: (_) => AddToShoppingListSheet._(
+        searchDebounceDuration: debounceDuration,
+      ),
     );
   }
 
@@ -93,9 +104,18 @@ class _AddToShoppingListSheetState
     final locale = Localizations.localeOf(context).languageCode;
     logInfo('Search queued — query="$query" locale=$locale');
     _debounce = Timer(
-      const Duration(milliseconds: 500),
+      widget.searchDebounceDuration,
       () => _search(query, locale),
     );
+  }
+
+  void _onSearchSubmitted(String value) {
+    _debounce?.cancel();
+    final query = value.trim();
+    if (query.isEmpty) return;
+    _requestId++;
+    final locale = Localizations.localeOf(context).languageCode;
+    unawaited(_search(query, locale));
   }
 
   Future<void> _search(String query, String locale) async {
@@ -322,6 +342,7 @@ class _AddToShoppingListSheetState
             ),
         ],
         onChanged: _onSearchChanged,
+        onSubmitted: _onSearchSubmitted,
         textInputAction: TextInputAction.search,
         autoFocus: true,
       ),

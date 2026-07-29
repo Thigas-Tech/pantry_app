@@ -36,6 +36,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(FakeDatabase());
+    registerFallbackValue(const Product(barcode: '', name: ''));
   });
 
   setUp(() {
@@ -43,6 +44,9 @@ void main() {
     mockApi = MockOffAdapter();
     fallbackApi = MockOffAdapter();
     mockUsda = MockUsdaApiClient();
+    when(() => mockUsda.enrichProductWithServingData(any())).thenAnswer(
+      (_) async => null,
+    );
     mockFirebaseCache = MockFirebaseCacheService();
     mockMetaDao = MockFirebaseCacheMetaDao();
     when(() => mockDb.database).thenAnswer((_) async => FakeDatabase());

@@ -318,7 +318,9 @@ class ProductRepository {
       try {
         final usdaResults = await _usdaClient.searchFood(produceName);
         if (usdaResults.isNotEmpty) {
-          final usda = usdaResults.first;
+          var usda = usdaResults.first;
+          final enriched = await _usdaClient.enrichProductWithServingData(usda);
+          if (enriched != null) usda = enriched;
           return usda.copyWith(
             barcode: barcode,
             name: produceName,

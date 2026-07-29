@@ -145,7 +145,8 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
@@ -166,7 +167,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -187,7 +188,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'bread');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('API Bread'), findsOneWidget);
@@ -214,7 +215,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'dup');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Only one result (the local one), showing local name.
@@ -249,7 +250,7 @@ void main() {
       );
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       await tester.tap(find.text('Local Milk'));
@@ -268,7 +269,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'zzzzz');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
@@ -296,7 +297,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -350,7 +351,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'short');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Should render "120" (padded to 3 chars) instead of crashing.
@@ -371,7 +372,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       final dismissible = tester.widget<Dismissible>(
@@ -408,11 +409,12 @@ void main() {
 
       // Start first search (type "old").
       await tester.enterText(find.byType(SearchBar), 'old');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
 
       // Before the first search completes, type "new".
       await tester.enterText(find.byType(SearchBar), 'new');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Now complete the old search — its results should be ignored.
@@ -435,7 +437,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'a');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Local result should appear.
@@ -467,7 +469,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Carrot'), findsOneWidget);
@@ -492,7 +494,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Produce items show leaf (avatar + trailing), never cloud.
@@ -514,7 +516,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Produce items override cloud with leaf (avatar + trailing).
@@ -536,7 +538,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'bread');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Non-produce API items still show cloud.
@@ -572,7 +574,7 @@ void main() {
         );
 
         await tester.enterText(find.byType(SearchBar), 'milk');
-        await tester.pump(const Duration(milliseconds: 550));
+        await tester.testTextInput.receiveAction(TextInputAction.search);
         await tester.pump();
 
         await tester.drag(find.text('Local Milk'), const Offset(500, 0));
@@ -622,7 +624,7 @@ void main() {
       );
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       await tester.drag(find.text('Local Milk'), const Offset(500, 0));
@@ -679,7 +681,7 @@ void main() {
         clearInteractions(mockDb);
 
         await tester.enterText(find.byType(SearchBar), 'milk');
-        await tester.pump(const Duration(milliseconds: 550));
+        await tester.testTextInput.receiveAction(TextInputAction.search);
         await tester.pump();
 
         await tester.tap(find.text('Local Milk'));
@@ -728,7 +730,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -765,7 +767,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('In Pantry'), findsOneWidget);
@@ -797,7 +799,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       expect(find.text('Local Milk'), findsOneWidget);
@@ -835,7 +837,7 @@ void main() {
       await pumpSearchScreen(tester);
 
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Toggle filter on, then off
@@ -868,7 +870,7 @@ void main() {
 
       // First search and activate filter
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
       await tester.tap(find.text('In Pantry'));
       await tester.pump();
@@ -877,7 +879,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.clear));
       await tester.pump();
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 550));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pump();
 
       // Filter chip should be present but NOT selected (filter off)

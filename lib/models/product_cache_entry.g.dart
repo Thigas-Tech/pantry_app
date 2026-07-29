@@ -35,6 +35,9 @@ _ProductCacheEntry _$ProductCacheEntryFromJson(Map<String, dynamic> json) =>
       offProductImageUrl: json['offProductImageUrl'] as String?,
       languageCode: json['languageCode'] as String? ?? 'en',
       schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? 1,
+      usdaServingAmount: (json['usdaServingAmount'] as num?)?.toDouble(),
+      usdaServingUnit: json['usdaServingUnit'] as String?,
+      usdaGramWeight: (json['usdaGramWeight'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$ProductCacheEntryToJson(_ProductCacheEntry instance) =>
@@ -64,4 +67,7 @@ Map<String, dynamic> _$ProductCacheEntryToJson(_ProductCacheEntry instance) =>
       'offProductImageUrl': ?instance.offProductImageUrl,
       'languageCode': instance.languageCode,
       'schemaVersion': instance.schemaVersion,
+      'usdaServingAmount': ?instance.usdaServingAmount,
+      'usdaServingUnit': ?instance.usdaServingUnit,
+      'usdaGramWeight': ?instance.usdaGramWeight,
     };
