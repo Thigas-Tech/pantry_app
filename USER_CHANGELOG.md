@@ -1,5 +1,9 @@
 # User Changelog
 
+- Recipe ingredient auto-fill: when adding a product as an ingredient in a
+  recipe, the quantity and unit are now pre-filled from the product's serving
+  size (e.g. "200 g" for flour). Works for both packaged products and fresh
+  produce. You can still change them if needed.
 - Quantity auto-fill: when adding a packaged product to your inventory, the
   quantity and unit fields are now automatically filled in from the product
   label. You can still change them if needed.

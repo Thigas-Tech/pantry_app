@@ -1,3 +1,8 @@
+// QuantityParser and ParsedQuantity are utility types; lint rules about
+// instance members and immutable annotations don't apply here.
+// ignore_for_file: avoid_equals_and_hash_code_on_mutable_classes
+// ignore_for_file: avoid_classes_with_only_static_members
+
 /// The result of parsing a quantity string.
 class ParsedQuantity {
   /// Creates a [ParsedQuantity].
@@ -159,6 +164,33 @@ abstract final class QuantityParser {
   }) {
     if (usdaGramWeight != null && usdaGramWeight > 0) {
       return ParsedQuantity(amount: usdaGramWeight, unit: 'g');
+    }
+    return null;
+  }
+
+  /// Parses a serving size from product data into a [ParsedQuantity].
+  ///
+  /// Priority:
+  /// 1. Uses [servingQuantity] as the amount when > 0, and extracts the unit
+  ///    from [servingSize] (e.g. `servingQuantity: 30, servingSize: "30g"`
+  ///    returns amount=30, unit="g").
+  /// 2. Falls back to parsing the [servingSize] string entirely.
+  /// 3. Returns `null` when nothing is parseable.
+  static ParsedQuantity? parseServing({
+    double? servingQuantity,
+    String? servingSize,
+  }) {
+    if (servingQuantity != null && servingQuantity > 0) {
+      if (servingSize != null && servingSize.isNotEmpty) {
+        final parsed = _parseQuantityString(servingSize);
+        if (parsed != null) {
+          return ParsedQuantity(amount: servingQuantity, unit: parsed.unit);
+        }
+      }
+      return null;
+    }
+    if (servingSize != null && servingSize.isNotEmpty) {
+      return _parseQuantityString(servingSize);
     }
     return null;
   }

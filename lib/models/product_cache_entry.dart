@@ -71,6 +71,10 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// The suggested serving size (e.g. "15 g").
     @JsonKey(includeIfNull: false) String? servingSize,
 
+    /// The normalized numeric serving quantity from the OFF API
+    /// (e.g. `30.0` for a serving size of "30 g").
+    @JsonKey(includeIfNull: false) double? servingQuantity,
+
     /// The display quantity as printed on packaging (e.g. "500 ml").
     @JsonKey(includeIfNull: false) String? quantity,
 
@@ -160,6 +164,7 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       categoriesHierarchy: product.categoriesHierarchy,
       ingredients: product.ingredients,
       servingSize: product.servingSize,
+      servingQuantity: product.servingQuantity,
       quantity: product.quantity,
       productQuantity: product.productQuantity,
       energyKcal: product.energyKcal,
@@ -192,6 +197,7 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       categoriesHierarchy: categoriesHierarchy,
       ingredients: ingredients,
       servingSize: servingSize,
+      servingQuantity: servingQuantity,
       quantity: quantity,
       productQuantity: productQuantity,
       energyKcal: energyKcal,

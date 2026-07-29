@@ -4,6 +4,18 @@
 
 ### Added
 
+- **Serving-size auto-fill for recipe ingredients**: when adding a product as
+  an ingredient in a recipe form, the quantity and unit are now pre-filled from
+  the product's serving size. Uses `offProduct.servingQuantity` when available
+  (OFF products) or `usdaGramWeight` (USDA produce), falling back to parsing
+  the `servingSize` string. A new `parseServing()` method on `QuantityParser`
+  handles the logic.
+  (`lib/utils/quantity_parser.dart`, `lib/screens/recipe_form_screen.dart`)
+- **`servingQuantity` field on Product**: new `double? servingQuantity` field
+  mapped from the OFF SDK's `off.Product.servingQuantity`. Stored in the
+  database (migration v31) and serialised in the Firebase cache.
+  (`lib/models/product.dart`, `lib/database/product_dao.dart`,
+  `lib/database/migrations/v31_serving_quantity.dart`)
 - **Quantity auto-fill from OFF**: when adding a product to inventory, the
   quantity and unit are now pre-filled from the product's OFF data. A new
   `QuantityParser` utility handles multi-pack strings ("3 x 150 g") by using

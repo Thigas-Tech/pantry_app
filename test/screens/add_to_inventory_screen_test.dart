@@ -223,7 +223,7 @@ void main() {
     testWidgets('does not pre-fill for produce type without USDA data', (
       tester,
     ) async {
-      final product = Product(
+      const product = Product(
         barcode: 'produce-Apple',
         name: 'Apple',
         productQuantity: 200,
@@ -232,7 +232,7 @@ void main() {
       );
       await _pumpScreen(
         tester,
-        AddToInventoryScreen(
+        const AddToInventoryScreen(
           barcode: 'produce-Apple',
           inventoryId: 1,
           productType: ProductType.produce,
@@ -265,7 +265,7 @@ void main() {
       testWidgets('pre-fills quantity from USDA gramWeight for produce', (
         tester,
       ) async {
-        final product = produceWithUsda(usdaGramWeight: 182.0);
+        final product = produceWithUsda(usdaGramWeight: 182);
         await _pumpScreen(
           tester,
           AddToInventoryScreen(
@@ -284,7 +284,7 @@ void main() {
       testWidgets('switches to weight mode when USDA gramWeight available', (
         tester,
       ) async {
-        final product = produceWithUsda(usdaGramWeight: 182.0);
+        final product = produceWithUsda(usdaGramWeight: 182);
         await _pumpScreen(
           tester,
           AddToInventoryScreen(
@@ -305,7 +305,7 @@ void main() {
       testWidgets('leaves default quantity when USDA has no gramWeight', (
         tester,
       ) async {
-        final product = produceWithUsda(usdaServingAmount: 1.0);
+        final product = produceWithUsda(usdaServingAmount: 1);
         await _pumpScreen(
           tester,
           AddToInventoryScreen(
@@ -324,7 +324,7 @@ void main() {
       testWidgets('remains in unit mode when USDA has no gramWeight', (
         tester,
       ) async {
-        final product = produceWithUsda(usdaServingAmount: 1.0);
+        final product = produceWithUsda(usdaServingAmount: 1);
         await _pumpScreen(
           tester,
           AddToInventoryScreen(
@@ -345,7 +345,7 @@ void main() {
       testWidgets('does not pre-fill from USDA when editing existing item', (
         tester,
       ) async {
-        final product = produceWithUsda(usdaGramWeight: 182.0);
+        final product = produceWithUsda(usdaGramWeight: 182);
         await _pumpScreen(
           tester,
           AddToInventoryScreen(
@@ -371,17 +371,16 @@ void main() {
         (
           tester,
         ) async {
-          final product = Product(
+          const product = Product(
             barcode: '123456789',
             name: 'Test',
-            productType: ProductType.barcoded,
             productQuantity: 500,
             quantity: '500 ml',
             usdaGramWeight: 200,
           );
           await _pumpScreen(
             tester,
-            AddToInventoryScreen(
+            const AddToInventoryScreen(
               barcode: '123456789',
               inventoryId: 1,
               productType: ProductType.barcoded,
@@ -400,17 +399,17 @@ void main() {
         (
           tester,
         ) async {
-          final product = Product(
+          const product = Product(
             barcode: 'produce-Apple',
             name: 'Apple',
             productType: ProductType.produce,
             productQuantity: 500,
             quantity: '500 ml',
-            usdaGramWeight: 182.0,
+            usdaGramWeight: 182,
           );
           await _pumpScreen(
             tester,
-            AddToInventoryScreen(
+            const AddToInventoryScreen(
               barcode: 'produce-Apple',
               inventoryId: 1,
               productType: ProductType.produce,

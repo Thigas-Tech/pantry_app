@@ -1,5 +1,10 @@
 # Registro de alteracoes do usuario
 
+- Preenchimento automatico de ingrediente de receita: ao adicionar um produto
+  como ingrediente em uma receita, a quantidade e a unidade sao preenchidas
+  automaticamente a partir do tamanho da porcao do produto (ex.: "200 g" para
+  farinha). Funciona tanto para produtos embalados quanto para produtos
+  frescos. Voce ainda pode altera-los se necessario.
 - Preenchimento automatico de quantidade: ao adicionar um produto embalado a
   sua despensa, os campos de quantidade e unidade sao preenchidos
   automaticamente a partir do rotulo do produto. Voce ainda pode altera-los

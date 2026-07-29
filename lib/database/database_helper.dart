@@ -121,7 +121,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 30;
+  static const int databaseVersion = 31;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -189,6 +189,7 @@ class DatabaseHelper {
         category TEXT,
         ingredients TEXT,
         serving_size TEXT,
+        serving_quantity REAL,
         energy_kcal REAL,
         protein_g REAL,
         carbs_g REAL,

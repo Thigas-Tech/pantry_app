@@ -251,14 +251,14 @@ void main() {
           barcode: 'plu-1750339',
           name: 'Apple',
           productType: ProductType.produce,
-          usdaServingAmount: 1.0,
+          usdaServingAmount: 1,
           usdaServingUnit: 'fruit',
-          usdaGramWeight: 182.0,
+          usdaGramWeight: 182,
         );
         final entry = ProductCacheEntryConversions.fromProduct(product);
-        expect(entry.usdaServingAmount, 1.0);
+        expect(entry.usdaServingAmount, 1);
         expect(entry.usdaServingUnit, 'fruit');
-        expect(entry.usdaGramWeight, 182.0);
+        expect(entry.usdaGramWeight, 182);
       });
 
       test('preserves provided createdAt', () {
@@ -329,14 +329,14 @@ void main() {
           createdAt: 1700000000000,
           lastRefreshedAt: 1700000000000,
           nextRefreshAt: 1708754400000,
-          usdaServingAmount: 1.0,
+          usdaServingAmount: 1,
           usdaServingUnit: 'fruit',
-          usdaGramWeight: 182.0,
+          usdaGramWeight: 182,
         );
         final product = entry.toProduct();
-        expect(product.usdaServingAmount, 1.0);
+        expect(product.usdaServingAmount, 1);
         expect(product.usdaServingUnit, 'fruit');
-        expect(product.usdaGramWeight, 182.0);
+        expect(product.usdaGramWeight, 182);
       });
 
       test('handles null categoriesHierarchy', () {

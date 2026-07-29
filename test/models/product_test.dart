@@ -114,7 +114,7 @@ void main() {
         expect(product.proteinG, 5.5);
         expect(product.carbsG, 20.0);
         expect(product.fatG, 2.0);
-        expect(product.fiberG, 1.0);
+        expect(product.fiberG, 1);
         expect(product.saltG, 0.5);
         expect(product.nutriscoreGrade, 'a');
         expect(product.lastSynced, isNotNull);
@@ -278,23 +278,23 @@ void main() {
           barcode: '1',
           name: 'Apple',
           productType: ProductType.produce,
-          usdaServingAmount: 1.0,
+          usdaServingAmount: 1,
           usdaServingUnit: 'fruit',
-          usdaGramWeight: 182.0,
+          usdaGramWeight: 182,
         );
-        expect(product.usdaServingAmount, 1.0);
+        expect(product.usdaServingAmount, 1);
         expect(product.usdaServingUnit, 'fruit');
-        expect(product.usdaGramWeight, 182.0);
+        expect(product.usdaGramWeight, 182);
       });
 
       test('copyWith preserves USDA fields', () {
         const product = Product(
           barcode: '1',
           name: 'Apple',
-          usdaGramWeight: 182.0,
+          usdaGramWeight: 182,
         );
-        final updated = product.copyWith(usdaGramWeight: 200.0);
-        expect(updated.usdaGramWeight, 200.0);
+        final updated = product.copyWith(usdaGramWeight: 200);
+        expect(updated.usdaGramWeight, 200);
         expect(updated.name, 'Apple');
       });
 
@@ -302,7 +302,7 @@ void main() {
         const product = Product(
           barcode: '1',
           name: 'Apple',
-          usdaGramWeight: 182.0,
+          usdaGramWeight: 182,
           usdaServingUnit: 'fruit',
         );
         final updated = product.copyWith(
@@ -318,13 +318,13 @@ void main() {
         const api = Product(
           barcode: '1',
           name: 'Apple',
-          usdaServingAmount: 1.0,
-          usdaGramWeight: 182.0,
+          usdaServingAmount: 1,
+          usdaGramWeight: 182,
           usdaServingUnit: 'fruit',
         );
         final merged = cached.mergeFromApi(api);
-        expect(merged.usdaServingAmount, 1.0);
-        expect(merged.usdaGramWeight, 182.0);
+        expect(merged.usdaServingAmount, 1);
+        expect(merged.usdaGramWeight, 182);
         expect(merged.usdaServingUnit, 'fruit');
       });
 
@@ -332,14 +332,14 @@ void main() {
         const cached = Product(
           barcode: '1',
           name: 'Apple',
-          usdaServingAmount: 1.0,
-          usdaGramWeight: 182.0,
+          usdaServingAmount: 1,
+          usdaGramWeight: 182,
           usdaServingUnit: 'fruit',
         );
         const api = Product(barcode: '1', name: 'Apple');
         final merged = cached.mergeFromApi(api);
-        expect(merged.usdaServingAmount, 1.0);
-        expect(merged.usdaGramWeight, 182.0);
+        expect(merged.usdaServingAmount, 1);
+        expect(merged.usdaGramWeight, 182);
         expect(merged.usdaServingUnit, 'fruit');
       });
     });
