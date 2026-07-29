@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 
 part 'product.freezed.dart';
@@ -125,6 +126,14 @@ abstract class Product with _$Product {
     /// The suggested serving size, typically with a unit (e.g. "15 g",
     /// "1 cookie (28 g)").
     String? servingSize,
+
+    /// The normalized numeric serving quantity from the OFF API
+    /// (e.g. `30.0` for a serving size of "30 g").
+    ///
+    /// Sourced from the OFF API `serving_quantity` field. When available,
+    /// this is used by [QuantityParser] as the amount for pre-fill, with
+    /// the unit extracted from the [String] serving size.
+    double? servingQuantity,
 
     /// The display quantity as printed on the packaging (e.g. "500 ml",
     /// "3 x 150 g", "6 eggs").
@@ -302,6 +311,7 @@ abstract class Product with _$Product {
       category: offProduct.categories,
       ingredients: offProduct.ingredientsText,
       servingSize: offProduct.servingSize,
+      servingQuantity: offProduct.servingQuantity,
       quantity: offProduct.quantity,
       productQuantity: offProduct.packagingQuantity,
       energyKcal: n?.getValue(
@@ -393,6 +403,7 @@ extension ProductMerge on Product {
       category: nonEmpty(api.category) ?? category,
       ingredients: nonEmpty(api.ingredients) ?? ingredients,
       servingSize: nonEmpty(api.servingSize) ?? servingSize,
+      servingQuantity: api.servingQuantity ?? servingQuantity,
       quantity: nonEmpty(api.quantity) ?? quantity,
       productQuantity: api.productQuantity ?? productQuantity,
       energyKcal: api.energyKcal ?? energyKcal,
@@ -439,6 +450,7 @@ extension ProductMerge on Product {
       imageUrl: nonEmpty(manual.imageUrl) ?? imageUrl,
 
       // Nutrition: user values win, but preserve cache when user left empty.
+      servingQuantity: manual.servingQuantity ?? servingQuantity,
       energyKcal: manual.energyKcal ?? energyKcal,
       proteinG: manual.proteinG ?? proteinG,
       carbsG: manual.carbsG ?? carbsG,

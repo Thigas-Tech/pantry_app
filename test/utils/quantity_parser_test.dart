@@ -105,27 +105,27 @@ void main() {
   group('QuantityParser.parseUsda', () {
     test('returns gramWeight and g when gramWeight is present', () {
       final result = QuantityParser.parseUsda(
-        usdaGramWeight: 182.0,
-        usdaServingAmount: 1.0,
+        usdaGramWeight: 182,
+        usdaServingAmount: 1,
       );
       expect(result, isNotNull);
-      expect(result!.amount, 182.0);
+      expect(result!.amount, 182);
       expect(result.unit, 'g');
     });
 
     test('ignores usdaServingAmount when gramWeight is present', () {
       final result = QuantityParser.parseUsda(
-        usdaGramWeight: 150.0,
-        usdaServingAmount: 99.0,
+        usdaGramWeight: 150,
+        usdaServingAmount: 99,
       );
       expect(result, isNotNull);
-      expect(result!.amount, 150.0);
+      expect(result!.amount, 150);
       expect(result.unit, 'g');
     });
 
     test('returns null when gramWeight is null', () {
       final result = QuantityParser.parseUsda(
-        usdaServingAmount: 1.0,
+        usdaServingAmount: 1,
         usdaServingUnit: 'fruit',
       );
       expect(result, isNull);
@@ -158,6 +158,127 @@ void main() {
       expect(result!.amount, 3000);
       expect(result.unit, 'g');
     });
+  });
+
+  group('QuantityParser.parseServing', () {
+    test(
+      'uses servingQuantity as amount with unit from servingSize',
+      () {
+        final result = QuantityParser.parseServing(
+          servingQuantity: 30,
+          servingSize: '30g',
+        );
+        expect(result, isNotNull);
+        expect(result!.amount, 30);
+        expect(result.unit, 'g');
+      },
+    );
+
+    test(
+      'servingQuantity with spaced servingSize extracts unit',
+      () {
+        final result = QuantityParser.parseServing(
+          servingQuantity: 100,
+          servingSize: '100 g',
+        );
+        expect(result, isNotNull);
+        expect(result!.amount, 100);
+        expect(result.unit, 'g');
+      },
+    );
+
+    test(
+      'servingQuantity with complex servingSize that has'
+      ' unrecognisable first-word unit returns null',
+      () {
+        expect(
+          QuantityParser.parseServing(
+            servingQuantity: 240,
+            servingSize: '1 cup (240ml)',
+          ),
+          isNull,
+        );
+      },
+    );
+
+    test(
+      'servingQuantity with unrecognised servingSize unit returns null',
+      () {
+        final result = QuantityParser.parseServing(
+          servingQuantity: 28,
+          servingSize: '1 cookie (28g)',
+        );
+        expect(result, isNull);
+      },
+    );
+
+    test(
+      'fallback parses servingSize string when servingQuantity is null',
+      () {
+        final result = QuantityParser.parseServing(servingSize: '100g');
+        expect(result, isNotNull);
+        expect(result!.amount, 100);
+        expect(result.unit, 'g');
+      },
+    );
+
+    test(
+      'fallback parses servingSize with ml when servingQuantity is null',
+      () {
+        final result = QuantityParser.parseServing(servingSize: '500ml');
+        expect(result, isNotNull);
+        expect(result!.amount, 500);
+        expect(result.unit, 'ml');
+      },
+    );
+
+    test(
+      'returns null when both servingQuantity and servingSize are null',
+      () => expect(QuantityParser.parseServing(), isNull),
+    );
+
+    test(
+      'returns null when servingQuantity is null and servingSize is empty',
+      () => expect(QuantityParser.parseServing(servingSize: ''), isNull),
+    );
+
+    test(
+      'falls back to parsing servingSize when servingQuantity is zero',
+      () {
+        final result = QuantityParser.parseServing(
+          servingQuantity: 0,
+          servingSize: '30g',
+        );
+        expect(result, isNotNull);
+        expect(result!.amount, 30);
+        expect(result.unit, 'g');
+      },
+    );
+
+    test(
+      'returns null when servingQuantity is present but servingSize'
+      ' has no recognisable unit',
+      () {
+        expect(
+          QuantityParser.parseServing(
+            servingQuantity: 1,
+            servingSize: '1 plate',
+          ),
+          isNull,
+        );
+      },
+    );
+
+    test(
+      'returns null for complex servingSize with unrecognised unit'
+      ' when servingQuantity is null',
+      () {
+        expect(
+          QuantityParser.parseServing(servingSize: '1 cookie (28g)'),
+          isNull,
+        );
+      },
+    );
   });
 
   group('QuantityParser.normalizeUnit', () {

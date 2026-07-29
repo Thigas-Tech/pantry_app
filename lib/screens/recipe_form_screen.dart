@@ -6,13 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/screens/product_picker_screen.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
+import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// Tracks mutable state for a single ingredient row in the form.
@@ -113,11 +116,30 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     });
   }
 
+  ({double quantity, String unit}) _prefillFromProduct(Product product) {
+    if (product.productType == ProductType.produce) {
+      final parsed = QuantityParser.parseUsda(
+        usdaServingAmount: product.usdaServingAmount,
+        usdaServingUnit: product.usdaServingUnit,
+        usdaGramWeight: product.usdaGramWeight,
+      );
+      if (parsed != null) return (quantity: parsed.amount, unit: parsed.unit);
+    } else {
+      final parsed = QuantityParser.parseServing(
+        servingQuantity: product.servingQuantity,
+        servingSize: product.servingSize,
+      );
+      if (parsed != null) return (quantity: parsed.amount, unit: parsed.unit);
+    }
+    return (quantity: 1.0, unit: 'pieces');
+  }
+
   void _addIngredient({
     String? name,
     String? barcode,
-    double quantity = 1.0,
-    String unit = 'pieces',
+    Product? product,
+    double? quantity,
+    String? unit,
   }) {
     setState(() {
       if (barcode != null && barcode.isNotEmpty) {
@@ -130,19 +152,27 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
                 _ingredients[existingIndex].quantityController.text,
               ) ??
               0.0;
+          final addQty =
+              quantity ??
+              (product != null ? _prefillFromProduct(product).quantity : 1.0);
           _ingredients[existingIndex].quantityController.text =
-              (currentQty + quantity).toStringAsFixed(1);
+              (currentQty + addQty).toStringAsFixed(1);
           return;
         }
       }
+      final prefill = product != null
+          ? _prefillFromProduct(product)
+          : (quantity: quantity ?? 1.0, unit: unit ?? 'pieces');
+      final qty = prefill.quantity;
+      final unt = prefill.unit;
       _ingredients.add(
         _IngredientEntry(
           nameController: TextEditingController(text: name ?? ''),
           barcode: barcode,
         ),
       );
-      _ingredients.last.quantityController.text = quantity.toString();
-      _ingredients.last.unit = unit;
+      _ingredients.last.quantityController.text = qty.toString();
+      _ingredients.last.unit = unt;
     });
   }
 
@@ -226,12 +256,19 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
 
     if (!mounted) return;
 
+    final repo = ref.read(productRepositoryProvider);
     for (var i = 0; i < items.length; i++) {
       if (selected[i]) {
         final item = items[i];
+        final barcode = item['barcode'] as String?;
+        Product? product;
+        if (barcode != null && barcode.isNotEmpty) {
+          product = await repo.getProductFromCache(barcode);
+        }
         _addIngredient(
           name: item['name'] as String? ?? item['barcode'] as String,
           barcode: item['barcode'] as String?,
+          product: product,
         );
       }
     }
@@ -243,9 +280,12 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
       MaterialPageRoute(builder: (_) => const ProductPickerScreen()),
     );
     if (product != null && mounted) {
+      final repo = ref.read(productRepositoryProvider);
+      final cached = await repo.getProductFromCache(product.barcode);
       _addIngredient(
         name: product.name,
         barcode: product.barcode,
+        product: cached ?? product,
       );
     }
   }
