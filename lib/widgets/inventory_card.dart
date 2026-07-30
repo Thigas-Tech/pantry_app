@@ -20,6 +20,8 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
+import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
@@ -230,8 +232,25 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
   }
 
   Widget _buildSubtitle(AppLocalizations l10n) {
+    final settings = ref.watch(settingsProvider);
+    final inventorySystem = UnitResolver.systemFor(
+      settings: settings,
+      context: UnitContext.inventory,
+    );
+    final display = UnitConverter.displayUnit(
+      widget.item.quantity,
+      widget.item.unit,
+      inventorySystem,
+      weightPref: settings.preferredWeightUnit,
+      volumePref: settings.preferredVolumeUnit,
+    );
     final sb = StringBuffer()
-      ..write('${widget.item.quantity} ${l10n.localizeUnit(widget.item.unit)}')
+      ..write(
+        l10n.formatQuantityUnit(
+          display.quantity,
+          l10n.localizeUnit(display.unit),
+        ),
+      )
       ..write(' · ${l10n.localizeLocation(widget.item.location)}');
     if (widget.item.expiryDate != null) {
       sb.write(' · ${l10n.expiryPrefix}: ${widget.item.expiryDate}');

@@ -7,19 +7,16 @@ import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
+import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:share_plus/share_plus.dart';
-
-String _formatQuantity(double quantity) {
-  return quantity == quantity.toInt()
-      ? quantity.toInt().toString()
-      : quantity.toString();
-}
 
 /// The main shopping list screen with price tracking and move-to-inventory.
 class ShoppingListScreen extends ConsumerStatefulWidget {
@@ -213,11 +210,23 @@ class _ShareButton extends ConsumerWidget {
           ..writeln();
 
         if (pending.isNotEmpty) {
+          final settings = ref.watch(settingsProvider);
+          final shoppingSystem = UnitResolver.systemFor(
+            settings: settings,
+            context: UnitContext.inventory,
+          );
           buffer.writeln('${l10n.pendingItems}:');
           for (final item in pending) {
+            final display = UnitConverter.displayUnit(
+              item.quantity,
+              item.unit,
+              shoppingSystem,
+              weightPref: settings.preferredWeightUnit,
+              volumePref: settings.preferredVolumeUnit,
+            );
             buffer.writeln(
-              '- ${item.name} (${_formatQuantity(item.quantity)} '
-              '${l10n.localizeUnit(item.unit)})',
+              '- ${item.name} '
+              '(${l10n.formatQuantityUnit(display.quantity, l10n.localizeUnit(display.unit))})',
             );
           }
           buffer.writeln();
@@ -426,7 +435,7 @@ class _ShoppingItemTile extends ConsumerWidget {
                 )
               : null,
         ),
-        subtitle: _buildSubtitle(context, l10n),
+        subtitle: _buildSubtitle(context, l10n, ref),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -475,9 +484,27 @@ class _ShoppingItemTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildSubtitle(BuildContext context, AppLocalizations l10n) {
-    final quantityText =
-        '${_formatQuantity(item.quantity)} ${l10n.localizeUnit(item.unit)}';
+  Widget _buildSubtitle(
+    BuildContext context,
+    AppLocalizations l10n,
+    WidgetRef ref,
+  ) {
+    final settings = ref.watch(settingsProvider);
+    final shoppingSystem = UnitResolver.systemFor(
+      settings: settings,
+      context: UnitContext.inventory,
+    );
+    final display = UnitConverter.displayUnit(
+      item.quantity,
+      item.unit,
+      shoppingSystem,
+      weightPref: settings.preferredWeightUnit,
+      volumePref: settings.preferredVolumeUnit,
+    );
+    final quantityText = l10n.formatQuantityUnit(
+      display.quantity,
+      l10n.localizeUnit(display.unit),
+    );
 
     if (item.priceAmount != null) {
       final symbol = currencySymbolFor(item.priceCurrency ?? 'USD');

@@ -52,6 +52,16 @@ class FakeSettingsNotifierNotifsOff extends SettingsNotifier {
   Settings build() => const Settings(notificationsEnabled: false);
 }
 
+/// A fake with imperial unit system.
+class FakeSettingsNotifierImperial extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(
+    unitSystem: UnitSystem.imperial,
+    preferredWeightUnit: WeightUnitPreference.pounds,
+    preferredVolumeUnit: VolumeUnitPreference.cups,
+  );
+}
+
 // ---------- Tests -----------------------------------------------------------
 
 void main() {
@@ -434,5 +444,95 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Send Feedback'), findsOneWidget);
+  });
+
+  // ---- Unit system -------------------------------------------------------
+
+  testWidgets('shows unit system radio group with Metric selected by default', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+      ],
+    );
+
+    // Open the units section
+    await tester.tap(find.text('Units'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Metric'), findsOneWidget);
+    expect(find.text('Imperial'), findsOneWidget);
+  });
+
+  testWidgets(
+    'tapping Imperial updates unit system via notifier',
+    (tester) async {
+      await pumpApp(
+        tester,
+        const SettingsScreen(),
+        overrides: [
+          themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+          settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        ],
+      );
+
+      await tester.tap(find.text('Units'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Imperial'));
+      await tester.pumpAndSettle();
+
+      // Imperial radio should now be selected (groupValue == imperial)
+      final imperialRadio = tester.widget<RadioListTile<UnitSystem>>(
+        find.ancestor(
+          of: find.text('Imperial'),
+          matching: find.byType(RadioListTile<UnitSystem>),
+        ),
+      );
+      expect(imperialRadio.groupValue, UnitSystem.imperial);
+    },
+  );
+
+  testWidgets(
+    'shows imperial preferences when system is imperial',
+    (tester) async {
+      await pumpApp(
+        tester,
+        const SettingsScreen(),
+        overrides: [
+          themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+          settingsProvider.overrideWith(FakeSettingsNotifierImperial.new),
+        ],
+      );
+
+      await tester.tap(find.text('Units'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Weight preference'), findsOneWidget);
+      expect(find.text('Volume preference'), findsOneWidget);
+    },
+  );
+
+  testWidgets('hides imperial preferences when system is metric', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+      ],
+    );
+
+    await tester.tap(find.text('Units'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Weight preference'), findsNothing);
+    expect(find.text('Volume preference'), findsNothing);
   });
 }

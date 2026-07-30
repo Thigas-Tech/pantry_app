@@ -33,6 +33,7 @@ import 'package:flutter_riverpod/misc.dart'; // for Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
@@ -41,6 +42,7 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/product_repository.dart';
@@ -166,6 +168,14 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   int build() => 1;
 }
 
+/// A fake [SettingsNotifier] that returns imperial settings globally.
+class FakeSettingsNotifierImperial extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(
+    unitSystem: UnitSystem.imperial,
+  );
+}
+
 // ---------- Mocks -----------------------------------------------------------
 
 class MockProductRepository extends Mock implements ProductRepository {}
@@ -235,6 +245,7 @@ void main() {
   late MockDatabaseHelper mockDb;
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     mockRepo = MockProductRepository();
     mockNotif = MockNotificationService();
     mockDb = MockDatabaseHelper();
@@ -1090,6 +1101,74 @@ void main() {
       final remindedItem = captured.first as InventoryItem;
       expect(remindedItem.id, isNotNull);
       expect(remindedItem.id, 42);
+    },
+  );
+
+  // --------------------------------------------------------------------------
+  // Imperial unit conversion
+  // --------------------------------------------------------------------------
+
+  testWidgets(
+    'converts serving size to imperial when settings specify imperial',
+    (
+      tester,
+    ) async {
+      // Use a product with structured serving data for conversion.
+      const juice = Product(
+        barcode: '4001234567890',
+        name: 'Juice',
+        servingSize: '250 ml',
+        servingQuantity: 250,
+      );
+      setLargeScreen(tester);
+      await pumpApp(
+        tester,
+        ProductDetailScreen(product: juice),
+        overrides: [
+          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+          settingsProvider.overrideWith(FakeSettingsNotifierImperial.new),
+        ],
+      );
+      // 250 ml -> ~8.5 fl oz
+      expect(find.textContaining('8.5 fl oz'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'converts inventory quantities to imperial when settings specify imperial',
+    (
+      tester,
+    ) async {
+      setLargeScreen(tester);
+      final items = [
+        makeItem(
+          id: 1,
+          quantity: 1,
+          unit: 'L',
+          location: 'fridge',
+          expiryDate: '2026-12-31',
+        ),
+        makeItem(id: 2, quantity: 1),
+      ];
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => items);
+
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: [
+          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+          settingsProvider.overrideWith(FakeSettingsNotifierImperial.new),
+        ],
+      );
+      // 1 L -> ~33.8 fl oz
+      expect(find.textContaining('33.8 fl oz'), findsOneWidget);
+      // 1 pcs should remain unchanged
+      expect(find.textContaining('1 pcs'), findsOneWidget);
     },
   );
 }

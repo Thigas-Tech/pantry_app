@@ -7,6 +7,15 @@ import 'package:pantry_app/config.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// The measurement system for displaying quantities.
+enum UnitSystem { metric, imperial }
+
+/// Preferred weight unit when using the imperial system.
+enum WeightUnitPreference { ounces, pounds, auto }
+
+/// Preferred volume unit when using the imperial system.
+enum VolumeUnitPreference { fluidOunces, cups, tablespoons, teaspoons, auto }
+
 /// Persistent settings for the pantry app.
 ///
 /// All fields have sensible defaults for a new user.
@@ -25,6 +34,12 @@ class Settings {
     this.baseCurrency = 'USD',
     this.openPricesSyncEnabled = false,
     this.openPricesToken = '',
+    this.unitSystem = UnitSystem.metric,
+    this.unitSystemServingSize,
+    this.unitSystemRecipeIngredients,
+    this.unitSystemInventory,
+    this.preferredWeightUnit = WeightUnitPreference.ounces,
+    this.preferredVolumeUnit = VolumeUnitPreference.fluidOunces,
   });
 
   /// Whether expiry notifications are enabled.
@@ -77,7 +92,28 @@ class Settings {
   /// Bearer token for the Open Prices API.
   final String openPricesToken;
 
+  /// Global unit system preference (Metric or Imperial).
+  final UnitSystem unitSystem;
+
+  /// Per-context override for serving size display, or null to inherit global.
+  final UnitSystem? unitSystemServingSize;
+
+  /// Per-context override for recipe ingredient display, or null to inherit.
+  final UnitSystem? unitSystemRecipeIngredients;
+
+  /// Per-context override for inventory display, or null to inherit global.
+  final UnitSystem? unitSystemInventory;
+
+  /// Preferred weight unit when system is Imperial.
+  final WeightUnitPreference preferredWeightUnit;
+
+  /// Preferred volume unit when system is Imperial.
+  final VolumeUnitPreference preferredVolumeUnit;
+
   /// Returns a copy with the given fields replaced.
+  ///
+  /// For nullable [UnitSystem] override fields, use a sentinel to distinguish
+  /// "not provided" from "set to null".
   Settings copyWith({
     bool? notificationsEnabled,
     int? retentionDays,
@@ -91,6 +127,12 @@ class Settings {
     String? baseCurrency,
     bool? openPricesSyncEnabled,
     String? openPricesToken,
+    UnitSystem? unitSystem,
+    Object? unitSystemServingSize = _nullSentinel,
+    Object? unitSystemRecipeIngredients = _nullSentinel,
+    Object? unitSystemInventory = _nullSentinel,
+    WeightUnitPreference? preferredWeightUnit,
+    VolumeUnitPreference? preferredVolumeUnit,
   }) {
     return Settings(
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -108,8 +150,23 @@ class Settings {
       openPricesSyncEnabled:
           openPricesSyncEnabled ?? this.openPricesSyncEnabled,
       openPricesToken: openPricesToken ?? this.openPricesToken,
+      unitSystem: unitSystem ?? this.unitSystem,
+      unitSystemServingSize: identical(unitSystemServingSize, _nullSentinel)
+          ? this.unitSystemServingSize
+          : unitSystemServingSize as UnitSystem?,
+      unitSystemRecipeIngredients:
+          identical(unitSystemRecipeIngredients, _nullSentinel)
+          ? this.unitSystemRecipeIngredients
+          : unitSystemRecipeIngredients as UnitSystem?,
+      unitSystemInventory: identical(unitSystemInventory, _nullSentinel)
+          ? this.unitSystemInventory
+          : unitSystemInventory as UnitSystem?,
+      preferredWeightUnit: preferredWeightUnit ?? this.preferredWeightUnit,
+      preferredVolumeUnit: preferredVolumeUnit ?? this.preferredVolumeUnit,
     );
   }
+
+  static const _nullSentinel = Object();
 }
 
 /// A [Notifier] that holds the current [Settings] and persists every field
@@ -143,6 +200,42 @@ class SettingsNotifier extends Notifier<Settings> {
         openPricesSyncEnabled: prefs.getBool('openPricesSyncEnabled') ?? false,
         openPricesToken:
             prefs.getString('openPricesToken') ?? AppConfig.openPricesToken,
+        unitSystem: UnitSystem.values.firstWhere(
+          (e) => e.name == prefs.getString('unitSystem'),
+          orElse: () => UnitSystem.metric,
+        ),
+        unitSystemServingSize: () {
+          final v = prefs.getString('unitSystemServingSize');
+          if (v == null) return null;
+          return UnitSystem.values.firstWhere(
+            (e) => e.name == v,
+            orElse: () => UnitSystem.metric,
+          );
+        }(),
+        unitSystemRecipeIngredients: () {
+          final v = prefs.getString('unitSystemRecipeIngredients');
+          if (v == null) return null;
+          return UnitSystem.values.firstWhere(
+            (e) => e.name == v,
+            orElse: () => UnitSystem.metric,
+          );
+        }(),
+        unitSystemInventory: () {
+          final v = prefs.getString('unitSystemInventory');
+          if (v == null) return null;
+          return UnitSystem.values.firstWhere(
+            (e) => e.name == v,
+            orElse: () => UnitSystem.metric,
+          );
+        }(),
+        preferredWeightUnit: WeightUnitPreference.values.firstWhere(
+          (e) => e.name == prefs.getString('preferredWeightUnit'),
+          orElse: () => WeightUnitPreference.ounces,
+        ),
+        preferredVolumeUnit: VolumeUnitPreference.values.firstWhere(
+          (e) => e.name == prefs.getString('preferredVolumeUnit'),
+          orElse: () => VolumeUnitPreference.fluidOunces,
+        ),
       );
     } on Exception catch (e) {
       logWarning('Failed to load settings from SharedPreferences: $e');
@@ -231,6 +324,42 @@ class SettingsNotifier extends Notifier<Settings> {
     unawaited(_persist(state));
   }
 
+  /// Sets the global unit system.
+  void setUnitSystem(UnitSystem value) {
+    state = state.copyWith(unitSystem: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the per-context override for serving size display.
+  void setUnitSystemServingSize(UnitSystem? value) {
+    state = state.copyWith(unitSystemServingSize: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the per-context override for recipe ingredients.
+  void setUnitSystemRecipeIngredients(UnitSystem? value) {
+    state = state.copyWith(unitSystemRecipeIngredients: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the per-context override for inventory display.
+  void setUnitSystemInventory(UnitSystem? value) {
+    state = state.copyWith(unitSystemInventory: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the preferred weight unit for imperial mode.
+  void setPreferredWeightUnit(WeightUnitPreference value) {
+    state = state.copyWith(preferredWeightUnit: value);
+    unawaited(_persist(state));
+  }
+
+  /// Sets the preferred volume unit for imperial mode.
+  void setPreferredVolumeUnit(VolumeUnitPreference value) {
+    state = state.copyWith(preferredVolumeUnit: value);
+    unawaited(_persist(state));
+  }
+
   Future<void> _persist(Settings settings) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -264,6 +393,42 @@ class SettingsNotifier extends Notifier<Settings> {
         settings.openPricesSyncEnabled,
       );
       await prefs.setString('openPricesToken', settings.openPricesToken);
+      await prefs.setString(
+        'unitSystem',
+        settings.unitSystem.name,
+      );
+      if (settings.unitSystemServingSize != null) {
+        await prefs.setString(
+          'unitSystemServingSize',
+          settings.unitSystemServingSize!.name,
+        );
+      } else {
+        await prefs.remove('unitSystemServingSize');
+      }
+      if (settings.unitSystemRecipeIngredients != null) {
+        await prefs.setString(
+          'unitSystemRecipeIngredients',
+          settings.unitSystemRecipeIngredients!.name,
+        );
+      } else {
+        await prefs.remove('unitSystemRecipeIngredients');
+      }
+      if (settings.unitSystemInventory != null) {
+        await prefs.setString(
+          'unitSystemInventory',
+          settings.unitSystemInventory!.name,
+        );
+      } else {
+        await prefs.remove('unitSystemInventory');
+      }
+      await prefs.setString(
+        'preferredWeightUnit',
+        settings.preferredWeightUnit.name,
+      );
+      await prefs.setString(
+        'preferredVolumeUnit',
+        settings.preferredVolumeUnit.name,
+      );
     } on Exception catch (e) {
       logWarning('Failed to persist settings to SharedPreferences: $e');
     }

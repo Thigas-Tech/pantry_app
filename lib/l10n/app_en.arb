@@ -830,5 +830,33 @@
   "inPantryIndicator": "In Pantry",
   "inPantryFilter": "In Pantry",
   "inPantryEmpty": "No products in your pantry match this search",
-  "inPantrySwipeLabel": "Already in pantry"
+  "inPantrySwipeLabel": "Already in pantry",
+  "units": "Units",
+  "unitSystemMetric": "Metric",
+  "unitSystemImperial": "Imperial",
+  "perContextOverrides": "Per-context overrides",
+  "servingSizeContext": "Serving size",
+  "recipeIngredientsContext": "Recipe ingredients",
+  "inventoryContext": "Inventory",
+  "systemDefault": "System default",
+  "imperialPreferences": "Imperial preferences",
+  "weightPreference": "Weight preference",
+  "volumePreference": "Volume preference",
+  "weightOz": "Ounces (oz)",
+  "weightLb": "Pounds (lb)",
+  "weightAuto": "Auto",
+  "volumeFlOz": "Fluid ounces",
+  "volumeCup": "Cups",
+  "volumeTbsp": "Tablespoons",
+  "volumeTsp": "Teaspoons",
+  "volumeAuto": "Auto",
+  "unitSystemChanged": "Units: {system}",
+  "@unitSystemChanged": {
+    "placeholders": {
+      "system": {
+        "type": "String",
+        "example": "Imperial"
+      }
+    }
+  }
 }
