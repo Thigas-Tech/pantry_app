@@ -79,7 +79,10 @@ quantity 1 and <a href="../../l10n_app_localizations/AppLocalizations/unitPlural
     final label = quantity == 1 ? unitSingular : unitPlural;
     return &#39;${quantity.toInt()} $label&#39;;
   }
-  return &#39;${quantity.toInt()} ${localizeUnit(unit)}&#39;;
+  if (quantity == quantity.toInt()) {
+    return &#39;${quantity.toInt()} ${localizeUnit(unit)}&#39;;
+  }
+  return &#39;$quantity ${localizeUnit(unit)}&#39;;
 }</code></pre>
 </section>
 

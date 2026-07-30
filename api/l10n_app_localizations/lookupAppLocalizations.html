@@ -68,31 +68,28 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">AppLocalizations lookupAppLocalizations(Locale locale) {
+
   &#47;&#47; Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case &#39;pt&#39;:
-      {
-        switch (locale.countryCode) {
-          case &#39;BR&#39;:
-            return AppLocalizationsPtBr();
-        }
-        break;
-      }
+    case &#39;pt&#39;: {
+  switch (locale.countryCode) {
+    case &#39;BR&#39;: return AppLocalizationsPtBr();
+   }
+  break;
+   }
   }
 
   &#47;&#47; Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case &#39;en&#39;:
-      return AppLocalizationsEn();
-    case &#39;pt&#39;:
-      return AppLocalizationsPt();
+    case &#39;en&#39;: return AppLocalizationsEn();
+    case &#39;pt&#39;: return AppLocalizationsPt();
   }
 
   throw FlutterError(
     &#39;AppLocalizations.delegate failed to load unsupported locale &quot;$locale&quot;. This is likely &#39;
     &#39;an issue with the localizations generation tool. Please file an issue &#39;
     &#39;on GitHub with a reproducible sample app and the gen-l10n configuration &#39;
-    &#39;that was used.&#39;,
+    &#39;that was used.&#39;
   );
 }</code></pre>
 </section>

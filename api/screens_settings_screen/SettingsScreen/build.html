@@ -152,6 +152,120 @@ Widget build(BuildContext context, WidgetRef ref) {
           ],
         ),
         ExpansionTile(
+          leading: const Icon(Icons.straighten),
+          title: Text(l10n.units),
+          initiallyExpanded: false,
+          children: [
+            RadioListTile&lt;UnitSystem&gt;(
+              title: Text(l10n.unitSystemMetric),
+              value: UnitSystem.metric,
+              groupValue: settings.unitSystem,
+              onChanged: (v) {
+                if (v != null) {
+                  logInfo(&#39;Unit system changed to: ${v.name}&#39;);
+                  ref.read(settingsProvider.notifier).setUnitSystem(v);
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      l10n.unitSystemChanged(
+                        v == UnitSystem.metric
+                            ? l10n.unitSystemMetric
+                            : l10n.unitSystemImperial,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+            RadioListTile&lt;UnitSystem&gt;(
+              title: Text(l10n.unitSystemImperial),
+              value: UnitSystem.imperial,
+              groupValue: settings.unitSystem,
+              onChanged: (v) {
+                if (v != null) {
+                  logInfo(&#39;Unit system changed to: ${v.name}&#39;);
+                  ref.read(settingsProvider.notifier).setUnitSystem(v);
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      l10n.unitSystemChanged(
+                        v == UnitSystem.metric
+                            ? l10n.unitSystemMetric
+                            : l10n.unitSystemImperial,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+            const Divider(),
+            ExpansionTile(
+              title: Text(l10n.perContextOverrides),
+              leading: const Icon(Icons.swap_horiz),
+              initiallyExpanded: false,
+              children: [
+                _contextOverrideTile(
+                  context,
+                  l10n: l10n,
+                  label: l10n.servingSizeContext,
+                  value: settings.unitSystemServingSize,
+                  onChanged: (v) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .setUnitSystemServingSize(v);
+                  },
+                ),
+                _contextOverrideTile(
+                  context,
+                  l10n: l10n,
+                  label: l10n.recipeIngredientsContext,
+                  value: settings.unitSystemRecipeIngredients,
+                  onChanged: (v) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .setUnitSystemRecipeIngredients(v);
+                  },
+                ),
+                _contextOverrideTile(
+                  context,
+                  l10n: l10n,
+                  label: l10n.inventoryContext,
+                  value: settings.unitSystemInventory,
+                  onChanged: (v) {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .setUnitSystemInventory(v);
+                  },
+                ),
+              ],
+            ),
+            if (_usesImperialInAnyContext(settings)) ...[
+              const Divider(),
+              ExpansionTile(
+                title: Text(l10n.imperialPreferences),
+                leading: const Icon(Icons.tune),
+                initiallyExpanded: true,
+                children: [
+                  ListTile(
+                    title: Text(l10n.weightPreference),
+                    subtitle: Text(
+                      _weightPrefLabel(settings.preferredWeightUnit, l10n),
+                    ),
+                    onTap: () =&gt; _showWeightPrefDialog(context, ref),
+                  ),
+                  ListTile(
+                    title: Text(l10n.volumePreference),
+                    subtitle: Text(
+                      _volumePrefLabel(settings.preferredVolumeUnit, l10n),
+                    ),
+                    onTap: () =&gt; _showVolumePrefDialog(context, ref),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+        ExpansionTile(
           leading: const Icon(Icons.notifications_active),
           title: Text(l10n.expiryNotifications),
           initiallyExpanded: true,

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the displayUnit method from the UnitConverter class, for the Dart programming language.">
+  <title>displayUnit method - UnitConverter class - unit_conversion library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../utils_unit_conversion/">utils&#47;unit_conversion.dart</a></li>
+    <li><a href="../../utils_unit_conversion/UnitConverter-class.html">UnitConverter</a></li>
+    <li class="self-crumb">displayUnit static method</li>
+  </ol>
+  <div class="self-name">displayUnit</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="utils_unit_conversion&#47;UnitConverter-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">displayUnit</span> static method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype">(<span class="field">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="field-name">quantity</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="field-name">unit</span>}</span>)</span>
+<span class="name ">displayUnit</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="displayUnit-param-quantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">quantity</span>, </span></li>
+<li><span class="parameter" id="displayUnit-param-fromUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fromUnit</span>, </span></li>
+<li><span class="parameter" id="displayUnit-param-targetSystem"><span class="type-annotation"><a href="../../providers_settings_provider/UnitSystem.html">UnitSystem</a></span> <span class="parameter-name">targetSystem</span>, {</span></li>
+<li><span class="parameter" id="displayUnit-param-weightPref"><span class="type-annotation"><a href="../../providers_settings_provider/WeightUnitPreference.html">WeightUnitPreference</a></span> <span class="parameter-name">weightPref</span> = <span class="default-value">WeightUnitPreference.auto</span>, </span></li>
+<li><span class="parameter" id="displayUnit-param-volumePref"><span class="type-annotation"><a href="../../providers_settings_provider/VolumeUnitPreference.html">VolumeUnitPreference</a></span> <span class="parameter-name">volumePref</span> = <span class="default-value">VolumeUnitPreference.auto</span>, </span></li>
+</ol>})
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Converts <code>quantity</code> in <code>fromUnit</code> for display in <code>targetSystem</code>.</p>
+<ul>
+<li>Metric system: auto-scales within metric (g -&gt; kg, ml -&gt; L).</li>
+<li>Imperial system: converts to the preferred imperial unit.</li>
+<li><code>pieces</code> always passes through unchanged.</li>
+<li>Respects <code>weightPref</code> and <code>volumePref</code> when target is imperial.</li>
+</ul>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">static ({double quantity, String unit}) displayUnit(
+  double quantity,
+  String fromUnit,
+  UnitSystem targetSystem, {
+  WeightUnitPreference weightPref = WeightUnitPreference.auto,
+  VolumeUnitPreference volumePref = VolumeUnitPreference.auto,
+}) {
+  if (fromUnit == &#39;pieces&#39;) return (quantity: quantity, unit: &#39;pieces&#39;);
+
+  final base = baseUnitFor(fromUnit);
+  if (base == &#39;pieces&#39;) return (quantity: quantity, unit: fromUnit);
+
+  if (targetSystem == UnitSystem.metric) {
+    if (base == &#39;g&#39;) {
+      final inGrams = normalizeToGrams(quantity, fromUnit);
+      return autoScale(inGrams, &#39;g&#39;);
+    }
+    final inMl = normalizeToMilliliters(quantity, fromUnit);
+    return autoScale(inMl, &#39;ml&#39;);
+  }
+
+  &#47;&#47; Imperial target
+  if (base == &#39;g&#39;) {
+    final inGrams = normalizeToGrams(quantity, fromUnit);
+    switch (weightPref) {
+      case WeightUnitPreference.ounces:
+        return (
+          quantity: _round(convertBack(inGrams, &#39;oz&#39;), &#39;oz&#39;),
+          unit: &#39;oz&#39;,
+        );
+      case WeightUnitPreference.pounds:
+        return (
+          quantity: _round(convertBack(inGrams, &#39;lb&#39;), &#39;lb&#39;),
+          unit: &#39;lb&#39;,
+        );
+      case WeightUnitPreference.auto:
+        final oz = convertBack(inGrams, &#39;oz&#39;);
+        if (oz &gt;= 16) {
+          return (
+            quantity: _round(convertBack(inGrams, &#39;lb&#39;), &#39;lb&#39;),
+            unit: &#39;lb&#39;,
+          );
+        }
+        return (quantity: _round(oz, &#39;oz&#39;), unit: &#39;oz&#39;);
+    }
+  }
+
+  &#47;&#47; Volume
+  final inMl = normalizeToMilliliters(quantity, fromUnit);
+  switch (volumePref) {
+    case VolumeUnitPreference.fluidOunces:
+      return (
+        quantity: _round(convertBack(inMl, &#39;fl oz&#39;), &#39;fl oz&#39;),
+        unit: &#39;fl oz&#39;,
+      );
+    case VolumeUnitPreference.cups:
+      return (
+        quantity: _round(convertBack(inMl, &#39;cup&#39;), &#39;cup&#39;),
+        unit: &#39;cup&#39;,
+      );
+    case VolumeUnitPreference.tablespoons:
+      return (
+        quantity: _round(convertBack(inMl, &#39;tbsp&#39;), &#39;tbsp&#39;),
+        unit: &#39;tbsp&#39;,
+      );
+    case VolumeUnitPreference.teaspoons:
+      return (
+        quantity: _round(convertBack(inMl, &#39;tsp&#39;), &#39;tsp&#39;),
+        unit: &#39;tsp&#39;,
+      );
+    case VolumeUnitPreference.auto:
+      final flOz = convertBack(inMl, &#39;fl oz&#39;);
+      if (flOz &gt;= 8) {
+        return (
+          quantity: _round(convertBack(inMl, &#39;cup&#39;), &#39;cup&#39;),
+          unit: &#39;cup&#39;,
+        );
+      }
+      if (flOz &gt;= 1) {
+        return (quantity: _round(flOz, &#39;fl oz&#39;), unit: &#39;fl oz&#39;);
+      }
+      final tbsp = convertBack(inMl, &#39;tbsp&#39;);
+      if (tbsp &gt;= 1) {
+        return (quantity: _round(tbsp, &#39;tbsp&#39;), unit: &#39;tbsp&#39;);
+      }
+      final tsp = convertBack(inMl, &#39;tsp&#39;);
+      return (quantity: _round(tsp, &#39;tsp&#39;), unit: &#39;tsp&#39;);
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../utils_unit_conversion/">unit_conversion</a></li>
+    <li><a href="../../utils_unit_conversion/UnitConverter-class.html">UnitConverter</a></li>
+    <li class="self-crumb">displayUnit static method</li>
+</ol>
+
+    <h5>UnitConverter class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.8+4
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

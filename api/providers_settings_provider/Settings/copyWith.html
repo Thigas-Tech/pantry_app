@@ -67,6 +67,12 @@
 <li><span class="parameter" id="copyWith-param-baseCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">baseCurrency</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-openPricesSyncEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">openPricesSyncEnabled</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-openPricesToken"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">openPricesToken</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-unitSystem"><span class="type-annotation"><a href="../../providers_settings_provider/UnitSystem.html">UnitSystem</a>?</span> <span class="parameter-name">unitSystem</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-unitSystemServingSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">unitSystemServingSize</span> = <span class="default-value">_nullSentinel</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-unitSystemRecipeIngredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">unitSystemRecipeIngredients</span> = <span class="default-value">_nullSentinel</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-unitSystemInventory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">unitSystemInventory</span> = <span class="default-value">_nullSentinel</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-preferredWeightUnit"><span class="type-annotation"><a href="../../providers_settings_provider/WeightUnitPreference.html">WeightUnitPreference</a>?</span> <span class="parameter-name">preferredWeightUnit</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-preferredVolumeUnit"><span class="type-annotation"><a href="../../providers_settings_provider/VolumeUnitPreference.html">VolumeUnitPreference</a>?</span> <span class="parameter-name">preferredVolumeUnit</span>, </span></li>
 </ol>})
 
       
@@ -75,6 +81,8 @@
     
 <section class="desc markdown">
   <p>Returns a copy with the given fields replaced.</p>
+<p>For nullable <a href="../../providers_settings_provider/UnitSystem.html">UnitSystem</a> override fields, use a sentinel to distinguish
+"not provided" from "set to null".</p>
 </section>
 
 
@@ -94,6 +102,12 @@
   String? baseCurrency,
   bool? openPricesSyncEnabled,
   String? openPricesToken,
+  UnitSystem? unitSystem,
+  Object? unitSystemServingSize = _nullSentinel,
+  Object? unitSystemRecipeIngredients = _nullSentinel,
+  Object? unitSystemInventory = _nullSentinel,
+  WeightUnitPreference? preferredWeightUnit,
+  VolumeUnitPreference? preferredVolumeUnit,
 }) {
   return Settings(
     notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
@@ -111,6 +125,19 @@
     openPricesSyncEnabled:
         openPricesSyncEnabled ?? this.openPricesSyncEnabled,
     openPricesToken: openPricesToken ?? this.openPricesToken,
+    unitSystem: unitSystem ?? this.unitSystem,
+    unitSystemServingSize: identical(unitSystemServingSize, _nullSentinel)
+        ? this.unitSystemServingSize
+        : unitSystemServingSize as UnitSystem?,
+    unitSystemRecipeIngredients:
+        identical(unitSystemRecipeIngredients, _nullSentinel)
+        ? this.unitSystemRecipeIngredients
+        : unitSystemRecipeIngredients as UnitSystem?,
+    unitSystemInventory: identical(unitSystemInventory, _nullSentinel)
+        ? this.unitSystemInventory
+        : unitSystemInventory as UnitSystem?,
+    preferredWeightUnit: preferredWeightUnit ?? this.preferredWeightUnit,
+    preferredVolumeUnit: preferredVolumeUnit ?? this.preferredVolumeUnit,
   );
 }</code></pre>
 </section>

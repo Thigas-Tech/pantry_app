@@ -57,8 +57,8 @@
   <p>Normalizes and converts between compatible measurement units.</p>
 <p>Supported unit groups:</p>
 <ul>
-<li>weight: g, kg</li>
-<li>volume: ml, L, tbsp, tsp, cup</li>
+<li>weight: g, kg, oz, lb</li>
+<li>volume: ml, L, tbsp, tsp, cup, fl oz</li>
 <li>count: pieces</li>
 </ul>
 </section>
@@ -159,6 +159,19 @@
   <section class="summary offset-anchor" id="static-methods">
     <h2>Static Methods</h2>
     <dl class="callables">
+        <dt id="allUnitsForSystem" class="callable">
+  <span class="name"><a href="../utils_unit_conversion/UnitConverter/allUnitsForSystem.html">allUnitsForSystem</a></span><span class="signature">(<wbr><span class="parameter" id="allUnitsForSystem-param-system"><span class="type-annotation"><a href="../providers_settings_provider/UnitSystem.html">UnitSystem</a></span> <span class="parameter-name">system</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the list of available units for the given <code>system</code>.
+  
+
+</dd>
+
         <dt id="areUnitsCompatible" class="callable">
   <span class="name"><a href="../utils_unit_conversion/UnitConverter/areUnitsCompatible.html">areUnitsCompatible</a></span><span class="signature">(<wbr><span class="parameter" id="areUnitsCompatible-param-unitA"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">unitA</span>, </span><span class="parameter" id="areUnitsCompatible-param-unitB"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">unitB</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
@@ -168,6 +181,19 @@
 </dt>
 <dd>
   Whether two units belong to the same measurement group.
+  
+
+</dd>
+
+        <dt id="autoScale" class="callable">
+  <span class="name"><a href="../utils_unit_conversion/UnitConverter/autoScale.html">autoScale</a></span><span class="signature">(<wbr><span class="parameter" id="autoScale-param-quantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">quantity</span>, </span><span class="parameter" id="autoScale-param-unit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">unit</span></span>)
+    <span class="returntype parameter">&#8594; (<span class="field">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="field-name">quantity</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="field-name">unit</span>}</span>)</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Scales <code>quantity</code> in <code>unit</code> to the most appropriate representation.
   
 
 </dd>
@@ -207,6 +233,19 @@
 </dt>
 <dd>
   Converts a normalized quantity (grams or ml) back to <code>targetUnit</code>.
+  
+
+</dd>
+
+        <dt id="displayUnit" class="callable">
+  <span class="name"><a href="../utils_unit_conversion/UnitConverter/displayUnit.html">displayUnit</a></span><span class="signature">(<wbr><span class="parameter" id="displayUnit-param-quantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">quantity</span>, </span><span class="parameter" id="displayUnit-param-fromUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">fromUnit</span>, </span><span class="parameter" id="displayUnit-param-targetSystem"><span class="type-annotation"><a href="../providers_settings_provider/UnitSystem.html">UnitSystem</a></span> <span class="parameter-name">targetSystem</span>, {</span><span class="parameter" id="displayUnit-param-weightPref"><span class="type-annotation"><a href="../providers_settings_provider/WeightUnitPreference.html">WeightUnitPreference</a></span> <span class="parameter-name">weightPref</span> = <span class="default-value">WeightUnitPreference.auto</span>, </span><span class="parameter" id="displayUnit-param-volumePref"><span class="type-annotation"><a href="../providers_settings_provider/VolumeUnitPreference.html">VolumeUnitPreference</a></span> <span class="parameter-name">volumePref</span> = <span class="default-value">VolumeUnitPreference.auto</span></span>})
+    <span class="returntype parameter">&#8594; (<span class="field">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="field-name">quantity</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="field-name">unit</span>}</span>)</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Converts <code>quantity</code> in <code>fromUnit</code> for display in <code>targetSystem</code>.
   
 
 </dd>
