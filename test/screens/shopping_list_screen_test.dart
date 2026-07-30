@@ -2,14 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/shopping_list_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/pump_app.dart';
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
   int build() => 1;
+}
+
+class _FakeSettingsNotifierImperial extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(
+    unitSystem: UnitSystem.imperial,
+    preferredWeightUnit: WeightUnitPreference.auto,
+    preferredVolumeUnit: VolumeUnitPreference.auto,
+  );
 }
 
 void main() {
@@ -139,4 +150,95 @@ void main() {
       expect(find.text('Inv1 Purchased'), findsOneWidget);
     },
   );
+
+  group('unit conversion', () {
+    testWidgets('converts metric item to imperial under imperial settings', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      await pumpApp(
+        tester,
+        const ShoppingListScreen(),
+        overrides: [
+          pendingShoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Flour', quantity: 500, unit: 'g'),
+            ],
+          ),
+          purchasedShoppingListProvider.overrideWith(
+            (ref) => <ShoppingItem>[],
+          ),
+          shoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Flour', quantity: 500, unit: 'g'),
+            ],
+          ),
+          settingsProvider.overrideWith(
+            _FakeSettingsNotifierImperial.new,
+          ),
+        ],
+      );
+
+      // 500 g -> ~17.6 oz (>=16) so auto -> lb: 500/453.592 = ~1.1 lb, rounded to 1 lb
+      expect(find.textContaining('1 lb'), findsOneWidget);
+    });
+
+    testWidgets('pieces remain unchanged under imperial settings', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      await pumpApp(
+        tester,
+        const ShoppingListScreen(),
+        overrides: [
+          pendingShoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Eggs', quantity: 6, unit: 'pcs'),
+            ],
+          ),
+          purchasedShoppingListProvider.overrideWith(
+            (ref) => <ShoppingItem>[],
+          ),
+          shoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Eggs', quantity: 6, unit: 'pcs'),
+            ],
+          ),
+          settingsProvider.overrideWith(
+            _FakeSettingsNotifierImperial.new,
+          ),
+        ],
+      );
+
+      expect(find.textContaining('6 pcs'), findsOneWidget);
+    });
+
+    testWidgets('metric items unchanged under default settings', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      await pumpApp(
+        tester,
+        const ShoppingListScreen(),
+        overrides: [
+          pendingShoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Milk', quantity: 2, unit: 'L'),
+            ],
+          ),
+          purchasedShoppingListProvider.overrideWith(
+            (ref) => <ShoppingItem>[],
+          ),
+          shoppingListProvider.overrideWith(
+            (ref) => [
+              const ShoppingItem(name: 'Milk', quantity: 2, unit: 'L'),
+            ],
+          ),
+        ],
+      );
+
+      // Under metric, 2 L stays as "2 L"
+      expect(find.textContaining('2 L'), findsOneWidget);
+    });
+  });
 }

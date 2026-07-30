@@ -78,6 +78,120 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           ExpansionTile(
+            leading: const Icon(Icons.straighten),
+            title: Text(l10n.units),
+            initiallyExpanded: false,
+            children: [
+              RadioListTile<UnitSystem>(
+                title: Text(l10n.unitSystemMetric),
+                value: UnitSystem.metric,
+                groupValue: settings.unitSystem,
+                onChanged: (v) {
+                  if (v != null) {
+                    logInfo('Unit system changed to: ${v.name}');
+                    ref.read(settingsProvider.notifier).setUnitSystem(v);
+                    if (context.mounted) {
+                      SnackbarHelper.showInfo(
+                        context,
+                        l10n.unitSystemChanged(
+                          v == UnitSystem.metric
+                              ? l10n.unitSystemMetric
+                              : l10n.unitSystemImperial,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+              RadioListTile<UnitSystem>(
+                title: Text(l10n.unitSystemImperial),
+                value: UnitSystem.imperial,
+                groupValue: settings.unitSystem,
+                onChanged: (v) {
+                  if (v != null) {
+                    logInfo('Unit system changed to: ${v.name}');
+                    ref.read(settingsProvider.notifier).setUnitSystem(v);
+                    if (context.mounted) {
+                      SnackbarHelper.showInfo(
+                        context,
+                        l10n.unitSystemChanged(
+                          v == UnitSystem.metric
+                              ? l10n.unitSystemMetric
+                              : l10n.unitSystemImperial,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+              const Divider(),
+              ExpansionTile(
+                title: Text(l10n.perContextOverrides),
+                leading: const Icon(Icons.swap_horiz),
+                initiallyExpanded: false,
+                children: [
+                  _contextOverrideTile(
+                    context,
+                    l10n: l10n,
+                    label: l10n.servingSizeContext,
+                    value: settings.unitSystemServingSize,
+                    onChanged: (v) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setUnitSystemServingSize(v);
+                    },
+                  ),
+                  _contextOverrideTile(
+                    context,
+                    l10n: l10n,
+                    label: l10n.recipeIngredientsContext,
+                    value: settings.unitSystemRecipeIngredients,
+                    onChanged: (v) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setUnitSystemRecipeIngredients(v);
+                    },
+                  ),
+                  _contextOverrideTile(
+                    context,
+                    l10n: l10n,
+                    label: l10n.inventoryContext,
+                    value: settings.unitSystemInventory,
+                    onChanged: (v) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setUnitSystemInventory(v);
+                    },
+                  ),
+                ],
+              ),
+              if (_usesImperialInAnyContext(settings)) ...[
+                const Divider(),
+                ExpansionTile(
+                  title: Text(l10n.imperialPreferences),
+                  leading: const Icon(Icons.tune),
+                  initiallyExpanded: true,
+                  children: [
+                    ListTile(
+                      title: Text(l10n.weightPreference),
+                      subtitle: Text(
+                        _weightPrefLabel(settings.preferredWeightUnit, l10n),
+                      ),
+                      onTap: () => _showWeightPrefDialog(context, ref),
+                    ),
+                    ListTile(
+                      title: Text(l10n.volumePreference),
+                      subtitle: Text(
+                        _volumePrefLabel(settings.preferredVolumeUnit, l10n),
+                      ),
+                      onTap: () => _showVolumePrefDialog(context, ref),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+          ExpansionTile(
             leading: const Icon(Icons.notifications_active),
             title: Text(l10n.expiryNotifications),
             initiallyExpanded: true,
@@ -457,6 +571,203 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Widget _contextOverrideTile(
+    BuildContext context, {
+    required AppLocalizations l10n,
+    required String label,
+    required UnitSystem? value,
+    required void Function(UnitSystem?) onChanged,
+  }) {
+    return ListTile(
+      title: Text(label),
+      subtitle: Text(_overrideLabel(value, l10n)),
+      onTap: () => _showOverrideDialog(
+        context,
+        l10n,
+        label,
+        value,
+        onChanged,
+      ),
+    );
+  }
+
+  String _overrideLabel(UnitSystem? value, AppLocalizations l10n) {
+    if (value == null) return l10n.systemDefault;
+    return value == UnitSystem.metric
+        ? l10n.unitSystemMetric
+        : l10n.unitSystemImperial;
+  }
+
+  Future<void> _showOverrideDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    String label,
+    UnitSystem? current,
+    void Function(UnitSystem?) onChanged,
+  ) async {
+    final result = await showDialog<UnitSystem?>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(label),
+        children: [
+          RadioListTile<UnitSystem?>(
+            title: Text(l10n.systemDefault),
+            value: null,
+            groupValue: current,
+            onChanged: (v) => Navigator.pop(ctx, v),
+          ),
+          RadioListTile<UnitSystem?>(
+            title: Text(l10n.unitSystemMetric),
+            value: UnitSystem.metric,
+            groupValue: current,
+            onChanged: (v) => Navigator.pop(ctx, v),
+          ),
+          RadioListTile<UnitSystem?>(
+            title: Text(l10n.unitSystemImperial),
+            value: UnitSystem.imperial,
+            groupValue: current,
+            onChanged: (v) => Navigator.pop(ctx, v),
+          ),
+        ],
+      ),
+    );
+    if (result != current && context.mounted) {
+      onChanged(result);
+    }
+  }
+
+  bool _usesImperialInAnyContext(Settings settings) {
+    if (settings.unitSystem == UnitSystem.imperial) return true;
+    if (settings.unitSystemServingSize == UnitSystem.imperial) return true;
+    if (settings.unitSystemRecipeIngredients == UnitSystem.imperial) {
+      return true;
+    }
+    if (settings.unitSystemInventory == UnitSystem.imperial) return true;
+    return false;
+  }
+
+  String _weightPrefLabel(
+    WeightUnitPreference pref,
+    AppLocalizations l10n,
+  ) {
+    switch (pref) {
+      case WeightUnitPreference.ounces:
+        return l10n.weightOz;
+      case WeightUnitPreference.pounds:
+        return l10n.weightLb;
+      case WeightUnitPreference.auto:
+        return l10n.weightAuto;
+    }
+  }
+
+  String _volumePrefLabel(
+    VolumeUnitPreference pref,
+    AppLocalizations l10n,
+  ) {
+    switch (pref) {
+      case VolumeUnitPreference.fluidOunces:
+        return l10n.volumeFlOz;
+      case VolumeUnitPreference.cups:
+        return l10n.volumeCup;
+      case VolumeUnitPreference.tablespoons:
+        return l10n.volumeTbsp;
+      case VolumeUnitPreference.teaspoons:
+        return l10n.volumeTsp;
+      case VolumeUnitPreference.auto:
+        return l10n.volumeAuto;
+    }
+  }
+
+  Future<void> _showWeightPrefDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final current = ref.read(settingsProvider).preferredWeightUnit;
+    final result = await showDialog<WeightUnitPreference>(
+      context: context,
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
+        return SimpleDialog(
+          title: Text(l10n.weightPreference),
+          children: [
+            RadioListTile<WeightUnitPreference>(
+              title: Text(l10n.weightOz),
+              value: WeightUnitPreference.ounces,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+            RadioListTile<WeightUnitPreference>(
+              title: Text(l10n.weightLb),
+              value: WeightUnitPreference.pounds,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+            RadioListTile<WeightUnitPreference>(
+              title: Text(l10n.weightAuto),
+              value: WeightUnitPreference.auto,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+          ],
+        );
+      },
+    );
+    if (result != null && context.mounted) {
+      ref.read(settingsProvider.notifier).setPreferredWeightUnit(result);
+    }
+  }
+
+  Future<void> _showVolumePrefDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final current = ref.read(settingsProvider).preferredVolumeUnit;
+    final result = await showDialog<VolumeUnitPreference>(
+      context: context,
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
+        return SimpleDialog(
+          title: Text(l10n.volumePreference),
+          children: [
+            RadioListTile<VolumeUnitPreference>(
+              title: Text(l10n.volumeFlOz),
+              value: VolumeUnitPreference.fluidOunces,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+            RadioListTile<VolumeUnitPreference>(
+              title: Text(l10n.volumeCup),
+              value: VolumeUnitPreference.cups,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+            RadioListTile<VolumeUnitPreference>(
+              title: Text(l10n.volumeTbsp),
+              value: VolumeUnitPreference.tablespoons,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+            RadioListTile<VolumeUnitPreference>(
+              title: Text(l10n.volumeTsp),
+              value: VolumeUnitPreference.teaspoons,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+            RadioListTile<VolumeUnitPreference>(
+              title: Text(l10n.volumeAuto),
+              value: VolumeUnitPreference.auto,
+              groupValue: current,
+              onChanged: (v) => Navigator.pop(ctx, v),
+            ),
+          ],
+        );
+      },
+    );
+    if (result != null && context.mounted) {
+      ref.read(settingsProvider.notifier).setPreferredVolumeUnit(result);
+    }
   }
 
   Future<void> _showWhatsNew(BuildContext context) async {

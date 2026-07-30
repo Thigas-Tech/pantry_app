@@ -41,7 +41,10 @@ extension AppLocalizationsX on AppLocalizations {
       final label = quantity == 1 ? unitSingular : unitPlural;
       return '${quantity.toInt()} $label';
     }
-    return '${quantity.toInt()} ${localizeUnit(unit)}';
+    if (quantity == quantity.toInt()) {
+      return '${quantity.toInt()} ${localizeUnit(unit)}';
+    }
+    return '$quantity ${localizeUnit(unit)}';
   }
 
   /// Returns the localized string for a unit code.

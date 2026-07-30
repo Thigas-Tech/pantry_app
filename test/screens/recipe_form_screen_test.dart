@@ -7,6 +7,7 @@ import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/recipe_form_screen.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,6 +24,23 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 
   @override
   void setActiveInventory(int newValue) {}
+}
+
+class FakeSettingsNotifierImperial extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(
+    unitSystem: UnitSystem.imperial,
+    preferredWeightUnit: WeightUnitPreference.ounces,
+  );
+}
+
+/// Fake with metric global but imperial override for recipe ingredients.
+class FakeSettingsNotifierRecipeImperial extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(
+    unitSystemRecipeIngredients: UnitSystem.imperial,
+    preferredWeightUnit: WeightUnitPreference.ounces,
+  );
 }
 
 void main() {
@@ -404,4 +422,298 @@ void main() {
       },
     );
   });
+
+  // ---------- Imperial unit tests ------------------------------------------
+
+  group('imperial pre-fill', () {
+    setUp(() {
+      when(() => mockRepo.getProductFromCache(any())).thenAnswer(
+        (_) async => null,
+      );
+    });
+
+    testWidgets(
+      'pre-fills oz from serving data when system is imperial'
+      ' with weightPref=ounces',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'name': 'Flour', 'barcode': '123456'},
+          ],
+        );
+        when(
+          () => mockRepo.getProductFromCache('123456'),
+        ).thenAnswer(
+          (_) async => const Product(
+            barcode: '123456',
+            name: 'Flour',
+            servingSize: '200g',
+            servingQuantity: 200,
+          ),
+        );
+
+        await pumpApp(
+          tester,
+          const RecipeFormScreen(),
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            settingsProvider.overrideWith(
+              FakeSettingsNotifierImperial.new,
+            ),
+          ],
+        );
+
+        await tester.tap(find.text('From your pantry'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(CheckboxListTile));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Add selected'));
+        await tester.pumpAndSettle();
+
+        // 200 g = 7.1 oz
+        expect(find.textContaining('7.'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'pre-fills imperial units in dropdown when system is imperial',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'name': 'Flour', 'barcode': '123456'},
+          ],
+        );
+
+        await pumpApp(
+          tester,
+          const RecipeFormScreen(),
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            settingsProvider.overrideWith(
+              FakeSettingsNotifierImperial.new,
+            ),
+          ],
+        );
+
+        await tester.tap(find.text('From your pantry'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(CheckboxListTile));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Add selected'));
+        await tester.pumpAndSettle();
+
+        // Tap the dropdown to see available options
+        await tester.tap(find.byType(DropdownButtonFormField<String>));
+        await tester.pumpAndSettle();
+
+        // Imperial units should be visible
+        expect(find.text('oz'), findsWidgets);
+        expect(find.text('lb'), findsWidgets);
+        expect(find.text('fl oz'), findsWidgets);
+        expect(find.text('cup'), findsWidgets);
+        expect(find.text('tbsp'), findsWidgets);
+        expect(find.text('tsp'), findsWidgets);
+      },
+    );
+  });
+
+  group('auto-convert on unit change', () {
+    testWidgets(
+      'converts quantity when unit changes from g to oz',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'name': 'Flour', 'barcode': '123456'},
+          ],
+        );
+        when(
+          () => mockRepo.getProductFromCache('123456'),
+        ).thenAnswer(
+          (_) async => const Product(
+            barcode: '123456',
+            name: 'Flour',
+            servingSize: '200g',
+            servingQuantity: 200,
+          ),
+        );
+
+        await pumpApp(
+          tester,
+          const RecipeFormScreen(),
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            settingsProvider.overrideWith(
+              FakeSettingsNotifierImperial.new,
+            ),
+          ],
+        );
+
+        await tester.tap(find.text('From your pantry'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(CheckboxListTile));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Add selected'));
+        await tester.pumpAndSettle();
+
+        // Find the dropdown and change unit from oz to lb
+        final dropdown = find.byType(DropdownButtonFormField<String>);
+        await tester.tap(dropdown);
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('lb').last);
+        await tester.pumpAndSettle();
+
+        // 7.1 oz should convert to ~0.4 lb
+        expect(find.textContaining('0.'), findsOneWidget);
+      },
+    );
+  });
+
+  group('per-context override', () {
+    testWidgets(
+      'shows imperial dropdown units when only recipe override is imperial'
+      ' and global is metric',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'name': 'Flour', 'barcode': '123456'},
+          ],
+        );
+        when(
+          () => mockRepo.getProductFromCache('123456'),
+        ).thenAnswer(
+          (_) async => const Product(
+            barcode: '123456',
+            name: 'Flour',
+            servingSize: '200g',
+            servingQuantity: 200,
+          ),
+        );
+
+        await pumpApp(
+          tester,
+          const RecipeFormScreen(),
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            settingsProvider.overrideWith(
+              FakeSettingsNotifierRecipeImperial.new,
+            ),
+          ],
+        );
+
+        await tester.tap(find.text('From your pantry'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(CheckboxListTile));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Add selected'));
+        await tester.pumpAndSettle();
+
+        // Find the unit dropdown and verify imperial units are present
+        final dropdown = find.byType(DropdownButtonFormField<String>);
+        await tester.tap(dropdown);
+        await tester.pumpAndSettle();
+
+        expect(find.text('oz'), findsWidgets);
+        expect(find.text('fl oz'), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'shows metric dropdown units when recipe override is metric'
+      ' and global is imperial',
+      (tester) async {
+        when(
+          () => mockDb.getDistinctProductsFromInventory(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'name': 'Flour', 'barcode': '123456'},
+          ],
+        );
+        when(
+          () => mockRepo.getProductFromCache('123456'),
+        ).thenAnswer(
+          (_) async => const Product(
+            barcode: '123456',
+            name: 'Flour',
+            servingSize: '200g',
+            servingQuantity: 200,
+          ),
+        );
+
+        await pumpApp(
+          tester,
+          const RecipeFormScreen(),
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            activeInventoryProvider.overrideWith(
+              FakeActiveInventoryNotifier.new,
+            ),
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            settingsProvider.overrideWith(
+              _FakeSettingsNotifierMetricOverride.new,
+            ),
+          ],
+        );
+
+        await tester.tap(find.text('From your pantry'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(CheckboxListTile));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Add selected'));
+        await tester.pumpAndSettle();
+
+        // Find the unit dropdown and verify metric units are present
+        final dropdown = find.byType(DropdownButtonFormField<String>);
+        await tester.tap(dropdown);
+        await tester.pumpAndSettle();
+
+        expect(find.text('kg'), findsWidgets);
+        expect(find.text('L'), findsWidgets);
+      },
+    );
+  });
+}
+
+/// Fake with imperial global but metric override for recipe ingredients.
+class _FakeSettingsNotifierMetricOverride extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(
+    unitSystem: UnitSystem.imperial,
+    unitSystemRecipeIngredients: UnitSystem.metric,
+    preferredWeightUnit: WeightUnitPreference.ounces,
+  );
 }

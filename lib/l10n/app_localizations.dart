@@ -62,8 +62,7 @@ import 'app_localizations_pt.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,19 +82,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('pt'),
-    Locale('pt', 'BR'),
+    Locale('pt', 'BR')
   ];
 
   /// No description provided for @myPantry.
@@ -3572,10 +3569,129 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Already in pantry'**
   String get inPantrySwipeLabel;
+
+  /// No description provided for @units.
+  ///
+  /// In en, this message translates to:
+  /// **'Units'**
+  String get units;
+
+  /// No description provided for @unitSystemMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'Metric'**
+  String get unitSystemMetric;
+
+  /// No description provided for @unitSystemImperial.
+  ///
+  /// In en, this message translates to:
+  /// **'Imperial'**
+  String get unitSystemImperial;
+
+  /// No description provided for @perContextOverrides.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-context overrides'**
+  String get perContextOverrides;
+
+  /// No description provided for @servingSizeContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Serving size'**
+  String get servingSizeContext;
+
+  /// No description provided for @recipeIngredientsContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipe ingredients'**
+  String get recipeIngredientsContext;
+
+  /// No description provided for @inventoryContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get inventoryContext;
+
+  /// No description provided for @systemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get systemDefault;
+
+  /// No description provided for @imperialPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Imperial preferences'**
+  String get imperialPreferences;
+
+  /// No description provided for @weightPreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight preference'**
+  String get weightPreference;
+
+  /// No description provided for @volumePreference.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume preference'**
+  String get volumePreference;
+
+  /// No description provided for @weightOz.
+  ///
+  /// In en, this message translates to:
+  /// **'Ounces (oz)'**
+  String get weightOz;
+
+  /// No description provided for @weightLb.
+  ///
+  /// In en, this message translates to:
+  /// **'Pounds (lb)'**
+  String get weightLb;
+
+  /// No description provided for @weightAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get weightAuto;
+
+  /// No description provided for @volumeFlOz.
+  ///
+  /// In en, this message translates to:
+  /// **'Fluid ounces'**
+  String get volumeFlOz;
+
+  /// No description provided for @volumeCup.
+  ///
+  /// In en, this message translates to:
+  /// **'Cups'**
+  String get volumeCup;
+
+  /// No description provided for @volumeTbsp.
+  ///
+  /// In en, this message translates to:
+  /// **'Tablespoons'**
+  String get volumeTbsp;
+
+  /// No description provided for @volumeTsp.
+  ///
+  /// In en, this message translates to:
+  /// **'Teaspoons'**
+  String get volumeTsp;
+
+  /// No description provided for @volumeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get volumeAuto;
+
+  /// No description provided for @unitSystemChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Units: {system}'**
+  String unitSystemChanged(String system);
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -3584,38 +3700,34 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'pt'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'pt':
-      {
-        switch (locale.countryCode) {
-          case 'BR':
-            return AppLocalizationsPtBr();
-        }
-        break;
-      }
+    case 'pt': {
+  switch (locale.countryCode) {
+    case 'BR': return AppLocalizationsPtBr();
+   }
+  break;
+   }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'pt':
-      return AppLocalizationsPt();
+    case 'en': return AppLocalizationsEn();
+    case 'pt': return AppLocalizationsPt();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

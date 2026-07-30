@@ -6,9 +6,20 @@ import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
+
+class _FakeSettingsNotifierImperial extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(
+    unitSystem: UnitSystem.imperial,
+    preferredWeightUnit: WeightUnitPreference.auto,
+    preferredVolumeUnit: VolumeUnitPreference.auto,
+  );
+}
 
 InventoryWithProduct createItem({
   String? name = 'Test Item',
@@ -59,7 +70,7 @@ void main() {
     );
 
     expect(find.text('Milk'), findsOneWidget);
-    expect(find.textContaining('3.0 L'), findsOneWidget);
+    expect(find.textContaining('3 L'), findsOneWidget);
     expect(find.textContaining('Pantry'), findsOneWidget);
   });
 
@@ -288,6 +299,76 @@ void main() {
       );
 
       expect(find.text('produce-Banana'), findsOneWidget);
+    });
+  });
+
+  group('unit conversion', () {
+    testWidgets('converts metric to imperial under imperial settings', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final item = createItem(name: 'Milk', quantity: 2000, unit: 'g');
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+          settingsProvider.overrideWith(
+            _FakeSettingsNotifierImperial.new,
+          ),
+        ],
+      );
+
+      // 2000 g -> ~4 lb (auto: >16 oz → lb, rounded to whole)
+      expect(find.textContaining('4 lb'), findsOneWidget);
+    });
+
+    testWidgets('pieces remain unchanged under imperial settings', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final item = createItem(name: 'Eggs', quantity: 6, unit: 'pcs');
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+          settingsProvider.overrideWith(
+            _FakeSettingsNotifierImperial.new,
+          ),
+        ],
+      );
+
+      expect(find.textContaining('6 pcs'), findsOneWidget);
+    });
+
+    testWidgets('quantity unchanged in default metric settings', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final item = createItem(name: 'Water', quantity: 1.5, unit: 'L');
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+        ],
+      );
+
+      // Under metric, 1.5 L should remain as "1.5 L"
+      expect(find.textContaining('1.5 L'), findsOneWidget);
     });
   });
 }

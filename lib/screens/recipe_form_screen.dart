@@ -12,6 +12,9 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
+import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/screens/product_picker_screen.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
@@ -116,22 +119,55 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     });
   }
 
-  ({double quantity, String unit}) _prefillFromProduct(Product product) {
+  ({double quantity, String unit}) _prefillFromProduct(
+    Product product, {
+    required Settings settings,
+  }) {
+    double metricQty;
+    String metricUnit;
+
     if (product.productType == ProductType.produce) {
       final parsed = QuantityParser.parseUsda(
         usdaServingAmount: product.usdaServingAmount,
         usdaServingUnit: product.usdaServingUnit,
         usdaGramWeight: product.usdaGramWeight,
       );
-      if (parsed != null) return (quantity: parsed.amount, unit: parsed.unit);
+      if (parsed != null) {
+        metricQty = parsed.amount;
+        metricUnit = parsed.unit;
+      } else {
+        return (quantity: 1.0, unit: 'pieces');
+      }
     } else {
       final parsed = QuantityParser.parseServing(
         servingQuantity: product.servingQuantity,
         servingSize: product.servingSize,
       );
-      if (parsed != null) return (quantity: parsed.amount, unit: parsed.unit);
+      if (parsed != null) {
+        metricQty = parsed.amount;
+        metricUnit = parsed.unit;
+      } else {
+        return (quantity: 1.0, unit: 'pieces');
+      }
     }
-    return (quantity: 1.0, unit: 'pieces');
+
+    final system = UnitResolver.systemFor(
+      settings: settings,
+      context: UnitContext.recipeIngredients,
+    );
+
+    if (system == UnitSystem.imperial) {
+      final converted = UnitConverter.displayUnit(
+        metricQty,
+        metricUnit,
+        UnitSystem.imperial,
+        weightPref: settings.preferredWeightUnit,
+        volumePref: settings.preferredVolumeUnit,
+      );
+      return (quantity: converted.quantity, unit: converted.unit);
+    }
+
+    return (quantity: metricQty, unit: metricUnit);
   }
 
   void _addIngredient({
@@ -140,6 +176,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     Product? product,
     double? quantity,
     String? unit,
+    Settings? settings,
   }) {
     setState(() {
       if (barcode != null && barcode.isNotEmpty) {
@@ -154,14 +191,22 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
               0.0;
           final addQty =
               quantity ??
-              (product != null ? _prefillFromProduct(product).quantity : 1.0);
+              (product != null
+                  ? _prefillFromProduct(
+                      product,
+                      settings: settings ?? const Settings(),
+                    ).quantity
+                  : 1.0);
           _ingredients[existingIndex].quantityController.text =
               (currentQty + addQty).toStringAsFixed(1);
           return;
         }
       }
       final prefill = product != null
-          ? _prefillFromProduct(product)
+          ? _prefillFromProduct(
+              product,
+              settings: settings ?? const Settings(),
+            )
           : (quantity: quantity ?? 1.0, unit: unit ?? 'pieces');
       final qty = prefill.quantity;
       final unt = prefill.unit;
@@ -265,10 +310,12 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
         if (barcode != null && barcode.isNotEmpty) {
           product = await repo.getProductFromCache(barcode);
         }
+        final settings = ref.read(settingsProvider);
         _addIngredient(
           name: item['name'] as String? ?? item['barcode'] as String,
           barcode: item['barcode'] as String?,
           product: product,
+          settings: settings,
         );
       }
     }
@@ -282,10 +329,12 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     if (product != null && mounted) {
       final repo = ref.read(productRepositoryProvider);
       final cached = await repo.getProductFromCache(product.barcode);
+      final settings = ref.read(settingsProvider);
       _addIngredient(
         name: product.name,
         barcode: product.barcode,
         product: cached ?? product,
+        settings: settings,
       );
     }
   }
@@ -310,17 +359,35 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final ingredients = _ingredients
-          .map(
-            (e) => RecipeIngredient(
-              recipeId: widget.existingRecipeId ?? 0,
-              barcode: e.barcode,
-              name: e.nameController.text.trim(),
-              quantity: double.tryParse(e.quantityController.text) ?? 1.0,
-              unit: e.unit,
-            ),
-          )
-          .toList();
+      final settings = ref.read(settingsProvider);
+      final recipeSystem = UnitResolver.systemFor(
+        settings: settings,
+        context: UnitContext.recipeIngredients,
+      );
+      final ingredients = _ingredients.map(
+        (e) {
+          var qty = double.tryParse(e.quantityController.text) ?? 1.0;
+          var unit = e.unit;
+          // Convert back to metric before saving if system is imperial
+          if (recipeSystem == UnitSystem.imperial &&
+              !UnitResolver.isMetricUnit(unit)) {
+            final converted = UnitConverter.displayUnit(
+              qty,
+              unit,
+              UnitSystem.metric,
+            );
+            qty = converted.quantity;
+            unit = converted.unit;
+          }
+          return RecipeIngredient(
+            recipeId: widget.existingRecipeId ?? 0,
+            barcode: e.barcode,
+            name: e.nameController.text.trim(),
+            quantity: qty,
+            unit: unit,
+          );
+        },
+      ).toList();
 
       await saveRecipe(
         ref,
@@ -377,6 +444,12 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final settings = ref.watch(settingsProvider);
+    final recipeSystem = UnitResolver.systemFor(
+      settings: settings,
+      context: UnitContext.recipeIngredients,
+    );
+    final dropdownUnits = UnitResolver.unitsForSystem(recipeSystem);
 
     return PopScope(
       canPop: !_isDirty,
@@ -530,43 +603,38 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
                                   labelText: l10n.ingredientUnit,
                                   isDense: true,
                                 ),
-                                items: const [
-                                  DropdownMenuItem(
-                                    value: 'pieces',
-                                    child: Text('pieces'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'g',
-                                    child: Text('g'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'kg',
-                                    child: Text('kg'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'ml',
-                                    child: Text('ml'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'L',
-                                    child: Text('L'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'tbsp',
-                                    child: Text('tbsp'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'tsp',
-                                    child: Text('tsp'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'cup',
-                                    child: Text('cup'),
+                                items: [
+                                  // Always include the current unit for
+                                  // backward compatibility with existing data.
+                                  if (!dropdownUnits.contains(ing.unit))
+                                    DropdownMenuItem(
+                                      value: ing.unit,
+                                      child: Text(ing.unit),
+                                    ),
+                                  ...dropdownUnits.map(
+                                    (u) => DropdownMenuItem(
+                                      value: u,
+                                      child: Text(u),
+                                    ),
                                   ),
                                 ],
                                 onChanged: (v) {
-                                  if (v != null) {
-                                    setState(() => ing.unit = v);
+                                  if (v != null && v != ing.unit) {
+                                    final oldQty =
+                                        double.tryParse(
+                                          ing.quantityController.text,
+                                        ) ??
+                                        0.0;
+                                    final converted = UnitConverter.convert(
+                                      oldQty,
+                                      ing.unit,
+                                      v,
+                                    );
+                                    ing.quantityController.text = converted
+                                        .toStringAsFixed(1);
+                                    setState(() {
+                                      ing.unit = v;
+                                    });
                                     _isDirty = true;
                                   }
                                 },

@@ -768,5 +768,33 @@
   "inPantryIndicator": "Na Despensa",
   "inPantryFilter": "Na Despensa",
   "inPantryEmpty": "Nenhum produto na sua despensa corresponde a esta pesquisa",
-  "inPantrySwipeLabel": "Ja na despensa"
+  "inPantrySwipeLabel": "Ja na despensa",
+  "units": "Unidades",
+  "unitSystemMetric": "Metrico",
+  "unitSystemImperial": "Imperial",
+  "perContextOverrides": "Substituicoes por contexto",
+  "servingSizeContext": "Porcao",
+  "recipeIngredientsContext": "Ingredientes de receitas",
+  "inventoryContext": "Inventario",
+  "systemDefault": "Padrao do sistema",
+  "imperialPreferences": "Preferencias imperiais",
+  "weightPreference": "Preferencia de peso",
+  "volumePreference": "Preferencia de volume",
+  "weightOz": "Oncas (oz)",
+  "weightLb": "Libras (lb)",
+  "weightAuto": "Automatico",
+  "volumeFlOz": "Oncas fluidas",
+  "volumeCup": "Xicaras",
+  "volumeTbsp": "Colheres de sopa",
+  "volumeTsp": "Colheres de cha",
+  "volumeAuto": "Automatico",
+  "unitSystemChanged": "Unidades: {system}",
+  "@unitSystemChanged": {
+    "placeholders": {
+      "system": {
+        "type": "String",
+        "example": "Imperial"
+      }
+    }
+  }
 }

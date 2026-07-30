@@ -24,7 +24,10 @@ import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
+import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
+import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
@@ -91,6 +94,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final settings = ref.watch(settingsProvider);
     final activeId = ref.watch<int>(activeInventoryProvider);
     final repo = ref.watch(productRepositoryProvider);
     final inventoryFuture = repo.getInventoryForBarcode(
@@ -286,7 +290,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               _infoRow(l10n.categoryLabel, widget.product.category!),
             if (widget.product.source == 'manual') _buildSubmissionStatus(l10n),
             const Divider(),
-            _infoRow(l10n.servingSize, _displayServingSize(l10n)),
+            _infoRow(l10n.servingSize, _displayServingSize(l10n, settings)),
 
             // Nutrition table
             NutritionTable(product: widget.product),
@@ -580,6 +584,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       onDismissed: (_) => _deleteItem(item),
       child: _InventoryTile(
         item: item,
+        settings: ref.read(settingsProvider),
         onEdit: () => _openAddEditScreen(existing: item),
         onDelete: () => _deleteItem(item),
         onQuantityChanged: (newQty) => _updateQuantity(item, newQty),
@@ -643,13 +648,57 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   /// Returns the serving size to display, using preset data for produce items
   /// that lack a serving size, or "100 g" when no preset is available.
-  String _displayServingSize(AppLocalizations l10n) {
+  /// Converts to the user's preferred unit system.
+  String _displayServingSize(AppLocalizations l10n, Settings settings) {
+    // Try structured serving data first
+    if (widget.product.servingQuantity != null &&
+        widget.product.servingQuantity! > 0 &&
+        widget.product.servingSize != null &&
+        widget.product.servingSize!.isNotEmpty) {
+      final parsed = QuantityParser.parseServing(
+        servingQuantity: widget.product.servingQuantity,
+        servingSize: widget.product.servingSize,
+      );
+      if (parsed != null) {
+        final system = UnitResolver.systemFor(
+          settings: settings,
+          context: UnitContext.servingSize,
+        );
+        if (system == UnitSystem.imperial) {
+          final converted = UnitConverter.displayUnit(
+            parsed.amount,
+            parsed.unit,
+            UnitSystem.imperial,
+            weightPref: settings.preferredWeightUnit,
+            volumePref: settings.preferredVolumeUnit,
+          );
+          return '${converted.quantity} ${converted.unit}';
+        }
+        return '${parsed.amount} ${parsed.unit}';
+      }
+    }
+
+    // Fallback to raw servingSize string for display only
     if (widget.product.servingSize != null) return widget.product.servingSize!;
+
     if (widget.product.productType == ProductType.produce) {
       final presets = ProduceServingPresets.forName(widget.product.name);
       if (presets != null) {
         final medium = presets['Medium'];
         if (medium != null) {
+          final system = UnitResolver.systemFor(
+            settings: settings,
+            context: UnitContext.servingSize,
+          );
+          if (system == UnitSystem.imperial) {
+            final converted = UnitConverter.displayUnit(
+              medium.toDouble(),
+              'g',
+              UnitSystem.imperial,
+              weightPref: settings.preferredWeightUnit,
+            );
+            return '1 ${l10n.servingMedium.toLowerCase()} (${converted.quantity} ${converted.unit})';
+          }
           return '1 ${l10n.servingMedium.toLowerCase()} (${medium.toInt()} g)';
         }
       }
@@ -896,6 +945,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 class _InventoryTile extends StatelessWidget {
   const _InventoryTile({
     required this.item,
+    required this.settings,
     required this.onEdit,
     required this.onDelete,
     required this.onQuantityChanged,
@@ -903,6 +953,9 @@ class _InventoryTile extends StatelessWidget {
 
   /// The inventory item to display.
   final InventoryItem item;
+
+  /// Current settings for unit conversion.
+  final Settings settings;
 
   /// Called when the user taps the edit button.
   final VoidCallback onEdit;
@@ -917,6 +970,17 @@ class _InventoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final itemIsExpired = isExpired(item.expiryDate);
+    final inventorySystem = UnitResolver.systemFor(
+      settings: settings,
+      context: UnitContext.inventory,
+    );
+    final display = UnitConverter.displayUnit(
+      item.quantity,
+      item.unit,
+      inventorySystem,
+      weightPref: settings.preferredWeightUnit,
+      volumePref: settings.preferredVolumeUnit,
+    );
     return ListTile(
       leading: Icon(
         _iconForLocation(item.location),
@@ -940,8 +1004,8 @@ class _InventoryTile extends StatelessWidget {
             onTap: () => _showQuantityDialog(context),
             child: Text(
               l10n.formatQuantityUnit(
-                item.quantity,
-                l10n.localizeUnit(item.unit),
+                display.quantity,
+                l10n.localizeUnit(display.unit),
               ),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
