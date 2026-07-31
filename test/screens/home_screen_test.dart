@@ -424,6 +424,74 @@ void main() {
     expect(find.byType(RecipeListScreen), findsOneWidget);
   });
 
+  testWidgets('action sheet Market trip shows styled SnackbarHelper snackbar', (
+    tester,
+  ) async {
+    final mockDb = _createMockDb();
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: _homeScreenOverrides(mockDb: mockDb, onboardingComplete: true),
+    );
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Market trip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final snackbar = tester.widget<SnackBar>(find.byType(SnackBar));
+    expect(snackbar.behavior, SnackBarBehavior.floating);
+    expect(find.byIcon(Icons.info_outline), findsOneWidget);
+  });
+
+  testWidgets(
+    'pull-to-refresh calls refreshInventoryProducts and setLastRefreshTime',
+    (
+      tester,
+    ) async {
+      final mockRepo = createMockProductRepository();
+      when(() => mockRepo.refreshInventoryProducts(any())).thenAnswer(
+        (_) async => 0,
+      );
+      when(mockRepo.setLastRefreshTime).thenAnswer((_) async {});
+      final mockDb = _createMockDb(
+        items: [testItem('Milk', barcode: '123')],
+        inventories: [
+          {'id': 1, 'name': 'Home'},
+        ],
+      );
+
+      await pumpApp(
+        tester,
+        const HomeScreen(),
+        imageCacheMock: mockImageCache,
+        overrides: _homeScreenOverrides(
+          mockDb: mockDb,
+          mockRepo: mockRepo,
+          inventories: [
+            {'id': 1, 'name': 'Home'},
+          ],
+          onboardingComplete: true,
+        ),
+      );
+
+      await tester.fling(
+        find.byType(RefreshIndicator),
+        const Offset(0, 300),
+        1000,
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      verify(() => mockRepo.refreshInventoryProducts(1)).called(1);
+      verify(mockRepo.setLastRefreshTime).called(1);
+    },
+  );
+
   testWidgets('shows stock count badges with item counts', (tester) async {
     final now = DateTime.now();
     final items = [

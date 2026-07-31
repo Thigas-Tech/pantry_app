@@ -96,7 +96,6 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
   final _notFoundFlowKey = GlobalKey<NotFoundFlowState>();
 
   @override
-  @override
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();

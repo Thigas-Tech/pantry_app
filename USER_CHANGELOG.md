@@ -1,5 +1,8 @@
 # User Changelog
 
+- Market trip notice: the "Coming soon" message shown when you tap "Market
+  trip" now appears as a polished, easier-to-read notice at the bottom of the
+  screen.
 - Recipe ingredient auto-fill: when adding a product as an ingredient in a
   recipe, the quantity and unit are now pre-filled from the product's serving
   size (e.g. "200 g" for flour). Works for both packaged products and fresh

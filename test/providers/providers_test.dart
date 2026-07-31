@@ -14,10 +14,14 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
+import 'package:pantry_app/services/product_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// A mock of [DatabaseHelper] used to override [databaseProvider].
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+
+/// A mock of [ProductRepository] used to override [productRepositoryProvider].
+class MockProductRepository extends Mock implements ProductRepository {}
 
 /// Tests for Riverpod providers.
 ///
@@ -171,6 +175,58 @@ void main() {
       expect(item.inventoryId, 2);
       expect(item.productName, 'Milk');
       expect(item.inventoryName, 'Work');
+    });
+
+    test('refresh refreshes the repository for the active inventory', () async {
+      final mockDb = MockDatabaseHelper();
+      when(mockDb.getInventories).thenAnswer(
+        (_) async => [
+          {'id': 1, 'name': 'Home', 'created_at': 1},
+        ],
+      );
+      final rows = [
+        {
+          'id': 1,
+          'barcode': '123',
+          'quantity': 2,
+          'unit': 'pcs',
+          'expiry_date': '2026-06-01',
+          'location': 'fridge',
+          'notes': null,
+          'date_added': 123456,
+          'inventory_id': 1,
+          'product_name': 'Milk',
+          'product_image_url': null,
+          'inventory_name': 'Home',
+        },
+      ];
+      when(
+        () => mockDb.getInventoryWithProduct(
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => rows);
+
+      final mockRepo = MockProductRepository();
+      when(() => mockRepo.refreshInventoryProducts(any())).thenAnswer(
+        (_) async => 0,
+      );
+      when(mockRepo.setLastRefreshTime).thenAnswer((_) async {});
+
+      final refreshContainer = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+      addTearDown(refreshContainer.dispose);
+
+      final items = await refreshContainer.read(pantryProvider.future);
+      expect(items.length, 1);
+
+      await refreshContainer.read(pantryProvider.notifier).refresh();
+
+      verify(() => mockRepo.refreshInventoryProducts(1)).called(1);
+      verify(mockRepo.setLastRefreshTime).called(1);
     });
   });
   group('apiServiceProvider', () {

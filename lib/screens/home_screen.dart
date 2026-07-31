@@ -11,7 +11,6 @@ import 'package:pantry_app/providers/home_screen_controller.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
-import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -144,9 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 subtitle: Text(l10n.marketTripSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.comingSoon)),
-                  );
+                  SnackbarHelper.showInfo(context, l10n.comingSoon);
                 },
               ),
             ],
@@ -450,15 +447,7 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
     }).length;
 
     return RefreshIndicator(
-      onRefresh: () async {
-        final activeId = ref.read(activeInventoryProvider);
-        final repo = ref.read(productRepositoryProvider);
-        await repo.refreshInventoryProducts(activeId);
-        await repo.setLastRefreshTime();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(pantryProvider);
-        });
-      },
+      onRefresh: () => ref.read(pantryProvider.notifier).refresh(),
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         children: [
