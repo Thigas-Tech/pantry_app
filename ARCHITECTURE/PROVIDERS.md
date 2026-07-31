@@ -38,3 +38,4 @@
 | `inventoryProductsProvider` | `FutureProvider` | Distinct products from active inventory |
 | `authServiceProvider` | `Provider` | `AuthService` (FirebaseAuth or no-op) |
 | `authStateProvider` | `StreamProvider` | Reactive `AuthUser` stream |
+| `searchPanelControllerProvider` | `NotifierProvider.family` | Async search state for SearchPanel (debounced query, source, in-pantry filter) |

@@ -1,5 +1,7 @@
 # User Changelog
 
+- Search improved: search is now snappier and more reliable when looking up
+  products, ingredients, and fresh produce.
 - Market trip notice: the "Coming soon" message shown when you tap "Market
   trip" now appears as a polished, easier-to-read notice at the bottom of the
   screen.

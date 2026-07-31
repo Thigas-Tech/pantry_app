@@ -5,19 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
-import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/search_filter.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
-import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
-import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/search_panel_controller.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/product_picker_screen.dart';
@@ -25,9 +21,11 @@ import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
-import 'package:pantry_app/utils/search_utils.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/not_found_flow.dart';
+import 'package:pantry_app/widgets/search_query_bar.dart';
+import 'package:pantry_app/widgets/search_results_list.dart';
+import 'package:pantry_app/widgets/search_source_selector.dart';
 
 /// A reusable search panel with search bar, source filter, category filter,
 /// and results list.
@@ -41,6 +39,12 @@ import 'package:pantry_app/widgets/not_found_flow.dart';
 ///   * **Picker** — set [selectMode] to pop the current route with the
 ///     selected [Product]. Used by [ProductPickerScreen] for recipe
 ///     ingredient selection.
+///
+/// The search bar, source dropdown, and results list are extracted into
+/// [SearchQueryBar], [SearchSourceSelector], and [SearchResultsList]. All
+/// search state and execution lives in [SearchPanelController]; this widget
+/// wires them together and renders the surrounding states (loading, idle,
+/// empty, and not-found).
 class SearchPanel extends ConsumerStatefulWidget {
   /// Creates a [SearchPanel].
   ///
@@ -84,322 +88,16 @@ class SearchPanel extends ConsumerStatefulWidget {
 }
 
 class _SearchPanelState extends ConsumerState<SearchPanel> {
-  final _searchController = TextEditingController();
-  Timer? _debounce;
-  List<_SearchResult> _results = [];
-  bool _isSearching = false;
-  bool _hasSearched = false;
-  int _requestId = 0;
-  Timer? _graceTimer;
-  SearchSource _activeSource = SearchSource.off;
-  bool _filterInPantryOnly = false;
   final _notFoundFlowKey = GlobalKey<NotFoundFlowState>();
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _debounce?.cancel();
-    _graceTimer?.cancel();
-    super.dispose();
-  }
+  SearchPanelController get _controller => ref.read(
+    searchPanelControllerProvider(widget.searchDebounceDuration).notifier,
+  );
 
-  void _onSearchChanged(String value) {
-    _debounce?.cancel();
-    _graceTimer?.cancel();
-    final query = value.trim();
-    if (query.isEmpty) {
-      setState(() {
-        _results = [];
-        _isSearching = false;
-        _hasSearched = false;
-      });
-      return;
-    }
-    _requestId++;
-    _filterInPantryOnly = false;
-    _debounce = Timer(widget.searchDebounceDuration, () => _search(query));
-  }
-
-  void _onSearchSubmitted(String value) {
-    _debounce?.cancel();
-    _graceTimer?.cancel();
-    final query = value.trim();
-    if (query.isEmpty) return;
-    _requestId++;
-    _filterInPantryOnly = false;
-    unawaited(_search(query));
-  }
-
-  Future<void> _search(String query) async {
-    if (!mounted) return;
-    final capturedRequestId = _requestId;
-    setState(() => _isSearching = true);
-
-    try {
-      List<_SearchResult> results;
-      bool apiHadResults;
-
-      switch (_activeSource) {
-        case SearchSource.off:
-          final r = await _searchOff(query, capturedRequestId);
-          results = r.results;
-          apiHadResults = r.apiHadResults;
-        case SearchSource.usda:
-          final r = await _searchUsda(query, capturedRequestId);
-          results = r;
-          apiHadResults = r.isNotEmpty;
-        case SearchSource.inventory:
-          final r = await _searchInventory(query, capturedRequestId);
-          results = r;
-          apiHadResults = r.isNotEmpty;
-      }
-
-      if (capturedRequestId != _requestId || !mounted) return;
-
-      final enriched = await _enrichWithPantryStatus(results);
-      if (capturedRequestId != _requestId || !mounted) return;
-
-      if (!mounted) return;
-      _graceTimer?.cancel();
-      if (enriched.isEmpty && !apiHadResults) {
-        _graceTimer = Timer(const Duration(seconds: 1), () {
-          if (!mounted) return;
-          setState(() {
-            _results = enriched;
-            _isSearching = false;
-            _hasSearched = true;
-          });
-        });
-        setState(() => _results = []);
-      } else {
-        setState(() {
-          _results = enriched;
-          _isSearching = false;
-          _hasSearched = true;
-        });
-      }
-    } on Exception catch (e) {
-      logError('Search failed: $e');
-      if (!mounted) return;
-      setState(() {
-        _results = [];
-        _isSearching = false;
-        _hasSearched = true;
-      });
-    }
-  }
-
-  Future<({List<_SearchResult> results, bool apiHadResults})> _searchOff(
-    String query,
-    int capturedRequestId,
-  ) async {
-    final normalizedQuery = normalizeForSearch(query.trim());
-    final db = ref.read(databaseProvider);
-    final localResults = await db.searchProducts(normalizedQuery);
-    if (capturedRequestId != _requestId || !mounted) {
-      return (results: <_SearchResult>[], apiHadResults: false);
-    }
-
-    final results = <_SearchResult>[
-      for (final p in localResults)
-        _SearchResult(product: p, source: _ResultSource.local),
-    ];
-
-    final isBarcodeQuery =
-        normalizedQuery.length >= 8 &&
-        RegExp(r'^\d+$').hasMatch(normalizedQuery);
-
-    var apiHadResults = false;
-    if (isBarcodeQuery) {
-      try {
-        final hasConnection = await ref.read(hasConnectionProvider.future);
-        if (!hasConnection) {
-          if (mounted) {
-            SnackbarHelper.showWarning(
-              context,
-              AppLocalizations.of(context)!.offlineWarning,
-            );
-          }
-        } else {
-          final repo = ref.read(productRepositoryProvider);
-          final product = await repo.getProduct(normalizedQuery);
-          if (capturedRequestId != _requestId || !mounted) {
-            return (results: <_SearchResult>[], apiHadResults: false);
-          }
-          apiHadResults = true;
-          final existingBarcodes = results
-              .map((r) => r.product.barcode)
-              .toSet();
-          if (!existingBarcodes.contains(product.barcode)) {
-            results.add(
-              _SearchResult(product: product, source: _ResultSource.api),
-            );
-          }
-        }
-      } on Exception catch (e) {
-        logWarning('Barcode lookup failed: $e');
-      }
-    } else if (query.length >= 2) {
-      final appLocale = Localizations.localeOf(context).languageCode;
-      final hasConnection = await ref.read(hasConnectionProvider.future);
-      if (!hasConnection) {
-        if (mounted) {
-          SnackbarHelper.showWarning(
-            context,
-            AppLocalizations.of(context)!.offlineWarning,
-          );
-        }
-      } else {
-        try {
-          final api = ref.read(apiServiceProvider);
-          var apiResults = await api.searchProducts(
-            normalizedQuery,
-            languageCode: appLocale,
-          );
-          if (capturedRequestId != _requestId || !mounted) {
-            return (results: <_SearchResult>[], apiHadResults: false);
-          }
-
-          if (apiResults.isEmpty && normalizedQuery != query) {
-            apiResults = await api.searchProducts(
-              query,
-              languageCode: appLocale,
-            );
-            if (capturedRequestId != _requestId || !mounted) {
-              return (results: <_SearchResult>[], apiHadResults: false);
-            }
-          }
-
-          apiHadResults = apiResults.isNotEmpty;
-          final existingBarcodes = results
-              .map((r) => r.product.barcode)
-              .toSet();
-          for (final p in apiResults) {
-            if (!existingBarcodes.contains(p.barcode)) {
-              results.add(
-                _SearchResult(product: p, source: _ResultSource.api),
-              );
-            }
-          }
-        } on Exception catch (e) {
-          logWarning('API search failed: $e');
-        }
-      }
-    }
-
-    return (results: results, apiHadResults: apiHadResults);
-  }
-
-  Future<List<_SearchResult>> _searchUsda(
-    String query,
-    int capturedRequestId,
-  ) async {
-    if (query.length < 2) return [];
-
-    final normalizedQuery = normalizeForSearch(query.trim());
-    final hasConnection = await ref.read(hasConnectionProvider.future);
-    if (!hasConnection) {
-      if (mounted) {
-        SnackbarHelper.showWarning(
-          context,
-          AppLocalizations.of(context)!.offlineWarning,
-        );
-      }
-      return [];
-    }
-
-    try {
-      final usda = ref.read(usdaApiClientProvider);
-      final products = await usda.searchFood(normalizedQuery);
-      if (capturedRequestId != _requestId || !mounted) return [];
-
-      return [
-        for (final p in products)
-          _SearchResult(product: p, source: _ResultSource.api),
-      ];
-    } on Exception catch (e) {
-      logWarning('USDA search failed: $e');
-      return [];
-    }
-  }
-
-  Future<List<_SearchResult>> _searchInventory(
-    String query,
-    int capturedRequestId,
-  ) async {
-    final normalizedQuery = normalizeForSearch(query.trim());
-    final activeId = ref.read(activeInventoryProvider);
-    final db = ref.read(databaseProvider);
-    final items = await db.getInventoryWithProduct(inventoryId: activeId);
-    if (capturedRequestId != _requestId || !mounted) return [];
-
-    final inventoryItems = items.map(InventoryWithProduct.fromMap).toList();
-
-    if (normalizedQuery.isEmpty) {
-      return [
-        for (final item in inventoryItems)
-          _SearchResult(
-            product: Product(
-              barcode: item.barcode,
-              name: item.productName ?? item.barcode,
-              productType: item.productType ?? ProductType.custom,
-            ),
-            source: _ResultSource.local,
-          ),
-      ];
-    }
-
-    final matching = inventoryItems.where((item) {
-      final searchText =
-          item.productSearchText ?? '${item.productName ?? ''} ${item.barcode}';
-      return normalizeForSearch(searchText).contains(normalizedQuery);
-    }).toList();
-
-    return [
-      for (final item in matching)
-        _SearchResult(
-          product: Product(
-            barcode: item.barcode,
-            name: item.productName ?? item.barcode,
-            productType: item.productType ?? ProductType.custom,
-          ),
-          source: _ResultSource.local,
-        ),
-    ];
-  }
-
-  Future<List<_SearchResult>> _enrichWithPantryStatus(
-    List<_SearchResult> results,
-  ) async {
-    if (results.isEmpty || _activeSource == SearchSource.inventory) {
-      return results
-          .map(
-            (r) => _SearchResult(
-              product: r.product,
-              source: r.source,
-              isInPantry: _activeSource == SearchSource.inventory,
-            ),
-          )
-          .toList();
-    }
-
-    final barcodes = results.map((r) => r.product.barcode).toSet();
-    final activeId = ref.read(activeInventoryProvider);
-    final db = ref.read(databaseProvider);
-    final inPantryBarcodes = await db.getBarcodesInInventory(
-      barcodes,
-      inventoryId: activeId,
-    );
-
-    return results
-        .map(
-          (r) => _SearchResult(
-            product: r.product,
-            source: r.source,
-            isInPantry: inPantryBarcodes.contains(r.product.barcode),
-          ),
-        )
-        .toList();
+  void _showOfflineWarning() {
+    final l10n = AppLocalizations.of(context)!;
+    SnackbarHelper.showWarning(context, l10n.offlineWarning);
+    _controller.consumeOfflineWarning();
   }
 
   void _onResultTapped(Product product) {
@@ -589,112 +287,76 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final provider = searchPanelControllerProvider(
+      widget.searchDebounceDuration,
+    );
+    final state = ref.watch(provider);
+
+    ref.listen<SearchPanelState>(provider, (previous, next) {
+      if (next.showOfflineWarning && !(previous?.showOfflineWarning ?? false)) {
+        _showOfflineWarning();
+      }
+    });
 
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: SearchBar(
-            controller: _searchController,
-            hintText: l10n.searchHint,
-            leading: widget.showBackButton && widget.onBack != null
-                ? IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: widget.onBack,
-                  )
-                : const Padding(
-                    padding: EdgeInsets.only(left: 12),
-                    child: Icon(Icons.search),
-                  ),
-            trailing: [
-              if (_searchController.text.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _debounce?.cancel();
-                    _graceTimer?.cancel();
-                    _searchController.clear();
-                    setState(() {
-                      _results = [];
-                      _hasSearched = false;
-                      _isSearching = false;
-                    });
-                  },
-                ),
-            ],
-            onChanged: _onSearchChanged,
-            onSubmitted: _onSearchSubmitted,
-            textInputAction: TextInputAction.search,
+          child: SearchQueryBar(
+            searchHint: l10n.searchHint,
             autoFocus: widget.autoFocus,
+            showBackButton: widget.showBackButton,
+            onBack: widget.onBack,
+            onChanged: (value) =>
+                _controller.onQueryChanged(value, languageCode: languageCode),
+            onSubmitted: (value) =>
+                _controller.onQuerySubmitted(value, languageCode: languageCode),
+            onClear: _controller.clear,
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              Text(
-                '${l10n.searchSourceLabel}: ',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              DropdownButton<SearchSource>(
-                value: _activeSource,
-                underline: const SizedBox(),
-                isDense: true,
-                items: [
-                  DropdownMenuItem(
-                    value: SearchSource.off,
-                    child: Text(l10n.searchSourceOff),
-                  ),
-                  DropdownMenuItem(
-                    value: SearchSource.usda,
-                    child: Text(l10n.searchSourceUsda),
-                  ),
-                  DropdownMenuItem(
-                    value: SearchSource.inventory,
-                    child: Text(l10n.searchSourceInventory),
-                  ),
-                ],
-                onChanged: (v) {
-                  if (v == null) return;
-                  setState(() => _activeSource = v);
-                  if (_searchController.text.trim().isNotEmpty) {
-                    _requestId++;
-                    _debounce?.cancel();
-                    _graceTimer?.cancel();
-                    unawaited(
-                      _search(_searchController.text.trim()),
-                    );
-                  }
-                },
-              ),
-            ],
+          child: SearchSourceSelector(
+            label: '${l10n.searchSourceLabel}: ',
+            value: state.activeSource,
+            onChanged: (source) => _controller.setActiveSource(
+              source,
+              languageCode: languageCode,
+            ),
+            offLabel: l10n.searchSourceOff,
+            usdaLabel: l10n.searchSourceUsda,
+            inventoryLabel: l10n.searchSourceInventory,
           ),
         ),
-        if (_results.isNotEmpty)
+        if (state.results.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
             child: Align(
               alignment: Alignment.centerLeft,
               child: FilterChip(
                 label: Text(l10n.inPantryFilter),
-                selected: _filterInPantryOnly,
-                onSelected: (v) => setState(() => _filterInPantryOnly = v),
+                selected: state.filterInPantryOnly,
+                onSelected: (value) =>
+                    _controller.setFilterInPantryOnly(value: value),
               ),
             ),
           ),
-        Expanded(child: _buildResults(l10n, theme)),
+        Expanded(child: _buildResults(state, l10n, theme)),
       ],
     );
   }
 
-  Widget _buildResults(AppLocalizations l10n, ThemeData theme) {
-    if (_isSearching) {
+  Widget _buildResults(
+    SearchPanelState state,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
+    if (state.isSearching) {
       return Center(child: ProgressIndicatorHelper.build());
     }
 
-    if (!_hasSearched) {
+    if (!state.hasSearched) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -716,12 +378,10 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
       );
     }
 
-    final displayResults = _filterInPantryOnly
-        ? _results.where((r) => r.isInPantry).toList()
-        : _results;
+    final displayResults = state.displayResults;
 
     if (displayResults.isEmpty) {
-      if (_filterInPantryOnly) {
+      if (state.filterInPantryOnly) {
         return Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
@@ -747,9 +407,9 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
         );
       }
 
-      if (_results.isEmpty &&
-          _activeSource == SearchSource.off &&
-          _hasSearched) {
+      if (state.results.isEmpty &&
+          state.activeSource == SearchSource.off &&
+          state.hasSearched) {
         return NotFoundFlow(
           key: _notFoundFlowKey,
           onScanBarcode: _onNotFoundScanBarcode,
@@ -783,146 +443,17 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      itemCount: displayResults.length,
-      separatorBuilder: (_, _) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final result = displayResults[index];
-        final product = result.product;
-        return Dismissible(
-          key: ValueKey('search-result-${product.barcode}'),
-          direction: DismissDirection.startToEnd,
-          background: Container(
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.only(left: 20),
-            color: result.isInPantry ? Colors.blue.shade200 : Colors.green,
-            child: Text(
-              result.isInPantry ? l10n.inPantrySwipeLabel : l10n.addToInventory,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          onDismissed: (_) {
-            setState(() {
-              _results.removeWhere(
-                (r) => r.product.barcode == product.barcode,
-              );
-            });
-            unawaited(_addToInventory(product));
-          },
-          child: ListTile(
-            leading: _searchResultAvatar(product, theme, context),
-            title: Text(
-              product.name != 'Unknown' ? product.name : product.barcode,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              [
-                if (product.brand != null && product.brand!.isNotEmpty)
-                  product.brand,
-                product.barcode,
-              ].join(' \u2014 '),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (result.isInPantry)
-                  Semantics(
-                    label: l10n.inPantryIndicator,
-                    child: Icon(
-                      Icons.kitchen,
-                      size: 16,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                if (result.isInPantry) const SizedBox(width: 4),
-                if (product.productType == ProductType.produce)
-                  Icon(
-                    Icons.eco_outlined,
-                    size: 16,
-                    color: Colors.green.shade600,
-                  )
-                else if (result.source == _ResultSource.api)
-                  Icon(
-                    Icons.cloud_outlined,
-                    size: 16,
-                    color: theme.colorScheme.outline,
-                  ),
-              ],
-            ),
-            onTap: () => _onResultTapped(product),
-            onLongPress: () => _showLongPressMenu(product),
-          ),
-        );
+    return SearchResultsList(
+      results: displayResults,
+      inPantrySwipeLabel: l10n.inPantrySwipeLabel,
+      addToInventoryLabel: l10n.addToInventory,
+      inPantryIndicatorLabel: l10n.inPantryIndicator,
+      onResultTapped: _onResultTapped,
+      onResultLongPressed: _showLongPressMenu,
+      onResultDismissed: (result) {
+        _controller.removeResult(result.product);
+        unawaited(_addToInventory(result.product));
       },
     );
   }
-
-  Widget _searchResultAvatar(
-    Product product,
-    ThemeData theme,
-    BuildContext context,
-  ) {
-    if (product.imageUrl != null) {
-      final ratio = MediaQuery.devicePixelRatioOf(context);
-      return ClipOval(
-        child: Image.network(
-          product.imageUrl!,
-          width: 40,
-          height: 40,
-          cacheWidth: (40 * ratio).round(),
-          cacheHeight: (40 * ratio).round(),
-          fit: BoxFit.cover,
-          loadingBuilder: (_, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return _produceOrBarcodeAvatar(product, theme);
-          },
-          errorBuilder: (_, _, _) => _produceOrBarcodeAvatar(product, theme),
-        ),
-      );
-    }
-    return _produceOrBarcodeAvatar(product, theme);
-  }
-
-  Widget _produceOrBarcodeAvatar(Product product, ThemeData theme) {
-    if (product.productType == ProductType.produce) {
-      return CircleAvatar(
-        backgroundColor: Colors.green.shade100,
-        child: Icon(Icons.eco_outlined, color: Colors.green.shade600, size: 18),
-      );
-    }
-    return _barcodeAvatar(product.barcode, theme);
-  }
-
-  Widget _barcodeAvatar(String barcode, ThemeData theme) {
-    return CircleAvatar(
-      backgroundColor: theme.colorScheme.secondaryContainer,
-      child: Text(
-        barcode.length >= 3
-            ? barcode.substring(0, 3)
-            : barcode.padRight(3, '0'),
-        style: TextStyle(
-          color: theme.colorScheme.onSecondaryContainer,
-          fontSize: 11,
-        ),
-      ),
-    );
-  }
-}
-
-enum _ResultSource { local, api }
-
-class _SearchResult {
-  const _SearchResult({
-    required this.product,
-    required this.source,
-    this.isInPantry = false,
-  });
-
-  final Product product;
-  final _ResultSource source;
-  final bool isInPantry;
 }
