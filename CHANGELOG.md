@@ -140,6 +140,11 @@
 
 ### Fixed
 
+- **Debug APK build on PRs**: the `build` job in `build.yml` previously
+  depended on the `testing` job, which only runs on pushes, so the APK/AAB
+  builds were silently skipped for every pull request. The build job now runs
+  independently for both pushes and PRs (PR tests are gated by `ci.yml`).
+  (`.github/workflows/build.yml`)
 - **Market trip coming-soon message**: the home screen action sheet now shows
   the "Coming soon" message through the shared `SnackbarHelper` (styled,
   floating snackbar) instead of a raw `ScaffoldMessenger.showSnackBar`,

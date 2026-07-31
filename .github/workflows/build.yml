@@ -92,7 +92,6 @@ jobs:
     # TODO: Add Patrol E2E tests here once implemented
     name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
     if: github.event_name == 'push' || github.event_name == 'pull_request'
-    needs: testing
     runs-on: ubuntu-latest
     strategy:
       matrix:
