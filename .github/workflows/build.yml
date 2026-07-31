@@ -149,7 +149,9 @@ jobs:
           ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info' || '' }}
         working-directory: code
       - name: Upload APK
-        if: matrix.package-type == 'apk' && !cancelled()
+        if: >
+          matrix.package-type == 'apk' && !cancelled() &&
+          (github.event_name != 'pull_request' || matrix.build-type == 'debug')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ${{ matrix.build-type }}-apk
@@ -157,7 +159,9 @@ jobs:
           retention-days: 90
           if-no-files-found: error
       - name: Upload AAB
-        if: matrix.package-type == 'appbundle' && !cancelled()
+        if: >
+          matrix.package-type == 'appbundle' && !cancelled() &&
+          github.event_name != 'pull_request'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ${{ matrix.build-type }}-aab
@@ -165,7 +169,9 @@ jobs:
           retention-days: 90
           if-no-files-found: error
       - name: Upload debug symbols
-        if: matrix.build-type == 'release' && matrix.package-type == 'apk' && !cancelled()
+        if: >
+          matrix.build-type == 'release' && matrix.package-type == 'apk' &&
+          !cancelled() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: release-debug-info
