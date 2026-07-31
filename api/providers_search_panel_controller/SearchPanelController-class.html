@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the SearchPanelController class from the search_panel_controller library, for the Dart programming language.">
+  <title>SearchPanelController class - search_panel_controller library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../providers_search_panel_controller/">providers&#47;search_panel_controller.dart</a></li>
+    <li class="self-crumb">SearchPanelController class</li>
+  </ol>
+  <div class="self-name">SearchPanelController</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="providers_search_panel_controller&#47;providers_search_panel_controller-library-sidebar.html"
+    data-below-sidebar="providers_search_panel_controller&#47;SearchPanelController-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">SearchPanelController</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Notifier that owns all search state and execution for <a href="../widgets_search_panel/SearchPanel-class.html">SearchPanel</a>.</p>
+<p>This is an auto-dispose provider family keyed by the search debounce
+duration, so state lives exactly as long as the hosting <a href="../widgets_search_panel/SearchPanel-class.html">SearchPanel</a>
+widget and each panel instance is isolated.</p>
+<p>The notifier handles query changes (debounced and on-submit), source
+switching, the stale-response race guard, pantry enrichment, and all three
+search implementations (OFF, USDA, and inventory). UI concerns such as
+navigation, snackbars, and the long-press menu live in the widget layer.</p>
+</section>
+
+
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
+        <li><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier-class.html">AnyNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span>, <span class="type-parameter"><a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span>&gt;</span></li>
+        <li><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$Notifier-class.html">$Notifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span>&gt;</span></li>
+      <li>SearchPanelController</li>
+    </ul>
+  </dd>
+
+        
+        
+
+
+        
+        
+  <dt>Annotations</dt>
+  <dd>
+    <ul class="annotation-list clazz-relationships">
+        <li>@<a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/riverpod-constant.html">riverpod</a></li>
+    </ul>
+  </dd>
+
+
+      </dl>
+    </section>
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="SearchPanelController.new" class="callable">
+          <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/SearchPanelController.html">SearchPanelController</a></span><span class="signature">()</span>
+        </dt>
+        <dd>
+          
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="ref" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/ref.html">ref</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a> associated with this notifier.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="searchDebounceDuration" class="property inherited">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/searchDebounceDuration.html">searchDebounceDuration</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="state" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/state.html">state</a></span>
+  <span class="signature">&#8596; <a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The value currently exposed by this notifier.
+  <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="stateOrNull" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$Notifier/stateOrNull.html">stateOrNull</a></span>
+  <span class="signature">&#8594; <a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a>?</span>
+  
+
+</dt>
+<dd class="inherited">
+  The value currently exposed by this <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier-class.html">Notifier</a>.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="build" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/build.html">build</a></span><span class="signature">(<wbr><span class="parameter" id="build-param-searchDebounceDuration"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">searchDebounceDuration</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  
+  
+
+</dd>
+
+        <dt id="clear" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/clear.html">clear</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Clears the query and resets the results.
+  
+
+</dd>
+
+        <dt id="consumeOfflineWarning" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/consumeOfflineWarning.html">consumeOfflineWarning</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Clears the one-shot offline warning flag.
+  
+
+</dd>
+
+        <dt id="listenSelf" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/listenSelf.html">listenSelf</a></span><span class="signature">(<wbr><span class="parameter" id="listenSelf-param-listener"><span class="type-annotation">void</span> <span class="parameter-name">listener</span>(<span class="parameter" id="param-previous"><span class="type-annotation"><a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a>?</span> <span class="parameter-name">previous</span>, </span><span class="parameter" id="param-next"><span class="type-annotation"><a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span> <span class="parameter-name">next</span></span>), {</span><span class="parameter" id="listenSelf-param-onError"><span class="type-annotation">void</span> <span class="parameter-name">onError</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-stackTrace"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/StackTrace-class.html">StackTrace</a></span> <span class="parameter-name">stackTrace</span></span>)?</span>})
+    <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/state_notifier/1.0.0/state_notifier/RemoveListener.html">RemoveListener</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Listens to changes on the value exposed by this provider.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="notifyOffline" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/notifyOffline.html">notifyOffline</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Requests the offline warning snackbar to be shown.
+  
+
+</dd>
+
+        <dt id="onQueryChanged" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/onQueryChanged.html">onQueryChanged</a></span><span class="signature">(<wbr><span class="parameter" id="onQueryChanged-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">value</span>, {</span><span class="parameter" id="onQueryChanged-param-languageCode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Called on every query change (keystroke).
+  
+
+</dd>
+
+        <dt id="onQuerySubmitted" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/onQuerySubmitted.html">onQuerySubmitted</a></span><span class="signature">(<wbr><span class="parameter" id="onQuerySubmitted-param-value"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">value</span>, {</span><span class="parameter" id="onQuerySubmitted-param-languageCode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Called when the user submits the search (Enter key).
+  
+
+</dd>
+
+        <dt id="removeResult" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/removeResult.html">removeResult</a></span><span class="signature">(<wbr><span class="parameter" id="removeResult-param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Removes the result with the same barcode as <code>product</code> from the list.
+  
+
+</dd>
+
+        <dt id="runBuild" class="callable inherited">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/runBuild.html">runBuild</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; WhenComplete?</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Executes <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier/build.html">Notifier.build</a>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="setActiveSource" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/setActiveSource.html">setActiveSource</a></span><span class="signature">(<wbr><span class="parameter" id="setActiveSource-param-source"><span class="type-annotation"><a href="../models_search_filter/SearchSource.html">SearchSource</a></span> <span class="parameter-name">source</span>, {</span><span class="parameter" id="setActiveSource-param-languageCode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Switches the active <a href="../models_search_filter/SearchSource.html">SearchSource</a>.
+  
+
+</dd>
+
+        <dt id="setFilterInPantryOnly" class="callable">
+  <span class="name"><a href="../providers_search_panel_controller/SearchPanelController/setFilterInPantryOnly.html">setFilterInPantryOnly</a></span><span class="signature">(<wbr>{<span class="parameter" id="setFilterInPantryOnly-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Sets whether only in-pantry results are displayed.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="updateShouldNotify" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/updateShouldNotify.html">updateShouldNotify</a></span><span class="signature">(<wbr><span class="parameter" id="updateShouldNotify-param-previous"><span class="type-annotation"><a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span> <span class="parameter-name">previous</span>, </span><span class="parameter" id="updateShouldNotify-param-next"><span class="type-annotation"><a href="../providers_search_panel_controller/SearchPanelState-class.html">SearchPanelState</a></span> <span class="parameter-name">next</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A method invoked when the state exposed by this <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier-class.html">Notifier</a> changes.
+It compares the previous and new value, and return whether listeners
+should be notified.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../providers_search_panel_controller/">search_panel_controller</a></li>
+    <li class="self-crumb">SearchPanelController class</li>
+</ol>
+
+    <h5>search_panel_controller library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.8+4
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

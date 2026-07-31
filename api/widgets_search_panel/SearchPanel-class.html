@@ -67,6 +67,11 @@ Used by the home screen.</li>
 selected <a href="../models_product/Product-class.html">Product</a>. Used by <a href="../screens_product_picker_screen/ProductPickerScreen-class.html">ProductPickerScreen</a> for recipe
 ingredient selection.</li>
 </ul>
+<p>The search bar, source dropdown, and results list are extracted into
+<a href="../widgets_search_query_bar/SearchQueryBar-class.html">SearchQueryBar</a>, <a href="../widgets_search_source_selector/SearchSourceSelector-class.html">SearchSourceSelector</a>, and <a href="../widgets_search_results_list/SearchResultsList-class.html">SearchResultsList</a>. All
+search state and execution lives in <a href="../providers_search_panel_controller/SearchPanelController-class.html">SearchPanelController</a>; this widget
+wires them together and renders the surrounding states (loading, idle,
+empty, and not-found).</p>
 </section>
 
 
