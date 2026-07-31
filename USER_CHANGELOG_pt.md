@@ -1,5 +1,7 @@
 # Registro de alteracoes do usuario
 
+- Busca melhorada: a busca agora e mais rapida e confiavel ao procurar
+  produtos, ingredientes e produtos frescos.
 - Aviso de "Ida ao mercado": a mensagem "Em breve" exibida ao tocar em
   "Ida ao mercado" agora aparece como um aviso mais bem apresentado e
   facil de ler na parte inferior da tela.

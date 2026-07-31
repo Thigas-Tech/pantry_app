@@ -67,7 +67,20 @@
 
 ### Changed
 
- 
+- **SearchPanel split into three widgets**: the 928-line `SearchPanel`
+  monolith was refactored into a Riverpod `SearchPanelController` with an
+  immutable `SearchPanelState` and three extracted widgets:
+  `SearchQueryBar` (search input with clear button and autofocus),
+  `SearchSourceSelector` (source dropdown), and `SearchResultsList`
+  (swipe-to-add list rows). `SearchPanel` remains a thin composition root;
+  there is no user-visible change.
+  (`lib/widgets/search_panel.dart`, `lib/widgets/search_query_bar.dart`,
+  `lib/widgets/search_source_selector.dart`,
+  `lib/widgets/search_results_list.dart`,
+  `lib/providers/search_panel_controller.dart`,
+  `lib/models/search_result.dart`)
+
+
 - **inPantry search cross-reference**: search results from OFF and USDA are
   now batch-checked against the active inventory. Results already in the
   pantry show a kitchen icon indicator, and a "In Pantry" `FilterChip`
