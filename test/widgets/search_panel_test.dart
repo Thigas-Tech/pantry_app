@@ -355,4 +355,125 @@ void main() {
       expect(find.text('Local Milk'), findsOneWidget);
     });
   });
+
+  group('search state controls', () {
+    testWidgets('clear button resets results and restores idle hint', (
+      tester,
+    ) async {
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [localProduct],
+      );
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpPanel(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.clear));
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsNothing);
+      expect(
+        find.text('Search for products by name or barcode'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('clearing the query resets to idle state', (tester) async {
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [localProduct],
+      );
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpPanel(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsOneWidget);
+
+      await tester.enterText(find.byType(SearchBar), '');
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsNothing);
+      expect(
+        find.text('Search for products by name or barcode'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('inPantry filter chip narrows results to pantry items', (
+      tester,
+    ) async {
+      const notInPantry = Product(
+        barcode: '002',
+        name: 'Almond Milk',
+        brand: 'Brand B',
+      );
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [localProduct, notInPantry],
+      );
+      when(
+        () => mockApi.searchProducts(
+          'milk',
+          pageSize: any(named: 'pageSize'),
+        ),
+      ).thenAnswer((_) async => []);
+      when(
+        () => mockDb.getBarcodesInInventory(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => {'001'});
+
+      await pumpPanel(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsOneWidget);
+      expect(find.text('Almond Milk'), findsOneWidget);
+
+      await tester.tap(find.byType(FilterChip));
+      await tester.pump();
+
+      expect(find.text('Local Milk'), findsOneWidget);
+      expect(find.text('Almond Milk'), findsNothing);
+    });
+
+    testWidgets('switching source re-runs the active search', (tester) async {
+      when(() => mockUsda.searchFood('milk')).thenAnswer(
+        (_) async => [localProduct],
+      );
+
+      await pumpPanel(tester);
+
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump();
+
+      await tester.tap(find.byType(DropdownButton<SearchSource>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Fresh Produce').last);
+      await tester.pumpAndSettle();
+
+      verify(() => mockUsda.searchFood('milk')).called(1);
+    });
+  });
 }

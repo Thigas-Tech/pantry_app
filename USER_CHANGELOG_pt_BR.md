@@ -1,5 +1,8 @@
 # Registro de alteracoes do usuario
 
+- Aviso de "Ida ao mercado": a mensagem "Em breve" exibida ao tocar em
+  "Ida ao mercado" agora aparece como um aviso mais bem apresentado e
+  facil de ler na parte inferior da tela.
 - Preenchimento automatico de ingrediente de receita: ao adicionar um produto
   como ingrediente em uma receita, a quantidade e a unidade sao preenchidas
   automaticamente a partir do tamanho da porcao do produto (ex.: "200 g" para

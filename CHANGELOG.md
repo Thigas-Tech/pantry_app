@@ -140,6 +140,26 @@
 
 ### Fixed
 
+- **Debug APK build on PRs**: the `build` job in `build.yml` previously
+  depended on the `testing` job, which only runs on pushes, so the APK/AAB
+  builds were silently skipped for every pull request. The build job now runs
+  independently for both pushes and PRs (PR tests are gated by `ci.yml`).
+  Artifact uploads are also gated so release and app-bundle combos, which only
+  build on pushes, no longer fail their upload steps on pull requests.
+  (`.github/workflows/build.yml`)
+- **Market trip coming-soon message**: the home screen action sheet now shows
+  the "Coming soon" message through the shared `SnackbarHelper` (styled,
+  floating snackbar) instead of a raw `ScaffoldMessenger.showSnackBar`,
+  aligning with the AGENTS.md feedback rule. (`lib/screens/home_screen.dart`)
+- **Pull-to-refresh deduplication**: the `RefreshIndicator.onRefresh` callback
+  on the home screen now delegates to `Pantry.refresh()` instead of
+  duplicating the repository refresh and deferred invalidation logic.
+  (`lib/screens/home_screen.dart`, `lib/providers/pantry_provider.dart`)
+- **Search panel cleanup**: removed a duplicated `@override` annotation in
+  `SearchPanel` and added widget-test coverage for the clear button, the
+  in-pantry filter chip, source-switch re-search, and empty-query reset.
+  (`lib/widgets/search_panel.dart`)
+
 - **Produce carousel error message**: changed "Could not create inventory." to
   "Could not load product details." since the new flow resolves and navigates
   instead of directly creating inventory. (`lib/l10n/app_en.arb`)
