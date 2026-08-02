@@ -50,15 +50,24 @@ void main() {
 
     test('list by barcode', () async {
       final db = await dbHelper.database;
+      final workId = await dbHelper.createInventory('Work');
       await dao.insert(db, const InventoryItem(barcode: '123'));
-      await dao.insert(db, const InventoryItem(barcode: '123', quantity: 2));
 
       // Need product for barcode 456
       await productDao.insert(db, const Product(barcode: '456', name: 'P2'));
       await dao.insert(db, const InventoryItem(barcode: '456'));
+      await dao.insert(
+        db,
+        InventoryItem(barcode: '456', inventoryId: workId),
+      );
 
-      final items = await dao.listByBarcode(db, '123', inventoryId: 1);
-      expect(items.length, 2);
+      final homeItems = await dao.listByBarcode(db, '456', inventoryId: 1);
+      expect(homeItems, hasLength(1));
+      expect(homeItems.first.inventoryId, 1);
+
+      final workItems = await dao.listByBarcode(db, '456', inventoryId: workId);
+      expect(workItems, hasLength(1));
+      expect(workItems.first.inventoryId, workId);
     });
 
     test('update item', () async {

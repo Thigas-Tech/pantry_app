@@ -1,5 +1,11 @@
 # Registro de alteracoes do usuario
 
+- Corrigido um problema raro em que um produto podia aparecer mais de uma vez
+  na mesma despensa numa instalacao nova, causando quantidades duplicadas. As
+  instalacoes novas agora correspondem as instalacoes atualizadas: cada produto
+  aparece uma vez por despensa, e adicionar um produto existente novamente
+  aumenta a sua quantidade.
+
 - Verificacoes recentes: depois de ler um codigo de barras, ele aparece na
   secao "Verificacoes recentes" da tela inicial. Pode adicionar rapidamente um
   produto verificado novamente a despensa com um toque, ou abri-lo para ver os

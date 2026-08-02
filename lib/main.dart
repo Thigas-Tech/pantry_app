@@ -110,9 +110,6 @@ Future<void> main() async {
         uri: Uri.parse('https://world.openfoodfacts.org'),
       ),
       AddressCheckOption(
-        uri: Uri.parse('https://api.openfoodfacts.org'),
-      ),
-      AddressCheckOption(
         uri: Uri.parse('https://fdc.nal.usda.gov'),
       ),
     ],

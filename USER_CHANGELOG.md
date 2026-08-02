@@ -1,5 +1,10 @@
 # User Changelog
 
+- Fixed a rare issue where a product could appear more than once in the same
+  pantry on a fresh install, causing duplicate quantities. New installs now
+  match upgraded installs: each product appears once per pantry, and adding
+  an existing product again increases its quantity.
+
 - Recent scans: after you scan a barcode, it now appears in a "Recent scans"
   section on the home screen. You can quickly add a scanned product to your
   pantry again with one tap, or open it to see details. The last 50 scans are

@@ -4,8 +4,8 @@ import 'package:sqflite/sqflite.dart';
 /// A single database migration step.
 ///
 /// Subclasses define a [version] number and the schema changes to apply
-/// in [up]. The [MigrationRunner] discovers subclasses by version and
-/// runs them in order during `onUpgrade`.
+/// in [up]. The [MigrationRunner] applies migrations whose version falls
+/// within the upgrade window, in ascending order.
 abstract class Migration {
   /// The target database version after this migration runs.
   int get version;

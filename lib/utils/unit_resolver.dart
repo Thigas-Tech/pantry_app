@@ -1,7 +1,16 @@
 import 'package:pantry_app/providers/settings_provider.dart';
 
 /// Context in which a unit system is used.
-enum UnitContext { servingSize, recipeIngredients, inventory }
+enum UnitContext {
+  /// Serving sizes shown on product details.
+  servingSize,
+
+  /// Ingredient quantities in recipe forms.
+  recipeIngredients,
+
+  /// Inventory item quantities.
+  inventory,
+}
 
 /// Stateless helper that resolves the effective [UnitSystem] for a given
 /// [UnitContext] from [Settings], accounting for per-context overrides.

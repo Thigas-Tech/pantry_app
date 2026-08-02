@@ -129,9 +129,8 @@ lib/
     open_prices_api_client.dart  # Open Prices API HTTP client
     open_prices_service.dart     # Open Prices sync coordinator
     github_issue_service.dart    # GitHub Issues API wrapper
-    photo_service.dart           # Camera/gallery photo capture
+    photo_service.dart           # Price tag photo cleanup for shopping items
     plu_service.dart             # PLU code lookup for produce
-    produce_search_service.dart  # Produce flow coordinator
     product_submission_service.dart  # OFF offline submission queue
   utils/               # Logger, snackbar helpers
   widgets/             # Reusable components

@@ -40,7 +40,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Twelve tables are created on first launch (version 28):
+/// Thirteen tables are created on first launch (version 32):
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -52,6 +52,7 @@ import 'package:sqflite/sqflite.dart';
 /// - firebase_cache_meta – Firestore cache sync metadata.
 /// - recipes – user-created recipes.
 /// - recipe_ingredients – ingredients linked to a recipe.
+/// - recipe_history – history of cooked recipes.
 /// - scan_history – snapshots of recent successful barcode/PLU scans.
 ///
 /// ## Delegation
@@ -252,12 +253,17 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_inventory_date_added ON inventory(date_added)',
     );
+    await db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS '
+      'idx_inventory_barcode_inventory_id '
+      'ON inventory(barcode, inventory_id)',
+    );
 
     await feedbackQueueDao.createTable(db);
 
     await productSubmissionQueueDao.createTable(db);
 
-    await _createPricesTable(db);
+    await priceDao.createTable(db);
 
     await _createShoppingListTable(db);
 
@@ -266,6 +272,13 @@ class DatabaseHelper {
     await firebaseCacheMetaDao.createTable(db);
 
     await recipeDao.createTable(db);
+
+    for (final col in ['name', 'created_at', 'updated_at']) {
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_recipes_$col'
+        ' ON recipes($col)',
+      );
+    }
 
     await recipeIngredientDao.createTable(db);
 
@@ -276,38 +289,6 @@ class DatabaseHelper {
     await inventoriesDao.seedDefault(db);
 
     logInfo('Database schema created successfully');
-  }
-
-  Future<void> _createPricesTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE prices (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        barcode TEXT NOT NULL,
-        price REAL NOT NULL,
-        currency TEXT NOT NULL,
-        store TEXT,
-        is_discounted INTEGER NOT NULL DEFAULT 0,
-        regular_price REAL,
-        date_purchased INTEGER,
-        sync_status TEXT NOT NULL DEFAULT 'local_only',
-        open_prices_id INTEGER,
-        location_osm_id TEXT,
-        location_osm_type TEXT,
-        receipt_series TEXT,
-        receipt_number TEXT,
-        receipt_item_index INTEGER,
-        notes TEXT,
-        date_added INTEGER NOT NULL,
-        FOREIGN KEY (barcode) REFERENCES products(barcode)
-      )
-    ''');
-    await db.execute('CREATE INDEX idx_prices_barcode ON prices(barcode)');
-    await db.execute(
-      'CREATE INDEX idx_prices_date ON prices(date_purchased)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_prices_sync_status ON prices(sync_status)',
-    );
   }
 
   Future<void> _createShoppingListTable(Database db) async {
