@@ -6,18 +6,23 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/home_screen_controller.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/scan_history_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
@@ -26,6 +31,7 @@ import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
+import 'package:pantry_app/widgets/recent_scans_section.dart';
 import 'package:pantry_app/widgets/search_panel.dart';
 
 /// The main pantry screen showing inventory items grouped by expiry.
@@ -160,6 +166,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  /// Builds the "Recent scans" section, hidden when the history is empty.
+  Widget _buildRecentScans(AppLocalizations l10n) {
+    final historyAsync = ref.watch(scanHistoryProvider);
+    final entries = historyAsync.value ?? const <ScanHistoryEntry>[];
+    if (entries.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: RecentScansSection(
+        entries: entries,
+        onQuickAdd: (entry) => unawaited(_quickAdd(entry)),
+        onTapEntry: (entry) => unawaited(_openProduct(entry)),
+      ),
+    );
+  }
+
+  /// Adds a scanned product directly to the active inventory.
+  Future<void> _quickAdd(ScanHistoryEntry entry) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await ref.read(scanHistoryProvider.notifier).quickAdd(entry);
+      if (!mounted) return;
+      SnackbarHelper.showInfo(context, l10n.quickAddAdded);
+    } on Exception catch (e) {
+      logError('Quick-add failed for ${entry.barcode}: $e');
+      if (mounted) SnackbarHelper.showError(context, l10n.quickAddFailed);
+    }
+  }
+
+  /// Opens the product detail screen for a scanned product.
+  Future<void> _openProduct(ScanHistoryEntry entry) async {
+    final l10n = AppLocalizations.of(context)!;
+    final repo = ref.read(productRepositoryProvider);
+    try {
+      final product = await repo.getProduct(entry.barcode);
+      if (!mounted) return;
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: product),
+        ),
+      );
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(pantryProvider);
+        });
+      }
+    } on FetchFailedException {
+      logError('Product ${entry.barcode} unavailable (offline)');
+      if (mounted) {
+        SnackbarHelper.showInfo(context, l10n.productDataUnavailable);
+      }
+    } on Exception catch (e) {
+      logError('Failed to open product ${entry.barcode}: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -272,6 +333,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             : Column(
                 children: [
                   if (!controller.selectionMode) _buildSearchBar(l10n),
+                  if (!controller.selectionMode && onboardingComplete)
+                    _buildRecentScans(l10n),
                   Expanded(
                     child: pantryAsync.when(
                       loading: () => Center(

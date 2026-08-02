@@ -108,6 +108,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addToPantry => 'Adicionar à Despensa';
 
   @override
+  String get recentScans => 'Verificações recentes';
+
+  @override
+  String get quickAdd => 'Adição rápida';
+
+  @override
+  String get quickAddAdded => 'Adicionado à despensa.';
+
+  @override
+  String get quickAddFailed => 'Não foi possível adicionar à despensa.';
+
+  @override
   String get quantityLabel => 'Quantidade';
 
   @override
@@ -2028,6 +2040,18 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get addToPantry => 'Adicionar à Despensa';
+
+  @override
+  String get recentScans => 'Verificações recentes';
+
+  @override
+  String get quickAdd => 'Adição rápida';
+
+  @override
+  String get quickAddAdded => 'Adicionado à despensa.';
+
+  @override
+  String get quickAddFailed => 'Não foi possível adicionar à despensa.';
 
   @override
   String get quantityLabel => 'Quantidade';

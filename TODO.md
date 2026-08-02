@@ -896,7 +896,7 @@ infrastructure or external server hosting are listed last.
 - [x] **Shopping list** — tab or separate screen; mark items as "to buy"
   with a toggle. Items appear in a dedicated list until purchased (then
   move to inventory).
-- [ ] **Barcode history** — show the last N scanned barcodes with quick-add
+- [x] **Barcode history** — show the last N scanned barcodes with quick-add
   button. Persist to SQLite.
 - [ ] **Empty-pantry onboarding** — when inventory is empty, show a guided
   "scan your first item" flow instead of just the empty state widget.

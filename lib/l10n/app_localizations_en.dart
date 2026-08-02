@@ -108,6 +108,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToPantry => 'Add to Pantry';
 
   @override
+  String get recentScans => 'Recent scans';
+
+  @override
+  String get quickAdd => 'Quick add';
+
+  @override
+  String get quickAddAdded => 'Added to pantry.';
+
+  @override
+  String get quickAddFailed => 'Could not add to pantry.';
+
+  @override
   String get quantityLabel => 'Quantity';
 
   @override

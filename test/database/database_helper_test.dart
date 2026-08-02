@@ -5,6 +5,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -1132,6 +1133,76 @@ void main() {
       );
 
       expect(result, hasLength(2));
+    });
+  });
+
+  group('Scan history', () {
+    ScanHistoryEntry entry(
+      int scannedAt, {
+      String barcode = '5012345678900',
+      String? imageUrl,
+    }) => ScanHistoryEntry(
+      barcode: barcode,
+      name: 'Product $barcode',
+      scannedAt: scannedAt,
+      imageUrl: imageUrl,
+    );
+
+    test('recordScan inserts an entry', () async {
+      final id = await db.recordScan(entry(1000));
+      expect(id, isNonNegative);
+
+      final history = await db.getRecentScanHistory();
+      expect(history, hasLength(1));
+      expect(history.first.barcode, '5012345678900');
+      expect(history.first.scannedAt, 1000);
+    });
+
+    test('getRecentScanHistory returns newest first', () async {
+      await db.recordScan(entry(100));
+      await db.recordScan(entry(300));
+      await db.recordScan(entry(200));
+
+      final history = await db.getRecentScanHistory();
+      expect(history.map((e) => e.scannedAt).toList(), [300, 200, 100]);
+    });
+
+    test('getRecentScanHistory respects the limit', () async {
+      await db.recordScan(entry(100));
+      await db.recordScan(entry(200));
+      await db.recordScan(entry(300));
+
+      final history = await db.getRecentScanHistory(limit: 2);
+      expect(history, hasLength(2));
+      expect(history.map((e) => e.scannedAt).toList(), [300, 200]);
+    });
+
+    test('recordScan prunes to the default cap', () async {
+      for (var i = 0; i < 55; i++) {
+        await db.recordScan(entry(i));
+      }
+
+      final history = await db.getRecentScanHistory();
+      expect(history, hasLength(50));
+      expect(history.first.scannedAt, 54);
+    });
+
+    test('recordScan persists imageUrl when provided', () async {
+      await db.recordScan(
+        entry(1000, imageUrl: 'https://example.com/img.jpg'),
+      );
+      final history = await db.getRecentScanHistory();
+      expect(history.single.imageUrl, 'https://example.com/img.jpg');
+    });
+
+    test('clearScanHistory removes all entries', () async {
+      await db.recordScan(entry(1000));
+      await db.recordScan(entry(2000));
+
+      final cleared = await db.clearScanHistory();
+      expect(cleared, 2);
+      final history = await db.getRecentScanHistory();
+      expect(history, isEmpty);
     });
   });
 }

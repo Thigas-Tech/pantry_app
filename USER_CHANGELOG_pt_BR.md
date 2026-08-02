@@ -1,5 +1,9 @@
 # Registro de alteracoes do usuario
 
+- Verificacoes recentes: depois de ler um codigo de barras, ele aparece na
+  secao "Verificacoes recentes" da tela inicial. Pode adicionar rapidamente um
+  produto verificado novamente a despensa com um toque, ou abri-lo para ver os
+  detalhes. As ultimas 50 verificacoes sao guardadas.
 - Busca melhorada: a busca agora e mais rapida e confiavel ao procurar
   produtos, ingredientes e produtos frescos.
 - Aviso de "Ida ao mercado": a mensagem "Em breve" exibida ao tocar em

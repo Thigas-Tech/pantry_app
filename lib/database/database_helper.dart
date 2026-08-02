@@ -11,6 +11,7 @@ import 'package:pantry_app/database/product_submission_queue_dao.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
 import 'package:pantry_app/database/recipe_history_dao.dart';
 import 'package:pantry_app/database/recipe_ingredient_dao.dart';
+import 'package:pantry_app/database/scan_history_dao.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/database/store_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
@@ -19,6 +20,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_history_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
+import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -50,6 +52,7 @@ import 'package:sqflite/sqflite.dart';
 /// - firebase_cache_meta – Firestore cache sync metadata.
 /// - recipes – user-created recipes.
 /// - recipe_ingredients – ingredients linked to a recipe.
+/// - scan_history – snapshots of recent successful barcode/PLU scans.
 ///
 /// ## Delegation
 ///
@@ -57,7 +60,7 @@ import 'package:sqflite/sqflite.dart';
 /// [ProductDao], [InventoryDao], [InventoriesDao], [PriceDao],
 /// [ShoppingListDao], [StoreDao], [FeedbackQueueDao],
 /// [ProductSubmissionQueueDao], [FirebaseCacheMetaDao],
-/// [RecipeDao], [RecipeIngredientDao].
+/// [RecipeDao], [RecipeIngredientDao], [ScanHistoryDao].
 ///
 /// See also:
 /// - [sqflite](https://pub.dev/packages/sqflite) — the SQLite plugin
@@ -117,11 +120,14 @@ class DatabaseHelper {
   /// DAO for the recipe_history table.
   final RecipeHistoryDao recipeHistoryDao = const RecipeHistoryDao();
 
+  /// DAO for the scan_history table.
+  final ScanHistoryDao scanHistoryDao = const ScanHistoryDao();
+
   /// The current database schema version.
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 31;
+  static const int databaseVersion = 32;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -264,6 +270,8 @@ class DatabaseHelper {
     await recipeIngredientDao.createTable(db);
 
     await recipeHistoryDao.createTable(db);
+
+    await scanHistoryDao.createTable(db);
 
     await inventoriesDao.seedDefault(db);
 
@@ -981,6 +989,38 @@ class DatabaseHelper {
   Future<void> deleteRecipeHistory(int historyId) async {
     final db = await database;
     return recipeHistoryDao.deleteById(db, historyId);
+  }
+
+  // ---- Scan history (delegating to ScanHistoryDao) -------
+
+  /// Records a successful scan and prunes the table to its cap.
+  ///
+  /// Inserts [entry], then deletes all rows beyond
+  /// [ScanHistoryDao.defaultKeepCount] so the table never grows unbounded.
+  /// Both operations run inside a single transaction.
+  Future<int> recordScan(ScanHistoryEntry entry) async {
+    final db = await database;
+    return db.transaction<int>((txn) async {
+      final id = await scanHistoryDao.insert(txn, entry);
+      await scanHistoryDao.deleteOld(txn);
+      return id;
+    });
+  }
+
+  /// Returns the most recent scan history entries, newest first.
+  Future<List<ScanHistoryEntry>> getRecentScanHistory({
+    int limit = ScanHistoryDao.defaultKeepCount,
+  }) async {
+    final db = await database;
+    return scanHistoryDao.getRecent(db, limit: limit);
+  }
+
+  /// Deletes every row from the scan_history table.
+  ///
+  /// Returns the number of rows removed.
+  Future<int> clearScanHistory() async {
+    final db = await database;
+    return scanHistoryDao.clear(db);
   }
 
   // ---- FEFO inventory query -------
