@@ -79,33 +79,7 @@ re-execution (idempotent) whenever possible.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 Future&lt;void&gt; up(Database db) async {
-  await db.execute(&#39;&#39;&#39;
-    CREATE TABLE prices (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      barcode TEXT NOT NULL,
-      price REAL NOT NULL,
-      currency TEXT NOT NULL,
-      store TEXT,
-      is_discounted INTEGER NOT NULL DEFAULT 0,
-      regular_price REAL,
-      date_purchased INTEGER,
-      sync_status TEXT NOT NULL DEFAULT &#39;local_only&#39;,
-      open_prices_id INTEGER,
-      location_osm_id TEXT,
-      location_osm_type TEXT,
-      receipt_series TEXT,
-      receipt_number TEXT,
-      receipt_item_index INTEGER,
-      notes TEXT,
-      date_added INTEGER NOT NULL,
-      FOREIGN KEY (barcode) REFERENCES products(barcode)
-    )
-  &#39;&#39;&#39;);
-  await db.execute(&#39;CREATE INDEX idx_prices_barcode ON prices(barcode)&#39;);
-  await db.execute(&#39;CREATE INDEX idx_prices_date ON prices(date_purchased)&#39;);
-  await db.execute(
-    &#39;CREATE INDEX idx_prices_sync_status ON prices(sync_status)&#39;,
-  );
+  await const PriceDao().createTable(db);
 }</code></pre>
 </section>
 

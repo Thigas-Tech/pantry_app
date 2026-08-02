@@ -62,7 +62,7 @@ database operations use the same connection.</p>
 constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
 or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
-<p>Twelve tables are created on first launch (version 28):</p>
+<p>Thirteen tables are created on first launch (version 32):</p>
 <ul>
 <li>products – product data fetched from Open Food Facts.</li>
 <li>inventories – named pantries (e.g. "Home", "Work").</li>
@@ -75,6 +75,7 @@ or a temporary file.</p>
 <li>firebase_cache_meta – Firestore cache sync metadata.</li>
 <li>recipes – user-created recipes.</li>
 <li>recipe_ingredients – ingredients linked to a recipe.</li>
+<li>recipe_history – history of cooked recipes.</li>
 <li>scan_history – snapshots of recent successful barcode/PLU scans.</li>
 </ul>
 <h2 id="delegation">Delegation</h2>

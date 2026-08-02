@@ -149,9 +149,8 @@ flutter build appbundle --debug
     open_prices_api_client.dart  # Open Prices API HTTP client
     open_prices_service.dart     # Open Prices sync coordinator
     github_issue_service.dart    # GitHub Issues API wrapper
-    photo_service.dart           # Camera/gallery photo capture
+    photo_service.dart           # Price tag photo cleanup for shopping items
     plu_service.dart             # PLU code lookup for produce
-    produce_search_service.dart  # Produce flow coordinator
     product_submission_service.dart  # OFF offline submission queue
   utils/               # Logger, snackbar helpers
   widgets/             # Reusable components
@@ -864,13 +863,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="open_prices_provider">
-  <span class="name"><a href="providers_open_prices_provider/">providers/open_prices_provider</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="pantry_provider">
   <span class="name"><a href="providers_pantry_provider/">providers/pantry_provider</a></span> 
 
@@ -1256,13 +1248,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="produce_search_service">
-  <span class="name"><a href="services_produce_search_service/">services/produce_search_service</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="produce_serving_presets">
   <span class="name"><a href="services_produce_serving_presets/">services/produce_serving_presets</a></span> 
 
@@ -1293,13 +1278,6 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="recipe_nutrition_service">
   <span class="name"><a href="services_recipe_nutrition_service/">services/recipe_nutrition_service</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="scan_result">
-  <span class="name"><a href="services_scan_result/">services/scan_result</a></span> 
 
 </dt>
 <dd>
@@ -1666,7 +1644,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="providers_inventory_provider/">providers/inventory_provider</a></li>
       <li><a href="providers_notification_service_provider/">providers/notification_service_provider</a></li>
       <li><a href="providers_onboarding_provider/">providers/onboarding_provider</a></li>
-      <li><a href="providers_open_prices_provider/">providers/open_prices_provider</a></li>
       <li><a href="providers_pantry_provider/">providers/pantry_provider</a></li>
       <li><a href="providers_price_provider/">providers/price_provider</a></li>
       <li><a href="providers_price_repository_provider/">providers/price_repository_provider</a></li>
@@ -1722,13 +1699,11 @@ dart pub global run dhttpd --path doc/api
       <li><a href="services_produce_barcode/">services/produce_barcode</a></li>
       <li><a href="services_produce_category_mapper/">services/produce_category_mapper</a></li>
       <li><a href="services_produce_nutrition_fallback/">services/produce_nutrition_fallback</a></li>
-      <li><a href="services_produce_search_service/">services/produce_search_service</a></li>
       <li><a href="services_produce_serving_presets/">services/produce_serving_presets</a></li>
       <li><a href="services_product_repository/">services/product_repository</a></li>
       <li><a href="services_product_submission_service/">services/product_submission_service</a></li>
       <li><a href="services_recipe_nutri_score_service/">services/recipe_nutri_score_service</a></li>
       <li><a href="services_recipe_nutrition_service/">services/recipe_nutrition_service</a></li>
-      <li><a href="services_scan_result/">services/scan_result</a></li>
       <li><a href="services_usda_api_client/">services/usda_api_client</a></li>
       <li><a href="utils_bottom_sheet_helper/">utils/bottom_sheet_helper</a></li>
       <li><a href="utils_changelog_loader/">utils/changelog_loader</a></li>

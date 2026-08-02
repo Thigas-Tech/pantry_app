@@ -54,11 +54,9 @@
 
     
 <section class="desc markdown">
-  <p>Service for capturing and managing price tag photos.</p>
-<p>Photos are captured via the device camera or selected from the gallery,
-then compressed and saved to a dedicated directory. Each photo is keyed
-by shopping item ID so it can be located during delete or move-to-inventory
-operations.</p>
+  <p>Service for managing price tag photos keyed by shopping item ID.</p>
+<p>Photos are saved to a dedicated directory and located by item ID during
+delete or move-to-inventory operations.</p>
 </section>
 
 
@@ -68,7 +66,7 @@ operations.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="PhotoService.new" class="callable">
-          <span class="name"><a href="../services_photo_service/PhotoService/PhotoService.html">PhotoService</a></span><span class="signature">({<span class="parameter" id="param-picker"><span class="type-annotation"><a href="https://pub.dev/documentation/image_picker/1.2.3/image_picker/ImagePicker-class.html">ImagePicker</a>?</span> <span class="parameter-name">picker</span>, </span><span class="parameter" id="param-photoDirectory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span> <span class="parameter-name">photoDirectory</span></span>})</span>
+          <span class="name"><a href="../services_photo_service/PhotoService/PhotoService.html">PhotoService</a></span><span class="signature">({<span class="parameter" id="param-photoDirectory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span> <span class="parameter-name">photoDirectory</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../services_photo_service/PhotoService-class.html">PhotoService</a>.
@@ -126,46 +124,6 @@ operations.</p>
       id="instance-methods">
     <h2>Methods</h2>
     <dl class="callables">
-        <dt id="capturePhoto" class="callable">
-  <span class="name"><a href="../services_photo_service/PhotoService/capturePhoto.html">capturePhoto</a></span><span class="signature">(<wbr><span class="parameter" id="capturePhoto-param-itemId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">itemId</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Opens the device camera and returns the path to the saved photo,
-or null if the user cancelled.
-  
-
-</dd>
-
-        <dt id="clearAllPhotos" class="callable">
-  <span class="name"><a href="../services_photo_service/PhotoService/clearAllPhotos.html">clearAllPhotos</a></span><span class="signature">(<wbr>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Deletes all cached price tag photos.
-  
-
-</dd>
-
-        <dt id="deletePhoto" class="callable">
-  <span class="name"><a href="../services_photo_service/PhotoService/deletePhoto.html">deletePhoto</a></span><span class="signature">(<wbr><span class="parameter" id="deletePhoto-param-path"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">path</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Deletes the photo at <code>path</code> if it exists.
-  
-
-</dd>
-
         <dt id="deletePhotoForItem" class="callable">
   <span class="name"><a href="../services_photo_service/PhotoService/deletePhotoForItem.html">deletePhotoForItem</a></span><span class="signature">(<wbr><span class="parameter" id="deletePhotoForItem-param-itemId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">itemId</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -189,20 +147,6 @@ or null if the user cancelled.
 <dd class="inherited">
   Invoked when a nonexistent method or property is accessed.
   <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="pickFromGallery" class="callable">
-  <span class="name"><a href="../services_photo_service/PhotoService/pickFromGallery.html">pickFromGallery</a></span><span class="signature">(<wbr><span class="parameter" id="pickFromGallery-param-itemId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">itemId</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Opens the device gallery and returns the path to the saved photo,
-or null if the user cancelled.
-  
 
 </dd>
 

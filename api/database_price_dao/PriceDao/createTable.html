@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the ProduceSearchService.new constructor from Class ProduceSearchService from the produce_search_service library, for the Dart programming language.">
-  <title>ProduceSearchService.new constructor - ProduceSearchService - produce_search_service library - Dart API</title>
+  <meta name="description" content="API docs for the createTable method from the PriceDao class, for the Dart programming language.">
+  <title>createTable method - PriceDao class - price_dao library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../services_produce_search_service/">services&#47;produce_search_service.dart</a></li>
-    <li><a href="../../services_produce_search_service/ProduceSearchService-class.html">ProduceSearchService</a></li>
-    <li class="self-crumb">ProduceSearchService.new const constructor</li>
+    <li><a href="../../database_price_dao/">database&#47;price_dao.dart</a></li>
+    <li><a href="../../database_price_dao/PriceDao-class.html">PriceDao</a></li>
+    <li class="self-crumb">createTable method</li>
   </ol>
-  <div class="self-name">ProduceSearchService.new</div>
+  <div class="self-name">createTable</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -43,38 +43,64 @@
   </button>
 </header>
 <main>
-  <div
-      id="dartdoc-main-content"
-      class="main-content"
-      data-above-sidebar="services_produce_search_service&#47;ProduceSearchService-class-sidebar.html"
-      data-below-sidebar="">
-      <div>
-<h1><span class="kind-constructor">ProduceSearchService</span> constructor 
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="database_price_dao&#47;PriceDao-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">createTable</span> method 
 </h1></div>
 
     <section class="multi-line-signature">
-      const
-      <span class="name ">ProduceSearchService</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-offAdapter"><span>required</span> <span class="type-annotation"><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">offAdapter</span>, </span></li>
-<li><span class="parameter" id="param-pluService"><span>required</span> <span class="type-annotation"><a href="../../services_plu_service/PluService-class.html">PluService</a></span> <span class="parameter-name">pluService</span>, </span></li>
-<li><span class="parameter" id="param-usdaClient"><span class="type-annotation"><a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a>?</span> <span class="parameter-name">usdaClient</span>, </span></li>
-</ol>})
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">createTable</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="createTable-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span></li>
+</ol>)
+
+      
+
     </section>
     
 <section class="desc markdown">
-  <p>Creates a <a href="../../services_produce_search_service/ProduceSearchService-class.html">ProduceSearchService</a>.</p>
-<p>All dependencies are injectable for testing. In production they
-default to real instances via Riverpod providers.</p>
+  <p>Creates the prices table and its indexes.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const ProduceSearchService({
-  required this.offAdapter,
-  required this.pluService,
-  this.usdaClient,
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; createTable(Database db) async {
+  await db.execute(&#39;&#39;&#39;
+    CREATE TABLE prices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      barcode TEXT NOT NULL,
+      price REAL NOT NULL,
+      currency TEXT NOT NULL,
+      store TEXT,
+      is_discounted INTEGER NOT NULL DEFAULT 0,
+      regular_price REAL,
+      date_purchased INTEGER,
+      sync_status TEXT NOT NULL DEFAULT &#39;local_only&#39;,
+      open_prices_id INTEGER,
+      location_osm_id TEXT,
+      location_osm_type TEXT,
+      receipt_series TEXT,
+      receipt_number TEXT,
+      receipt_item_index INTEGER,
+      notes TEXT,
+      date_added INTEGER NOT NULL,
+      FOREIGN KEY (barcode) REFERENCES products(barcode)
+    )
+  &#39;&#39;&#39;);
+  await db.execute(&#39;CREATE INDEX idx_prices_barcode ON prices(barcode)&#39;);
+  await db.execute(
+    &#39;CREATE INDEX idx_prices_date ON prices(date_purchased)&#39;,
+  );
+  await db.execute(
+    &#39;CREATE INDEX idx_prices_sync_status ON prices(sync_status)&#39;,
+  );
+}</code></pre>
 </section>
 
 
@@ -88,16 +114,16 @@ default to real instances via Riverpod providers.</p>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../services_produce_search_service/">produce_search_service</a></li>
-    <li><a href="../../services_produce_search_service/ProduceSearchService-class.html">ProduceSearchService</a></li>
-    <li class="self-crumb">ProduceSearchService.new const constructor</li>
+    <li><a href="../../database_price_dao/">price_dao</a></li>
+    <li><a href="../../database_price_dao/PriceDao-class.html">PriceDao</a></li>
+    <li class="self-crumb">createTable method</li>
 </ol>
 
-    <h5>ProduceSearchService class</h5>
+    <h5>PriceDao class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
-  </div><!--/.sidebar-offcanvas-left-->
-  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
   </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
 </main>
 <footer>
   <span class="no-break">

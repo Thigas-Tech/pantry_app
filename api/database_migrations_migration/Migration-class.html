@@ -57,8 +57,8 @@
 <section class="desc markdown">
   <p>A single database migration step.</p>
 <p>Subclasses define a <a href="../database_migrations_migration/Migration/version.html">version</a> number and the schema changes to apply
-in <a href="../database_migrations_migration/Migration/up.html">up</a>. The <a href="../database_migrations_migration_runner/MigrationRunner-class.html">MigrationRunner</a> discovers subclasses by version and
-runs them in order during <code>onUpgrade</code>.</p>
+in <a href="../database_migrations_migration/Migration/up.html">up</a>. The <a href="../database_migrations_migration_runner/MigrationRunner-class.html">MigrationRunner</a> applies migrations whose version falls
+within the upgrade window, in ascending order.</p>
 </section>
 
 
