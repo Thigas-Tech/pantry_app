@@ -1,8 +1,8 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 30)
+### 2.1 Schema (version 32)
 
-Nine tables:
+Thirteen tables:
 
 | Table | Purpose |
 |---|---|
@@ -15,6 +15,10 @@ Nine tables:
 | `shopping_list` | Items the user intends to buy |
 | `stores` | Saved store names for autocomplete on price entry |
 | `firebase_cache_meta` | Tracks last-refresh timestamps for product cache entries synced to Firestore |
+| `recipes` | User-created recipes |
+| `recipe_ingredients` | Ingredients linked to a recipe |
+| `recipe_history` | Audit log of recipes marked as made |
+| `scan_history` | Self-contained snapshots of the latest successful scans (capped at 50) |
 
 ### 2.2 DAO pattern
 
@@ -31,8 +35,15 @@ Each table has a dedicated Data Access Object:
 | `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
 | `StoreDao` | CRUD saved store names, case-insensitive lookup |
 | `FirebaseCacheMetaDao` | CRUD Firestore cache sync metadata, next-refresh tracking |
+| `RecipeDao` | CRUD recipes |
+| `RecipeIngredientDao` | CRUD recipe ingredients |
+| `RecipeHistoryDao` | CRUD recipe history entries |
+| `ScanHistoryDao` | CRUD scan history, bounded pruning (keep newest 50) |
 
-Every DAO method receives a `Database` instance so it can be tested independently.
+Every DAO method receives a `Database` instance so it can be tested
+independently. DAOs that must compose inside transactions (such as
+`ScanHistoryDao`) accept a `DatabaseExecutor` instead, which covers both a
+`Database` and a `Transaction`.
 
 `DatabaseHelper` is the singleton that owns the connection, runs schema
 migrations, and delegates CRUD to the DAOs.  It is the **only public entry
@@ -48,7 +59,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v30).
+- `_onUpgrade` handles version bumps (currently v1 -> v32).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -83,6 +94,8 @@ Version history:
 | v27 -> v28 | Normalize produce barcodes (lowercase, trim, spaces to underscores) across all tables |
 | v28 -> v29 | Added unique index on `inventory(barcode, inventory_id)`, deduplicated existing rows |
 | v29 -> v30 | Added `search_text` column on `recipes` + indexes on name/created_at/updated_at |
+| v30 -> v31 | Added `serving_quantity REAL` column to `products` |
+| v31 -> v32 | Added `scan_history` table with indexes on scanned_at and barcode |
 
 ### 2.4 Connectivity layer
 

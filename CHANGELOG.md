@@ -4,6 +4,16 @@
 
 ### Added
 
+- **Barcode history**: every successful barcode or PLU scan is now recorded
+  in a new `scan_history` table (migration v32), capped at the latest 50
+  entries. The home screen shows a "Recent scans" strip with a one-tap
+  quick-add that inserts the product directly into the active inventory,
+  falling back to a manual snapshot when offline.
+  (`lib/database/scan_history_dao.dart`,
+  `lib/database/migrations/v32_scan_history.dart`,
+  `lib/providers/scan_history_provider.dart`,
+  `lib/providers/scanner_providers.dart`,
+  `lib/widgets/recent_scans_section.dart`, `lib/screens/home_screen.dart`)
 - **Serving-size auto-fill for recipe ingredients**: when adding a product as
   an ingredient in a recipe form, the quantity and unit are now pre-filled from
   the product's serving size. Uses `offProduct.servingQuantity` when available

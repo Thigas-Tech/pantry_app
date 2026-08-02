@@ -294,6 +294,30 @@ abstract class AppLocalizations {
   /// **'Add to Pantry'**
   String get addToPantry;
 
+  /// No description provided for @recentScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent scans'**
+  String get recentScans;
+
+  /// No description provided for @quickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get quickAdd;
+
+  /// No description provided for @quickAddAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to pantry.'**
+  String get quickAddAdded;
+
+  /// No description provided for @quickAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not add to pantry.'**
+  String get quickAddFailed;
+
   /// No description provided for @quantityLabel.
   ///
   /// In en, this message translates to:

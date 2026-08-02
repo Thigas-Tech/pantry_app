@@ -1,5 +1,9 @@
 # User Changelog
 
+- Recent scans: after you scan a barcode, it now appears in a "Recent scans"
+  section on the home screen. You can quickly add a scanned product to your
+  pantry again with one tap, or open it to see details. The last 50 scans are
+  kept.
 - Search improved: search is now snappier and more reliable when looking up
   products, ingredients, and fresh produce.
 - Market trip notice: the "Coming soon" message shown when you tap "Market

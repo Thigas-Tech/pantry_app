@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/scan_history_provider.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -283,6 +285,7 @@ class ScannerCamera extends _$ScannerCamera {
       final product = await repo.getProduct(barcode).timeout(timeout);
       logInfo('Barcode resolved: ${product.name}');
       state = state.copyWith(scanResolution: ScanResolved(product));
+      await _recordScan(product);
     } on ProductNotFoundException {
       logInfo('Product not found for barcode: $barcode');
       state = state.copyWith(
@@ -333,6 +336,7 @@ class ScannerCamera extends _$ScannerCamera {
         );
         logInfo('PLU resolved: ${enriched.name} (${enriched.barcode})');
         state = state.copyWith(scanResolution: ScanResolved(enriched));
+        await _recordScan(enriched);
       } else {
         logInfo('No OFF results found for PLU: $pluCode ($produceName)');
         state = state.copyWith(
@@ -345,6 +349,30 @@ class ScannerCamera extends _$ScannerCamera {
     } on Exception catch (e) {
       logError('PLU resolution failed: $e');
       state = state.copyWith(scanResolution: ScanFailed(e.toString()));
+    }
+  }
+
+  /// Records a successful scan into the scan history.
+  ///
+  /// The write is best-effort: failures are logged and swallowed so that a
+  /// database error never breaks the scan resolution flow. Products without a
+  /// barcode are skipped.
+  Future<void> _recordScan(Product product) async {
+    if (product.barcode.isEmpty) return;
+    logInfo('Recording scan for ${product.barcode}');
+    try {
+      await ref
+          .read(scanHistoryProvider.notifier)
+          .record(
+            ScanHistoryEntry(
+              barcode: product.barcode,
+              name: product.name,
+              scannedAt: DateTime.now().millisecondsSinceEpoch,
+              imageUrl: product.imageUrl,
+            ),
+          );
+    } on Object catch (e) {
+      logError('Failed to record scan for ${product.barcode}: $e');
     }
   }
 

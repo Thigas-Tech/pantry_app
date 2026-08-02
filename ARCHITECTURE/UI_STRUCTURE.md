@@ -3,7 +3,8 @@
 ```
 HomeScreen
 ├── AppBar (title, switcher, settings)
-├── QuickAddProduce (horizontal carousel of 8 common produce items)
+├── SearchBar (inline search panel)
+├── RecentScansSection (horizontal strip of the last scans with quick-add)
 ├── ErrorView (loading/error states)
 ├── EmptyPantry (empty state with scan prompt)
 └── _InventoryList
