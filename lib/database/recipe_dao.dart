@@ -20,6 +20,7 @@ class RecipeDao {
         instructions TEXT NOT NULL DEFAULT '',
         servings INTEGER NOT NULL DEFAULT 0,
         image_path TEXT NOT NULL DEFAULT '',
+        search_text TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       )

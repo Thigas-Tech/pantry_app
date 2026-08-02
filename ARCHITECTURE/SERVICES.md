@@ -170,9 +170,9 @@ User scans barcode
 
 ### 3.12 Photo service
 
-- `PhotoService` -- wraps `image_picker` for camera and gallery capture.
-  Used by the price entry sheet and product submission flow to attach proof
-  photos and product images.
+- `PhotoService` -- manages price tag photos keyed by shopping item ID.
+  `deletePhotoForItem` removes the photo when a shopping item is deleted.
+  Used by the shopping list flow to clean up cached photos.
 
 ### 3.13 Store persistence
 
@@ -218,26 +218,13 @@ User scans barcode
   item via SharedPreferences. Used by the quick-add carousel to surface
   frequently-bought items.
 
-### 3.19 Produce search service
-
-- `ProduceSearchService` -- coordinates the OFF API, USDA API, and manual
-  entry flow for produce items. Tries OFF first, falls back to USDA, then
-  to nutrition fallback, and finally to manual entry.
-
-### 3.20 PLU service
+### 3.19 PLU service
 
 - `PluService` -- local lookup table of ~70 common PLU codes (e.g. 4011
   for Banana) mapped to produce names. Used for barcode-less produce
   entry on the scanner screen.
 
-### 3.21 Scan result
-
-- `ScanResult` (sealed class) -- models the output of the scanner screen.
-  Variants: `BarcodeResult(String barcode)` and `PluResult(int pluCode)`.
-  Used by the home screen to dispatch between barcode lookup and produce
-  search flow.
-
-### 3.22 Changelog loader
+### 3.20 Changelog loader
 
 - `ChangelogLoader` utility at `lib/utils/changelog_loader.dart` provides
   `loadLocalizedChangelog(Locale)` that resolves locale-specific

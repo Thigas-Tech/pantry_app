@@ -151,7 +151,7 @@ class UnitConverter {
   ///
   /// - Metric system: auto-scales within metric (g -> kg, ml -> L).
   /// - Imperial system: converts to the preferred imperial unit.
-  /// - [pieces] always passes through unchanged.
+  /// - The 'pieces' unit always passes through unchanged.
   /// - Respects [weightPref] and [volumePref] when target is imperial.
   static ({double quantity, String unit}) displayUnit(
     double quantity,

@@ -167,9 +167,12 @@ void main() {
       await db.createInventory('Pantry A');
       await db.createInventory('Pantry B');
 
-      // Insert a product.
+      // Insert products.
       await db.insertProduct(
         const Product(barcode: '001', name: 'Test'),
+      );
+      await db.insertProduct(
+        const Product(barcode: '002', name: 'Test 2'),
       );
 
       // Insert two items in Pantry A.
@@ -177,10 +180,8 @@ void main() {
         const InventoryItem(barcode: '001'),
       );
       final id2 = await db.insertInventoryItem(
-        const InventoryItem(barcode: '001', quantity: 2),
+        const InventoryItem(barcode: '002', quantity: 2),
       );
-
-      // Move both items to Pantry B.
       await db.moveItemsToInventory([id1, id2], 2);
 
       // Verify they now belong to Pantry B.
@@ -198,6 +199,7 @@ void main() {
       'removes items older than retention days and orphaned products',
       () async {
         await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
+        await db.insertProduct(const Product(barcode: 'p2', name: 'P2'));
         final oldItem = InventoryItem(
           barcode: 'p1',
           dateAdded: DateTime.now()
@@ -205,7 +207,7 @@ void main() {
               .millisecondsSinceEpoch,
         );
         final newItem = InventoryItem(
-          barcode: 'p1',
+          barcode: 'p2',
           dateAdded: DateTime.now()
               .subtract(const Duration(days: 10))
               .millisecondsSinceEpoch,
@@ -216,10 +218,11 @@ void main() {
         await db.cleanupOldEntries();
 
         final remaining = await db.getInventoryItems(inventoryId: 1);
-        expect(remaining.length, 1);
+        expect(remaining, hasLength(1));
+        expect(remaining.first.barcode, 'p2');
         expect(remaining.first.dateAdded, newItem.dateAdded);
 
-        final product = await db.getProduct('p1');
+        final product = await db.getProduct('p2');
         expect(product, isNotNull);
       },
     );
@@ -1121,18 +1124,14 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test('returns distinct barcodes when duplicates exist', () async {
-      // Insert a duplicate of barcode1.
-      await db.insertInventoryItem(
-        const InventoryItem(barcode: 'barcode1'),
+    test('rejects a duplicate barcode in the same inventory', () async {
+      // The setUp already inserted barcode1 in inventory 1. A second
+      // insert of the same (barcode, inventory_id) must fail because the
+      // unique index (v29) is enforced on fresh installs.
+      await expectLater(
+        db.insertInventoryItem(const InventoryItem(barcode: 'barcode1')),
+        throwsA(isA<Exception>()),
       );
-
-      final result = await db.getBarcodesInInventory(
-        {'barcode1', 'barcode2'},
-        inventoryId: 1,
-      );
-
-      expect(result, hasLength(2));
     });
   });
 

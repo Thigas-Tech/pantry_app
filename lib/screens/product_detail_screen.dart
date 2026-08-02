@@ -692,7 +692,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           );
           if (system == UnitSystem.imperial) {
             final converted = UnitConverter.displayUnit(
-              medium.toDouble(),
+              medium,
               'g',
               UnitSystem.imperial,
               weightPref: settings.preferredWeightUnit,

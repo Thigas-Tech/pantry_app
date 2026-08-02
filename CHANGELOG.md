@@ -160,6 +160,21 @@
   `ProgressIndicatorHelper.build()` for consistent defaults and
   centralized theming. No visual or behavioural changes.
   (`lib/utils/progress_indicator_helper.dart`)
+- **Removed functional debt**: deleted the superseded
+  `ProduceSearchService` and `ScanResult`/`BarcodeResult`/`PluResult`
+  (replaced by `ScanResolution` in `scanner_providers.dart`), the unused
+  `openPricesServiceProvider`, and the unused photo capture/gallery/delete
+  methods on `PhotoService`. Fresh-install database schema now matches the
+  migration chain: `_onCreate` creates the v29 unique inventory index and
+  the v30 recipe `search_text` column and indexes, and the prices table is
+  built through `PriceDao.createTable` (shared with migration v12).
+  (`lib/services/produce_search_service.dart`,
+  `lib/services/scan_result.dart`, `lib/providers/open_prices_provider.dart`,
+  `lib/services/photo_service.dart`, `lib/database/database_helper.dart`,
+  `lib/database/price_dao.dart`,
+  `lib/database/migrations/v12_prices_table.dart`,
+  `lib/database/recipe_dao.dart`,
+  `test/database/oncreate_schema_parity_test.dart`)
 
 ### Fixed
 
