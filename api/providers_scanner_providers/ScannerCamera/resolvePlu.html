@@ -106,6 +106,7 @@ caught and <a href="../../providers_scanner_providers/ScanFailed-class.html">Sca
       );
       logInfo(&#39;PLU resolved: ${enriched.name} (${enriched.barcode})&#39;);
       state = state.copyWith(scanResolution: ScanResolved(enriched));
+      await _recordScan(enriched);
     } else {
       logInfo(&#39;No OFF results found for PLU: $pluCode ($produceName)&#39;);
       state = state.copyWith(

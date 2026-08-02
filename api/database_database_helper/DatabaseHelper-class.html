@@ -75,13 +75,14 @@ or a temporary file.</p>
 <li>firebase_cache_meta – Firestore cache sync metadata.</li>
 <li>recipes – user-created recipes.</li>
 <li>recipe_ingredients – ingredients linked to a recipe.</li>
+<li>scan_history – snapshots of recent successful barcode/PLU scans.</li>
 </ul>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
 <a href="../database_product_dao/ProductDao-class.html">ProductDao</a>, <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>, <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a>, <a href="../database_price_dao/PriceDao-class.html">PriceDao</a>,
 <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a>, <a href="../database_store_dao/StoreDao-class.html">StoreDao</a>, <a href="../database_feedback_queue_dao/FeedbackQueueDao-class.html">FeedbackQueueDao</a>,
 <a href="../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>, <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>,
-<a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a>, <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a>.</p>
+<a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a>, <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a>, <a href="../database_scan_history_dao/ScanHistoryDao-class.html">ScanHistoryDao</a>.</p>
 <p>See also:</p>
 <ul>
 <li><a href="https://pub.dev/packages/sqflite">sqflite</a> — the SQLite plugin
@@ -274,6 +275,18 @@ used for local storage.</li>
 
 </dd>
 
+        <dt id="scanHistoryDao" class="property">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/scanHistoryDao.html">scanHistoryDao</a></span>
+  <span class="signature">&#8594; <a href="../database_scan_history_dao/ScanHistoryDao-class.html">ScanHistoryDao</a></span>
+  
+
+</dt>
+<dd>
+  DAO for the scan_history table.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="shoppingListDao" class="property">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/shoppingListDao.html">shoppingListDao</a></span>
   <span class="signature">&#8594; <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a></span>
@@ -356,6 +369,19 @@ used for local storage.</li>
 <dd>
   Deletes all purchased shopping list items, optionally scoped to an
 inventory.
+  
+
+</dd>
+
+        <dt id="clearScanHistory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/clearScanHistory.html">clearScanHistory</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes every row from the scan_history table.
   
 
 </dd>
@@ -876,6 +902,19 @@ descending.
 
 </dd>
 
+        <dt id="getRecentScanHistory" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getRecentScanHistory.html">getRecentScanHistory</a></span><span class="signature">(<wbr>{<span class="parameter" id="getRecentScanHistory-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">limit</span> = <span class="default-value">ScanHistoryDao.defaultKeepCount</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_scan_history_entry/ScanHistoryEntry-class.html">ScanHistoryEntry</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns the most recent scan history entries, newest first.
+  
+
+</dd>
+
         <dt id="getRecipe" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/getRecipe.html">getRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="getRecipe-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe/Recipe-class.html">Recipe</a>?</span>&gt;</span></span>
@@ -1148,6 +1187,19 @@ scoped to an inventory.
 </dt>
 <dd>
   Queues a feedback issue for offline submission.
+  
+
+</dd>
+
+        <dt id="recordScan" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/recordScan.html">recordScan</a></span><span class="signature">(<wbr><span class="parameter" id="recordScan-param-entry"><span class="type-annotation"><a href="../models_scan_history_entry/ScanHistoryEntry-class.html">ScanHistoryEntry</a></span> <span class="parameter-name">entry</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Records a successful scan and prunes the table to its cap.
   
 
 </dd>

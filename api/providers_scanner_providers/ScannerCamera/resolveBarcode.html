@@ -87,6 +87,7 @@ caught and <a href="../../providers_scanner_providers/ScanFailed-class.html">Sca
     final product = await repo.getProduct(barcode).timeout(timeout);
     logInfo(&#39;Barcode resolved: ${product.name}&#39;);
     state = state.copyWith(scanResolution: ScanResolved(product));
+    await _recordScan(product);
   } on ProductNotFoundException {
     logInfo(&#39;Product not found for barcode: $barcode&#39;);
     state = state.copyWith(
