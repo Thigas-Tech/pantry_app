@@ -4,7 +4,7 @@
 
 Run BEFORE every local commit. Fix ALL issues:
   git fetch
-  dart analyze lib/ test/
+  dart analyze lib/ test/   # MUST report "No issues found!" — zero warnings AND infos
   flutter test --concurrency=2
   flutter build apk --debug
   dart doc .

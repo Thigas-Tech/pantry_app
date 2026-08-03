@@ -13,13 +13,13 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
-import 'package:pantry_app/utils/unit_conversion.dart';
-import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/screens/product_picker_screen.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
+import 'package:pantry_app/utils/unit_resolver.dart';
 
 /// Tracks mutable state for a single ingredient row in the form.
 class _IngredientEntry {

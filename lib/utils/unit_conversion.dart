@@ -102,7 +102,8 @@ class UnitConverter {
 
   /// Scales [quantity] in [unit] to the most appropriate representation.
   ///
-  /// Examples: 1500 g -> (1.5, kg), 32 oz -> (2.0, lb), 3 pieces -> (3, pieces).
+  /// Examples: 1500 g -> (1.5, kg), 32 oz -> (2.0, lb),
+  /// 3 pieces -> (3, pieces).
   static ({double quantity, String unit}) autoScale(
     double quantity,
     String unit,

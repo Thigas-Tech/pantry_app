@@ -62,7 +62,7 @@ void main() {
     });
 
     test('copyWith clears override when set to null', () {
-      final original = Settings(
+      const original = Settings(
         unitSystemServingSize: UnitSystem.imperial,
       );
       final copy = original.copyWith(unitSystemServingSize: null);

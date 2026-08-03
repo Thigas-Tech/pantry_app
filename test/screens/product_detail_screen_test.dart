@@ -33,7 +33,6 @@ import 'package:flutter_riverpod/misc.dart'; // for Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
@@ -48,6 +47,7 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 import '../services/mock_notification_service.dart';
 
@@ -1123,7 +1123,7 @@ void main() {
       setLargeScreen(tester);
       await pumpApp(
         tester,
-        ProductDetailScreen(product: juice),
+        const ProductDetailScreen(product: juice),
         overrides: [
           ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
           settingsProvider.overrideWith(FakeSettingsNotifierImperial.new),

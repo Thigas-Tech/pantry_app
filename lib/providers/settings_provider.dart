@@ -8,13 +8,43 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// The measurement system for displaying quantities.
-enum UnitSystem { metric, imperial }
+enum UnitSystem {
+  /// Metric units (g, kg, ml, L).
+  metric,
+
+  /// Imperial units (oz, lb, fl oz, cups).
+  imperial,
+}
 
 /// Preferred weight unit when using the imperial system.
-enum WeightUnitPreference { ounces, pounds, auto }
+enum WeightUnitPreference {
+  /// Always display ounces.
+  ounces,
+
+  /// Always display pounds.
+  pounds,
+
+  /// Automatically choose the most readable unit.
+  auto,
+}
 
 /// Preferred volume unit when using the imperial system.
-enum VolumeUnitPreference { fluidOunces, cups, tablespoons, teaspoons, auto }
+enum VolumeUnitPreference {
+  /// Always display fluid ounces.
+  fluidOunces,
+
+  /// Always display cups.
+  cups,
+
+  /// Always display tablespoons.
+  tablespoons,
+
+  /// Always display teaspoons.
+  teaspoons,
+
+  /// Automatically choose the most readable unit.
+  auto,
+}
 
 /// Persistent settings for the pantry app.
 ///

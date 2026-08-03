@@ -487,13 +487,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Imperial radio should now be selected (groupValue == imperial)
-      final imperialRadio = tester.widget<RadioListTile<UnitSystem>>(
-        find.ancestor(
-          of: find.text('Imperial'),
-          matching: find.byType(RadioListTile<UnitSystem>),
-        ),
+      final radioGroup = tester.widget<RadioGroup<UnitSystem>>(
+        find.byType(RadioGroup<UnitSystem>),
       );
-      expect(imperialRadio.groupValue, UnitSystem.imperial);
+      expect(radioGroup.groupValue, UnitSystem.imperial);
     },
   );
 
