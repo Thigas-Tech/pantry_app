@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the submitProduct method from the OffAdapter class, for the Dart programming language.">
-  <title>submitProduct method - OffAdapter class - off_adapter library - Dart API</title>
+  <meta name="description" content="API docs for the isRateLimitStatus method from the OffAdapter class, for the Dart programming language.">
+  <title>isRateLimitStatus method - OffAdapter class - off_adapter library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../services_off_adapter/">services&#47;off_adapter.dart</a></li>
     <li><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></li>
-    <li class="self-crumb">submitProduct method</li>
+    <li class="self-crumb">isRateLimitStatus static method</li>
   </ol>
-  <div class="self-name">submitProduct</div>
+  <div class="self-name">isRateLimitStatus</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -49,13 +49,18 @@
     data-above-sidebar="services_off_adapter&#47;OffAdapter-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">submitProduct</span> method 
+<h1><span class="kind-method">isRateLimitStatus</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
-<span class="name ">submitProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span></li>
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/meta/visibleForTesting-constant.html">visibleForTesting</a></li>
+    </ol>
+  </div>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+<span class="name ">isRateLimitStatus</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="isRateLimitStatus-param-status"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Status-class.html">Status</a></span> <span class="parameter-name">status</span></span></li>
 </ol>)
 
       
@@ -63,71 +68,22 @@
     </section>
     
 <section class="desc markdown">
-  <p>Submits a product to Open Food Facts.</p>
-<p>Returns true on success, false if credentials are missing or
-the server rejected the submission.</p>
+  <p>Returns <code>true</code> when <code>status</code> indicates HTTP 429 rate limiting.</p>
+<p>Write endpoints return a <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Status-class.html">off.Status</a> instead of throwing on 429,
+so rate limits are detected by inspecting the status code or the
+response body, which often carries the HTML error page with the
+"429 Too Many Requests" title.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; submitProduct(Product product) async {
-  final user = writeUser;
-  if (user == null) {
-    logWarning(&#39;Cannot submit — no OFF credentials configured&#39;);
-    return false;
-  }
-  const maxRetries = 2;
-  for (var attempt = 0; attempt &lt;= maxRetries; attempt++) {
-    try {
-      logInfo(
-        &#39;Submitting product ${product.barcode} to OFF &#39;
-        &#39;(attempt ${attempt + 1})&#39;,
-      );
-      final offProduct = product.toOffProduct();
-      final status = await _onSaveProduct(
-        user,
-        offProduct,
-        uriHelper: _uriHelper,
-      );
-      if (isStatusOk(status)) {
-        logInfo(&#39;Product ${product.barcode} submitted successfully&#39;);
-        return true;
-      }
-      if (isRateLimitStatus(status) &amp;&amp; attempt &lt; maxRetries) {
-        final delay = retryDelay(attempt, isRateLimit: true);
-        logWarning(
-          &#39;Submission rate-limited for ${product.barcode} &#39;
-          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s&#39;,
-        );
-        await Future&lt;void&gt;.delayed(delay);
-        continue;
-      }
-      logWarning(
-        &#39;Product ${product.barcode} submission returned status &#39;
-        &#39;${status.status}: ${status.statusVerbose}&#39;,
-      );
-      return false;
-    } on Exception catch (e) {
-      if (attempt &lt; maxRetries) {
-        final isRateLimit = isRateLimitError(e);
-        final delay = retryDelay(attempt, isRateLimit: isRateLimit);
-        logWarning(
-          &#39;Submission failed for ${product.barcode} &#39;
-          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e&#39;,
-        );
-        await Future&lt;void&gt;.delayed(delay);
-      } else {
-        logError(
-          &#39;Submission failed for ${product.barcode} after &#39;
-          &#39;all retries: $e&#39;,
-        );
-        return false;
-      }
-    }
-  }
-  return false;
+  <pre class="language-dart"><code class="language-dart">@visibleForTesting
+static bool isRateLimitStatus(off.Status status) {
+  if (status.status is num &amp;&amp; status.status == 429) return true;
+  final body = status.body ?? status.statusVerbose ?? &#39;&#39;;
+  return body.contains(&#39;429 Too Many Requests&#39;);
 }</code></pre>
 </section>
 
@@ -144,7 +100,7 @@ the server rejected the submission.</p>
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../services_off_adapter/">off_adapter</a></li>
     <li><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></li>
-    <li class="self-crumb">submitProduct method</li>
+    <li class="self-crumb">isRateLimitStatus static method</li>
 </ol>
 
     <h5>OffAdapter class</h5>

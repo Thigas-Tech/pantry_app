@@ -114,10 +114,18 @@ success, false if credentials are missing or the upload fails.</p>
         image,
         uriHelper: _uriHelper,
       );
-      final success = status.status == 1;
-      if (success) {
+      if (isStatusOk(status)) {
         logInfo(&#39;$imageField image uploaded for $barcode&#39;);
         return true;
+      }
+      if (isRateLimitStatus(status) &amp;&amp; attempt &lt; maxRetries) {
+        final delay = retryDelay(attempt, isRateLimit: true);
+        logWarning(
+          &#39;$imageField image upload rate-limited for $barcode &#39;
+          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s&#39;,
+        );
+        await Future&lt;void&gt;.delayed(delay);
+        continue;
       }
       logWarning(
         &#39;$imageField image upload for $barcode returned status &#39;
