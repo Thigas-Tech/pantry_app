@@ -154,11 +154,8 @@ Widget build(BuildContext context, WidgetRef ref) {
         ExpansionTile(
           leading: const Icon(Icons.straighten),
           title: Text(l10n.units),
-          initiallyExpanded: false,
           children: [
-            RadioListTile&lt;UnitSystem&gt;(
-              title: Text(l10n.unitSystemMetric),
-              value: UnitSystem.metric,
+            RadioGroup&lt;UnitSystem&gt;(
               groupValue: settings.unitSystem,
               onChanged: (v) {
                 if (v != null) {
@@ -176,34 +173,24 @@ Widget build(BuildContext context, WidgetRef ref) {
                   }
                 }
               },
-            ),
-            RadioListTile&lt;UnitSystem&gt;(
-              title: Text(l10n.unitSystemImperial),
-              value: UnitSystem.imperial,
-              groupValue: settings.unitSystem,
-              onChanged: (v) {
-                if (v != null) {
-                  logInfo(&#39;Unit system changed to: ${v.name}&#39;);
-                  ref.read(settingsProvider.notifier).setUnitSystem(v);
-                  if (context.mounted) {
-                    SnackbarHelper.showInfo(
-                      context,
-                      l10n.unitSystemChanged(
-                        v == UnitSystem.metric
-                            ? l10n.unitSystemMetric
-                            : l10n.unitSystemImperial,
-                      ),
-                    );
-                  }
-                }
-              },
+              child: Column(
+                children: [
+                  RadioListTile&lt;UnitSystem&gt;(
+                    title: Text(l10n.unitSystemMetric),
+                    value: UnitSystem.metric,
+                  ),
+                  RadioListTile&lt;UnitSystem&gt;(
+                    title: Text(l10n.unitSystemImperial),
+                    value: UnitSystem.imperial,
+                  ),
+                ],
+              ),
             ),
             const Divider(),
             ExpansionTile(
               title: Text(l10n.perContextOverrides),
               leading: const Icon(Icons.swap_horiz),
-              initiallyExpanded: false,
-              children: [
+                  children: [
                 _contextOverrideTile(
                   context,
                   l10n: l10n,
@@ -673,7 +660,7 @@ Widget build(BuildContext context, WidgetRef ref) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.8+4
+      0.0.9+5
   </span>
   
 </footer>
