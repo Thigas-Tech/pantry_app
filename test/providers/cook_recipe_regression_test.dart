@@ -52,6 +52,9 @@ void main() {
         return db;
       },
     );
+    when(() => mockDb.getRecipe(1)).thenAnswer(
+      (_) async => const Recipe(id: 1, name: 'Eggs', createdAt: 1000),
+    );
     when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
       (_) async => [
         const RecipeIngredient(

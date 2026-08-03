@@ -1,5 +1,14 @@
 # Registro de alteracoes do usuario
 
+## Unreleased
+
+- As receitas agora sao guardadas por despensa: cada despensa (Casa,
+  Trabalho, etc.) tem o seu proprio conjunto de receitas. Pode mudar de
+  despensa diretamente no ecra de receitas usando o mesmo seletor do ecra
+  inicial. As suas receitas existentes sao movidas automaticamente para a
+  sua primeira despensa.
+- Quando apaga uma despensa, as receitas dessa despensa tambem sao apagadas.
+
 ## [0.0.9+5]
 
 - Corrigido um problema em que um produto ou suas fotos podiam ser marcados

@@ -1,12 +1,54 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+
+class _MutableActiveInventory extends ActiveInventoryNotifier {
+  _MutableActiveInventory(this.initial);
+
+  final int initial;
+
+  @override
+  int build() => initial;
+
+  @override
+  void setActiveInventory(int id) {
+    state = id;
+  }
+}
+
+class FakeSettingsNotifier extends SettingsNotifier {
+  @override
+  Settings build() => const Settings();
+}
+
+class _CookRecipeButton extends ConsumerWidget {
+  const _CookRecipeButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ElevatedButton(
+      onPressed: () async {
+        try {
+          await cookRecipe(ref, 1);
+        } on Exception {
+          // cookRecipe is asserted via pre-flight mock interactions.
+        }
+      },
+      child: const Text('Cook'),
+    );
+  }
+}
 
 void main() {
   setUpAll(() {
@@ -26,7 +68,7 @@ void main() {
     mockDb = MockDatabaseHelper();
 
     when(() => mockDb.database).thenAnswer((_) async => db);
-    when(() => mockDb.getAllRecipes()).thenAnswer((_) async => []);
+    when(() => mockDb.getAllRecipes(any())).thenAnswer((_) async => []);
     when(() => mockDb.getRecipeIngredients(any())).thenAnswer((_) async => []);
     when(() => mockDb.insertRecipe(any())).thenAnswer((_) async => 1);
     when(
@@ -94,16 +136,16 @@ void main() {
         Recipe(id: 1, name: 'Soup'),
         Recipe(id: 2, name: 'Salad'),
       ];
-      when(() => mockDb.getAllRecipes()).thenAnswer((_) async => recipes);
+      when(() => mockDb.getAllRecipes(1)).thenAnswer((_) async => recipes);
 
-      final result = await mockDb.getAllRecipes();
+      final result = await mockDb.getAllRecipes(1);
       expect(result.length, 2);
       expect(result[0].name, 'Soup');
       expect(result[1].name, 'Salad');
     });
 
     test('returns empty list when no recipes', () async {
-      final result = await mockDb.getAllRecipes();
+      final result = await mockDb.getAllRecipes(1);
       expect(result, isEmpty);
     });
   });
@@ -139,9 +181,9 @@ void main() {
 
   group('calculateAverageRecipeCost', () {
     test('returns 0 when no recipes exist', () async {
-      when(() => mockDb.getAllRecipes()).thenAnswer((_) async => []);
+      when(() => mockDb.getAllRecipes(1)).thenAnswer((_) async => []);
 
-      final recipes = await mockDb.getAllRecipes();
+      final recipes = await mockDb.getAllRecipes(1);
       expect(recipes, isEmpty);
     });
   });
@@ -643,6 +685,115 @@ void main() {
           1,
         );
         expect(shortages, isEmpty);
+      },
+    );
+  });
+
+  group('allRecipesProvider inventory scoping', () {
+    test('reloads recipes when the active inventory changes', () async {
+      when(() => mockDb.getAllRecipes(1)).thenAnswer(
+        (_) async => [
+          const Recipe(id: 1, name: 'Home Soup'),
+        ],
+      );
+      when(() => mockDb.getAllRecipes(2)).thenAnswer(
+        (_) async => [
+          const Recipe(id: 2, name: 'Work Soup', inventoryId: 2),
+        ],
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          activeInventoryProvider.overrideWith(
+            () => _MutableActiveInventory(1),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final subscription = container.listen(allRecipesProvider, (_, _) {});
+      addTearDown(subscription.close);
+
+      final initial = await container.read(allRecipesProvider.future);
+      expect(initial.map((r) => r.name), ['Home Soup']);
+
+      container.read(activeInventoryProvider.notifier).setActiveInventory(2);
+      final next = await container.read(allRecipesProvider.future);
+      expect(next.map((r) => r.name), ['Work Soup']);
+    });
+  });
+
+  group('cookRecipe inventory source', () {
+    testWidgets(
+      "deducts from the recipe's own inventory, not the active one",
+      (tester) async {
+        when(() => mockDb.getRecipe(1)).thenAnswer(
+          (_) async => const Recipe(
+            id: 1,
+            name: 'Soup',
+            inventoryId: 2,
+            createdAt: 1000,
+          ),
+        );
+        when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
+          (_) async => const [
+            RecipeIngredient(
+              recipeId: 1,
+              name: 'Eggs',
+              barcode: '001',
+              quantity: 2,
+            ),
+          ],
+        );
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: '001',
+            inventoryId: 2,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 12, 'unit': 'pieces', 'id': 1},
+          ],
+        );
+        when(
+          () => mockDb.getInventoryRowsByProductName(
+            name: any(named: 'name'),
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              databaseProvider.overrideWithValue(mockDb),
+              activeInventoryProvider.overrideWith(
+                () => _MutableActiveInventory(1),
+              ),
+              settingsProvider.overrideWith(
+                () => FakeSettingsNotifier() as SettingsNotifier,
+              ),
+            ],
+            child: const MaterialApp(home: _CookRecipeButton()),
+          ),
+        );
+
+        await tester.tap(find.text('Cook'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
+
+        verify(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: '001',
+            inventoryId: 2,
+          ),
+        ).called(1);
+        verifyNever(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: '001',
+            inventoryId: 1,
+          ),
+        );
       },
     );
   });

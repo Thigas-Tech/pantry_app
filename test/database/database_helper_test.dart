@@ -5,6 +5,9 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/models/recipe_history_entry.dart';
+import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -99,6 +102,105 @@ void main() {
       final tempItems = await db.getInventoryItems(inventoryId: id);
       expect(tempItems, isEmpty);
     });
+  });
+
+  group('Recipes per inventory', () {
+    test('getAllRecipes filters by inventory', () async {
+      final workId = await db.createInventory('Work');
+      await db.insertRecipe(
+        const Recipe(name: 'Home Soup'),
+      );
+      await db.insertRecipe(
+        Recipe(name: 'Work Salad', inventoryId: workId),
+      );
+
+      final homeRecipes = await db.getAllRecipes(1);
+      final workRecipes = await db.getAllRecipes(workId);
+
+      expect(homeRecipes.map((r) => r.name), ['Home Soup']);
+      expect(workRecipes.map((r) => r.name), ['Work Salad']);
+    });
+
+    test('insertRecipeWithIngredients persists inventory_id', () async {
+      final workId = await db.createInventory('Work');
+      final recipeId = await db.insertRecipeWithIngredients(
+        Recipe(name: 'Work Soup', inventoryId: workId),
+        const [
+          RecipeIngredient(recipeId: 0, name: 'Carrots', quantity: 3),
+        ],
+      );
+
+      final recipe = await db.getRecipe(recipeId);
+      expect(recipe!.inventoryId, workId);
+
+      final ingredients = await db.getRecipeIngredients(recipeId);
+      expect(ingredients, hasLength(1));
+    });
+
+    test(
+      'updateRecipeWithIngredients preserves existing inventory_id',
+      () async {
+        final workId = await db.createInventory('Work');
+        final recipeId = await db.insertRecipeWithIngredients(
+          Recipe(name: 'Work Soup', inventoryId: workId),
+          const [
+            RecipeIngredient(recipeId: 0, name: 'Carrots', quantity: 3),
+          ],
+        );
+
+        // Caller passes default inventoryId (1) — must NOT move the recipe.
+        await db.updateRecipeWithIngredients(
+          Recipe(id: recipeId, name: 'Work Soup V2'),
+          const [
+            RecipeIngredient(recipeId: 0, name: 'Carrots', quantity: 5),
+          ],
+        );
+
+        final recipe = await db.getRecipe(recipeId);
+        expect(recipe!.name, 'Work Soup V2');
+        expect(recipe.inventoryId, workId);
+      },
+    );
+
+    test(
+      "deleteInventory deletes that inventory's recipes, ingredients,"
+      " and history but leaves other inventories' recipes intact",
+      () async {
+        final workId = await db.createInventory('Work');
+
+        // A recipe in the work inventory with ingredients + history.
+        final workRecipeId = await db.insertRecipeWithIngredients(
+          Recipe(name: 'Work Soup', inventoryId: workId),
+          const [
+            RecipeIngredient(recipeId: 0, name: 'Carrots', quantity: 3),
+          ],
+        );
+        await db.insertRecipeHistory(
+          RecipeHistoryEntry(
+            recipeId: workRecipeId,
+            madeAt: 1000,
+            ingredientSnapshot: '[]',
+          ),
+        );
+
+        // A recipe in the Home inventory that must survive.
+        await db.insertRecipeWithIngredients(
+          const Recipe(name: 'Home Soup'),
+          const [
+            RecipeIngredient(recipeId: 0, name: 'Onions', quantity: 2),
+          ],
+        );
+
+        await db.deleteInventory(workId);
+
+        expect(await db.getRecipe(workRecipeId), isNull);
+        expect(await db.getRecipeIngredients(workRecipeId), isEmpty);
+        expect(await db.getRecipeHistory(workRecipeId), isEmpty);
+
+        final homeRecipes = await db.getAllRecipes(1);
+        expect(homeRecipes.map((r) => r.name), ['Home Soup']);
+      },
+    );
   });
 
   group('Inventory Item CRUD', () {

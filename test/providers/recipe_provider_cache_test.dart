@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/models/recipe_cache_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
@@ -15,6 +17,20 @@ import 'package:pantry_app/services/firebase_cache_service.dart';
 class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class _MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
+
+class _MutableActiveInventory extends ActiveInventoryNotifier {
+  _MutableActiveInventory(this.initial);
+
+  final int initial;
+
+  @override
+  int build() => initial;
+
+  @override
+  void setActiveInventory(int id) {
+    state = id;
+  }
+}
 
 class _SaveRecipeTestWidget extends ConsumerStatefulWidget {
   const _SaveRecipeTestWidget({
@@ -93,6 +109,7 @@ void main() {
     setUp(() {
       mockDb = _MockDatabaseHelper();
       mockCache = _MockFirebaseCacheService();
+      when(() => mockDb.getRecipe(any())).thenAnswer((_) async => null);
       when(
         () => mockDb.insertRecipeWithIngredients(any(), any()),
       ).thenAnswer((_) async => 1);
@@ -187,6 +204,86 @@ void main() {
       expect(captured, hasLength(1));
       expect(captured.first.$1.id, 1);
     });
+
+    testWidgets('saveRecipe stamps the active inventory on create', (
+      tester,
+    ) async {
+      final captured = <Recipe>[];
+      when(() => mockDb.insertRecipeWithIngredients(any(), any())).thenAnswer(
+        (invocation) async {
+          captured.add(invocation.positionalArguments[0] as Recipe);
+          return 1;
+        },
+      );
+      when(
+        () => mockCache.cacheRecipe(any(), any()),
+      ).thenAnswer((_) async => {});
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            firebaseCacheProvider.overrideWithValue(mockCache),
+            activeInventoryProvider.overrideWith(
+              () => _MutableActiveInventory(2),
+            ),
+          ],
+          child: const _SaveRecipeTestWidget(
+            name: 'Soup',
+            ingredients: [RecipeIngredient(recipeId: 0, name: 'Carrots')],
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(captured, hasLength(1));
+      expect(captured.single.inventoryId, 2);
+    });
+
+    testWidgets('saveRecipe preserves existing inventory on update', (
+      tester,
+    ) async {
+      when(() => mockDb.getRecipe(1)).thenAnswer(
+        (_) async => const Recipe(
+          id: 1,
+          name: 'Soup',
+          inventoryId: 3,
+          createdAt: 1000,
+        ),
+      );
+      final captured = <Recipe>[];
+      when(() => mockDb.updateRecipeWithIngredients(any(), any())).thenAnswer(
+        (invocation) async {
+          captured.add(invocation.positionalArguments[0] as Recipe);
+        },
+      );
+      when(
+        () => mockCache.cacheRecipe(any(), any()),
+      ).thenAnswer((_) async => {});
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            firebaseCacheProvider.overrideWithValue(mockCache),
+            activeInventoryProvider.overrideWith(
+              () => _MutableActiveInventory(2),
+            ),
+          ],
+          child: const _SaveRecipeTestWidget(
+            name: 'Soup',
+            existingRecipeId: 1,
+            ingredients: [RecipeIngredient(recipeId: 1, name: 'Carrots')],
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(captured, hasLength(1));
+      expect(captured.single.inventoryId, 3);
+    });
   });
 
   group('deleteRecipe', () {
@@ -247,5 +344,51 @@ void main() {
         verifyNever(() => mockCache.deleteSharedRecipe(any()));
       },
     );
+
+    testWidgets('deletes the inventory-scoped shared recipe key', (
+      tester,
+    ) async {
+      when(() => mockDb.getRecipe(1)).thenAnswer(
+        (_) async => const Recipe(
+          id: 1,
+          name: 'Soup',
+          createdAt: 1000,
+          inventoryId: 2,
+        ),
+      );
+      when(() => mockDb.deleteRecipe(any())).thenAnswer((_) async => 1);
+      final keys = <String>[];
+      when(() => mockCache.deleteSharedRecipe(any())).thenAnswer(
+        (invocation) async {
+          keys.add(invocation.positionalArguments[0] as String);
+        },
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(mockDb),
+            firebaseCacheProvider.overrideWithValue(mockCache),
+          ],
+          child: const _DeleteRecipeTestWidget(id: 1),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(keys, hasLength(1));
+      const recipeInv1 = Recipe(name: 'Soup', createdAt: 1000);
+      const recipeInv2 = Recipe(name: 'Soup', createdAt: 1000, inventoryId: 2);
+      final keyInv1 = RecipeCacheEntryConversions.fromRecipe(
+        recipeInv1,
+        [],
+      ).recipeId;
+      final keyInv2 = RecipeCacheEntryConversions.fromRecipe(
+        recipeInv2,
+        [],
+      ).recipeId;
+      expect(keyInv1, isNot(keyInv2));
+      expect(keys.single, keyInv2);
+    });
   });
 }

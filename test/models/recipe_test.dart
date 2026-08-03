@@ -10,6 +10,7 @@ void main() {
       expect(recipe.createdAt, 0);
       expect(recipe.updatedAt, 0);
       expect(recipe.id, isNull);
+      expect(recipe.inventoryId, 1);
     });
 
     test('creates with all fields', () {
@@ -19,12 +20,14 @@ void main() {
         instructions: 'Cook the chicken. Assemble the sandwich.',
         createdAt: 1000,
         updatedAt: 2000,
+        inventoryId: 2,
       );
       expect(recipe.id, 1);
       expect(recipe.name, 'Chicken Sandwich');
       expect(recipe.instructions, 'Cook the chicken. Assemble the sandwich.');
       expect(recipe.createdAt, 1000);
       expect(recipe.updatedAt, 2000);
+      expect(recipe.inventoryId, 2);
     });
 
     test('copyWith preserves unset fields', () {

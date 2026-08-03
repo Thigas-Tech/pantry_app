@@ -30,7 +30,35 @@ class InventoriesDao {
   }
 
   /// Deletes the inventory with the given [id] and all its items.
+  ///
+  /// Also deletes the inventory's recipes, their ingredients, and their
+  /// history, mirroring item-delete semantics.
   Future<void> delete(Database db, int id) async {
+    final recipeRows = await db.query(
+      'recipes',
+      columns: ['id'],
+      where: 'inventory_id = ?',
+      whereArgs: [id],
+    );
+    final recipeIds = recipeRows
+        .map((r) => r['id'] as int?)
+        .whereType<int>()
+        .toList();
+    if (recipeIds.isNotEmpty) {
+      final placeholders = recipeIds.map((_) => '?').join(',');
+      await db.delete(
+        'recipe_history',
+        where: 'recipe_id IN ($placeholders)',
+        whereArgs: recipeIds,
+      );
+      await db.delete(
+        'recipe_ingredients',
+        where: 'recipe_id IN ($placeholders)',
+        whereArgs: recipeIds,
+      );
+      await db.delete('recipes', where: 'inventory_id = ?', whereArgs: [id]);
+    }
+
     await db.delete('inventory', where: 'inventory_id = ?', whereArgs: [id]);
     await db.delete('inventories', where: 'id = ?', whereArgs: [id]);
   }

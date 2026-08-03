@@ -1,5 +1,13 @@
 # User Changelog
 
+## Unreleased
+
+- Recipes are now saved per pantry: each pantry (Home, Work, etc.) has its
+  own set of recipes. You can switch pantries directly from the Recipes
+  screen using the same switcher as on the Home screen. Your existing
+  recipes are moved to your first pantry automatically.
+- When you delete a pantry, its recipes are deleted too.
+
 ## [0.0.9+5]
 
 - Fixed a problem where a product or its photos could be marked as "failed to

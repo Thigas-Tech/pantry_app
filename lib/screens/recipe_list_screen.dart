@@ -3,16 +3,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/recipe_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_form_screen.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
@@ -43,6 +48,40 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
       appBar: AppBar(
         title: Text(l10n.recipes),
         actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final inventoriesAsync = ref.watch(inventoryListProvider);
+              final activeId = ref.watch<int>(activeInventoryProvider);
+              final inventories = inventoriesAsync.asData?.value
+                  .cast<Map<String, dynamic>>();
+              final match = inventories?.firstWhere(
+                (inv) => inv['id'] == activeId,
+                orElse: () => <String, dynamic>{'name': l10n.myPantry},
+              );
+              final name = match != null
+                  ? l10n.displayInventoryName(
+                      (match['name'] as String?) ?? l10n.myPantry,
+                    )
+                  : null;
+              return InventorySwitcherCard(
+                name: name,
+                nutriscoreGrade: null,
+                isLoading: inventoriesAsync.isLoading,
+                onTap: () async {
+                  final result = await Navigator.of(context).push<Object>(
+                    MaterialPageRoute(
+                      builder: (_) => const ManageInventoriesScreen(),
+                    ),
+                  );
+                  if (result == true && context.mounted) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ref.invalidate(allRecipesProvider);
+                    });
+                  }
+                },
+              );
+            },
+          ),
           Consumer(
             builder: (context, ref, child) {
               final settings = ref.watch(settingsProvider);

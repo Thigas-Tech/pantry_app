@@ -1,6 +1,6 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 32)
+### 2.1 Schema (version 33)
 
 Thirteen tables:
 
@@ -15,7 +15,7 @@ Thirteen tables:
 | `shopping_list` | Items the user intends to buy |
 | `stores` | Saved store names for autocomplete on price entry |
 | `firebase_cache_meta` | Tracks last-refresh timestamps for product cache entries synced to Firestore |
-| `recipes` | User-created recipes |
+| `recipes` | User-created recipes, scoped to their owning inventory via `inventory_id` |
 | `recipe_ingredients` | Ingredients linked to a recipe |
 | `recipe_history` | Audit log of recipes marked as made |
 | `scan_history` | Self-contained snapshots of the latest successful scans (capped at 50) |
@@ -59,7 +59,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v32).
+- `_onUpgrade` handles version bumps (currently v1 -> v33).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -96,6 +96,7 @@ Version history:
 | v29 -> v30 | Added `search_text` column on `recipes` + indexes on name/created_at/updated_at |
 | v30 -> v31 | Added `serving_quantity REAL` column to `products` |
 | v31 -> v32 | Added `scan_history` table with indexes on scanned_at and barcode |
+| v32 -> v33 | Added `inventory_id` column on `recipes` (backfilled to first inventory) + `idx_recipes_inventory_id` index |
 
 ### 2.4 Connectivity layer
 

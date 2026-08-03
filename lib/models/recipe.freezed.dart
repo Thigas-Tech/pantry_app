@@ -25,7 +25,11 @@ mixin _$Recipe {
  int get servings;/// Optional file path to a user-selected photo of the prepared dish.
  String get imagePath;/// Epoch timestamp (milliseconds since epoch) of creation.
  int get createdAt;/// Epoch timestamp (milliseconds since epoch) of last update.
- int get updatedAt;
+ int get updatedAt;/// The inventory (pantry) this recipe belongs to.
+///
+/// Defaults to 1 (the seeded "Home" inventory) so recipes created before
+/// the per-inventory feature remain in the first pantry.
+ int get inventoryId;
 /// Create a copy of Recipe
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -36,16 +40,16 @@ $RecipeCopyWith<Recipe> get copyWith => _$RecipeCopyWithImpl<Recipe>(this as Rec
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Recipe&&(identical(other.name, name) || other.name == name)&&(identical(other.id, id) || other.id == id)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Recipe&&(identical(other.name, name) || other.name == name)&&(identical(other.id, id) || other.id == id)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,id,instructions,servings,imagePath,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,name,id,instructions,servings,imagePath,createdAt,updatedAt,inventoryId);
 
 @override
 String toString() {
-  return 'Recipe(name: $name, id: $id, instructions: $instructions, servings: $servings, imagePath: $imagePath, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Recipe(name: $name, id: $id, instructions: $instructions, servings: $servings, imagePath: $imagePath, createdAt: $createdAt, updatedAt: $updatedAt, inventoryId: $inventoryId)';
 }
 
 
@@ -56,7 +60,7 @@ abstract mixin class $RecipeCopyWith<$Res>  {
   factory $RecipeCopyWith(Recipe value, $Res Function(Recipe) _then) = _$RecipeCopyWithImpl;
 @useResult
 $Res call({
- String name, int? id, String instructions, int servings, String imagePath, int createdAt, int updatedAt
+ String name, int? id, String instructions, int servings, String imagePath, int createdAt, int updatedAt, int inventoryId
 });
 
 
@@ -73,7 +77,7 @@ class _$RecipeCopyWithImpl<$Res>
 
 /// Create a copy of Recipe
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? id = freezed,Object? instructions = null,Object? servings = null,Object? imagePath = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? id = freezed,Object? instructions = null,Object? servings = null,Object? imagePath = null,Object? createdAt = null,Object? updatedAt = null,Object? inventoryId = null,}) {
   return _then(_self.copyWith(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
@@ -82,6 +86,7 @@ as String,servings: null == servings ? _self.servings : servings // ignore: cast
 as int,imagePath: null == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as int,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -167,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  int? id,  String instructions,  int servings,  String imagePath,  int createdAt,  int updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  int? id,  String instructions,  int servings,  String imagePath,  int createdAt,  int updatedAt,  int inventoryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Recipe() when $default != null:
-return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imagePath,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imagePath,_that.createdAt,_that.updatedAt,_that.inventoryId);case _:
   return orElse();
 
 }
@@ -188,10 +193,10 @@ return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imag
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  int? id,  String instructions,  int servings,  String imagePath,  int createdAt,  int updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  int? id,  String instructions,  int servings,  String imagePath,  int createdAt,  int updatedAt,  int inventoryId)  $default,) {final _that = this;
 switch (_that) {
 case _Recipe():
-return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imagePath,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imagePath,_that.createdAt,_that.updatedAt,_that.inventoryId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +213,10 @@ return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imag
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  int? id,  String instructions,  int servings,  String imagePath,  int createdAt,  int updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  int? id,  String instructions,  int servings,  String imagePath,  int createdAt,  int updatedAt,  int inventoryId)?  $default,) {final _that = this;
 switch (_that) {
 case _Recipe() when $default != null:
-return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imagePath,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imagePath,_that.createdAt,_that.updatedAt,_that.inventoryId);case _:
   return null;
 
 }
@@ -223,7 +228,7 @@ return $default(_that.name,_that.id,_that.instructions,_that.servings,_that.imag
 
 
 class _Recipe implements Recipe {
-  const _Recipe({required this.name, this.id, this.instructions = '', this.servings = 0, this.imagePath = '', this.createdAt = 0, this.updatedAt = 0});
+  const _Recipe({required this.name, this.id, this.instructions = '', this.servings = 0, this.imagePath = '', this.createdAt = 0, this.updatedAt = 0, this.inventoryId = 1});
   
 
 /// The recipe display name. Must not be empty.
@@ -244,6 +249,11 @@ class _Recipe implements Recipe {
 @override@JsonKey() final  int createdAt;
 /// Epoch timestamp (milliseconds since epoch) of last update.
 @override@JsonKey() final  int updatedAt;
+/// The inventory (pantry) this recipe belongs to.
+///
+/// Defaults to 1 (the seeded "Home" inventory) so recipes created before
+/// the per-inventory feature remain in the first pantry.
+@override@JsonKey() final  int inventoryId;
 
 /// Create a copy of Recipe
 /// with the given fields replaced by the non-null parameter values.
@@ -255,16 +265,16 @@ _$RecipeCopyWith<_Recipe> get copyWith => __$RecipeCopyWithImpl<_Recipe>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Recipe&&(identical(other.name, name) || other.name == name)&&(identical(other.id, id) || other.id == id)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Recipe&&(identical(other.name, name) || other.name == name)&&(identical(other.id, id) || other.id == id)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&(identical(other.imagePath, imagePath) || other.imagePath == imagePath)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,id,instructions,servings,imagePath,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,name,id,instructions,servings,imagePath,createdAt,updatedAt,inventoryId);
 
 @override
 String toString() {
-  return 'Recipe(name: $name, id: $id, instructions: $instructions, servings: $servings, imagePath: $imagePath, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Recipe(name: $name, id: $id, instructions: $instructions, servings: $servings, imagePath: $imagePath, createdAt: $createdAt, updatedAt: $updatedAt, inventoryId: $inventoryId)';
 }
 
 
@@ -275,7 +285,7 @@ abstract mixin class _$RecipeCopyWith<$Res> implements $RecipeCopyWith<$Res> {
   factory _$RecipeCopyWith(_Recipe value, $Res Function(_Recipe) _then) = __$RecipeCopyWithImpl;
 @override @useResult
 $Res call({
- String name, int? id, String instructions, int servings, String imagePath, int createdAt, int updatedAt
+ String name, int? id, String instructions, int servings, String imagePath, int createdAt, int updatedAt, int inventoryId
 });
 
 
@@ -292,7 +302,7 @@ class __$RecipeCopyWithImpl<$Res>
 
 /// Create a copy of Recipe
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? id = freezed,Object? instructions = null,Object? servings = null,Object? imagePath = null,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? id = freezed,Object? instructions = null,Object? servings = null,Object? imagePath = null,Object? createdAt = null,Object? updatedAt = null,Object? inventoryId = null,}) {
   return _then(_Recipe(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
@@ -301,6 +311,7 @@ as String,servings: null == servings ? _self.servings : servings // ignore: cast
 as int,imagePath: null == imagePath ? _self.imagePath : imagePath // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as int,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
