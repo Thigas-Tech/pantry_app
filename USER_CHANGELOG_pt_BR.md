@@ -1,5 +1,10 @@
 # Registro de alteracoes do usuario
 
+- Corrigido um problema em que um produto ou suas fotos podiam ser marcados
+  como "falha no envio" para o Open Food Facts mesmo depois de um envio bem
+  sucedido. O envio agora tenta novamente automaticamente quando o servidor
+  esta ocupado, tornando o registro de produtos manuais mais confiavel.
+
 - Corrigido um problema raro em que um produto podia aparecer mais de uma vez
   na mesma despensa numa instalacao nova, causando quantidades duplicadas. As
   instalacoes novas agora correspondem as instalacoes atualizadas: cada produto

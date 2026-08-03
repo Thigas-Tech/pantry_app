@@ -117,6 +117,30 @@ class OffAdapter {
     return msg.contains('429 Too Many Requests');
   }
 
+  /// Returns `true` when [status] indicates a successful write.
+  ///
+  /// OFF write endpoints return either the integer `1` (metadata save)
+  /// or the string `'status ok'` (image upload). Both are treated as
+  /// success.
+  @visibleForTesting
+  static bool isStatusOk(off.Status status) {
+    if (status.status is num) return status.status == 1;
+    return status.status == 'status ok';
+  }
+
+  /// Returns `true` when [status] indicates HTTP 429 rate limiting.
+  ///
+  /// Write endpoints return a [off.Status] instead of throwing on 429,
+  /// so rate limits are detected by inspecting the status code or the
+  /// response body, which often carries the HTML error page with the
+  /// "429 Too Many Requests" title.
+  @visibleForTesting
+  static bool isRateLimitStatus(off.Status status) {
+    if (status.status is num && status.status == 429) return true;
+    final body = status.body ?? status.statusVerbose ?? '';
+    return body.contains('429 Too Many Requests');
+  }
+
   /// Returns a retry delay with linear backoff and ±25% jitter.
   ///
   /// [attempt] is zero-based (0 = first retry).  The base delay is
@@ -299,10 +323,18 @@ class OffAdapter {
           offProduct,
           uriHelper: _uriHelper,
         );
-        final success = status.status == 1;
-        if (success) {
+        if (isStatusOk(status)) {
           logInfo('Product ${product.barcode} submitted successfully');
           return true;
+        }
+        if (isRateLimitStatus(status) && attempt < maxRetries) {
+          final delay = retryDelay(attempt, isRateLimit: true);
+          logWarning(
+            'Submission rate-limited for ${product.barcode} '
+            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s',
+          );
+          await Future<void>.delayed(delay);
+          continue;
         }
         logWarning(
           'Product ${product.barcode} submission returned status '
@@ -373,10 +405,18 @@ class OffAdapter {
           image,
           uriHelper: _uriHelper,
         );
-        final success = status.status == 1;
-        if (success) {
+        if (isStatusOk(status)) {
           logInfo('$imageField image uploaded for $barcode');
           return true;
+        }
+        if (isRateLimitStatus(status) && attempt < maxRetries) {
+          final delay = retryDelay(attempt, isRateLimit: true);
+          logWarning(
+            '$imageField image upload rate-limited for $barcode '
+            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s',
+          );
+          await Future<void>.delayed(delay);
+          continue;
         }
         logWarning(
           '$imageField image upload for $barcode returned status '

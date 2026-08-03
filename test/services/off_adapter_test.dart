@@ -7,8 +7,11 @@
 /// and edge-case paths.
 library;
 
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
@@ -290,6 +293,69 @@ void main() {
       });
     });
 
+    group('isStatusOk', () {
+      test('returns true for status 1', () {
+        expect(
+          OffAdapter.isStatusOk(off.Status.fromJson({'status': 1})),
+          isTrue,
+        );
+      });
+
+      test('returns true for status "status ok"', () {
+        expect(
+          OffAdapter.isStatusOk(
+            off.Status.fromJson({'status': 'status ok'}),
+          ),
+          isTrue,
+        );
+      });
+
+      test('returns false for status 0', () {
+        expect(
+          OffAdapter.isStatusOk(off.Status.fromJson({'status': 0})),
+          isFalse,
+        );
+      });
+
+      test('returns false for status "status not ok"', () {
+        expect(
+          OffAdapter.isStatusOk(
+            off.Status.fromJson({'status': 'status not ok'}),
+          ),
+          isFalse,
+        );
+      });
+
+      test('returns false for status 400', () {
+        expect(
+          OffAdapter.isStatusOk(off.Status.fromJson({'status': 400})),
+          isFalse,
+        );
+      });
+    });
+
+    group('isRateLimitStatus', () {
+      test('returns true for status 429', () {
+        expect(
+          OffAdapter.isRateLimitStatus(off.Status.fromJson({'status': 429})),
+          isTrue,
+        );
+      });
+
+      test('returns true when body contains 429 Too Many Requests', () {
+        final status = off.Status(
+          status: 400,
+          body: '<html><title>429 Too Many Requests</title></html>',
+        );
+        expect(OffAdapter.isRateLimitStatus(status), isTrue);
+      });
+
+      test('returns false for a plain error status', () {
+        final status = off.Status(status: 400, body: 'Something went wrong');
+        expect(OffAdapter.isRateLimitStatus(status), isFalse);
+      });
+    });
+
     group('searchProducts', () {
       /// Verifies [searchProducts] returns a list of [Product]s from
       /// the SDK search results.
@@ -430,6 +496,70 @@ void main() {
         final result = await adapter.submitProduct(product);
         expect(result, isFalse);
       });
+
+      /// Verifies [submitProduct] treats the string form "status ok"
+      /// (returned by the image upload endpoint contract) as success.
+      test('returns true when status is "status ok"', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onSaveProduct:
+              (user, product, {uriHelper = off.uriHelperFoodProd}) async {
+                return off.Status.fromJson({'status': 'status ok'});
+              },
+        );
+
+        const product = Product(barcode: '001', name: 'Test');
+        final result = await adapter.submitProduct(product);
+        expect(result, isTrue);
+      });
+
+      /// Verifies [submitProduct] retries when the server responds with a
+      /// 429 rate-limit [off.Status] instead of throwing.
+      test('retries on rate limit status and succeeds', () {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        var attempts = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onSaveProduct: (user, product, {uriHelper = off.uriHelperFoodProd}) {
+            attempts++;
+            if (attempts == 1) {
+              return Future.value(
+                off.Status(
+                  status: 429,
+                  statusVerbose: '429 Too Many Requests',
+                ),
+              );
+            }
+            return Future.value(off.Status.fromJson({'status': 1}));
+          },
+        );
+
+        fakeAsync((async) {
+          const product = Product(barcode: '001', name: 'Test');
+          var result = false;
+          unawaited(
+            adapter.submitProduct(product).then((value) => result = value),
+          );
+          async.elapse(const Duration(seconds: 10));
+          expect(result, isTrue);
+          expect(attempts, 2);
+        });
+      });
     });
 
     group('uploadProductImage', () {
@@ -457,6 +587,41 @@ void main() {
         // ProductRepository integration tests.
         // For now, just verify the credential-guard branch runs.
         expect(adapter.writeUser, isNull);
+      });
+
+      /// Verifies [uploadProductImage] treats the image endpoint's string
+      /// form "status ok" as success for an existing local image file.
+      test('returns true when status is "status ok"', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final tempDir = Directory.systemTemp.createTempSync('pantry_off_');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final imagePath = '${tempDir.path}/front.png';
+        File(imagePath).writeAsBytesSync([1, 2, 3]);
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onAddProductImage:
+              (user, image, {uriHelper = off.uriHelperFoodProd}) async {
+                return off.Status.fromJson({
+                  'status': 'status ok',
+                  'imgid': 42,
+                });
+              },
+        );
+
+        final result = await adapter.uploadProductImage(
+          barcode: '001',
+          imageField: 'front',
+          imagePath: imagePath,
+        );
+        expect(result, isTrue);
       });
     });
   });

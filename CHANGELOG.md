@@ -256,6 +256,19 @@
   `lib/providers/recipe_provider.dart`, `lib/screens/recipe_form_screen.dart`,
   `lib/screens/recipe_list_screen.dart`, fixes #156)
 
+### Fixed
+
+- **OFF write success and rate-limit handling**: `OffAdapter.submitProduct`
+  and `uploadProductImage` now treat the image endpoint's string form
+  `status ok` as success (previously only the integer `1` matched, so image
+  uploads could report failure after a successful upload). Writes now also
+  detect HTTP 429 rate limits in the returned `off.Status` and retry with a
+  5x backoff instead of failing immediately. New `isStatusOk` and
+  `isRateLimitStatus` helpers cover both forms, and the OFF submission
+  contract is documented in
+  `docs/superpowers/agents/off_submission_contract.md`.
+  (`lib/services/off_adapter.dart`, `test/services/off_adapter_test.dart`)
+
 ## [0.0.8+4] — 2026-07-18
 
 ### Added
