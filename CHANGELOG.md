@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.9+5
+
+- **Version bump**: updated version to 0.0.9+5.
+  (`pubspec.yaml`)
+
 ## To be released:
 
 ### Added
