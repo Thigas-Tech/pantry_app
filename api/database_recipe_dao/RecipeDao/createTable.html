@@ -80,9 +80,16 @@
       image_path TEXT NOT NULL DEFAULT &#39;&#39;,
       search_text TEXT,
       created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
+      updated_at INTEGER NOT NULL,
+      inventory_id INTEGER NOT NULL DEFAULT 1,
+      FOREIGN KEY (inventory_id) REFERENCES inventories(id)
+        ON DELETE CASCADE
     )
   &#39;&#39;&#39;);
+  await db.execute(
+    &#39;CREATE INDEX IF NOT EXISTS idx_recipes_inventory_id&#39;
+    &#39; ON recipes(inventory_id)&#39;,
+  );
 }</code></pre>
 </section>
 

@@ -95,15 +95,19 @@ provided, the recipe and its ingredients are updated.</p>
 
   final db = ref.read(databaseProvider);
   final cache = ref.read(firebaseCacheProvider);
+  final activeInventoryId = ref.read(activeInventoryProvider);
   final now = DateTime.now().millisecondsSinceEpoch;
 
   if (existingRecipeId != null) {
+    &#47;&#47; Preserve the recipe&#39;s original inventory when editing.
+    final existing = await db.getRecipe(existingRecipeId);
     final recipe = Recipe(
       id: existingRecipeId,
       name: name.trim(),
       instructions: instructions.trim(),
       servings: servings,
       imagePath: imagePath,
+      inventoryId: existing?.inventoryId ?? activeInventoryId,
       updatedAt: now,
     );
     await db.updateRecipeWithIngredients(recipe, ingredients);
@@ -115,6 +119,7 @@ provided, the recipe and its ingredients are updated.</p>
       instructions: instructions.trim(),
       servings: servings,
       imagePath: imagePath,
+      inventoryId: activeInventoryId,
       createdAt: now,
       updatedAt: now,
     );

@@ -61,7 +61,10 @@
         </section>
         
 <section class="desc markdown">
-  <p>Provides all recipes, ordered by updated_at descending.</p>
+  <p>Provides all recipes for the active inventory, ordered by updated_at
+descending.</p>
+<p>Watches <a href="../providers_active_inventory_provider/activeInventoryProvider.html">activeInventoryProvider</a> so the list automatically reloads when
+the user switches pantries.</p>
 </section>
 
         
@@ -70,7 +73,8 @@
   <pre class="language-dart"><code class="language-dart">final FutureProvider&lt;List&lt;Recipe&gt;&gt; allRecipesProvider =
     FutureProvider.autoDispose&lt;List&lt;Recipe&gt;&gt;((ref) {
       final db = ref.watch(databaseProvider);
-      return db.getAllRecipes();
+      final activeId = ref.watch(activeInventoryProvider);
+      return db.getAllRecipes(activeId);
     });</code></pre>
 </section>
 

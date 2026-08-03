@@ -64,9 +64,12 @@
     </section>
     
 <section class="desc markdown">
-  <p>Cooks a recipe: deducts ingredients from inventory (FEFO) and logs history.</p>
-<p>Throws <a href="https://api.flutter.dev/flutter/dart-core/StateError-class.html">StateError</a> with shortage details if any ingredient has
-insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-class.html">CookResult</a> for undo support.</p>
+  <p>Cooks a recipe: deducts ingredients from the recipe's own inventory
+(FEFO) and logs history.</p>
+<p>The inventory used is the recipe's own <code>Recipe.inventoryId</code>, falling back
+to the active inventory when the recipe has no inventory. Throws
+<a href="https://api.flutter.dev/flutter/dart-core/StateError-class.html">StateError</a> with shortage details if any ingredient has insufficient
+stock. Returns a <a href="../providers_recipe_provider/CookResult-class.html">CookResult</a> for undo support.</p>
 </section>
 
 
@@ -76,6 +79,8 @@ insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-c
   <pre class="language-dart"><code class="language-dart">Future&lt;CookResult&gt; cookRecipe(WidgetRef ref, int recipeId) async {
   final db = ref.read(databaseProvider);
   final activeInventoryId = ref.read(activeInventoryProvider);
+  final recipe = await db.getRecipe(recipeId);
+  final inventoryId = recipe?.inventoryId ?? activeInventoryId;
   final ingredients = await db.getRecipeIngredients(recipeId);
   final settings = ref.read(settingsProvider);
   final currencyService = CurrencyService();
@@ -87,7 +92,7 @@ insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-c
   final shortages = await checkIngredientShortages(
     db,
     ingredients,
-    activeInventoryId,
+    inventoryId,
   );
   if (shortages.isNotEmpty) {
     throw RecipeCookException(shortages);
@@ -131,7 +136,7 @@ insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-c
           var rows = await txn.rawQuery(
             &#39;SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?&#39;
             &#39; ORDER BY expiry_date ASC NULLS LAST&#39;,
-            [barcode, activeInventoryId],
+            [barcode, inventoryId],
           );
           if (rows.isEmpty &amp;&amp; entry.value.name.isNotEmpty) {
             final normalizedName = entry.value.name.trim().toLowerCase();
@@ -140,7 +145,7 @@ insufficient stock. Returns a <a href="../providers_recipe_provider/CookResult-c
               &#39; INNER JOIN products p ON p.barcode = i.barcode&#39;
               &#39; WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?&#39;
               &#39; ORDER BY i.expiry_date ASC NULLS LAST&#39;,
-              [&#39;%$normalizedName%&#39;, activeInventoryId],
+              [&#39;%$normalizedName%&#39;, inventoryId],
             );
           }
           for (final row in rows) {

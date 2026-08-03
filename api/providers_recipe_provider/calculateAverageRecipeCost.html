@@ -63,7 +63,7 @@
     </section>
     
 <section class="desc markdown">
-  <p>Calculates the average cost across all recipes.</p>
+  <p>Calculates the average cost across all recipes in the active inventory.</p>
 <p>Returns 0.0 if no recipes exist (guards division by zero).</p>
 </section>
 
@@ -73,7 +73,8 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;double&gt; calculateAverageRecipeCost(WidgetRef ref) async {
   final db = ref.read(databaseProvider);
-  final recipes = await db.getAllRecipes();
+  final activeId = ref.read(activeInventoryProvider);
+  final recipes = await db.getAllRecipes(activeId);
   if (recipes.isEmpty) return 0.0;
 
   var totalCost = 0.0;

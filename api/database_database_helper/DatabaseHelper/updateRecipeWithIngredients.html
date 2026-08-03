@@ -81,10 +81,15 @@ If any step fails the entire transaction is rolled back.</p>
   final db = await database;
   final now = DateTime.now().millisecondsSinceEpoch;
 
-  &#47;&#47; Preserve original createdAt.
+  &#47;&#47; Preserve original createdAt and inventory_id.
   final existing = await recipeDao.get(db, recipe.id!);
   final preserved = existing?.createdAt ?? recipe.createdAt;
-  final updated = recipe.copyWith(createdAt: preserved, updatedAt: now);
+  final preservedInventory = existing?.inventoryId ?? recipe.inventoryId;
+  final updated = recipe.copyWith(
+    createdAt: preserved,
+    inventoryId: preservedInventory,
+    updatedAt: now,
+  );
   final recipeMap = recipeDao.toMap(updated);
 
   return db.transaction((txn) async {

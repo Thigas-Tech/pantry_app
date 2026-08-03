@@ -55,7 +55,8 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_recipe/Recipe-class.html">Recipe</a></span>&gt;</span></span>&gt;</span></span>
-<span class="name ">listAll</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="listAll-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span></li>
+<span class="name ">listAll</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="listAll-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
+<li><span class="parameter" id="listAll-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span></li>
 </ol>)
 
       
@@ -63,17 +64,20 @@
     </section>
     
 <section class="desc markdown">
-  <p>Returns all recipes, ordered by updated_at descending.</p>
+  <p>Returns all recipes for the given <code>inventoryId</code>,
+ordered by updated_at descending.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Recipe&gt;&gt; listAll(Database db) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Recipe&gt;&gt; listAll(Database db, int inventoryId) async {
   try {
     final result = await db.query(
       &#39;recipes&#39;,
+      where: &#39;inventory_id = ?&#39;,
+      whereArgs: [inventoryId],
       orderBy: &#39;updated_at DESC&#39;,
     );
     return result.map(fromMap).toList();

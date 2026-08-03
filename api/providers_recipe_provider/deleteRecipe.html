@@ -80,7 +80,11 @@
     final cache = ref.read(firebaseCacheProvider);
     unawaited(
       cache.deleteSharedRecipe(
-        _computeSharedRecipeId(recipe.name, recipe.createdAt),
+        _computeSharedRecipeId(
+          recipe.name,
+          recipe.createdAt,
+          recipe.inventoryId,
+        ),
       ),
     );
   }

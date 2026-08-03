@@ -110,7 +110,8 @@
 
 </dt>
 <dd>
-  Provides all recipes, ordered by updated_at descending.
+  Provides all recipes for the active inventory, ordered by updated_at
+descending.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -189,7 +190,7 @@
 
 </dt>
 <dd>
-  Calculates the average cost across all recipes.
+  Calculates the average cost across all recipes in the active inventory.
   
 
 </dd>
@@ -229,7 +230,8 @@ checks availability against inventory.
 
 </dt>
 <dd>
-  Cooks a recipe: deducts ingredients from inventory (FEFO) and logs history.
+  Cooks a recipe: deducts ingredients from the recipe's own inventory
+(FEFO) and logs history.
   
 
 </dd>
@@ -355,6 +357,7 @@ checks availability against inventory.
       <li><a href="../database_migrations_v30_recipe_indexes_and_search/">database/migrations/v30_recipe_indexes_and_search</a></li>
       <li><a href="../database_migrations_v31_serving_quantity/">database/migrations/v31_serving_quantity</a></li>
       <li><a href="../database_migrations_v32_scan_history/">database/migrations/v32_scan_history</a></li>
+      <li><a href="../database_migrations_v33_recipes_inventory/">database/migrations/v33_recipes_inventory</a></li>
       <li><a href="../database_price_dao/">database/price_dao</a></li>
       <li><a href="../database_product_dao/">database/product_dao</a></li>
       <li><a href="../database_product_submission_queue_dao/">database/product_submission_queue_dao</a></li>

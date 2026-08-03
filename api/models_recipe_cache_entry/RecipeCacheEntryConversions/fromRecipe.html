@@ -85,7 +85,11 @@ the current time.</p>
 }) {
   final now = DateTime.now().millisecondsSinceEpoch;
   final effectiveCreatedAt = createdAt ?? recipe.createdAt;
-  final recipeId = _computeRecipeId(recipe.name, effectiveCreatedAt);
+  final recipeId = _computeRecipeId(
+    recipe.name,
+    effectiveCreatedAt,
+    recipe.inventoryId,
+  );
 
   return RecipeCacheEntry(
     recipeId: recipeId,

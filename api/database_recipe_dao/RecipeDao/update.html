@@ -65,8 +65,9 @@
     
 <section class="desc markdown">
   <p>Updates an existing recipe. Returns rows affected.</p>
-<p>The original createdAt field is preserved from the existing row.
-updatedAt is set to the current epoch timestamp.</p>
+<p>The original createdAt and inventory_id fields are preserved from the
+existing row, so an update never silently moves a recipe to another
+inventory. updatedAt is set to the current epoch timestamp.</p>
 </section>
 
 
@@ -76,12 +77,14 @@ updatedAt is set to the current epoch timestamp.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; update(Database db, Recipe recipe) async {
   final now = DateTime.now().millisecondsSinceEpoch;
 
-  &#47;&#47; Preserve original createdAt from the database.
+  &#47;&#47; Preserve original createdAt and inventoryId from the database.
   final existing = await get(db, recipe.id!);
   final preservedCreatedAt = existing?.createdAt ?? recipe.createdAt;
+  final preservedInventoryId = existing?.inventoryId ?? recipe.inventoryId;
 
   final updated = recipe.copyWith(
     createdAt: preservedCreatedAt,
+    inventoryId: preservedInventoryId,
     updatedAt: now,
   );
 

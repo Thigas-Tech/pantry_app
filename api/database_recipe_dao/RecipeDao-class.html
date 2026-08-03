@@ -192,14 +192,15 @@ independently of <a href="../database_database_helper/DatabaseHelper-class.html"
 </dd>
 
         <dt id="listAll" class="callable">
-  <span class="name"><a href="../database_recipe_dao/RecipeDao/listAll.html">listAll</a></span><span class="signature">(<wbr><span class="parameter" id="listAll-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+  <span class="name"><a href="../database_recipe_dao/RecipeDao/listAll.html">listAll</a></span><span class="signature">(<wbr><span class="parameter" id="listAll-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="listAll-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe/Recipe-class.html">Recipe</a></span>&gt;</span></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns all recipes, ordered by updated_at descending.
+  Returns all recipes for the given <code>inventoryId</code>,
+ordered by updated_at descending.
   
 
 </dd>

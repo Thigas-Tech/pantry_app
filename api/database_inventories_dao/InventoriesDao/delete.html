@@ -65,6 +65,8 @@
     
 <section class="desc markdown">
   <p>Deletes the inventory with the given <code>id</code> and all its items.</p>
+<p>Also deletes the inventory's recipes, their ingredients, and their
+history, mirroring item-delete semantics.</p>
 </section>
 
 
@@ -72,6 +74,31 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; delete(Database db, int id) async {
+  final recipeRows = await db.query(
+    &#39;recipes&#39;,
+    columns: [&#39;id&#39;],
+    where: &#39;inventory_id = ?&#39;,
+    whereArgs: [id],
+  );
+  final recipeIds = recipeRows
+      .map((r) =&gt; r[&#39;id&#39;] as int?)
+      .whereType&lt;int&gt;()
+      .toList();
+  if (recipeIds.isNotEmpty) {
+    final placeholders = recipeIds.map((_) =&gt; &#39;?&#39;).join(&#39;,&#39;);
+    await db.delete(
+      &#39;recipe_history&#39;,
+      where: &#39;recipe_id IN ($placeholders)&#39;,
+      whereArgs: recipeIds,
+    );
+    await db.delete(
+      &#39;recipe_ingredients&#39;,
+      where: &#39;recipe_id IN ($placeholders)&#39;,
+      whereArgs: recipeIds,
+    );
+    await db.delete(&#39;recipes&#39;, where: &#39;inventory_id = ?&#39;, whereArgs: [id]);
+  }
+
   await db.delete(&#39;inventory&#39;, where: &#39;inventory_id = ?&#39;, whereArgs: [id]);
   await db.delete(&#39;inventories&#39;, where: &#39;id = ?&#39;, whereArgs: [id]);
 }</code></pre>
