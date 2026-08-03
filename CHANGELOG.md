@@ -1,5 +1,33 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Per-inventory recipes**: recipes now belong to the inventory (pantry)
+  that is active when they are created. The Recipes screen shows only the
+  active inventory's recipes and includes the same inventory switcher used
+  on the Home screen, so you can switch pantries directly from Recipes.
+  Migration v33 adds `inventory_id` to the `recipes` table, backfills
+  existing recipes to the first inventory, and adds a scoping index.
+  (`lib/database/migrations/v33_recipes_inventory.dart`,
+  `lib/models/recipe.dart`, `lib/database/recipe_dao.dart`,
+  `lib/providers/recipe_provider.dart`,
+  `lib/screens/recipe_list_screen.dart`)
+- **Cascade delete**: deleting an inventory now also deletes its recipes,
+  their ingredients, and their cook history.
+  (`lib/database/inventories_dao.dart`)
+- **Cooking uses the recipe's own inventory**: `cookRecipe` now deducts
+  ingredient stock from the recipe's own inventory (falling back to the
+  active one), so shortage checks and FEFO deduction stay consistent with
+  per-inventory recipes.
+  (`lib/providers/recipe_provider.dart`)
+- **Inventory-scoped shared recipe cache keys**: the Firebase recipe cache
+  key now includes the inventory id, so same-named recipes in different
+  pantries no longer overwrite each other.
+  (`lib/models/recipe_cache_entry.dart`,
+  `lib/providers/recipe_provider.dart`)
+
 ## [0.0.9+5] — 2026-08-03
 
 ### Added

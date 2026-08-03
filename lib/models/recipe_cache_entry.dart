@@ -10,11 +10,11 @@ import 'package:pantry_app/models/recipe_ingredient_cache.dart';
 part 'recipe_cache_entry.freezed.dart';
 part 'recipe_cache_entry.g.dart';
 
-/// Computes a deterministic SHA-256 hex hash from a recipe's name and
-/// createdAt timestamp, avoiding any local DB IDs. The result is used as
-/// the Firestore document ID.
-String _computeRecipeId(String name, int createdAt) {
-  final bytes = utf8.encode('$name:$createdAt');
+/// Computes a deterministic SHA-256 hex hash from a recipe's name,
+/// createdAt timestamp, and inventory id, avoiding any local DB IDs. The
+/// result is used as the Firestore document ID.
+String _computeRecipeId(String name, int createdAt, int inventoryId) {
+  final bytes = utf8.encode('$name:$createdAt:$inventoryId');
   final digest = sha256.convert(bytes);
   return digest.toString();
 }
@@ -33,8 +33,9 @@ List<Map<String, dynamic>> _ingredientsToJson(
 /// recipe. No PII (user ID, device ID, local file paths) is stored.
 ///
 /// [recipeId] is a SHA-256 hex hash derived from the original recipe's
-/// name and createdAt, ensuring deterministic, collision-resistant IDs
-/// that cannot be traced back to the local SQLite database.
+/// name, createdAt, and inventory id, ensuring deterministic,
+/// collision-resistant IDs that cannot be traced back to the local SQLite
+/// database.
 @freezed
 abstract class RecipeCacheEntry with _$RecipeCacheEntry {
   /// Creates a [RecipeCacheEntry] with all required fields.
@@ -99,7 +100,11 @@ extension RecipeCacheEntryConversions on RecipeCacheEntry {
   }) {
     final now = DateTime.now().millisecondsSinceEpoch;
     final effectiveCreatedAt = createdAt ?? recipe.createdAt;
-    final recipeId = _computeRecipeId(recipe.name, effectiveCreatedAt);
+    final recipeId = _computeRecipeId(
+      recipe.name,
+      effectiveCreatedAt,
+      recipe.inventoryId,
+    );
 
     return RecipeCacheEntry(
       recipeId: recipeId,

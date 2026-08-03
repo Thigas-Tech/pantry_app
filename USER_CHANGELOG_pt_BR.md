@@ -1,5 +1,14 @@
 # Registro de alteracoes do usuario
 
+## Unreleased
+
+- As receitas agora sao salvas por despensa: cada despensa (Casa, Trabalho,
+  etc.) tem o seu proprio conjunto de receitas. Voce pode alternar a
+  despensa diretamente na tela de receitas usando o mesmo seletor da tela
+  inicial. Suas receitas existentes sao movidas automaticamente para a sua
+  primeira despensa.
+- Quando voce exclui uma despensa, as receitas dela tambem sao excluidas.
+
 ## [0.0.9+5]
 
 - Corrigido um problema em que um produto ou suas fotos podiam ser marcados

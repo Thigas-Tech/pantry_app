@@ -225,6 +225,33 @@ void main() {
       expect(entry1.recipeId, isNot(entry2.recipeId));
     });
 
+    test(
+      'fromRecipe generates different IDs for the same recipe in different'
+      ' inventories',
+      () {
+        const recipe1 = Recipe(name: 'Toast', createdAt: 7000);
+        const recipe2 = Recipe(name: 'Toast', createdAt: 7000, inventoryId: 2);
+
+        final entry1 = RecipeCacheEntryConversions.fromRecipe(recipe1, []);
+        final entry2 = RecipeCacheEntryConversions.fromRecipe(recipe2, []);
+
+        expect(entry1.recipeId, isNot(entry2.recipeId));
+      },
+    );
+
+    test(
+      'fromRecipe generates identical IDs for the same recipe in the same'
+      ' inventory',
+      () {
+        const recipe = Recipe(name: 'Toast', createdAt: 7000, inventoryId: 2);
+
+        final entry1 = RecipeCacheEntryConversions.fromRecipe(recipe, []);
+        final entry2 = RecipeCacheEntryConversions.fromRecipe(recipe, []);
+
+        expect(entry1.recipeId, entry2.recipeId);
+      },
+    );
+
     test('toRecipe round-trips through fromRecipe', () {
       const recipe = Recipe(
         id: 99,

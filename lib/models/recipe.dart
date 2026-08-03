@@ -46,5 +46,11 @@ abstract class Recipe with _$Recipe {
 
     /// Epoch timestamp (milliseconds since epoch) of last update.
     @Default(0) int updatedAt,
+
+    /// The inventory (pantry) this recipe belongs to.
+    ///
+    /// Defaults to 1 (the seeded "Home" inventory) so recipes created before
+    /// the per-inventory feature remain in the first pantry.
+    @Default(1) int inventoryId,
   }) = _Recipe;
 }

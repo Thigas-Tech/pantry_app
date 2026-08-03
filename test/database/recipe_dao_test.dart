@@ -81,7 +81,7 @@ void main() {
         const Recipe(name: 'Third', updatedAt: 300),
       );
 
-      final recipes = await dao.listAll(db);
+      final recipes = await dao.listAll(db, 1);
       expect(recipes.length, 3);
       expect(recipes[0].name, 'Third');
       expect(recipes[1].name, 'Second');
@@ -89,7 +89,7 @@ void main() {
     });
 
     test('listAll returns empty list when no recipes', () async {
-      final recipes = await dao.listAll(db);
+      final recipes = await dao.listAll(db, 1);
       expect(recipes, isEmpty);
     });
 
@@ -146,6 +146,88 @@ void main() {
     test('delete returns 0 for non-existent id', () async {
       final affected = await dao.delete(db, 999);
       expect(affected, 0);
+    });
+  });
+
+  group('RecipeDao inventory scoping', () {
+    test('createTable includes inventory_id column', () async {
+      final cols = await db.rawQuery("PRAGMA table_info('recipes')");
+      expect(cols.map((c) => c['name']), contains('inventory_id'));
+    });
+
+    test('toMap writes inventory_id', () {
+      final map = dao.toMap(const Recipe(name: 'Soup', inventoryId: 2));
+      expect(map['inventory_id'], 2);
+    });
+
+    test('fromMap reads inventory_id with default 1', () {
+      final recipe = dao.fromMap({
+        'id': 1,
+        'name': 'Soup',
+        'instructions': '',
+        'servings': 2,
+        'image_path': '',
+        'created_at': 100,
+        'updated_at': 200,
+        'inventory_id': 2,
+      });
+      expect(recipe.inventoryId, 2);
+
+      final fallback = dao.fromMap({
+        'id': 2,
+        'name': 'Broth',
+        'instructions': '',
+        'servings': 1,
+        'image_path': '',
+        'created_at': 100,
+        'updated_at': 200,
+      });
+      expect(fallback.inventoryId, 1);
+    });
+
+    test('insert persists inventory_id', () async {
+      final id = await dao.insert(
+        db,
+        const Recipe(name: 'Soup', inventoryId: 2),
+      );
+      final recipe = await dao.get(db, id);
+      expect(recipe!.inventoryId, 2);
+    });
+
+    test('listAll filters recipes by inventory', () async {
+      await dao.insert(
+        db,
+        const Recipe(name: 'A', updatedAt: 100),
+      );
+      await dao.insert(
+        db,
+        const Recipe(name: 'B', inventoryId: 2, updatedAt: 200),
+      );
+      await dao.insert(
+        db,
+        const Recipe(name: 'C', inventoryId: 2, updatedAt: 300),
+      );
+
+      final inv1 = await dao.listAll(db, 1);
+      final inv2 = await dao.listAll(db, 2);
+
+      expect(inv1.map((r) => r.name), ['A']);
+      expect(inv2.map((r) => r.name), ['C', 'B']);
+    });
+
+    test('update preserves existing inventory_id', () async {
+      final id = await dao.insert(
+        db,
+        const Recipe(name: 'A', inventoryId: 2),
+      );
+      await dao.update(
+        db,
+        Recipe(id: id, name: 'A2'),
+      );
+
+      final recipe = await dao.get(db, id);
+      expect(recipe!.name, 'A2');
+      expect(recipe.inventoryId, 2);
     });
   });
 }

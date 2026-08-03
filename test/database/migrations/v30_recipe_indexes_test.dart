@@ -91,12 +91,13 @@ void main() {
       await runner.run(db, 29, 30);
       await runner.run(db, 29, 30);
 
-      // No crash. Indexes still present.
+      // No crash. Indexes still present (including idx_recipes_inventory_id
+      // which is part of the recipes createTable schema).
       final indexes = await db.rawQuery(
         'SELECT name FROM sqlite_master'
         " WHERE type='index' AND name LIKE 'idx_recipes_%'",
       );
-      expect(indexes, hasLength(3));
+      expect(indexes, hasLength(4));
 
       await db.close();
     });

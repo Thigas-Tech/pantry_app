@@ -22,9 +22,16 @@ class RecipeDao {
         image_path TEXT NOT NULL DEFAULT '',
         search_text TEXT,
         created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL
+        updated_at INTEGER NOT NULL,
+        inventory_id INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
+          ON DELETE CASCADE
       )
     ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_recipes_inventory_id'
+      ' ON recipes(inventory_id)',
+    );
   }
 
   /// Converts a [Recipe] to a map for database insertion.
@@ -36,6 +43,7 @@ class RecipeDao {
     'image_path': recipe.imagePath,
     'created_at': recipe.createdAt,
     'updated_at': recipe.updatedAt,
+    'inventory_id': recipe.inventoryId,
   };
 
   /// Converts a database row map into a [Recipe].
@@ -47,6 +55,7 @@ class RecipeDao {
     imagePath: map['image_path'] as String? ?? '',
     createdAt: map['created_at'] as int? ?? 0,
     updatedAt: map['updated_at'] as int? ?? 0,
+    inventoryId: (map['inventory_id'] as num?)?.toInt() ?? 1,
   );
 
   /// Inserts a recipe and returns its row ID.
@@ -89,11 +98,14 @@ class RecipeDao {
     }
   }
 
-  /// Returns all recipes, ordered by updated_at descending.
-  Future<List<Recipe>> listAll(Database db) async {
+  /// Returns all recipes for the given [inventoryId],
+  /// ordered by updated_at descending.
+  Future<List<Recipe>> listAll(Database db, int inventoryId) async {
     try {
       final result = await db.query(
         'recipes',
+        where: 'inventory_id = ?',
+        whereArgs: [inventoryId],
         orderBy: 'updated_at DESC',
       );
       return result.map(fromMap).toList();
@@ -105,17 +117,20 @@ class RecipeDao {
 
   /// Updates an existing recipe. Returns rows affected.
   ///
-  /// The original createdAt field is preserved from the existing row.
-  /// updatedAt is set to the current epoch timestamp.
+  /// The original createdAt and inventory_id fields are preserved from the
+  /// existing row, so an update never silently moves a recipe to another
+  /// inventory. updatedAt is set to the current epoch timestamp.
   Future<int> update(Database db, Recipe recipe) async {
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    // Preserve original createdAt from the database.
+    // Preserve original createdAt and inventoryId from the database.
     final existing = await get(db, recipe.id!);
     final preservedCreatedAt = existing?.createdAt ?? recipe.createdAt;
+    final preservedInventoryId = existing?.inventoryId ?? recipe.inventoryId;
 
     final updated = recipe.copyWith(
       createdAt: preservedCreatedAt,
+      inventoryId: preservedInventoryId,
       updatedAt: now,
     );
 

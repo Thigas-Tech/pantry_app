@@ -88,7 +88,23 @@ void main() {
     );
 
     test(
-      'onCreate schema matches a full migration replay (0 to 32)',
+      'fresh install includes the v33 recipes inventory_id column',
+      () async {
+        final db = DatabaseHelper.withPath(_uniqueDbPath());
+        final database = await db.database;
+
+        final columns = await _columnNames(database, 'recipes');
+        expect(columns, contains('inventory_id'));
+        expect(
+          await _indexExists(database, 'idx_recipes_inventory_id'),
+          isTrue,
+        );
+        await database.close();
+      },
+    );
+
+    test(
+      'onCreate schema matches a full migration replay (0 to 33)',
       () async {
         // Fresh-install path: onCreate builds the schema directly.
         final fresh = DatabaseHelper.withPath(_uniqueDbPath());
@@ -96,7 +112,7 @@ void main() {
 
         // Upgrade path: replay every migration from scratch.
         final replayDb = await databaseFactory.openDatabase(_uniqueDbPath());
-        await MigrationRunner(allMigrations()).run(replayDb, 0, 32);
+        await MigrationRunner(allMigrations()).run(replayDb, 0, 33);
 
         final freshTables = await _tableNames(freshDb);
         final replayTables = await _tableNames(replayDb);

@@ -40,7 +40,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Thirteen tables are created on first launch (version 32):
+/// Thirteen tables are created on first launch (version 33):
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -128,7 +128,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 32;
+  static const int databaseVersion = 33;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -833,10 +833,11 @@ class DatabaseHelper {
     return recipeDao.get(db, id);
   }
 
-  /// Returns all recipes, ordered by updated_at descending.
-  Future<List<Recipe>> getAllRecipes() async {
+  /// Returns all recipes for the given [inventoryId],
+  /// ordered by updated_at descending.
+  Future<List<Recipe>> getAllRecipes(int inventoryId) async {
     final db = await database;
-    return recipeDao.listAll(db);
+    return recipeDao.listAll(db, inventoryId);
   }
 
   /// Updates an existing recipe. Returns rows affected.
@@ -917,10 +918,15 @@ class DatabaseHelper {
     final db = await database;
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    // Preserve original createdAt.
+    // Preserve original createdAt and inventory_id.
     final existing = await recipeDao.get(db, recipe.id!);
     final preserved = existing?.createdAt ?? recipe.createdAt;
-    final updated = recipe.copyWith(createdAt: preserved, updatedAt: now);
+    final preservedInventory = existing?.inventoryId ?? recipe.inventoryId;
+    final updated = recipe.copyWith(
+      createdAt: preserved,
+      inventoryId: preservedInventory,
+      updatedAt: now,
+    );
     final recipeMap = recipeDao.toMap(updated);
 
     return db.transaction((txn) async {

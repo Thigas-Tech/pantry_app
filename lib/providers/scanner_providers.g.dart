@@ -56,7 +56,7 @@ final class ScannerCameraProvider
   }
 }
 
-String _$scannerCameraHash() => r'8c60c1cae3a55dae04226365624ca9ee8f6c1f72';
+String _$scannerCameraHash() => r'3a66bce4887e67882c846d105fca8ee04a5bdc18';
 
 /// Notifier that manages the scanner camera lifecycle and scan resolution.
 ///

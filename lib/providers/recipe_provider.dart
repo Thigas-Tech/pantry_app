@@ -46,11 +46,16 @@ final _currencyServiceProvider = Provider<CurrencyService>((ref) {
   return CurrencyService();
 });
 
-/// Provides all recipes, ordered by updated_at descending.
+/// Provides all recipes for the active inventory, ordered by updated_at
+/// descending.
+///
+/// Watches [activeInventoryProvider] so the list automatically reloads when
+/// the user switches pantries.
 final FutureProvider<List<Recipe>> allRecipesProvider =
     FutureProvider.autoDispose<List<Recipe>>((ref) {
       final db = ref.watch(databaseProvider);
-      return db.getAllRecipes();
+      final activeId = ref.watch(activeInventoryProvider);
+      return db.getAllRecipes(activeId);
     });
 
 /// Provides ingredients for a specific recipe.
@@ -100,15 +105,19 @@ Future<void> saveRecipe(
 
   final db = ref.read(databaseProvider);
   final cache = ref.read(firebaseCacheProvider);
+  final activeInventoryId = ref.read(activeInventoryProvider);
   final now = DateTime.now().millisecondsSinceEpoch;
 
   if (existingRecipeId != null) {
+    // Preserve the recipe's original inventory when editing.
+    final existing = await db.getRecipe(existingRecipeId);
     final recipe = Recipe(
       id: existingRecipeId,
       name: name.trim(),
       instructions: instructions.trim(),
       servings: servings,
       imagePath: imagePath,
+      inventoryId: existing?.inventoryId ?? activeInventoryId,
       updatedAt: now,
     );
     await db.updateRecipeWithIngredients(recipe, ingredients);
@@ -120,6 +129,7 @@ Future<void> saveRecipe(
       instructions: instructions.trim(),
       servings: servings,
       imagePath: imagePath,
+      inventoryId: activeInventoryId,
       createdAt: now,
       updatedAt: now,
     );
@@ -146,7 +156,11 @@ Future<void> deleteRecipe(WidgetRef ref, int id) async {
     final cache = ref.read(firebaseCacheProvider);
     unawaited(
       cache.deleteSharedRecipe(
-        _computeSharedRecipeId(recipe.name, recipe.createdAt),
+        _computeSharedRecipeId(
+          recipe.name,
+          recipe.createdAt,
+          recipe.inventoryId,
+        ),
       ),
     );
   }
@@ -155,8 +169,8 @@ Future<void> deleteRecipe(WidgetRef ref, int id) async {
 
 /// Computes the shared recipe cache key for a local recipe, matching
 /// the hash produced by [RecipeCacheEntryConversions.fromRecipe].
-String _computeSharedRecipeId(String name, int createdAt) {
-  final bytes = utf8.encode('$name:$createdAt');
+String _computeSharedRecipeId(String name, int createdAt, int inventoryId) {
+  final bytes = utf8.encode('$name:$createdAt:$inventoryId');
   final digest = sha256.convert(bytes);
   return digest.toString();
 }
@@ -334,12 +348,13 @@ Future<double> calculateRecipeCost(WidgetRef ref, int recipeId) async {
   return total;
 }
 
-/// Calculates the average cost across all recipes.
+/// Calculates the average cost across all recipes in the active inventory.
 ///
 /// Returns 0.0 if no recipes exist (guards division by zero).
 Future<double> calculateAverageRecipeCost(WidgetRef ref) async {
   final db = ref.read(databaseProvider);
-  final recipes = await db.getAllRecipes();
+  final activeId = ref.read(activeInventoryProvider);
+  final recipes = await db.getAllRecipes(activeId);
   if (recipes.isEmpty) return 0.0;
 
   var totalCost = 0.0;
@@ -470,13 +485,18 @@ class InventoryRowSnapshot {
   final Map<String, dynamic> originalRow;
 }
 
-/// Cooks a recipe: deducts ingredients from inventory (FEFO) and logs history.
+/// Cooks a recipe: deducts ingredients from the recipe's own inventory
+/// (FEFO) and logs history.
 ///
-/// Throws [StateError] with shortage details if any ingredient has
-/// insufficient stock. Returns a [CookResult] for undo support.
+/// The inventory used is the recipe's own [Recipe.inventoryId], falling back
+/// to the active inventory when the recipe has no inventory. Throws
+/// [StateError] with shortage details if any ingredient has insufficient
+/// stock. Returns a [CookResult] for undo support.
 Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
   final db = ref.read(databaseProvider);
   final activeInventoryId = ref.read(activeInventoryProvider);
+  final recipe = await db.getRecipe(recipeId);
+  final inventoryId = recipe?.inventoryId ?? activeInventoryId;
   final ingredients = await db.getRecipeIngredients(recipeId);
   final settings = ref.read(settingsProvider);
   final currencyService = CurrencyService();
@@ -488,7 +508,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
   final shortages = await checkIngredientShortages(
     db,
     ingredients,
-    activeInventoryId,
+    inventoryId,
   );
   if (shortages.isNotEmpty) {
     throw RecipeCookException(shortages);
@@ -532,7 +552,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
           var rows = await txn.rawQuery(
             'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
             ' ORDER BY expiry_date ASC NULLS LAST',
-            [barcode, activeInventoryId],
+            [barcode, inventoryId],
           );
           if (rows.isEmpty && entry.value.name.isNotEmpty) {
             final normalizedName = entry.value.name.trim().toLowerCase();
@@ -541,7 +561,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
               ' INNER JOIN products p ON p.barcode = i.barcode'
               ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
               ' ORDER BY i.expiry_date ASC NULLS LAST',
-              ['%$normalizedName%', activeInventoryId],
+              ['%$normalizedName%', inventoryId],
             );
           }
           for (final row in rows) {

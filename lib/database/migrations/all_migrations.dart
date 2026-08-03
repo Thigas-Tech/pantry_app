@@ -24,6 +24,7 @@ import 'package:pantry_app/database/migrations/v2_inventories.dart';
 import 'package:pantry_app/database/migrations/v30_recipe_indexes_and_search.dart';
 import 'package:pantry_app/database/migrations/v31_serving_quantity.dart';
 import 'package:pantry_app/database/migrations/v32_scan_history.dart';
+import 'package:pantry_app/database/migrations/v33_recipes_inventory.dart';
 import 'package:pantry_app/database/migrations/v3_normalize_units.dart';
 import 'package:pantry_app/database/migrations/v4_nutriscore_grade.dart';
 import 'package:pantry_app/database/migrations/v5_nutriscore_not_applicable.dart';
@@ -66,4 +67,5 @@ List<Migration> allMigrations() => [
   MigrationV30(),
   MigrationV31(),
   MigrationV32(),
+  MigrationV33(),
 ];
