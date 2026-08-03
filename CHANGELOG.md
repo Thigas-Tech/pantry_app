@@ -1,6 +1,6 @@
 # Changelog
 
-## To be released:
+## [0.0.9+5] — 2026-08-03
 
 ### Added
 
@@ -268,6 +268,14 @@
   contract is documented in
   `docs/superpowers/agents/off_submission_contract.md`.
   (`lib/services/off_adapter.dart`, `test/services/off_adapter_test.dart`)
+- **Zero-warning static analysis**: fixed all remaining info-level lint
+  issues across `lib/` and `test/`. Migrated deprecated `RadioListTile`
+  `groupValue`/`onChanged` usage to the `RadioGroup` ancestor API, added
+  missing enum doc comments, sorted imports, and removed redundant default
+  arguments. `dart analyze lib/ test/` now reports no issues.
+  (`lib/screens/settings_screen.dart`,
+  `lib/providers/settings_provider.dart`, `lib/utils/unit_resolver.dart`,
+  `test/screens/settings_screen_test.dart`, and others)
 
 ## [0.0.8+4] — 2026-07-18
 

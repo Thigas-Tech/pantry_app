@@ -16,7 +16,10 @@ enum UnitContext {
 /// [UnitContext] from [Settings], accounting for per-context overrides.
 ///
 /// Also provides unit lists and utility checks for metric/imperial units.
-abstract final class UnitResolver {
+class UnitResolver {
+  /// Prevents instantiation of this static helper.
+  UnitResolver._();
+
   /// Returns the effective [UnitSystem] for [context] based on [settings].
   ///
   /// If the per-context override is non-null, returns the override.

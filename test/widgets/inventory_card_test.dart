@@ -331,7 +331,7 @@ void main() {
       tester,
     ) async {
       SharedPreferences.setMockInitialValues({});
-      final item = createItem(name: 'Eggs', quantity: 6, unit: 'pcs');
+      final item = createItem(name: 'Eggs', quantity: 6);
 
       await pumpApp(
         tester,

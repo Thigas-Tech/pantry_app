@@ -80,11 +80,8 @@ class SettingsScreen extends ConsumerWidget {
           ExpansionTile(
             leading: const Icon(Icons.straighten),
             title: Text(l10n.units),
-            initiallyExpanded: false,
             children: [
-              RadioListTile<UnitSystem>(
-                title: Text(l10n.unitSystemMetric),
-                value: UnitSystem.metric,
+              RadioGroup<UnitSystem>(
                 groupValue: settings.unitSystem,
                 onChanged: (v) {
                   if (v != null) {
@@ -102,34 +99,24 @@ class SettingsScreen extends ConsumerWidget {
                     }
                   }
                 },
-              ),
-              RadioListTile<UnitSystem>(
-                title: Text(l10n.unitSystemImperial),
-                value: UnitSystem.imperial,
-                groupValue: settings.unitSystem,
-                onChanged: (v) {
-                  if (v != null) {
-                    logInfo('Unit system changed to: ${v.name}');
-                    ref.read(settingsProvider.notifier).setUnitSystem(v);
-                    if (context.mounted) {
-                      SnackbarHelper.showInfo(
-                        context,
-                        l10n.unitSystemChanged(
-                          v == UnitSystem.metric
-                              ? l10n.unitSystemMetric
-                              : l10n.unitSystemImperial,
-                        ),
-                      );
-                    }
-                  }
-                },
+                child: Column(
+                  children: [
+                    RadioListTile<UnitSystem>(
+                      title: Text(l10n.unitSystemMetric),
+                      value: UnitSystem.metric,
+                    ),
+                    RadioListTile<UnitSystem>(
+                      title: Text(l10n.unitSystemImperial),
+                      value: UnitSystem.imperial,
+                    ),
+                  ],
+                ),
               ),
               const Divider(),
               ExpansionTile(
                 title: Text(l10n.perContextOverrides),
                 leading: const Icon(Icons.swap_horiz),
-                initiallyExpanded: false,
-                children: [
+                    children: [
                   _contextOverrideTile(
                     context,
                     l10n: l10n,
@@ -612,23 +599,26 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) => SimpleDialog(
         title: Text(label),
         children: [
-          RadioListTile<UnitSystem?>(
-            title: Text(l10n.systemDefault),
-            value: null,
+          RadioGroup<UnitSystem?>(
             groupValue: current,
             onChanged: (v) => Navigator.pop(ctx, v),
-          ),
-          RadioListTile<UnitSystem?>(
-            title: Text(l10n.unitSystemMetric),
-            value: UnitSystem.metric,
-            groupValue: current,
-            onChanged: (v) => Navigator.pop(ctx, v),
-          ),
-          RadioListTile<UnitSystem?>(
-            title: Text(l10n.unitSystemImperial),
-            value: UnitSystem.imperial,
-            groupValue: current,
-            onChanged: (v) => Navigator.pop(ctx, v),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<UnitSystem?>(
+                  title: Text(l10n.systemDefault),
+                  value: null,
+                ),
+                RadioListTile<UnitSystem?>(
+                  title: Text(l10n.unitSystemMetric),
+                  value: UnitSystem.metric,
+                ),
+                RadioListTile<UnitSystem?>(
+                  title: Text(l10n.unitSystemImperial),
+                  value: UnitSystem.imperial,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -692,23 +682,26 @@ class SettingsScreen extends ConsumerWidget {
         return SimpleDialog(
           title: Text(l10n.weightPreference),
           children: [
-            RadioListTile<WeightUnitPreference>(
-              title: Text(l10n.weightOz),
-              value: WeightUnitPreference.ounces,
+            RadioGroup<WeightUnitPreference>(
               groupValue: current,
               onChanged: (v) => Navigator.pop(ctx, v),
-            ),
-            RadioListTile<WeightUnitPreference>(
-              title: Text(l10n.weightLb),
-              value: WeightUnitPreference.pounds,
-              groupValue: current,
-              onChanged: (v) => Navigator.pop(ctx, v),
-            ),
-            RadioListTile<WeightUnitPreference>(
-              title: Text(l10n.weightAuto),
-              value: WeightUnitPreference.auto,
-              groupValue: current,
-              onChanged: (v) => Navigator.pop(ctx, v),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<WeightUnitPreference>(
+                    title: Text(l10n.weightOz),
+                    value: WeightUnitPreference.ounces,
+                  ),
+                  RadioListTile<WeightUnitPreference>(
+                    title: Text(l10n.weightLb),
+                    value: WeightUnitPreference.pounds,
+                  ),
+                  RadioListTile<WeightUnitPreference>(
+                    title: Text(l10n.weightAuto),
+                    value: WeightUnitPreference.auto,
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -731,35 +724,34 @@ class SettingsScreen extends ConsumerWidget {
         return SimpleDialog(
           title: Text(l10n.volumePreference),
           children: [
-            RadioListTile<VolumeUnitPreference>(
-              title: Text(l10n.volumeFlOz),
-              value: VolumeUnitPreference.fluidOunces,
+            RadioGroup<VolumeUnitPreference>(
               groupValue: current,
               onChanged: (v) => Navigator.pop(ctx, v),
-            ),
-            RadioListTile<VolumeUnitPreference>(
-              title: Text(l10n.volumeCup),
-              value: VolumeUnitPreference.cups,
-              groupValue: current,
-              onChanged: (v) => Navigator.pop(ctx, v),
-            ),
-            RadioListTile<VolumeUnitPreference>(
-              title: Text(l10n.volumeTbsp),
-              value: VolumeUnitPreference.tablespoons,
-              groupValue: current,
-              onChanged: (v) => Navigator.pop(ctx, v),
-            ),
-            RadioListTile<VolumeUnitPreference>(
-              title: Text(l10n.volumeTsp),
-              value: VolumeUnitPreference.teaspoons,
-              groupValue: current,
-              onChanged: (v) => Navigator.pop(ctx, v),
-            ),
-            RadioListTile<VolumeUnitPreference>(
-              title: Text(l10n.volumeAuto),
-              value: VolumeUnitPreference.auto,
-              groupValue: current,
-              onChanged: (v) => Navigator.pop(ctx, v),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<VolumeUnitPreference>(
+                    title: Text(l10n.volumeFlOz),
+                    value: VolumeUnitPreference.fluidOunces,
+                  ),
+                  RadioListTile<VolumeUnitPreference>(
+                    title: Text(l10n.volumeCup),
+                    value: VolumeUnitPreference.cups,
+                  ),
+                  RadioListTile<VolumeUnitPreference>(
+                    title: Text(l10n.volumeTbsp),
+                    value: VolumeUnitPreference.tablespoons,
+                  ),
+                  RadioListTile<VolumeUnitPreference>(
+                    title: Text(l10n.volumeTsp),
+                    value: VolumeUnitPreference.teaspoons,
+                  ),
+                  RadioListTile<VolumeUnitPreference>(
+                    title: Text(l10n.volumeAuto),
+                    value: VolumeUnitPreference.auto,
+                  ),
+                ],
+              ),
             ),
           ],
         );

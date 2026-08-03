@@ -275,8 +275,8 @@ void main() {
     });
 
     test('handles very large value g -> kg', () {
-      final result = UnitConverter.autoScale(1e9, 'g');
-      expect(result.quantity, 1e6);
+      final result = UnitConverter.autoScale(1000000000, 'g');
+      expect(result.quantity, 1000000);
       expect(result.unit, 'kg');
     });
   });
@@ -331,7 +331,6 @@ void main() {
           1000,
           'g',
           UnitSystem.imperial,
-          weightPref: WeightUnitPreference.auto,
         );
         expect(result.quantity, closeTo(2.0, 0.1));
         expect(result.unit, 'lb');
@@ -345,7 +344,6 @@ void main() {
           100,
           'g',
           UnitSystem.imperial,
-          weightPref: WeightUnitPreference.auto,
         );
         expect(result.quantity, closeTo(3.5, 0.1));
         expect(result.unit, 'oz');
@@ -403,7 +401,6 @@ void main() {
           500,
           'ml',
           UnitSystem.imperial,
-          volumePref: VolumeUnitPreference.auto,
         );
         expect(result.quantity, closeTo(2.0, 0.1));
         expect(result.unit, 'cup');
@@ -417,7 +414,6 @@ void main() {
           100,
           'ml',
           UnitSystem.imperial,
-          volumePref: VolumeUnitPreference.auto,
         );
         expect(result.quantity, closeTo(3.4, 0.1));
         expect(result.unit, 'fl oz');
@@ -431,7 +427,6 @@ void main() {
           15,
           'ml',
           UnitSystem.imperial,
-          volumePref: VolumeUnitPreference.auto,
         );
         expect(result.quantity, closeTo(1.0, 0.1));
         expect(result.unit, 'tbsp');
@@ -445,7 +440,6 @@ void main() {
           5,
           'ml',
           UnitSystem.imperial,
-          volumePref: VolumeUnitPreference.auto,
         );
         expect(result.quantity, closeTo(1.0, 0.1));
         expect(result.unit, 'tsp');

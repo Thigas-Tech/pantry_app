@@ -24,12 +24,12 @@ import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
-import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
+import 'package:pantry_app/utils/quantity_parser.dart';
+import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
-import 'package:pantry_app/utils/progress_indicator_helper.dart';
-import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/nutrition_table.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
@@ -697,7 +697,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               UnitSystem.imperial,
               weightPref: settings.preferredWeightUnit,
             );
-            return '1 ${l10n.servingMedium.toLowerCase()} (${converted.quantity} ${converted.unit})';
+            return '1 ${l10n.servingMedium.toLowerCase()}'
+                ' (${converted.quantity} ${converted.unit})';
           }
           return '1 ${l10n.servingMedium.toLowerCase()} (${medium.toInt()} g)';
         }

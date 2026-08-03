@@ -30,7 +30,6 @@ class FakeSettingsNotifierImperial extends SettingsNotifier {
   @override
   Settings build() => const Settings(
     unitSystem: UnitSystem.imperial,
-    preferredWeightUnit: WeightUnitPreference.ounces,
   );
 }
 
@@ -39,7 +38,6 @@ class FakeSettingsNotifierRecipeImperial extends SettingsNotifier {
   @override
   Settings build() => const Settings(
     unitSystemRecipeIngredients: UnitSystem.imperial,
-    preferredWeightUnit: WeightUnitPreference.ounces,
   );
 }
 
@@ -714,6 +712,5 @@ class _FakeSettingsNotifierMetricOverride extends SettingsNotifier {
   Settings build() => const Settings(
     unitSystem: UnitSystem.imperial,
     unitSystemRecipeIngredients: UnitSystem.metric,
-    preferredWeightUnit: WeightUnitPreference.ounces,
   );
 }

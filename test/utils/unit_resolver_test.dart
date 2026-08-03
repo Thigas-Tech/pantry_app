@@ -29,7 +29,6 @@ void main() {
 
       test('uses override when present for servingSize', () {
         const settings = Settings(
-          unitSystem: UnitSystem.metric,
           unitSystemServingSize: UnitSystem.imperial,
         );
         expect(
@@ -57,7 +56,6 @@ void main() {
 
       test('uses override when present for inventory', () {
         const settings = Settings(
-          unitSystem: UnitSystem.metric,
           unitSystemInventory: UnitSystem.imperial,
         );
         expect(
@@ -71,7 +69,6 @@ void main() {
 
       test('global metric when another context has override', () {
         const settings = Settings(
-          unitSystem: UnitSystem.metric,
           unitSystemServingSize: UnitSystem.imperial,
         );
         // recipeIngredients has no override, should fall back to global

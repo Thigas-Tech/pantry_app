@@ -1,5 +1,7 @@
 # Registro de alteracoes do usuario
 
+## [0.0.9+5]
+
 - Corrigido um problema em que um produto ou suas fotos podiam ser marcados
   como "falha no envio" para o Open Food Facts mesmo depois de um envio bem
   sucedido. O envio agora tenta novamente automaticamente quando o servidor

@@ -224,10 +224,11 @@ class _ShareButton extends ConsumerWidget {
               weightPref: settings.preferredWeightUnit,
               volumePref: settings.preferredVolumeUnit,
             );
-            buffer.writeln(
-              '- ${item.name} '
-              '(${l10n.formatQuantityUnit(display.quantity, l10n.localizeUnit(display.unit))})',
+            final formatted = l10n.formatQuantityUnit(
+              display.quantity,
+              l10n.localizeUnit(display.unit),
             );
+            buffer.writeln('- ${item.name} ($formatted)');
           }
           buffer.writeln();
         }
