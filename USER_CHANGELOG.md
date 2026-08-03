@@ -1,5 +1,10 @@
 # User Changelog
 
+- Fixed a problem where a product or its photos could be marked as "failed to
+  submit" to Open Food Facts even after a successful upload. Submission now
+  automatically retries when the server is busy, so manually added products
+  are submitted more reliably.
+
 - Fixed a rare issue where a product could appear more than once in the same
   pantry on a fresh install, causing duplicate quantities. New installs now
   match upgraded installs: each product appears once per pantry, and adding
