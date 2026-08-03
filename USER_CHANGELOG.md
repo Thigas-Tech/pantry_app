@@ -1,5 +1,7 @@
 # User Changelog
 
+## [0.0.9+5]
+
 - Fixed a problem where a product or its photos could be marked as "failed to
   submit" to Open Food Facts even after a successful upload. Submission now
   automatically retries when the server is busy, so manually added products

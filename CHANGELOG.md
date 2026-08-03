@@ -1,11 +1,6 @@
 # Changelog
 
-## 0.0.9+5
-
-- **Version bump**: updated version to 0.0.9+5.
-  (`pubspec.yaml`)
-
-## To be released:
+## [0.0.9+5] — 2026-08-03
 
 ### Added
 
