@@ -1,7 +1,5 @@
-// The .autoDispose.family types are inferred from the value expression.
-// ignore_for_file: specify_nonobvious_property_types
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
@@ -11,8 +9,8 @@ import 'package:pantry_app/providers/settings_provider.dart';
 ///
 /// Keyed by a `(barcode, inventoryId)` record so each pantry keeps an
 /// independent, cache-isolated history.
-final priceHistoryProvider = FutureProvider.autoDispose
-    .family<List<Price>, (String, int)>(
+final FutureProviderFamily<List<Price>, (String, int)> priceHistoryProvider =
+    FutureProvider.autoDispose.family<List<Price>, (String, int)>(
       (ref, args) {
         final (barcode, inventoryId) = args;
         return ref
@@ -25,8 +23,8 @@ final priceHistoryProvider = FutureProvider.autoDispose
 /// inventory, or null.
 ///
 /// Keyed by a `(barcode, inventoryId)` record.
-final latestPriceProvider = FutureProvider.autoDispose
-    .family<Price?, (String, int)>(
+final FutureProviderFamily<Price?, (String, int)> latestPriceProvider =
+    FutureProvider.autoDispose.family<Price?, (String, int)>(
       (ref, args) {
         final (barcode, inventoryId) = args;
         return ref

@@ -55,7 +55,7 @@ mixin _$Product {
 /// (e.g. `30.0` for a serving size of "30 g").
 ///
 /// Sourced from the OFF API `serving_quantity` field. When available,
-/// this is used by [QuantityParser] as the amount for pre-fill, with
+/// this is used by [parseServingQuantity] as the amount for pre-fill, with
 /// the unit extracted from the [String] serving size.
  double? get servingQuantity;/// The display quantity as printed on the packaging (e.g. "500 ml",
 /// "3 x 150 g", "6 eggs").
@@ -68,7 +68,7 @@ mixin _$Product {
 ///
 /// Sourced from the OFF API `product_quantity` field. This is the total
 /// quantity, not the per-unit value for multi-pack items. For pre-fill,
-/// [QuantityParser] extracts the per-unit value from [quantity]
+/// [parseQuantity] extracts the per-unit value from [quantity]
 /// instead.
  double? get productQuantity;/// Energy content in **kilocalories per 100 g** (or 100 ml).
 ///
@@ -161,7 +161,7 @@ mixin _$Product {
 /// products, manually entered items, or when USDA has no portion data.
  String? get usdaServingUnit;/// The `gramWeight` from the first USDA foodPortion (e.g. `182.0` for a
 /// medium apple). This is the primary pre-fill value via
-/// [QuantityParser.parseUsda].
+/// [parseUsdaQuantity].
 ///
 /// Only meaningful for produce items fetched from USDA. Null for OFF
 /// products, manually entered items, or when USDA has no portion data.
@@ -459,7 +459,7 @@ class _Product implements Product {
 /// (e.g. `30.0` for a serving size of "30 g").
 ///
 /// Sourced from the OFF API `serving_quantity` field. When available,
-/// this is used by [QuantityParser] as the amount for pre-fill, with
+/// this is used by [parseServingQuantity] as the amount for pre-fill, with
 /// the unit extracted from the [String] serving size.
 @override final  double? servingQuantity;
 /// The display quantity as printed on the packaging (e.g. "500 ml",
@@ -474,7 +474,7 @@ class _Product implements Product {
 ///
 /// Sourced from the OFF API `product_quantity` field. This is the total
 /// quantity, not the per-unit value for multi-pack items. For pre-fill,
-/// [QuantityParser] extracts the per-unit value from [quantity]
+/// [parseQuantity] extracts the per-unit value from [quantity]
 /// instead.
 @override final  double? productQuantity;
 /// Energy content in **kilocalories per 100 g** (or 100 ml).
@@ -587,7 +587,7 @@ class _Product implements Product {
 @override final  String? usdaServingUnit;
 /// The `gramWeight` from the first USDA foodPortion (e.g. `182.0` for a
 /// medium apple). This is the primary pre-fill value via
-/// [QuantityParser.parseUsda].
+/// [parseUsdaQuantity].
 ///
 /// Only meaningful for produce items fetched from USDA. Null for OFF
 /// products, manually entered items, or when USDA has no portion data.

@@ -47,6 +47,19 @@
   (`lib/models/recipe_cache_entry.dart`,
   `lib/providers/recipe_provider.dart`)
 
+### Changed
+
+- **Lint-suppression cleanup**: removed all `// ignore` and
+  `// ignore_for_file` comments from hand-written code. The `QuantityParser`
+  utility class was dissolved into top-level functions (`parseQuantity`,
+  `parseUsdaQuantity`, `parseServingQuantity`, `normalizeUnit`),
+  `ParsedQuantity` is now annotated `@immutable`, and the Riverpod `.family`
+  providers in `price_provider.dart` and `recipe_provider.dart` declare their
+  `FutureProviderFamily` types explicitly. `dart analyze lib/ test/` reports
+  zero issues.
+  (`lib/utils/quantity_parser.dart`, `lib/providers/price_provider.dart`,
+  `lib/providers/recipe_provider.dart`)
+
 ### Fixed
 
 - **Recipe cost scoped to the recipe's own inventory**: `calculateRecipeCost`

@@ -53,7 +53,7 @@ class AddToInventoryScreen extends StatefulWidget {
   /// unit fields in create mode (when [existingItem] is null).
   ///
   /// Only used for non-produce items. The values are parsed by
-  /// [QuantityParser] and applied as defaults — the user can still
+  /// [parseQuantity] and applied as defaults — the user can still
   /// override them.
   final Product? product;
 
@@ -108,14 +108,14 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
 
   /// Pre-fills the quantity from product data.
   ///
-  /// For non-produce items, uses [QuantityParser.parse] with OFF data.
-  /// For produce items, uses [QuantityParser.parseUsda] with USDA
+  /// For non-produce items, uses [parseQuantity] with OFF data.
+  /// For produce items, uses [parseUsdaQuantity] with USDA
   /// foodPortion data. Returns 1 (the default) when no data is available.
   double _prefillQuantity() {
     if (widget.product == null) return 1;
 
     if (!_isProduce) {
-      final parsed = QuantityParser.parse(
+      final parsed = parseQuantity(
         productQuantity: widget.product!.productQuantity,
         quantity: widget.product!.quantity,
       );
@@ -123,7 +123,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     }
 
     if (_isProduce) {
-      final parsed = QuantityParser.parseUsda(
+      final parsed = parseUsdaQuantity(
         usdaServingAmount: widget.product!.usdaServingAmount,
         usdaServingUnit: widget.product!.usdaServingUnit,
         usdaGramWeight: widget.product!.usdaGramWeight,
@@ -136,14 +136,14 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
 
   /// Pre-fills the unit from product data.
   ///
-  /// For non-produce items, uses [QuantityParser.parse] with OFF data.
-  /// For produce items, uses [QuantityParser.parseUsda] with USDA
+  /// For non-produce items, uses [parseQuantity] with OFF data.
+  /// For produce items, uses [parseUsdaQuantity] with USDA
   /// foodPortion data. Returns 'pieces' when no data is available.
   String _prefillUnit() {
     if (widget.product == null) return 'pieces';
 
     if (!_isProduce) {
-      final parsed = QuantityParser.parse(
+      final parsed = parseQuantity(
         productQuantity: widget.product!.productQuantity,
         quantity: widget.product!.quantity,
       );
@@ -151,7 +151,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     }
 
     if (_isProduce) {
-      final parsed = QuantityParser.parseUsda(
+      final parsed = parseUsdaQuantity(
         usdaServingAmount: widget.product!.usdaServingAmount,
         usdaServingUnit: widget.product!.usdaServingUnit,
         usdaGramWeight: widget.product!.usdaGramWeight,
