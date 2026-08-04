@@ -69,8 +69,8 @@ independent, cache-isolated history.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final priceHistoryProvider = FutureProvider.autoDispose
-    .family&lt;List&lt;Price&gt;, (String, int)&gt;(
+  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;List&lt;Price&gt;, (String, int)&gt; priceHistoryProvider =
+    FutureProvider.autoDispose.family&lt;List&lt;Price&gt;, (String, int)&gt;(
       (ref, args) {
         final (barcode, inventoryId) = args;
         return ref

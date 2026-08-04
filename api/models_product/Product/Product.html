@@ -165,7 +165,7 @@ and may not be present for every product.</p>
   &#47;&#47;&#47; (e.g. `30.0` for a serving size of &quot;30 g&quot;).
   &#47;&#47;&#47;
   &#47;&#47;&#47; Sourced from the OFF API `serving_quantity` field. When available,
-  &#47;&#47;&#47; this is used by [QuantityParser] as the amount for pre-fill, with
+  &#47;&#47;&#47; this is used by [parseServingQuantity] as the amount for pre-fill, with
   &#47;&#47;&#47; the unit extracted from the [String] serving size.
   double? servingQuantity,
 
@@ -182,7 +182,7 @@ and may not be present for every product.</p>
   &#47;&#47;&#47;
   &#47;&#47;&#47; Sourced from the OFF API `product_quantity` field. This is the total
   &#47;&#47;&#47; quantity, not the per-unit value for multi-pack items. For pre-fill,
-  &#47;&#47;&#47; [QuantityParser] extracts the per-unit value from [quantity]
+  &#47;&#47;&#47; [parseQuantity] extracts the per-unit value from [quantity]
   &#47;&#47;&#47; instead.
   double? productQuantity,
 
@@ -315,7 +315,7 @@ and may not be present for every product.</p>
 
   &#47;&#47;&#47; The `gramWeight` from the first USDA foodPortion (e.g. `182.0` for a
   &#47;&#47;&#47; medium apple). This is the primary pre-fill value via
-  &#47;&#47;&#47; [QuantityParser.parseUsda].
+  &#47;&#47;&#47; [parseUsdaQuantity].
   &#47;&#47;&#47;
   &#47;&#47;&#47; Only meaningful for produce items fetched from USDA. Null for OFF
   &#47;&#47;&#47; products, manually entered items, or when USDA has no portion data.

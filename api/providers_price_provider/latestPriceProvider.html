@@ -69,8 +69,8 @@ inventory, or null.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final latestPriceProvider = FutureProvider.autoDispose
-    .family&lt;Price?, (String, int)&gt;(
+  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;Price?, (String, int)&gt; latestPriceProvider =
+    FutureProvider.autoDispose.family&lt;Price?, (String, int)&gt;(
       (ref, args) {
         final (barcode, inventoryId) = args;
         return ref

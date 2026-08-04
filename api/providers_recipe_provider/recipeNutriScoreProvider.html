@@ -69,8 +69,8 @@ known scores.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final recipeNutriScoreProvider = FutureProvider.autoDispose
-    .family&lt;String?, int&gt;(
+  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;String?, int&gt; recipeNutriScoreProvider =
+    FutureProvider.autoDispose.family&lt;String?, int&gt;(
       (ref, recipeId) async {
         ref.keepAlive();
         final db = ref.watch(databaseProvider);

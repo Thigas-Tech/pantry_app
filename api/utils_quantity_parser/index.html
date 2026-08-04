@@ -72,15 +72,6 @@
   The result of parsing a quantity string.
 </dd>
 
-          <dt id="QuantityParser">
-  <span class="name "><a href="../utils_quantity_parser/QuantityParser-class.html">QuantityParser</a></span> 
-
-</dt>
-<dd>
-  Parses quantity strings from the Open Food Facts API into numeric
-amount and normalized unit pairs.
-</dd>
-
       </dl>
     </section>
 
@@ -90,6 +81,63 @@ amount and normalized unit pairs.
 
 
 
+    <section class="summary offset-anchor" id="functions">
+      <h2>Functions</h2>
+      <dl class="callables">
+          <dt id="normalizeUnit" class="callable">
+  <span class="name"><a href="../utils_quantity_parser/normalizeUnit.html">normalizeUnit</a></span><span class="signature">(<wbr><span class="parameter" id="normalizeUnit-param-unit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">unit</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Normalizes an OFF unit string to the app's internal representation.
+  
+
+</dd>
+
+          <dt id="parseQuantity" class="callable">
+  <span class="name"><a href="../utils_quantity_parser/parseQuantity.html">parseQuantity</a></span><span class="signature">(<wbr>{<span class="parameter" id="parseQuantity-param-productQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">productQuantity</span>, </span><span class="parameter" id="parseQuantity-param-productQuantityUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productQuantityUnit</span>, </span><span class="parameter" id="parseQuantity-param-quantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">quantity</span></span>})
+    <span class="returntype parameter">&#8594; <a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>?</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Parses a quantity from OFF API fields into a <a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>.
+  
+
+</dd>
+
+          <dt id="parseServingQuantity" class="callable">
+  <span class="name"><a href="../utils_quantity_parser/parseServingQuantity.html">parseServingQuantity</a></span><span class="signature">(<wbr>{<span class="parameter" id="parseServingQuantity-param-servingQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">servingQuantity</span>, </span><span class="parameter" id="parseServingQuantity-param-servingSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">servingSize</span></span>})
+    <span class="returntype parameter">&#8594; <a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>?</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Parses a serving size from product data into a <a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>.
+  
+
+</dd>
+
+          <dt id="parseUsdaQuantity" class="callable">
+  <span class="name"><a href="../utils_quantity_parser/parseUsdaQuantity.html">parseUsdaQuantity</a></span><span class="signature">(<wbr>{<span class="parameter" id="parseUsdaQuantity-param-usdaServingAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">usdaServingAmount</span>, </span><span class="parameter" id="parseUsdaQuantity-param-usdaServingUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">usdaServingUnit</span>, </span><span class="parameter" id="parseUsdaQuantity-param-usdaGramWeight"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">usdaGramWeight</span></span>})
+    <span class="returntype parameter">&#8594; <a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>?</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Parses USDA foodPortion data into a <a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>.
+  
+
+</dd>
+
+      </dl>
+    </section>
 
 
   </div> <!-- /.main-content -->

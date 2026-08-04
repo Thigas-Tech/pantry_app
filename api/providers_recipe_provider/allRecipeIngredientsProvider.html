@@ -67,7 +67,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final allRecipeIngredientsProvider = FutureProvider.autoDispose
+  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;List&lt;RecipeIngredient&gt;, int&gt;
+allRecipeIngredientsProvider = FutureProvider.autoDispose
     .family&lt;List&lt;RecipeIngredient&gt;, int&gt;(
       (ref, recipeId) {
         final db = ref.watch(databaseProvider);

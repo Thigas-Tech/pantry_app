@@ -70,7 +70,8 @@ product.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
+  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;List&lt;IngredientWithProduct&gt;, int&gt;
+recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
     .family&lt;List&lt;IngredientWithProduct&gt;, int&gt;(
       (ref, recipeId) async {
         ref.keepAlive();

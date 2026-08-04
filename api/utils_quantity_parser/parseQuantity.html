@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the parse method from the QuantityParser class, for the Dart programming language.">
-  <title>parse method - QuantityParser class - quantity_parser library - Dart API</title>
+  <meta name="description" content="API docs for the parseQuantity function from the quantity_parser library, for the Dart programming language.">
+  <title>parseQuantity function - quantity_parser library - Dart API</title>
 
 
   
@@ -13,23 +13,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
   
-  <link rel="stylesheet" href="../../static-assets/github.css?v1">
-  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
-  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
   
 </head>
 
-<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
 <div id="overlay-under-drawer"></div>
 <header id="title">
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
-    <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../utils_quantity_parser/">utils&#47;quantity_parser.dart</a></li>
-    <li><a href="../../utils_quantity_parser/QuantityParser-class.html">QuantityParser</a></li>
-    <li class="self-crumb">parse static method</li>
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../utils_quantity_parser/">utils&#47;quantity_parser.dart</a></li>
+    <li class="self-crumb">parseQuantity function</li>
   </ol>
-  <div class="self-name">parse</div>
+  <div class="self-name">parseQuantity</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -43,29 +42,30 @@
   </button>
 </header>
 <main>
-<div
-    id="dartdoc-main-content"
-    class="main-content"
-    data-above-sidebar="utils_quantity_parser&#47;QuantityParser-class-sidebar.html"
-    data-below-sidebar="">
-    <div>
-<h1><span class="kind-method">parse</span> static method 
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="utils_quantity_parser&#47;utils_quantity_parser-library-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-function">parseQuantity</span> function 
+ 
 </h1></div>
 
     <section class="multi-line-signature">
-      
-<span class="returntype"><a href="../../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>?</span>
-<span class="name ">parse</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="parse-param-productQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">productQuantity</span>, </span></li>
-<li><span class="parameter" id="parse-param-productQuantityUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productQuantityUnit</span>, </span></li>
-<li><span class="parameter" id="parse-param-quantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">quantity</span>, </span></li>
+        
+<span class="returntype"><a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>?</span>
+<span class="name ">parseQuantity</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="parseQuantity-param-productQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">productQuantity</span>, </span></li>
+<li><span class="parameter" id="parseQuantity-param-productQuantityUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">productQuantityUnit</span>, </span></li>
+<li><span class="parameter" id="parseQuantity-param-quantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">quantity</span>, </span></li>
 </ol>})
 
-      
+        
 
     </section>
     
 <section class="desc markdown">
-  <p>Parses a quantity from OFF API fields into a <a href="../../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>.</p>
+  <p>Parses a quantity from OFF API fields into a <a href="../utils_quantity_parser/ParsedQuantity-class.html">ParsedQuantity</a>.</p>
 <p>Priority:</p>
 <ol>
 <li>Uses <code>productQuantity</code> and <code>productQuantityUnit</code> when both present,
@@ -80,7 +80,7 @@ extracted from the <code>quantity</code> string instead of the normalized total.
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static ParsedQuantity? parse({
+  <pre class="language-dart"><code class="language-dart">ParsedQuantity? parseQuantity({
   double? productQuantity,
   String? productQuantityUnit,
   String? quantity,
@@ -115,17 +115,16 @@ extracted from the <code>quantity</code> string instead of the normalized total.
   </form>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
-    <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../utils_quantity_parser/">quantity_parser</a></li>
-    <li><a href="../../utils_quantity_parser/QuantityParser-class.html">QuantityParser</a></li>
-    <li class="self-crumb">parse static method</li>
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../utils_quantity_parser/">quantity_parser</a></li>
+    <li class="self-crumb">parseQuantity function</li>
 </ol>
 
-    <h5>QuantityParser class</h5>
+    <h5>quantity_parser library</h5>
     <div id="dartdoc-sidebar-left-content"></div>
-  </div><!--/.sidebar-offcanvas-->
+  </div><!--/.sidebar-offcanvas-left-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
-</div><!--/.sidebar-offcanvas-->
+  </div><!--/.sidebar-offcanvas-->
 </main>
 <footer>
   <span class="no-break">
@@ -136,8 +135,8 @@ extracted from the <code>quantity</code> string instead of the normalized total.
 </footer>
 
 
-<script src="../../static-assets/highlight.pack.js?v1"></script>
-<script src="../../static-assets/docs.dart.js"></script>
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
 
 </body>
 </html>

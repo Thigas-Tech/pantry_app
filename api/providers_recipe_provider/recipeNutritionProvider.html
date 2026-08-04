@@ -69,8 +69,8 @@ product nutrition data. Auto-disposes when no listener remains.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final recipeNutritionProvider = FutureProvider.autoDispose
-    .family&lt;RecipeNutrition?, int&gt;(
+  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;RecipeNutrition?, int&gt; recipeNutritionProvider =
+    FutureProvider.autoDispose.family&lt;RecipeNutrition?, int&gt;(
       (ref, recipeId) async {
         ref.keepAlive();
         final db = ref.watch(databaseProvider);

@@ -69,7 +69,7 @@
 <section class="desc markdown">
   <p>The <code>gramWeight</code> from the first USDA foodPortion (e.g. <code>182.0</code> for a
 medium apple). This is the primary pre-fill value via
-<a href="../../utils_quantity_parser/QuantityParser/parseUsda.html">QuantityParser.parseUsda</a>.</p>
+<a href="../../utils_quantity_parser/parseUsdaQuantity.html">parseUsdaQuantity</a>.</p>
 <p>Only meaningful for produce items fetched from USDA. Null for OFF
 products, manually entered items, or when USDA has no portion data.</p>
 </section>
@@ -79,7 +79,7 @@ products, manually entered items, or when USDA has no portion data.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">String? get usdaServingUnit;&#47;&#47;&#47; The `gramWeight` from the first USDA foodPortion (e.g. `182.0` for a
 &#47;&#47;&#47; medium apple). This is the primary pre-fill value via
-&#47;&#47;&#47; [QuantityParser.parseUsda].
+&#47;&#47;&#47; [parseUsdaQuantity].
 &#47;&#47;&#47;
 &#47;&#47;&#47; Only meaningful for produce items fetched from USDA. Null for OFF
 &#47;&#47;&#47; products, manually entered items, or when USDA has no portion data.
