@@ -4,6 +4,25 @@
 
 ### Added
 
+- **Per-inventory price tracking**: prices now belong to the inventory
+  (pantry) that is active when they are recorded. The Product Detail screen
+  shows prices relevant to the current inventory, and a new inline trend
+  section displays the last 5 prices as a sparkline with a compact list
+  (date, masked price, store) plus a "View all" link to the full history.
+  Migration v34 adds `inventory_id` to the `prices` table, backfills existing
+  prices to the first inventory, and adds a scoping index.
+  (`lib/database/migrations/v34_prices_inventory.dart`,
+  `lib/models/price.dart`, `lib/database/price_dao.dart`,
+  `lib/providers/price_provider.dart`,
+  `lib/screens/product_detail_screen.dart`)
+- **Price rows survive inventory deletion**: deleting a pantry does not
+  delete its recorded prices — they are barcode observations that stay
+  available if the product is re-added to another pantry.
+  (`lib/database/inventories_dao.dart`)
+- **Inventory-scoped price stats**: value, average, priced-item count, and
+  monthly/store spending aggregations now only consider prices recorded for
+  the queried inventory.
+  (`lib/database/price_dao.dart`)
 - **Per-inventory recipes**: recipes now belong to the inventory (pantry)
   that is active when they are created. The Recipes screen shows only the
   active inventory's recipes and includes the same inventory switcher used

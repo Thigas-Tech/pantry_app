@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
@@ -377,14 +378,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// Builds the price section with latest price, add/edit, and history.
   Widget _buildPriceSection(BuildContext context, AppLocalizations l10n) {
     final barcode = widget.product.barcode;
-    final priceAsync = ref.watch(latestPriceProvider(barcode));
+    final activeId = ref.watch(activeInventoryProvider);
+    final priceAsync = ref.watch(latestPriceProvider((barcode, activeId)));
+    final historyAsync = ref.watch(priceHistoryProvider((barcode, activeId)));
 
     return priceAsync.when(
       data: (price) {
-        if (price != null) {
-          return _buildPriceData(context, l10n, price);
+        if (price == null) {
+          return _buildNoPriceData(context, l10n);
         }
-        return _buildNoPriceData(context, l10n);
+        return historyAsync.when(
+          data: (history) => _buildPriceData(context, l10n, price, history),
+          loading: () => const SizedBox(height: 48),
+          error: (_, _) => _buildPriceData(context, l10n, price, const []),
+        );
       },
       loading: () => const SizedBox(height: 48),
       error: (_, _) => const SizedBox.shrink(),
@@ -395,31 +402,53 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     BuildContext context,
     AppLocalizations l10n,
     Price price,
+    List<Price> history,
   ) {
-    final formattedPrice = ref
-        .read(priceRepositoryProvider)
-        .formatPrice(
-          price.price,
-          price.currency,
-        );
+    final repo = ref.read(priceRepositoryProvider);
+    final theme = Theme.of(context);
+    final formattedPrice = repo.formatPrice(price.price, price.currency);
+    final recent = history.length > 5 ? history.sublist(0, 5) : history;
+    final trend = _trendFor(recent);
+    final trendLabel = switch (trend) {
+      'up' => l10n.priceTrendUp,
+      'down' => l10n.priceTrendDown,
+      'stable' => l10n.priceTrendStable,
+      _ => null,
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(l10n.prices, style: Theme.of(context).textTheme.titleMedium),
+        Text(l10n.prices, style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         PriceMask(
           formattedPrice: formattedPrice,
           child: Text(
             formattedPrice,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: theme.textTheme.headlineSmall,
           ),
         ),
         if (price.store != null)
+          Text(price.store!, style: theme.textTheme.bodySmall),
+        if (trendLabel != null) ...[
+          const SizedBox(height: 4),
           Text(
-            price.store!,
-            style: Theme.of(context).textTheme.bodySmall,
+            trendLabel,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
           ),
+        ],
+        if (recent.length >= 2) ...[
+          const SizedBox(height: 12),
+          _buildTrendChart(context, l10n, recent),
+        ],
+        if (recent.length >= 2) ...[
+          const SizedBox(height: 12),
+          Text(l10n.recentPrices, style: theme.textTheme.titleSmall),
+          const SizedBox(height: 4),
+          ...recent.map((p) => _buildRecentPriceRow(context, l10n, p)),
+        ],
         const SizedBox(height: 8),
         Row(
           children: [
@@ -429,16 +458,158 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               label: Text(l10n.editPrice),
             ),
             const SizedBox(width: 8),
-            OutlinedButton.icon(
+            TextButton(
               onPressed: () => _openPriceHistory(context),
-              icon: const Icon(Icons.history, size: 18),
-              label: Text(l10n.priceHistory),
+              child: Text(l10n.viewAllPrices),
             ),
           ],
         ),
         const Divider(height: 24),
       ],
     );
+  }
+
+  /// Builds a compact line chart of the most recent prices.
+  Widget _buildTrendChart(
+    BuildContext context,
+    AppLocalizations l10n,
+    List<Price> history,
+  ) {
+    final theme = Theme.of(context);
+    final repo = ref.read(priceRepositoryProvider);
+    final spots = <FlSpot>[];
+    for (var i = 0; i < history.length; i++) {
+      spots.add(FlSpot(i.toDouble(), history[i].price));
+    }
+
+    return SizedBox(
+      height: 100,
+      child: LineChart(
+        LineChartData(
+          gridData: const FlGridData(show: false),
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 24,
+                getTitlesWidget: (value, _) {
+                  final i = value.toInt();
+                  if (i < 0 || i >= history.length) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      _formatShortDate(history[i]),
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 48,
+                maxIncluded: false,
+                getTitlesWidget: (value, _) {
+                  final formatted = repo.formatPrice(
+                    value,
+                    history.first.currency,
+                  );
+                  final short = formatted
+                      .replaceAll(RegExp(r'[,.]\d{2}$'), '')
+                      .replaceAll(RegExp(r'\s+'), '');
+                  return Text(short, style: theme.textTheme.labelSmall);
+                },
+              ),
+            ),
+            topTitles: const AxisTitles(),
+            rightTitles: const AxisTitles(),
+          ),
+          borderData: FlBorderData(show: false),
+          lineTouchData: const LineTouchData(enabled: false),
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: true,
+              color: theme.colorScheme.primary,
+              barWidth: 2.5,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds one compact recent-price row (date, masked price, store).
+  Widget _buildRecentPriceRow(
+    BuildContext context,
+    AppLocalizations l10n,
+    Price price,
+  ) {
+    final theme = Theme.of(context);
+    final repo = ref.read(priceRepositoryProvider);
+    final formattedPrice = repo.formatPrice(price.price, price.currency);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 84,
+            child: Text(
+              _formatShortDate(price),
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          Expanded(
+            child: PriceMask(
+              formattedPrice: formattedPrice,
+              child: Text(
+                formattedPrice,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          if (price.store != null)
+            Expanded(
+              child: Text(
+                price.store!,
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Returns 'up', 'down', or 'stable' comparing the newest price against
+  /// the oldest in [history], or null when there are fewer than two prices.
+  static String? _trendFor(List<Price> history) {
+    if (history.length < 2) return null;
+    final latest = history.first.price;
+    final oldest = history.last.price;
+    const epsilon = 0.001;
+    if (latest > oldest + epsilon) return 'up';
+    if (latest < oldest - epsilon) return 'down';
+    return 'stable';
+  }
+
+  /// Formats the purchase date as dd/mm/yyyy.
+  String _formatShortDate(Price price) {
+    if (price.datePurchased == null) return '\u2014';
+    final d = DateTime.fromMillisecondsSinceEpoch(price.datePurchased!);
+    return '${d.day.toString().padLeft(2, '0')}/'
+        '${d.month.toString().padLeft(2, '0')}/'
+        '${d.year}';
   }
 
   Widget _buildNoPriceData(BuildContext context, AppLocalizations l10n) {
@@ -473,11 +644,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (price != null) {
       try {
         await ref.read(productRepositoryProvider).cacheProduct(widget.product);
-        await ref.read(priceRepositoryProvider).addPrice(price);
+        final activeId = ref.read(activeInventoryProvider);
+        final scoped = price.copyWith(inventoryId: activeId);
+        await ref.read(priceRepositoryProvider).addPrice(scoped);
         if (!context.mounted) return;
         ref
-          ..invalidate(latestPriceProvider(widget.product.barcode))
-          ..invalidate(priceHistoryProvider(widget.product.barcode));
+          ..invalidate(latestPriceProvider((widget.product.barcode, activeId)))
+          ..invalidate(
+            priceHistoryProvider((widget.product.barcode, activeId)),
+          );
 
         if (price.datePurchased != null &&
             price.store != null &&
@@ -546,9 +721,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         await ref.read(priceRepositoryProvider).updatePrice(updated);
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.priceUpdated);
+          final activeId = ref.read(activeInventoryProvider);
           ref
-            ..invalidate(latestPriceProvider(widget.product.barcode))
-            ..invalidate(priceHistoryProvider(widget.product.barcode));
+            ..invalidate(
+              latestPriceProvider((widget.product.barcode, activeId)),
+            )
+            ..invalidate(
+              priceHistoryProvider((widget.product.barcode, activeId)),
+            );
         }
       } on Exception catch (e) {
         logError('Failed to update price: $e');

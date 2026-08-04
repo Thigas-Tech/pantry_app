@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Os precos agora sao guardados por despensa: cada despensa (Casa, Trabalho,
+  etc.) tem o seu proprio historico de precos. A pagina do produto mostra o
+  ultimo preco da despensa atual com um pequeno grafico de tendencia e os
+  ultimos 5 precos, com uma ligacao para o historico completo.
+- Apagar uma despensa ja nao apaga os precos registados nela. As suas
+  observacoes de preco ficam guardadas se voltar a adicionar o produto a
+  outra despensa mais tarde.
 - As receitas agora sao guardadas por despensa: cada despensa (Casa,
   Trabalho, etc.) tem o seu proprio conjunto de receitas. Pode mudar de
   despensa diretamente no ecra de receitas usando o mesmo seletor do ecra

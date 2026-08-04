@@ -34,7 +34,7 @@ void main() {
       const PriceHistoryScreen(barcode: barcode, productName: productName),
       settle: false,
       overrides: [
-        priceHistoryProvider(barcode).overrideWith(
+        priceHistoryProvider((barcode, 1)).overrideWith(
           (ref) => Completer<List<Price>>().future,
         ),
       ],
@@ -52,7 +52,7 @@ void main() {
       tester,
       const PriceHistoryScreen(barcode: barcode, productName: productName),
       overrides: [
-        priceHistoryProvider(barcode).overrideWith(
+        priceHistoryProvider((barcode, 1)).overrideWith(
           (ref) => <Price>[],
         ),
       ],
@@ -66,7 +66,7 @@ void main() {
       tester,
       const PriceHistoryScreen(barcode: barcode, productName: productName),
       overrides: [
-        priceHistoryProvider(barcode).overrideWith(
+        priceHistoryProvider((barcode, 1)).overrideWith(
           (ref) => testPrices,
         ),
       ],
@@ -76,5 +76,22 @@ void main() {
     expect(find.text('Store B'), findsOneWidget);
     expect(find.text(r'$10.50'), findsOneWidget);
     expect(find.text(r'$5.00'), findsOneWidget);
+  });
+
+  testWidgets('is scoped to the active inventory', (tester) async {
+    // Inventory 1 has no prices; inventory 2 does. The screen must read the
+    // (barcode, 1) key and show the empty state.
+    await pumpApp(
+      tester,
+      const PriceHistoryScreen(barcode: barcode, productName: productName),
+      overrides: [
+        priceHistoryProvider((barcode, 1)).overrideWith((ref) => <Price>[]),
+        priceHistoryProvider((barcode, 2)).overrideWith(
+          (ref) => testPrices,
+        ),
+      ],
+    );
+
+    expect(find.text('No prices recorded.'), findsOneWidget);
   });
 }

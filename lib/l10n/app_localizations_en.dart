@@ -903,6 +903,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPrices => 'No prices recorded.';
 
   @override
+  String get recentPrices => 'Recent prices';
+
+  @override
+  String get viewAllPrices => 'View all';
+
+  @override
+  String get noPriceTrend => 'Add at least two prices to see the trend.';
+
+  @override
   String get totalValue => 'Total value';
 
   @override

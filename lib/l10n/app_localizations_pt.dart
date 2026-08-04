@@ -903,6 +903,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noPrices => 'Nenhum preco registrado.';
 
   @override
+  String get recentPrices => 'Precos recentes';
+
+  @override
+  String get viewAllPrices => 'Ver todos';
+
+  @override
+  String get noPriceTrend => 'Adicione pelo menos dois precos para ver a tendencia.';
+
+  @override
   String get totalValue => 'Valor total';
 
   @override
@@ -2835,6 +2844,15 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get noPrices => 'Nenhum preco registrado.';
+
+  @override
+  String get recentPrices => 'Precos recentes';
+
+  @override
+  String get viewAllPrices => 'Ver todos';
+
+  @override
+  String get noPriceTrend => 'Adicione pelo menos dois precos para ver a tendencia.';
 
   @override
   String get totalValue => 'Valor total';

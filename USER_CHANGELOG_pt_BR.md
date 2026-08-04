@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Os precos agora sao salvos por despensa: cada despensa (Casa, Trabalho,
+  etc.) tem o seu proprio historico de precos. A pagina do produto mostra o
+  ultimo preco da despensa atual com um pequeno grafico de tendencia e os
+  ultimos 5 precos, com um link para o historico completo.
+- Excluir uma despensa nao apaga mais os precos registrados nela. Suas
+  observacoes de preco ficam salvas se voce adicionar o produto a outra
+  despensa depois.
 - As receitas agora sao salvas por despensa: cada despensa (Casa, Trabalho,
   etc.) tem o seu proprio conjunto de receitas. Voce pode alternar a
   despensa diretamente na tela de receitas usando o mesmo seletor da tela

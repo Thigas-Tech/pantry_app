@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -34,7 +35,8 @@ class PriceHistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final historyAsync = ref.watch(priceHistoryProvider(barcode));
+    final activeId = ref.watch(activeInventoryProvider);
+    final historyAsync = ref.watch(priceHistoryProvider((barcode, activeId)));
 
     final priceTrackingEnabled = ref.watch(
       settingsProvider.select((s) => s.priceTrackingEnabled),
@@ -78,6 +80,7 @@ class PriceHistoryScreen extends ConsumerWidget {
     Price price,
   ) async {
     final l10n = AppLocalizations.of(context)!;
+    final activeId = ref.read(activeInventoryProvider);
     if (price.id != null) {
       try {
         await ref.read(priceRepositoryProvider).deletePrice(price.id!);
@@ -93,8 +96,8 @@ class PriceHistoryScreen extends ConsumerWidget {
             },
           );
           ref
-            ..invalidate(priceHistoryProvider(barcode))
-            ..invalidate(latestPriceProvider(barcode));
+            ..invalidate(priceHistoryProvider((barcode, activeId)))
+            ..invalidate(latestPriceProvider((barcode, activeId)));
         }
       } on Exception catch (e) {
         logError('Failed to delete price: $e');

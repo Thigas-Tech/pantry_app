@@ -103,5 +103,11 @@ abstract class Price with _$Price {
     /// Epoch timestamp (milliseconds since Unix epoch) of when this record
     /// was created locally.
     int? dateAdded,
+
+    /// The inventory (pantry) this price observation belongs to.
+    ///
+    /// Prices are scoped per inventory so the same product can track
+    /// independent histories in each pantry. Defaults to 1 (Home).
+    @Default(1) int inventoryId,
   }) = _Price;
 }

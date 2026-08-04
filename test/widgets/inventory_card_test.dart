@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
+import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -371,4 +373,66 @@ void main() {
       expect(find.textContaining('1.5 L'), findsOneWidget);
     });
   });
+
+  group('price line scoping', () {
+    testWidgets('shows the price from the active inventory key', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final item = createItem(name: 'Milk', quantity: 1, unit: 'L');
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+          settingsProvider.overrideWith(
+            _FakePriceTrackingSettingsNotifier.new,
+          ),
+          latestPriceProvider(('123', 1)).overrideWith(
+            (ref) => const Price(
+              barcode: '123',
+              price: 4.99,
+            ),
+          ),
+        ],
+      );
+
+      expect(find.text(r'$4.99'), findsOneWidget);
+    });
+
+    testWidgets('hides the price when the active inventory has none', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final item = createItem(name: 'Milk', quantity: 1, unit: 'L');
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+          settingsProvider.overrideWith(
+            _FakePriceTrackingSettingsNotifier.new,
+          ),
+          latestPriceProvider(('123', 1)).overrideWith(
+            (ref) => null,
+          ),
+        ],
+      );
+
+      expect(find.text(r'$4.99'), findsNothing);
+    });
+  });
+}
+
+class _FakePriceTrackingSettingsNotifier extends SettingsNotifier {
+  @override
+  Settings build() => const Settings(priceTrackingEnabled: true);
 }

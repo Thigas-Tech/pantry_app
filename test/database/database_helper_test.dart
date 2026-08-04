@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_history_entry.dart';
@@ -101,6 +102,76 @@ void main() {
 
       final tempItems = await db.getInventoryItems(inventoryId: id);
       expect(tempItems, isEmpty);
+    });
+  });
+
+  group('Prices per inventory', () {
+    test('getLatestPrice and getPricesByBarcode are scoped', () async {
+      await db.insertProduct(const Product(barcode: '123', name: 'Coffee'));
+      final workId = await db.createInventory('Work');
+
+      await db.insertPrice(
+        const Price(barcode: '123', price: 10, datePurchased: 100),
+      );
+      await db.insertPrice(
+        Price(
+          barcode: '123',
+          price: 20,
+          inventoryId: workId,
+          datePurchased: 200,
+        ),
+      );
+
+      final homeLatest = await db.getLatestPrice(
+        '123',
+        inventoryId: 1,
+      );
+      final workLatest = await db.getLatestPrice(
+        '123',
+        inventoryId: workId,
+      );
+      expect(homeLatest!.price, 10);
+      expect(workLatest!.price, 20);
+
+      final homeHistory = await db.getPricesByBarcode(
+        '123',
+        inventoryId: 1,
+      );
+      expect(homeHistory, hasLength(1));
+      expect(homeHistory.first.price, 10);
+    });
+
+    test('deleteInventory preserves price rows', () async {
+      await db.insertProduct(const Product(barcode: '123', name: 'Coffee'));
+      final workId = await db.createInventory('Work');
+
+      await db.insertPrice(
+        const Price(barcode: '123', price: 10, datePurchased: 100),
+      );
+      await db.insertPrice(
+        Price(
+          barcode: '123',
+          price: 20,
+          inventoryId: workId,
+          datePurchased: 200,
+        ),
+      );
+
+      await db.deleteInventory(workId);
+
+      // The inventory is gone...
+      final list = await db.getInventories();
+      expect(list.any((e) => e['id'] == workId), isFalse);
+
+      // ...but both price rows survive (barcode observations are not deleted).
+      expect(
+        (await db.getLatestPrice('123', inventoryId: 1))!.price,
+        10,
+      );
+      expect(
+        (await db.getLatestPrice('123', inventoryId: workId))!.price,
+        20,
+      );
     });
   });
 

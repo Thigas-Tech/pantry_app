@@ -1776,6 +1776,24 @@ abstract class AppLocalizations {
   /// **'No prices recorded.'**
   String get noPrices;
 
+  /// No description provided for @recentPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent prices'**
+  String get recentPrices;
+
+  /// No description provided for @viewAllPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAllPrices;
+
+  /// No description provided for @noPriceTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two prices to see the trend.'**
+  String get noPriceTrend;
+
   /// No description provided for @totalValue.
   ///
   /// In en, this message translates to:

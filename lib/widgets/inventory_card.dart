@@ -9,6 +9,7 @@ import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
@@ -262,7 +263,10 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
     final settings = ref.watch(settingsProvider);
     if (!settings.priceTrackingEnabled) return const SizedBox.shrink();
 
-    final priceAsync = ref.watch(latestPriceProvider(widget.item.barcode));
+    final activeId = ref.watch(activeInventoryProvider);
+    final priceAsync = ref.watch(
+      latestPriceProvider((widget.item.barcode, activeId)),
+    );
     return priceAsync.whenOrNull(
           data: (price) {
             if (price == null) return const SizedBox.shrink();
