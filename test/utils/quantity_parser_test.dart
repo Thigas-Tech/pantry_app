@@ -1,13 +1,13 @@
-/// Tests for [QuantityParser].
+/// Tests for the quantity parser utilities.
 library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 
 void main() {
-  group('QuantityParser.parse', () {
+  group('parseQuantity', () {
     test('uses productQuantity and productQuantityUnit when both present', () {
-      final result = QuantityParser.parse(
+      final result = parseQuantity(
         productQuantity: 500,
         productQuantityUnit: 'ml',
         quantity: '500 ml',
@@ -18,7 +18,7 @@ void main() {
     });
 
     test('parses multi-pack per-unit value from quantity string', () {
-      final result = QuantityParser.parse(
+      final result = parseQuantity(
         productQuantity: 450,
         productQuantityUnit: 'g',
         quantity: '3 x 150 g',
@@ -29,7 +29,7 @@ void main() {
     });
 
     test('multi-pack with "x" works without spaces', () {
-      final result = QuantityParser.parse(
+      final result = parseQuantity(
         productQuantity: 400,
         productQuantityUnit: 'ml',
         quantity: '2x200 ml',
@@ -40,58 +40,58 @@ void main() {
     });
 
     test('parses quantity string when productQuantity is null', () {
-      final result = QuantityParser.parse(quantity: '500 ml');
+      final result = parseQuantity(quantity: '500 ml');
       expect(result, isNotNull);
       expect(result!.amount, 500);
       expect(result.unit, 'ml');
     });
 
     test('parses quantity string without space', () {
-      final result = QuantityParser.parse(quantity: '750ml');
+      final result = parseQuantity(quantity: '750ml');
       expect(result, isNotNull);
       expect(result!.amount, 750);
       expect(result.unit, 'ml');
     });
 
     test('returns null for unparseable quantity with unrecognised unit', () {
-      expect(QuantityParser.parse(quantity: '6 eggs'), isNull);
+      expect(parseQuantity(quantity: '6 eggs'), isNull);
     });
 
     test('parses decimal quantity', () {
-      final result = QuantityParser.parse(quantity: '0.75 L');
+      final result = parseQuantity(quantity: '0.75 L');
       expect(result, isNotNull);
       expect(result!.amount, closeTo(0.75, 0.001));
       expect(result.unit, 'L');
     });
 
     test('parses fl oz unit', () {
-      final result = QuantityParser.parse(quantity: '33.8 fl oz');
+      final result = parseQuantity(quantity: '33.8 fl oz');
       expect(result, isNotNull);
       expect(result!.amount, closeTo(33.8, 0.001));
       expect(result.unit, 'oz');
     });
 
     test('returns null for empty string', () {
-      expect(QuantityParser.parse(quantity: ''), isNull);
+      expect(parseQuantity(quantity: ''), isNull);
     });
 
     test('returns null for null quantity', () {
-      expect(QuantityParser.parse(), isNull);
+      expect(parseQuantity(), isNull);
     });
 
     test('returns null when quantity string has no number', () {
-      expect(QuantityParser.parse(quantity: 'some text'), isNull);
+      expect(parseQuantity(quantity: 'some text'), isNull);
     });
 
     test('parses multi-pack with decimal', () {
-      final result = QuantityParser.parse(quantity: '2 x 0.5 kg');
+      final result = parseQuantity(quantity: '2 x 0.5 kg');
       expect(result, isNotNull);
       expect(result!.amount, closeTo(0.5, 0.001));
       expect(result.unit, 'kg');
     });
 
     test('uses productQuantityUnit when quantity has no unit', () {
-      final result = QuantityParser.parse(
+      final result = parseQuantity(
         productQuantity: 6,
         productQuantityUnit: 'pieces',
         quantity: '6',
@@ -102,9 +102,9 @@ void main() {
     });
   });
 
-  group('QuantityParser.parseUsda', () {
+  group('parseUsdaQuantity', () {
     test('returns gramWeight and g when gramWeight is present', () {
-      final result = QuantityParser.parseUsda(
+      final result = parseUsdaQuantity(
         usdaGramWeight: 182,
         usdaServingAmount: 1,
       );
@@ -114,7 +114,7 @@ void main() {
     });
 
     test('ignores usdaServingAmount when gramWeight is present', () {
-      final result = QuantityParser.parseUsda(
+      final result = parseUsdaQuantity(
         usdaGramWeight: 150,
         usdaServingAmount: 99,
       );
@@ -124,7 +124,7 @@ void main() {
     });
 
     test('returns null when gramWeight is null', () {
-      final result = QuantityParser.parseUsda(
+      final result = parseUsdaQuantity(
         usdaServingAmount: 1,
         usdaServingUnit: 'fruit',
       );
@@ -132,39 +132,39 @@ void main() {
     });
 
     test('returns null when gramWeight is zero', () {
-      final result = QuantityParser.parseUsda(usdaGramWeight: 0);
+      final result = parseUsdaQuantity(usdaGramWeight: 0);
       expect(result, isNull);
     });
 
     test('returns null when gramWeight is negative', () {
-      final result = QuantityParser.parseUsda(usdaGramWeight: -5);
+      final result = parseUsdaQuantity(usdaGramWeight: -5);
       expect(result, isNull);
     });
 
     test('returns null when all fields are null', () {
-      expect(QuantityParser.parseUsda(), isNull);
+      expect(parseUsdaQuantity(), isNull);
     });
 
     test('handles fractional gram weights', () {
-      final result = QuantityParser.parseUsda(usdaGramWeight: 0.5);
+      final result = parseUsdaQuantity(usdaGramWeight: 0.5);
       expect(result, isNotNull);
       expect(result!.amount, closeTo(0.5, 0.001));
       expect(result.unit, 'g');
     });
 
     test('handles large gram weights', () {
-      final result = QuantityParser.parseUsda(usdaGramWeight: 3000);
+      final result = parseUsdaQuantity(usdaGramWeight: 3000);
       expect(result, isNotNull);
       expect(result!.amount, 3000);
       expect(result.unit, 'g');
     });
   });
 
-  group('QuantityParser.parseServing', () {
+  group('parseServingQuantity', () {
     test(
       'uses servingQuantity as amount with unit from servingSize',
       () {
-        final result = QuantityParser.parseServing(
+        final result = parseServingQuantity(
           servingQuantity: 30,
           servingSize: '30g',
         );
@@ -177,7 +177,7 @@ void main() {
     test(
       'servingQuantity with spaced servingSize extracts unit',
       () {
-        final result = QuantityParser.parseServing(
+        final result = parseServingQuantity(
           servingQuantity: 100,
           servingSize: '100 g',
         );
@@ -192,7 +192,7 @@ void main() {
       ' unrecognisable first-word unit returns null',
       () {
         expect(
-          QuantityParser.parseServing(
+          parseServingQuantity(
             servingQuantity: 240,
             servingSize: '1 cup (240ml)',
           ),
@@ -204,7 +204,7 @@ void main() {
     test(
       'servingQuantity with unrecognised servingSize unit returns null',
       () {
-        final result = QuantityParser.parseServing(
+        final result = parseServingQuantity(
           servingQuantity: 28,
           servingSize: '1 cookie (28g)',
         );
@@ -215,7 +215,7 @@ void main() {
     test(
       'fallback parses servingSize string when servingQuantity is null',
       () {
-        final result = QuantityParser.parseServing(servingSize: '100g');
+        final result = parseServingQuantity(servingSize: '100g');
         expect(result, isNotNull);
         expect(result!.amount, 100);
         expect(result.unit, 'g');
@@ -225,7 +225,7 @@ void main() {
     test(
       'fallback parses servingSize with ml when servingQuantity is null',
       () {
-        final result = QuantityParser.parseServing(servingSize: '500ml');
+        final result = parseServingQuantity(servingSize: '500ml');
         expect(result, isNotNull);
         expect(result!.amount, 500);
         expect(result.unit, 'ml');
@@ -234,18 +234,18 @@ void main() {
 
     test(
       'returns null when both servingQuantity and servingSize are null',
-      () => expect(QuantityParser.parseServing(), isNull),
+      () => expect(parseServingQuantity(), isNull),
     );
 
     test(
       'returns null when servingQuantity is null and servingSize is empty',
-      () => expect(QuantityParser.parseServing(servingSize: ''), isNull),
+      () => expect(parseServingQuantity(servingSize: ''), isNull),
     );
 
     test(
       'falls back to parsing servingSize when servingQuantity is zero',
       () {
-        final result = QuantityParser.parseServing(
+        final result = parseServingQuantity(
           servingQuantity: 0,
           servingSize: '30g',
         );
@@ -260,7 +260,7 @@ void main() {
       ' has no recognisable unit',
       () {
         expect(
-          QuantityParser.parseServing(
+          parseServingQuantity(
             servingQuantity: 1,
             servingSize: '1 plate',
           ),
@@ -274,107 +274,107 @@ void main() {
       ' when servingQuantity is null',
       () {
         expect(
-          QuantityParser.parseServing(servingSize: '1 cookie (28g)'),
+          parseServingQuantity(servingSize: '1 cookie (28g)'),
           isNull,
         );
       },
     );
   });
 
-  group('QuantityParser.normalizeUnit', () {
+  group('normalizeUnit', () {
     test('normalizes g -> g', () {
-      expect(QuantityParser.normalizeUnit('g'), 'g');
+      expect(normalizeUnit('g'), 'g');
     });
 
     test('normalizes gram -> g', () {
-      expect(QuantityParser.normalizeUnit('gram'), 'g');
+      expect(normalizeUnit('gram'), 'g');
     });
 
     test('normalizes grams -> g', () {
-      expect(QuantityParser.normalizeUnit('grams'), 'g');
+      expect(normalizeUnit('grams'), 'g');
     });
 
     test('normalizes kilogram -> kg', () {
-      expect(QuantityParser.normalizeUnit('kilogram'), 'kg');
+      expect(normalizeUnit('kilogram'), 'kg');
     });
 
     test(
       'normalizes kilograms -> kg',
-      () => expect(QuantityParser.normalizeUnit('kilograms'), 'kg'),
+      () => expect(normalizeUnit('kilograms'), 'kg'),
     );
 
     test('normalizes ml -> ml', () {
-      expect(QuantityParser.normalizeUnit('ml'), 'ml');
+      expect(normalizeUnit('ml'), 'ml');
     });
 
     test('normalizes milliliter -> ml', () {
-      expect(QuantityParser.normalizeUnit('milliliter'), 'ml');
+      expect(normalizeUnit('milliliter'), 'ml');
     });
 
     test('normalizes millilitre -> ml', () {
-      expect(QuantityParser.normalizeUnit('millilitre'), 'ml');
+      expect(normalizeUnit('millilitre'), 'ml');
     });
 
     test(
       'normalizes L -> L',
-      () => expect(QuantityParser.normalizeUnit('L'), 'L'),
+      () => expect(normalizeUnit('L'), 'L'),
     );
 
     test(
       'normalizes l -> L',
-      () => expect(QuantityParser.normalizeUnit('l'), 'L'),
+      () => expect(normalizeUnit('l'), 'L'),
     );
 
     test(
       'normalizes liter -> L',
-      () => expect(QuantityParser.normalizeUnit('liter'), 'L'),
+      () => expect(normalizeUnit('liter'), 'L'),
     );
 
     test(
       'normalizes litre -> L',
-      () => expect(QuantityParser.normalizeUnit('litre'), 'L'),
+      () => expect(normalizeUnit('litre'), 'L'),
     );
 
     test(
       'normalizes cl -> ml',
-      () => expect(QuantityParser.normalizeUnit('cl'), 'ml'),
+      () => expect(normalizeUnit('cl'), 'ml'),
     );
 
     test('normalizes centiliter -> ml', () {
-      expect(QuantityParser.normalizeUnit('centiliter'), 'ml');
+      expect(normalizeUnit('centiliter'), 'ml');
     });
 
     test(
       'normalizes oz -> oz',
-      () => expect(QuantityParser.normalizeUnit('oz'), 'oz'),
+      () => expect(normalizeUnit('oz'), 'oz'),
     );
 
     test(
       'normalizes ounce -> oz',
-      () => expect(QuantityParser.normalizeUnit('ounce'), 'oz'),
+      () => expect(normalizeUnit('ounce'), 'oz'),
     );
 
     test(
       'normalizes pounds -> lb',
-      () => expect(QuantityParser.normalizeUnit('pounds'), 'lb'),
+      () => expect(normalizeUnit('pounds'), 'lb'),
     );
 
     test(
       'normalizes lbs -> lb',
-      () => expect(QuantityParser.normalizeUnit('lbs'), 'lb'),
+      () => expect(normalizeUnit('lbs'), 'lb'),
     );
 
     test(
       'returns null for null',
-      () => expect(QuantityParser.normalizeUnit(null), isNull),
+      () => expect(normalizeUnit(null), isNull),
     );
 
     test('returns null for unrecognised unit', () {
-      expect(QuantityParser.normalizeUnit('unknown'), isNull);
+      expect(normalizeUnit('unknown'), isNull);
     });
 
     test('returns null for empty string', () {
-      expect(QuantityParser.normalizeUnit(''), isNull);
+      expect(normalizeUnit(''), isNull);
     });
   });
 }

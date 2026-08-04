@@ -3,11 +3,9 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-// The .autoDispose.family type is inferred from the value expression.
-// ignore_for_file: specify_nonobvious_property_types
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
 import 'package:pantry_app/database/recipe_ingredient_dao.dart';
@@ -60,7 +58,8 @@ final FutureProvider<List<Recipe>> allRecipesProvider =
     });
 
 /// Provides ingredients for a specific recipe.
-final allRecipeIngredientsProvider = FutureProvider.autoDispose
+final FutureProviderFamily<List<RecipeIngredient>, int>
+allRecipeIngredientsProvider = FutureProvider.autoDispose
     .family<List<RecipeIngredient>, int>(
       (ref, recipeId) {
         final db = ref.watch(databaseProvider);
@@ -180,8 +179,8 @@ String _computeSharedRecipeId(String name, int createdAt, int inventoryId) {
 ///
 /// Returns [RecipeNutrition] computed from the recipe's ingredients and their
 /// product nutrition data. Auto-disposes when no listener remains.
-final recipeNutritionProvider = FutureProvider.autoDispose
-    .family<RecipeNutrition?, int>(
+final FutureProviderFamily<RecipeNutrition?, int> recipeNutritionProvider =
+    FutureProvider.autoDispose.family<RecipeNutrition?, int>(
       (ref, recipeId) async {
         ref.keepAlive();
         final db = ref.watch(databaseProvider);
@@ -234,7 +233,8 @@ typedef IngredientWithProduct = ({
 /// Fetches each ingredient's product via [ProductRepository] so that images
 /// are available for display. Ingredients without a barcode get a null
 /// product.
-final recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
+final FutureProviderFamily<List<IngredientWithProduct>, int>
+recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
     .family<List<IngredientWithProduct>, int>(
       (ref, recipeId) async {
         ref.keepAlive();
@@ -278,8 +278,8 @@ final recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
 ///
 /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
 /// known scores.
-final recipeNutriScoreProvider = FutureProvider.autoDispose
-    .family<String?, int>(
+final FutureProviderFamily<String?, int> recipeNutriScoreProvider =
+    FutureProvider.autoDispose.family<String?, int>(
       (ref, recipeId) async {
         ref.keepAlive();
         final db = ref.watch(databaseProvider);

@@ -835,7 +835,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         widget.product.servingQuantity! > 0 &&
         widget.product.servingSize != null &&
         widget.product.servingSize!.isNotEmpty) {
-      final parsed = QuantityParser.parseServing(
+      final parsed = parseServingQuantity(
         servingQuantity: widget.product.servingQuantity,
         servingSize: widget.product.servingSize,
       );

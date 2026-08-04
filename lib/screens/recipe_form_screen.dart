@@ -127,7 +127,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     String metricUnit;
 
     if (product.productType == ProductType.produce) {
-      final parsed = QuantityParser.parseUsda(
+      final parsed = parseUsdaQuantity(
         usdaServingAmount: product.usdaServingAmount,
         usdaServingUnit: product.usdaServingUnit,
         usdaGramWeight: product.usdaGramWeight,
@@ -139,7 +139,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
         return (quantity: 1.0, unit: 'pieces');
       }
     } else {
-      final parsed = QuantityParser.parseServing(
+      final parsed = parseServingQuantity(
         servingQuantity: product.servingQuantity,
         servingSize: product.servingSize,
       );
