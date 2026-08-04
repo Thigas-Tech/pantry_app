@@ -111,7 +111,8 @@ and</li>
   <pre class="language-dart"><code class="language-dart">@override
 Widget build(BuildContext context, WidgetRef ref) {
   final l10n = AppLocalizations.of(context)!;
-  final historyAsync = ref.watch(priceHistoryProvider(barcode));
+  final activeId = ref.watch(activeInventoryProvider);
+  final historyAsync = ref.watch(priceHistoryProvider((barcode, activeId)));
 
   final priceTrackingEnabled = ref.watch(
     settingsProvider.select((s) =&gt; s.priceTrackingEnabled),

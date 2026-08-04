@@ -95,6 +95,7 @@ Returns raw rows {store, avg_score}.</p>
         FROM prices p
         INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
         WHERE p.store IS NOT NULL AND p.store != &#39;&#39;
+          AND p.inventory_id = ?
       )
       SELECT
         lp.store,
@@ -114,7 +115,7 @@ Returns raw rows {store, avg_score}.</p>
       GROUP BY lp.store
       ORDER BY avg_score DESC
     &#39;&#39;&#39;,
-      [inventoryId],
+      [inventoryId, inventoryId],
     );
     logInfo(&#39;Fetched Nutri-Score by store: ${result.length} stores&#39;);
     return result;

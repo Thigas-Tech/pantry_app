@@ -79,9 +79,9 @@ have at least one price.</p>
       SELECT COUNT(DISTINCT i.barcode)
       FROM inventory i
       INNER JOIN prices p ON p.barcode = i.barcode
-      WHERE i.inventory_id = ?
+      WHERE i.inventory_id = ? AND p.inventory_id = ?
     &#39;&#39;&#39;,
-          [inventoryId],
+          [inventoryId, inventoryId],
         ),
       ) ??
       0;

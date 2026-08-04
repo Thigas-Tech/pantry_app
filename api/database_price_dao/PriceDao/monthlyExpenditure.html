@@ -92,6 +92,7 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
           ) AS rn
         FROM prices p
         INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
+        WHERE p.inventory_id = ?
       )
       SELECT
         strftime(&#39;%Y-%m&#39;, date_purchased &#47; 1000, &#39;unixepoch&#39;) AS month,
@@ -101,7 +102,7 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
       GROUP BY month
       ORDER BY month ASC
     &#39;&#39;&#39;,
-      [inventoryId],
+      [inventoryId, inventoryId],
     );
     logInfo(
       &#39;Fetched monthly expenditure: ${result.length} months&#39;,

@@ -82,13 +82,14 @@ is not applied here — the caller should convert via CurrencyService.</p>
     INNER JOIN (
       SELECT barcode, MAX(date_purchased) as max_date
       FROM prices
+      WHERE inventory_id = ?
       GROUP BY barcode
     ) latest ON p.barcode = latest.barcode
       AND p.date_purchased = latest.max_date
     INNER JOIN inventory i ON i.barcode = p.barcode
-    WHERE i.inventory_id = ?
+    WHERE i.inventory_id = ? AND p.inventory_id = ?
   &#39;&#39;&#39;,
-    [inventoryId],
+    [inventoryId, inventoryId, inventoryId],
   );
   final total = result.first[&#39;total&#39;] as double?;
   return total;

@@ -55,22 +55,27 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
-<span class="name ">getLatestPrice</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="getLatestPrice-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
-</ol>)
+<span class="name ">getLatestPrice</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="getLatestPrice-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
+<li><span class="parameter" id="getLatestPrice-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Returns the most recent price for the given <code>barcode</code>, or null.</p>
+  <p>Returns the most recent price for the given <code>barcode</code> and
+<code>inventoryId</code>, or null.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Price?&gt; getLatestPrice(String barcode) =&gt; _db.getLatestPrice(barcode);</code></pre>
+  <pre class="language-dart"><code class="language-dart">Future&lt;Price?&gt; getLatestPrice(
+  String barcode, {
+  required int inventoryId,
+}) =&gt; _db.getLatestPrice(barcode, inventoryId: inventoryId);</code></pre>
 </section>
 
 

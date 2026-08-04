@@ -55,29 +55,34 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
-<span class="name ">getLatest</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="getLatest-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
-<li><span class="parameter" id="getLatest-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span></li>
-</ol>)
+<span class="name ">getLatest</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="getLatest-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
+<li><span class="parameter" id="getLatest-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
+<li><span class="parameter" id="getLatest-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
+</ol>})
 
       
 
     </section>
     
 <section class="desc markdown">
-  <p>Returns the most recent price for the given <code>barcode</code>, or null
-if none exist.</p>
+  <p>Returns the most recent price for the given <code>barcode</code> and
+<code>inventoryId</code>, or null if none exist.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Price?&gt; getLatest(Database db, String barcode) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;Price?&gt; getLatest(
+  Database db,
+  String barcode, {
+  required int inventoryId,
+}) async {
   try {
     final result = await db.query(
       &#39;prices&#39;,
-      where: &#39;barcode = ?&#39;,
-      whereArgs: [barcode],
+      where: &#39;barcode = ? AND inventory_id = ?&#39;,
+      whereArgs: [barcode, inventoryId],
       orderBy: &#39;date_purchased DESC&#39;,
       limit: 1,
     );

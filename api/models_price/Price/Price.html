@@ -71,6 +71,7 @@
 <li><span class="parameter" id="param-receiptItemIndex"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">receiptItemIndex</span>, </span></li>
 <li><span class="parameter" id="param-notes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">notes</span>, </span></li>
 <li><span class="parameter" id="param-dateAdded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">dateAdded</span>, </span></li>
+<li><span class="parameter" id="param-inventoryId"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(1)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
 </ol>})
     </section>
     
@@ -144,6 +145,12 @@
   &#47;&#47;&#47; Epoch timestamp (milliseconds since Unix epoch) of when this record
   &#47;&#47;&#47; was created locally.
   int? dateAdded,
+
+  &#47;&#47;&#47; The inventory (pantry) this price observation belongs to.
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; Prices are scoped per inventory so the same product can track
+  &#47;&#47;&#47; independent histories in each pantry. Defaults to 1 (Home).
+  @Default(1) int inventoryId,
 }) = _Price;</code></pre>
 </section>
 

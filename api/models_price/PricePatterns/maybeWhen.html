@@ -77,6 +77,7 @@
 <li><span class="parameter" id="param-receiptItemIndex"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">receiptItemIndex</span>, </span></li>
 <li><span class="parameter" id="param-notes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">notes</span>, </span></li>
 <li><span class="parameter" id="param-dateAdded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">dateAdded</span>, </span></li>
+<li><span class="parameter" id="param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
 </ol>)?, {</span></li>
 <li><span class="parameter" id="maybeWhen-param-orElse"><span>required</span> <span class="type-annotation">TResult</span> <span class="parameter-name">orElse</span>(), </span></li>
 </ol>})
@@ -101,10 +102,10 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult maybeWhen&lt;TResult extends Object?&gt;(TResult Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  int? dateAdded)?  $default,{required TResult orElse(),}) {final _that = this;
+  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult maybeWhen&lt;TResult extends Object?&gt;(TResult Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  int? dateAdded,  int inventoryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Price() when $default != null:
-return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.dateAdded);case _:
+return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.dateAdded,_that.inventoryId);case _:
   return orElse();
 
 }

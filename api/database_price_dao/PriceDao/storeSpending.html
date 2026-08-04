@@ -93,6 +93,7 @@ Returns raw rows {store, total, item_count}.</p>
         FROM prices p
         INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
         WHERE p.store IS NOT NULL AND p.store != &#39;&#39;
+          AND p.inventory_id = ?
       )
       SELECT
         store,
@@ -103,7 +104,7 @@ Returns raw rows {store, total, item_count}.</p>
       GROUP BY store
       ORDER BY total DESC
     &#39;&#39;&#39;,
-      [inventoryId],
+      [inventoryId, inventoryId],
     );
     logInfo(&#39;Fetched store spending: ${result.length} stores&#39;);
     return result;

@@ -65,6 +65,8 @@
     
 <section class="desc markdown">
   <p>Updates an existing price row. Returns the number of rows affected.</p>
+<p>The original inventory_id is preserved from the existing row, so an
+update never silently moves a price to another inventory.</p>
 </section>
 
 
@@ -74,9 +76,12 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; update(Database db, Price price) async {
   logInfo(&#39;Updating price ${price.id}&#39;);
   try {
+    final existing = await getById(db, price.id!);
+    final preservedInventoryId = existing?.inventoryId ?? price.inventoryId;
+    final updated = price.copyWith(inventoryId: preservedInventoryId);
     final affected = await db.update(
       &#39;prices&#39;,
-      toMap(price),
+      toMap(updated),
       where: &#39;id = ?&#39;,
       whereArgs: [price.id],
     );

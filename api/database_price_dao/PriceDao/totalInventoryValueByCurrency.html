@@ -86,14 +86,15 @@ When no items have prices, this returns an empty list.</p>
     INNER JOIN (
       SELECT barcode, MAX(date_purchased) as max_date
       FROM prices
+      WHERE inventory_id = ?
       GROUP BY barcode
     ) latest ON p.barcode = latest.barcode
       AND p.date_purchased = latest.max_date
     INNER JOIN inventory i ON i.barcode = p.barcode
-    WHERE i.inventory_id = ?
+    WHERE i.inventory_id = ? AND p.inventory_id = ?
     GROUP BY p.currency
   &#39;&#39;&#39;,
-    [inventoryId],
+    [inventoryId, inventoryId, inventoryId],
   );
   return result;
 }</code></pre>

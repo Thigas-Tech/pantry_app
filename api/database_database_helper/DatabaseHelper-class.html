@@ -721,14 +721,15 @@ ordered by expiry_date ASC (nulls last) for FEFO deduction.
 </dd>
 
         <dt id="getLatestPrice" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/getLatestPrice.html">getLatestPrice</a></span><span class="signature">(<wbr><span class="parameter" id="getLatestPrice-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getLatestPrice.html">getLatestPrice</a></span><span class="signature">(<wbr><span class="parameter" id="getLatestPrice-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getLatestPrice-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns the most recent price for the given <code>barcode</code>, or null.
+  Returns the most recent price for the given <code>barcode</code> and
+<code>inventoryId</code>, or null.
   
 
 </dd>
@@ -826,15 +827,15 @@ price.
 </dd>
 
         <dt id="getPricesByBarcode" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPricesByBarcode.html">getPricesByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="getPricesByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getPricesByBarcode-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">limit</span>, </span><span class="parameter" id="getPricesByBarcode-param-offset"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">offset</span></span>})
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPricesByBarcode.html">getPricesByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="getPricesByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="getPricesByBarcode-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="getPricesByBarcode-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">limit</span>, </span><span class="parameter" id="getPricesByBarcode-param-offset"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">offset</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
-  Returns all price entries for the given <code>barcode</code>, ordered by date
-descending.
+  Returns all price entries for the given <code>barcode</code> and <code>inventoryId</code>,
+ordered by date descending.
   
 
 </dd>

@@ -67,6 +67,11 @@
   <p>Deletes the inventory with the given <code>id</code> and all its items.</p>
 <p>Also deletes the inventory's recipes, their ingredients, and their
 history, mirroring item-delete semantics.</p>
+<p>Price rows are intentionally NOT deleted — they are barcode observations
+that remain useful if the product is re-added to another pantry. Foreign
+key enforcement is temporarily disabled so the no-action
+prices.inventory_id FK does not block the parent delete (mirrors
+clearCachedProducts).</p>
 </section>
 
 
@@ -74,33 +79,42 @@ history, mirroring item-delete semantics.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; delete(Database db, int id) async {
-  final recipeRows = await db.query(
-    &#39;recipes&#39;,
-    columns: [&#39;id&#39;],
-    where: &#39;inventory_id = ?&#39;,
-    whereArgs: [id],
-  );
-  final recipeIds = recipeRows
-      .map((r) =&gt; r[&#39;id&#39;] as int?)
-      .whereType&lt;int&gt;()
-      .toList();
-  if (recipeIds.isNotEmpty) {
-    final placeholders = recipeIds.map((_) =&gt; &#39;?&#39;).join(&#39;,&#39;);
-    await db.delete(
-      &#39;recipe_history&#39;,
-      where: &#39;recipe_id IN ($placeholders)&#39;,
-      whereArgs: recipeIds,
+  await db.execute(&#39;PRAGMA foreign_keys = OFF&#39;);
+  try {
+    final recipeRows = await db.query(
+      &#39;recipes&#39;,
+      columns: [&#39;id&#39;],
+      where: &#39;inventory_id = ?&#39;,
+      whereArgs: [id],
     );
-    await db.delete(
-      &#39;recipe_ingredients&#39;,
-      where: &#39;recipe_id IN ($placeholders)&#39;,
-      whereArgs: recipeIds,
-    );
-    await db.delete(&#39;recipes&#39;, where: &#39;inventory_id = ?&#39;, whereArgs: [id]);
-  }
+    final recipeIds = recipeRows
+        .map((r) =&gt; r[&#39;id&#39;] as int?)
+        .whereType&lt;int&gt;()
+        .toList();
+    if (recipeIds.isNotEmpty) {
+      final placeholders = recipeIds.map((_) =&gt; &#39;?&#39;).join(&#39;,&#39;);
+      await db.delete(
+        &#39;recipe_history&#39;,
+        where: &#39;recipe_id IN ($placeholders)&#39;,
+        whereArgs: recipeIds,
+      );
+      await db.delete(
+        &#39;recipe_ingredients&#39;,
+        where: &#39;recipe_id IN ($placeholders)&#39;,
+        whereArgs: recipeIds,
+      );
+      await db.delete(
+        &#39;recipes&#39;,
+        where: &#39;inventory_id = ?&#39;,
+        whereArgs: [id],
+      );
+    }
 
-  await db.delete(&#39;inventory&#39;, where: &#39;inventory_id = ?&#39;, whereArgs: [id]);
-  await db.delete(&#39;inventories&#39;, where: &#39;id = ?&#39;, whereArgs: [id]);
+    await db.delete(&#39;inventory&#39;, where: &#39;inventory_id = ?&#39;, whereArgs: [id]);
+    await db.delete(&#39;inventories&#39;, where: &#39;id = ?&#39;, whereArgs: [id]);
+  } finally {
+    await db.execute(&#39;PRAGMA foreign_keys = ON&#39;);
+  }
 }</code></pre>
 </section>
 
