@@ -27,6 +27,7 @@ library;
 
 import 'dart:async';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/misc.dart'; // for Override
@@ -34,16 +35,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/price_provider.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
+import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/services/price_repository.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
@@ -180,6 +186,8 @@ class FakeSettingsNotifierImperial extends SettingsNotifier {
 
 class MockProductRepository extends Mock implements ProductRepository {}
 
+class MockPriceRepository extends Mock implements PriceRepository {}
+
 class MockProductSubmissionService extends Mock
     implements ProductSubmissionService {}
 
@@ -200,6 +208,7 @@ void _registerFallbacks() {
   );
   registerFallbackValue(AndroidScheduleMode.inexactAllowWhileIdle);
   registerFallbackValue(const Product(barcode: 'fallback', name: 'Fallback'));
+  registerFallbackValue(const Price(barcode: 'fallback', price: 1));
 }
 
 // ---------- Test harness overrides ------------------------------------------
@@ -210,6 +219,7 @@ List<Override> screenOverrides({
   required MockNotificationService mockNotif,
   MockProductSubmissionService? mockSubmissionService,
   MockDatabaseHelper? mockDb,
+  MockPriceRepository? mockPriceRepo,
 }) {
   return [
     productRepositoryProvider.overrideWithValue(mockRepo),
@@ -217,6 +227,8 @@ List<Override> screenOverrides({
     if (mockSubmissionService != null)
       productSubmissionServiceProvider.overrideWithValue(mockSubmissionService),
     if (mockDb != null) databaseProvider.overrideWithValue(mockDb),
+    if (mockPriceRepo != null)
+      priceRepositoryProvider.overrideWithValue(mockPriceRepo),
     activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
   ];
 }
@@ -1171,6 +1183,174 @@ void main() {
       expect(find.textContaining('1 pcs'), findsOneWidget);
     },
   );
+
+  // --------------------------------------------------------------------------
+  // Price section (trend + recent prices + view all + scoped save)
+  // --------------------------------------------------------------------------
+
+  group('price section', () {
+    const barcode = '5901234123457';
+
+    final trendPrices = [
+      const Price(
+        barcode: barcode,
+        price: 6.5,
+        store: 'Store C',
+        datePurchased: 1719792000000,
+      ),
+      const Price(
+        barcode: barcode,
+        price: 5,
+        store: 'Store A',
+        datePurchased: 1719705600000,
+      ),
+      const Price(
+        barcode: barcode,
+        price: 4,
+        store: 'Store B',
+        datePurchased: 1719619200000,
+      ),
+    ];
+
+    testWidgets('shows latest price, trend and recent list', (tester) async {
+      setLargeScreen(tester);
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: [
+          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+          latestPriceProvider((barcode, 1)).overrideWith(
+            (ref) => trendPrices.first,
+          ),
+          priceHistoryProvider((barcode, 1)).overrideWith(
+            (ref) => trendPrices,
+          ),
+        ],
+      );
+
+      expect(find.text(r'$6.50'), findsNWidgets(2));
+      expect(find.text('Recent prices'), findsOneWidget);
+      expect(find.text('Prices are rising'), findsOneWidget);
+      expect(find.text('Store A'), findsOneWidget);
+      expect(find.text('Store B'), findsOneWidget);
+      expect(find.text('View all'), findsOneWidget);
+      expect(find.byType(LineChart), findsOneWidget);
+    });
+
+    testWidgets('single price shows no trend or recent list', (tester) async {
+      setLargeScreen(tester);
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: [
+          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+          latestPriceProvider((barcode, 1)).overrideWith(
+            (ref) => trendPrices.first,
+          ),
+          priceHistoryProvider((barcode, 1)).overrideWith(
+            (ref) => [trendPrices.first],
+          ),
+        ],
+      );
+
+      expect(find.text(r'$6.50'), findsOneWidget);
+      expect(find.text('Recent prices'), findsNothing);
+      expect(find.text('Prices are rising'), findsNothing);
+      expect(find.byType(LineChart), findsNothing);
+    });
+
+    testWidgets('shows empty state when no prices exist', (tester) async {
+      setLargeScreen(tester);
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: [
+          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+          latestPriceProvider((barcode, 1)).overrideWith(
+            (ref) => null,
+          ),
+        ],
+      );
+
+      expect(find.text('No prices recorded.'), findsOneWidget);
+      expect(find.text('Price saved'), findsOneWidget);
+    });
+
+    testWidgets('view all link opens the price history screen', (
+      tester,
+    ) async {
+      setLargeScreen(tester);
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: [
+          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+          latestPriceProvider((barcode, 1)).overrideWith(
+            (ref) => trendPrices.first,
+          ),
+          priceHistoryProvider((barcode, 1)).overrideWith(
+            (ref) => trendPrices,
+          ),
+        ],
+      );
+
+      await tester.tap(find.text('View all'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PriceHistoryScreen), findsOneWidget);
+    });
+
+    testWidgets('saved price is stamped with the active inventory', (
+      tester,
+    ) async {
+      setLargeScreen(tester);
+      final mockPriceRepo = MockPriceRepository();
+      when(
+        () => mockPriceRepo.addPrice(any()),
+      ).thenAnswer((_) async => 1);
+      when(
+        () => mockRepo.cacheProduct(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockPriceRepo.getLatestPrice(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockPriceRepo.getPriceHistory(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => <Price>[]);
+
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: [
+          ...screenOverrides(
+            mockRepo: mockRepo,
+            mockNotif: mockNotif,
+            mockPriceRepo: mockPriceRepo,
+          ),
+          latestPriceProvider((barcode, 1)).overrideWith((ref) => null),
+        ],
+      );
+
+      await tester.tap(find.text('Price saved'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, '12.50');
+      await tester.tap(find.text('Price saved').last);
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockPriceRepo.addPrice(
+          any(that: isA<Price>().having((p) => p.inventoryId, 'inv', 1)),
+        ),
+      ).called(1);
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------

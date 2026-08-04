@@ -33,34 +33,49 @@ class InventoriesDao {
   ///
   /// Also deletes the inventory's recipes, their ingredients, and their
   /// history, mirroring item-delete semantics.
+  ///
+  /// Price rows are intentionally NOT deleted — they are barcode observations
+  /// that remain useful if the product is re-added to another pantry. Foreign
+  /// key enforcement is temporarily disabled so the no-action
+  /// prices.inventory_id FK does not block the parent delete (mirrors
+  /// clearCachedProducts).
   Future<void> delete(Database db, int id) async {
-    final recipeRows = await db.query(
-      'recipes',
-      columns: ['id'],
-      where: 'inventory_id = ?',
-      whereArgs: [id],
-    );
-    final recipeIds = recipeRows
-        .map((r) => r['id'] as int?)
-        .whereType<int>()
-        .toList();
-    if (recipeIds.isNotEmpty) {
-      final placeholders = recipeIds.map((_) => '?').join(',');
-      await db.delete(
-        'recipe_history',
-        where: 'recipe_id IN ($placeholders)',
-        whereArgs: recipeIds,
+    await db.execute('PRAGMA foreign_keys = OFF');
+    try {
+      final recipeRows = await db.query(
+        'recipes',
+        columns: ['id'],
+        where: 'inventory_id = ?',
+        whereArgs: [id],
       );
-      await db.delete(
-        'recipe_ingredients',
-        where: 'recipe_id IN ($placeholders)',
-        whereArgs: recipeIds,
-      );
-      await db.delete('recipes', where: 'inventory_id = ?', whereArgs: [id]);
-    }
+      final recipeIds = recipeRows
+          .map((r) => r['id'] as int?)
+          .whereType<int>()
+          .toList();
+      if (recipeIds.isNotEmpty) {
+        final placeholders = recipeIds.map((_) => '?').join(',');
+        await db.delete(
+          'recipe_history',
+          where: 'recipe_id IN ($placeholders)',
+          whereArgs: recipeIds,
+        );
+        await db.delete(
+          'recipe_ingredients',
+          where: 'recipe_id IN ($placeholders)',
+          whereArgs: recipeIds,
+        );
+        await db.delete(
+          'recipes',
+          where: 'inventory_id = ?',
+          whereArgs: [id],
+        );
+      }
 
-    await db.delete('inventory', where: 'inventory_id = ?', whereArgs: [id]);
-    await db.delete('inventories', where: 'id = ?', whereArgs: [id]);
+      await db.delete('inventory', where: 'inventory_id = ?', whereArgs: [id]);
+      await db.delete('inventories', where: 'id = ?', whereArgs: [id]);
+    } finally {
+      await db.execute('PRAGMA foreign_keys = ON');
+    }
   }
 
   /// Renames the inventory with the given [id].

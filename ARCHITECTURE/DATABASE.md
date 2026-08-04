@@ -1,6 +1,6 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 33)
+### 2.1 Schema (version 34)
 
 Thirteen tables:
 
@@ -11,7 +11,7 @@ Thirteen tables:
 | `inventory` | Instances of products in a pantry. FK -> products, inventories |
 | `feedback_queue` | Offline queue for GitHub issue reports |
 | `product_submission_queue` | Offline queue for OFF product submissions |
-| `prices` | Purchase price observations per barcode |
+| `prices` | Purchase price observations per barcode, scoped to their owning inventory via `inventory_id` |
 | `shopping_list` | Items the user intends to buy |
 | `stores` | Saved store names for autocomplete on price entry |
 | `firebase_cache_meta` | Tracks last-refresh timestamps for product cache entries synced to Firestore |
@@ -59,7 +59,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v33).
+- `_onUpgrade` handles version bumps (currently v1 -> v34).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -97,6 +97,7 @@ Version history:
 | v30 -> v31 | Added `serving_quantity REAL` column to `products` |
 | v31 -> v32 | Added `scan_history` table with indexes on scanned_at and barcode |
 | v32 -> v33 | Added `inventory_id` column on `recipes` (backfilled to first inventory) + `idx_recipes_inventory_id` index |
+| v33 -> v34 | Added `inventory_id` column on `prices` (backfilled to first inventory) + `idx_prices_inventory_id` index |
 
 ### 2.4 Connectivity layer
 

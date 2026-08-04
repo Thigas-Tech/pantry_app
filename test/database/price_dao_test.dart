@@ -61,11 +61,11 @@ void main() {
         price.copyWith(price: 12, datePurchased: 999999999),
       );
 
-      final list = await dao.listByBarcode(db, '123');
+      final list = await dao.listByBarcode(db, '123', inventoryId: 1);
       expect(list.length, 2);
       expect(list.first.price, 12.0); // Latest first
 
-      final latest = await dao.getLatest(db, '123');
+      final latest = await dao.getLatest(db, '123', inventoryId: 1);
       expect(latest!.price, 12.0);
     });
 
@@ -78,6 +78,122 @@ void main() {
 
       await dao.delete(db, id);
       expect(await dao.getById(db, id), isNull);
+    });
+  });
+
+  group('PriceDao inventory scoping', () {
+    /// Creates a second inventory (id 2) so inventory-scoped rows satisfy the
+    /// runtime-enforced FK to inventories(id).
+    Future<void> seedInventory2(Database db) async {
+      await dbHelper.inventoriesDao.create(db, 'Work');
+    }
+
+    test('toMap and fromMap round-trip inventory_id', () async {
+      final db = await dbHelper.database;
+      await seedInventory2(db);
+      const scoped = Price(
+        barcode: '123',
+        price: 10.5,
+        inventoryId: 2,
+      );
+      final id = await dao.insert(db, scoped);
+      final fetched = await dao.getById(db, id);
+      expect(fetched, isNotNull);
+      expect(fetched!.inventoryId, 2);
+    });
+
+    test('listByBarcode filters by inventory', () async {
+      final db = await dbHelper.database;
+      await seedInventory2(db);
+      await dao.insert(
+        db,
+        const Price(barcode: '123', price: 10),
+      );
+      await dao.insert(
+        db,
+        const Price(barcode: '123', price: 20, inventoryId: 2),
+      );
+
+      final inv1 = await dao.listByBarcode(db, '123', inventoryId: 1);
+      final inv2 = await dao.listByBarcode(db, '123', inventoryId: 2);
+      expect(inv1, hasLength(1));
+      expect(inv1.first.price, 10);
+      expect(inv2, hasLength(1));
+      expect(inv2.first.price, 20);
+    });
+
+    test('getLatest filters by inventory', () async {
+      final db = await dbHelper.database;
+      await seedInventory2(db);
+      await dao.insert(
+        db,
+        const Price(
+          barcode: '123',
+          price: 10,
+          datePurchased: 100,
+        ),
+      );
+      await dao.insert(
+        db,
+        const Price(
+          barcode: '123',
+          price: 99,
+          inventoryId: 2,
+          datePurchased: 200,
+        ),
+      );
+
+      final inv1 = await dao.getLatest(db, '123', inventoryId: 1);
+      final inv2 = await dao.getLatest(db, '123', inventoryId: 2);
+      expect(inv1!.price, 10);
+      expect(inv2!.price, 99);
+    });
+
+    test('listByBarcode limit returns the last N by date desc', () async {
+      final db = await dbHelper.database;
+      for (var i = 1; i <= 7; i++) {
+        await dao.insert(
+          db,
+          Price(
+            barcode: '123',
+            price: i.toDouble(),
+            datePurchased: i * 1000,
+          ),
+        );
+      }
+
+      final recent = await dao.listByBarcode(
+        db,
+        '123',
+        inventoryId: 1,
+        limit: 5,
+      );
+      expect(recent, hasLength(5));
+      expect(recent.first.price, 7);
+      expect(recent.last.price, 3);
+    });
+
+    test('update preserves the existing inventory_id', () async {
+      final db = await dbHelper.database;
+      await seedInventory2(db);
+      const scoped = Price(
+        barcode: '123',
+        price: 10,
+        inventoryId: 2,
+      );
+      final id = await dao.insert(db, scoped);
+
+      // Caller passes a price that forgot to set inventoryId (defaults to 1).
+      final edit = Price(
+        barcode: '123',
+        price: 15,
+        id: id,
+      );
+      await dao.update(db, edit);
+
+      final fetched = await dao.getById(db, id);
+      expect(fetched!.price, 15);
+      expect(fetched.inventoryId, 2);
     });
   });
 
@@ -136,6 +252,29 @@ void main() {
       final db = await dbHelper.database;
       expect(await dao.pricedItemCount(db, 1), 2);
     });
+
+    test('stats ignore prices recorded in other inventories', () async {
+      final db = await dbHelper.database;
+      await dbHelper.inventoriesDao.create(db, 'Work');
+
+      // p1 already has prices in inventory 1 (latest 10 @ 200). Record a
+      // higher price in inventory 2 with a LATER date — without scoping the
+      // "latest per barcode" subquery would wrongly pick it up.
+      await dao.insert(
+        db,
+        const Price(
+          barcode: 'p1',
+          price: 50,
+          datePurchased: 300,
+          inventoryId: 2,
+        ),
+      );
+
+      // Inventory 1 stats must only reflect its own prices (p1: 10, p2: 20).
+      expect(await dao.totalInventoryValue(db, 1), 30.0);
+      expect(await dao.averageItemPrice(db, 1), 15.0);
+      expect(await dao.pricedItemCount(db, 1), 2);
+    });
   });
 
   group('PriceDao sync and retention', () {
@@ -184,8 +323,8 @@ void main() {
       final deleted = await dao.deleteStale(db, 30);
       expect(deleted, 1);
       expect(await dao.count(db), 1);
-      expect(await dao.getLatest(db, '2'), isNotNull);
-      expect(await dao.getLatest(db, '1'), isNull);
+      expect(await dao.getLatest(db, '2', inventoryId: 1), isNotNull);
+      expect(await dao.getLatest(db, '1', inventoryId: 1), isNull);
     });
   });
 }

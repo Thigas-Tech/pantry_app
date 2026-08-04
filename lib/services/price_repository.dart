@@ -50,16 +50,26 @@ class PriceRepository {
   /// Returns the price with the given [id], or null if not found.
   Future<Price?> getPriceById(int id) => _db.getPriceById(id);
 
-  /// Returns all price entries for the given [barcode], ordered by
-  /// datePurchased descending.
+  /// Returns all price entries for the given [barcode] and [inventoryId],
+  /// ordered by datePurchased descending.
   Future<List<Price>> getPriceHistory(
     String barcode, {
+    required int inventoryId,
     int? limit,
     int? offset,
-  }) => _db.getPricesByBarcode(barcode, limit: limit, offset: offset);
+  }) => _db.getPricesByBarcode(
+    barcode,
+    inventoryId: inventoryId,
+    limit: limit,
+    offset: offset,
+  );
 
-  /// Returns the most recent price for the given [barcode], or null.
-  Future<Price?> getLatestPrice(String barcode) => _db.getLatestPrice(barcode);
+  /// Returns the most recent price for the given [barcode] and
+  /// [inventoryId], or null.
+  Future<Price?> getLatestPrice(
+    String barcode, {
+    required int inventoryId,
+  }) => _db.getLatestPrice(barcode, inventoryId: inventoryId);
 
   /// Returns the total number of prices on record.
   Future<int> getPriceCount() => _db.getPriceCount();

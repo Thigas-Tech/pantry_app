@@ -7,20 +7,33 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 
-/// Provides the price history for a specific barcode.
+/// Provides the price history for a specific barcode in the given inventory.
+///
+/// Keyed by a `(barcode, inventoryId)` record so each pantry keeps an
+/// independent, cache-isolated history.
 final priceHistoryProvider = FutureProvider.autoDispose
-    .family<List<Price>, String>(
-      (ref, barcode) {
-        return ref.watch(priceRepositoryProvider).getPriceHistory(barcode);
+    .family<List<Price>, (String, int)>(
+      (ref, args) {
+        final (barcode, inventoryId) = args;
+        return ref
+            .watch(priceRepositoryProvider)
+            .getPriceHistory(barcode, inventoryId: inventoryId);
       },
     );
 
-/// Provides the most recent price for a specific barcode, or null.
-final latestPriceProvider = FutureProvider.autoDispose.family<Price?, String>(
-  (ref, barcode) {
-    return ref.watch(priceRepositoryProvider).getLatestPrice(barcode);
-  },
-);
+/// Provides the most recent price for a specific barcode in the given
+/// inventory, or null.
+///
+/// Keyed by a `(barcode, inventoryId)` record.
+final latestPriceProvider = FutureProvider.autoDispose
+    .family<Price?, (String, int)>(
+      (ref, args) {
+        final (barcode, inventoryId) = args;
+        return ref
+            .watch(priceRepositoryProvider)
+            .getLatestPrice(barcode, inventoryId: inventoryId);
+      },
+    );
 
 /// Whether prices are hidden for privacy.
 final pricesHiddenProvider = Provider<bool>(

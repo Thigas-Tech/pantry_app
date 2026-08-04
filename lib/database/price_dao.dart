@@ -32,7 +32,9 @@ class PriceDao {
         receipt_item_index INTEGER,
         notes TEXT,
         date_added INTEGER NOT NULL,
-        FOREIGN KEY (barcode) REFERENCES products(barcode)
+        inventory_id INTEGER NOT NULL DEFAULT 1,
+        FOREIGN KEY (barcode) REFERENCES products(barcode),
+        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
       )
     ''');
     await db.execute('CREATE INDEX idx_prices_barcode ON prices(barcode)');
@@ -41,6 +43,9 @@ class PriceDao {
     );
     await db.execute(
       'CREATE INDEX idx_prices_sync_status ON prices(sync_status)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_prices_inventory_id ON prices(inventory_id)',
     );
   }
 
@@ -62,6 +67,7 @@ class PriceDao {
     'receipt_item_index': p.receiptItemIndex,
     'notes': p.notes,
     'date_added': p.dateAdded ?? DateTime.now().millisecondsSinceEpoch,
+    'inventory_id': p.inventoryId,
   };
 
   /// Converts a database row map into a [Price].
@@ -83,6 +89,7 @@ class PriceDao {
     receiptItemIndex: map['receipt_item_index'] as int?,
     notes: map['notes'] as String?,
     dateAdded: map['date_added'] as int?,
+    inventoryId: (map['inventory_id'] as num?)?.toInt() ?? 1,
   );
 
   /// Inserts a price row and returns its row ID.
@@ -114,19 +121,20 @@ class PriceDao {
     }
   }
 
-  /// Returns all price entries for the given [barcode], ordered by
-  /// datePurchased descending.
+  /// Returns all price entries for the given [barcode] and [inventoryId],
+  /// ordered by datePurchased descending.
   Future<List<Price>> listByBarcode(
     Database db,
     String barcode, {
+    required int inventoryId,
     int? limit,
     int? offset,
   }) async {
     try {
       final result = await db.query(
         'prices',
-        where: 'barcode = ?',
-        whereArgs: [barcode],
+        where: 'barcode = ? AND inventory_id = ?',
+        whereArgs: [barcode, inventoryId],
         orderBy: 'date_purchased DESC',
         limit: limit,
         offset: offset,
@@ -138,14 +146,18 @@ class PriceDao {
     }
   }
 
-  /// Returns the most recent price for the given [barcode], or null
-  /// if none exist.
-  Future<Price?> getLatest(Database db, String barcode) async {
+  /// Returns the most recent price for the given [barcode] and
+  /// [inventoryId], or null if none exist.
+  Future<Price?> getLatest(
+    Database db,
+    String barcode, {
+    required int inventoryId,
+  }) async {
     try {
       final result = await db.query(
         'prices',
-        where: 'barcode = ?',
-        whereArgs: [barcode],
+        where: 'barcode = ? AND inventory_id = ?',
+        whereArgs: [barcode, inventoryId],
         orderBy: 'date_purchased DESC',
         limit: 1,
       );
@@ -174,12 +186,18 @@ class PriceDao {
   }
 
   /// Updates an existing price row. Returns the number of rows affected.
+  ///
+  /// The original inventory_id is preserved from the existing row, so an
+  /// update never silently moves a price to another inventory.
   Future<int> update(Database db, Price price) async {
     logInfo('Updating price ${price.id}');
     try {
+      final existing = await getById(db, price.id!);
+      final preservedInventoryId = existing?.inventoryId ?? price.inventoryId;
+      final updated = price.copyWith(inventoryId: preservedInventoryId);
       final affected = await db.update(
         'prices',
-        toMap(price),
+        toMap(updated),
         where: 'id = ?',
         whereArgs: [price.id],
       );
@@ -241,13 +259,14 @@ class PriceDao {
       INNER JOIN (
         SELECT barcode, MAX(date_purchased) as max_date
         FROM prices
+        WHERE inventory_id = ?
         GROUP BY barcode
       ) latest ON p.barcode = latest.barcode
         AND p.date_purchased = latest.max_date
       INNER JOIN inventory i ON i.barcode = p.barcode
-      WHERE i.inventory_id = ?
+      WHERE i.inventory_id = ? AND p.inventory_id = ?
     ''',
-      [inventoryId],
+      [inventoryId, inventoryId, inventoryId],
     );
     final total = result.first['total'] as double?;
     return total;
@@ -270,14 +289,15 @@ class PriceDao {
       INNER JOIN (
         SELECT barcode, MAX(date_purchased) as max_date
         FROM prices
+        WHERE inventory_id = ?
         GROUP BY barcode
       ) latest ON p.barcode = latest.barcode
         AND p.date_purchased = latest.max_date
       INNER JOIN inventory i ON i.barcode = p.barcode
-      WHERE i.inventory_id = ?
+      WHERE i.inventory_id = ? AND p.inventory_id = ?
       GROUP BY p.currency
     ''',
-      [inventoryId],
+      [inventoryId, inventoryId, inventoryId],
     );
     return result;
   }
@@ -297,13 +317,14 @@ class PriceDao {
       INNER JOIN (
         SELECT barcode, MAX(date_purchased) as max_date
         FROM prices
+        WHERE inventory_id = ?
         GROUP BY barcode
       ) latest ON p.barcode = latest.barcode
         AND p.date_purchased = latest.max_date
       INNER JOIN inventory i ON i.barcode = p.barcode
-      WHERE i.inventory_id = ?
+      WHERE i.inventory_id = ? AND p.inventory_id = ?
     ''',
-      [inventoryId],
+      [inventoryId, inventoryId, inventoryId],
     );
     return result;
   }
@@ -320,13 +341,14 @@ class PriceDao {
       INNER JOIN (
         SELECT barcode, MAX(date_purchased) as max_date
         FROM prices
+        WHERE inventory_id = ?
         GROUP BY barcode
       ) latest ON p.barcode = latest.barcode
         AND p.date_purchased = latest.max_date
       INNER JOIN inventory i ON i.barcode = p.barcode
-      WHERE i.inventory_id = ?
+      WHERE i.inventory_id = ? AND p.inventory_id = ?
     ''',
-      [inventoryId],
+      [inventoryId, inventoryId, inventoryId],
     );
     final avg = result.first['avg'] as double?;
     return avg;
@@ -341,9 +363,9 @@ class PriceDao {
         SELECT COUNT(DISTINCT i.barcode)
         FROM inventory i
         INNER JOIN prices p ON p.barcode = i.barcode
-        WHERE i.inventory_id = ?
+        WHERE i.inventory_id = ? AND p.inventory_id = ?
       ''',
-            [inventoryId],
+            [inventoryId, inventoryId],
           ),
         ) ??
         0;
@@ -408,6 +430,7 @@ class PriceDao {
             ) AS rn
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
+          WHERE p.inventory_id = ?
         )
         SELECT
           strftime('%Y-%m', date_purchased / 1000, 'unixepoch') AS month,
@@ -417,7 +440,7 @@ class PriceDao {
         GROUP BY month
         ORDER BY month ASC
       ''',
-        [inventoryId],
+        [inventoryId, inventoryId],
       );
       logInfo(
         'Fetched monthly expenditure: ${result.length} months',
@@ -453,6 +476,7 @@ class PriceDao {
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
           WHERE p.store IS NOT NULL AND p.store != ''
+            AND p.inventory_id = ?
         )
         SELECT
           store,
@@ -463,7 +487,7 @@ class PriceDao {
         GROUP BY store
         ORDER BY total DESC
       ''',
-        [inventoryId],
+        [inventoryId, inventoryId],
       );
       logInfo('Fetched store spending: ${result.length} stores');
       return result;
@@ -499,6 +523,7 @@ class PriceDao {
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
           WHERE p.store IS NOT NULL AND p.store != ''
+            AND p.inventory_id = ?
         )
         SELECT
           lp.store,
@@ -518,7 +543,7 @@ class PriceDao {
         GROUP BY lp.store
         ORDER BY avg_score DESC
       ''',
-        [inventoryId],
+        [inventoryId, inventoryId],
       );
       logInfo('Fetched Nutri-Score by store: ${result.length} stores');
       return result;

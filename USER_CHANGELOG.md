@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Prices are now saved per pantry: each pantry (Home, Work, etc.) keeps its
+  own price history. The product page shows the latest price for the current
+  pantry together with a small trend chart and the last 5 prices, with a
+  link to the full history.
+- Deleting a pantry no longer deletes its recorded prices. Your price
+  observations stay safe if you add the product to another pantry later.
 - Recipes are now saved per pantry: each pantry (Home, Work, etc.) has its
   own set of recipes. You can switch pantries directly from the Recipes
   screen using the same switcher as on the Home screen. Your existing

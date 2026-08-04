@@ -128,7 +128,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 33;
+  static const int databaseVersion = 34;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -649,21 +649,32 @@ class DatabaseHelper {
     return priceDao.getById(db, id);
   }
 
-  /// Returns all price entries for the given [barcode], ordered by date
-  /// descending.
+  /// Returns all price entries for the given [barcode] and [inventoryId],
+  /// ordered by date descending.
   Future<List<Price>> getPricesByBarcode(
     String barcode, {
+    required int inventoryId,
     int? limit,
     int? offset,
   }) async {
     final db = await database;
-    return priceDao.listByBarcode(db, barcode, limit: limit, offset: offset);
+    return priceDao.listByBarcode(
+      db,
+      barcode,
+      inventoryId: inventoryId,
+      limit: limit,
+      offset: offset,
+    );
   }
 
-  /// Returns the most recent price for the given [barcode], or null.
-  Future<Price?> getLatestPrice(String barcode) async {
+  /// Returns the most recent price for the given [barcode] and
+  /// [inventoryId], or null.
+  Future<Price?> getLatestPrice(
+    String barcode, {
+    required int inventoryId,
+  }) async {
     final db = await database;
-    return priceDao.getLatest(db, barcode);
+    return priceDao.getLatest(db, barcode, inventoryId: inventoryId);
   }
 
   /// Updates an existing price row.
