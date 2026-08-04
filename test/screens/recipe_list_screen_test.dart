@@ -62,6 +62,9 @@ void main() {
       ],
     );
     when(() => mockDb.getAllRecipes(1)).thenAnswer((_) async => homeRecipes);
+    when(() => mockDb.getRecipe(any())).thenAnswer(
+      (_) async => homeRecipes.isNotEmpty ? homeRecipes.first : null,
+    );
     when(() => mockDb.getRecipeIngredients(any())).thenAnswer(
       (_) async => [
         const RecipeIngredient(

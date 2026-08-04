@@ -47,6 +47,17 @@
   (`lib/models/recipe_cache_entry.dart`,
   `lib/providers/recipe_provider.dart`)
 
+### Fixed
+
+- **Recipe cost scoped to the recipe's own inventory**: `calculateRecipeCost`
+  and the cost computation in `cookRecipe` now price ingredients using prices
+  recorded in the recipe's own inventory (falling back to the active one when
+  the recipe has no inventory), instead of the latest price across all
+  pantries. A recipe therefore never costs using prices recorded in a
+  different pantry. Refactored into a shared `calculateIngredientCost`
+  helper.
+  (`lib/providers/recipe_provider.dart`)
+
 ## [0.0.9+5] — 2026-08-03
 
 ### Added

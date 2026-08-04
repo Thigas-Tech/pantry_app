@@ -3,12 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/database/migrations/all_migrations.dart';
+import 'package:pantry_app/database/migrations/migration_runner.dart';
+import 'package:pantry_app/database/price_dao.dart';
+import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/services/currency_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
@@ -47,6 +52,93 @@ class _CookRecipeButton extends ConsumerWidget {
       },
       child: const Text('Cook'),
     );
+  }
+}
+
+/// Captures the result of a [calculateRecipeCost] call inside a widget.
+class _CapturedCost {
+  double? value;
+  bool done = false;
+}
+
+/// A button that computes [calculateRecipeCost] when tapped.
+class _CostButton extends ConsumerWidget {
+  const _CostButton({required this.recipeId, required this.capture});
+
+  final int recipeId;
+  final _CapturedCost capture;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ElevatedButton(
+      onPressed: () async {
+        capture.value = await calculateRecipeCost(ref, recipeId);
+        capture.done = true;
+      },
+      child: const Text('Cost'),
+    );
+  }
+}
+
+/// Captures the outcome of a [cookRecipe] call inside a widget.
+class _CookResultCapture {
+  Object? error;
+  bool started = false;
+  bool done = false;
+}
+
+/// A button that invokes [cookRecipe] when tapped.
+class _CookButton extends ConsumerWidget {
+  const _CookButton({required this.capture});
+
+  final _CookResultCapture capture;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ElevatedButton(
+      onPressed: () async {
+        capture.started = true;
+        try {
+          await cookRecipe(ref, 1);
+        } on Exception catch (e) {
+          capture.error = e;
+        } finally {
+          capture.done = true;
+        }
+      },
+      child: const Text('Cook'),
+    );
+  }
+}
+
+/// Drives pending fake-async microtasks and real ffi I/O to completion.
+///
+/// testWidgets runs under a fake-async zone where futures awaited from an
+/// event-handler callback chain (such as the price lookup in
+/// [calculateRecipeCost]) do not resolve on their own: sqflite_common_ffi
+/// completes its futures from the real event loop, which only turns during
+/// [WidgetTester.runAsync], while the continuation microtasks only flush
+/// during [WidgetTester.pump]. This helper alternates the two until [done] is
+/// true or [maxTurns] is reached, so real database work completes
+/// deterministically.
+Future<void> _pumpWithRealIo(
+  WidgetTester tester, {
+  required bool Function() done,
+  int maxTurns = 200,
+}) async {
+  for (var i = 0; i < maxTurns && !done(); i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pump();
+  }
+}
+
+/// Creates the prices table in [db] and inserts [prices].
+Future<void> _seedPrices(Database db, List<Price> prices) async {
+  await const PriceDao().createTable(db);
+  for (final price in prices) {
+    await const PriceDao().insert(db, price);
   }
 }
 
@@ -177,6 +269,275 @@ void main() {
       final ingredients = await mockDb.getRecipeIngredients(1);
       expect(ingredients, isEmpty);
     });
+  });
+
+  group('calculateIngredientCost', () {
+    test('returns the latest price for the requested inventory only', () async {
+      await _seedPrices(db, const [
+        Price(barcode: '001', price: 9.99, datePurchased: 3000),
+        Price(barcode: '001', price: 2.50, inventoryId: 2, datePurchased: 1000),
+        Price(barcode: '001', price: 3, inventoryId: 2, datePurchased: 2000),
+      ]);
+      const ingredients = [
+        RecipeIngredient(
+          recipeId: 1,
+          name: 'Eggs',
+          barcode: '001',
+          quantity: 2,
+        ),
+      ];
+
+      final inv2 = await calculateIngredientCost(
+        db,
+        ingredients,
+        inventoryId: 2,
+        baseCurrency: 'USD',
+        currencyService: CurrencyService(),
+      );
+      expect(inv2, closeTo(3.0, 0.001));
+
+      final inv1 = await calculateIngredientCost(
+        db,
+        ingredients,
+        inventoryId: 1,
+        baseCurrency: 'USD',
+        currencyService: CurrencyService(),
+      );
+      expect(inv1, closeTo(9.99, 0.001));
+    });
+
+    test('returns 0 when the requested inventory has no prices', () async {
+      await _seedPrices(db, const [
+        Price(barcode: '001', price: 9.99, datePurchased: 3000),
+      ]);
+      const ingredients = [
+        RecipeIngredient(recipeId: 1, name: 'Eggs', barcode: '001'),
+      ];
+
+      final cost = await calculateIngredientCost(
+        db,
+        ingredients,
+        inventoryId: 2,
+        baseCurrency: 'USD',
+        currencyService: CurrencyService(),
+      );
+      expect(cost, 0.0);
+    });
+
+    test('skips ingredients without a barcode', () async {
+      const ingredients = [
+        RecipeIngredient(recipeId: 1, name: 'Salt'),
+      ];
+
+      final cost = await calculateIngredientCost(
+        db,
+        ingredients,
+        inventoryId: 1,
+        baseCurrency: 'USD',
+        currencyService: CurrencyService(),
+      );
+      expect(cost, 0.0);
+    });
+  });
+
+  group('calculateRecipeCost inventory scoping', () {
+    testWidgets(
+      'uses the recipe own inventory for cost, not the active one',
+      (tester) async {
+        await tester.runAsync(
+          () => _seedPrices(db, const [
+            Price(
+              barcode: '001',
+              price: 9.99,
+              datePurchased: 3000,
+            ),
+            Price(
+              barcode: '001',
+              price: 3,
+              inventoryId: 2,
+              datePurchased: 2000,
+            ),
+          ]),
+        );
+        when(() => mockDb.getRecipe(1)).thenAnswer(
+          (_) async => const Recipe(id: 1, name: 'Soup', inventoryId: 2),
+        );
+        when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
+          (_) async => const [
+            RecipeIngredient(
+              recipeId: 1,
+              name: 'Eggs',
+              barcode: '001',
+              quantity: 2,
+            ),
+          ],
+        );
+
+        final captured = _CapturedCost();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              databaseProvider.overrideWithValue(mockDb),
+              activeInventoryProvider.overrideWith(
+                () => _MutableActiveInventory(1),
+              ),
+              settingsProvider.overrideWith(
+                () => FakeSettingsNotifier() as SettingsNotifier,
+              ),
+            ],
+            child: MaterialApp(
+              home: _CostButton(recipeId: 1, capture: captured),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Cost'));
+        await _pumpWithRealIo(tester, done: () => captured.done);
+
+        expect(captured.done, isTrue);
+        expect(captured.value, closeTo(3.0, 0.001));
+      },
+    );
+
+    testWidgets(
+      'falls back to the active inventory when the recipe is not found',
+      (tester) async {
+        await tester.runAsync(
+          () => _seedPrices(db, const [
+            Price(
+              barcode: '001',
+              price: 3,
+              inventoryId: 2,
+              datePurchased: 2000,
+            ),
+          ]),
+        );
+        when(() => mockDb.getRecipe(1)).thenAnswer((_) async => null);
+        when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
+          (_) async => const [
+            RecipeIngredient(recipeId: 1, name: 'Eggs', barcode: '001'),
+          ],
+        );
+
+        final captured = _CapturedCost();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              databaseProvider.overrideWithValue(mockDb),
+              activeInventoryProvider.overrideWith(
+                () => _MutableActiveInventory(2),
+              ),
+              settingsProvider.overrideWith(
+                () => FakeSettingsNotifier() as SettingsNotifier,
+              ),
+            ],
+            child: MaterialApp(
+              home: _CostButton(recipeId: 1, capture: captured),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Cost'));
+        await _pumpWithRealIo(tester, done: () => captured.done);
+
+        expect(captured.done, isTrue);
+        expect(captured.value, closeTo(3.0, 0.001));
+      },
+    );
+  });
+
+  group('cookRecipe inventory-scoped cost', () {
+    testWidgets(
+      'records cost_at_time from the recipe inventory prices,'
+      ' not the active inventory',
+      (tester) async {
+        await tester.runAsync(() async {
+          await MigrationRunner(allMigrations()).run(db, 0, 34);
+          await const PriceDao().insert(
+            db,
+            const Price(
+              barcode: '001',
+              price: 9.99,
+              datePurchased: 3000,
+            ),
+          );
+          await const PriceDao().insert(
+            db,
+            const Price(
+              barcode: '001',
+              price: 3,
+              inventoryId: 2,
+              datePurchased: 2000,
+            ),
+          );
+          await db.insert('inventory', {
+            'barcode': '001',
+            'inventory_id': 2,
+            'quantity': 10,
+            'unit': 'pieces',
+          });
+        });
+
+        when(() => mockDb.getRecipe(1)).thenAnswer(
+          (_) async => const Recipe(id: 1, name: 'Soup', inventoryId: 2),
+        );
+        when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
+          (_) async => const [
+            RecipeIngredient(
+              recipeId: 1,
+              name: 'Eggs',
+              barcode: '001',
+              quantity: 2,
+            ),
+          ],
+        );
+        when(
+          () => mockDb.getInventoryRowsByBarcode(
+            barcode: '001',
+            inventoryId: 2,
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {'quantity': 10, 'unit': 'pieces', 'id': 1},
+          ],
+        );
+        when(
+          () => mockDb.getInventoryRowsByProductName(
+            name: any(named: 'name'),
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer((_) async => []);
+
+        final capture = _CookResultCapture();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              databaseProvider.overrideWithValue(mockDb),
+              activeInventoryProvider.overrideWith(
+                () => _MutableActiveInventory(1),
+              ),
+              settingsProvider.overrideWith(
+                () => FakeSettingsNotifier() as SettingsNotifier,
+              ),
+            ],
+            child: MaterialApp(home: _CookButton(capture: capture)),
+          ),
+        );
+        await tester.tap(find.text('Cook'));
+        await _pumpWithRealIo(tester, done: () => capture.done);
+
+        expect(capture.done, isTrue);
+        expect(capture.error, isNull);
+
+        final rows = await tester.runAsync(
+          () => db.rawQuery(
+            'SELECT cost_at_time FROM recipe_history WHERE recipe_id = 1',
+          ),
+        );
+        expect(
+          ((rows ?? []).single['cost_at_time'] as num?) ?? 0,
+          closeTo(3.0, 0.001),
+        );
+      },
+    );
   });
 
   group('calculateAverageRecipeCost', () {
