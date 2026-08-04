@@ -15,6 +15,10 @@
   inicial. As suas receitas existentes sao movidas automaticamente para a
   sua primeira despensa.
 - Quando apaga uma despensa, as receitas dessa despensa tambem sao apagadas.
+- O custo de uma receita agora e calculado a partir dos precos da despensa a
+  que a receita pertence, para que mudar de despensa nunca misture precos de
+  outra. Ingredientes sem preco registado nessa despensa contam como custando
+  zero.
 
 ## [0.0.9+5]
 

@@ -15,6 +15,10 @@
   inicial. Suas receitas existentes sao movidas automaticamente para a sua
   primeira despensa.
 - Quando voce exclui uma despensa, as receitas dela tambem sao excluidas.
+- O custo de uma receita agora e calculado a partir dos precos da despensa a
+  que a receita pertence, para que trocar de despensa nunca misture precos de
+  outra. Ingredientes sem preco registrado nessa despensa contam como custando
+  zero.
 
 ## [0.0.9+5]
 

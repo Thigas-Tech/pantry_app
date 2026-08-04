@@ -13,6 +13,10 @@
   screen using the same switcher as on the Home screen. Your existing
   recipes are moved to your first pantry automatically.
 - When you delete a pantry, its recipes are deleted too.
+- A recipe's cost is now calculated from the prices of the pantry the recipe
+  belongs to, so switching pantries never mixes in prices from another one.
+  Ingredients with no price recorded in that pantry are counted as costing
+  nothing.
 
 ## [0.0.9+5]
 

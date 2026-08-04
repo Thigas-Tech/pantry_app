@@ -31,6 +31,7 @@ import 'package:pantry_app/services/recipe_nutri_score_service.dart';
 import 'package:pantry_app/services/recipe_nutrition_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
+import 'package:sqflite/sqflite.dart';
 
 /// Provides a singleton [RecipeDao] instance.
 final recipeDaoProvider = Provider<RecipeDao>((ref) {
@@ -311,38 +312,59 @@ final recipeNutriScoreProvider = FutureProvider.autoDispose
 /// prices table is fetched and converted to the user's base currency.
 /// Ingredients without a barcode contribute zero to the total.
 ///
+/// The price lookup is scoped to the recipe's own [Recipe.inventoryId],
+/// falling back to the active inventory when the recipe is not found, so a
+/// recipe never costs using prices recorded in a different pantry.
+///
 /// Returns 0.0 if no ingredients have price data.
 Future<double> calculateRecipeCost(WidgetRef ref, int recipeId) async {
   final db = ref.read(databaseProvider);
   final ingredients = await db.getRecipeIngredients(recipeId);
-  final settings = ref.read(settingsProvider);
-  final baseCurrency = settings.baseCurrency;
-  final currencyService = ref.read(_currencyServiceProvider);
-
   if (ingredients.isEmpty) return 0.0;
 
+  final recipe = await db.getRecipe(recipeId);
+  final activeInventoryId = ref.read(activeInventoryProvider);
+  final inventoryId = recipe?.inventoryId ?? activeInventoryId;
   final database = await db.database;
+  final settings = ref.read(settingsProvider);
+
+  return calculateIngredientCost(
+    database,
+    ingredients,
+    inventoryId: inventoryId,
+    baseCurrency: settings.baseCurrency,
+    currencyService: ref.read(_currencyServiceProvider),
+  );
+}
+
+/// Sums the latest price of each [ingredients] row found in the prices table
+/// for the given [inventoryId], converted to [baseCurrency].
+///
+/// Ingredients without a barcode, or with no price recorded in [inventoryId],
+/// contribute zero. Returns 0.0 when nothing can be priced.
+Future<double> calculateIngredientCost(
+  Database database,
+  List<RecipeIngredient> ingredients, {
+  required int inventoryId,
+  required String baseCurrency,
+  required CurrencyService currencyService,
+}) async {
   var total = 0.0;
   for (final ingredient in ingredients) {
     if (ingredient.barcode == null || ingredient.barcode!.isEmpty) continue;
 
     final rows = await database.rawQuery(
       'SELECT price, currency FROM prices'
-      ' WHERE barcode = ?'
+      ' WHERE barcode = ? AND inventory_id = ?'
       ' ORDER BY date_purchased DESC LIMIT 1',
-      [ingredient.barcode],
+      [ingredient.barcode, inventoryId],
     );
     if (rows.isEmpty) continue;
 
     final price = (rows.first['price'] as num?)?.toDouble() ?? 0.0;
     final currency = rows.first['currency'] as String? ?? baseCurrency;
 
-    final converted = await currencyService.convert(
-      price,
-      currency,
-      baseCurrency,
-    );
-    total += converted;
+    total += await currencyService.convert(price, currency, baseCurrency);
   }
 
   return total;
@@ -516,20 +538,13 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
 
   // Compute current cost
   final database = await db.database;
-  var totalCost = 0.0;
-  for (final ing in ingredients) {
-    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
-    final rows = await database.rawQuery(
-      'SELECT price, currency FROM prices'
-      ' WHERE barcode = ?'
-      ' ORDER BY date_purchased DESC LIMIT 1',
-      [ing.barcode],
-    );
-    if (rows.isEmpty) continue;
-    final price = (rows.first['price'] as num?)?.toDouble() ?? 0.0;
-    final currency = rows.first['currency'] as String? ?? baseCurrency;
-    totalCost += await currencyService.convert(price, currency, baseCurrency);
-  }
+  final totalCost = await calculateIngredientCost(
+    database,
+    ingredients,
+    inventoryId: inventoryId,
+    baseCurrency: baseCurrency,
+    currencyService: currencyService,
+  );
 
   // Transaction: FEFO deduction + history
   final affectedRows = <InventoryRowSnapshot>[];
