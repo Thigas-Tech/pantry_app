@@ -100,20 +100,13 @@ stock. Returns a <a href="../providers_recipe_provider/CookResult-class.html">Co
 
   &#47;&#47; Compute current cost
   final database = await db.database;
-  var totalCost = 0.0;
-  for (final ing in ingredients) {
-    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
-    final rows = await database.rawQuery(
-      &#39;SELECT price, currency FROM prices&#39;
-      &#39; WHERE barcode = ?&#39;
-      &#39; ORDER BY date_purchased DESC LIMIT 1&#39;,
-      [ing.barcode],
-    );
-    if (rows.isEmpty) continue;
-    final price = (rows.first[&#39;price&#39;] as num?)?.toDouble() ?? 0.0;
-    final currency = rows.first[&#39;currency&#39;] as String? ?? baseCurrency;
-    totalCost += await currencyService.convert(price, currency, baseCurrency);
-  }
+  final totalCost = await calculateIngredientCost(
+    database,
+    ingredients,
+    inventoryId: inventoryId,
+    baseCurrency: baseCurrency,
+    currencyService: currencyService,
+  );
 
   &#47;&#47; Transaction: FEFO deduction + history
   final affectedRows = &lt;InventoryRowSnapshot&gt;[];

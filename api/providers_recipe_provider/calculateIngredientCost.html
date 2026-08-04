@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the calculateRecipeCost function from the recipe_provider library, for the Dart programming language.">
-  <title>calculateRecipeCost function - recipe_provider library - Dart API</title>
+  <meta name="description" content="API docs for the calculateIngredientCost function from the recipe_provider library, for the Dart programming language.">
+  <title>calculateIngredientCost function - recipe_provider library - Dart API</title>
 
 
   
@@ -26,9 +26,9 @@
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">pantry_app</a></li>
     <li><a href="../providers_recipe_provider/">providers&#47;recipe_provider.dart</a></li>
-    <li class="self-crumb">calculateRecipeCost function</li>
+    <li class="self-crumb">calculateIngredientCost function</li>
   </ol>
-  <div class="self-name">calculateRecipeCost</div>
+  <div class="self-name">calculateIngredientCost</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -48,54 +48,61 @@
       data-above-sidebar="providers_recipe_provider&#47;providers_recipe_provider-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">calculateRecipeCost</span> function 
+<h1><span class="kind-function">calculateIngredientCost</span> function 
  
 </h1></div>
 
     <section class="multi-line-signature">
         
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span>
-<span class="name ">calculateRecipeCost</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="calculateRecipeCost-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span></li>
-<li><span class="parameter" id="calculateRecipeCost-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span></li>
-</ol>)
+<span class="name ">calculateIngredientCost</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="calculateIngredientCost-param-database"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">database</span>, </span></li>
+<li><span class="parameter" id="calculateIngredientCost-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, {</span></li>
+<li><span class="parameter" id="calculateIngredientCost-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
+<li><span class="parameter" id="calculateIngredientCost-param-baseCurrency"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseCurrency</span>, </span></li>
+<li><span class="parameter" id="calculateIngredientCost-param-currencyService"><span>required</span> <span class="type-annotation"><a href="../services_currency_service/CurrencyService-class.html">CurrencyService</a></span> <span class="parameter-name">currencyService</span>, </span></li>
+</ol>})
 
         
 
     </section>
     
 <section class="desc markdown">
-  <p>Calculates the total cost of a recipe by summing ingredient prices.</p>
-<p>For each ingredient with a barcode, the most recent price from the
-prices table is fetched and converted to the user's base currency.
-Ingredients without a barcode contribute zero to the total.</p>
-<p>The price lookup is scoped to the recipe's own <code>Recipe.inventoryId</code>,
-falling back to the active inventory when the recipe is not found, so a
-recipe never costs using prices recorded in a different pantry.</p>
-<p>Returns 0.0 if no ingredients have price data.</p>
+  <p>Sums the latest price of each <code>ingredients</code> row found in the prices table
+for the given <code>inventoryId</code>, converted to <code>baseCurrency</code>.</p>
+<p>Ingredients without a barcode, or with no price recorded in <code>inventoryId</code>,
+contribute zero. Returns 0.0 when nothing can be priced.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;double&gt; calculateRecipeCost(WidgetRef ref, int recipeId) async {
-  final db = ref.read(databaseProvider);
-  final ingredients = await db.getRecipeIngredients(recipeId);
-  if (ingredients.isEmpty) return 0.0;
+  <pre class="language-dart"><code class="language-dart">Future&lt;double&gt; calculateIngredientCost(
+  Database database,
+  List&lt;RecipeIngredient&gt; ingredients, {
+  required int inventoryId,
+  required String baseCurrency,
+  required CurrencyService currencyService,
+}) async {
+  var total = 0.0;
+  for (final ingredient in ingredients) {
+    if (ingredient.barcode == null || ingredient.barcode!.isEmpty) continue;
 
-  final recipe = await db.getRecipe(recipeId);
-  final activeInventoryId = ref.read(activeInventoryProvider);
-  final inventoryId = recipe?.inventoryId ?? activeInventoryId;
-  final database = await db.database;
-  final settings = ref.read(settingsProvider);
+    final rows = await database.rawQuery(
+      &#39;SELECT price, currency FROM prices&#39;
+      &#39; WHERE barcode = ? AND inventory_id = ?&#39;
+      &#39; ORDER BY date_purchased DESC LIMIT 1&#39;,
+      [ingredient.barcode, inventoryId],
+    );
+    if (rows.isEmpty) continue;
 
-  return calculateIngredientCost(
-    database,
-    ingredients,
-    inventoryId: inventoryId,
-    baseCurrency: settings.baseCurrency,
-    currencyService: ref.read(_currencyServiceProvider),
-  );
+    final price = (rows.first[&#39;price&#39;] as num?)?.toDouble() ?? 0.0;
+    final currency = rows.first[&#39;currency&#39;] as String? ?? baseCurrency;
+
+    total += await currencyService.convert(price, currency, baseCurrency);
+  }
+
+  return total;
 }</code></pre>
 </section>
 
@@ -111,7 +118,7 @@ recipe never costs using prices recorded in a different pantry.</p>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">pantry_app</a></li>
     <li><a href="../providers_recipe_provider/">recipe_provider</a></li>
-    <li class="self-crumb">calculateRecipeCost function</li>
+    <li class="self-crumb">calculateIngredientCost function</li>
 </ol>
 
     <h5>recipe_provider library</h5>
