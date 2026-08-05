@@ -4,6 +4,21 @@
 
 ### Added
 
+- **Product photo preview, retake, replace, and delete**: photos added to
+  the manual product form now open in a full-screen preview with visible
+  Close, Retake, Replace, and Delete actions. Empty photo slots open a
+  source chooser with camera and gallery options. Deleting a photo shows an
+  undo snackbar that restores it; picking compresses the image so Open Food
+  Facts uploads stay small. Camera permission denials surface a dialog with
+  an "Open Settings" action.
+  (`lib/widgets/product_photo_preview.dart`,
+  `lib/widgets/product_photo_tile.dart`,
+  `lib/widgets/photo_source_chooser.dart`,
+  `lib/services/product_photo_picker.dart`,
+  `lib/models/photo_pick_result.dart`,
+  `lib/utils/camera_permission_dialog.dart`,
+  `lib/screens/add_product_screen.dart`)
+
 - **Per-inventory price tracking**: prices now belong to the inventory
   (pantry) that is active when they are recorded. The Product Detail screen
   shows prices relevant to the current inventory, and a new inline trend

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Product photos are easier to manage when you add a product manually. Tap a
+  photo to see it full screen, then take a new one, choose another from your
+  gallery, or delete it. Empty photo slots let you pick from the camera or
+  your gallery, and if you remove a photo by accident you can undo it.
+- If camera access is denied, the app now explains why and offers a button
+  to open your device settings.
+
 - Prices are now saved per pantry: each pantry (Home, Work, etc.) keeps its
   own price history. The product page shows the latest price for the current
   pantry together with a small trend chart and the last 5 prices, with a

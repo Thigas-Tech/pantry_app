@@ -1434,18 +1434,6 @@ abstract class AppLocalizations {
   /// **'Attach screenshot'**
   String get attachScreenshot;
 
-  /// No description provided for @takePhoto.
-  ///
-  /// In en, this message translates to:
-  /// **'Take photo'**
-  String get takePhoto;
-
-  /// No description provided for @chooseFromGallery.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose from gallery'**
-  String get chooseFromGallery;
-
   /// No description provided for @includeDeviceInfo.
   ///
   /// In en, this message translates to:
@@ -1542,6 +1530,18 @@ abstract class AppLocalizations {
   /// **'Camera permission denied. Grant access in Settings.'**
   String get cameraPermissionDenied;
 
+  /// No description provided for @cameraPermissionDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission needed'**
+  String get cameraPermissionDeniedTitle;
+
+  /// No description provided for @cameraPermissionDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry needs camera access to take product photos.'**
+  String get cameraPermissionDeniedBody;
+
   /// No description provided for @cameraNotAvailable.
   ///
   /// In en, this message translates to:
@@ -1577,6 +1577,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Toggle flashlight'**
   String get toggleTorch;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @retakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake photo'**
+  String get retakePhoto;
+
+  /// No description provided for @replacePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace photo'**
+  String get replacePhoto;
+
+  /// No description provided for @deletePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete photo'**
+  String get deletePhoto;
+
+  /// No description provided for @photoRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo removed.'**
+  String get photoRemoved;
+
+  /// No description provided for @choosePhotoSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo source'**
+  String get choosePhotoSourceTitle;
+
+  /// No description provided for @addPhotoSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get addPhotoSlot;
+
+  /// No description provided for @previewPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview photo'**
+  String get previewPhoto;
+
+  /// No description provided for @photoSourceCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a new photo'**
+  String get photoSourceCamera;
+
+  /// No description provided for @photoSourceGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an existing photo'**
+  String get photoSourceGallery;
+
+  /// No description provided for @photoSlotAction.
+  ///
+  /// In en, this message translates to:
+  /// **'{action} {label}'**
+  String photoSlotAction(Object action, Object label);
 
   /// No description provided for @inactivityReminderTitle.
   ///

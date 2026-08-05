@@ -231,3 +231,20 @@ User scans barcode
   `USER_CHANGELOG_*.md` asset paths with fallback to English. Used by
   the "What's New" sheet to display user-facing changelog in the app's
   current language.
+
+### 3.21 Product photo picker
+
+- `ProductPhotoPicker` (at `lib/services/product_photo_picker.dart`)
+  picks product photos from the camera or the device gallery for the
+  manual product form.
+- Camera picks first request the camera permission; gallery picks go
+  through the system picker and never request a permission. Both sources
+  compress the result to 1600 x 1600 px at quality 85 so Open Food Facts
+  uploads stay small.
+- `ImagePicker` and the camera permission check are injectable for tests;
+  the result is modeled by the sealed `PhotoPickResult` type
+  (`PhotoPicked`, `PhotoPermissionDenied`, `PhotoPickCancelled`).
+  Exposed to screens via `productPhotoPickerProvider`.
+- Camera permission denials surface a dialog with an "Open Settings"
+  action (`showCameraPermissionDialog` at
+  `lib/utils/camera_permission_dialog.dart`).

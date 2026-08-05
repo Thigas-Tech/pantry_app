@@ -3,15 +3,20 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/image_field.dart';
+import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
+import 'package:pantry_app/utils/camera_permission_dialog.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/photo_source_chooser.dart';
+import 'package:pantry_app/widgets/product_photo_preview.dart';
+import 'package:pantry_app/widgets/product_photo_tile.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 /// A form screen for manually entering product details.
 ///
@@ -31,7 +36,6 @@ class AddProductScreen extends ConsumerStatefulWidget {
 
 class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
-  final ImagePicker _imagePicker = ImagePicker();
 
   late String _name;
   String _brand = '';
@@ -50,27 +54,100 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   File? _ingredientsImage;
   File? _productImage;
 
-  Future<void> _pickImage(ImageField field) async {
-    final status = await Permission.camera.request();
-    if (!status.isGranted) {
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      SnackbarHelper.showError(context, l10n.cameraPermissionDenied);
-      return;
+  File? _imageFor(ImageField field) {
+    switch (field) {
+      case ImageField.nutrition:
+        return _nutritionImage;
+      case ImageField.ingredients:
+        return _ingredientsImage;
+      case ImageField.product:
+        return _productImage;
     }
-    final picked = await _imagePicker.pickImage(source: ImageSource.camera);
-    if (picked != null) {
-      setState(() {
-        switch (field) {
-          case ImageField.nutrition:
-            _nutritionImage = File(picked.path);
-          case ImageField.ingredients:
-            _ingredientsImage = File(picked.path);
-          case ImageField.product:
-            _productImage = File(picked.path);
+  }
+
+  void _setImage(ImageField field, File? file) {
+    setState(() {
+      switch (field) {
+        case ImageField.nutrition:
+          _nutritionImage = file;
+        case ImageField.ingredients:
+          _ingredientsImage = file;
+        case ImageField.product:
+          _productImage = file;
+      }
+    });
+  }
+
+  String _labelFor(ImageField field) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (field) {
+      case ImageField.nutrition:
+        return l10n.nutritionTableImage;
+      case ImageField.ingredients:
+        return l10n.ingredientsImage;
+      case ImageField.product:
+        return l10n.productImage;
+    }
+  }
+
+  Future<void> _chooseSource(ImageField field) async {
+    final source = await showPhotoSourceChooser(context);
+    if (source == null || !mounted) return;
+    await _pick(field, source);
+  }
+
+  Future<void> _pick(ImageField field, PhotoSource source) async {
+    final result = await ref.read(productPhotoPickerProvider).pick(source);
+    if (!mounted) return;
+    switch (result) {
+      case PhotoPicked(:final file):
+        _setImage(field, file);
+      case PhotoPermissionDenied():
+        await showCameraPermissionDialog(context);
+      case PhotoPickCancelled():
+        break;
+    }
+  }
+
+  Future<void> _openPreview(ImageField field) async {
+    final image = _imageFor(field);
+    if (image == null) return;
+    final action = await Navigator.of(context).push<PhotoPreviewAction>(
+      MaterialPageRoute<PhotoPreviewAction>(
+        builder: (_) => ProductPhotoPreview(
+          image: image,
+          label: _labelFor(field),
+        ),
+      ),
+    );
+    if (!mounted || action == null) return;
+    switch (action) {
+      case PhotoPreviewAction.close:
+        break;
+      case PhotoPreviewAction.retake:
+        await _pick(field, PhotoSource.camera);
+      case PhotoPreviewAction.replace:
+        await _chooseSource(field);
+      case PhotoPreviewAction.delete:
+        _removeImage(field);
+    }
+  }
+
+  void _removeImage(ImageField field) {
+    final removed = _imageFor(field);
+    _setImage(field, null);
+    final l10n = AppLocalizations.of(context)!;
+    SnackbarHelper.showUndo(
+      context,
+      l10n.photoRemoved,
+      () {
+        // Only restore when the slot is still empty so an older photo is
+        // never restored over a newer pick.
+        if (mounted && _imageFor(field) == null) {
+          _setImage(field, removed);
         }
-      });
-    }
+      },
+    );
   }
 
   Future<String?> _saveImageToStorage(
@@ -275,35 +352,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   }
 
   Widget _imageTile(String label, File? image, ImageField field) {
-    return ListTile(
-      leading: image != null
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Image.file(
-                image,
-                width: 48,
-                height: 48,
-                fit: BoxFit.cover,
-              ),
-            )
-          : const Icon(Icons.camera_alt),
-      title: Text(label),
-      trailing: IconButton(
-        icon: const Icon(Icons.camera),
-        onPressed: () => _pickImage(field),
-      ),
+    return ProductPhotoTile(
+      label: label,
+      image: image,
+      onAdd: () => _chooseSource(field),
+      onTap: () => _openPreview(field),
+      onDelete: () => _removeImage(field),
     );
   }
-}
-
-/// The type of image being captured for a product.
-enum ImageField {
-  /// Photo of the nutrition facts table.
-  nutrition,
-
-  /// Photo of the ingredients list.
-  ingredients,
-
-  /// Photo of the product packaging/front.
-  product,
 }

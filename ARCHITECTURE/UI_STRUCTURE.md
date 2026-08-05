@@ -31,7 +31,11 @@ AddProductScreen (manual entry when offline or barcode not found)
 ├── Product name, brand, category, serving size
 ├── Nutrition table (6 fields, per 100g/ml)
 ├── Ingredients (multi-line)
-└── Image capture (nutrition table, ingredients, product photos)
+└── ProductPhotoTile x3 (nutrition table, ingredients, product photos)
+    ├── Empty slot -> PhotoSourceChooser (camera / gallery bottom sheet)
+    ├── Filled slot -> ProductPhotoPreview (full screen)
+    │   └── Close / Retake (camera) / Replace (source chooser) / Delete (undo snackbar)
+    └── Camera permission denied -> showCameraPermissionDialog ("Open Settings")
 
 SearchScreen
 ├── SearchPanel (composition root, owns SearchPanelController via Riverpod)

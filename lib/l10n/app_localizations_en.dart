@@ -724,12 +724,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attachScreenshot => 'Attach screenshot';
 
   @override
-  String get takePhoto => 'Take photo';
-
-  @override
-  String get chooseFromGallery => 'Choose from gallery';
-
-  @override
   String get includeDeviceInfo => 'Include device info';
 
   @override
@@ -782,6 +776,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cameraPermissionDenied => 'Camera permission denied. Grant access in Settings.';
 
   @override
+  String get cameraPermissionDeniedTitle => 'Camera permission needed';
+
+  @override
+  String get cameraPermissionDeniedBody => 'Pantry needs camera access to take product photos.';
+
+  @override
   String get cameraNotAvailable => 'Camera not available on this device.';
 
   @override
@@ -798,6 +798,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toggleTorch => 'Toggle flashlight';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get retakePhoto => 'Retake photo';
+
+  @override
+  String get replacePhoto => 'Replace photo';
+
+  @override
+  String get deletePhoto => 'Delete photo';
+
+  @override
+  String get photoRemoved => 'Photo removed.';
+
+  @override
+  String get choosePhotoSourceTitle => 'Choose photo source';
+
+  @override
+  String get addPhotoSlot => 'Add photo';
+
+  @override
+  String get previewPhoto => 'Preview photo';
+
+  @override
+  String get photoSourceCamera => 'Take a new photo';
+
+  @override
+  String get photoSourceGallery => 'Choose an existing photo';
+
+  @override
+  String photoSlotAction(Object action, Object label) {
+    return '$action $label';
+  }
 
   @override
   String get inactivityReminderTitle => 'Time to restock your pantry?';
