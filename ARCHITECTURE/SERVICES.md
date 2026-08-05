@@ -248,3 +248,31 @@ User scans barcode
 - Camera permission denials surface a dialog with an "Open Settings"
   action (`showCameraPermissionDialog` at
   `lib/utils/camera_permission_dialog.dart`).
+
+### 3.22 Product image service
+
+- `ProductImageService` (at `lib/services/product_image_service.dart`) is
+  the testable boundary for product photo persistence in the manual form.
+  It copies picked files into deterministic managed paths under
+  `product_images` using the `<barcode>_<suffix>.jpg` convention, with the
+  suffix (`nutrition`/`ingredients`/`product`) derived from `ImageField`.
+- `assign` copies a picker file into its managed path immediately so the
+  photo survives form validation failures and OS cache purges; replacing a
+  slot overwrites the same managed file so no stale copies accumulate.
+- `remove` only clears the slot. Physical deletion is deferred to `save` or
+  `cleanupUncommitted` so the undo action can restore a live file while the
+  form is still open.
+- `save` persists every non-empty slot, deletes stale managed files for
+  empty slots (never when another slot still references the path), and
+  returns the three managed paths as `SavedProductPhotoPaths` for the
+  `Product` model.
+- `cleanupUncommitted` runs from `AddProductScreen.dispose()` (unawaited)
+  and deletes managed files for a barcode that were never committed to a
+  saved product, preserving paths listed in `committedPaths`. This keeps
+  backing out of the form free of orphaned files.
+- Barcodes are sanitized against path separators before forming file names.
+  The image directory resolves to the application-documents `product_images`
+  folder at runtime and is injectable for tests. Exposed to screens via
+  `productImageServiceProvider` (`lib/providers/product_image_service_provider.dart`).
+- The slot snapshot is modeled by the immutable `ProductPhotoSlots`
+  (`lib/models/product_photo_slots.dart`).

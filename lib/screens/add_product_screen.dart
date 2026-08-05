@@ -7,16 +7,18 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_photo_slots.dart';
+import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
+import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/utils/camera_permission_dialog.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
-import 'package:path_provider/path_provider.dart';
 
 /// A form screen for manually entering product details.
 ///
@@ -50,33 +52,21 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   String _fiberG = '';
   String _saltG = '';
 
-  File? _nutritionImage;
-  File? _ingredientsImage;
-  File? _productImage;
+  ProductPhotoSlots _slots = const ProductPhotoSlots.empty();
 
-  File? _imageFor(ImageField field) {
-    switch (field) {
-      case ImageField.nutrition:
-        return _nutritionImage;
-      case ImageField.ingredients:
-        return _ingredientsImage;
-      case ImageField.product:
-        return _productImage;
-    }
+  late final ProductImageService _imageService;
+
+  /// Managed photo paths already committed to a saved [Product]; dispose
+  /// cleanup must never delete these.
+  final Set<String> _committedPaths = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _imageService = ref.read(productImageServiceProvider);
   }
 
-  void _setImage(ImageField field, File? file) {
-    setState(() {
-      switch (field) {
-        case ImageField.nutrition:
-          _nutritionImage = file;
-        case ImageField.ingredients:
-          _ingredientsImage = file;
-        case ImageField.product:
-          _productImage = file;
-      }
-    });
-  }
+  File? _imageFor(ImageField field) => _slots.forField(field);
 
   String _labelFor(ImageField field) {
     final l10n = AppLocalizations.of(context)!;
@@ -97,11 +87,22 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   }
 
   Future<void> _pick(ImageField field, PhotoSource source) async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await ref.read(productPhotoPickerProvider).pick(source);
     if (!mounted) return;
     switch (result) {
       case PhotoPicked(:final file):
-        _setImage(field, file);
+        final updated = await _imageService.assign(
+          _slots,
+          field,
+          file,
+          barcode: widget.barcode,
+        );
+        if (!mounted) return;
+        setState(() => _slots = updated);
+        if (updated.forField(field) == null) {
+          SnackbarHelper.showWarning(context, l10n.couldNotAttachImage);
+        }
       case PhotoPermissionDenied():
         await showCameraPermissionDialog(context);
       case PhotoPickCancelled():
@@ -135,7 +136,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
   void _removeImage(ImageField field) {
     final removed = _imageFor(field);
-    _setImage(field, null);
+    setState(() => _slots = _imageService.remove(_slots, field));
     final l10n = AppLocalizations.of(context)!;
     SnackbarHelper.showUndo(
       context,
@@ -144,26 +145,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         // Only restore when the slot is still empty so an older photo is
         // never restored over a newer pick.
         if (mounted && _imageFor(field) == null) {
-          _setImage(field, removed);
+          setState(() => _slots = _slots.withField(field, removed));
         }
       },
     );
-  }
-
-  Future<String?> _saveImageToStorage(
-    File? image,
-    String barcode,
-    String suffix,
-  ) async {
-    if (image == null) return null;
-    final appDir = await getApplicationDocumentsDirectory();
-    final dir = Directory('${appDir.path}/product_images');
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    final targetPath = '${dir.path}/${barcode}_$suffix.jpg';
-    await image.copy(targetPath);
-    return targetPath;
   }
 
   Future<void> _save() async {
@@ -173,20 +158,13 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     }
     _formKey.currentState!.save();
 
-    final nutritionPath = await _saveImageToStorage(
-      _nutritionImage,
-      widget.barcode,
-      'nutrition',
-    );
-    final ingredientsPath = await _saveImageToStorage(
-      _ingredientsImage,
-      widget.barcode,
-      'ingredients',
-    );
-    final productPath = await _saveImageToStorage(
-      _productImage,
-      widget.barcode,
-      'product',
+    final saved = await _imageService.save(_slots, barcode: widget.barcode);
+    _committedPaths.addAll(
+      [
+        saved.nutrition,
+        saved.ingredients,
+        saved.product,
+      ].whereType<String>(),
     );
 
     final product = Product(
@@ -204,9 +182,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       saltG: double.tryParse(_saltG),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
       source: 'manual',
-      nutritionImagePath: nutritionPath,
-      ingredientsImagePath: ingredientsPath,
-      productImagePath: productPath,
+      nutritionImagePath: saved.nutrition,
+      ingredientsImagePath: saved.ingredients,
+      productImagePath: saved.product,
     );
     logInfo('Manual product entry saved: ${product.name}');
 
@@ -230,6 +208,20 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     } on Object catch (e) {
       logError('Failed to submit product to OFF: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    // Remove photos the form never committed to a saved product. Files already
+    // committed on save are listed in [_committedPaths] and preserved.
+    unawaited(
+      _imageService.cleanupUncommitted(
+        _slots,
+        barcode: widget.barcode,
+        committedPaths: _committedPaths,
+      ),
+    );
+    super.dispose();
   }
 
   @override
@@ -296,17 +288,17 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               ),
               _imageTile(
                 l10n.nutritionTableImage,
-                _nutritionImage,
+                _slots.nutrition,
                 ImageField.nutrition,
               ),
               _imageTile(
                 l10n.ingredientsImage,
-                _ingredientsImage,
+                _slots.ingredients,
                 ImageField.ingredients,
               ),
               _imageTile(
                 l10n.productImage,
-                _productImage,
+                _slots.product,
                 ImageField.product,
               ),
               const SizedBox(height: 32),

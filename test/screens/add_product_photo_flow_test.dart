@@ -4,9 +4,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
+import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
+import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
+import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/services/product_photo_picker.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
@@ -14,6 +19,8 @@ import 'package:pantry_app/widgets/product_photo_tile.dart';
 import '../helpers/pump_app.dart';
 
 class MockProductPhotoPicker extends Mock implements ProductPhotoPicker {}
+
+class MockProductImageService extends Mock implements ProductImageService {}
 
 /// A minimal 1x1 transparent PNG so [Image.file] decodes in tests.
 final Uint8List kTransparentPng = Uint8List.fromList(const <int>[
@@ -90,9 +97,14 @@ void main() {
   late Directory tempDir;
   late File imageFile;
   late MockProductPhotoPicker mockPicker;
+  late MockProductImageService mockImageService;
 
   setUpAll(() {
     registerFallbackValue(PhotoSource.camera);
+    registerFallbackValue(File('/fallback.jpg'));
+    registerFallbackValue(ImageField.nutrition);
+    registerFallbackValue(const ProductPhotoSlots.empty());
+    registerFallbackValue('123');
   });
 
   setUp(() async {
@@ -103,6 +115,44 @@ void main() {
     when(
       () => mockPicker.pick(any()),
     ).thenAnswer((_) async => PhotoPicked(imageFile));
+    mockImageService = MockProductImageService();
+    when(
+      () => mockImageService.assign(
+        any(),
+        any(),
+        any(),
+        barcode: any(named: 'barcode'),
+      ),
+    ).thenAnswer((invocation) async {
+      final slots = invocation.positionalArguments[0] as ProductPhotoSlots;
+      final field = invocation.positionalArguments[1] as ImageField;
+      final file = invocation.positionalArguments[2] as File;
+      return slots.withField(field, file);
+    });
+    when(
+      () => mockImageService.remove(any(), any()),
+    ).thenAnswer((invocation) {
+      final slots = invocation.positionalArguments[0] as ProductPhotoSlots;
+      final field = invocation.positionalArguments[1] as ImageField;
+      return slots.withField(field, null);
+    });
+    when(
+      () => mockImageService.save(any(), barcode: any(named: 'barcode')),
+    ).thenAnswer((invocation) async {
+      final slots = invocation.positionalArguments[0] as ProductPhotoSlots;
+      return (
+        nutrition: slots.nutrition?.path,
+        ingredients: slots.ingredients?.path,
+        product: slots.product?.path,
+      );
+    });
+    when(
+      () => mockImageService.cleanupUncommitted(
+        any(),
+        barcode: any(named: 'barcode'),
+        committedPaths: any(named: 'committedPaths'),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   tearDown(() async {
@@ -123,8 +173,47 @@ void main() {
       const AddProductScreen(barcode: '123'),
       overrides: [
         productPhotoPickerProvider.overrideWithValue(mockPicker),
+        productImageServiceProvider.overrideWithValue(
+          mockImageService,
+        ),
       ],
     );
+    await tester.pumpAndSettle();
+  }
+
+  /// Pumps the screen inside a pushed route so the popped [Product] can be
+  /// captured and dispose cleanup can be observed.
+  Future<void> pumpScreenPushed(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    await pumpApp(
+      tester,
+      Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () async {
+            await Navigator.push<void>(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const AddProductScreen(barcode: '123'),
+              ),
+            );
+          },
+          child: const Text('Open form'),
+        ),
+      ),
+      overrides: [
+        productPhotoPickerProvider.overrideWithValue(mockPicker),
+        productImageServiceProvider.overrideWithValue(
+          mockImageService,
+        ),
+      ],
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open form'));
     await tester.pumpAndSettle();
   }
 
@@ -399,6 +488,222 @@ void main() {
           reason: '$label must be announced as a button',
         );
       }
+    });
+  });
+
+  group('AddProductScreen photo persistence', () {
+    testWidgets('canceled selection leaves the slot empty and never assigns', (
+      tester,
+    ) async {
+      when(
+        () => mockPicker.pick(any()),
+      ).thenAnswer((_) async => const PhotoPickCancelled());
+      await pumpScreen(tester);
+
+      await tester.tap(find.byIcon(Icons.add_a_photo).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take a new photo'));
+      await tester.pumpAndSettle();
+
+      final tile = find.widgetWithText(
+        ProductPhotoTile,
+        'Nutrition table photo',
+      );
+      expect(
+        find.descendant(of: tile, matching: find.byType(Image)),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: tile, matching: find.byIcon(Icons.add_a_photo)),
+        findsOneWidget,
+      );
+      verifyNever(
+        () => mockImageService.assign(
+          any(),
+          any(),
+          any(),
+          barcode: any(named: 'barcode'),
+        ),
+      );
+    });
+
+    testWidgets(
+      'validation failure preserves picked photos and does not save',
+      (
+        tester,
+      ) async {
+        await pumpScreen(tester);
+        await attachNutritionPhoto(tester);
+
+        await tester.tap(find.text('Save product'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('This field is required'), findsOneWidget);
+        final tile = find.widgetWithText(
+          ProductPhotoTile,
+          'Nutrition table photo',
+        );
+        expect(
+          find.descendant(of: tile, matching: find.byType(Image)),
+          findsOneWidget,
+          reason: 'Picked photos must survive failed validation',
+        );
+        verifyNever(
+          () => mockImageService.save(any(), barcode: any(named: 'barcode')),
+        );
+      },
+    );
+
+    testWidgets('replacing a photo assigns the slot again', (tester) async {
+      await pumpScreen(tester);
+      await attachNutritionPhoto(tester);
+
+      final replacement = File('${tempDir.path}/replacement.png')
+        ..writeAsBytesSync(kTransparentPng);
+      when(
+        () => mockPicker.pick(any()),
+      ).thenAnswer((_) async => PhotoPicked(replacement));
+
+      await tester.tap(
+        find.widgetWithText(ProductPhotoTile, 'Nutrition table photo'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Replace photo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take a new photo'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockImageService.assign(
+          any(),
+          any(),
+          any(),
+          barcode: any(named: 'barcode'),
+        ),
+      ).called(2);
+    });
+
+    testWidgets('saving delegates every filled slot to the service', (
+      tester,
+    ) async {
+      await pumpScreenPushed(tester);
+
+      for (var i = 0; i < 3; i++) {
+        await tester.tap(find.byIcon(Icons.add_a_photo).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Take a new photo'));
+        await tester.pumpAndSettle();
+      }
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await tester.tap(find.text('Save product'));
+      await tester.pumpAndSettle();
+
+      final savedSlots =
+          verify(
+                () => mockImageService.save(captureAny(), barcode: '123'),
+              ).captured.single
+              as ProductPhotoSlots;
+      expect(savedSlots.nutrition, isNotNull);
+      expect(savedSlots.ingredients, isNotNull);
+      expect(savedSlots.product, isNotNull);
+    });
+
+    testWidgets('popping without saving asks cleanup for no committed paths', (
+      tester,
+    ) async {
+      await pumpScreenPushed(tester);
+      await tester.tap(find.byIcon(Icons.add_a_photo).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take a new photo'));
+      await tester.pumpAndSettle();
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockImageService.cleanupUncommitted(
+          any(),
+          barcode: '123',
+          committedPaths: <String>{},
+        ),
+      ).called(1);
+    });
+
+    testWidgets('saving asks cleanup to keep the committed photo paths', (
+      tester,
+    ) async {
+      await pumpScreenPushed(tester);
+      await tester.tap(find.byIcon(Icons.add_a_photo).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take a new photo'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await tester.tap(find.text('Save product'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockImageService.cleanupUncommitted(
+          any(),
+          barcode: '123',
+          committedPaths: {imageFile.path},
+        ),
+      ).called(1);
+    });
+
+    testWidgets('saved product carries the service-returned photo paths', (
+      tester,
+    ) async {
+      Product? captured;
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              captured = await Navigator.push<Product>(
+                context,
+                MaterialPageRoute<Product>(
+                  builder: (_) => const AddProductScreen(barcode: '123'),
+                ),
+              );
+            },
+            child: const Text('Open form'),
+          ),
+        ),
+        overrides: [
+          productPhotoPickerProvider.overrideWithValue(mockPicker),
+          productImageServiceProvider.overrideWithValue(mockImageService),
+        ],
+      );
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.add_a_photo).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take a new photo'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await tester.tap(find.text('Save product'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.nutritionImagePath, imageFile.path);
+      expect(captured!.ingredientsImagePath, isNull);
+      expect(captured!.productImagePath, isNull);
     });
   });
 }
