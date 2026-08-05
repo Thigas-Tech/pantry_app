@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:pantry_app/models/image_field.dart';
+import 'package:pantry_app/services/product_image_service.dart';
 
 /// An immutable snapshot of the three photo slots in the manual product form.
 ///

@@ -48,10 +48,11 @@ class ProductImageService {
   ///
   /// [imageDirectory] is injected for tests; when omitted the service resolves
   /// `getApplicationDocumentsDirectory()/product_images` at runtime.
-  ProductImageService({Directory? imageDirectory})
-    : _imageDirectory = imageDirectory;
+  ProductImageService({this.imageDirectory});
 
-  final Directory? _imageDirectory;
+  /// The directory that holds managed product photos, or null to resolve the
+  /// application-documents `product_images` directory at runtime.
+  final Directory? imageDirectory;
 
   /// Copies [picked] into the managed file for [field] of [barcode] and
   /// returns [slots] updated with the managed file.
@@ -153,7 +154,8 @@ class ProductImageService {
 
   /// Resolves the product image directory without creating it.
   Future<Directory> _resolveDirectory() async {
-    if (_imageDirectory != null) return _imageDirectory!;
+    final dir = imageDirectory;
+    if (dir != null) return dir;
     final appDir = await getApplicationDocumentsDirectory();
     return Directory(p.join(appDir.path, 'product_images'));
   }
@@ -207,7 +209,7 @@ class ProductImageService {
   /// Builds the managed file name for [field] of [barcode], sanitizing the
   /// barcode so it cannot inject path separators.
   String _fileName(String barcode, ImageField field) {
-    final safe = barcode.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
+    final safe = barcode.replaceAll(RegExp('[^A-Za-z0-9_-]'), '_');
     return '${safe}_${_suffixFor(field)}.jpg';
   }
 

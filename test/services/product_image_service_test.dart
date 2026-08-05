@@ -349,7 +349,7 @@ void main() {
 
     test('keeps a managed file still referenced by another slot', () async {
       final picked = await createSource('pick.png', <int>[1, 2, 3]);
-      final slots = await service.assign(
+      await service.assign(
         const ProductPhotoSlots.empty(),
         ImageField.nutrition,
         picked,
