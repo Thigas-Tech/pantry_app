@@ -612,27 +612,27 @@ infrastructure or external server hosting are listed last.
   submission UX.
 
   **Implementation**:
-  1. **Gallery support** — add `ImageSource.gallery` option to
-     `AddProductScreen._pickImage()` (currently camera-only). Show a
-     bottom sheet with "Take Photo" and "Choose from Gallery".
-  2. **Photo preview + replace** — after taking/selecting a photo, show a
-     full-screen preview. Add a "Retake" / "Replace" button.
-  3. **Photo deletion** — add a delete/X button on each image tile in the
-     add product form to remove a previously taken photo.
-  4. **Submission progress UI** — after tapping "Save", show a progress
+  1. [x] **Gallery support** — `AddProductScreen` now shows a bottom sheet
+     source chooser with "Take a new photo" and "Choose an existing photo".
+     Done in issue #263.
+  2. [x] **Photo preview + replace** — photos open in a full-screen preview
+     with Close, Retake, and Replace actions. Done in issue #263.
+  3. [x] **Photo deletion** — each image tile has a delete button that
+     removes the photo and offers undo. Done in issue #263.
+  4. [ ] **Submission progress UI** — after tapping "Save", show a progress
      indicator (e.g. `LinearProgressIndicator` or a bottom sheet with
      step status: "Submitting metadata...", "Uploading photos (1/3)...")
      instead of silently fire-and-forgetting via `unawaited()`.
-  5. **Submission retry from failure state** — if submission fails, show
+  5. [ ] **Submission retry from failure state** — if submission fails, show
      a persistent status in the product detail screen (already exists)
      AND allow the user to retry with the option to change photos before
      retrying.
-  6. **Photo management from detail screen** — on `ProductDetailScreen`,
+  6. [ ] **Photo management from detail screen** — on `ProductDetailScreen`,
      when viewing a manually-entered product, show the 3 local photos with
      edit/delete/replace options.
-  7. **Camera permission denied handling** — detect when camera permission
-     is denied and show a helpful dialog with a "Open Settings" button.
-  8. Study the official Open Food Facts app (smooth-app) for UX patterns:
+  7. [x] **Camera permission denied handling** — denied camera permission
+     shows a dialog with an "Open Settings" button. Done in issue #263.
+  8. [x] Study the official Open Food Facts app (smooth-app) for UX patterns:
      - Photo capture flow with retake
      - Progress indicators during submission
      - Error states and retry

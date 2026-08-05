@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- As fotos dos produtos ficam mais faceis de gerenciar ao adicionar um produto
+  manualmente. Toque em uma foto para ve-la em tela cheia e depois tire uma
+  nova, escolha outra da sua galeria ou exclua-a. As caixas de foto vazias
+  permitem escolher entre a camera e a galeria, e se voce remover uma foto
+  por engano pode desfazer a acao.
+- Se o acesso a camera for negado, o app explica o motivo e oferece um botao
+  para abrir as configuracoes do dispositivo.
+
 - Os precos agora sao salvos por despensa: cada despensa (Casa, Trabalho,
   etc.) tem o seu proprio historico de precos. A pagina do produto mostra o
   ultimo preco da despensa atual com um pequeno grafico de tendencia e os

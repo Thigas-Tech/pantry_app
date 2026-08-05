@@ -724,12 +724,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get attachScreenshot => 'Anexar captura de tela';
 
   @override
-  String get takePhoto => 'Tirar foto';
-
-  @override
-  String get chooseFromGallery => 'Escolher da galeria';
-
-  @override
   String get includeDeviceInfo => 'Incluir informações do dispositivo';
 
   @override
@@ -782,6 +776,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get cameraPermissionDenied => 'Permissao da camera negada. Conceda acesso nas Configuracoes.';
 
   @override
+  String get cameraPermissionDeniedTitle => 'Permissão da câmera necessária';
+
+  @override
+  String get cameraPermissionDeniedBody => 'O Pantry precisa de acesso à câmera para tirar fotos de produtos.';
+
+  @override
   String get cameraNotAvailable => 'Camera nao disponivel neste dispositivo.';
 
   @override
@@ -798,6 +798,41 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get toggleTorch => 'Alternar lanterna';
+
+  @override
+  String get close => 'Fechar';
+
+  @override
+  String get retakePhoto => 'Tirar foto novamente';
+
+  @override
+  String get replacePhoto => 'Substituir foto';
+
+  @override
+  String get deletePhoto => 'Excluir foto';
+
+  @override
+  String get photoRemoved => 'Foto removida.';
+
+  @override
+  String get choosePhotoSourceTitle => 'Escolher origem da foto';
+
+  @override
+  String get addPhotoSlot => 'Adicionar foto';
+
+  @override
+  String get previewPhoto => 'Visualizar foto';
+
+  @override
+  String get photoSourceCamera => 'Tirar uma nova foto';
+
+  @override
+  String get photoSourceGallery => 'Escolher uma foto existente';
+
+  @override
+  String photoSlotAction(Object action, Object label) {
+    return '$action $label';
+  }
 
   @override
   String get inactivityReminderTitle => 'Hora de reabastecer sua despensa?';
@@ -2667,12 +2702,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get attachScreenshot => 'Anexar captura de tela';
 
   @override
-  String get takePhoto => 'Tirar foto';
-
-  @override
-  String get chooseFromGallery => 'Escolher da galeria';
-
-  @override
   String get includeDeviceInfo => 'Incluir informações do dispositivo';
 
   @override
@@ -2725,6 +2754,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get cameraPermissionDenied => 'Permissao da camera negada. Conceda acesso nas Configuracoes.';
 
   @override
+  String get cameraPermissionDeniedTitle => 'Permissão da câmera necessária';
+
+  @override
+  String get cameraPermissionDeniedBody => 'O Pantry precisa de acesso à câmera para tirar fotos de produtos.';
+
+  @override
   String get cameraNotAvailable => 'Camera nao disponivel neste dispositivo.';
 
   @override
@@ -2741,6 +2776,41 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get toggleTorch => 'Alternar lanterna';
+
+  @override
+  String get close => 'Fechar';
+
+  @override
+  String get retakePhoto => 'Tirar foto novamente';
+
+  @override
+  String get replacePhoto => 'Substituir foto';
+
+  @override
+  String get deletePhoto => 'Excluir foto';
+
+  @override
+  String get photoRemoved => 'Foto removida.';
+
+  @override
+  String get choosePhotoSourceTitle => 'Escolher origem da foto';
+
+  @override
+  String get addPhotoSlot => 'Adicionar foto';
+
+  @override
+  String get previewPhoto => 'Visualizar foto';
+
+  @override
+  String get photoSourceCamera => 'Tirar uma nova foto';
+
+  @override
+  String get photoSourceGallery => 'Escolher uma foto existente';
+
+  @override
+  String photoSlotAction(Object action, Object label) {
+    return '$action $label';
+  }
 
   @override
   String get inactivityReminderTitle => 'Hora de reabastecer sua despensa?';
