@@ -49,6 +49,7 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/price_repository.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
@@ -153,6 +154,13 @@ const partiallySubmittedManualProduct = Product(
   name: 'Manual Partial',
   source: 'manual',
   submissionStatus: productSubmissionPartiallyCompleted,
+);
+
+/// An API product cached in a non-default language.
+const foreignLanguageProduct = Product(
+  barcode: '1112223334445',
+  name: 'Foreign Product',
+  languageCode: 'fr',
 );
 
 /// A sample inventory item.
@@ -817,6 +825,33 @@ void main() {
     );
     expect(
       find.text('Partially submitted to Open Food Facts'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows localized error when re-fetching in another language '
+      'fails', (tester) async {
+    when(
+      () => mockRepo.getProduct(
+        any(),
+        languageCode: any(named: 'languageCode'),
+      ),
+    ).thenThrow(FetchFailedException('network down'));
+
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: foreignLanguageProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.text('Show in EN'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(
+      find.text('Failed to fetch product. Please check your connection.'),
       findsOneWidget,
     );
   });

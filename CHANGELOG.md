@@ -21,6 +21,9 @@
   status, including the new `productSubmissionPartiallyCompleted` constant
   (`lib/models/product.dart`). The detail-screen chip renders a partial-state
   variant with a retry action. (`lib/screens/product_detail_screen.dart`)
+  Note: the chip and vocabulary are wired in the UI; the submission service
+  does not emit this state yet (it still marks metadata-OK/image-failed
+  submissions as `failed`). Service wiring is deferred to a follow-up.
 
 - **ARB integrity guard**: new `test/l10n/arb_integrity_test.dart` fails when
   the Portuguese ARB files drift from the English template — missing keys,

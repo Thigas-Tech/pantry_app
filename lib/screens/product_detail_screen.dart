@@ -242,8 +242,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         setState(() {});
                         SnackbarHelper.showInfo(context, l10n.productUpdated);
                       }
-                    } on FetchFailedException {
-                      logError('Failed to re-fetch product in $currentLocale');
+                    } on FetchFailedException catch (e) {
+                      logError(
+                        'Failed to re-fetch product in $currentLocale: $e',
+                      );
                       if (context.mounted) {
                         SnackbarHelper.showError(
                           context,
@@ -845,7 +847,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   /// Returns the serving size to display, using preset data for produce items
   /// that lack a serving size, or "100 g" when no preset is available.
-  /// Converts to the user's preferred unit system.
+  /// Converts to the user's preferred unit system. Falls back to the
+  /// localized not-available label when the product has no serving data.
   String _displayServingSize(AppLocalizations l10n, Settings settings) {
     // Try structured serving data first
     if (widget.product.servingQuantity != null &&

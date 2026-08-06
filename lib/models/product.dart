@@ -251,6 +251,8 @@ abstract class Product with _$Product {
     /// - [productSubmissionPending] — queued for submission.
     /// - [productSubmissionSubmitted] — successfully submitted.
     /// - [productSubmissionFailed] — submission failed; retry possible.
+    /// - [productSubmissionPartiallyCompleted] — some uploads failed; retry
+    ///   possible.
     @Default(productSubmissionNotSubmitted) String submissionStatus,
 
     /// The PLU (Price Look-Up) code for this product, if it is a fresh
