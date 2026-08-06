@@ -147,6 +147,14 @@ const notSubmittedManualProduct = Product(
   source: 'manual',
 );
 
+/// A manual product with partially completed submission status.
+const partiallySubmittedManualProduct = Product(
+  barcode: '567890123',
+  name: 'Manual Partial',
+  source: 'manual',
+  submissionStatus: productSubmissionPartiallyCompleted,
+);
+
 /// A sample inventory item.
 InventoryItem makeItem({
   int? id,
@@ -796,6 +804,21 @@ void main() {
       overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
     );
     expect(find.text('Not submitted to Open Food Facts'), findsOneWidget);
+  });
+
+  testWidgets('shows partially submitted chip for manual product', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: partiallySubmittedManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+    expect(
+      find.text('Partially submitted to Open Food Facts'),
+      findsOneWidget,
+    );
   });
 
   // --------------------------------------------------------------------------

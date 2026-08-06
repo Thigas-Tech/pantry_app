@@ -4,6 +4,35 @@
 
 ### Added
 
+- **Localized submission-flow vocabulary**: new ARB keys in English, European
+  Portuguese, and Brazilian Portuguese for the manual submission and photo
+  flow — gallery permission explanations, submitting-metadata progress, the
+  per-photo upload progress label `uploadingPhotos`, the partially-completed
+  submission state, duplicate-product responses, a localized fetch-failure
+  message, and a localized N/A fallback. The product detail language-switch
+  error now surfaces `l10n.fetchProductFailed` on
+  `FetchFailedException`, and the serving-size fallback uses `l10n.notAvailable`.
+  (`lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`,
+  `lib/screens/product_detail_screen.dart`)
+
+- **Extracted submission status label mapping**: the status-chip label logic
+  now lives in `submissionStatusLabel`
+  (`lib/utils/submission_status_label.dart`) and is unit-tested for every
+  status, including the new `productSubmissionPartiallyCompleted` constant
+  (`lib/models/product.dart`). The detail-screen chip renders a partial-state
+  variant with a retry action. (`lib/screens/product_detail_screen.dart`)
+
+- **ARB integrity guard**: new `test/l10n/arb_integrity_test.dart` fails when
+  the Portuguese ARB files drift from the English template — missing keys,
+  empty values, or missing placeholder metadata — so gen-l10n can never
+  silently fall back to English. Fixed the existing pt/pt_BR drift (10 missing
+  keys and the missing placeholder metadata blocks).
+
+- **Doc-comment cleanup**: removed backticks from `///` comments in the
+  submission-flow services, replacing literal paths with plain text and HTML
+  entities where needed. (`lib/services/product_image_service.dart`,
+  `lib/services/off_adapter.dart`)
+
 - **Testable product photo persistence and cleanup**: photo storage for the
   manual product form now lives in a dedicated `ProductImageService` behind
   the immutable `ProductPhotoSlots` snapshot. Picked files are copied

@@ -19,6 +19,10 @@ const String productSubmissionSubmitted = 'submitted';
 /// Submission status: submission failed, retry possible.
 const String productSubmissionFailed = 'failed';
 
+/// Submission status: metadata and some images submitted, but at least one
+/// image upload failed. Retrying can complete the remaining uploads.
+const String productSubmissionPartiallyCompleted = 'partially_completed';
+
 /// Represents a cached product from Open Food Facts.
 ///
 /// Each [Product] corresponds to a row in the products table. Unlike

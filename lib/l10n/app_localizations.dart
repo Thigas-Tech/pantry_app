@@ -62,7 +62,8 @@ import 'app_localizations_pt.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,18 +84,19 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('pt'),
-    Locale('pt', 'BR')
+    Locale('pt', 'BR'),
   ];
 
   /// No description provided for @myPantry.
@@ -492,6 +495,12 @@ abstract class AppLocalizations {
   /// **'Product updated.'**
   String get productUpdated;
 
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get notAvailable;
+
   /// No description provided for @itemAdded.
   ///
   /// In en, this message translates to:
@@ -761,6 +770,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Network error. Please check your connection.'**
   String get networkError;
+
+  /// No description provided for @fetchProductFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch product. Please check your connection.'**
+  String get fetchProductFailed;
 
   /// No description provided for @productNotFound.
   ///
@@ -1067,6 +1082,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to submit product. Tap to retry.'**
   String get submissionError;
+
+  /// No description provided for @submissionPartiallyCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially submitted to Open Food Facts'**
+  String get submissionPartiallyCompleted;
+
+  /// No description provided for @submittingMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting product details to Open Food Facts…'**
+  String get submittingMetadata;
+
+  /// No description provided for @productAlreadyInOff.
+  ///
+  /// In en, this message translates to:
+  /// **'This product is already in Open Food Facts.'**
+  String get productAlreadyInOff;
+
+  /// No description provided for @productAlreadyInOffTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already in Open Food Facts'**
+  String get productAlreadyInOffTitle;
 
   /// No description provided for @navHome.
   ///
@@ -1542,6 +1581,18 @@ abstract class AppLocalizations {
   /// **'Pantry needs camera access to take product photos.'**
   String get cameraPermissionDeniedBody;
 
+  /// No description provided for @galleryPermissionDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery access needed'**
+  String get galleryPermissionDeniedTitle;
+
+  /// No description provided for @galleryPermissionDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry needs access to your photos to choose an existing photo. Open Settings to allow access.'**
+  String get galleryPermissionDeniedBody;
+
   /// No description provided for @cameraNotAvailable.
   ///
   /// In en, this message translates to:
@@ -1637,6 +1688,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose an existing photo'**
   String get photoSourceGallery;
+
+  /// No description provided for @uploadingPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo {current} of {total}…'**
+  String uploadingPhotos(int current, int total);
 
   /// No description provided for @photoSlotAction.
   ///
@@ -3799,7 +3856,8 @@ abstract class AppLocalizations {
   String unitSystemChanged(String system);
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -3808,34 +3866,38 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'pt'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'pt': {
-  switch (locale.countryCode) {
-    case 'BR': return AppLocalizationsPtBr();
-   }
-  break;
-   }
+    case 'pt':
+      {
+        switch (locale.countryCode) {
+          case 'BR':
+            return AppLocalizationsPtBr();
+        }
+        break;
+      }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'pt': return AppLocalizationsPt();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'pt':
+      return AppLocalizationsPt();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

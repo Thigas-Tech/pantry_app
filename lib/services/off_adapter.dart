@@ -107,7 +107,7 @@ class OffAdapter {
   off.UriProductHelper get _uriHelper =>
       useStaging ? off.uriHelperFoodTest : off.uriHelperFoodProd;
 
-  /// Returns `true` when [error] indicates HTTP 429 rate limiting.
+  /// Returns true when [error] indicates HTTP 429 rate limiting.
   ///
   /// The OFF SDK wraps 429 responses as generic exceptions with the
   /// HTTP error page in the message body.
@@ -117,10 +117,10 @@ class OffAdapter {
     return msg.contains('429 Too Many Requests');
   }
 
-  /// Returns `true` when [status] indicates a successful write.
+  /// Returns true when [status] indicates a successful write.
   ///
-  /// OFF write endpoints return either the integer `1` (metadata save)
-  /// or the string `'status ok'` (image upload). Both are treated as
+  /// OFF write endpoints return either the integer 1 (metadata save)
+  /// or the string 'status ok' (image upload). Both are treated as
   /// success.
   @visibleForTesting
   static bool isStatusOk(off.Status status) {
@@ -128,7 +128,7 @@ class OffAdapter {
     return status.status == 'status ok';
   }
 
-  /// Returns `true` when [status] indicates HTTP 429 rate limiting.
+  /// Returns true when [status] indicates HTTP 429 rate limiting.
   ///
   /// Write endpoints return a [off.Status] instead of throwing on 429,
   /// so rate limits are detected by inspecting the status code or the
@@ -143,8 +143,8 @@ class OffAdapter {
 
   /// Returns a retry delay with linear backoff and ±25% jitter.
   ///
-  /// [attempt] is zero-based (0 = first retry).  The base delay is
-  /// `(attempt + 1)` seconds.  When [isRateLimit] is `true`, the base
+  /// [attempt] is zero-based (0 = first retry). The base delay is
+  /// (attempt + 1) seconds. When [isRateLimit] is true, the base
   /// delay is multiplied by 5 to be more respectful of the server's
   /// capacity.  The result is clamped to >= 500 ms.
   @visibleForTesting
