@@ -74,6 +74,7 @@
   "submit": "Submit",
   "itemUpdated": "Item updated.",
   "productUpdated": "Product updated.",
+  "notAvailable": "N/A",
   "itemAdded": "Item added to pantry.",
   "itemRemoved": "Item removed from pantry.",
   "saveFailed": "Failed to save inventory item.",
@@ -180,6 +181,7 @@
   "couldNotRenameInventory": "Could not rename inventory.",
   "couldNotDeleteInventory": "Could not delete inventory.",
   "networkError": "Network error. Please check your connection.",
+  "fetchProductFailed": "Failed to fetch product. Please check your connection.",
   "productNotFound": "Product not found in database.",
   "productNotFoundHint": "This product isn't in the Open Food Facts database yet. You can add it manually or contribute it to the community.",
   "addManually": "Add manually",
@@ -276,6 +278,10 @@
   "submissionNotSubmitted": "Not submitted to Open Food Facts",
   "submissionSuccess": "Product submitted to Open Food Facts.",
   "submissionError": "Failed to submit product. Tap to retry.",
+  "submissionPartiallyCompleted": "Partially submitted to Open Food Facts",
+  "submittingMetadata": "Submitting product details to Open Food Facts…",
+  "productAlreadyInOff": "This product is already in Open Food Facts.",
+  "productAlreadyInOffTitle": "Already in Open Food Facts",
   "navHome": "Home",
   "navSearch": "Search",
   "navRecipes": "Recipes",
@@ -394,6 +400,8 @@
   "cameraPermissionDenied": "Camera permission denied. Grant access in Settings.",
   "cameraPermissionDeniedTitle": "Camera permission needed",
   "cameraPermissionDeniedBody": "Pantry needs camera access to take product photos.",
+  "galleryPermissionDeniedTitle": "Gallery access needed",
+  "galleryPermissionDeniedBody": "Pantry needs access to your photos to choose an existing photo. Open Settings to allow access.",
   "cameraNotAvailable": "Camera not available on this device.",
   "scannerGenericError": "An unexpected error occurred while starting the camera.",
   "switchToManualEntry": "Enter barcode manually",
@@ -410,6 +418,17 @@
   "previewPhoto": "Preview photo",
   "photoSourceCamera": "Take a new photo",
   "photoSourceGallery": "Choose an existing photo",
+  "uploadingPhotos": "Uploading photo {current} of {total}…",
+  "@uploadingPhotos": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "photoSlotAction": "{action} {label}",
   "@photoSlotAction": {
     "placeholders": {

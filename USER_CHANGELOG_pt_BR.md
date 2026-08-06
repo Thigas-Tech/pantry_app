@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Ha agora mais mensagens traduzidas para o portugues. Algumas telas
+  mostravam antes texto em ingles quando faltava uma traducao, e essas
+  lacunas agora estao preenchidas.
+- Se recarregar um produto em outro idioma falhar porque voce esta offline,
+  agora ve uma mensagem clara em vez de um erro tecnico.
+
 - As fotos dos produtos ficam mais faceis de gerenciar ao adicionar um produto
   manualmente. Toque em uma foto para ve-la em tela cheia e depois tire uma
   nova, escolha outra da sua galeria ou exclua-a. As caixas de foto vazias

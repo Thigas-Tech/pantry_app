@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- More messages are now translated into Portuguese. Some screens previously
+  showed English text when a translation was missing, and those gaps are now
+  filled.
+- If re-loading a product in another language fails because you are offline,
+  you now see a clear message instead of a technical error.
+
 - Product photos are easier to manage when you add a product manually. Tap a
   photo to see it full screen, then take a new one, choose another from your
   gallery, or delete it. Empty photo slots let you pick from the camera or

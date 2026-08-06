@@ -21,9 +21,10 @@ typedef SavedProductPhotoPaths = ({
 /// Owns persistence and cleanup of product photos for the manual-entry form.
 ///
 /// Photos are copied into a stable managed file per slot and barcode inside
-/// the application-documents `product_images` directory, following the
-/// `<barcode>_<suffix>.jpg` convention used by the product model. The service
-/// is the single testable boundary between picked files and the durable store.
+/// the application-documents product_images directory, following the
+/// &lt;barcode&gt;_&lt;suffix&gt;.jpg convention used by the product
+/// model. The service is the single testable boundary between picked files
+/// and the durable store.
 ///
 /// ## Lifecycle
 ///
@@ -41,17 +42,18 @@ typedef SavedProductPhotoPaths = ({
 ///   form leaves no orphaned files, while images committed to a saved product
 ///   are preserved.
 ///
-/// Managed paths are deterministic (`<barcode>_<suffix>.jpg`), so replacing a
-/// photo overwrites the same file and no stale copies accumulate.
+/// Managed paths are deterministic (&lt;barcode&gt;_&lt;suffix&gt;.jpg), so
+/// replacing a photo overwrites the same file and no stale copies
+/// accumulate.
 class ProductImageService {
   /// Creates a [ProductImageService].
   ///
   /// [imageDirectory] is injected for tests; when omitted the service resolves
-  /// `getApplicationDocumentsDirectory()/product_images` at runtime.
+  /// getApplicationDocumentsDirectory()/product_images at runtime.
   ProductImageService({this.imageDirectory});
 
   /// The directory that holds managed product photos, or null to resolve the
-  /// application-documents `product_images` directory at runtime.
+  /// application-documents product_images directory at runtime.
   final Directory? imageDirectory;
 
   /// Copies [picked] into the managed file for [field] of [barcode] and

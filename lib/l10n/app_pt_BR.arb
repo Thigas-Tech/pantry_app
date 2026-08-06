@@ -175,6 +175,7 @@
   "couldNotRenameInventory": "Não foi possível renomear a despensa.",
   "couldNotDeleteInventory": "Não foi possível excluir a despensa.",
   "networkError": "Erro de rede. Verifique sua conexão.",
+  "fetchProductFailed": "Não foi possível buscar o produto. Verifique sua conexão.",
   "productNotFound": "Produto nao encontrado no banco de dados.",
   "productNotFoundHint": "Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.",
   "addManually": "Adicionar manualmente",
@@ -260,6 +261,10 @@
   "submissionNotSubmitted": "Não enviado pro Open Food Facts",
   "submissionSuccess": "Produto enviado pro Open Food Facts.",
   "submissionError": "Falha ao enviar o produto. Toque pra tentar de novo.",
+  "submissionPartiallyCompleted": "Enviado parcialmente pro Open Food Facts",
+  "submittingMetadata": "Enviando os detalhes do produto para o Open Food Facts…",
+  "productAlreadyInOff": "Este produto já está no Open Food Facts.",
+  "productAlreadyInOffTitle": "Já está no Open Food Facts",
   "navHome": "Início",
   "navSearch": "Buscar",
   "navRecipes": "Receitas",
@@ -421,6 +426,8 @@
   "cameraPermissionDenied": "Permissao da camera negada. Conceda acesso nas Configuracoes.",
   "cameraPermissionDeniedTitle": "Permissão da câmera necessária",
   "cameraPermissionDeniedBody": "O Pantry precisa de acesso à câmera para tirar fotos de produtos.",
+  "galleryPermissionDeniedTitle": "É necessário acesso à galeria",
+  "galleryPermissionDeniedBody": "O Pantry precisa de acesso às suas fotos para escolher uma foto existente. Abra as Configurações para permitir o acesso.",
   "clearPurchased": "Limpar comprados",
   "clearPurchasedConfirm": "Remover todos os itens comprados?",
   "confirmDeletePrice": "Excluir esta entrada de preco?",
@@ -442,12 +449,28 @@
   "hidePricesDescription": "Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.",
   "iUnderstand": "Entendi",
   "inactivityReminderBody": "Voce nao adicionou nenhum produto em {days} dias.",
+  "@inactivityReminderBody": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
   "inactivityReminderChannelDescription": "Lembra voce de adicionar produtos regularmente",
   "inactivityReminderChannelName": "Lembretes de inatividade",
   "inactivityReminderEnabled": "Lembrar de adicionar produtos regularmente",
   "inactivityReminderTitle": "Hora de reabastecer sua despensa?",
   "inactivityThresholdDays": "Limite de inatividade (dias)",
   "inactivityThresholdSet": "Limite de inatividade definido para {days} dias.",
+  "@inactivityThresholdSet": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
   "includeDeviceInfo": "Incluir informações do dispositivo",
   "ingredientsOriginal": "Show original ingredients",
   "ingredientsTranslated": "Show translated ingredients",
@@ -465,6 +488,18 @@
   "issueType": "Tipo de problema",
   "itemName": "Nome do item",
   "itemWithPriceCount": "{count} de {total} itens tem precos",
+  "@itemWithPriceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "total": {
+        "type": "int",
+        "example": "20"
+      }
+    }
+  },
   "markPurchased": "Marcar como comprado",
   "moveToInventory": "Mover para despensa",
   "noPrices": "Nenhum preco registrado.",
@@ -476,6 +511,14 @@
   "openPricesConsentTitle": "Contribuir com Open Prices",
   "openPricesProofExplanation": "Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.",
   "openPricesSyncComplete": "{count} precos sincronizados.",
+  "@openPricesSyncComplete": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
   "openPricesSyncStarted": "Sincronizando precos...",
   "openPricesToken": "Token da API Open Prices",
   "openPricesTokenDescription": "Token gerado da sua conta do Open Food Facts.",
@@ -491,6 +534,14 @@
   "noPriceTrend": "Adicione pelo menos dois precos para ver a tendencia.",
   "priceRetentionDays": "Retencao de precos",
   "priceRetentionDaysValue": "Manter precos por {days} dias (0 = manter para sempre)",
+  "@priceRetentionDaysValue": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "365"
+      }
+    }
+  },
   "priceSyncFailed": "Falha na sincronizacao",
   "priceSyncPending": "Sincronizacao pendente",
   "priceSyncStatus": "Sincronizado",
@@ -503,6 +554,7 @@
   "pricesHidden": "Precos ocultos.",
   "pricesVisible": "Precos visiveis.",
   "productUpdated": "Produto atualizado.",
+  "notAvailable": "N/D",
   "purchasedItems": "Comprados",
   "quantity": "Quantidade",
   "quickAddHint": "Nome, ex: Leite",
@@ -524,6 +576,17 @@
   "previewPhoto": "Visualizar foto",
   "photoSourceCamera": "Tirar uma nova foto",
   "photoSourceGallery": "Escolher uma foto existente",
+  "uploadingPhotos": "Enviando foto {current} de {total}…",
+  "@uploadingPhotos": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "photoSlotAction": "{action} {label}",
   "@photoSlotAction": {
     "placeholders": {
@@ -536,6 +599,14 @@
   "shareShoppingList": "Compartilhar lista",
   "shoppingList": "Lista de Compras",
   "showInLanguage": "Mostrar em {language}",
+  "@showInLanguage": {
+    "description": "Label for a chip that allows the user to re-fetch the product in a different language",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
   "statsEmptySubtitle": "Adicione produtos à sua despensa para ver estatísticas aqui.",
   "statsEmptyTitle": "Nenhum item para analisar",
   "store": "Loja",
@@ -581,6 +652,11 @@
   "locationFreezer": "Freezer",
   "unitSingular": "unidade",
   "unitPlural": "unidades",
+  "weightModeLabel": "Peso (g)",
+  "unitModeLabel": "Unidade",
+  "servingSmall": "Pequeno",
+  "servingMedium": "Médio",
+  "servingLarge": "Grande",
   "unitGrams": "g",
   "unitKg": "kg",
   "unitMl": "ml",
@@ -672,6 +748,11 @@
   "categoryMilkfat": "Gordura do leite",
   "categoryStarches": "Amidos",
   "fromYourPantry": "Da sua despensa",
+  "pluEntryTooltip": "Digitar código PLU (hortifrúti)",
+  "enterPluCode": "Digitar código PLU",
+  "pluCodeNotFound": "Código PLU não reconhecido",
+  "digitLabel": "Dígito",
+  "deleteDigit": "Apagar dígito",
   "inYourPantry": "Na sua despensa",
   "monthlySpendingTitle": "Gastos mensais",
   "storeSpendingTitle": "Gastos por loja",

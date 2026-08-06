@@ -19,6 +19,10 @@ const String productSubmissionSubmitted = 'submitted';
 /// Submission status: submission failed, retry possible.
 const String productSubmissionFailed = 'failed';
 
+/// Submission status: metadata and some images submitted, but at least one
+/// image upload failed. Retrying can complete the remaining uploads.
+const String productSubmissionPartiallyCompleted = 'partially_completed';
+
 /// Represents a cached product from Open Food Facts.
 ///
 /// Each [Product] corresponds to a row in the products table. Unlike
@@ -247,6 +251,8 @@ abstract class Product with _$Product {
     /// - [productSubmissionPending] — queued for submission.
     /// - [productSubmissionSubmitted] — successfully submitted.
     /// - [productSubmissionFailed] — submission failed; retry possible.
+    /// - [productSubmissionPartiallyCompleted] — some uploads failed; retry
+    ///   possible.
     @Default(productSubmissionNotSubmitted) String submissionStatus,
 
     /// The PLU (Price Look-Up) code for this product, if it is a fresh

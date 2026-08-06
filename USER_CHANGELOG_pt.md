@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Ha agora mais mensagens traduzidas para portugues. Alguns ecras mostravam
+  antes texto em ingles quando faltava uma traducao, e essas lacunas estao
+  agora preenchidas.
+- Se carregar de novo um produto noutra lingua falhar por estar offline, ve
+  agora uma mensagem clara em vez de um erro tecnico.
+
 - As fotos dos produtos ficam mais faceis de gerir ao adicionar um produto
   manualmente. Toque numa foto para a ver em ecra inteiro e depois tire uma
   nova, escolha outra da sua galeria ou apague-a. As caixas de foto vazias

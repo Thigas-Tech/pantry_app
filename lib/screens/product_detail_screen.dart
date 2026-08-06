@@ -23,12 +23,14 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/utils/submission_status_label.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
@@ -239,6 +241,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         if (!context.mounted) return;
                         setState(() {});
                         SnackbarHelper.showInfo(context, l10n.productUpdated);
+                      }
+                    } on FetchFailedException catch (e) {
+                      logError(
+                        'Failed to re-fetch product in $currentLocale: $e',
+                      );
+                      if (context.mounted) {
+                        SnackbarHelper.showError(
+                          context,
+                          l10n.fetchProductFailed,
+                        );
                       }
                     } on Exception catch (e) {
                       logError('Failed to switch product language: $e');
@@ -785,24 +797,31 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// Builds a chip showing the OFF submission status for manual products.
   Widget _buildSubmissionStatus(AppLocalizations l10n) {
     final status = widget.product.submissionStatus;
+    final label = submissionStatusLabel(l10n, status);
     final chip = switch (status) {
       productSubmissionSubmitted => Chip(
         avatar: const Icon(Icons.check_circle, size: 18, color: Colors.green),
-        label: Text(l10n.submissionSubmitted),
+        label: Text(label),
       ),
       productSubmissionFailed => Chip(
         avatar: const Icon(Icons.error, size: 18, color: Colors.red),
-        label: Text(l10n.submissionFailed),
+        label: Text(label),
         deleteIcon: const Icon(Icons.refresh, size: 18),
         onDeleted: _retrySubmission,
       ),
       productSubmissionPending => Chip(
         avatar: ProgressIndicatorHelper.build(size: 16, strokeWidth: 2),
-        label: Text(l10n.submissionPending),
+        label: Text(label),
+      ),
+      productSubmissionPartiallyCompleted => Chip(
+        avatar: const Icon(Icons.warning_amber, size: 18, color: Colors.orange),
+        label: Text(label),
+        deleteIcon: const Icon(Icons.refresh, size: 18),
+        onDeleted: _retrySubmission,
       ),
       _ => Chip(
         avatar: const Icon(Icons.cloud_upload, size: 18, color: Colors.grey),
-        label: Text(l10n.submissionNotSubmitted),
+        label: Text(label),
         deleteIcon: const Icon(Icons.refresh, size: 18),
         onDeleted: _retrySubmission,
       ),
@@ -828,7 +847,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   /// Returns the serving size to display, using preset data for produce items
   /// that lack a serving size, or "100 g" when no preset is available.
-  /// Converts to the user's preferred unit system.
+  /// Converts to the user's preferred unit system. Falls back to the
+  /// localized not-available label when the product has no serving data.
   String _displayServingSize(AppLocalizations l10n, Settings settings) {
     // Try structured serving data first
     if (widget.product.servingQuantity != null &&
@@ -885,7 +905,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       }
       return '100 g';
     }
-    return 'N/A';
+    return l10n.notAvailable;
   }
 
   /// Builds a simple label‑value row used for non‑nutrition product information
