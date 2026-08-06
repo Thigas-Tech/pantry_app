@@ -9,6 +9,7 @@ import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -30,7 +31,6 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
-import 'package:pantry_app/utils/submission_status_label.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
@@ -38,6 +38,8 @@ import 'package:pantry_app/widgets/nutrition_table.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
+import 'package:pantry_app/widgets/product_photo_management.dart';
+import 'package:pantry_app/widgets/product_submission_status.dart';
 import 'package:pantry_app/widgets/quantity_and_pantry_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -93,6 +95,52 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// Incremented after every inventory mutation to force the [FutureBuilder]
   /// to re‑fetch the inventory list.
   int _inventoryVersion = 0;
+
+  /// The current photo slots for a manual product.
+  ///
+  /// Local photo edits update this state without rebuilding the whole screen
+  /// from [ProductDetailScreen.product], so in-progress changes survive
+  /// unrelated rebuilds (for example the inventory [FutureBuilder]).
+  late ProductPhotoSlots _photoSlots;
+
+  @override
+  void initState() {
+    super.initState();
+    _photoSlots = _slotsFromProduct();
+  }
+
+  /// Builds the photo slots from the product's persisted photo paths.
+  ProductPhotoSlots _slotsFromProduct() {
+    final product = widget.product;
+    return ProductPhotoSlots(
+      nutrition: product.nutritionImagePath != null
+          ? File(product.nutritionImagePath!)
+          : null,
+      ingredients: product.ingredientsImagePath != null
+          ? File(product.ingredientsImagePath!)
+          : null,
+      product: product.productImagePath != null
+          ? File(product.productImagePath!)
+          : null,
+    );
+  }
+
+  /// Persists photo slot changes back to the product row.
+  Future<void> _onPhotosChanged(ProductPhotoSlots slots) async {
+    final updated = widget.product.withPhotoPaths(
+      nutritionImagePath: slots.nutrition?.path,
+      ingredientsImagePath: slots.ingredients?.path,
+      productImagePath: slots.product?.path,
+    );
+    try {
+      await ref.read(productRepositoryProvider).cacheProduct(updated);
+    } on Object catch (e) {
+      logError(
+        'Failed to persist product photos for '
+        '${widget.product.barcode}: $e',
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -301,7 +349,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               _infoRow(l10n.brandLabel, widget.product.brand!),
             if (widget.product.category != null)
               _infoRow(l10n.categoryLabel, widget.product.category!),
-            if (widget.product.source == 'manual') _buildSubmissionStatus(l10n),
+            if (widget.product.source == 'manual') _buildSubmissionStatus(),
             const Divider(),
             _infoRow(l10n.servingSize, _displayServingSize(l10n, settings)),
 
@@ -320,6 +368,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 ],
               ),
             const SizedBox(height: 24),
+
+            // Local photo management for manual products.
+            if (widget.product.source == 'manual')
+              ProductPhotoManagement(
+                barcode: widget.product.barcode,
+                initialSlots: _photoSlots,
+                onChanged: _onPhotosChanged,
+              ),
+            const SizedBox(height: 16),
 
             // Price section
             _buildPriceSection(context, l10n),
@@ -795,53 +852,30 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   /// Builds a chip showing the OFF submission status for manual products.
-  Widget _buildSubmissionStatus(AppLocalizations l10n) {
+  Widget _buildSubmissionStatus() {
     final status = widget.product.submissionStatus;
-    final label = submissionStatusLabel(l10n, status);
-    final chip = switch (status) {
-      productSubmissionSubmitted => Chip(
-        avatar: const Icon(Icons.check_circle, size: 18, color: Colors.green),
-        label: Text(label),
-      ),
-      productSubmissionFailed => Chip(
-        avatar: const Icon(Icons.error, size: 18, color: Colors.red),
-        label: Text(label),
-        deleteIcon: const Icon(Icons.refresh, size: 18),
-        onDeleted: _retrySubmission,
-      ),
-      productSubmissionPending => Chip(
-        avatar: ProgressIndicatorHelper.build(size: 16, strokeWidth: 2),
-        label: Text(label),
-      ),
-      productSubmissionPartiallyCompleted => Chip(
-        avatar: const Icon(Icons.warning_amber, size: 18, color: Colors.orange),
-        label: Text(label),
-        deleteIcon: const Icon(Icons.refresh, size: 18),
-        onDeleted: _retrySubmission,
-      ),
-      _ => Chip(
-        avatar: const Icon(Icons.cloud_upload, size: 18, color: Colors.grey),
-        label: Text(label),
-        deleteIcon: const Icon(Icons.refresh, size: 18),
-        onDeleted: _retrySubmission,
-      ),
-    };
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: chip,
+    final canRetry =
+        status != productSubmissionSubmitted &&
+        status != productSubmissionPending;
+    return ProductSubmissionStatus(
+      status: status,
+      barcode: widget.product.barcode,
+      onRetry: canRetry ? _retrySubmission : null,
     );
   }
 
   Future<void> _retrySubmission() async {
     final l10n = AppLocalizations.of(context)!;
-    final service = ref.read(productSubmissionServiceProvider);
-    final result = await service.submitProduct(widget.product);
-    if (mounted) {
-      if (result.submissionStatus == productSubmissionSubmitted) {
+    final notifier = ref.read(productSubmissionNotifierProvider.notifier);
+    final result = await notifier.submit(widget.product, retry: true);
+    if (!mounted) return;
+    switch (result.submissionStatus) {
+      case productSubmissionSubmitted:
         SnackbarHelper.showInfo(context, l10n.submissionSuccess);
-      } else {
+      case productSubmissionPartiallyCompleted:
+        SnackbarHelper.showWarning(context, l10n.submissionPartial);
+      default:
         SnackbarHelper.showError(context, l10n.submissionError);
-      }
     }
   }
 

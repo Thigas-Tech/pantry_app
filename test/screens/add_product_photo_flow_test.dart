@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/image_field.dart';
@@ -10,9 +11,12 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/services/product_photo_picker.dart';
+import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -21,6 +25,9 @@ import '../helpers/pump_app.dart';
 class MockProductPhotoPicker extends Mock implements ProductPhotoPicker {}
 
 class MockProductImageService extends Mock implements ProductImageService {}
+
+class MockProductSubmissionService extends Mock
+    implements ProductSubmissionService {}
 
 /// A minimal 1x1 transparent PNG so [Image.file] decodes in tests.
 final Uint8List kTransparentPng = Uint8List.fromList(const <int>[
@@ -105,6 +112,7 @@ void main() {
     registerFallbackValue(ImageField.nutrition);
     registerFallbackValue(const ProductPhotoSlots.empty());
     registerFallbackValue('123');
+    registerFallbackValue(const Product(barcode: 'fallback', name: 'F'));
   });
 
   setUp(() async {
@@ -161,6 +169,36 @@ void main() {
     }
   });
 
+  /// Overrides for the picker, image service, repository, and submission
+  /// service so save flows never touch the filesystem, database, or network.
+  ///
+  /// Real I/O does not settle under testWidgets FakeAsync, and the durable
+  /// submission notifier must complete for the progress sheet to settle.
+  List<Override> screenOverrides() {
+    final submissionService = MockProductSubmissionService();
+    when(
+      () => submissionService.submitProduct(
+        any(),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).thenAnswer(
+      (_) async => const Product(
+        barcode: '123',
+        name: 'Test Product',
+        source: 'manual',
+        submissionStatus: productSubmissionSubmitted,
+      ),
+    );
+    final repo = createMockProductRepository();
+    when(() => repo.cacheProduct(any())).thenAnswer((_) async {});
+    return [
+      productPhotoPickerProvider.overrideWithValue(mockPicker),
+      productImageServiceProvider.overrideWithValue(mockImageService),
+      productRepositoryProvider.overrideWithValue(repo),
+      productSubmissionServiceProvider.overrideWithValue(submissionService),
+    ];
+  }
+
   Future<void> pumpScreen(WidgetTester tester) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -171,12 +209,7 @@ void main() {
     await pumpApp(
       tester,
       const AddProductScreen(barcode: '123'),
-      overrides: [
-        productPhotoPickerProvider.overrideWithValue(mockPicker),
-        productImageServiceProvider.overrideWithValue(
-          mockImageService,
-        ),
-      ],
+      overrides: screenOverrides(),
     );
     await tester.pumpAndSettle();
   }
@@ -205,12 +238,7 @@ void main() {
           child: const Text('Open form'),
         ),
       ),
-      overrides: [
-        productPhotoPickerProvider.overrideWithValue(mockPicker),
-        productImageServiceProvider.overrideWithValue(
-          mockImageService,
-        ),
-      ],
+      overrides: screenOverrides(),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Open form'));
@@ -681,10 +709,7 @@ void main() {
             child: const Text('Open form'),
           ),
         ),
-        overrides: [
-          productPhotoPickerProvider.overrideWithValue(mockPicker),
-          productImageServiceProvider.overrideWithValue(mockImageService),
-        ],
+        overrides: screenOverrides(),
       );
       await tester.tap(find.text('Open form'));
       await tester.pumpAndSettle();

@@ -553,6 +553,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Submitting product details to Open Food Facts…';
 
   @override
+  String get submissionProgressTitle => 'Submitting to Open Food Facts';
+
+  @override
+  String get submissionInBackground =>
+      'You can leave this screen; submission continues in the background.';
+
+  @override
+  String get submissionPartial =>
+      'Partially submitted — some photos could not be uploaded.';
+
+  @override
+  String get submissionDone => 'Done';
+
+  @override
   String get productAlreadyInOff =>
       'This product is already in Open Food Facts.';
 

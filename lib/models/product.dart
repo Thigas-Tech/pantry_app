@@ -487,3 +487,58 @@ extension ProductMerge on Product {
     );
   }
 }
+
+/// Extension that replaces the local photo paths of a [Product].
+///
+/// Unlike [Product.copyWith], passing null to this method actually clears the
+/// path instead of keeping the previous value, which is required when a photo
+/// is removed from the product detail screen.
+extension ProductPhotoPaths on Product {
+  /// Returns a copy of this product with the given local photo paths.
+  ///
+  /// [nutritionImagePath], [ingredientsImagePath], and [productImagePath]
+  /// are set exactly as provided, so null removes the photo. All other
+  /// fields are preserved unchanged.
+  Product withPhotoPaths({
+    String? nutritionImagePath,
+    String? ingredientsImagePath,
+    String? productImagePath,
+  }) {
+    return Product(
+      barcode: barcode,
+      name: name,
+      brand: brand,
+      imageUrl: imageUrl,
+      offNutritionImageUrl: offNutritionImageUrl,
+      offIngredientsImageUrl: offIngredientsImageUrl,
+      offProductImageUrl: offProductImageUrl,
+      categoriesHierarchy: categoriesHierarchy,
+      category: category,
+      ingredients: ingredients,
+      servingSize: servingSize,
+      servingQuantity: servingQuantity,
+      quantity: quantity,
+      productQuantity: productQuantity,
+      energyKcal: energyKcal,
+      proteinG: proteinG,
+      carbsG: carbsG,
+      fatG: fatG,
+      fiberG: fiberG,
+      saltG: saltG,
+      lastSynced: lastSynced,
+      nutriscoreGrade: nutriscoreGrade,
+      nutriscoreNotApplicableCategory: nutriscoreNotApplicableCategory,
+      source: source,
+      languageCode: languageCode,
+      nutritionImagePath: nutritionImagePath,
+      ingredientsImagePath: ingredientsImagePath,
+      productImagePath: productImagePath,
+      submissionStatus: submissionStatus,
+      pluCode: pluCode,
+      productType: productType,
+      usdaServingAmount: usdaServingAmount,
+      usdaServingUnit: usdaServingUnit,
+      usdaGramWeight: usdaGramWeight,
+    );
+  }
+}

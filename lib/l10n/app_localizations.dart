@@ -1095,6 +1095,30 @@ abstract class AppLocalizations {
   /// **'Submitting product details to Open Food Facts…'**
   String get submittingMetadata;
 
+  /// No description provided for @submissionProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting to Open Food Facts'**
+  String get submissionProgressTitle;
+
+  /// No description provided for @submissionInBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'You can leave this screen; submission continues in the background.'**
+  String get submissionInBackground;
+
+  /// No description provided for @submissionPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially submitted — some photos could not be uploaded.'**
+  String get submissionPartial;
+
+  /// No description provided for @submissionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get submissionDone;
+
   /// No description provided for @productAlreadyInOff.
   ///
   /// In en, this message translates to:

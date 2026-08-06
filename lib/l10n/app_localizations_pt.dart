@@ -559,6 +559,20 @@ class AppLocalizationsPt extends AppLocalizations {
       'Enviando os detalhes do produto para o Open Food Facts…';
 
   @override
+  String get submissionProgressTitle => 'Enviando para o Open Food Facts';
+
+  @override
+  String get submissionInBackground =>
+      'Você pode sair desta tela; o envio continua em segundo plano.';
+
+  @override
+  String get submissionPartial =>
+      'Enviado parcialmente — algumas fotos não puderam ser enviadas.';
+
+  @override
+  String get submissionDone => 'Concluído';
+
+  @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';
 
   @override
@@ -2640,6 +2654,20 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get submittingMetadata =>
       'Enviando os detalhes do produto para o Open Food Facts…';
+
+  @override
+  String get submissionProgressTitle => 'Enviando para o Open Food Facts';
+
+  @override
+  String get submissionInBackground =>
+      'Você pode sair desta tela; o envio continua em segundo plano.';
+
+  @override
+  String get submissionPartial =>
+      'Enviado parcialmente — algumas fotos não puderam ser enviadas.';
+
+  @override
+  String get submissionDone => 'Concluído';
 
   @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';

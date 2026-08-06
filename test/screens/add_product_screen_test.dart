@@ -4,11 +4,17 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/services/product_image_service.dart';
+import 'package:pantry_app/services/product_submission_service.dart';
 import '../helpers/pump_app.dart';
 
 class MockProductImageService extends Mock implements ProductImageService {}
+
+class MockProductSubmissionService extends Mock
+    implements ProductSubmissionService {}
 
 /// Pumps [screen] with a viewport tall enough so all [ListView] children
 /// are built. Resets the viewport on teardown.
@@ -28,6 +34,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const ProductPhotoSlots.empty());
+    registerFallbackValue(const Product(barcode: 'fallback', name: 'F'));
   });
 
   setUp(() {
@@ -37,6 +44,8 @@ void main() {
   /// Pumps the screen with a mocked image service so the save flow never
   /// touches the filesystem (real I/O does not settle under testWidgets
   /// FakeAsync). Real file persistence is covered by the service unit tests.
+  /// A mocked submission service lets the durable notifier complete so the
+  /// progress sheet settles and the screen pops with the saved product.
   Future<void> pumpSaveScreen(WidgetTester tester, Widget screen) async {
     when(
       () => imageService.save(
@@ -57,11 +66,31 @@ void main() {
         committedPaths: any(named: 'committedPaths'),
       ),
     ).thenAnswer((_) async {});
+    final submissionService = MockProductSubmissionService();
+    when(
+      () => submissionService.submitProduct(
+        any(),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).thenAnswer(
+      (_) async => const Product(
+        barcode: '123',
+        name: 'Test Product',
+        source: 'manual',
+        submissionStatus: productSubmissionSubmitted,
+      ),
+    );
+    final repo = createMockProductRepository();
+    when(() => repo.cacheProduct(any())).thenAnswer((_) async {});
     await pumpApp(
       tester,
       screen,
       overrides: [
         productImageServiceProvider.overrideWithValue(imageService),
+        productRepositoryProvider.overrideWithValue(repo),
+        productSubmissionServiceProvider.overrideWithValue(
+          submissionService,
+        ),
       ],
     );
   }

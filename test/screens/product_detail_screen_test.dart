@@ -26,6 +26,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -34,15 +35,18 @@ import 'package:flutter_riverpod/misc.dart'; // for Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
+import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -51,9 +55,11 @@ import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/price_repository.dart';
+import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:pantry_app/widgets/product_photo_management.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 import '../services/mock_notification_service.dart';
@@ -207,10 +213,15 @@ class MockPriceRepository extends Mock implements PriceRepository {}
 class MockProductSubmissionService extends Mock
     implements ProductSubmissionService {}
 
+class MockProductImageService extends Mock implements ProductImageService {}
+
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 void _registerFallbacks() {
   registerFallbackValue(const InventoryItem(barcode: 'fallback'));
+  registerFallbackValue(ImageField.nutrition);
+  registerFallbackValue(const ProductPhotoSlots.empty());
+  registerFallbackValue(File('/fallback.jpg'));
   registerFallbackValue(
     const NotificationDetails(
       android: AndroidNotificationDetails(
@@ -1113,7 +1124,84 @@ void main() {
     await tester.tap(find.byIcon(Icons.refresh));
     await tester.pumpAndSettle();
 
-    verify(() => mockSubmission.submitProduct(any())).called(1);
+    verify(
+      () => mockSubmission.submitProduct(
+        any(),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('manual product renders the local photo management section', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: failedManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    expect(find.byType(ProductPhotoManagement), findsOneWidget);
+  });
+
+  testWidgets(
+    'api product does not render the local photo management section',
+    (
+      tester,
+    ) async {
+      setLargeScreen(tester);
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+      );
+
+      expect(find.byType(ProductPhotoManagement), findsNothing);
+    },
+  );
+
+  testWidgets('deleting a local photo persists the cleared path via the repo', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async {});
+    final imageService = MockProductImageService();
+    when(
+      () => imageService.remove(any(), any()),
+    ).thenAnswer((invocation) {
+      final slots = invocation.positionalArguments[0] as ProductPhotoSlots;
+      final field = invocation.positionalArguments[1] as ImageField;
+      return slots.withField(field, null);
+    });
+    when(
+      () => imageService.cleanupUncommitted(
+        any(),
+        barcode: any(named: 'barcode'),
+        committedPaths: any(named: 'committedPaths'),
+      ),
+    ).thenAnswer((_) async {});
+    final product = failedManualProduct.copyWith(
+      nutritionImagePath: '/tmp/fake-nutrition.jpg',
+    );
+
+    await pumpApp(
+      tester,
+      ProductDetailScreen(product: product),
+      overrides: [
+        ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+        productImageServiceProvider.overrideWithValue(imageService),
+      ],
+    );
+
+    await tester.tap(find.byIcon(Icons.delete_outline).first);
+    await tester.pumpAndSettle();
+
+    final captured = verify(
+      () => mockRepo.cacheProduct(captureAny()),
+    ).captured.cast<Product>();
+    expect(captured, hasLength(1));
+    expect(captured.single.nutritionImagePath, isNull);
   });
 
   testWidgets(

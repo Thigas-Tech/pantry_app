@@ -109,9 +109,9 @@ normalizes both the integer `1` (metadata) and the string `status ok`
 | Wrong credentials | Server responds non-ok; the write returns `false`; `Status.isWrongUsernameOrPassword()` surfaces `Incorrect user name or password` |
 | Duplicate barcode | Save is an upsert for the submitting user; re-submitting updates the existing product |
 | Duplicate image field | New upload is stored; the newest selected photo of each field is displayed, older ones are kept |
-| HTTP 429 rate limit | `isRateLimitStatus` detects it; write retries with a 5x linear backoff up to `maxRetries`, then returns `false` |
-| Timeout / network error | SDK throws; adapter retries with linear backoff, then returns `false` |
-| Partial image success | `ProductSubmissionService` treats the whole product as failed if any present image upload fails, even when metadata and other images succeeded |
+| HTTP 429 rate limit | `isRateLimitStatus` detects it; write retries with a 5x linear backoff up to `maxRetries`, then returns `false`; the submission service categorizes the failure as rate-limited and queues the barcode for background retry |
+| Timeout / network error | SDK throws; adapter retries with linear backoff, then returns `false`; the submission service categorizes the failure as transient and queues the barcode for retry |
+| Partial image success | Metadata accepted but at least one image upload failed: product is marked `partially_completed` (not `failed`). A transient image failure (network/429/timeout) queues the barcode so remaining uploads can complete later; a non-transient image rejection does not queue |
 | File missing on disk | Image upload returns `false` without a network call |
 
 ## Retry and backoff

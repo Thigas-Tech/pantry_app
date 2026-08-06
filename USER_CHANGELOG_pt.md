@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Ao guardar um produto introduzido manualmente, ve agora um painel com o
+  progresso do envio para o Open Food Facts: primeiro os detalhes, depois o
+  carregamento de cada foto. Pode fechar o painel e o envio continua em segundo
+  plano.
+- Se so algumas fotos forem carregadas com sucesso, a pagina do produto mostra
+  agora que o envio esta apenas parcialmente concluido e permite tentar de
+  novo.
+- Se um envio falhar por estar offline ou o servidor estar ocupado, a app
+  lembra-se dele e tenta de novo automaticamente mais tarde.
+- Na pagina de um produto introduzido manualmente, pode agora adicionar,
+  substituir ou apagar as fotos, e desfazer uma eliminacao por engano.
+
 - Ha agora mais mensagens traduzidas para portugues. Alguns ecras mostravam
   antes texto em ingles quando faltava uma traducao, e essas lacunas estao
   agora preenchidas.

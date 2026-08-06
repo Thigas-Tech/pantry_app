@@ -619,17 +619,19 @@ infrastructure or external server hosting are listed last.
      with Close, Retake, and Replace actions. Done in issue #263.
   3. [x] **Photo deletion** — each image tile has a delete button that
      removes the photo and offers undo. Done in issue #263.
-  4. [ ] **Submission progress UI** — after tapping "Save", show a progress
-     indicator (e.g. `LinearProgressIndicator` or a bottom sheet with
-     step status: "Submitting metadata...", "Uploading photos (1/3)...")
-     instead of silently fire-and-forgetting via `unawaited()`.
-  5. [ ] **Submission retry from failure state** — if submission fails, show
-     a persistent status in the product detail screen (already exists)
-     AND allow the user to retry with the option to change photos before
-     retrying.
-  6. [ ] **Photo management from detail screen** — on `ProductDetailScreen`,
-     when viewing a manually-entered product, show the 3 local photos with
-     edit/delete/replace options.
+  4. [x] **Submission progress UI** — saving a manual product now shows a
+     bottom-sheet progress panel (metadata, then per-image "Uploading photos
+     (1/3)") driven by the durable `ProductSubmissionNotifier`, which survives
+     navigating away from the form and reports the terminal result. Done in
+     issues #265/#268.
+  5. [x] **Submission retry from failure state** — the product detail screen
+     shows a persistent status chip for manual products with a retry action on
+     failed/partial states, and the retry now runs through the durable notifier
+     (so progress is visible while retrying). Photos can be changed on the
+     detail screen before retrying. Done in issues #265/#269.
+  6. [x] **Photo management from detail screen** — `ProductDetailScreen` shows
+     the 3 local photo slots for manual products with add/replace/delete/undo,
+     reusing `ProductPhotoManagement`. Done in issues #265/#269.
    7. [x] **Camera permission denied handling** — denied camera permission
       shows a dialog with an "Open Settings" button. Done in issue #263.
    8. [x] Study the official Open Food Facts app (smooth-app) for UX patterns:
@@ -661,22 +663,23 @@ infrastructure or external server hosting are listed last.
     committed to a saved product. `ProductImageService.cleanupUncommitted`
     runs from `AddProductScreen.dispose()`, preserving `committedPaths`.
     Done in issue #262.
-  - **Submission in progress when user navigates away**: Current
-    `unawaited(_cacheAndSubmit(...))` makes the submission fire-and-forget.
-    If the user pops the screen, submission still runs but errors are
-    logged only. Replace with a `SubmitNotifier` that outlives the screen
-    and shows status via snackbar or a persistent notification.
+  - **Submission in progress when user navigates away**: The submission now
+    runs through the keep-alive `ProductSubmissionNotifier`
+    (`lib/providers/product_submission_provider.dart`), which survives
+    navigation and drives the progress sheet and the detail-screen status
+    chip. Done in issue #265.
   - **OFF API submission quota**: The OFF API may rate-limit submissions.
-    Check `OffAdapter.submitProduct()` response for 429 status. Wait and
-    retry with exponential backoff.
-  - **Image upload ordering**: Currently sequential (front, ingredients,
-    nutrition). If the 2nd or 3rd upload fails, the product is marked
-    `failed` even though metadata and some images succeeded. Consider
-    partial success: mark as `submitted` if metadata + at least 1 image
-    succeeds; report partial failure in the UI.
-  - **Network timeout during upload**: Image uploads can take 10-30s on
-    slow connections. Set a per-image timeout of 60s. Show per-image
-    progress if the SDK supports it.
+    Rate-limit (429) and network failures are categorized as transient, marked
+    `failed`, and queued for background retry with the offline queue. Done in
+    issue #265.
+  - **Image upload ordering**: Uploads run sequentially (front, ingredients,
+    nutrition). If some uploads fail but metadata succeeded, the product is now
+    marked `partially_completed` instead of `failed`, and a transient image
+    failure queues the barcode so the remaining uploads can complete later.
+    Done in issue #265.
+  - **Network timeout during upload**: A single image upload is bounded by a
+    60s per-image timeout (injectable via `imageUploadTimeout`); a timeout is
+    transient and queues the barcode for retry. Done in issue #265.
   - **Product already exists on OFF**: The `submitProduct()` call may fail
     if the barcode already exists in the OFF database. Add a check before
     submission: query OFF for the barcode first. If it exists, show "This

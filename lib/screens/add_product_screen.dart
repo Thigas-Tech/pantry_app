@@ -19,6 +19,7 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
+import 'package:pantry_app/widgets/submission_progress_sheet.dart';
 
 /// A form screen for manually entering product details.
 ///
@@ -189,25 +190,33 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     logInfo('Manual product entry saved: ${product.name}');
 
     if (!mounted) return;
+    // Pop the screen first so the progress sheet (pushed afterwards on the
+    // root navigator) appears above whatever screen the user lands on. The
+    // submission runs through the durable notifier and continues even if the
+    // user navigates away; the sheet observes the notifier state and shows
+    // the terminal result when the run finishes.
+    final notifier = ref.read(productSubmissionNotifierProvider.notifier);
     Navigator.of(context).pop(product);
-
-    // Background submit to OFF (fire-and-forget after local save).
-    unawaited(_cacheAndSubmit(product));
+    unawaited(showSubmissionProgressSheet(context, barcode: product.barcode));
+    unawaited(_persistAndSubmit(product, notifier));
   }
 
-  Future<void> _cacheAndSubmit(Product product) async {
+  /// Persists [product] locally, then submits it to Open Food Facts through
+  /// the durable [notifier].
+  ///
+  /// Runs detached from the save flow so the form can pop immediately; a
+  /// failure to cache locally is logged and never blocks the submission.
+  Future<void> _persistAndSubmit(
+    Product product,
+    ProductSubmissionNotifier notifier,
+  ) async {
     try {
       final repo = ref.read(productRepositoryProvider);
       await repo.cacheProduct(product);
     } on Object catch (e) {
       logError('Failed to cache product locally: $e');
     }
-    try {
-      final service = ref.read(productSubmissionServiceProvider);
-      await service.submitProduct(product);
-    } on Object catch (e) {
-      logError('Failed to submit product to OFF: $e');
-    }
+    await notifier.submit(product);
   }
 
   @override

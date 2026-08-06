@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- When you save a manually entered product, you now see a panel showing the
+  progress of submitting it to Open Food Facts: submitting the details, then
+  uploading each photo. You can dismiss the panel and the submission keeps
+  running in the background.
+- If only some photos upload successfully, the product page now shows that the
+  submission is only partially complete and lets you try again.
+- If a submission fails because you are offline or the server is busy, the app
+  remembers it and tries again automatically later.
+- On the page of a manually entered product you can now add, replace, or
+  delete its photos, and undo an accidental deletion.
+
 - More messages are now translated into Portuguese. Some screens previously
   showed English text when a translation was missing, and those gaps are now
   filled.

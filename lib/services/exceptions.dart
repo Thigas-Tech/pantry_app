@@ -23,6 +23,22 @@ class FetchFailedException implements Exception {
   String toString() => 'FetchFailedException: $message';
 }
 
+/// Thrown when a submission is attempted for a barcode that already has a
+/// submission in flight.
+///
+/// Callers should treat this as a no-op: the earlier submission is still
+/// running and will persist its result to the database.
+class SubmissionAlreadyInProgressException implements Exception {
+  /// Creates a [SubmissionAlreadyInProgressException] for [barcode].
+  const SubmissionAlreadyInProgressException(this.barcode);
+
+  /// The barcode whose submission is already running.
+  final String barcode;
+
+  @override
+  String toString() => 'SubmissionAlreadyInProgressException: $barcode';
+}
+
 /// Thrown when there is insufficient stock in the inventory to cook a recipe.
 ///
 /// [shortages] maps ingredient names to the additional quantity needed.

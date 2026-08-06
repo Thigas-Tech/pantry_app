@@ -21,9 +21,41 @@
   status, including the new `productSubmissionPartiallyCompleted` constant
   (`lib/models/product.dart`). The detail-screen chip renders a partial-state
   variant with a retry action. (`lib/screens/product_detail_screen.dart`)
-  Note: the chip and vocabulary are wired in the UI; the submission service
-  does not emit this state yet (it still marks metadata-OK/image-failed
-  submissions as `failed`). Service wiring is deferred to a follow-up.
+
+- **Durable, observable product submission**: the manual-product submission
+  now runs through a keep-alive `ProductSubmissionNotifier`
+  (`lib/providers/product_submission_provider.dart`) holding an immutable
+  `ProductSubmissionState` (`lib/models/product_submission_state.dart`).
+  Saving a product shows a bottom-sheet progress panel
+  (`lib/widgets/submission_progress_sheet.dart`) that reports metadata
+  upload, per-image progress (image N of M), and the terminal result, and it
+  survives navigating away from the form. The submission service
+  (`lib/services/product_submission_service.dart`) emits step and progress
+  callbacks, enforces one in-flight submission per barcode via
+  `SubmissionAlreadyInProgressException`, marks metadata-OK/image-failed
+  runs as `partially_completed` (transient image failures still queue for
+  retry), applies a per-image 60s timeout (injectable), and only queues
+  transient (network/rate-limit/timeout) failures for background retry.
+  (`lib/models/product_submission_state.dart`,
+  `lib/services/product_submission_service.dart`,
+  `lib/providers/product_submission_provider.dart`,
+  `lib/widgets/submission_progress_sheet.dart`,
+  `lib/screens/add_product_screen.dart`,
+  `lib/services/exceptions.dart`)
+
+- **Detail-screen submission status and photo management**: manual products
+  on `ProductDetailScreen` now render a `ProductSubmissionStatus` chip with a
+  retry action on failed/partial/not-submitted states (retries run through the
+  durable notifier), plus a `ProductPhotoManagement` section to add, replace,
+  and delete the three local photos with undo. Photo changes persist back to
+  the product row via the new `withPhotoPaths` extension, and uncommitted
+  files are cleaned up on dispose. (`lib/widgets/product_submission_status.dart`,
+  `lib/widgets/product_photo_management.dart`, `lib/models/product.dart`,
+  `lib/screens/product_detail_screen.dart`)
+
+- **Public rate-limit helper**: `OffAdapter.isRateLimitError` is no longer
+  test-only so the submission service can categorize rate-limit failures.
+  (`lib/services/off_adapter.dart`)
 
 - **ARB integrity guard**: new `test/l10n/arb_integrity_test.dart` fails when
   the Portuguese ARB files drift from the English template — missing keys,

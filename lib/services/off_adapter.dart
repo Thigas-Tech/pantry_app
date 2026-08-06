@@ -110,8 +110,8 @@ class OffAdapter {
   /// Returns true when [error] indicates HTTP 429 rate limiting.
   ///
   /// The OFF SDK wraps 429 responses as generic exceptions with the
-  /// HTTP error page in the message body.
-  @visibleForTesting
+  /// HTTP error page in the message body. Exposed as public so the
+  /// product submission service can categorize submission failures.
   static bool isRateLimitError(Object error) {
     final msg = error.toString();
     return msg.contains('429 Too Many Requests');
