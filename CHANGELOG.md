@@ -4,6 +4,20 @@
 
 ### Added
 
+- **Testable product photo persistence and cleanup**: photo storage for the
+  manual product form now lives in a dedicated `ProductImageService` behind
+  the immutable `ProductPhotoSlots` snapshot. Picked files are copied
+  immediately into deterministic managed paths under the app's
+  `product_images` directory (`<barcode>_<suffix>.jpg`), replacing a photo
+  overwrites the same file, and files are only deleted once they are no
+  longer referenced or committed. `AddProductScreen.dispose()` removes
+  photos the form never saved, so backing out leaves no orphaned files,
+  while undo can still restore a removed photo from its live file.
+  (`lib/services/product_image_service.dart`,
+  `lib/models/product_photo_slots.dart`,
+  `lib/providers/product_image_service_provider.dart`,
+  `lib/screens/add_product_screen.dart`)
+
 - **Product photo preview, retake, replace, and delete**: photos added to
   the manual product form now open in a full-screen preview with visible
   Close, Retake, Replace, and Delete actions. Empty photo slots open a

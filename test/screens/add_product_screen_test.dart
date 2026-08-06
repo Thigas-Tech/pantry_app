@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_photo_slots.dart';
+import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
+import 'package:pantry_app/services/product_image_service.dart';
 import '../helpers/pump_app.dart';
+
+class MockProductImageService extends Mock implements ProductImageService {}
 
 /// Pumps [screen] with a viewport tall enough so all [ListView] children
 /// are built. Resets the viewport on teardown.
@@ -18,6 +24,48 @@ Future<void> pumpTall(WidgetTester tester, Widget screen) async {
 }
 
 void main() {
+  late MockProductImageService imageService;
+
+  setUpAll(() {
+    registerFallbackValue(const ProductPhotoSlots.empty());
+  });
+
+  setUp(() {
+    imageService = MockProductImageService();
+  });
+
+  /// Pumps the screen with a mocked image service so the save flow never
+  /// touches the filesystem (real I/O does not settle under testWidgets
+  /// FakeAsync). Real file persistence is covered by the service unit tests.
+  Future<void> pumpSaveScreen(WidgetTester tester, Widget screen) async {
+    when(
+      () => imageService.save(
+        any(),
+        barcode: any(named: 'barcode'),
+      ),
+    ).thenAnswer(
+      (_) async => (
+        nutrition: null,
+        ingredients: null,
+        product: null,
+      ),
+    );
+    when(
+      () => imageService.cleanupUncommitted(
+        any(),
+        barcode: any(named: 'barcode'),
+        committedPaths: any(named: 'committedPaths'),
+      ),
+    ).thenAnswer((_) async {});
+    await pumpApp(
+      tester,
+      screen,
+      overrides: [
+        productImageServiceProvider.overrideWithValue(imageService),
+      ],
+    );
+  }
+
   group('AddProductScreen', () {
     testWidgets('renders without crashing', (tester) async {
       await pumpApp(tester, const AddProductScreen(barcode: '123'));
@@ -79,7 +127,13 @@ void main() {
     });
 
     testWidgets('entering name and saving pops the route', (tester) async {
-      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      await pumpSaveScreen(tester, const AddProductScreen(barcode: '123'));
 
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Product name'),
@@ -101,7 +155,7 @@ void main() {
 
       Product? captured;
 
-      await pumpApp(
+      await pumpSaveScreen(
         tester,
         Builder(
           builder: (context) => ElevatedButton(
@@ -193,7 +247,7 @@ void main() {
 
       Product? captured;
 
-      await pumpApp(
+      await pumpSaveScreen(
         tester,
         Builder(
           builder: (context) => ElevatedButton(

@@ -8,6 +8,9 @@
   your gallery, and if you remove a photo by accident you can undo it.
 - If camera access is denied, the app now explains why and offers a button
   to open your device settings.
+- Photos you add to a manually entered product are saved together with the
+  product. If you leave the form without saving, the photos you added are
+  removed so they do not stay on your device.
 
 - Prices are now saved per pantry: each pantry (Home, Work, etc.) keeps its
   own price history. The product page shows the latest price for the current

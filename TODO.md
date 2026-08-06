@@ -630,14 +630,21 @@ infrastructure or external server hosting are listed last.
   6. [ ] **Photo management from detail screen** — on `ProductDetailScreen`,
      when viewing a manually-entered product, show the 3 local photos with
      edit/delete/replace options.
-  7. [x] **Camera permission denied handling** — denied camera permission
-     shows a dialog with an "Open Settings" button. Done in issue #263.
-  8. [x] Study the official Open Food Facts app (smooth-app) for UX patterns:
-     - Photo capture flow with retake
-     - Progress indicators during submission
-     - Error states and retry
-     - Image quality guidelines before upload
-     Reference: https://github.com/openfoodfacts/smooth-app
+   7. [x] **Camera permission denied handling** — denied camera permission
+      shows a dialog with an "Open Settings" button. Done in issue #263.
+   8. [x] Study the official Open Food Facts app (smooth-app) for UX patterns:
+      - Photo capture flow with retake
+      - Progress indicators during submission
+      - Error states and retry
+      - Image quality guidelines before upload
+      Reference: https://github.com/openfoodfacts/smooth-app
+   9. [x] **Testable photo persistence & cleanup** — photo persistence now
+      lives in `ProductImageService` (`lib/services/product_image_service.dart`)
+      with the immutable `ProductPhotoSlots` snapshot, so the copy/cleanup
+      logic is unit-tested without camera hardware. Picked files are copied
+      to deterministic managed paths under `product_images`, deletion is
+      deferred so undo can restore a live file, and uncommitted files are
+      removed from `AddProductScreen.dispose()`. Done in issue #262.
 
   **Pitfalls & edge cases**:
   - **Image file size**: Camera photos can be 3-10 MB. Resize/compress
@@ -649,9 +656,11 @@ infrastructure or external server hosting are listed last.
     on Android 13+ or `READ_EXTERNAL_STORAGE` on older versions. Handle
     permission request gracefully.
   - **Photo deletion deletes local file**: Deleting a photo from the form
-    should also delete the local file from
-    `product_images/<barcode>_<suffix>.jpg`. Add cleanup in
-    `AddProductScreen.dispose()`.
+    clears the slot; the managed file under
+    `product_images/<barcode>_<suffix>.jpg` is deleted only when it is not
+    committed to a saved product. `ProductImageService.cleanupUncommitted`
+    runs from `AddProductScreen.dispose()`, preserving `committedPaths`.
+    Done in issue #262.
   - **Submission in progress when user navigates away**: Current
     `unawaited(_cacheAndSubmit(...))` makes the submission fire-and-forget.
     If the user pops the screen, submission still runs but errors are

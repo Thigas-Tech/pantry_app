@@ -9,6 +9,9 @@
   engano pode desfazer a acao.
 - Se o acesso a camera for negado, a app explica o motivo e oferece um botao
   para abrir as definicoes do dispositivo.
+- As fotos que adiciona a um produto introduzido manualmente sao guardadas
+  juntamente com o produto. Se sair do formulario sem guardar, as fotos que
+  adicionou sao removidas para nao ficarem no dispositivo.
 
 - Os precos agora sao guardados por despensa: cada despensa (Casa, Trabalho,
   etc.) tem o seu proprio historico de precos. A pagina do produto mostra o
