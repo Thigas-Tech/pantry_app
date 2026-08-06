@@ -71,8 +71,8 @@
     
 <section class="desc markdown">
   <p>Returns a retry delay with linear backoff and ±25% jitter.</p>
-<p><code>attempt</code> is zero-based (0 = first retry).  The base delay is
-<code>(attempt + 1)</code> seconds.  When <code>isRateLimit</code> is <code>true</code>, the base
+<p><code>attempt</code> is zero-based (0 = first retry). The base delay is
+(attempt + 1) seconds. When <code>isRateLimit</code> is true, the base
 delay is multiplied by 5 to be more respectful of the server's
 capacity.  The result is clamped to &gt;= 500 ms.</p>
 </section>

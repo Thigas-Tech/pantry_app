@@ -281,6 +281,8 @@ and may not be present for every product.</p>
   &#47;&#47;&#47; - [productSubmissionPending] — queued for submission.
   &#47;&#47;&#47; - [productSubmissionSubmitted] — successfully submitted.
   &#47;&#47;&#47; - [productSubmissionFailed] — submission failed; retry possible.
+  &#47;&#47;&#47; - [productSubmissionPartiallyCompleted] — some uploads failed; retry
+  &#47;&#47;&#47;   possible.
   @Default(productSubmissionNotSubmitted) String submissionStatus,
 
   &#47;&#47;&#47; The PLU (Price Look-Up) code for this product, if it is a fresh

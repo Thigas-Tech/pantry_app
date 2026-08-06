@@ -56,9 +56,10 @@
 <section class="desc markdown">
   <p>Owns persistence and cleanup of product photos for the manual-entry form.</p>
 <p>Photos are copied into a stable managed file per slot and barcode inside
-the application-documents <code>product_images</code> directory, following the
-<code>&lt;barcode&gt;_&lt;suffix&gt;.jpg</code> convention used by the product model. The service
-is the single testable boundary between picked files and the durable store.</p>
+the application-documents product_images directory, following the
+&lt;barcode&gt;_&lt;suffix&gt;.jpg convention used by the product
+model. The service is the single testable boundary between picked files
+and the durable store.</p>
 <h2 id="lifecycle">Lifecycle</h2>
 <ul>
 <li><a href="../services_product_image_service/ProductImageService/assign.html">assign</a> copies a picked file into its managed path immediately, so the
@@ -75,8 +76,9 @@ committed to a saved product. Call it from dispose so backing out of the
 form leaves no orphaned files, while images committed to a saved product
 are preserved.</li>
 </ul>
-<p>Managed paths are deterministic (<code>&lt;barcode&gt;_&lt;suffix&gt;.jpg</code>), so replacing a
-photo overwrites the same file and no stale copies accumulate.</p>
+<p>Managed paths are deterministic (&lt;barcode&gt;_&lt;suffix&gt;.jpg), so
+replacing a photo overwrites the same file and no stale copies
+accumulate.</p>
 </section>
 
 
@@ -119,7 +121,7 @@ photo overwrites the same file and no stale copies accumulate.</p>
 </dt>
 <dd>
   The directory that holds managed product photos, or null to resolve the
-application-documents <code>product_images</code> directory at runtime.
+application-documents product_images directory at runtime.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
