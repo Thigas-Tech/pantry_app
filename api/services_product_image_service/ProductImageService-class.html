@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the ProductImageService class from the product_image_service library, for the Dart programming language.">
+  <title>ProductImageService class - product_image_service library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_product_image_service/">services&#47;product_image_service.dart</a></li>
+    <li class="self-crumb">ProductImageService class</li>
+  </ol>
+  <div class="self-name">ProductImageService</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_product_image_service&#47;services_product_image_service-library-sidebar.html"
+    data-below-sidebar="services_product_image_service&#47;ProductImageService-class-sidebar.html">
+    <div>
+<h1><span class="kind-class">ProductImageService</span> class 
+ 
+</h1></div>
+
+    
+<section class="desc markdown">
+  <p>Owns persistence and cleanup of product photos for the manual-entry form.</p>
+<p>Photos are copied into a stable managed file per slot and barcode inside
+the application-documents <code>product_images</code> directory, following the
+<code>&lt;barcode&gt;_&lt;suffix&gt;.jpg</code> convention used by the product model. The service
+is the single testable boundary between picked files and the durable store.</p>
+<h2 id="lifecycle">Lifecycle</h2>
+<ul>
+<li><a href="../services_product_image_service/ProductImageService/assign.html">assign</a> copies a picked file into its managed path immediately, so the
+photo survives OS cache purges of picker temp files and is preserved
+when form validation fails.</li>
+<li><a href="../services_product_image_service/ProductImageService/remove.html">remove</a> only clears the slot. Physical deletion is deferred to <a href="../services_product_image_service/ProductImageService/save.html">save</a>
+or <a href="../services_product_image_service/ProductImageService/cleanupUncommitted.html">cleanupUncommitted</a> so an undo action can restore a live file while
+the form is still open.</li>
+<li><a href="../services_product_image_service/ProductImageService/save.html">save</a> persists every non-empty slot and deletes the managed file of any
+empty slot that still has one on disk, without touching files still
+referenced by another slot.</li>
+<li><a href="../services_product_image_service/ProductImageService/cleanupUncommitted.html">cleanupUncommitted</a> deletes managed files for a barcode that were never
+committed to a saved product. Call it from dispose so backing out of the
+form leaves no orphaned files, while images committed to a saved product
+are preserved.</li>
+</ul>
+<p>Managed paths are deterministic (<code>&lt;barcode&gt;_&lt;suffix&gt;.jpg</code>), so replacing a
+photo overwrites the same file and no stale copies accumulate.</p>
+</section>
+
+
+
+    
+  <section class="summary offset-anchor" id="constructors">
+    <h2>Constructors</h2>
+    <dl class="constructor-summary-list">
+        <dt id="ProductImageService.new" class="callable">
+          <span class="name"><a href="../services_product_image_service/ProductImageService/ProductImageService.html">ProductImageService</a></span><span class="signature">({<span class="parameter" id="param-imageDirectory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span> <span class="parameter-name">imageDirectory</span></span>})</span>
+        </dt>
+        <dd>
+          Creates a <a href="../services_product_image_service/ProductImageService-class.html">ProductImageService</a>.
+        </dd>
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-properties">
+    <h2>Properties</h2>
+    <dl class="properties">
+        <dt id="hashCode" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  The hash code for this object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="imageDirectory" class="property">
+  <span class="name"><a href="../services_product_image_service/ProductImageService/imageDirectory.html">imageDirectory</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span>
+  
+
+</dt>
+<dd>
+  The directory that holds managed product photos, or null to resolve the
+application-documents <code>product_images</code> directory at runtime.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
+        <dt id="runtimeType" class="property inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
+  
+
+</dt>
+<dd class="inherited">
+  A representation of the runtime type of the object.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+
+    
+  <section
+      class="summary offset-anchor"
+      id="instance-methods">
+    <h2>Methods</h2>
+    <dl class="callables">
+        <dt id="assign" class="callable">
+  <span class="name"><a href="../services_product_image_service/ProductImageService/assign.html">assign</a></span><span class="signature">(<wbr><span class="parameter" id="assign-param-slots"><span class="type-annotation"><a href="../models_product_photo_slots/ProductPhotoSlots-class.html">ProductPhotoSlots</a></span> <span class="parameter-name">slots</span>, </span><span class="parameter" id="assign-param-field"><span class="type-annotation"><a href="../models_image_field/ImageField.html">ImageField</a></span> <span class="parameter-name">field</span>, </span><span class="parameter" id="assign-param-picked"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/File-class.html">File</a></span> <span class="parameter-name">picked</span>, {</span><span class="parameter" id="assign-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product_photo_slots/ProductPhotoSlots-class.html">ProductPhotoSlots</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Copies <code>picked</code> into the managed file for <code>field</code> of <code>barcode</code> and
+returns <code>slots</code> updated with the managed file.
+  
+
+</dd>
+
+        <dt id="cleanupUncommitted" class="callable">
+  <span class="name"><a href="../services_product_image_service/ProductImageService/cleanupUncommitted.html">cleanupUncommitted</a></span><span class="signature">(<wbr><span class="parameter" id="cleanupUncommitted-param-slots"><span class="type-annotation"><a href="../models_product_photo_slots/ProductPhotoSlots-class.html">ProductPhotoSlots</a></span> <span class="parameter-name">slots</span>, {</span><span class="parameter" id="cleanupUncommitted-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="cleanupUncommitted-param-committedPaths"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Set-class.html">Set</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">committedPaths</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes managed files for <code>barcode</code> that are not in <code>committedPaths</code> and
+not referenced by another slot in <code>slots</code>.
+  
+
+</dd>
+
+        <dt id="noSuchMethod" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
+    <span class="returntype parameter">&#8594; dynamic</span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  Invoked when a nonexistent method or property is accessed.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="remove" class="callable">
+  <span class="name"><a href="../services_product_image_service/ProductImageService/remove.html">remove</a></span><span class="signature">(<wbr><span class="parameter" id="remove-param-slots"><span class="type-annotation"><a href="../models_product_photo_slots/ProductPhotoSlots-class.html">ProductPhotoSlots</a></span> <span class="parameter-name">slots</span>, </span><span class="parameter" id="remove-param-field"><span class="type-annotation"><a href="../models_image_field/ImageField.html">ImageField</a></span> <span class="parameter-name">field</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../models_product_photo_slots/ProductPhotoSlots-class.html">ProductPhotoSlots</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Returns <code>slots</code> with <code>field</code> cleared.
+  
+
+</dd>
+
+        <dt id="save" class="callable">
+  <span class="name"><a href="../services_product_image_service/ProductImageService/save.html">save</a></span><span class="signature">(<wbr><span class="parameter" id="save-param-slots"><span class="type-annotation"><a href="../models_product_photo_slots/ProductPhotoSlots-class.html">ProductPhotoSlots</a></span> <span class="parameter-name">slots</span>, {</span><span class="parameter" id="save-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_product_image_service/SavedProductPhotoPaths.html">SavedProductPhotoPaths</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Persists every non-empty slot in <code>slots</code> for <code>barcode</code> and deletes the
+managed file of every empty slot that still has one on disk.
+  
+
+</dd>
+
+        <dt id="toString" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A string representation of this object.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+  <section
+      class="summary offset-anchor inherited"
+      id="operators">
+    <h2>Operators</h2>
+    <dl class="callables">
+        <dt id="operator ==" class="callable inherited">
+  <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/operator_equals.html">operator ==</a></span><span class="signature">(<wbr><span class="parameter" id="==-param-other"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">other</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  The equality operator.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
+    </dl>
+  </section>
+    
+    
+    
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../services_product_image_service/">product_image_service</a></li>
+    <li class="self-crumb">ProductImageService class</li>
+</ol>
+
+    <h5>product_image_service library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.9+5
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
