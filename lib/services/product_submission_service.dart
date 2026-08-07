@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/utils/logger.dart';
 
@@ -13,8 +14,12 @@ import 'package:pantry_app/utils/logger.dart';
 ///    /cgi/product_image_upload.pl.
 /// 3. Update the product's submission status on success/failure and
 ///    persist to the local database.
-/// 4. On network failure, queue the barcode in the
+/// 4. On transient failure, queue the barcode in the
 ///    product_submission_queue table for later retry.
+///
+/// Progress is reported through [submitProduct]'s progress callback as
+/// typed [SubmissionProgress] snapshots, so callers can expose observable,
+/// durable progress that outlives the originating screen.
 ///
 /// ## Offline queue
 ///
@@ -35,74 +40,143 @@ class ProductSubmissionService {
 
   /// Submits [product] to Open Food Facts along with any local images.
   ///
+  /// Progress snapshots are delivered to [onProgress] when provided.
   /// Returns the updated [Product] with submission status set to
-  /// [productSubmissionSubmitted] on success or
-  /// [productSubmissionFailed] on failure. On network failure the barcode
-  /// is queued for background retry.
-  Future<Product> submitProduct(Product product) async {
+  /// [productSubmissionSubmitted] on success, [productSubmissionFailed]
+  /// on failure, or [productSubmissionPartiallyCompleted] when the
+  /// metadata and some photos succeeded but at least one photo failed.
+  /// On transient failure the barcode is queued for background retry.
+  Future<Product> submitProduct(
+    Product product, {
+    void Function(SubmissionProgress progress)? onProgress,
+  }) async {
+    final totalImages = _countImages(product);
     var updated = product.copyWith(
       submissionStatus: productSubmissionPending,
     );
     await _db.insertProduct(updated);
+    _emit(
+      onProgress,
+      SubmissionProgress(
+        barcode: product.barcode,
+        totalImageCount: totalImages,
+      ),
+    );
 
     try {
-      final metadataOk = await _api.submitProduct(updated);
-      if (!metadataOk) {
+      _emit(
+        onProgress,
+        SubmissionProgress(
+          barcode: product.barcode,
+          step: SubmissionStep.submittingMetadata,
+          totalImageCount: totalImages,
+        ),
+      );
+      final metadataResult = await _api.submitProduct(updated);
+      if (!metadataResult.success) {
         logWarning(
-          'Product ${product.barcode}: metadata submission returned false',
+          'Product ${product.barcode}: metadata submission failed',
         );
-        updated = updated.copyWith(
-          submissionStatus: productSubmissionFailed,
+        return _finishFailed(
+          product,
+          onProgress,
+          _categorize(metadataResult.error),
+          _retryFor(metadataResult.error),
+          totalImages,
         );
-        await _db.insertProduct(updated);
-        return updated;
       }
 
-      var imagesOk = true;
-      imagesOk &= await _uploadImageIfPresent(
-        updated,
-        'front',
-        updated.productImagePath,
-      );
-      imagesOk &= await _uploadImageIfPresent(
-        updated,
-        'ingredients',
-        updated.ingredientsImagePath,
-      );
-      imagesOk &= await _uploadImageIfPresent(
-        updated,
-        'nutrition',
-        updated.nutritionImagePath,
-      );
+      var completedImages = 0;
+      final failures = <OffWriteResult>[];
+      final uploads = <(String, String?, SubmissionStep)>[
+        ('front', updated.productImagePath, SubmissionStep.uploadingFront),
+        (
+          'ingredients',
+          updated.ingredientsImagePath,
+          SubmissionStep.uploadingIngredients,
+        ),
+        (
+          'nutrition',
+          updated.nutritionImagePath,
+          SubmissionStep.uploadingNutrition,
+        ),
+      ];
 
-      updated = updated.copyWith(
-        submissionStatus: imagesOk
-            ? productSubmissionSubmitted
-            : productSubmissionFailed,
-      );
-      await _db.insertProduct(updated);
+      for (final (imageField, imagePath, step) in uploads) {
+        final result = await _uploadImageIfPresent(
+          product: updated,
+          imageField: imageField,
+          imagePath: imagePath,
+          step: step,
+          completedImages: completedImages,
+          totalImages: totalImages,
+          onProgress: onProgress,
+        );
+        if (result.success) {
+          completedImages++;
+        } else {
+          failures.add(result);
+        }
+      }
 
-      // On success, remove any pending queue entries for this barcode.
-      if (imagesOk) {
+      if (failures.isEmpty) {
+        updated = updated.copyWith(
+          submissionStatus: productSubmissionSubmitted,
+        );
+        await _db.insertProduct(updated);
+        _emit(
+          onProgress,
+          SubmissionProgress(
+            barcode: product.barcode,
+            step: SubmissionStep.completed,
+            completedImageCount: completedImages,
+            totalImageCount: totalImages,
+          ),
+        );
         final database = await _db.database;
         await _db.productSubmissionQueueDao.deleteByBarcode(
           database,
           product.barcode,
         );
+        return updated;
       }
 
-      return updated;
+      if (completedImages > 0) {
+        updated = updated.copyWith(
+          submissionStatus: productSubmissionPartiallyCompleted,
+        );
+        await _db.insertProduct(updated);
+        _emit(
+          onProgress,
+          SubmissionProgress(
+            barcode: product.barcode,
+            step: SubmissionStep.partiallyCompleted,
+            completedImageCount: completedImages,
+            totalImageCount: totalImages,
+            errorCategory: _categorize(failures.first.error),
+            retryAvailable: true,
+          ),
+        );
+        await _queueForRetry(product.barcode);
+        return updated;
+      }
+
+      return _finishFailed(
+        product,
+        onProgress,
+        _categorize(failures.first.error),
+        _retryFor(failures.first.error),
+        totalImages,
+      );
     } on Exception catch (e) {
       logError('Submission failed for ${product.barcode}: $e');
-      updated = updated.copyWith(
-        submissionStatus: productSubmissionFailed,
+      return _finishFailed(
+        product,
+        onProgress,
+        SubmissionErrorCategory.network,
+        true,
+        totalImages,
       );
-      await _db.insertProduct(updated);
-
-      // Queue for background retry on network failure.
-      await _queueForRetry(product.barcode);
-
-      return updated;
     }
   }
 
@@ -182,19 +256,66 @@ class ProductSubmissionService {
     }
   }
 
-  Future<bool> _uploadImageIfPresent(
+  /// Persists the failed status, emits the failed snapshot, and queues the
+  /// barcode for background retry when [retryAvailable] is true.
+  Future<Product> _finishFailed(
     Product product,
-    String imageField,
-    String? imagePath,
+    void Function(SubmissionProgress progress)? onProgress,
+    SubmissionErrorCategory errorCategory,
+    bool retryAvailable,
+    int totalImages,
   ) async {
-    if (imagePath == null || imagePath.isEmpty) return true;
+    final updated = product.copyWith(
+      submissionStatus: productSubmissionFailed,
+    );
+    await _db.insertProduct(updated);
+    _emit(
+      onProgress,
+      SubmissionProgress(
+        barcode: product.barcode,
+        step: SubmissionStep.failed,
+        totalImageCount: totalImages,
+        errorCategory: errorCategory,
+        retryAvailable: retryAvailable,
+      ),
+    );
+    if (retryAvailable) {
+      await _queueForRetry(product.barcode);
+    }
+    return updated;
+  }
+
+  /// Uploads [imagePath] for [imageField] when a local file exists.
+  ///
+  /// Missing or empty paths count as success and skip the upload. A
+  /// [SubmissionProgress] snapshot for [step] is emitted before the
+  /// network call so the UI can show the in-flight image.
+  Future<OffWriteResult> _uploadImageIfPresent({
+    required Product product,
+    required String imageField,
+    required String? imagePath,
+    required SubmissionStep step,
+    required int completedImages,
+    required int totalImages,
+    required void Function(SubmissionProgress progress)? onProgress,
+  }) async {
+    if (imagePath == null || imagePath.isEmpty) {
+      return const OffWriteResult.success();
+    }
     final file = File(imagePath);
     if (!await file.exists()) {
-      logWarning(
-        'Image not found for $imageField: $imagePath',
-      );
-      return true;
+      logWarning('Image not found for $imageField: $imagePath');
+      return const OffWriteResult.success();
     }
+    _emit(
+      onProgress,
+      SubmissionProgress(
+        barcode: product.barcode,
+        step: step,
+        completedImageCount: completedImages,
+        totalImageCount: totalImages,
+      ),
+    );
     try {
       return await _api.uploadProductImage(
         barcode: product.barcode,
@@ -203,7 +324,52 @@ class ProductSubmissionService {
       );
     } on Exception catch (e) {
       logError('Error uploading $imageField image: $e');
-      return false;
+      return const OffWriteResult.failure(OffWriteError.network);
     }
+  }
+
+  /// Delivers [progress] to [onProgress] when one was provided.
+  void _emit(
+    void Function(SubmissionProgress progress)? onProgress,
+    SubmissionProgress progress,
+  ) {
+    onProgress?.call(progress);
+  }
+
+  /// Counts how many image fields have a local file path.
+  int _countImages(Product product) {
+    var count = 0;
+    if (_hasImage(product.productImagePath)) count++;
+    if (_hasImage(product.ingredientsImagePath)) count++;
+    if (_hasImage(product.nutritionImagePath)) count++;
+    return count;
+  }
+
+  /// Whether [path] names a local image file.
+  bool _hasImage(String? path) => path != null && path.isNotEmpty;
+
+  /// Maps an [OffWriteError] to its [SubmissionErrorCategory].
+  SubmissionErrorCategory _categorize(OffWriteError error) {
+    return switch (error) {
+      OffWriteError.none => SubmissionErrorCategory.none,
+      OffWriteError.missingCredentials =>
+        SubmissionErrorCategory.missingCredentials,
+      OffWriteError.network => SubmissionErrorCategory.network,
+      OffWriteError.rateLimited => SubmissionErrorCategory.rateLimited,
+      OffWriteError.serverRejected => SubmissionErrorCategory.serverRejected,
+      OffWriteError.unknown => SubmissionErrorCategory.unknown,
+    };
+  }
+
+  /// Whether retrying a write that failed with [error] can succeed.
+  bool _retryFor(OffWriteError error) {
+    return switch (error) {
+      OffWriteError.missingCredentials ||
+      OffWriteError.serverRejected ||
+      OffWriteError.none => false,
+      OffWriteError.network ||
+      OffWriteError.rateLimited ||
+      OffWriteError.unknown => true,
+    };
   }
 }

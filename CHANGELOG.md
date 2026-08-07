@@ -4,6 +4,34 @@
 
 ### Added
 
+- **Observable, durable submission progress**: `ProductSubmissionService`
+  now reports typed `SubmissionProgress` snapshots through an `onProgress`
+  callback (`lib/models/submission_progress.dart`), covering checking,
+  submitting-metadata, per-photo upload (front, ingredients, nutrition)
+  with completed/total counts, and terminal states. A new
+  `ProductSubmissionNotifier`/`productSubmissionProvider`
+  (`lib/providers/product_submission_provider.dart`) owns the submission
+  lifecycle, ignores duplicate in-flight submissions, and keeps running
+  after the screen that started it is disposed. `AddProductScreen` now
+  stays open while submitting, shows an inline determinate progress bar,
+  auto-pops with a success snackbar, and offers an in-form retry button on
+  transient failures; the old fire-and-forget `unawaited(_cacheAndSubmit)`
+  path was removed.
+
+- **Categorized OFF write results**: `OffAdapter.submitProduct` and
+  `uploadProductImage` now return `OffWriteResult` carrying an
+  `OffWriteError` category — missing credentials, network, rate-limited,
+  or server-rejected — so the submission service can distinguish transient
+  failures (queued for retry, `retryAvailable`) from permanent ones. The
+  adapter already retries 429 responses with exponential backoff. A new
+  `submissionErrorLabel` helper (`lib/utils/submission_error_label.dart`)
+  maps each category to a localized message.
+
+- **Partial-success persistence**: when metadata and at least one photo
+  succeed but another photo fails, the product's submission status is now
+  persisted as `productSubmissionPartiallyCompleted` instead of `failed`,
+  matching the chip vocabulary added earlier.
+
 - **Localized submission-flow vocabulary**: new ARB keys in English, European
   Portuguese, and Brazilian Portuguese for the manual submission and photo
   flow — gallery permission explanations, submitting-metadata progress, the
@@ -21,9 +49,7 @@
   status, including the new `productSubmissionPartiallyCompleted` constant
   (`lib/models/product.dart`). The detail-screen chip renders a partial-state
   variant with a retry action. (`lib/screens/product_detail_screen.dart`)
-  Note: the chip and vocabulary are wired in the UI; the submission service
-  does not emit this state yet (it still marks metadata-OK/image-failed
-  submissions as `failed`). Service wiring is deferred to a follow-up.
+  The submission service now persists this state for real partial uploads.
 
 - **ARB integrity guard**: new `test/l10n/arb_integrity_test.dart` fails when
   the Portuguese ARB files drift from the English template — missing keys,

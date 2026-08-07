@@ -1095,6 +1095,36 @@ abstract class AppLocalizations {
   /// **'Submitting product details to Open Food Facts…'**
   String get submittingMetadata;
 
+  /// No description provided for @preparingSubmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing submission…'**
+  String get preparingSubmission;
+
+  /// No description provided for @submissionCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission failed because Open Food Facts credentials are not configured.'**
+  String get submissionCredentialsError;
+
+  /// No description provided for @submissionOfflineError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach Open Food Facts. Check your connection and retry.'**
+  String get submissionOfflineError;
+
+  /// No description provided for @submissionRateLimitedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts rate-limited the request. Please wait and try again.'**
+  String get submissionRateLimitedError;
+
+  /// No description provided for @submissionRejectedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts rejected the product data.'**
+  String get submissionRejectedError;
+
   /// No description provided for @productAlreadyInOff.
   ///
   /// In en, this message translates to:

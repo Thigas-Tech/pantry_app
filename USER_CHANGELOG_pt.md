@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Ao guardar um produto introduzido manualmente, ve agora o progresso do
+  envio para o Open Food Facts: primeiro os detalhes do produto e depois
+  cada foto enquanto e carregada.
+- O formulario fica aberto enquanto o produto esta a ser enviado e fecha-se
+  sozinho com uma confirmacao quando termina com sucesso.
+- Se o envio falhar, pode tentar de novo diretamente no formulario, e a
+  mensagem indica o motivo — por exemplo, sem ligacao a internet ou Open
+  Food Facts ocupado.
+
 - Ha agora mais mensagens traduzidas para portugues. Alguns ecras mostravam
   antes texto em ingles quando faltava uma traducao, e essas lacunas estao
   agora preenchidas.

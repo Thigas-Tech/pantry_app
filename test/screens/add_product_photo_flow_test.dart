@@ -8,11 +8,15 @@ import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
+import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/services/product_photo_picker.dart';
+import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -21,6 +25,9 @@ import '../helpers/pump_app.dart';
 class MockProductPhotoPicker extends Mock implements ProductPhotoPicker {}
 
 class MockProductImageService extends Mock implements ProductImageService {}
+
+class MockProductSubmissionService extends Mock
+    implements ProductSubmissionService {}
 
 /// A minimal 1x1 transparent PNG so [Image.file] decodes in tests.
 final Uint8List kTransparentPng = Uint8List.fromList(const <int>[
@@ -98,12 +105,15 @@ void main() {
   late File imageFile;
   late MockProductPhotoPicker mockPicker;
   late MockProductImageService mockImageService;
+  late MockProductSubmissionService mockSubmissionService;
+  late MockProductRepository mockRepo;
 
   setUpAll(() {
     registerFallbackValue(PhotoSource.camera);
     registerFallbackValue(File('/fallback.jpg'));
     registerFallbackValue(ImageField.nutrition);
     registerFallbackValue(const ProductPhotoSlots.empty());
+    registerFallbackValue(const Product(barcode: '', name: ''));
     registerFallbackValue('123');
   });
 
@@ -153,6 +163,28 @@ void main() {
         committedPaths: any(named: 'committedPaths'),
       ),
     ).thenAnswer((_) async {});
+
+    mockSubmissionService = MockProductSubmissionService();
+    when(
+      () => mockSubmissionService.submitProduct(
+        any(),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).thenAnswer((invocation) async {
+      final onProgress =
+          invocation.namedArguments[#onProgress]
+              as void Function(SubmissionProgress)?;
+      onProgress?.call(
+        const SubmissionProgress(
+          barcode: '123',
+          step: SubmissionStep.completed,
+        ),
+      );
+      return const Product(barcode: '123', name: 'Test');
+    });
+
+    mockRepo = createMockProductRepository();
+    when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async {});
   });
 
   tearDown(() async {
@@ -176,6 +208,10 @@ void main() {
         productImageServiceProvider.overrideWithValue(
           mockImageService,
         ),
+        productSubmissionServiceProvider.overrideWithValue(
+          mockSubmissionService,
+        ),
+        productRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
     await tester.pumpAndSettle();
@@ -210,6 +246,10 @@ void main() {
         productImageServiceProvider.overrideWithValue(
           mockImageService,
         ),
+        productSubmissionServiceProvider.overrideWithValue(
+          mockSubmissionService,
+        ),
+        productRepositoryProvider.overrideWithValue(mockRepo),
       ],
     );
     await tester.pumpAndSettle();
@@ -749,6 +789,10 @@ void main() {
         overrides: [
           productPhotoPickerProvider.overrideWithValue(mockPicker),
           productImageServiceProvider.overrideWithValue(mockImageService),
+          productSubmissionServiceProvider.overrideWithValue(
+            mockSubmissionService,
+          ),
+          productRepositoryProvider.overrideWithValue(mockRepo),
         ],
       );
       await tester.tap(find.text('Open form'));

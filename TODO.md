@@ -619,10 +619,10 @@ infrastructure or external server hosting are listed last.
      with Close, Retake, and Replace actions. Done in issue #263.
   3. [x] **Photo deletion** — each image tile has a delete button that
      removes the photo and offers undo. Done in issue #263.
-  4. [ ] **Submission progress UI** — after tapping "Save", show a progress
-     indicator (e.g. `LinearProgressIndicator` or a bottom sheet with
-     step status: "Submitting metadata...", "Uploading photos (1/3)...")
-     instead of silently fire-and-forgetting via `unawaited()`.
+   4. [x] **Submission progress UI** — after tapping "Save", the form shows a
+      linear progress indicator and step status ("Submitting metadata...",
+      "Uploading photo 2 of 3...") via a `SubmitNotifier` that outlives the
+      screen, then auto-pops with a success snackbar. Done in issue #268.
   5. [ ] **Submission retry from failure state** — if submission fails, show
      a persistent status in the product detail screen (already exists)
      AND allow the user to retry with the option to change photos before
@@ -676,14 +676,20 @@ infrastructure or external server hosting are listed last.
     If the user pops the screen, submission still runs but errors are
     logged only. Replace with a `SubmitNotifier` that outlives the screen
     and shows status via snackbar or a persistent notification.
+    Done in issue #268: `ProductSubmissionNotifier` keeps the submission
+    running after the screen is disposed and exposes typed progress.
   - **OFF API submission quota**: The OFF API may rate-limit submissions.
     Check `OffAdapter.submitProduct()` response for 429 status. Wait and
     retry with exponential backoff.
+    Done in issue #268: the adapter retries 429 responses with backoff and
+    the service reports a `rateLimited` category with retry available.
   - **Image upload ordering**: Currently sequential (front, ingredients,
     nutrition). If the 2nd or 3rd upload fails, the product is marked
     `failed` even though metadata and some images succeeded. Consider
     partial success: mark as `submitted` if metadata + at least 1 image
     succeeds; report partial failure in the UI.
+    Done in issue #268: partial successes persist the
+    `productSubmissionPartiallyCompleted` status and the UI offers retry.
   - **Network timeout during upload**: Image uploads can take 10-30s on
     slow connections. Set a per-image timeout of 60s. Show per-image
     progress if the SDK supports it.
@@ -693,6 +699,8 @@ infrastructure or external server hosting are listed last.
     product is already in Open Food Facts" instead of submitting.
   - **Submission of product without photos**: Allow submitting metadata
     only. The OFF API accepts products with no image fields.
+    Done in issue #268: metadata-only products submit and complete without
+    upload calls (covered by tests).
    - **Photo EXIF data stripping**: Strip EXIF location data from uploaded
      photos for privacy. Use `flutter_image_compress` or a manual EXIF
      removal step before upload.
