@@ -632,6 +632,11 @@ infrastructure or external server hosting are listed last.
      edit/delete/replace options.
    7. [x] **Camera permission denied handling** — denied camera permission
       shows a dialog with an "Open Settings" button. Done in issue #263.
+      Issue #266 refined the flow: the Open Settings dialog now appears only
+      when the camera permission is permanently denied; a one-time denial
+      shows a recoverable warning. Gallery denials surface a localized dialog
+      with Cancel and Open Settings, and a gallery permission is requested
+      only when the platform requires one.
    8. [x] Study the official Open Food Facts app (smooth-app) for UX patterns:
       - Photo capture flow with retake
       - Progress indicators during submission
@@ -652,9 +657,14 @@ infrastructure or external server hosting are listed last.
     or resize at capture time via `ImagePicker` `maxWidth`/`maxHeight`.
   - **Storage permissions**: Saving images to app-local directory
     (`getApplicationDocumentsDirectory()`) does NOT require storage
-    permission. Loading from gallery DOES require `READ_MEDIA_IMAGES`
-    on Android 13+ or `READ_EXTERNAL_STORAGE` on older versions. Handle
-    permission request gracefully.
+    permission. Loading from gallery does NOT require one either: the image
+    picker uses the system Photo Picker (Android 13+), ACTION_GET_CONTENT
+    (older Android), and PHPicker (iOS), all of which grant access without a
+    permission. `ProductPhotoPicker` only requests a gallery permission when
+    the platform requires one (off by default) and surfaces a localized
+    dialog when the picker reports denial. Do not add `READ_MEDIA_IMAGES`
+    unless the picker is swapped for one that needs it. Handled in issue
+    #266.
   - **Photo deletion deletes local file**: Deleting a photo from the form
     clears the slot; the managed file under
     `product_images/<barcode>_<suffix>.jpg` is deleted only when it is not

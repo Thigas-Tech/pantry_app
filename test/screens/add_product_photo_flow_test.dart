@@ -452,22 +452,87 @@ void main() {
       );
     });
 
-    testWidgets('camera permission denied shows the settings dialog', (
-      tester,
-    ) async {
-      when(
-        () => mockPicker.pick(any()),
-      ).thenAnswer((_) async => const PhotoPermissionDenied());
-      await pumpScreen(tester);
+    testWidgets(
+      'permanently denied camera permission shows the settings dialog',
+      (tester) async {
+        when(
+          () => mockPicker.pick(any()),
+        ).thenAnswer(
+          (_) async => const PhotoPermissionDenied(permanentlyDenied: true),
+        );
+        await pumpScreen(tester);
 
-      await tester.tap(find.byIcon(Icons.add_a_photo).first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Take a new photo'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byIcon(Icons.add_a_photo).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Take a new photo'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Camera permission needed'), findsOneWidget);
-      expect(find.text('Open Settings'), findsOneWidget);
-    });
+        expect(find.text('Camera permission needed'), findsOneWidget);
+        expect(find.text('Open Settings'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'one-time camera denial shows a recoverable snackbar and keeps the slot',
+      (tester) async {
+        when(
+          () => mockPicker.pick(any()),
+        ).thenAnswer((_) async => const PhotoPermissionDenied());
+        await pumpScreen(tester);
+
+        await tester.tap(find.byIcon(Icons.add_a_photo).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Take a new photo'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Camera permission denied. Grant access in Settings.'),
+          findsOneWidget,
+        );
+        expect(find.text('Camera permission needed'), findsNothing);
+        verifyNever(
+          () => mockImageService.assign(
+            any(),
+            any(),
+            any(),
+            barcode: any(named: 'barcode'),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'gallery permission denied shows the gallery settings dialog',
+      (tester) async {
+        when(
+          () => mockPicker.pick(any()),
+        ).thenAnswer((_) async => const PhotoGalleryPermissionDenied());
+        await pumpScreen(tester);
+
+        await tester.tap(find.byIcon(Icons.add_a_photo).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Choose an existing photo'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Gallery access needed'), findsOneWidget);
+        expect(
+          find.text(
+            'Pantry needs access to your photos to choose an existing photo. '
+            'Open Settings to allow access.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Open Settings'), findsOneWidget);
+        verifyNever(
+          () => mockImageService.assign(
+            any(),
+            any(),
+            any(),
+            barcode: any(named: 'barcode'),
+          ),
+        );
+      },
+    );
 
     testWidgets('preview shows accessible retake replace and delete actions', (
       tester,

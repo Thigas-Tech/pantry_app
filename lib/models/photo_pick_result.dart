@@ -14,10 +14,22 @@ class PhotoPicked extends PhotoPickResult {
   final File file;
 }
 
-/// The user denied the camera (or gallery) permission request.
+/// The user denied the camera permission request.
 class PhotoPermissionDenied extends PhotoPickResult {
   /// Creates a [PhotoPermissionDenied].
-  const PhotoPermissionDenied();
+  ///
+  /// [permanentlyDenied] is true when the user cannot be prompted again and
+  /// must grant access from the system settings.
+  const PhotoPermissionDenied({this.permanentlyDenied = false});
+
+  /// Whether the denial is permanent and requires the system settings.
+  final bool permanentlyDenied;
+}
+
+/// The user denied gallery access or the picker reported it as denied.
+class PhotoGalleryPermissionDenied extends PhotoPickResult {
+  /// Creates a [PhotoGalleryPermissionDenied].
+  const PhotoGalleryPermissionDenied();
 }
 
 /// The user cancelled the picker without choosing a photo.

@@ -121,6 +121,18 @@
   (`lib/utils/quantity_parser.dart`, `lib/providers/price_provider.dart`,
   `lib/providers/recipe_provider.dart`)
 
+- **Camera and gallery permission handling for product photos**: the photo
+  picker now distinguishes a permanent camera denial from a one-time denial.
+  A permanent denial shows the localized dialog with an Open Settings action;
+  a one-time denial shows a recoverable warning so the user can try again.
+  Gallery picks request a photo-library permission only when the platform
+  requires one (the default system pickers need none), and a denied or
+  blocked gallery surfaces a localized dialog with Cancel and Open Settings.
+  (`lib/models/photo_permission.dart`, `lib/models/photo_pick_result.dart`,
+  `lib/services/product_photo_picker.dart`,
+  `lib/utils/gallery_permission_dialog.dart`,
+  `lib/screens/add_product_screen.dart`)
+
 ### Fixed
 
 - **Recipe cost scoped to the recipe's own inventory**: `calculateRecipeCost`

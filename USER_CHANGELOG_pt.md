@@ -13,8 +13,12 @@
   nova, escolha outra da sua galeria ou apague-a. As caixas de foto vazias
   permitem escolher entre a camera e a galeria, e se remover uma foto por
   engano pode desfazer a acao.
-- Se o acesso a camera for negado, a app explica o motivo e oferece um botao
-  para abrir as definicoes do dispositivo.
+- Se recusar o acesso a camera em definitivo, a app explica agora o motivo e
+  oferece um botao para abrir as definicoes do dispositivo. Recusar apenas
+  uma vez mostra uma mensagem curta, para poder tentar de novo sem ir as
+  definicoes.
+- Se a app nao conseguir abrir a galeria, explica agora o motivo e oferece
+  um botao para abrir as definicoes do dispositivo.
 - As fotos que adiciona a um produto introduzido manualmente sao guardadas
   juntamente com o produto. Se sair do formulario sem guardar, as fotos que
   adicionou sao removidas para nao ficarem no dispositivo.
