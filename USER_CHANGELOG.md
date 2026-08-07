@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- When you save a manually entered product, you now see how the submission
+  to Open Food Facts is going: first the product details, then each photo
+  as it uploads.
+- The form stays open while your product is being submitted and closes by
+  itself with a confirmation once it succeeds.
+- If the submission fails, you can retry it directly from the form, and the
+  message tells you why — for example, no internet connection or Open Food
+  Facts being busy.
+
 - More messages are now translated into Portuguese. Some screens previously
   showed English text when a translation was missing, and those gaps are now
   filled.

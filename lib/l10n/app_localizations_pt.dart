@@ -559,6 +559,25 @@ class AppLocalizationsPt extends AppLocalizations {
       'Enviando os detalhes do produto para o Open Food Facts…';
 
   @override
+  String get preparingSubmission => 'Preparando o envio…';
+
+  @override
+  String get submissionCredentialsError =>
+      'O envio falhou porque as credenciais do Open Food Facts não estão configuradas.';
+
+  @override
+  String get submissionOfflineError =>
+      'Não foi possível conectar ao Open Food Facts. Verifique sua conexão e tente de novo.';
+
+  @override
+  String get submissionRateLimitedError =>
+      'O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.';
+
+  @override
+  String get submissionRejectedError =>
+      'O Open Food Facts rejeitou os dados do produto.';
+
+  @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';
 
   @override
@@ -2640,6 +2659,25 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get submittingMetadata =>
       'Enviando os detalhes do produto para o Open Food Facts…';
+
+  @override
+  String get preparingSubmission => 'Preparando o envio…';
+
+  @override
+  String get submissionCredentialsError =>
+      'O envio falhou porque as credenciais do Open Food Facts não estão configuradas.';
+
+  @override
+  String get submissionOfflineError =>
+      'Não foi possível conectar ao Open Food Facts. Verifique sua conexão e tente de novo.';
+
+  @override
+  String get submissionRateLimitedError =>
+      'O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.';
+
+  @override
+  String get submissionRejectedError =>
+      'O Open Food Facts rejeitou os dados do produto.';
 
   @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';

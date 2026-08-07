@@ -1,14 +1,53 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
+import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/services/product_image_service.dart';
+import 'package:pantry_app/services/product_submission_service.dart';
 import '../helpers/pump_app.dart';
 
 class MockProductImageService extends Mock implements ProductImageService {}
+
+class MockProductSubmissionService extends Mock
+    implements ProductSubmissionService {}
+
+/// A terminal [SubmissionProgress] snapshot representing a successful
+/// submission, used to make the mocked service pop the screen.
+const completedProgress = SubmissionProgress(
+  barcode: '123',
+  step: SubmissionStep.completed,
+);
+
+/// Stubs a submission so it emits the given [SubmissionProgress] snapshots
+/// then returns, so the screen's save flow runs to completion.
+void stubSubmission(
+  MockProductSubmissionService service, {
+  List<SubmissionProgress> progress = const [],
+  Product? result,
+}) {
+  when(
+    () => service.submitProduct(
+      any(),
+      onProgress: any(named: 'onProgress'),
+    ),
+  ).thenAnswer((invocation) async {
+    final onProgress =
+        invocation.namedArguments[#onProgress]
+            as void Function(SubmissionProgress)?;
+    if (onProgress != null) {
+      progress.forEach(onProgress);
+    }
+    return result ?? const Product(barcode: '123', name: 'Test');
+  });
+}
 
 /// Pumps [screen] with a viewport tall enough so all [ListView] children
 /// are built. Resets the viewport on teardown.
@@ -28,6 +67,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const ProductPhotoSlots.empty());
+    registerFallbackValue(const Product(barcode: '', name: ''));
   });
 
   setUp(() {
@@ -37,7 +77,15 @@ void main() {
   /// Pumps the screen with a mocked image service so the save flow never
   /// touches the filesystem (real I/O does not settle under testWidgets
   /// FakeAsync). Real file persistence is covered by the service unit tests.
-  Future<void> pumpSaveScreen(WidgetTester tester, Widget screen) async {
+  ///
+  /// A success-emitting submission service and a stubbed repository are
+  /// provided so the save flow pops the screen as in production. Pass
+  /// [submissionService] to assert on custom progress.
+  Future<void> pumpSaveScreen(
+    WidgetTester tester,
+    Widget screen, {
+    MockProductSubmissionService? submissionService,
+  }) async {
     when(
       () => imageService.save(
         any(),
@@ -57,11 +105,21 @@ void main() {
         committedPaths: any(named: 'committedPaths'),
       ),
     ).thenAnswer((_) async {});
+
+    final service = submissionService ?? MockProductSubmissionService();
+    if (submissionService == null) {
+      stubSubmission(service, progress: [completedProgress]);
+    }
+    final repo = createMockProductRepository();
+    when(() => repo.cacheProduct(any())).thenAnswer((_) async {});
+
     await pumpApp(
       tester,
       screen,
       overrides: [
         productImageServiceProvider.overrideWithValue(imageService),
+        productSubmissionServiceProvider.overrideWithValue(service),
+        productRepositoryProvider.overrideWithValue(repo),
       ],
     );
   }
@@ -290,6 +348,265 @@ void main() {
       expect(captured!.ingredients, isNull);
       expect(captured!.source, 'manual');
       expect(captured!.nutriscoreGrade, isNull);
+    });
+  });
+
+  group('AddProductScreen submission progress', () {
+    /// Pumps the screen in a tall viewport with the given submission service.
+    Future<void> pumpForm(
+      WidgetTester tester,
+      MockProductSubmissionService service,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      when(
+        () => imageService.save(any(), barcode: any(named: 'barcode')),
+      ).thenAnswer(
+        (_) async => (
+          nutrition: null,
+          ingredients: null,
+          product: null,
+        ),
+      );
+      when(
+        () => imageService.cleanupUncommitted(
+          any(),
+          barcode: any(named: 'barcode'),
+          committedPaths: any(named: 'committedPaths'),
+        ),
+      ).thenAnswer((_) async {});
+      final repo = createMockProductRepository();
+      when(() => repo.cacheProduct(any())).thenAnswer((_) async {});
+      await pumpApp(
+        tester,
+        const AddProductScreen(barcode: '123'),
+        overrides: [
+          productImageServiceProvider.overrideWithValue(imageService),
+          productSubmissionServiceProvider.overrideWithValue(service),
+          productRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+    }
+
+    /// Pumps the screen inside a pushed route backed by a [Scaffold] so a
+    /// success snackbar remains visible after the screen pops.
+    Future<void> pumpPushedForm(
+      WidgetTester tester,
+      MockProductSubmissionService service,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      when(
+        () => imageService.save(any(), barcode: any(named: 'barcode')),
+      ).thenAnswer(
+        (_) async => (
+          nutrition: null,
+          ingredients: null,
+          product: null,
+        ),
+      );
+      when(
+        () => imageService.cleanupUncommitted(
+          any(),
+          barcode: any(named: 'barcode'),
+          committedPaths: any(named: 'committedPaths'),
+        ),
+      ).thenAnswer((_) async {});
+      final repo = createMockProductRepository();
+      when(() => repo.cacheProduct(any())).thenAnswer((_) async {});
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AddProductScreen(barcode: '123'),
+                  ),
+                ),
+                child: const Text('Open form'),
+              ),
+            ),
+          ),
+        ),
+        overrides: [
+          productImageServiceProvider.overrideWithValue(imageService),
+          productSubmissionServiceProvider.overrideWithValue(service),
+          productRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> fillName(WidgetTester tester) async {
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+    }
+
+    testWidgets('shows inline progress while submitting', (tester) async {
+      final service = MockProductSubmissionService();
+      final completer = Completer<Product>();
+      when(
+        () => service.submitProduct(
+          any(),
+          onProgress: any(named: 'onProgress'),
+        ),
+      ).thenAnswer((invocation) {
+        final onProgress =
+            invocation.namedArguments[#onProgress]
+                as void Function(SubmissionProgress)?;
+        onProgress?.call(
+          const SubmissionProgress(
+            barcode: '123',
+            step: SubmissionStep.uploadingNutrition,
+            completedImageCount: 2,
+            totalImageCount: 3,
+          ),
+        );
+        return completer.future;
+      });
+
+      await pumpForm(tester, service);
+      await fillName(tester);
+      await tester.tap(find.text('Save product'));
+      await tester.pump();
+
+      expect(find.text('Uploading photo 3 of 3…'), findsOneWidget);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+
+      completer.complete(const Product(barcode: '123', name: 'Test'));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('pops with a success snackbar when submission completes', (
+      tester,
+    ) async {
+      final service = MockProductSubmissionService();
+      stubSubmission(service, progress: [completedProgress]);
+
+      await pumpPushedForm(tester, service);
+      await fillName(tester);
+      await tester.tap(find.text('Save product'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddProductScreen), findsNothing);
+      expect(
+        find.text('Product submitted to Open Food Facts.'),
+        findsOneWidget,
+      );
+
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('stays open with a retry button on transient failure', (
+      tester,
+    ) async {
+      final service = MockProductSubmissionService();
+      stubSubmission(
+        service,
+        progress: const [
+          SubmissionProgress(
+            barcode: '123',
+            step: SubmissionStep.failed,
+            errorCategory: SubmissionErrorCategory.network,
+            retryAvailable: true,
+          ),
+        ],
+      );
+
+      await pumpForm(tester, service);
+      await fillName(tester);
+      await tester.tap(find.text('Save product'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddProductScreen), findsOneWidget);
+      expect(
+        find.text(
+          'Could not reach Open Food Facts. Check your connection and retry.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Retry now'), findsOneWidget);
+    });
+
+    testWidgets('shows an error without retry for permanent rejection', (
+      tester,
+    ) async {
+      final service = MockProductSubmissionService();
+      stubSubmission(
+        service,
+        progress: const [
+          SubmissionProgress(
+            barcode: '123',
+            step: SubmissionStep.failed,
+            errorCategory: SubmissionErrorCategory.serverRejected,
+          ),
+        ],
+      );
+
+      await pumpForm(tester, service);
+      await fillName(tester);
+      await tester.tap(find.text('Save product'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Open Food Facts rejected the product data.'),
+        findsOneWidget,
+      );
+      expect(find.text('Retry now'), findsNothing);
+    });
+
+    testWidgets('retry re-submits and pops on success', (tester) async {
+      final service = MockProductSubmissionService();
+      var callCount = 0;
+      when(
+        () => service.submitProduct(
+          any(),
+          onProgress: any(named: 'onProgress'),
+        ),
+      ).thenAnswer((invocation) async {
+        callCount++;
+        final onProgress =
+            invocation.namedArguments[#onProgress]
+                as void Function(SubmissionProgress)?;
+        final firstCall = callCount == 1;
+        onProgress?.call(
+          SubmissionProgress(
+            barcode: '123',
+            step: firstCall ? SubmissionStep.failed : SubmissionStep.completed,
+            errorCategory: firstCall
+                ? SubmissionErrorCategory.network
+                : SubmissionErrorCategory.none,
+            retryAvailable: firstCall,
+          ),
+        );
+        return const Product(barcode: '123', name: 'Test');
+      });
+
+      await pumpPushedForm(tester, service);
+      await fillName(tester);
+      await tester.tap(find.text('Save product'));
+      await tester.pumpAndSettle();
+      expect(find.text('Retry now'), findsOneWidget);
+
+      await tester.tap(find.text('Retry now'));
+      await tester.pumpAndSettle();
+
+      expect(callCount, 2);
+      expect(find.byType(AddProductScreen), findsNothing);
     });
   });
 }

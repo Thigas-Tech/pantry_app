@@ -9,6 +9,47 @@ import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_query.dart';
 import 'package:pantry_app/utils/logger.dart';
 
+/// The category of an Open Food Facts write failure.
+enum OffWriteError {
+  /// The write succeeded.
+  none,
+
+  /// Open Food Facts credentials are not configured.
+  missingCredentials,
+
+  /// A network or timeout error occurred during the write.
+  network,
+
+  /// Open Food Facts rate-limited the request.
+  rateLimited,
+
+  /// The server rejected the request, e.g. with a validation error.
+  serverRejected,
+
+  /// The failure could not be categorized.
+  unknown,
+}
+
+/// The outcome of a write operation to Open Food Facts.
+///
+/// Replaces the plain [bool] returned by the write methods so callers can
+/// distinguish transient failures (network, rate limited) from permanent
+/// ones (missing credentials, server rejection) when deciding whether a
+/// retry can help.
+class OffWriteResult {
+  /// Creates a successful [OffWriteResult].
+  const OffWriteResult.success() : success = true, error = OffWriteError.none;
+
+  /// Creates a failed [OffWriteResult] with the given [error].
+  const OffWriteResult.failure(this.error) : success = false;
+
+  /// Whether the write succeeded.
+  final bool success;
+
+  /// The failure category, or [OffWriteError.none] on success.
+  final OffWriteError error;
+}
+
 /// Injectable wrapper around the official Open Food Facts SDK.
 ///
 /// Wraps [off.OpenFoodAPIClient] static methods so they can be injected
@@ -28,7 +69,7 @@ import 'package:pantry_app/utils/logger.dart';
 ///   authentication for read operations.
 /// - [submitProduct] and [uploadProductImage] use the credentials
 ///   configured in [AppConfig.offUserId] and [AppConfig.offPassword],
-///   or return false if no credentials are set.
+///   or return a failure [OffWriteResult] if no credentials are set.
 class OffAdapter {
   /// Creates an [OffAdapter].
   ///
@@ -302,13 +343,15 @@ class OffAdapter {
 
   /// Submits a product to Open Food Facts.
   ///
-  /// Returns true on success, false if credentials are missing or
-  /// the server rejected the submission.
-  Future<bool> submitProduct(Product product) async {
+  /// Returns [OffWriteResult.success] on success, or a failure result
+  /// with the error categorized as [OffWriteError.missingCredentials],
+  /// [OffWriteError.network], [OffWriteError.rateLimited], or
+  /// [OffWriteError.serverRejected].
+  Future<OffWriteResult> submitProduct(Product product) async {
     final user = writeUser;
     if (user == null) {
       logWarning('Cannot submit — no OFF credentials configured');
-      return false;
+      return const OffWriteResult.failure(OffWriteError.missingCredentials);
     }
     const maxRetries = 2;
     for (var attempt = 0; attempt <= maxRetries; attempt++) {
@@ -325,22 +368,29 @@ class OffAdapter {
         );
         if (isStatusOk(status)) {
           logInfo('Product ${product.barcode} submitted successfully');
-          return true;
+          return const OffWriteResult.success();
         }
-        if (isRateLimitStatus(status) && attempt < maxRetries) {
-          final delay = retryDelay(attempt, isRateLimit: true);
+        if (isRateLimitStatus(status)) {
+          if (attempt < maxRetries) {
+            final delay = retryDelay(attempt, isRateLimit: true);
+            logWarning(
+              'Submission rate-limited for ${product.barcode} '
+              '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s',
+            );
+            await Future<void>.delayed(delay);
+            continue;
+          }
           logWarning(
-            'Submission rate-limited for ${product.barcode} '
-            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s',
+            'Product ${product.barcode} submission stayed rate-limited '
+            'after all retries',
           );
-          await Future<void>.delayed(delay);
-          continue;
+          return const OffWriteResult.failure(OffWriteError.rateLimited);
         }
         logWarning(
           'Product ${product.barcode} submission returned status '
           '${status.status}: ${status.statusVerbose}',
         );
-        return false;
+        return const OffWriteResult.failure(OffWriteError.serverRejected);
       } on Exception catch (e) {
         if (attempt < maxRetries) {
           final isRateLimit = isRateLimitError(e);
@@ -355,18 +405,25 @@ class OffAdapter {
             'Submission failed for ${product.barcode} after '
             'all retries: $e',
           );
-          return false;
+          return OffWriteResult.failure(
+            isRateLimitError(e)
+                ? OffWriteError.rateLimited
+                : OffWriteError.network,
+          );
         }
       }
     }
-    return false;
+    return const OffWriteResult.failure(OffWriteError.network);
   }
 
   /// Uploads a product image to Open Food Facts.
   ///
-  /// [imagePath] must be a valid local file path. Returns true on
-  /// success, false if credentials are missing or the upload fails.
-  Future<bool> uploadProductImage({
+  /// [imagePath] must be a valid local file path. Returns
+  /// [OffWriteResult.success] on success, or a failure result with the
+  /// error categorized as [OffWriteError.missingCredentials],
+  /// [OffWriteError.unknown], [OffWriteError.network],
+  /// [OffWriteError.rateLimited], or [OffWriteError.serverRejected].
+  Future<OffWriteResult> uploadProductImage({
     required String barcode,
     required String imageField,
     required String imagePath,
@@ -375,12 +432,12 @@ class OffAdapter {
     final user = writeUser;
     if (user == null) {
       logWarning('Cannot upload image — no OFF credentials configured');
-      return false;
+      return const OffWriteResult.failure(OffWriteError.missingCredentials);
     }
     final file = File(imagePath);
-    if (!await file.exists()) {
+    if (!file.existsSync()) {
       logWarning('Image file not found: $imagePath');
-      return false;
+      return const OffWriteResult.failure(OffWriteError.unknown);
     }
     const maxRetries = 2;
     for (var attempt = 0; attempt <= maxRetries; attempt++) {
@@ -407,22 +464,29 @@ class OffAdapter {
         );
         if (isStatusOk(status)) {
           logInfo('$imageField image uploaded for $barcode');
-          return true;
+          return const OffWriteResult.success();
         }
-        if (isRateLimitStatus(status) && attempt < maxRetries) {
-          final delay = retryDelay(attempt, isRateLimit: true);
+        if (isRateLimitStatus(status)) {
+          if (attempt < maxRetries) {
+            final delay = retryDelay(attempt, isRateLimit: true);
+            logWarning(
+              '$imageField image upload rate-limited for $barcode '
+              '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s',
+            );
+            await Future<void>.delayed(delay);
+            continue;
+          }
           logWarning(
-            '$imageField image upload rate-limited for $barcode '
-            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s',
+            '$imageField image upload for $barcode stayed rate-limited '
+            'after all retries',
           );
-          await Future<void>.delayed(delay);
-          continue;
+          return const OffWriteResult.failure(OffWriteError.rateLimited);
         }
         logWarning(
           '$imageField image upload for $barcode returned status '
           '${status.status}: ${status.statusVerbose}',
         );
-        return false;
+        return const OffWriteResult.failure(OffWriteError.serverRejected);
       } on Exception catch (e) {
         if (attempt < maxRetries) {
           final isRateLimit = isRateLimitError(e);
@@ -437,11 +501,15 @@ class OffAdapter {
             'Image upload failed for $barcode after '
             'all retries: $e',
           );
-          return false;
+          return OffWriteResult.failure(
+            isRateLimitError(e)
+                ? OffWriteError.rateLimited
+                : OffWriteError.network,
+          );
         }
       }
     }
-    return false;
+    return const OffWriteResult.failure(OffWriteError.network);
   }
 
   /// Parses an image field string into the SDK's [off.ImageField] enum.

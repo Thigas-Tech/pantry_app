@@ -553,6 +553,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Submitting product details to Open Food Facts…';
 
   @override
+  String get preparingSubmission => 'Preparing submission…';
+
+  @override
+  String get submissionCredentialsError =>
+      'Submission failed because Open Food Facts credentials are not configured.';
+
+  @override
+  String get submissionOfflineError =>
+      'Could not reach Open Food Facts. Check your connection and retry.';
+
+  @override
+  String get submissionRateLimitedError =>
+      'Open Food Facts rate-limited the request. Please wait and try again.';
+
+  @override
+  String get submissionRejectedError =>
+      'Open Food Facts rejected the product data.';
+
+  @override
   String get productAlreadyInOff =>
       'This product is already in Open Food Facts.';
 

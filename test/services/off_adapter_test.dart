@@ -448,20 +448,35 @@ void main() {
       });
     });
 
+    group('OffWriteResult', () {
+      test('success has error none', () {
+        const result = OffWriteResult.success();
+        expect(result.success, isTrue);
+        expect(result.error, OffWriteError.none);
+      });
+
+      test('failure carries the given error', () {
+        const result = OffWriteResult.failure(OffWriteError.network);
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.network);
+      });
+    });
+
     group('submitProduct', () {
-      /// Verifies [submitProduct] returns false when no OFF
-      /// credentials are configured.
-      test('returns false when no credentials', () async {
+      /// Verifies [submitProduct] reports [OffWriteError.missingCredentials]
+      /// when no OFF credentials are configured.
+      test('reports missingCredentials when no credentials', () async {
         final adapter = OffAdapter(useStaging: false);
 
         const product = Product(barcode: '001', name: 'Test');
         final result = await adapter.submitProduct(product);
-        expect(result, isFalse);
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.missingCredentials);
       });
 
-      /// Verifies [submitProduct] returns true on a successful save
+      /// Verifies [submitProduct] succeeds on a successful save
       /// (status code 1).
-      test('returns true on successful save', () async {
+      test('returns success on successful save', () async {
         dotenv.loadFromString(
           isOptional: true,
           mergeWith: {
@@ -480,26 +495,68 @@ void main() {
 
         const product = Product(barcode: '001', name: 'Test');
         final result = await adapter.submitProduct(product);
-        expect(result, isTrue);
+        expect(result.success, isTrue);
+        expect(result.error, OffWriteError.none);
       });
 
-      /// Verifies [submitProduct] returns false when the SDK returns
-      /// a non‑success status or throws.
-      test('returns false on SDK error', () async {
+      /// Verifies [submitProduct] reports [OffWriteError.network] when the
+      /// SDK throws after all retries are exhausted.
+      test('reports network on SDK error', () {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
         final adapter = OffAdapter(
           useStaging: false,
           onSaveProduct: (user, product, {uriHelper = off.uriHelperFoodProd}) =>
               Future.error(Exception('Save failed')),
         );
 
+        fakeAsync((async) {
+          const product = Product(barcode: '001', name: 'Test');
+          OffWriteResult? result;
+          unawaited(
+            adapter.submitProduct(product).then((value) => result = value),
+          );
+          async.elapse(const Duration(seconds: 30));
+          expect(result, isNotNull);
+          expect(result!.success, isFalse);
+          expect(result!.error, OffWriteError.network);
+        });
+      });
+
+      /// Verifies [submitProduct] reports [OffWriteError.serverRejected]
+      /// when the server returns a non‑success status.
+      test('reports serverRejected on non-ok status', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onSaveProduct:
+              (user, product, {uriHelper = off.uriHelperFoodProd}) async {
+                return off.Status.fromJson({'status': 0});
+              },
+        );
+
         const product = Product(barcode: '001', name: 'Test');
         final result = await adapter.submitProduct(product);
-        expect(result, isFalse);
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.serverRejected);
       });
 
       /// Verifies [submitProduct] treats the string form "status ok"
       /// (returned by the image upload endpoint contract) as success.
-      test('returns true when status is "status ok"', () async {
+      test('returns success when status is "status ok"', () async {
         dotenv.loadFromString(
           isOptional: true,
           mergeWith: {
@@ -518,7 +575,8 @@ void main() {
 
         const product = Product(barcode: '001', name: 'Test');
         final result = await adapter.submitProduct(product);
-        expect(result, isTrue);
+        expect(result.success, isTrue);
+        expect(result.error, OffWriteError.none);
       });
 
       /// Verifies [submitProduct] retries when the server responds with a
@@ -551,21 +609,62 @@ void main() {
 
         fakeAsync((async) {
           const product = Product(barcode: '001', name: 'Test');
-          var result = false;
+          OffWriteResult? result;
           unawaited(
             adapter.submitProduct(product).then((value) => result = value),
           );
-          async.elapse(const Duration(seconds: 10));
-          expect(result, isTrue);
+          async.elapse(const Duration(seconds: 30));
+          expect(result, isNotNull);
+          expect(result!.success, isTrue);
           expect(attempts, 2);
+        });
+      });
+
+      /// Verifies [submitProduct] reports [OffWriteError.rateLimited] when
+      /// a rate limit never clears.
+      test('reports rateLimited when rate limit never clears', () {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        var attempts = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onSaveProduct: (user, product, {uriHelper = off.uriHelperFoodProd}) {
+            attempts++;
+            return Future.value(
+              off.Status(
+                status: 429,
+                statusVerbose: '429 Too Many Requests',
+              ),
+            );
+          },
+        );
+
+        fakeAsync((async) {
+          const product = Product(barcode: '001', name: 'Test');
+          OffWriteResult? result;
+          unawaited(
+            adapter.submitProduct(product).then((value) => result = value),
+          );
+          async.elapse(const Duration(seconds: 60));
+          expect(result, isNotNull);
+          expect(result!.success, isFalse);
+          expect(result!.error, OffWriteError.rateLimited);
+          expect(attempts, 3);
         });
       });
     });
 
     group('uploadProductImage', () {
-      /// Verifies [uploadProductImage] returns false when no OFF
-      /// credentials are configured.
-      test('returns false when no credentials', () async {
+      /// Verifies [uploadProductImage] reports
+      /// [OffWriteError.missingCredentials] when no OFF credentials are
+      /// configured.
+      test('reports missingCredentials when no credentials', () async {
         final adapter = OffAdapter(useStaging: false);
 
         final result = await adapter.uploadProductImage(
@@ -573,25 +672,34 @@ void main() {
           imageField: 'front',
           imagePath: '/tmp/test.png',
         );
-        expect(result, isFalse);
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.missingCredentials);
       });
 
-      /// Verifies [uploadProductImage] returns false when the image
-      /// file does not exist.
-      test('returns false when file not found', () {
-        final adapter = OffAdapter(useStaging: false);
+      /// Verifies [uploadProductImage] reports [OffWriteError.unknown] when
+      /// the local image file does not exist.
+      test('reports unknown when file not found', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
 
-        // The test needs writeUser to be non-null, but defaults to null
-        // because no env vars are set.  We can't easily inject writeUser,
-        // so this test is skipped for now — it's tested via the real
-        // ProductRepository integration tests.
-        // For now, just verify the credential-guard branch runs.
-        expect(adapter.writeUser, isNull);
+        final adapter = OffAdapter(useStaging: false);
+        final result = await adapter.uploadProductImage(
+          barcode: '001',
+          imageField: 'front',
+          imagePath: '/nonexistent/missing.png',
+        );
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.unknown);
       });
 
       /// Verifies [uploadProductImage] treats the image endpoint's string
       /// form "status ok" as success for an existing local image file.
-      test('returns true when status is "status ok"', () async {
+      test('returns success when status is "status ok"', () async {
         dotenv.loadFromString(
           isOptional: true,
           mergeWith: {
@@ -621,7 +729,132 @@ void main() {
           imageField: 'front',
           imagePath: imagePath,
         );
-        expect(result, isTrue);
+        expect(result.success, isTrue);
+        expect(result.error, OffWriteError.none);
+      });
+
+      /// Verifies [uploadProductImage] reports [OffWriteError.serverRejected]
+      /// when the server returns a non‑success status.
+      test('reports serverRejected on non-ok status', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final tempDir = Directory.systemTemp.createTempSync('pantry_off_');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final imagePath = '${tempDir.path}/front.png';
+        File(imagePath).writeAsBytesSync([1, 2, 3]);
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onAddProductImage:
+              (user, image, {uriHelper = off.uriHelperFoodProd}) async {
+                return off.Status.fromJson({'status': 'status not ok'});
+              },
+        );
+
+        final result = await adapter.uploadProductImage(
+          barcode: '001',
+          imageField: 'front',
+          imagePath: imagePath,
+        );
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.serverRejected);
+      });
+
+      /// Verifies [uploadProductImage] reports [OffWriteError.network] when
+      /// the SDK throws after all retries are exhausted.
+      test('reports network on exception after retries', () {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final tempDir = Directory.systemTemp.createTempSync('pantry_off_');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final imagePath = '${tempDir.path}/front.png';
+        File(imagePath).writeAsBytesSync([1, 2, 3]);
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onAddProductImage:
+              (user, image, {uriHelper = off.uriHelperFoodProd}) =>
+                  Future.error(Exception('Upload failed')),
+        );
+
+        fakeAsync((async) {
+          OffWriteResult? result;
+          unawaited(
+            adapter
+                .uploadProductImage(
+                  barcode: '001',
+                  imageField: 'front',
+                  imagePath: imagePath,
+                )
+                .then((value) => result = value),
+          );
+          async.elapse(const Duration(seconds: 30));
+          expect(result, isNotNull);
+          expect(result!.success, isFalse);
+          expect(result!.error, OffWriteError.network);
+        });
+      });
+
+      /// Verifies [uploadProductImage] reports [OffWriteError.rateLimited]
+      /// when a rate limit never clears.
+      test('reports rateLimited when rate limit never clears', () {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final tempDir = Directory.systemTemp.createTempSync('pantry_off_');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final imagePath = '${tempDir.path}/front.png';
+        File(imagePath).writeAsBytesSync([1, 2, 3]);
+
+        var attempts = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onAddProductImage:
+              (user, image, {uriHelper = off.uriHelperFoodProd}) {
+                attempts++;
+                return Future.value(
+                  off.Status(
+                    status: 429,
+                    statusVerbose: '429 Too Many Requests',
+                  ),
+                );
+              },
+        );
+
+        fakeAsync((async) {
+          OffWriteResult? result;
+          unawaited(
+            adapter
+                .uploadProductImage(
+                  barcode: '001',
+                  imageField: 'front',
+                  imagePath: imagePath,
+                )
+                .then((value) => result = value),
+          );
+          async.elapse(const Duration(seconds: 60));
+          expect(result, isNotNull);
+          expect(result!.success, isFalse);
+          expect(result!.error, OffWriteError.rateLimited);
+          expect(attempts, 3);
+        });
       });
     });
   });

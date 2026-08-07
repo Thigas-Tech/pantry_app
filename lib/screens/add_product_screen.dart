@@ -8,6 +8,7 @@ import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
+import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -16,7 +17,9 @@ import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/utils/camera_permission_dialog.dart';
 import 'package:pantry_app/utils/gallery_permission_dialog.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/utils/submission_error_label.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -61,10 +64,20 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   /// cleanup must never delete these.
   final Set<String> _committedPaths = <String>{};
 
+  /// The product saved by the last [_save]; used to re-submit on retry.
+  Product? _submittedProduct;
+
   @override
   void initState() {
     super.initState();
     _imageService = ref.read(productImageServiceProvider);
+    // Clear any progress left by a previous submission. Deferred until after
+    // the first frame because providers cannot be modified during build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(productSubmissionProvider.notifier).clear();
+      }
+    });
   }
 
   File? _imageFor(ImageField field) => _slots.forField(field);
@@ -165,6 +178,12 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     }
     _formKey.currentState!.save();
 
+    final notifier = ref.read(productSubmissionProvider.notifier);
+    if (notifier.isSubmitting) {
+      logInfo('Add-product save ignored while a submission is running');
+      return;
+    }
+
     final saved = await _imageService.save(_slots, barcode: widget.barcode);
     _committedPaths.addAll(
       [
@@ -195,25 +214,40 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     );
     logInfo('Manual product entry saved: ${product.name}');
 
-    if (!mounted) return;
-    Navigator.of(context).pop(product);
+    await _cacheLocally(product);
+    _submittedProduct = product;
 
-    // Background submit to OFF (fire-and-forget after local save).
-    unawaited(_cacheAndSubmit(product));
+    // The screen stays open while the submission runs so progress is
+    // visible. On success it pops; on failure the panel offers a retry.
+    await notifier.submit(product);
+
+    if (!mounted) return;
+    if (ref.read(productSubmissionProvider)?.step == SubmissionStep.completed) {
+      final l10n = AppLocalizations.of(context)!;
+      SnackbarHelper.showInfo(context, l10n.submissionSuccess);
+      Navigator.of(context).pop(product);
+    }
   }
 
-  Future<void> _cacheAndSubmit(Product product) async {
+  Future<void> _cacheLocally(Product product) async {
     try {
       final repo = ref.read(productRepositoryProvider);
       await repo.cacheProduct(product);
     } on Object catch (e) {
       logError('Failed to cache product locally: $e');
     }
-    try {
-      final service = ref.read(productSubmissionServiceProvider);
-      await service.submitProduct(product);
-    } on Object catch (e) {
-      logError('Failed to submit product to OFF: $e');
+  }
+
+  Future<void> _retrySubmission() async {
+    final product = _submittedProduct;
+    if (product == null) return;
+    final notifier = ref.read(productSubmissionProvider.notifier);
+    await notifier.submit(product);
+    if (!mounted) return;
+    if (ref.read(productSubmissionProvider)?.step == SubmissionStep.completed) {
+      final l10n = AppLocalizations.of(context)!;
+      SnackbarHelper.showInfo(context, l10n.submissionSuccess);
+      Navigator.of(context).pop(product);
     }
   }
 
@@ -234,6 +268,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final progress = ref.watch(productSubmissionProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.enterProductDetails)),
       body: Padding(
@@ -314,6 +349,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 icon: const Icon(Icons.save),
                 label: Text(l10n.saveProduct),
               ),
+              if (progress != null) ...[
+                const SizedBox(height: 16),
+                _submissionPanel(progress),
+              ],
             ],
           ),
         ),
@@ -357,6 +396,69 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       onAdd: () => _chooseSource(field),
       onTap: () => _openPreview(field),
       onDelete: () => _removeImage(field),
+    );
+  }
+
+  /// Builds the inline submission status shown under the save button.
+  ///
+  /// Shows an indeterminate or determinate [LinearProgressIndicator] while
+  /// the submission runs and a localized message with a retry button once
+  /// it reaches a terminal state that can be retried.
+  Widget _submissionPanel(SubmissionProgress progress) {
+    final l10n = AppLocalizations.of(context)!;
+    final (text, value) = switch (progress.step) {
+      SubmissionStep.checking => (l10n.preparingSubmission, null),
+      SubmissionStep.submittingMetadata => (l10n.submittingMetadata, null),
+      SubmissionStep.uploadingFront ||
+      SubmissionStep.uploadingIngredients ||
+      SubmissionStep.uploadingNutrition => (
+        l10n.uploadingPhotos(
+          progress.completedImageCount + 1,
+          progress.totalImageCount,
+        ),
+        progress.totalImageCount > 0
+            ? (progress.completedImageCount + 1) / progress.totalImageCount
+            : null,
+      ),
+      SubmissionStep.completed => (l10n.submissionSuccess, 1.0),
+      SubmissionStep.partiallyCompleted => (
+        l10n.submissionPartiallyCompleted,
+        null,
+      ),
+      SubmissionStep.failed => (
+        submissionErrorLabel(l10n, progress.errorCategory),
+        null,
+      ),
+    };
+    final showBar =
+        progress.isActive || progress.step == SubmissionStep.completed;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text(text)),
+                if (progress.retryAvailable)
+                  TextButton(
+                    onPressed: _retrySubmission,
+                    child: Text(l10n.retryNow),
+                  ),
+              ],
+            ),
+            if (showBar) ...[
+              const SizedBox(height: 8),
+              ProgressIndicatorHelper.build(
+                type: ProgressIndicatorType.linear,
+                value: value,
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
