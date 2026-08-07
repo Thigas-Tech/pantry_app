@@ -57,7 +57,8 @@
   <p>Picks product photos from the camera or the device gallery.</p>
 <p>Requests the camera permission for camera sources and compresses the
 picked image so uploads to Open Food Facts stay small. Gallery picks go
-through the system picker and never request the camera permission.</p>
+through the system picker and only request a permission when the platform
+requires one.</p>
 </section>
 
 
@@ -67,7 +68,7 @@ through the system picker and never request the camera permission.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ProductPhotoPicker.new" class="callable">
-          <span class="name"><a href="../services_product_photo_picker/ProductPhotoPicker/ProductPhotoPicker.html">ProductPhotoPicker</a></span><span class="signature">({<span class="parameter" id="param-imagePicker"><span class="type-annotation"><a href="https://pub.dev/documentation/image_picker/1.2.3/image_picker/ImagePicker-class.html">ImagePicker</a>?</span> <span class="parameter-name">imagePicker</span>, </span><span class="parameter" id="param-cameraPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">cameraPermissionCheck</span>()?</span>})</span>
+          <span class="name"><a href="../services_product_photo_picker/ProductPhotoPicker/ProductPhotoPicker.html">ProductPhotoPicker</a></span><span class="signature">({<span class="parameter" id="param-imagePicker"><span class="type-annotation"><a href="https://pub.dev/documentation/image_picker/1.2.3/image_picker/ImagePicker-class.html">ImagePicker</a>?</span> <span class="parameter-name">imagePicker</span>, </span><span class="parameter" id="param-cameraPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_photo_permission/PhotoPermissionStatus.html">PhotoPermissionStatus</a></span>&gt;</span></span> <span class="parameter-name">cameraPermissionCheck</span>()?, </span><span class="parameter" id="param-galleryPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_photo_permission/PhotoPermissionStatus.html">PhotoPermissionStatus</a></span>&gt;</span></span> <span class="parameter-name">galleryPermissionCheck</span>()?, </span><span class="parameter" id="param-isGalleryPermissionRequired"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isGalleryPermissionRequired</span>()?</span>})</span>
         </dt>
         <dd>
           Creates a <a href="../services_product_photo_picker/ProductPhotoPicker-class.html">ProductPhotoPicker</a>.

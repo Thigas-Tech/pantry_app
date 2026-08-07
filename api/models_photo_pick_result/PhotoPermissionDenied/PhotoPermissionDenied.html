@@ -54,18 +54,21 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">PhotoPermissionDenied</span>(<wbr>)
+      <span class="name ">PhotoPermissionDenied</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-permanentlyDenied"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">permanentlyDenied</span> = <span class="default-value">false</span>, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../models_photo_pick_result/PhotoPermissionDenied-class.html">PhotoPermissionDenied</a>.</p>
+<p><code>permanentlyDenied</code> is true when the user cannot be prompted again and
+must grant access from the system settings.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const PhotoPermissionDenied();</code></pre>
+  <pre class="language-dart"><code class="language-dart">const PhotoPermissionDenied({this.permanentlyDenied = false});</code></pre>
 </section>
 
 

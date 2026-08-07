@@ -55,13 +55,16 @@
     <section class="multi-line-signature">
       
       <span class="name ">ProductPhotoPicker</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-imagePicker"><span class="type-annotation"><a href="https://pub.dev/documentation/image_picker/1.2.3/image_picker/ImagePicker-class.html">ImagePicker</a>?</span> <span class="parameter-name">imagePicker</span>, </span></li>
-<li><span class="parameter" id="param-cameraPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">cameraPermissionCheck</span>()?, </span></li>
+<li><span class="parameter" id="param-cameraPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_photo_permission/PhotoPermissionStatus.html">PhotoPermissionStatus</a></span>&gt;</span></span> <span class="parameter-name">cameraPermissionCheck</span>()?, </span></li>
+<li><span class="parameter" id="param-galleryPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_photo_permission/PhotoPermissionStatus.html">PhotoPermissionStatus</a></span>&gt;</span></span> <span class="parameter-name">galleryPermissionCheck</span>()?, </span></li>
+<li><span class="parameter" id="param-isGalleryPermissionRequired"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isGalleryPermissionRequired</span>()?, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../services_product_photo_picker/ProductPhotoPicker-class.html">ProductPhotoPicker</a>.</p>
-<p><code>imagePicker</code> and <code>cameraPermissionCheck</code> are injectable for tests.</p>
+<p><code>imagePicker</code>, <code>cameraPermissionCheck</code>, <code>galleryPermissionCheck</code>, and
+<code>isGalleryPermissionRequired</code> are injectable for tests.</p>
 </section>
 
 
@@ -70,10 +73,16 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">ProductPhotoPicker({
   ImagePicker? imagePicker,
-  Future&lt;bool&gt; Function()? cameraPermissionCheck,
+  Future&lt;PhotoPermissionStatus&gt; Function()? cameraPermissionCheck,
+  Future&lt;PhotoPermissionStatus&gt; Function()? galleryPermissionCheck,
+  bool Function()? isGalleryPermissionRequired,
 }) : _imagePicker = imagePicker ?? ImagePicker(),
      _cameraPermissionCheck =
-         cameraPermissionCheck ?? _requestCameraPermission;</code></pre>
+         cameraPermissionCheck ?? _requestCameraPermission,
+     _galleryPermissionCheck =
+         galleryPermissionCheck ?? _requestGalleryPermission,
+     _isGalleryPermissionRequired =
+         isGalleryPermissionRequired ?? _isGalleryPermissionRequiredDefault;</code></pre>
 </section>
 
 

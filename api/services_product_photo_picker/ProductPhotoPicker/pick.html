@@ -64,9 +64,11 @@
     
 <section class="desc markdown">
   <p>Picks a photo from the given <code>source</code>.</p>
-<p>Returns a <a href="../../models_photo_pick_result/PhotoPicked-class.html">PhotoPicked</a> with the chosen file, a
-<a href="../../models_photo_pick_result/PhotoPermissionDenied-class.html">PhotoPermissionDenied</a> when the camera permission is refused, or a
-<a href="../../models_photo_pick_result/PhotoPickCancelled-class.html">PhotoPickCancelled</a> when the user dismisses the picker.</p>
+<p>Returns a <a href="../../models_photo_pick_result/PhotoPicked-class.html">PhotoPicked</a> with the chosen file, a <a href="../../models_photo_pick_result/PhotoPermissionDenied-class.html">PhotoPermissionDenied</a>
+when the camera permission is refused (permanentlyDenied is true when
+the user cannot be prompted again), a <a href="../../models_photo_pick_result/PhotoGalleryPermissionDenied-class.html">PhotoGalleryPermissionDenied</a>
+when gallery access is denied, or a <a href="../../models_photo_pick_result/PhotoPickCancelled-class.html">PhotoPickCancelled</a> when the user
+dismisses the picker.</p>
 </section>
 
 
@@ -75,23 +77,28 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;PhotoPickResult&gt; pick(PhotoSource source) async {
   if (source == PhotoSource.camera) {
-    final granted = await _cameraPermissionCheck();
-    if (!granted) {
-      return const PhotoPermissionDenied();
+    final status = await _cameraPermissionCheck();
+    if (status != PhotoPermissionStatus.granted) {
+      return PhotoPermissionDenied(
+        permanentlyDenied: status == PhotoPermissionStatus.permanentlyDenied,
+      );
+    }
+    return _pickImage(ImageSource.camera);
+  }
+  if (_isGalleryPermissionRequired()) {
+    final status = await _galleryPermissionCheck();
+    if (status != PhotoPermissionStatus.granted) {
+      return const PhotoGalleryPermissionDenied();
     }
   }
-  final picked = await _imagePicker.pickImage(
-    source: source == PhotoSource.camera
-        ? ImageSource.camera
-        : ImageSource.gallery,
-    maxWidth: 1600,
-    maxHeight: 1600,
-    imageQuality: 85,
-  );
-  if (picked == null) {
-    return const PhotoPickCancelled();
+  try {
+    return await _pickImage(ImageSource.gallery);
+  } on PlatformException catch (e) {
+    if (e.code == &#39;photo_access_denied&#39;) {
+      return const PhotoGalleryPermissionDenied();
+    }
+    rethrow;
   }
-  return PhotoPicked(File(picked.path));
 }</code></pre>
 </section>
 
