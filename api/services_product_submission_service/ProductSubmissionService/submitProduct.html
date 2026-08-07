@@ -55,8 +55,10 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product/Product-class.html">Product</a></span>&gt;</span></span>
-<span class="name ">submitProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span></li>
-</ol>)
+<span class="name ">submitProduct</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span>, {</span></li>
+<li><span class="parameter" id="submitProduct-param-onProgress"><span class="type-annotation">void</span> <span class="parameter-name">onProgress</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-progress"><span class="type-annotation"><a href="../../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a></span> <span class="parameter-name">progress</span></span></li>
+</ol>)?, </span></li>
+</ol>})
 
       
 
@@ -64,80 +66,149 @@
     
 <section class="desc markdown">
   <p>Submits <code>product</code> to Open Food Facts along with any local images.</p>
-<p>Returns the updated <a href="../../models_product/Product-class.html">Product</a> with submission status set to
-<a href="../../models_product/productSubmissionSubmitted-constant.html">productSubmissionSubmitted</a> on success or
-<a href="../../models_product/productSubmissionFailed-constant.html">productSubmissionFailed</a> on failure. On network failure the barcode
-is queued for background retry.</p>
+<p>Progress snapshots are delivered to <code>onProgress</code> when provided.
+Returns the updated <a href="../../models_product/Product-class.html">Product</a> with submission status set to
+<a href="../../models_product/productSubmissionSubmitted-constant.html">productSubmissionSubmitted</a> on success, <a href="../../models_product/productSubmissionFailed-constant.html">productSubmissionFailed</a>
+on failure, or <a href="../../models_product/productSubmissionPartiallyCompleted-constant.html">productSubmissionPartiallyCompleted</a> when the
+metadata and some photos succeeded but at least one photo failed.
+On transient failure the barcode is queued for background retry.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; submitProduct(Product product) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; submitProduct(
+  Product product, {
+  void Function(SubmissionProgress progress)? onProgress,
+}) async {
+  final totalImages = _countImages(product);
   var updated = product.copyWith(
     submissionStatus: productSubmissionPending,
   );
   await _db.insertProduct(updated);
+  _emit(
+    onProgress,
+    SubmissionProgress(
+      barcode: product.barcode,
+      totalImageCount: totalImages,
+    ),
+  );
 
   try {
-    final metadataOk = await _api.submitProduct(updated);
-    if (!metadataOk) {
+    _emit(
+      onProgress,
+      SubmissionProgress(
+        barcode: product.barcode,
+        step: SubmissionStep.submittingMetadata,
+        totalImageCount: totalImages,
+      ),
+    );
+    final metadataResult = await _api.submitProduct(updated);
+    if (!metadataResult.success) {
       logWarning(
-        &#39;Product ${product.barcode}: metadata submission returned false&#39;,
+        &#39;Product ${product.barcode}: metadata submission failed&#39;,
       );
-      updated = updated.copyWith(
-        submissionStatus: productSubmissionFailed,
+      return _finishFailed(
+        product,
+        onProgress,
+        _categorize(metadataResult.error),
+        _retryFor(metadataResult.error),
+        totalImages,
       );
-      await _db.insertProduct(updated);
-      return updated;
     }
 
-    var imagesOk = true;
-    imagesOk &amp;= await _uploadImageIfPresent(
-      updated,
-      &#39;front&#39;,
-      updated.productImagePath,
-    );
-    imagesOk &amp;= await _uploadImageIfPresent(
-      updated,
-      &#39;ingredients&#39;,
-      updated.ingredientsImagePath,
-    );
-    imagesOk &amp;= await _uploadImageIfPresent(
-      updated,
-      &#39;nutrition&#39;,
-      updated.nutritionImagePath,
-    );
+    var completedImages = 0;
+    final failures = &lt;OffWriteResult&gt;[];
+    final uploads = &lt;(String, String?, SubmissionStep)&gt;[
+      (&#39;front&#39;, updated.productImagePath, SubmissionStep.uploadingFront),
+      (
+        &#39;ingredients&#39;,
+        updated.ingredientsImagePath,
+        SubmissionStep.uploadingIngredients,
+      ),
+      (
+        &#39;nutrition&#39;,
+        updated.nutritionImagePath,
+        SubmissionStep.uploadingNutrition,
+      ),
+    ];
 
-    updated = updated.copyWith(
-      submissionStatus: imagesOk
-          ? productSubmissionSubmitted
-          : productSubmissionFailed,
-    );
-    await _db.insertProduct(updated);
+    for (final (imageField, imagePath, step) in uploads) {
+      final result = await _uploadImageIfPresent(
+        product: updated,
+        imageField: imageField,
+        imagePath: imagePath,
+        step: step,
+        completedImages: completedImages,
+        totalImages: totalImages,
+        onProgress: onProgress,
+      );
+      if (result.success) {
+        completedImages++;
+      } else {
+        failures.add(result);
+      }
+    }
 
-    &#47;&#47; On success, remove any pending queue entries for this barcode.
-    if (imagesOk) {
+    if (failures.isEmpty) {
+      updated = updated.copyWith(
+        submissionStatus: productSubmissionSubmitted,
+      );
+      await _db.insertProduct(updated);
+      _emit(
+        onProgress,
+        SubmissionProgress(
+          barcode: product.barcode,
+          step: SubmissionStep.completed,
+          completedImageCount: completedImages,
+          totalImageCount: totalImages,
+        ),
+      );
       final database = await _db.database;
       await _db.productSubmissionQueueDao.deleteByBarcode(
         database,
         product.barcode,
       );
+      return updated;
     }
 
-    return updated;
+    if (completedImages &gt; 0) {
+      updated = updated.copyWith(
+        submissionStatus: productSubmissionPartiallyCompleted,
+      );
+      await _db.insertProduct(updated);
+      _emit(
+        onProgress,
+        SubmissionProgress(
+          barcode: product.barcode,
+          step: SubmissionStep.partiallyCompleted,
+          completedImageCount: completedImages,
+          totalImageCount: totalImages,
+          errorCategory: _categorize(failures.first.error),
+          retryAvailable: true,
+        ),
+      );
+      await _queueForRetry(product.barcode);
+      return updated;
+    }
+
+    return _finishFailed(
+      product,
+      onProgress,
+      _categorize(failures.first.error),
+      _retryFor(failures.first.error),
+      totalImages,
+    );
   } on Exception catch (e) {
     logError(&#39;Submission failed for ${product.barcode}: $e&#39;);
-    updated = updated.copyWith(
-      submissionStatus: productSubmissionFailed,
+    return _finishFailed(
+      product,
+      onProgress,
+      SubmissionErrorCategory.network,
+      true,
+      totalImages,
     );
-    await _db.insertProduct(updated);
-
-    &#47;&#47; Queue for background retry on network failure.
-    await _queueForRetry(product.barcode);
-
-    return updated;
   }
 }</code></pre>
 </section>

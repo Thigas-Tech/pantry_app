@@ -70,7 +70,7 @@ established by the official smooth-app. OFF does not require
 authentication for read operations.</li>
 <li><a href="../services_off_adapter/OffAdapter/submitProduct.html">submitProduct</a> and <a href="../services_off_adapter/OffAdapter/uploadProductImage.html">uploadProductImage</a> use the credentials
 configured in <a href="../config/AppConfig/offUserId.html">AppConfig.offUserId</a> and <a href="../config/AppConfig/offPassword.html">AppConfig.offPassword</a>,
-or return false if no credentials are set.</li>
+or return a failure <a href="../services_off_adapter/OffWriteResult-class.html">OffWriteResult</a> if no credentials are set.</li>
 </ul>
 </section>
 
@@ -192,7 +192,7 @@ or return false if no credentials are set.</li>
 
         <dt id="submitProduct" class="callable">
   <span class="name"><a href="../services_off_adapter/OffAdapter/submitProduct.html">submitProduct</a></span><span class="signature">(<wbr><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_off_adapter/OffWriteResult-class.html">OffWriteResult</a></span>&gt;</span></span>
   </span>
   
 
@@ -218,7 +218,7 @@ or return false if no credentials are set.</li>
 
         <dt id="uploadProductImage" class="callable">
   <span class="name"><a href="../services_off_adapter/OffAdapter/uploadProductImage.html">uploadProductImage</a></span><span class="signature">(<wbr>{<span class="parameter" id="uploadProductImage-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="uploadProductImage-param-imageField"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">imageField</span>, </span><span class="parameter" id="uploadProductImage-param-imagePath"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">imagePath</span>, </span><span class="parameter" id="uploadProductImage-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">languageCode</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_off_adapter/OffWriteResult-class.html">OffWriteResult</a></span>&gt;</span></span>
   </span>
   
 

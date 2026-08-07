@@ -54,7 +54,7 @@
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../services_off_adapter/OffWriteResult-class.html">OffWriteResult</a></span>&gt;</span></span>
 <span class="name ">uploadProductImage</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="uploadProductImage-param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span></li>
 <li><span class="parameter" id="uploadProductImage-param-imageField"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">imageField</span>, </span></li>
 <li><span class="parameter" id="uploadProductImage-param-imagePath"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">imagePath</span>, </span></li>
@@ -67,15 +67,18 @@
     
 <section class="desc markdown">
   <p>Uploads a product image to Open Food Facts.</p>
-<p><code>imagePath</code> must be a valid local file path. Returns true on
-success, false if credentials are missing or the upload fails.</p>
+<p><code>imagePath</code> must be a valid local file path. Returns
+<a href="../../services_off_adapter/OffWriteResult/success.html">OffWriteResult.success</a> on success, or a failure result with the
+error categorized as <a href="../../services_off_adapter/OffWriteError.html">OffWriteError.missingCredentials</a>,
+<a href="../../services_off_adapter/OffWriteError.html">OffWriteError.unknown</a>, <a href="../../services_off_adapter/OffWriteError.html">OffWriteError.network</a>,
+<a href="../../services_off_adapter/OffWriteError.html">OffWriteError.rateLimited</a>, or <a href="../../services_off_adapter/OffWriteError.html">OffWriteError.serverRejected</a>.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; uploadProductImage({
+  <pre class="language-dart"><code class="language-dart">Future&lt;OffWriteResult&gt; uploadProductImage({
   required String barcode,
   required String imageField,
   required String imagePath,
@@ -84,12 +87,12 @@ success, false if credentials are missing or the upload fails.</p>
   final user = writeUser;
   if (user == null) {
     logWarning(&#39;Cannot upload image — no OFF credentials configured&#39;);
-    return false;
+    return const OffWriteResult.failure(OffWriteError.missingCredentials);
   }
   final file = File(imagePath);
-  if (!await file.exists()) {
+  if (!file.existsSync()) {
     logWarning(&#39;Image file not found: $imagePath&#39;);
-    return false;
+    return const OffWriteResult.failure(OffWriteError.unknown);
   }
   const maxRetries = 2;
   for (var attempt = 0; attempt &lt;= maxRetries; attempt++) {
@@ -116,22 +119,29 @@ success, false if credentials are missing or the upload fails.</p>
       );
       if (isStatusOk(status)) {
         logInfo(&#39;$imageField image uploaded for $barcode&#39;);
-        return true;
+        return const OffWriteResult.success();
       }
-      if (isRateLimitStatus(status) &amp;&amp; attempt &lt; maxRetries) {
-        final delay = retryDelay(attempt, isRateLimit: true);
+      if (isRateLimitStatus(status)) {
+        if (attempt &lt; maxRetries) {
+          final delay = retryDelay(attempt, isRateLimit: true);
+          logWarning(
+            &#39;$imageField image upload rate-limited for $barcode &#39;
+            &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s&#39;,
+          );
+          await Future&lt;void&gt;.delayed(delay);
+          continue;
+        }
         logWarning(
-          &#39;$imageField image upload rate-limited for $barcode &#39;
-          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s&#39;,
+          &#39;$imageField image upload for $barcode stayed rate-limited &#39;
+          &#39;after all retries&#39;,
         );
-        await Future&lt;void&gt;.delayed(delay);
-        continue;
+        return const OffWriteResult.failure(OffWriteError.rateLimited);
       }
       logWarning(
         &#39;$imageField image upload for $barcode returned status &#39;
         &#39;${status.status}: ${status.statusVerbose}&#39;,
       );
-      return false;
+      return const OffWriteResult.failure(OffWriteError.serverRejected);
     } on Exception catch (e) {
       if (attempt &lt; maxRetries) {
         final isRateLimit = isRateLimitError(e);
@@ -146,11 +156,15 @@ success, false if credentials are missing or the upload fails.</p>
           &#39;Image upload failed for $barcode after &#39;
           &#39;all retries: $e&#39;,
         );
-        return false;
+        return OffWriteResult.failure(
+          isRateLimitError(e)
+              ? OffWriteError.rateLimited
+              : OffWriteError.network,
+        );
       }
     }
   }
-  return false;
+  return const OffWriteResult.failure(OffWriteError.network);
 }</code></pre>
 </section>
 

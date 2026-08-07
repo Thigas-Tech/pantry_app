@@ -54,7 +54,7 @@
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../services_off_adapter/OffWriteResult-class.html">OffWriteResult</a></span>&gt;</span></span>
 <span class="name ">submitProduct</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span></li>
 </ol>)
 
@@ -64,19 +64,21 @@
     
 <section class="desc markdown">
   <p>Submits a product to Open Food Facts.</p>
-<p>Returns true on success, false if credentials are missing or
-the server rejected the submission.</p>
+<p>Returns <a href="../../services_off_adapter/OffWriteResult/success.html">OffWriteResult.success</a> on success, or a failure result
+with the error categorized as <a href="../../services_off_adapter/OffWriteError.html">OffWriteError.missingCredentials</a>,
+<a href="../../services_off_adapter/OffWriteError.html">OffWriteError.network</a>, <a href="../../services_off_adapter/OffWriteError.html">OffWriteError.rateLimited</a>, or
+<a href="../../services_off_adapter/OffWriteError.html">OffWriteError.serverRejected</a>.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; submitProduct(Product product) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;OffWriteResult&gt; submitProduct(Product product) async {
   final user = writeUser;
   if (user == null) {
     logWarning(&#39;Cannot submit — no OFF credentials configured&#39;);
-    return false;
+    return const OffWriteResult.failure(OffWriteError.missingCredentials);
   }
   const maxRetries = 2;
   for (var attempt = 0; attempt &lt;= maxRetries; attempt++) {
@@ -93,22 +95,29 @@ the server rejected the submission.</p>
       );
       if (isStatusOk(status)) {
         logInfo(&#39;Product ${product.barcode} submitted successfully&#39;);
-        return true;
+        return const OffWriteResult.success();
       }
-      if (isRateLimitStatus(status) &amp;&amp; attempt &lt; maxRetries) {
-        final delay = retryDelay(attempt, isRateLimit: true);
+      if (isRateLimitStatus(status)) {
+        if (attempt &lt; maxRetries) {
+          final delay = retryDelay(attempt, isRateLimit: true);
+          logWarning(
+            &#39;Submission rate-limited for ${product.barcode} &#39;
+            &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s&#39;,
+          );
+          await Future&lt;void&gt;.delayed(delay);
+          continue;
+        }
         logWarning(
-          &#39;Submission rate-limited for ${product.barcode} &#39;
-          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s&#39;,
+          &#39;Product ${product.barcode} submission stayed rate-limited &#39;
+          &#39;after all retries&#39;,
         );
-        await Future&lt;void&gt;.delayed(delay);
-        continue;
+        return const OffWriteResult.failure(OffWriteError.rateLimited);
       }
       logWarning(
         &#39;Product ${product.barcode} submission returned status &#39;
         &#39;${status.status}: ${status.statusVerbose}&#39;,
       );
-      return false;
+      return const OffWriteResult.failure(OffWriteError.serverRejected);
     } on Exception catch (e) {
       if (attempt &lt; maxRetries) {
         final isRateLimit = isRateLimitError(e);
@@ -123,11 +132,15 @@ the server rejected the submission.</p>
           &#39;Submission failed for ${product.barcode} after &#39;
           &#39;all retries: $e&#39;,
         );
-        return false;
+        return OffWriteResult.failure(
+          isRateLimitError(e)
+              ? OffWriteError.rateLimited
+              : OffWriteError.network,
+        );
       }
     }
   }
-  return false;
+  return const OffWriteResult.failure(OffWriteError.network);
 }</code></pre>
 </section>
 

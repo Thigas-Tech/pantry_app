@@ -62,9 +62,12 @@
 /cgi/product_image_upload.pl.</li>
 <li>Update the product's submission status on success/failure and
 persist to the local database.</li>
-<li>On network failure, queue the barcode in the
+<li>On transient failure, queue the barcode in the
 product_submission_queue table for later retry.</li>
 </ol>
+<p>Progress is reported through <a href="../services_product_submission_service/ProductSubmissionService/submitProduct.html">submitProduct</a>'s progress callback as
+typed <a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a> snapshots, so callers can expose observable,
+durable progress that outlives the originating screen.</p>
 <h2 id="offline-queue">Offline queue</h2>
 <p>When a submission fails due to a network error (Exception), the barcode
 is persisted in the product_submission_queue table. The queue is
@@ -154,7 +157,7 @@ and removes entries that succeed or exhaust retries.
 </dd>
 
         <dt id="submitProduct" class="callable">
-  <span class="name"><a href="../services_product_submission_service/ProductSubmissionService/submitProduct.html">submitProduct</a></span><span class="signature">(<wbr><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span>)
+  <span class="name"><a href="../services_product_submission_service/ProductSubmissionService/submitProduct.html">submitProduct</a></span><span class="signature">(<wbr><span class="parameter" id="submitProduct-param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span>, {</span><span class="parameter" id="submitProduct-param-onProgress"><span class="type-annotation">void</span> <span class="parameter-name">onProgress</span>(<span class="parameter" id="param-progress"><span class="type-annotation"><a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a></span> <span class="parameter-name">progress</span></span>)?</span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>
   </span>
   
