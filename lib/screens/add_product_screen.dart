@@ -14,6 +14,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/utils/camera_permission_dialog.dart';
+import 'package:pantry_app/utils/gallery_permission_dialog.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
@@ -103,8 +104,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         if (updated.forField(field) == null) {
           SnackbarHelper.showWarning(context, l10n.couldNotAttachImage);
         }
-      case PhotoPermissionDenied():
-        await showCameraPermissionDialog(context);
+      case PhotoPermissionDenied(:final permanentlyDenied):
+        if (permanentlyDenied) {
+          await showCameraPermissionDialog(context);
+        } else {
+          SnackbarHelper.showWarning(context, l10n.cameraPermissionDenied);
+        }
+      case PhotoGalleryPermissionDenied():
+        await showGalleryPermissionDialog(context);
       case PhotoPickCancelled():
         break;
     }

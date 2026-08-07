@@ -12,8 +12,11 @@
   photo to see it full screen, then take a new one, choose another from your
   gallery, or delete it. Empty photo slots let you pick from the camera or
   your gallery, and if you remove a photo by accident you can undo it.
-- If camera access is denied, the app now explains why and offers a button
-  to open your device settings.
+- If you refuse camera access for good, the app now explains why and offers
+  a button to open your device settings. Declining once only shows a short
+  message, so you can try again without being sent to settings.
+- If the app cannot access your gallery, it now explains why and offers a
+  button to open your device settings.
 - Photos you add to a manually entered product are saved together with the
   product. If you leave the form without saving, the photos you added are
   removed so they do not stay on your device.
