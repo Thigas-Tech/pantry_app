@@ -55,3 +55,6 @@ app.*.map.json
 /android/app/release
 test_output.txt
 android/app/google-services.json
+
+# Golden test failure diffs (regenerated on failure)
+test/screens/failures/
