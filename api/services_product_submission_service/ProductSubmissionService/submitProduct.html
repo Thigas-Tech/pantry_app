@@ -104,6 +104,27 @@ On transient failure the barcode is queued for background retry.</p>
         totalImageCount: totalImages,
       ),
     );
+
+    &#47;&#47; A fresh manual entry must not silently overwrite a barcode that
+    &#47;&#47; already exists on Open Food Facts. Retries skip the check so a
+    &#47;&#47; partially completed submission (whose metadata already reached the
+    &#47;&#47; server) can still recover.
+    if (product.submissionStatus == productSubmissionNotSubmitted) {
+      final duplicate = await _isDuplicate(product);
+      if (duplicate) {
+        logWarning(
+          &#39;Product ${product.barcode}: barcode already exists on OFF&#39;,
+        );
+        return _finishFailed(
+          product,
+          onProgress,
+          SubmissionErrorCategory.duplicate,
+          false,
+          totalImages,
+        );
+      }
+    }
+
     final metadataResult = await _api.submitProduct(updated);
     if (!metadataResult.success) {
       logWarning(
@@ -134,7 +155,21 @@ On transient failure the barcode is queued for background retry.</p>
       ),
     ];
 
+    &#47;&#47; On a retry the metadata may already be on the server and some image
+    &#47;&#47; fields may have been uploaded successfully before the interruption.
+    &#47;&#47; Detect those so they are not uploaded again. Fresh submissions skip
+    &#47;&#47; this read because the duplicate check already proved the barcode is
+    &#47;&#47; unknown.
+    final serverImages =
+        product.submissionStatus == productSubmissionNotSubmitted
+        ? &lt;String&gt;{}
+        : await _existingServerImages(product);
+
     for (final (imageField, imagePath, step) in uploads) {
+      if (serverImages.contains(imageField)) {
+        completedImages++;
+        continue;
+      }
       final result = await _uploadImageIfPresent(
         product: updated,
         imageField: imageField,
@@ -201,7 +236,9 @@ On transient failure the barcode is queued for background retry.</p>
       totalImages,
     );
   } on Exception catch (e) {
-    logError(&#39;Submission failed for ${product.barcode}: $e&#39;);
+    logError(
+      &#39;Submission failed for ${product.barcode}: ${redactSensitive(&#39;$e&#39;)}&#39;,
+    );
     return _finishFailed(
       product,
       onProgress,

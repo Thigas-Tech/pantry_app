@@ -99,7 +99,7 @@ backoff: 2^retry * 1 minute, capped at 24 hours.</p>
 
     &#47;&#47; Exponential backoff: 2^retry minutes, capped at 1440 (24h).
     final delayMinutes = (1 &lt;&lt; retryCount).clamp(1, 1440);
-    final nextRetry = DateTime.now()
+    final nextRetry = _now()
         .add(Duration(minutes: delayMinutes))
         .millisecondsSinceEpoch;
 

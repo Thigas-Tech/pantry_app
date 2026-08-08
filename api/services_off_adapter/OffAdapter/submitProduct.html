@@ -115,22 +115,23 @@ with the error categorized as <a href="../../services_off_adapter/OffWriteError.
       }
       logWarning(
         &#39;Product ${product.barcode} submission returned status &#39;
-        &#39;${status.status}: ${status.statusVerbose}&#39;,
+        &#39;${status.status}: ${redactSensitive(&#39;${status.statusVerbose}&#39;)}&#39;,
       );
-      return const OffWriteResult.failure(OffWriteError.serverRejected);
+      return OffWriteResult.failure(categorizeSaveStatus(status));
     } on Exception catch (e) {
       if (attempt &lt; maxRetries) {
         final isRateLimit = isRateLimitError(e);
         final delay = retryDelay(attempt, isRateLimit: isRateLimit);
         logWarning(
           &#39;Submission failed for ${product.barcode} &#39;
-          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e&#39;,
+          &#39;(attempt ${attempt + 1}), &#39;
+          &#39;retrying in ${delay.inSeconds}s: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
         await Future&lt;void&gt;.delayed(delay);
       } else {
         logError(
           &#39;Submission failed for ${product.barcode} after &#39;
-          &#39;all retries: $e&#39;,
+          &#39;all retries: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
         return OffWriteResult.failure(
           isRateLimitError(e)

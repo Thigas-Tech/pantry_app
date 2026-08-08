@@ -27,7 +27,7 @@
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../database_product_submission_queue_dao/">database&#47;product_submission_queue_dao.dart</a></li>
     <li><a href="../../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a></li>
-    <li class="self-crumb">ProductSubmissionQueueDao.new const constructor</li>
+    <li class="self-crumb">ProductSubmissionQueueDao.new constructor</li>
   </ol>
   <div class="self-name">ProductSubmissionQueueDao.new</div>
   <form class="search navbar-right" role="search">
@@ -53,19 +53,24 @@
 </h1></div>
 
     <section class="multi-line-signature">
-      const
-      <span class="name ">ProductSubmissionQueueDao</span>(<wbr>)
+      
+      <span class="name ">ProductSubmissionQueueDao</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-now"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/DateTime-class.html">DateTime</a></span> <span class="parameter-name">now</span>()?, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>.</p>
+<p><code>now</code> is the clock used for all timestamps and due-date comparisons;
+tests inject a fake clock so backoff scheduling never waits for real
+minutes. Defaults to <a href="https://api.flutter.dev/flutter/dart-core/DateTime/DateTime.now.html">DateTime.now</a>.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const ProductSubmissionQueueDao();</code></pre>
+  <pre class="language-dart"><code class="language-dart">ProductSubmissionQueueDao({DateTime Function()? now})
+  : _now = now ?? DateTime.now;</code></pre>
 </section>
 
 
@@ -81,7 +86,7 @@
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../database_product_submission_queue_dao/">product_submission_queue_dao</a></li>
     <li><a href="../../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a></li>
-    <li class="self-crumb">ProductSubmissionQueueDao.new const constructor</li>
+    <li class="self-crumb">ProductSubmissionQueueDao.new constructor</li>
 </ol>
 
     <h5>ProductSubmissionQueueDao class</h5>

@@ -75,7 +75,7 @@ this is a no-op due to the UNIQUE constraint.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; insert(Database db, String barcode) async {
   logInfo(&#39;Queuing submission for barcode $barcode&#39;);
   try {
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = _now().millisecondsSinceEpoch;
     await db.insert(
       &#39;product_submission_queue&#39;,
       {

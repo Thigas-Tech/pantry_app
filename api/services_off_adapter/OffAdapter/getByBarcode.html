@@ -111,11 +111,13 @@ are not "not found" responses.</p>
         final delay = retryDelay(attempt, isRateLimit: isRateLimit);
         logWarning(
           &#39;Fetch $barcode failed (attempt ${attempt + 1}), &#39;
-          &#39;retrying in ${delay.inSeconds}s: $e&#39;,
+          &#39;retrying in ${delay.inSeconds}s: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
         await Future&lt;void&gt;.delayed(delay);
       } else {
-        logError(&#39;Fetch $barcode failed after all retries: $e&#39;);
+        logError(
+          &#39;Fetch $barcode failed after all retries: ${redactSensitive(&#39;$e&#39;)}&#39;,
+        );
         throw FetchFailedException(
           &#39;Failed to fetch product. Please check your connection.&#39;,
         );

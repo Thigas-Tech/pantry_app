@@ -114,14 +114,16 @@ and removes entries that succeed or exhaust retries.</p>
           await _db.productSubmissionQueueDao.incrementRetry(database, id);
         }
       } on Exception catch (e) {
-        logWarning(&#39;Queue flush failed for $barcode: $e&#39;);
+        logWarning(
+          &#39;Queue flush failed for $barcode: ${redactSensitive(&#39;$e&#39;)}&#39;,
+        );
         await _db.productSubmissionQueueDao.incrementRetry(database, id);
       }
     }
 
     logInfo(&#39;Queue flush completed: $submitted submitted&#39;);
   } on Exception catch (e) {
-    logError(&#39;Queue flush failed: $e&#39;);
+    logError(&#39;Queue flush failed: ${redactSensitive(&#39;$e&#39;)}&#39;);
   }
   return submitted;
 }</code></pre>

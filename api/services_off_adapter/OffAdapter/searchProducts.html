@@ -114,11 +114,14 @@ products with empty barcodes are filtered out.</p>
         final delay = retryDelay(attempt, isRateLimit: isRateLimit);
         logWarning(
           &#39;Search &quot;$query&quot; failed (attempt ${attempt + 1}), &#39;
-          &#39;retrying in ${delay.inSeconds}s: $e&#39;,
+          &#39;retrying in ${delay.inSeconds}s: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
         await Future&lt;void&gt;.delayed(delay);
       } else {
-        logWarning(&#39;Search &quot;$query&quot; failed after all retries: $e&#39;);
+        logWarning(
+          &#39;Search &quot;$query&quot; failed after all retries: &#39;
+          &#39;${redactSensitive(&#39;$e&#39;)}&#39;,
+        );
         return &lt;Product&gt;[];
       }
     }

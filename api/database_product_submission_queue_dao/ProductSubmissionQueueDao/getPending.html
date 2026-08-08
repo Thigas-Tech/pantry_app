@@ -73,7 +73,7 @@ is in the past or null).</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Map&lt;String, dynamic&gt;&gt;&gt; getPending(Database db) async {
   try {
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = _now().millisecondsSinceEpoch;
     final result = await db.query(
       &#39;product_submission_queue&#39;,
       where: &#39;next_retry_at IS NULL OR next_retry_at &lt;= ?&#39;,

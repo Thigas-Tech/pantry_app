@@ -91,7 +91,7 @@ error categorized as <a href="../../services_off_adapter/OffWriteError.html">Off
   }
   final file = File(imagePath);
   if (!file.existsSync()) {
-    logWarning(&#39;Image file not found: $imagePath&#39;);
+    logWarning(&#39;Image file not found for image upload&#39;);
     return const OffWriteResult.failure(OffWriteError.unknown);
   }
   const maxRetries = 2;
@@ -116,9 +116,13 @@ error categorized as <a href="../../services_off_adapter/OffWriteError.html">Off
         user,
         image,
         uriHelper: _uriHelper,
-      );
+      ).timeout(imageUploadTimeout);
       if (isStatusOk(status)) {
         logInfo(&#39;$imageField image uploaded for $barcode&#39;);
+        return const OffWriteResult.success();
+      }
+      if (status.status == &#39;status not ok&#39; &amp;&amp; status.imageId != null) {
+        logInfo(&#39;$imageField image for $barcode was already uploaded&#39;);
         return const OffWriteResult.success();
       }
       if (isRateLimitStatus(status)) {
@@ -139,7 +143,7 @@ error categorized as <a href="../../services_off_adapter/OffWriteError.html">Off
       }
       logWarning(
         &#39;$imageField image upload for $barcode returned status &#39;
-        &#39;${status.status}: ${status.statusVerbose}&#39;,
+        &#39;${status.status}: ${redactSensitive(&#39;${status.statusVerbose}&#39;)}&#39;,
       );
       return const OffWriteResult.failure(OffWriteError.serverRejected);
     } on Exception catch (e) {
@@ -148,13 +152,14 @@ error categorized as <a href="../../services_off_adapter/OffWriteError.html">Off
         final delay = retryDelay(attempt, isRateLimit: isRateLimit);
         logWarning(
           &#39;$imageField image upload failed for $barcode &#39;
-          &#39;(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e&#39;,
+          &#39;(attempt ${attempt + 1}), &#39;
+          &#39;retrying in ${delay.inSeconds}s: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
         await Future&lt;void&gt;.delayed(delay);
       } else {
         logError(
           &#39;Image upload failed for $barcode after &#39;
-          &#39;all retries: $e&#39;,
+          &#39;all retries: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
         return OffWriteResult.failure(
           isRateLimitError(e)

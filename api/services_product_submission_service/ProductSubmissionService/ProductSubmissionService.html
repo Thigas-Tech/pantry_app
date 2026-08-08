@@ -56,6 +56,7 @@
       
       <span class="name ">ProductSubmissionService</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-db"><span>required</span> <span class="type-annotation"><a href="../../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">db</span>, </span></li>
 <li><span class="parameter" id="param-api"><span>required</span> <span class="type-annotation"><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">api</span>, </span></li>
+<li><span class="parameter" id="param-imageCompressor"><span class="type-annotation"><a href="../../services_product_image_compressor/ProductImageCompressor-class.html">ProductImageCompressor</a>?</span> <span class="parameter-name">imageCompressor</span>, </span></li>
 </ol>})
     </section>
     
@@ -70,7 +71,8 @@
   <pre class="language-dart"><code class="language-dart">ProductSubmissionService({
   required this._db,
   required this._api,
-});</code></pre>
+  ProductImageCompressor? imageCompressor,
+}) : _imageCompressor = imageCompressor ?? ProductImageCompressor();</code></pre>
 </section>
 
 

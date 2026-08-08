@@ -71,7 +71,7 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; countPending(Database db) async {
-  final now = DateTime.now().millisecondsSinceEpoch;
+  final now = _now().millisecondsSinceEpoch;
   return Sqflite.firstIntValue(
         await db.rawQuery(
           &#39;SELECT COUNT(*) FROM product_submission_queue&#39;

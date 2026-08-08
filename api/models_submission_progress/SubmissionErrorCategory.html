@@ -62,8 +62,8 @@
   <p>The category of a submission or image-upload failure.</p>
 <p>Used to decide whether retrying can help and to pick a localized
 message. Transient categories (<a href="../models_submission_progress/SubmissionErrorCategory.html">network</a> and <a href="../models_submission_progress/SubmissionErrorCategory.html">rateLimited</a>) allow
-retry; permanent ones (<a href="../models_submission_progress/SubmissionErrorCategory.html">missingCredentials</a> and <a href="../models_submission_progress/SubmissionErrorCategory.html">serverRejected</a>)
-do not.</p>
+retry; permanent ones (<a href="../models_submission_progress/SubmissionErrorCategory.html">missingCredentials</a>, <a href="../models_submission_progress/SubmissionErrorCategory.html">validation</a>,
+<a href="../models_submission_progress/SubmissionErrorCategory.html">duplicate</a>, and <a href="../models_submission_progress/SubmissionErrorCategory.html">serverRejected</a>) do not.</p>
 </section>
 
 
@@ -139,6 +139,30 @@ do not.</p>
 </dt>
 <dd>
   <p>Open Food Facts rate-limited the request.</p>
+  
+
+</dd>
+
+            <dt id="validation" class="constant">
+    <span class="name ">validation</span>
+  <span class="signature">&#8594; const <a href="../models_submission_progress/SubmissionErrorCategory.html">SubmissionErrorCategory</a></span>
+  
+
+</dt>
+<dd>
+  <p>The server rejected the request with a validation error.</p>
+  
+
+</dd>
+
+            <dt id="duplicate" class="constant">
+    <span class="name ">duplicate</span>
+  <span class="signature">&#8594; const <a href="../models_submission_progress/SubmissionErrorCategory.html">SubmissionErrorCategory</a></span>
+  
+
+</dt>
+<dd>
+  <p>The barcode already exists on Open Food Facts.</p>
   
 
 </dd>

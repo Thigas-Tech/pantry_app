@@ -257,6 +257,20 @@ or return a failure <a href="../services_off_adapter/OffWriteResult-class.html">
   <section class="summary offset-anchor" id="static-methods">
     <h2>Static Methods</h2>
     <dl class="callables">
+        <dt id="categorizeSaveStatus" class="callable">
+  <span class="name"><a href="../services_off_adapter/OffAdapter/categorizeSaveStatus.html">categorizeSaveStatus</a></span><span class="signature">(<wbr><span class="parameter" id="categorizeSaveStatus-param-status"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Status-class.html">Status</a></span> <span class="parameter-name">status</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../services_off_adapter/OffWriteError.html">OffWriteError</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Classifies a non-success <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/Status-class.html">off.Status</a> returned by the metadata save
+endpoint into a specific <a href="../services_off_adapter/OffWriteError.html">OffWriteError</a>.
+  
+
+</dd>
+
         <dt id="isRateLimitError" class="callable">
   <span class="name"><a href="../services_off_adapter/OffAdapter/isRateLimitError.html">isRateLimitError</a></span><span class="signature">(<wbr><span class="parameter" id="isRateLimitError-param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
@@ -329,6 +343,19 @@ or return a failure <a href="../services_off_adapter/OffWriteResult-class.html">
   <section class="summary offset-anchor" id="constants">
     <h2>Constants</h2>
     <dl class="properties">
+        <dt id="imageUploadTimeout" class="constant">
+    <span class="name "><a href="../services_off_adapter/OffAdapter/imageUploadTimeout-constant.html">imageUploadTimeout</a></span>
+  <span class="signature">&#8594; const <a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span>
+  
+
+</dt>
+<dd>
+  The maximum duration a single image upload may take before it is
+abandoned and treated as a network failure.
+  
+
+</dd>
+
         <dt id="readUser" class="constant">
     <span class="name "><a href="../services_off_adapter/OffAdapter/readUser-constant.html">readUser</a></span>
   <span class="signature">&#8594; const <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/User-class.html">User</a></span>
