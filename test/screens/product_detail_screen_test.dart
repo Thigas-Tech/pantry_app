@@ -26,6 +26,8 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -34,15 +36,21 @@ import 'package:flutter_riverpod/misc.dart'; // for Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
+import 'package:pantry_app/providers/product_image_service_provider.dart';
+import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -51,9 +59,15 @@ import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/price_repository.dart';
+import 'package:pantry_app/services/product_image_service.dart';
+import 'package:pantry_app/services/product_photo_picker.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:pantry_app/widgets/photo_source_chooser.dart';
+import 'package:pantry_app/widgets/product_photo_management.dart';
+import 'package:pantry_app/widgets/product_photo_preview.dart';
+import 'package:pantry_app/widgets/product_photo_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 import '../services/mock_notification_service.dart';
@@ -156,6 +170,93 @@ const partiallySubmittedManualProduct = Product(
   submissionStatus: productSubmissionPartiallyCompleted,
 );
 
+/// A manual product with all three local photos attached.
+Product manualProductWithPhotos({
+  String? nutrition,
+  String? ingredients,
+  String? product,
+}) {
+  return Product(
+    barcode: '678901234',
+    name: 'Manual With Photos',
+    source: 'manual',
+    nutritionImagePath: nutrition,
+    ingredientsImagePath: ingredients,
+    productImagePath: product,
+  );
+}
+
+/// A minimal 1x1 transparent PNG so [Image.file] decodes in tests.
+final Uint8List kTransparentPng = Uint8List.fromList(const <int>[
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
+]);
+
 /// An API product cached in a non-default language.
 const foreignLanguageProduct = Product(
   barcode: '1112223334445',
@@ -209,6 +310,24 @@ class MockProductSubmissionService extends Mock
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
+class MockProductImageService extends Mock implements ProductImageService {}
+
+class MockProductPhotoPicker extends Mock implements ProductPhotoPicker {}
+
+/// A notifier that records the product passed to submit instead of running a
+/// real submission, so tests can prove Retry drives the notifier.
+class _RecordingNotifier extends ProductSubmissionNotifier {
+  Product? submitted;
+
+  @override
+  SubmissionProgress? build() => null;
+
+  @override
+  Future<void> submit(Product product) async {
+    submitted = product;
+  }
+}
+
 void _registerFallbacks() {
   registerFallbackValue(const InventoryItem(barcode: 'fallback'));
   registerFallbackValue(
@@ -225,6 +344,10 @@ void _registerFallbacks() {
   registerFallbackValue(AndroidScheduleMode.inexactAllowWhileIdle);
   registerFallbackValue(const Product(barcode: 'fallback', name: 'Fallback'));
   registerFallbackValue(const Price(barcode: 'fallback', price: 1));
+  registerFallbackValue(PhotoSource.camera);
+  registerFallbackValue(File('/fallback.jpg'));
+  registerFallbackValue(ImageField.nutrition);
+  registerFallbackValue(const ProductPhotoSlots.empty());
 }
 
 // ---------- Test harness overrides ------------------------------------------
@@ -236,7 +359,18 @@ List<Override> screenOverrides({
   MockProductSubmissionService? mockSubmissionService,
   MockDatabaseHelper? mockDb,
   MockPriceRepository? mockPriceRepo,
+  ProductImageService? imageService,
+  MockProductPhotoPicker? mockPicker,
 }) {
+  final effectiveImageService = imageService ?? MockProductImageService();
+  // Always default deleteOrphanedFiles to a no-op; tests exercising real
+  // cleanup re-stub it afterwards (a later registration wins in mocktail).
+  when(
+    () => effectiveImageService.deleteOrphanedFiles(
+      barcode: any(named: 'barcode'),
+      referencedPaths: any(named: 'referencedPaths'),
+    ),
+  ).thenAnswer((_) => Future<void>.value());
   return [
     productRepositoryProvider.overrideWithValue(mockRepo),
     notificationServiceProvider.overrideWithValue(mockNotif),
@@ -245,10 +379,12 @@ List<Override> screenOverrides({
     if (mockDb != null) databaseProvider.overrideWithValue(mockDb),
     if (mockPriceRepo != null)
       priceRepositoryProvider.overrideWithValue(mockPriceRepo),
+    productImageServiceProvider.overrideWithValue(effectiveImageService),
+    if (mockPicker != null)
+      productPhotoPickerProvider.overrideWithValue(mockPicker),
     activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
   ];
 }
-
 // ---------- Helpers ----------------------------------------------------------
 
 /// Makes the test viewport tall enough to render the entire product detail
@@ -278,6 +414,9 @@ void main() {
     mockNotif = MockNotificationService();
     mockDb = MockDatabaseHelper();
     when(() => mockDb.getLastAddDate()).thenAnswer((_) => Future.value());
+    when(
+      () => mockRepo.getProductFromCache(any()),
+    ).thenAnswer((_) async => null);
     when(
       () => mockNotif.scheduleExpiryReminders(
         any(),
@@ -1085,11 +1224,46 @@ void main() {
   // Retry submission
   // --------------------------------------------------------------------------
 
-  testWidgets('retry submission on failed chip', (tester) async {
+  testWidgets('failed manual product shows a Retry button', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: failedManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    expect(find.text('Retry now'), findsOneWidget);
+  });
+
+  testWidgets('retry drives the submission notifier', (tester) async {
+    setLargeScreen(tester);
+    final notifier = _RecordingNotifier();
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: failedManualProduct),
+      overrides: [
+        ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+        productSubmissionProvider.overrideWith(() => notifier),
+      ],
+    );
+
+    await tester.tap(find.text('Retry now'));
+    await tester.pumpAndSettle();
+
+    expect(notifier.submitted, isNotNull);
+    expect(notifier.submitted!.barcode, failedManualProduct.barcode);
+  });
+
+  testWidgets('retry reaches the submission service through the notifier', (
+    tester,
+  ) async {
     setLargeScreen(tester);
     final mockSubmission = MockProductSubmissionService();
     when(
-      () => mockSubmission.submitProduct(any()),
+      () => mockSubmission.submitProduct(
+        any(),
+        onProgress: any(named: 'onProgress'),
+      ),
     ).thenAnswer(
       (_) async => const Product(
         barcode: '234567890',
@@ -1109,11 +1283,207 @@ void main() {
       ),
     );
 
-    // Tap the refresh icon on the failed chip.
-    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.tap(find.text('Retry now'));
     await tester.pumpAndSettle();
 
-    verify(() => mockSubmission.submitProduct(any())).called(1);
+    verify(
+      () => mockSubmission.submitProduct(
+        any(),
+        onProgress: any(named: 'onProgress'),
+      ),
+    ).called(1);
+  });
+
+  // --------------------------------------------------------------------------
+  // Photo management for manual products
+  // --------------------------------------------------------------------------
+
+  testWidgets('manual product shows local photo controls', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: failedManualProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    expect(find.byType(ProductPhotoManagement), findsOneWidget);
+    expect(find.byType(ProductPhotoTile), findsNWidgets(3));
+  });
+
+  testWidgets('API products do not show local photo controls', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    expect(find.byType(ProductPhotoManagement), findsNothing);
+    expect(find.byType(ProductPhotoTile), findsNothing);
+  });
+
+  testWidgets('replacing a photo from the detail screen persists the change', (
+    tester,
+  ) async {
+    setLargeScreen(tester);
+    final tempDir = Directory.systemTemp.createTempSync('detail_replace_');
+    addTearDown(() {
+      if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
+    });
+    final original = File('${tempDir.path}/nutrition.png')
+      ..writeAsBytesSync(kTransparentPng);
+    final replacement = File('${tempDir.path}/replacement.png')
+      ..writeAsBytesSync(kTransparentPng);
+    final product = manualProductWithPhotos(nutrition: original.path);
+
+    final picker = MockProductPhotoPicker();
+    when(
+      () => picker.pick(any()),
+    ).thenAnswer((_) async => PhotoPicked(replacement));
+    final imageService = MockProductImageService();
+    when(
+      () => imageService.assign(
+        any(),
+        any(),
+        any(),
+        barcode: any(named: 'barcode'),
+      ),
+    ).thenAnswer((invocation) async {
+      final slots = invocation.positionalArguments[0] as ProductPhotoSlots;
+      final field = invocation.positionalArguments[1] as ImageField;
+      final file = invocation.positionalArguments[2] as File;
+      return slots.withField(field, file);
+    });
+    when(() => mockDb.insertProduct(any())).thenAnswer((_) async {});
+
+    await pumpApp(
+      tester,
+      ProductDetailScreen(product: product),
+      overrides: screenOverrides(
+        mockRepo: mockRepo,
+        mockNotif: mockNotif,
+        mockDb: mockDb,
+        mockPicker: picker,
+        imageService: imageService,
+      ),
+    );
+
+    await tester.tap(
+      find.widgetWithText(ProductPhotoTile, 'Nutrition table photo'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(ProductPhotoPreview), findsOneWidget);
+
+    await tester.tap(find.text('Replace photo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Take a new photo'));
+    await tester.pumpAndSettle();
+
+    verify(() => picker.pick(PhotoSource.camera)).called(1);
+    verify(
+      () => imageService.assign(
+        any(),
+        any(),
+        any(),
+        barcode: '678901234',
+      ),
+    ).called(1);
+    final persisted =
+        verify(
+              () => mockDb.insertProduct(captureAny()),
+            ).captured.last
+            as Product;
+    expect(
+      persisted.nutritionImagePath,
+      replacement.path,
+      reason: 'The replacement must be persisted onto the product',
+    );
+    // The updated tile now points at the replacement file.
+    final tile = find.widgetWithText(ProductPhotoTile, 'Nutrition table photo');
+    final tileImage = tester.widget<Image>(
+      find.descendant(of: tile, matching: find.byType(Image)),
+    );
+    expect((tileImage.image as FileImage).file.path, replacement.path);
+  });
+
+  testWidgets('deleting a photo removes the local file when leaving the '
+      'screen', (tester) async {
+    setLargeScreen(tester);
+    final tempDir = Directory.systemTemp.createTempSync('detail_delete_');
+    addTearDown(() {
+      if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
+    });
+    final managed = File('${tempDir.path}/678901234_nutrition.jpg')
+      ..writeAsBytesSync(kTransparentPng);
+    final product = manualProductWithPhotos(nutrition: managed.path);
+
+    when(() => mockDb.insertProduct(any())).thenAnswer((_) async {});
+
+    // Mirror the real ProductImageService.deleteOrphanedFiles using sync IO
+    // (async dart:io never completes inside testWidgets' fake-async zone).
+    // Registered after pumpApp so it wins over the harness's default no-op.
+    final imageService = MockProductImageService();
+
+    await pumpApp(
+      tester,
+      Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () => Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (_) => ProductDetailScreen(product: product),
+            ),
+          ),
+          child: const Text('Open detail'),
+        ),
+      ),
+      overrides: screenOverrides(
+        mockRepo: mockRepo,
+        mockNotif: mockNotif,
+        mockDb: mockDb,
+        imageService: imageService,
+      ),
+    );
+    when(
+      () => imageService.deleteOrphanedFiles(
+        barcode: any(named: 'barcode'),
+        referencedPaths: any(named: 'referencedPaths'),
+      ),
+    ).thenAnswer((invocation) async {
+      final referenced =
+          invocation.namedArguments[#referencedPaths] as Set<String>;
+      for (final suffix in ['nutrition', 'ingredients', 'product']) {
+        final path = '${tempDir.path}/678901234_$suffix.jpg';
+        if (referenced.contains(path)) continue;
+        final file = File(path);
+        if (file.existsSync()) file.deleteSync();
+      }
+    });
+    await tester.tap(find.text('Open detail'));
+    await tester.pumpAndSettle();
+    expect(managed.existsSync(), isTrue);
+
+    final deleteButton = find.descendant(
+      of: find.widgetWithText(ProductPhotoTile, 'Nutrition table photo'),
+      matching: find.byIcon(Icons.delete_outline),
+    );
+    await tester.tap(deleteButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Photo removed.'), findsOneWidget);
+    expect(
+      managed.existsSync(),
+      isTrue,
+      reason: 'Deletion is deferred so undo can restore a live photo',
+    );
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    expect(
+      managed.existsSync(),
+      isFalse,
+      reason: 'Leaving the screen deletes the orphaned photo file',
+    );
   });
 
   testWidgets(

@@ -4,6 +4,31 @@
 
 ### Added
 
+- **Detail-screen submission retry and status**: the product detail screen
+  for a manual product now shows its persistent submission status
+  (submitted, pending, partially completed, failed, or not submitted) in a
+  new `ProductSubmissionStatus` widget
+  (`lib/widgets/product_submission_status.dart`). While a submission for
+  that barcode is in flight it shows the same live progress panel as the
+  add form; on a transient failure a "Retry now" button drives the shared
+  `ProductSubmissionNotifier`, re-reading the product from the local
+  database first so the retried data is fresh, and the screen refreshes
+  when the retry finishes. The old detail-screen retry path that called the
+  submission service directly was removed.
+  (`lib/screens/product_detail_screen.dart`)
+
+- **Photo management on the product detail screen**: manual products now
+  expose their three local photos (nutrition table, ingredients, product)
+  directly on the detail screen through a new `ProductPhotoManagement`
+  widget (`lib/widgets/product_photo_management.dart`). Each slot reuses the
+  add-form photo tile and full-screen preview, so photos can be added,
+  replaced, or deleted with an undo snackbar. Every change is persisted with
+  a raw upsert so a cleared path is truly removed, and the screen deletes
+  orphaned photo files on dispose via the new
+  `ProductImageService.deleteOrphanedFiles`, keeping the disk clean while
+  undo still restores a live file.
+  (`lib/services/product_image_service.dart`)
+
 - **Observable, durable submission progress**: `ProductSubmissionService`
   now reports typed `SubmissionProgress` snapshots through an `onProgress`
   callback (`lib/models/submission_progress.dart`), covering checking,

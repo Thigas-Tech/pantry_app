@@ -623,13 +623,18 @@ infrastructure or external server hosting are listed last.
       linear progress indicator and step status ("Submitting metadata...",
       "Uploading photo 2 of 3...") via a `SubmitNotifier` that outlives the
       screen, then auto-pops with a success snackbar. Done in issue #268.
-  5. [ ] **Submission retry from failure state** — if submission fails, show
-     a persistent status in the product detail screen (already exists)
-     AND allow the user to retry with the option to change photos before
-     retrying.
-  6. [ ] **Photo management from detail screen** — on `ProductDetailScreen`,
-     when viewing a manually-entered product, show the 3 local photos with
-     edit/delete/replace options.
+   5. [x] **Submission retry from failure state** — the product detail
+      screen shows a persistent status chip (submitted, pending, partially
+      completed, failed, not submitted) with a live progress panel while a
+      submission is in flight and a "Retry now" button that drives the
+      shared submission notifier, re-reading the product from the database
+      first. Photos can be changed on the detail screen before retrying.
+      Done in issue #269.
+   6. [x] **Photo management from detail screen** — `ProductDetailScreen`
+      now shows the 3 local photos of a manually-entered product with
+      preview, replace, retake, and delete (with undo); changes are
+      persisted and orphaned files are removed when the screen is disposed.
+      Done in issue #269.
    7. [x] **Camera permission denied handling** — denied camera permission
       shows a dialog with an "Open Settings" button. Done in issue #263.
       Issue #266 refined the flow: the Open Settings dialog now appears only

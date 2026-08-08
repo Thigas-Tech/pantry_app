@@ -25,6 +25,10 @@ ProductDetailScreen
 ├── Ingredients (ExpansionTile)
 ├── InventoryTiles (location icon, qty, expiry, edit/delete)
 ├── PriceHistorySection (latest price, store, date; tap for history)
+├── ProductSubmissionStatus (manual products only; status chip + retry)
+│   └── Live progress panel while a submission for this barcode is in flight
+├── ProductPhotoManagement (manual products only)
+│   └── ProductPhotoTile x3 (preview / replace / delete with undo snackbar)
 └── "Add to Inventory" button
 
 AddProductScreen (manual entry when offline or barcode not found)

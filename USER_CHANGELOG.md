@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- For a manually entered product, the product page now shows where the
+  submission to Open Food Facts stands. If it failed, you can retry it
+  right there instead of going back to the form.
+- The photos of a manually entered product can now be managed from its
+  product page: tap a photo to view it full screen, replace it, or remove
+  it. If you remove one by accident you can undo it, and files you delete
+  are cleaned up when you leave the page.
+
 - When you save a manually entered product, the app now checks first whether
   that barcode already exists on Open Food Facts. If it does, the submission
   stops and you are told the product is already there instead of
