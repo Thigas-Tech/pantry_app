@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Ao guardar um produto introduzido manualmente, a app verifica primeiro se
+  esse codigo de barras ja existe no Open Food Facts. Se existir, o envio e
+  interrompido e e informado de que o produto ja esta la, em vez de o
+  sobrescrever.
+- Se o envio de um produto falhar por um motivo que pode corrigir — por
+  exemplo, dados de produto invalidos — a app explica agora o que correu
+  mal, em vez de mostrar um erro generico.
+- As fotos carregam uma de cada vez e uma foto que falha ja nao bloqueia as
+  outras; quando a ligacao voltar, so as fotos em falta sao enviadas de
+  novo, nao as que ja chegaram.
+- As fotos dos produtos sao comprimidas antes do envio, para chegarem mais
+  depressa e gastarem menos dados moveis.
 - Ao guardar um produto introduzido manualmente, ve agora o progresso do
   envio para o Open Food Facts: primeiro os detalhes do produto e depois
   cada foto enquanto e carregada.

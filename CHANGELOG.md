@@ -134,6 +134,27 @@
   (`lib/models/recipe_cache_entry.dart`,
   `lib/providers/recipe_provider.dart`)
 
+- **Predictable OFF submission retries and partial success**: manual product
+  submissions now block fresh entries whose barcode already exists on Open
+  Food Facts with a dedicated duplicate failure category (`#270`). The
+  metadata-save adapter distinguishes validation rejections (HTTP 400 or a
+  verbose error message) from generic server rejections. Image uploads are
+  bounded by a 60-second per-upload timeout, already-uploaded images are
+  detected (a "status not ok" response carrying an `imgid`, and a retry-time
+  server-image check that skips re-uploading them), and photos are
+  recompressed to under 1 MB before upload via the new
+  `ProductImageCompressor` (`lib/services/product_image_compressor.dart`).
+  The submission queue now runs on an injectable clock so backoff scheduling
+  is deterministic and testable, and `OffAdapter`/`ProductSubmissionService`
+  logs redact the OFF password so credentials never reach the logs.
+  (`lib/services/off_adapter.dart`,
+  `lib/services/product_submission_service.dart`,
+  `lib/database/product_submission_queue_dao.dart`,
+  `lib/models/submission_progress.dart`,
+  `lib/utils/submission_error_label.dart`,
+  `lib/utils/redaction.dart`,
+  `lib/l10n/app_en.arb`)
+
 ### Changed
 
 - **Lint-suppression cleanup**: removed all `// ignore` and

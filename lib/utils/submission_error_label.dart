@@ -15,6 +15,8 @@ String submissionErrorLabel(
     SubmissionErrorCategory.rateLimited => l10n.submissionRateLimitedError,
     SubmissionErrorCategory.missingCredentials =>
       l10n.submissionCredentialsError,
+    SubmissionErrorCategory.validation => l10n.submissionValidationError,
+    SubmissionErrorCategory.duplicate => l10n.productAlreadyInOff,
     SubmissionErrorCategory.serverRejected => l10n.submissionRejectedError,
     SubmissionErrorCategory.none ||
     SubmissionErrorCategory.unknown => l10n.submissionError,

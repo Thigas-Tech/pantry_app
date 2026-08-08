@@ -652,9 +652,11 @@ infrastructure or external server hosting are listed last.
       removed from `AddProductScreen.dispose()`. Done in issue #262.
 
   **Pitfalls & edge cases**:
-  - **Image file size**: Camera photos can be 3-10 MB. Resize/compress
-    before submission (target <1 MB per image). Use `flutter_image_compress`
-    or resize at capture time via `ImagePicker` `maxWidth`/`maxHeight`.
+  - **Image file size**: Camera photos can be 3-10 MB. Submission recompresses
+    each photo to under 1 MB (`ProductImageCompressor`,
+    `lib/services/product_image_compressor.dart`) using the existing `image`
+    package in a background isolate, so no new dependency is needed. Done in
+    issue #270.
   - **Storage permissions**: Saving images to app-local directory
     (`getApplicationDocumentsDirectory()`) does NOT require storage
     permission. Loading from gallery does NOT require one either: the image

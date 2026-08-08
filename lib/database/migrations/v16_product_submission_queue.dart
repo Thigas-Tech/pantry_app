@@ -9,6 +9,6 @@ class MigrationV16 extends Migration {
 
   @override
   Future<void> up(Database db) async {
-    await const ProductSubmissionQueueDao().createTable(db);
+    await ProductSubmissionQueueDao().createTable(db);
   }
 }

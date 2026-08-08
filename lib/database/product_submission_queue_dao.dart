@@ -9,7 +9,14 @@ import 'package:sqflite/sqflite.dart';
 /// startup task and connectivity-change listener process the queue.
 class ProductSubmissionQueueDao {
   /// Creates a [ProductSubmissionQueueDao].
-  const ProductSubmissionQueueDao();
+  ///
+  /// [now] is the clock used for all timestamps and due-date comparisons;
+  /// tests inject a fake clock so backoff scheduling never waits for real
+  /// minutes. Defaults to [DateTime.now].
+  ProductSubmissionQueueDao({DateTime Function()? now})
+    : _now = now ?? DateTime.now;
+
+  final DateTime Function() _now;
 
   /// Creates the product_submission_queue table.
   Future<void> createTable(Database db) async {
@@ -34,7 +41,7 @@ class ProductSubmissionQueueDao {
   Future<void> insert(Database db, String barcode) async {
     logInfo('Queuing submission for barcode $barcode');
     try {
-      final now = DateTime.now().millisecondsSinceEpoch;
+      final now = _now().millisecondsSinceEpoch;
       await db.insert(
         'product_submission_queue',
         {
@@ -57,7 +64,7 @@ class ProductSubmissionQueueDao {
   /// is in the past or null).
   Future<List<Map<String, dynamic>>> getPending(Database db) async {
     try {
-      final now = DateTime.now().millisecondsSinceEpoch;
+      final now = _now().millisecondsSinceEpoch;
       final result = await db.query(
         'product_submission_queue',
         where: 'next_retry_at IS NULL OR next_retry_at <= ?',
@@ -100,7 +107,7 @@ class ProductSubmissionQueueDao {
 
       // Exponential backoff: 2^retry minutes, capped at 1440 (24h).
       final delayMinutes = (1 << retryCount).clamp(1, 1440);
-      final nextRetry = DateTime.now()
+      final nextRetry = _now()
           .add(Duration(minutes: delayMinutes))
           .millisecondsSinceEpoch;
 
@@ -155,7 +162,7 @@ class ProductSubmissionQueueDao {
 
   /// Returns the count of pending (not yet maxed out) queue entries.
   Future<int> countPending(Database db) async {
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = _now().millisecondsSinceEpoch;
     return Sqflite.firstIntValue(
           await db.rawQuery(
             'SELECT COUNT(*) FROM product_submission_queue'

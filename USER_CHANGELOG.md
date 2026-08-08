@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- When you save a manually entered product, the app now checks first whether
+  that barcode already exists on Open Food Facts. If it does, the submission
+  stops and you are told the product is already there instead of
+  overwriting it.
+- If submitting a product fails for a reason you can fix — such as invalid
+  product data — the app now explains what went wrong instead of showing a
+  generic error.
+- Photos upload one at a time and a photo that fails no longer blocks the
+  others; once the connection is back, only the missing photos are
+  re-uploaded, not the ones that already made it.
+- Product photos are shrunk before upload so they send faster and use less
+  mobile data.
 - When you save a manually entered product, you now see how the submission
   to Open Food Facts is going: first the product details, then each photo
   as it uploads.

@@ -268,6 +268,7 @@
   "submissionOfflineError": "Não foi possível conectar ao Open Food Facts. Verifique sua conexão e tente de novo.",
   "submissionRateLimitedError": "O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.",
   "submissionRejectedError": "O Open Food Facts rejeitou os dados do produto.",
+  "submissionValidationError": "O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.",
   "productAlreadyInOff": "Este produto já está no Open Food Facts.",
   "productAlreadyInOffTitle": "Já está no Open Food Facts",
   "navHome": "Início",

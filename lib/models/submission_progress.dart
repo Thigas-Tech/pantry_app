@@ -36,8 +36,8 @@ enum SubmissionStep {
 ///
 /// Used to decide whether retrying can help and to pick a localized
 /// message. Transient categories ([network] and [rateLimited]) allow
-/// retry; permanent ones ([missingCredentials] and [serverRejected])
-/// do not.
+/// retry; permanent ones ([missingCredentials], [validation],
+/// [duplicate], and [serverRejected]) do not.
 enum SubmissionErrorCategory {
   /// No error; the last operation succeeded.
   none,
@@ -50,6 +50,12 @@ enum SubmissionErrorCategory {
 
   /// Open Food Facts rate-limited the request.
   rateLimited,
+
+  /// The server rejected the request with a validation error.
+  validation,
+
+  /// The barcode already exists on Open Food Facts.
+  duplicate,
 
   /// The server rejected the request (e.g. validation failure).
   serverRejected,

@@ -8,6 +8,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_query.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/redaction.dart';
 
 /// The category of an Open Food Facts write failure.
 enum OffWriteError {
@@ -23,7 +24,10 @@ enum OffWriteError {
   /// Open Food Facts rate-limited the request.
   rateLimited,
 
-  /// The server rejected the request, e.g. with a validation error.
+  /// The server rejected the request with a validation error.
+  validation,
+
+  /// The server rejected the request, e.g. with a generic error.
   serverRejected,
 
   /// The failure could not be categorized.
@@ -182,6 +186,21 @@ class OffAdapter {
     return body.contains('429 Too Many Requests');
   }
 
+  /// Classifies a non-success [off.Status] returned by the metadata save
+  /// endpoint into a specific [OffWriteError].
+  ///
+  /// An HTTP 400 status and any response that carries a verbose message or
+  /// an error field are treated as validation failures (the submitted data
+  /// was rejected); everything else is a generic server rejection.
+  @visibleForTesting
+  static OffWriteError categorizeSaveStatus(off.Status status) {
+    if (status.status == 400) return OffWriteError.validation;
+    final hasMessage =
+        (status.statusVerbose?.isNotEmpty ?? false) ||
+        (status.error?.isNotEmpty ?? false);
+    return hasMessage ? OffWriteError.validation : OffWriteError.serverRejected;
+  }
+
   /// Returns a retry delay with linear backoff and ±25% jitter.
   ///
   /// [attempt] is zero-based (0 = first retry). The base delay is
@@ -202,6 +221,11 @@ class OffAdapter {
     final jitter = ((rng.nextDouble() - 0.5) * 0.5 * base).round();
     return Duration(milliseconds: (base + jitter).clamp(500, base * 2));
   }
+
+  /// The maximum duration a single image upload may take before it is
+  /// abandoned and treated as a network failure.
+  @visibleForTesting
+  static const Duration imageUploadTimeout = Duration(seconds: 60);
 
   /// The test user used for unauthenticated read operations.
   ///
@@ -267,11 +291,13 @@ class OffAdapter {
           final delay = retryDelay(attempt, isRateLimit: isRateLimit);
           logWarning(
             'Fetch $barcode failed (attempt ${attempt + 1}), '
-            'retrying in ${delay.inSeconds}s: $e',
+            'retrying in ${delay.inSeconds}s: ${redactSensitive('$e')}',
           );
           await Future<void>.delayed(delay);
         } else {
-          logError('Fetch $barcode failed after all retries: $e');
+          logError(
+            'Fetch $barcode failed after all retries: ${redactSensitive('$e')}',
+          );
           throw FetchFailedException(
             'Failed to fetch product. Please check your connection.',
           );
@@ -329,11 +355,14 @@ class OffAdapter {
           final delay = retryDelay(attempt, isRateLimit: isRateLimit);
           logWarning(
             'Search "$query" failed (attempt ${attempt + 1}), '
-            'retrying in ${delay.inSeconds}s: $e',
+            'retrying in ${delay.inSeconds}s: ${redactSensitive('$e')}',
           );
           await Future<void>.delayed(delay);
         } else {
-          logWarning('Search "$query" failed after all retries: $e');
+          logWarning(
+            'Search "$query" failed after all retries: '
+            '${redactSensitive('$e')}',
+          );
           return <Product>[];
         }
       }
@@ -388,22 +417,23 @@ class OffAdapter {
         }
         logWarning(
           'Product ${product.barcode} submission returned status '
-          '${status.status}: ${status.statusVerbose}',
+          '${status.status}: ${redactSensitive('${status.statusVerbose}')}',
         );
-        return const OffWriteResult.failure(OffWriteError.serverRejected);
+        return OffWriteResult.failure(categorizeSaveStatus(status));
       } on Exception catch (e) {
         if (attempt < maxRetries) {
           final isRateLimit = isRateLimitError(e);
           final delay = retryDelay(attempt, isRateLimit: isRateLimit);
           logWarning(
             'Submission failed for ${product.barcode} '
-            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e',
+            '(attempt ${attempt + 1}), '
+            'retrying in ${delay.inSeconds}s: ${redactSensitive('$e')}',
           );
           await Future<void>.delayed(delay);
         } else {
           logError(
             'Submission failed for ${product.barcode} after '
-            'all retries: $e',
+            'all retries: ${redactSensitive('$e')}',
           );
           return OffWriteResult.failure(
             isRateLimitError(e)
@@ -436,7 +466,7 @@ class OffAdapter {
     }
     final file = File(imagePath);
     if (!file.existsSync()) {
-      logWarning('Image file not found: $imagePath');
+      logWarning('Image file not found for image upload');
       return const OffWriteResult.failure(OffWriteError.unknown);
     }
     const maxRetries = 2;
@@ -461,9 +491,13 @@ class OffAdapter {
           user,
           image,
           uriHelper: _uriHelper,
-        );
+        ).timeout(imageUploadTimeout);
         if (isStatusOk(status)) {
           logInfo('$imageField image uploaded for $barcode');
+          return const OffWriteResult.success();
+        }
+        if (status.status == 'status not ok' && status.imageId != null) {
+          logInfo('$imageField image for $barcode was already uploaded');
           return const OffWriteResult.success();
         }
         if (isRateLimitStatus(status)) {
@@ -484,7 +518,7 @@ class OffAdapter {
         }
         logWarning(
           '$imageField image upload for $barcode returned status '
-          '${status.status}: ${status.statusVerbose}',
+          '${status.status}: ${redactSensitive('${status.statusVerbose}')}',
         );
         return const OffWriteResult.failure(OffWriteError.serverRejected);
       } on Exception catch (e) {
@@ -493,13 +527,14 @@ class OffAdapter {
           final delay = retryDelay(attempt, isRateLimit: isRateLimit);
           logWarning(
             '$imageField image upload failed for $barcode '
-            '(attempt ${attempt + 1}), retrying in ${delay.inSeconds}s: $e',
+            '(attempt ${attempt + 1}), '
+            'retrying in ${delay.inSeconds}s: ${redactSensitive('$e')}',
           );
           await Future<void>.delayed(delay);
         } else {
           logError(
             'Image upload failed for $barcode after '
-            'all retries: $e',
+            'all retries: ${redactSensitive('$e')}',
           );
           return OffWriteResult.failure(
             isRateLimitError(e)
