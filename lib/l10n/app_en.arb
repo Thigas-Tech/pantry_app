@@ -304,8 +304,6 @@
   "enterBarcodePrompt": "Type or paste a barcode number",
   "productNotInDatabase": "This barcode is not registered with Open Food Facts.",
   "productNotInDatabaseHint": "You can still use this product locally.",
-  "contributeToOffComingSoonTitle": "Coming Soon",
-  "contributeToOffComingSoonBody": "Direct product contribution to Open Food Facts is not yet available. A GitHub issue has been created to track this feature.",
   "saveLocallyAction": "Save Locally",
   "totalItemsCount": "Total items: {count}",
   "@totalItemsCount": {

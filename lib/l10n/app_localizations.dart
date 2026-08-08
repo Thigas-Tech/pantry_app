@@ -1236,18 +1236,6 @@ abstract class AppLocalizations {
   /// **'You can still use this product locally.'**
   String get productNotInDatabaseHint;
 
-  /// No description provided for @contributeToOffComingSoonTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Coming Soon'**
-  String get contributeToOffComingSoonTitle;
-
-  /// No description provided for @contributeToOffComingSoonBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Direct product contribution to Open Food Facts is not yet available. A GitHub issue has been created to track this feature.'**
-  String get contributeToOffComingSoonBody;
-
   /// No description provided for @saveLocallyAction.
   ///
   /// In en, this message translates to:

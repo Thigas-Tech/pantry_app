@@ -875,8 +875,6 @@
   "enterBarcodePrompt": "Digite ou cole um codigo de barras",
   "productNotInDatabase": "Este codigo de barras nao esta registrado no Open Food Facts.",
   "productNotInDatabaseHint": "Voce ainda pode usar este produto localmente.",
-  "contributeToOffComingSoonTitle": "Em Breve",
-  "contributeToOffComingSoonBody": "A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.",
   "saveLocallyAction": "Salvar Localmente",
   "inPantryIndicator": "Na Despensa",
   "inPantryFilter": "Na Despensa",

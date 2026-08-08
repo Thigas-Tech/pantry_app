@@ -615,12 +615,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productNotInDatabaseHint => 'Voce ainda pode usar este produto localmente.';
 
   @override
-  String get contributeToOffComingSoonTitle => 'Em Breve';
-
-  @override
-  String get contributeToOffComingSoonBody => 'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
-
-  @override
   String get saveLocallyAction => 'Salvar Localmente';
 
   @override
@@ -2644,12 +2638,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get productNotInDatabaseHint => 'Voce ainda pode usar este produto localmente.';
-
-  @override
-  String get contributeToOffComingSoonTitle => 'Em Breve';
-
-  @override
-  String get contributeToOffComingSoonBody => 'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
 
   @override
   String get saveLocallyAction => 'Salvar Localmente';

@@ -615,12 +615,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNotInDatabaseHint => 'You can still use this product locally.';
 
   @override
-  String get contributeToOffComingSoonTitle => 'Coming Soon';
-
-  @override
-  String get contributeToOffComingSoonBody => 'Direct product contribution to Open Food Facts is not yet available. A GitHub issue has been created to track this feature.';
-
-  @override
   String get saveLocallyAction => 'Save Locally';
 
   @override

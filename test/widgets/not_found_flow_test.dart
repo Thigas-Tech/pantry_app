@@ -9,7 +9,7 @@ void main() {
       Key? key,
       void Function(String)? onBarcodeSubmitted,
       VoidCallback? onScanBarcode,
-      VoidCallback? onContributeToOff,
+      void Function(String barcode)? onContributeToOff,
       void Function(String)? onSaveLocally,
     }) {
       return Scaffold(
@@ -126,11 +126,14 @@ void main() {
     testWidgets('stage 3: tapping Contribute to OFF calls onContributeToOff', (
       tester,
     ) async {
-      var called = false;
+      String? captured;
       final key = GlobalKey<NotFoundFlowState>();
       await pumpApp(
         tester,
-        buildFlow(key: key, onContributeToOff: () => called = true),
+        buildFlow(
+          key: key,
+          onContributeToOff: (b) => captured = b,
+        ),
       );
 
       key.currentState?.showBarcodeNotFound('7622210449283');
@@ -139,7 +142,7 @@ void main() {
       await tester.tap(find.text('Contribute to Open Food Facts'));
       await tester.pumpAndSettle();
 
-      expect(called, isTrue);
+      expect(captured, '7622210449283');
     });
 
     testWidgets('stage 3: tapping Save Locally calls onSaveLocally', (

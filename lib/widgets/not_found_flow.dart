@@ -33,8 +33,9 @@ class NotFoundFlow extends StatefulWidget {
   /// Called when the user taps the Scan Barcode button.
   final VoidCallback? onScanBarcode;
 
-  /// Called when the user taps Contribute to Open Food Facts.
-  final VoidCallback? onContributeToOff;
+  /// Called with the barcode when the user taps Contribute to Open Food
+  /// Facts.
+  final void Function(String barcode)? onContributeToOff;
 
   /// Called with the barcode when the user taps Save Locally.
   final void Function(String barcode)? onSaveLocally;
@@ -221,7 +222,7 @@ class NotFoundFlowState extends State<NotFoundFlow> {
         ),
         const SizedBox(height: 24),
         FilledButton.icon(
-          onPressed: widget.onContributeToOff,
+          onPressed: () => widget.onContributeToOff?.call(_barcode),
           icon: const Icon(Icons.cloud_upload_outlined),
           label: Text(l10n.contributeToOpenFoodFacts),
         ),

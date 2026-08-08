@@ -159,21 +159,11 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
     }
   }
 
-  void _onNotFoundContributeToOff() {
-    final l10n = AppLocalizations.of(context)!;
+  void _onNotFoundContributeToOff(String barcode) {
     unawaited(
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => AlertDialog(
-          title: Text(l10n.contributeToOffComingSoonTitle),
-          content: Text(l10n.contributeToOffComingSoonBody),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.iUnderstand),
-            ),
-          ],
+      Navigator.of(context).push<void>(
+        MaterialPageRoute(
+          builder: (_) => AddProductScreen(barcode: barcode, submitToOff: true),
         ),
       ),
     );
