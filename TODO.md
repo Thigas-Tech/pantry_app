@@ -605,7 +605,7 @@ infrastructure or external server hosting are listed last.
     The notification was scheduled with a snapshot of the inventory.
     Accept this limitation — the recipe may still be useful.
 
-- [ ] **Fix manual product registration & OFF submission flow** — users
+- [x] **Fix manual product registration & OFF submission flow** — users
   report being unable to submit products to Open Food Facts, and having
   issues with product photos (cannot retake, cannot replace, cannot delete
   a bad photo). Revamp the photo management in `AddProductScreen` and the

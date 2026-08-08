@@ -137,6 +137,8 @@ mixin _$Product {
 /// - [productSubmissionPending] — queued for submission.
 /// - [productSubmissionSubmitted] — successfully submitted.
 /// - [productSubmissionFailed] — submission failed; retry possible.
+/// - [productSubmissionPartiallyCompleted] — some uploads failed; retry
+///   possible.
  String get submissionStatus;/// The PLU (Price Look-Up) code for this product, if it is a fresh
 /// produce item (e.g. '4011' for Banana, '4032' for Apple).
 ///
@@ -558,6 +560,8 @@ class _Product implements Product {
 /// - [productSubmissionPending] — queued for submission.
 /// - [productSubmissionSubmitted] — successfully submitted.
 /// - [productSubmissionFailed] — submission failed; retry possible.
+/// - [productSubmissionPartiallyCompleted] — some uploads failed; retry
+///   possible.
 @override@JsonKey() final  String submissionStatus;
 /// The PLU (Price Look-Up) code for this product, if it is a fresh
 /// produce item (e.g. '4011' for Banana, '4032' for Apple).
