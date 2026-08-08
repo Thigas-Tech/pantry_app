@@ -116,7 +116,7 @@ class SettingsScreen extends ConsumerWidget {
               ExpansionTile(
                 title: Text(l10n.perContextOverrides),
                 leading: const Icon(Icons.swap_horiz),
-                    children: [
+                children: [
                   _contextOverrideTile(
                     context,
                     l10n: l10n,

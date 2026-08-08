@@ -207,6 +207,14 @@
 
 ### Fixed
 
+- **Final verification for the OFF submission flow (issue #157)**: ran all
+  repository quality gates (`dart analyze`, `dart format`,
+  `build_runner`, `gen-l10n`, full test suite, debug APK build, `dart doc`)
+  and fixed the only two issues they surfaced. Regenerated
+  `lib/models/product.freezed.dart` so the generated output documents the
+  `productSubmissionPartiallyCompleted` status, and reformatted one
+  misindented block in `lib/screens/settings_screen.dart`.
+
 - **Recipe cost scoped to the recipe's own inventory**: `calculateRecipeCost`
   and the cost computation in `cookRecipe` now price ingredients using prices
   recorded in the recipe's own inventory (falling back to the active one when
