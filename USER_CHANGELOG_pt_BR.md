@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Para um produto inserido manualmente, a pagina do produto agora mostra em
+  que ponto esta o envio para o Open Food Facts. Se ele falhar, voce pode
+  tentar novamente ali mesmo, sem voltar ao formulario.
+- As fotos de um produto inserido manualmente agora podem ser gerenciadas
+  pela pagina do produto: toque em uma foto para ve-la em tela cheia,
+  substitua-a ou remova-a. Se remover uma por engano, voce pode desfazer a
+  acao, e os arquivos que voce excluir sao limpos ao sair da pagina.
+
 - Ao salvar um produto inserido manualmente, o app agora verifica primeiro
   se esse codigo de barras ja existe no Open Food Facts. Se existir, o envio
   e interrompido e voce e informado de que o produto ja esta la, em vez de

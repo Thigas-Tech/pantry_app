@@ -303,6 +303,79 @@ void main() {
     });
   });
 
+  group('ProductImageService.deleteOrphanedFiles', () {
+    test('deletes managed files that are no longer referenced', () async {
+      for (final field in ImageField.values) {
+        final picked = await createSource('${field.name}.png', <int>[1]);
+        await service.assign(
+          const ProductPhotoSlots.empty(),
+          field,
+          picked,
+          barcode: '123',
+        );
+      }
+
+      await service.deleteOrphanedFiles(
+        barcode: '123',
+        referencedPaths: const <String>{},
+      );
+
+      for (final field in ImageField.values) {
+        expect(
+          await File(managedPath('123', field)).exists(),
+          isFalse,
+          reason: 'Unreferenced ${field.name} file must be deleted',
+        );
+      }
+    });
+
+    test('keeps referenced files', () async {
+      final picked = await createSource('pick.png', <int>[1]);
+      await service.assign(
+        const ProductPhotoSlots.empty(),
+        ImageField.nutrition,
+        picked,
+        barcode: '123',
+      );
+      final kept = File(managedPath('123', ImageField.nutrition));
+
+      await service.deleteOrphanedFiles(
+        barcode: '123',
+        referencedPaths: {kept.path},
+      );
+
+      expect(await kept.exists(), isTrue);
+    });
+
+    test(
+      'keeps a shared file while another slot still references it',
+      () async {
+        final picked = await createSource('pick.png', <int>[1]);
+        await service.assign(
+          const ProductPhotoSlots.empty(),
+          ImageField.nutrition,
+          picked,
+          barcode: '123',
+        );
+        final shared = File(managedPath('123', ImageField.nutrition));
+
+        await service.deleteOrphanedFiles(
+          barcode: '123',
+          referencedPaths: {shared.path},
+        );
+
+        expect(await shared.exists(), isTrue);
+      },
+    );
+
+    test('is a no-op when the image directory does not exist', () async {
+      await service.deleteOrphanedFiles(
+        barcode: '123',
+        referencedPaths: const <String>{},
+      );
+    });
+  });
+
   group('ProductImageService.cleanupUncommitted', () {
     test('deletes managed files that were never committed', () async {
       final picked = await createSource('pick.png', <int>[1, 2, 3]);

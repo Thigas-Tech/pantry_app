@@ -145,6 +145,32 @@ class ProductImageService {
     }
   }
 
+  /// Deletes managed files for [barcode] that no currently referenced slot
+  /// uses.
+  ///
+  /// Call from the detail screen's dispose to remove photos that were removed
+  /// (their path was cleared in the database) but whose physical file was kept
+  /// on disk so the user could undo while the screen was open. Files listed in
+  /// [referencedPaths] are always preserved, which also protects a file shared
+  /// by more than one slot and a replaced photo that reuses the same
+  /// deterministic managed path.
+  Future<void> deleteOrphanedFiles({
+    required String barcode,
+    required Set<String> referencedPaths,
+  }) async {
+    final dir = await _resolveDirectory();
+    if (!await dir.exists()) return;
+    for (final field in ImageField.values) {
+      final path = p.join(dir.path, _fileName(barcode, field));
+      if (referencedPaths.contains(path)) continue;
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+        logInfo('Deleted orphaned product photo: $path');
+      }
+    }
+  }
+
   /// Resolves and creates the product image directory.
   Future<Directory> _ensureDirectory() async {
     final dir = await _resolveDirectory();

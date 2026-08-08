@@ -17,6 +17,7 @@ import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
+import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -25,12 +26,12 @@ import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
+import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
-import 'package:pantry_app/utils/submission_status_label.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
@@ -38,6 +39,8 @@ import 'package:pantry_app/widgets/nutrition_table.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
+import 'package:pantry_app/widgets/product_photo_management.dart';
+import 'package:pantry_app/widgets/product_submission_status.dart';
 import 'package:pantry_app/widgets/quantity_and_pantry_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -94,6 +97,40 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// to re‑fetch the inventory list.
   int _inventoryVersion = 0;
 
+  /// The latest product snapshot. Starts from [ProductDetailScreen.product]
+  /// and is refreshed from the local cache after a submission retry or when
+  /// the submission notifier reports a terminal state for this barcode.
+  late Product _product;
+
+  /// The photo persistence service, captured in [initState] so it is safe to
+  /// use from [dispose] (where `ref` is unavailable).
+  late final ProductImageService _imageService;
+
+  @override
+  void initState() {
+    super.initState();
+    _product = widget.product;
+    _imageService = ref.read(productImageServiceProvider);
+  }
+
+  @override
+  void dispose() {
+    // Remove product photo files that were deleted while the screen was open
+    // but whose physical file was kept so the user could undo.
+    unawaited(
+      _imageService.deleteOrphanedFiles(
+        barcode: _product.barcode,
+        referencedPaths: {
+          if (_product.nutritionImagePath != null) _product.nutritionImagePath!,
+          if (_product.ingredientsImagePath != null)
+            _product.ingredientsImagePath!,
+          if (_product.productImagePath != null) _product.productImagePath!,
+        },
+      ),
+    );
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -101,7 +138,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final activeId = ref.watch<int>(activeInventoryProvider);
     final repo = ref.watch(productRepositoryProvider);
     final inventoryFuture = repo.getInventoryForBarcode(
-      widget.product.barcode,
+      _product.barcode,
       inventoryId: activeId,
     );
 
@@ -109,12 +146,21 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       settingsProvider.select((s) => s.priceTrackingEnabled),
     );
 
+    // When a submission for this product reaches a terminal state (e.g. one
+    // started from the add-product screen), refresh the displayed product so
+    // the status chip updates without an app restart.
+    ref.listen(productSubmissionProvider, (previous, next) {
+      if (next != null && next.barcode == _product.barcode && next.isTerminal) {
+        unawaited(_refreshProductFromDb());
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.product.productType == ProductType.produce
-              ? l10n.localizeProduceName(widget.product.name)
-              : widget.product.name,
+          _product.productType == ProductType.produce
+              ? l10n.localizeProduceName(_product.name)
+              : _product.name,
         ),
         actions: [
           if (priceTrackingEnabled) const PriceVisibilityToggle(),
@@ -123,9 +169,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             tooltip: l10n.viewOnOpenFoodFacts,
             onPressed: () async {
               final url = Uri.parse(
-                'https://world.openfoodfacts.org/product/${widget.product.barcode}',
+                'https://world.openfoodfacts.org/product/${_product.barcode}',
               );
-              logInfo('Opening OFF page for ${widget.product.barcode}');
+              logInfo('Opening OFF page for ${_product.barcode}');
               if (await canLaunchUrl(url) && context.mounted) {
                 await launchUrl(url, mode: LaunchMode.externalApplication);
                 logInfo('OFF page opened successfully');
@@ -142,16 +188,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         child: ListView(
           children: [
             // Product image wrapped in Hero, loaded from cache when possible.
-            if (widget.product.imageUrl != null)
+            if (_product.imageUrl != null)
               Hero(
-                tag: 'detail_${widget.product.barcode}',
+                tag: 'detail_${_product.barcode}',
                 child: Consumer(
                   builder: (context, ref, _) {
                     final imageCache = ref.read(imageCacheProvider);
                     return FutureBuilder<String?>(
                       future: imageCache.cacheImage(
-                        widget.product.imageUrl,
-                        widget.product.barcode,
+                        _product.imageUrl,
+                        _product.barcode,
                       ),
                       builder: (context, snapshot) {
                         if (snapshot.hasData && snapshot.data != null) {
@@ -174,7 +220,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                             minScale: 0.5,
                             maxScale: 3,
                             child: Image.network(
-                              widget.product.imageUrl!,
+                              _product.imageUrl!,
                               height: 200,
                               cacheWidth:
                                   (MediaQuery.sizeOf(context).width *
@@ -213,8 +259,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   },
                 ),
               ),
-            _infoRow(l10n.barcodeLabel, widget.product.barcode),
-            if (widget.product.languageCode !=
+            _infoRow(l10n.barcodeLabel, _product.barcode),
+            if (_product.languageCode !=
                 Localizations.localeOf(context).languageCode)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
@@ -233,7 +279,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ).languageCode;
                     try {
                       final product = await repo.getProduct(
-                        widget.product.barcode,
+                        _product.barcode,
                         languageCode: currentLocale,
                       );
                       if (context.mounted) {
@@ -261,25 +307,25 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   },
                 ),
               ),
-            if (widget.product.nutriscoreGrade != null)
+            if (_product.nutriscoreGrade != null)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
                   children: [
                     const SizedBox(width: 100),
                     NutriScoreBadge(
-                      grade: widget.product.nutriscoreGrade,
+                      grade: _product.nutriscoreGrade,
                       size: 32,
                     ),
                     const SizedBox(width: 8),
                     Tooltip(
                       message:
                           NutriScoreBadge.isNotApplicable(
-                            widget.product.nutriscoreGrade,
+                            _product.nutriscoreGrade,
                           )
                           ? () {
                               final category = _formatCategory(
-                                widget.product.nutriscoreNotApplicableCategory,
+                                _product.nutriscoreNotApplicableCategory,
                               );
                               return category.isNotEmpty
                                   ? l10n.nutriscoreNotApplicable(category)
@@ -297,25 +343,36 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   ],
                 ),
               ),
-            if (widget.product.brand != null)
-              _infoRow(l10n.brandLabel, widget.product.brand!),
-            if (widget.product.category != null)
-              _infoRow(l10n.categoryLabel, widget.product.category!),
-            if (widget.product.source == 'manual') _buildSubmissionStatus(l10n),
+            if (_product.brand != null)
+              _infoRow(l10n.brandLabel, _product.brand!),
+            if (_product.category != null)
+              _infoRow(l10n.categoryLabel, _product.category!),
+            if (_product.source == 'manual') ...[
+              ProductSubmissionStatus(
+                product: _product,
+                onRetry: _retrySubmission,
+              ),
+              const SizedBox(height: 8),
+              ProductPhotoManagement(
+                product: _product,
+                onChanged: (updated) => setState(() => _product = updated),
+              ),
+              const SizedBox(height: 8),
+            ],
             const Divider(),
             _infoRow(l10n.servingSize, _displayServingSize(l10n, settings)),
 
             // Nutrition table
-            NutritionTable(product: widget.product),
+            NutritionTable(product: _product),
 
             const Divider(),
-            if (widget.product.ingredients != null)
+            if (_product.ingredients != null)
               ExpansionTile(
                 title: Text(l10n.ingredients),
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Text(widget.product.ingredients!),
+                    child: Text(_product.ingredients!),
                   ),
                 ],
               ),
@@ -369,8 +426,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             OutlinedButton.icon(
               onPressed: () {
                 final item = ShoppingItem(
-                  name: widget.product.name,
-                  barcode: widget.product.barcode,
+                  name: _product.name,
+                  barcode: _product.barcode,
                 );
                 unawaited(addShoppingItem(ref, item));
                 SnackbarHelper.showInfo(
@@ -389,7 +446,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   /// Builds the price section with latest price, add/edit, and history.
   Widget _buildPriceSection(BuildContext context, AppLocalizations l10n) {
-    final barcode = widget.product.barcode;
+    final barcode = _product.barcode;
     final activeId = ref.watch(activeInventoryProvider);
     final priceAsync = ref.watch(latestPriceProvider((barcode, activeId)));
     final historyAsync = ref.watch(priceHistoryProvider((barcode, activeId)));
@@ -651,19 +708,19 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final price = await PriceEntrySheet.show(
       context,
-      barcode: widget.product.barcode,
+      barcode: _product.barcode,
     );
     if (price != null) {
       try {
-        await ref.read(productRepositoryProvider).cacheProduct(widget.product);
+        await ref.read(productRepositoryProvider).cacheProduct(_product);
         final activeId = ref.read(activeInventoryProvider);
         final scoped = price.copyWith(inventoryId: activeId);
         await ref.read(priceRepositoryProvider).addPrice(scoped);
         if (!context.mounted) return;
         ref
-          ..invalidate(latestPriceProvider((widget.product.barcode, activeId)))
+          ..invalidate(latestPriceProvider((_product.barcode, activeId)))
           ..invalidate(
-            priceHistoryProvider((widget.product.barcode, activeId)),
+            priceHistoryProvider((_product.barcode, activeId)),
           );
 
         if (price.datePurchased != null &&
@@ -672,18 +729,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           final repo = ref.read(productRepositoryProvider);
           final activeId = ref.read(activeInventoryProvider);
           final existingItems = await repo.getInventoryForBarcode(
-            widget.product.barcode,
+            _product.barcode,
             inventoryId: activeId,
           );
           if (context.mounted && existingItems.isEmpty) {
             final result = await QuantityAndPantrySheet.show(context);
             if (result != null && context.mounted) {
               final item = InventoryItem(
-                barcode: widget.product.barcode,
+                barcode: _product.barcode,
                 inventoryId: result.inventoryId,
                 quantity: result.quantity,
               );
-              await repo.cacheProduct(widget.product);
+              await repo.cacheProduct(_product);
               final newId = await repo.addInventoryItem(item);
               final savedItem = item.copyWith(id: newId);
               final notificationService = ref.read(
@@ -691,7 +748,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               );
               await notificationService.scheduleExpiryReminders(
                 savedItem,
-                productName: widget.product.name,
+                productName: _product.name,
                 expiringSoonTitle: l10n.expiringSoon,
                 buildExpiringSoonBody: l10n.expiresTomorrow,
                 expiringTodayTitle: l10n.expiringToday,
@@ -725,7 +782,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final updated = await PriceEntrySheet.show(
       context,
-      barcode: widget.product.barcode,
+      barcode: _product.barcode,
       existingPrice: price,
     );
     if (updated != null) {
@@ -736,10 +793,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           final activeId = ref.read(activeInventoryProvider);
           ref
             ..invalidate(
-              latestPriceProvider((widget.product.barcode, activeId)),
+              latestPriceProvider((_product.barcode, activeId)),
             )
             ..invalidate(
-              priceHistoryProvider((widget.product.barcode, activeId)),
+              priceHistoryProvider((_product.barcode, activeId)),
             );
         }
       } on Exception catch (e) {
@@ -755,8 +812,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => PriceHistoryScreen(
-          barcode: widget.product.barcode,
-          productName: widget.product.name,
+          barcode: _product.barcode,
+          productName: _product.name,
         ),
       ),
     );
@@ -794,55 +851,36 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     return withoutPrefix.replaceAll('-', ' ');
   }
 
-  /// Builds a chip showing the OFF submission status for manual products.
-  Widget _buildSubmissionStatus(AppLocalizations l10n) {
-    final status = widget.product.submissionStatus;
-    final label = submissionStatusLabel(l10n, status);
-    final chip = switch (status) {
-      productSubmissionSubmitted => Chip(
-        avatar: const Icon(Icons.check_circle, size: 18, color: Colors.green),
-        label: Text(label),
-      ),
-      productSubmissionFailed => Chip(
-        avatar: const Icon(Icons.error, size: 18, color: Colors.red),
-        label: Text(label),
-        deleteIcon: const Icon(Icons.refresh, size: 18),
-        onDeleted: _retrySubmission,
-      ),
-      productSubmissionPending => Chip(
-        avatar: ProgressIndicatorHelper.build(size: 16, strokeWidth: 2),
-        label: Text(label),
-      ),
-      productSubmissionPartiallyCompleted => Chip(
-        avatar: const Icon(Icons.warning_amber, size: 18, color: Colors.orange),
-        label: Text(label),
-        deleteIcon: const Icon(Icons.refresh, size: 18),
-        onDeleted: _retrySubmission,
-      ),
-      _ => Chip(
-        avatar: const Icon(Icons.cloud_upload, size: 18, color: Colors.grey),
-        label: Text(label),
-        deleteIcon: const Icon(Icons.refresh, size: 18),
-        onDeleted: _retrySubmission,
-      ),
-    };
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: chip,
-    );
-  }
-
+  /// Retries the Open Food Facts submission through
+  /// [ProductSubmissionNotifier], then refreshes the displayed product from
+  /// the local cache so the status updates without an app restart.
   Future<void> _retrySubmission() async {
     final l10n = AppLocalizations.of(context)!;
-    final service = ref.read(productSubmissionServiceProvider);
-    final result = await service.submitProduct(widget.product);
-    if (mounted) {
-      if (result.submissionStatus == productSubmissionSubmitted) {
-        SnackbarHelper.showInfo(context, l10n.submissionSuccess);
-      } else {
-        SnackbarHelper.showError(context, l10n.submissionError);
-      }
+    final notifier = ref.read(productSubmissionProvider.notifier);
+    final repo = ref.read(productRepositoryProvider);
+    final fresh = await repo.getProductFromCache(_product.barcode) ?? _product;
+    await notifier.submit(fresh);
+    final refreshed = await repo.getProductFromCache(_product.barcode);
+    if (!mounted) return;
+    notifier.clear();
+    setState(() {
+      if (refreshed != null) _product = refreshed;
+    });
+    if ((refreshed ?? _product).submissionStatus ==
+        productSubmissionSubmitted) {
+      SnackbarHelper.showInfo(context, l10n.submissionSuccess);
+    } else {
+      SnackbarHelper.showError(context, l10n.submissionError);
     }
+  }
+
+  /// Re-reads the product for this screen's barcode from the local cache and
+  /// updates the displayed snapshot.
+  Future<void> _refreshProductFromDb() async {
+    final repo = ref.read(productRepositoryProvider);
+    final refreshed = await repo.getProductFromCache(_product.barcode);
+    if (!mounted || refreshed == null) return;
+    setState(() => _product = refreshed);
   }
 
   /// Returns the serving size to display, using preset data for produce items
@@ -851,13 +889,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// localized not-available label when the product has no serving data.
   String _displayServingSize(AppLocalizations l10n, Settings settings) {
     // Try structured serving data first
-    if (widget.product.servingQuantity != null &&
-        widget.product.servingQuantity! > 0 &&
-        widget.product.servingSize != null &&
-        widget.product.servingSize!.isNotEmpty) {
+    if (_product.servingQuantity != null &&
+        _product.servingQuantity! > 0 &&
+        _product.servingSize != null &&
+        _product.servingSize!.isNotEmpty) {
       final parsed = parseServingQuantity(
-        servingQuantity: widget.product.servingQuantity,
-        servingSize: widget.product.servingSize,
+        servingQuantity: _product.servingQuantity,
+        servingSize: _product.servingSize,
       );
       if (parsed != null) {
         final system = UnitResolver.systemFor(
@@ -879,10 +917,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     }
 
     // Fallback to raw servingSize string for display only
-    if (widget.product.servingSize != null) return widget.product.servingSize!;
+    if (_product.servingSize != null) return _product.servingSize!;
 
-    if (widget.product.productType == ProductType.produce) {
-      final presets = ProduceServingPresets.forName(widget.product.name);
+    if (_product.productType == ProductType.produce) {
+      final presets = ProduceServingPresets.forName(_product.name);
       if (presets != null) {
         final medium = presets['Medium'];
         if (medium != null) {
@@ -952,8 +990,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     // Suggest an expiry date based on the product category.
     String? suggested;
-    if (existing == null && widget.product.category != null) {
-      final cat = widget.product.category!.toLowerCase();
+    if (existing == null && _product.category != null) {
+      final cat = _product.category!.toLowerCase();
       if (cat.contains('dairy')) {
         suggested = DateTime.now()
             .add(const Duration(days: 7))
@@ -970,13 +1008,13 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final result = await Navigator.of(context).push<InventoryItem>(
       MaterialPageRoute(
         builder: (_) => AddToInventoryScreen(
-          barcode: widget.product.barcode,
+          barcode: _product.barcode,
           existingItem: existing,
           suggestedExpiry: suggested,
           inventoryId: activeId,
-          productType: widget.product.productType,
-          produceName: widget.product.name,
-          product: widget.product,
+          productType: _product.productType,
+          produceName: _product.name,
+          product: _product,
         ),
       ),
     );
@@ -988,7 +1026,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       try {
         if (existing != null) {
           logInfo(
-            '''Updated inventory item ${existing.id} (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
+            '''Updated inventory item ${existing.id} (${_product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
           await repo.updateInventoryItem(result);
           if (existing.id != null) {
@@ -996,7 +1034,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           }
           await notificationService.scheduleExpiryReminders(
             result,
-            productName: widget.product.name,
+            productName: _product.name,
             expiringSoonTitle: l10n.expiringSoon,
             buildExpiringSoonBody: l10n.expiresTomorrow,
             expiringTodayTitle: l10n.expiringToday,
@@ -1009,15 +1047,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           }
         } else {
           logInfo(
-            '''Added inventory item (${widget.product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
+            '''Added inventory item (${_product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
-          await repo.cacheProduct(widget.product);
+          await repo.cacheProduct(_product);
           final newId = await repo.addInventoryItem(result);
           final savedItem = result.copyWith(id: newId);
           await _rescheduleInactivityReminder();
           await notificationService.scheduleExpiryReminders(
             savedItem,
-            productName: widget.product.name,
+            productName: _product.name,
             expiringSoonTitle: l10n.expiringSoon,
             buildExpiringSoonBody: l10n.expiresTomorrow,
             expiringTodayTitle: l10n.expiringToday,
@@ -1053,7 +1091,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       await repo.updateInventoryItem(updated);
       await notificationService.scheduleExpiryReminders(
         updated,
-        productName: widget.product.name,
+        productName: _product.name,
         expiringSoonTitle: l10n.expiringSoon,
         buildExpiringSoonBody: l10n.expiresTomorrow,
         expiringTodayTitle: l10n.expiringToday,
@@ -1100,7 +1138,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           await notificationService.cancelReminders(item.id!);
         }
         logInfo(
-          'Deleted inventory item ${item.id} (${widget.product.barcode})',
+          'Deleted inventory item ${item.id} (${_product.barcode})',
         );
         if (mounted) {
           SnackbarHelper.showUndo(context, l10n.itemRemoved, () async {
@@ -1110,7 +1148,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               final restoredItem = item.copyWith(id: restoredId);
               await notificationService.scheduleExpiryReminders(
                 restoredItem,
-                productName: widget.product.name,
+                productName: _product.name,
                 expiringSoonTitle: l10n.expiringSoon,
                 buildExpiringSoonBody: l10n.expiresTomorrow,
                 expiringTodayTitle: l10n.expiringToday,

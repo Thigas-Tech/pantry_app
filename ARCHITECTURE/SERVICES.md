@@ -270,6 +270,12 @@ User scans barcode
   and deletes managed files for a barcode that were never committed to a
   saved product, preserving paths listed in `committedPaths`. This keeps
   backing out of the form free of orphaned files.
+- `deleteOrphanedFiles` runs from `ProductDetailScreen.dispose()`
+  (unawaited) and removes managed files for a barcode that no currently
+  referenced slot uses. Photos deleted from the detail screen keep their
+  physical file so undo restores a live photo while the screen is open;
+  this method cleans those files up when the screen is left, while paths
+  in `referencedPaths` (the current non-null photo paths) are preserved.
 - Barcodes are sanitized against path separators before forming file names.
   The image directory resolves to the application-documents `product_images`
   folder at runtime and is injectable for tests. Exposed to screens via
