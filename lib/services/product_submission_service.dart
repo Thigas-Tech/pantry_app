@@ -432,6 +432,7 @@ class ProductSubmissionService {
         barcode: product.barcode,
         imageField: imageField,
         imagePath: uploadPath,
+        languageCode: product.languageCode,
       );
     } on Exception catch (e) {
       logError('Error uploading $imageField image: ${redactSensitive('$e')}');

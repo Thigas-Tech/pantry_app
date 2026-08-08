@@ -39,8 +39,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get emptyPantryTitle => 'Sua despensa está vazia';
 
   @override
-  String get emptyPantrySubtitle =>
-      'Toque no botão abaixo pra escanear seu primeiro produto';
+  String get emptyPantrySubtitle => 'Toque no botão abaixo pra escanear seu primeiro produto';
 
   @override
   String get scanFirstProduct => 'Escanear um código';
@@ -281,8 +280,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get delete => 'Excluir';
 
   @override
-  String get failedToLoadInventoryItems =>
-      'Não foi possível carregar os itens do estoque.';
+  String get failedToLoadInventoryItems => 'Não foi possível carregar os itens do estoque.';
 
   @override
   String get enterPositiveNumber => 'Digite um número positivo';
@@ -294,12 +292,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notificationsDisabled => 'Notificações desativadas.';
 
   @override
-  String get notificationPermissionTitle =>
-      'Permissao de Notificacao Necessaria';
+  String get notificationPermissionTitle => 'Permissao de Notificacao Necessaria';
 
   @override
-  String get notificationPermissionBody =>
-      'Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.';
+  String get notificationPermissionBody => 'Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.';
 
   @override
   String get openSettings => 'Abrir Configuracoes';
@@ -361,8 +357,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get couldNotCreateInventory => 'Não foi possível criar a despensa.';
 
   @override
-  String get couldNotResolveProduct =>
-      'Não foi possível carregar os detalhes do produto.';
+  String get couldNotResolveProduct => 'Não foi possível carregar os detalhes do produto.';
 
   @override
   String get couldNotRenameInventory => 'Não foi possível renomear a despensa.';
@@ -374,15 +369,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get networkError => 'Erro de rede. Verifique sua conexão.';
 
   @override
-  String get fetchProductFailed =>
-      'Não foi possível buscar o produto. Verifique sua conexão.';
+  String get fetchProductFailed => 'Não foi possível buscar o produto. Verifique sua conexão.';
 
   @override
   String get productNotFound => 'Produto nao encontrado no banco de dados.';
 
   @override
-  String get productNotFoundHint =>
-      'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
+  String get productNotFoundHint => 'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
 
   @override
   String get addManually => 'Adicionar manualmente';
@@ -486,12 +479,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get saveProduct => 'Salvar produto';
 
   @override
-  String get offlineWarning =>
-      'Você está offline — adicionando produto manualmente';
+  String get saveToInventory => 'Salvar no inventario';
 
   @override
-  String get nutriscoreExplanation =>
-      'Nutri-Score é um selo nutricional que classifica produtos de A (melhor) a E (pior) com base na qualidade nutricional. Ajuda a comparar produtos parecidos rapidamente.';
+  String get submitProductToOff => 'Enviar para o Open Food Facts';
+
+  @override
+  String get offlineWarning => 'Você está offline — adicionando produto manualmente';
+
+  @override
+  String get nutriscoreExplanation => 'Nutri-Score é um selo nutricional que classifica produtos de A (melhor) a E (pior) com base na qualidade nutricional. Ajuda a comparar produtos parecidos rapidamente.';
 
   @override
   String nutriscoreNotApplicable(Object category) {
@@ -499,8 +496,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get nutriscoreNotApplicableGeneric =>
-      'Nutri-Score não se aplica a essa categoria de produto.';
+  String get nutriscoreNotApplicableGeneric => 'Nutri-Score não se aplica a essa categoria de produto.';
 
   @override
   String get flushCache => 'Limpar cache';
@@ -509,16 +505,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get flushCacheSub => 'Excluir dados e imagens em cache';
 
   @override
-  String get flushCacheConfirm =>
-      'Isso vai excluir todos os dados e imagens em cache obtidos do Open Food Facts. Produtos adicionados manualmente e seus itens de estoque serão mantidos. Os produtos em cache serão baixados de novo na próxima vez que você visualizá-los.';
+  String get flushCacheConfirm => 'Isso vai excluir todos os dados e imagens em cache obtidos do Open Food Facts. Produtos adicionados manualmente e seus itens de estoque serão mantidos. Os produtos em cache serão baixados de novo na próxima vez que você visualizá-los.';
 
   @override
-  String get flushCacheSuccess =>
-      'Cache limpo. Os produtos serão atualizados automaticamente.';
+  String get flushCacheSuccess => 'Cache limpo. Os produtos serão atualizados automaticamente.';
 
   @override
-  String get flushCacheFailed =>
-      'Não foi possível limpar o cache. Tente de novo.';
+  String get flushCacheFailed => 'Não foi possível limpar o cache. Tente de novo.';
 
   @override
   String get submissionPending => 'Envio pendente pro Open Food Facts';
@@ -547,39 +540,31 @@ class AppLocalizationsPt extends AppLocalizations {
   String get submissionSuccess => 'Produto enviado pro Open Food Facts.';
 
   @override
-  String get submissionError =>
-      'Falha ao enviar o produto. Toque pra tentar de novo.';
+  String get submissionError => 'Falha ao enviar o produto. Toque pra tentar de novo.';
 
   @override
-  String get submissionPartiallyCompleted =>
-      'Enviado parcialmente pro Open Food Facts';
+  String get submissionPartiallyCompleted => 'Enviado parcialmente pro Open Food Facts';
 
   @override
-  String get submittingMetadata =>
-      'Enviando os detalhes do produto para o Open Food Facts…';
+  String get submittingMetadata => 'Enviando os detalhes do produto para o Open Food Facts…';
 
   @override
   String get preparingSubmission => 'Preparando o envio…';
 
   @override
-  String get submissionCredentialsError =>
-      'O envio falhou porque as credenciais do Open Food Facts não estão configuradas.';
+  String get submissionCredentialsError => 'O envio falhou porque as credenciais do Open Food Facts não estão configuradas.';
 
   @override
-  String get submissionOfflineError =>
-      'Não foi possível conectar ao Open Food Facts. Verifique sua conexão e tente de novo.';
+  String get submissionOfflineError => 'Não foi possível conectar ao Open Food Facts. Verifique sua conexão e tente de novo.';
 
   @override
-  String get submissionRateLimitedError =>
-      'O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.';
+  String get submissionRateLimitedError => 'O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.';
 
   @override
-  String get submissionRejectedError =>
-      'O Open Food Facts rejeitou os dados do produto.';
+  String get submissionRejectedError => 'O Open Food Facts rejeitou os dados do produto.';
 
   @override
-  String get submissionValidationError =>
-      'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
+  String get submissionValidationError => 'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
 
   @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';
@@ -606,41 +591,34 @@ class AppLocalizationsPt extends AppLocalizations {
   String get searchTitle => 'Buscar Produtos';
 
   @override
-  String get searchProductsHint =>
-      'Busque produtos por nome ou código de barras';
+  String get searchProductsHint => 'Busque produtos por nome ou código de barras';
 
   @override
   String get noSearchResults => 'Nenhum produto encontrado';
 
   @override
-  String get productNotFoundSearch =>
-      'Nenhum produto encontrado em Produtos Embalados.';
+  String get productNotFoundSearch => 'Nenhum produto encontrado em Produtos Embalados.';
 
   @override
-  String get productNotFoundBarcodeHint =>
-      'Tente escanear ou digitar o codigo de barras do produto.';
+  String get productNotFoundBarcodeHint => 'Tente escanear ou digitar o codigo de barras do produto.';
 
   @override
-  String get productNotFoundOfflineHint =>
-      'A pesquisa requer conexao com a internet.';
+  String get productNotFoundOfflineHint => 'A pesquisa requer conexao com a internet.';
 
   @override
   String get enterBarcodePrompt => 'Digite ou cole um codigo de barras';
 
   @override
-  String get productNotInDatabase =>
-      'Este codigo de barras nao esta registrado no Open Food Facts.';
+  String get productNotInDatabase => 'Este codigo de barras nao esta registrado no Open Food Facts.';
 
   @override
-  String get productNotInDatabaseHint =>
-      'Voce ainda pode usar este produto localmente.';
+  String get productNotInDatabaseHint => 'Voce ainda pode usar este produto localmente.';
 
   @override
   String get contributeToOffComingSoonTitle => 'Em Breve';
 
   @override
-  String get contributeToOffComingSoonBody =>
-      'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
+  String get contributeToOffComingSoonBody => 'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
 
   @override
   String get saveLocallyAction => 'Salvar Localmente';
@@ -687,8 +665,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsAbout => 'Sobre';
 
   @override
-  String get comingSoonDescription =>
-      'Este recurso estará disponível em breve.';
+  String get comingSoonDescription => 'Este recurso estará disponível em breve.';
 
   @override
   String get priceTracking => 'Controle de Preços';
@@ -700,8 +677,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get receiptTracking => 'Notas NFC-e';
 
   @override
-  String get receiptTrackingDescription =>
-      'Escanear notas para adicionar produtos.';
+  String get receiptTrackingDescription => 'Escanear notas para adicionar produtos.';
 
   @override
   String get photoCompletenessTitle => 'Fotos dos Produtos';
@@ -721,8 +697,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get statsEmptyTitle => 'Nenhum item para analisar';
 
   @override
-  String get statsEmptySubtitle =>
-      'Adicione produtos à sua despensa para ver estatísticas aqui.';
+  String get statsEmptySubtitle => 'Adicione produtos à sua despensa para ver estatísticas aqui.';
 
   @override
   String get addedThisWeekLabel => 'Esta semana';
@@ -731,8 +706,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addedThisMonthLabel => 'Este mês';
 
   @override
-  String get productDataUnavailable =>
-      'Dados do produto indisponíveis — atualize para baixar';
+  String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
 
   @override
   String get locationStats => 'Locais';
@@ -765,20 +739,16 @@ class AppLocalizationsPt extends AppLocalizations {
   String get regressionReport => 'Regressao';
 
   @override
-  String get bugReportExplanation =>
-      'Algo esta quebrado ou nao funciona como esperado.';
+  String get bugReportExplanation => 'Algo esta quebrado ou nao funciona como esperado.';
 
   @override
-  String get featureRequestExplanation =>
-      'Sugira uma nova funcionalidade ou melhoria.';
+  String get featureRequestExplanation => 'Sugira uma nova funcionalidade ou melhoria.';
 
   @override
-  String get generalFeedbackExplanation =>
-      'Outros comentarios, duvidas ou sugestoes.';
+  String get generalFeedbackExplanation => 'Outros comentarios, duvidas ou sugestoes.';
 
   @override
-  String get regressionReportExplanation =>
-      'Uma funcionalidade que funcionava antes mas nao funciona mais.';
+  String get regressionReportExplanation => 'Uma funcionalidade que funcionava antes mas nao funciona mais.';
 
   @override
   String get issueTitle => 'Título';
@@ -790,8 +760,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get issueDescription => 'Descrição';
 
   @override
-  String get issueDescriptionRequired =>
-      'Descrição obrigatória (mín. 10 caracteres)';
+  String get issueDescriptionRequired => 'Descrição obrigatória (mín. 10 caracteres)';
 
   @override
   String get attachScreenshot => 'Anexar captura de tela';
@@ -809,8 +778,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get issueSubmitted => 'Obrigado! Seu relato foi enviado.';
 
   @override
-  String get issueQueuedOffline =>
-      'Você está offline. Seu relato será enviado quando você estiver online.';
+  String get issueQueuedOffline => 'Você está offline. Seu relato será enviado quando você estiver online.';
 
   @override
   String get issueSubmissionFailed => 'Falha ao enviar. Tente novamente.';
@@ -847,29 +815,25 @@ class AppLocalizationsPt extends AppLocalizations {
   String get osLabel => 'SO';
 
   @override
-  String get cameraPermissionDenied =>
-      'Permissao da camera negada. Conceda acesso nas Configuracoes.';
+  String get cameraPermissionDenied => 'Permissao da camera negada. Conceda acesso nas Configuracoes.';
 
   @override
   String get cameraPermissionDeniedTitle => 'Permissão da câmera necessária';
 
   @override
-  String get cameraPermissionDeniedBody =>
-      'O Pantry precisa de acesso à câmera para tirar fotos de produtos.';
+  String get cameraPermissionDeniedBody => 'O Pantry precisa de acesso à câmera para tirar fotos de produtos.';
 
   @override
   String get galleryPermissionDeniedTitle => 'É necessário acesso à galeria';
 
   @override
-  String get galleryPermissionDeniedBody =>
-      'O Pantry precisa de acesso às suas fotos para escolher uma foto existente. Abra as Configurações para permitir o acesso.';
+  String get galleryPermissionDeniedBody => 'O Pantry precisa de acesso às suas fotos para escolher uma foto existente. Abra as Configurações para permitir o acesso.';
 
   @override
   String get cameraNotAvailable => 'Camera nao disponivel neste dispositivo.';
 
   @override
-  String get scannerGenericError =>
-      'Ocorreu um erro inesperado ao iniciar a camera.';
+  String get scannerGenericError => 'Ocorreu um erro inesperado ao iniciar a camera.';
 
   @override
   String get switchToManualEntry => 'Digitar codigo manualmente';
@@ -932,8 +896,7 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get inactivityReminderEnabled =>
-      'Lembrar de adicionar produtos regularmente';
+  String get inactivityReminderEnabled => 'Lembrar de adicionar produtos regularmente';
 
   @override
   String get inactivityThresholdDays => 'Limite de inatividade (dias)';
@@ -942,12 +905,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get inactivityReminderChannelName => 'Lembretes de inatividade';
 
   @override
-  String get inactivityReminderChannelDescription =>
-      'Lembra voce de adicionar produtos regularmente';
+  String get inactivityReminderChannelDescription => 'Lembra voce de adicionar produtos regularmente';
 
   @override
-  String get notificationDeniedWarning =>
-      'Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.';
+  String get notificationDeniedWarning => 'Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.';
 
   @override
   String inactivityThresholdSet(int days) {
@@ -958,8 +919,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get amoledDarkMode => 'Modo escuro AMOLED';
 
   @override
-  String get amoledDarkModeExplanation =>
-      'Usar fundo preto no modo escuro para economizar bateria em telas AMOLED';
+  String get amoledDarkModeExplanation => 'Usar fundo preto no modo escuro para economizar bateria em telas AMOLED';
 
   @override
   String get amoledDarkModeEnabled => 'Modo escuro AMOLED ativado.';
@@ -971,8 +931,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get amoledNudgeTitle => 'Trocar para o modo escuro?';
 
   @override
-  String get amoledNudgeBody =>
-      'O modo escuro pode economizar bateria no seu dispositivo, especialmente se a tela for AMOLED. Voce tambem pode ativar o fundo preto puro nas Configuracoes para economia maxima de energia.';
+  String get amoledNudgeBody => 'O modo escuro pode economizar bateria no seu dispositivo, especialmente se a tela for AMOLED. Voce tambem pode ativar o fundo preto puro nas Configuracoes para economia maxima de energia.';
 
   @override
   String get amoledNudgeEnable => 'Ativar modo escuro';
@@ -984,16 +943,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get translationReport => 'Relato de Traducao';
 
   @override
-  String get translationReportExplanation =>
-      'Relate um problema com a traducao de um produto ou sugira uma nova traducao.';
+  String get translationReportExplanation => 'Relate um problema com a traducao de um produto ou sugira uma nova traducao.';
 
   @override
-  String get feedbackRateLimit =>
-      'Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.';
+  String get feedbackRateLimit => 'Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.';
 
   @override
-  String get couldNotOpenLinkFallback =>
-      'URL copiada para a area de transferencia.';
+  String get couldNotOpenLinkFallback => 'URL copiada para a area de transferencia.';
 
   @override
   String get includeLogs => 'Incluir registros do app';
@@ -1002,8 +958,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get includeLogsExplanation => 'Avisos e erros recentes desta sessao';
 
   @override
-  String get logsPrivacyNote =>
-      'Os registros podem conter nomes de produtos e horarios.';
+  String get logsPrivacyNote => 'Os registros podem conter nomes de produtos e horarios.';
 
   @override
   String get price => 'Preco';
@@ -1042,8 +997,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get viewAllPrices => 'Ver todos';
 
   @override
-  String get noPriceTrend =>
-      'Adicione pelo menos dois precos para ver a tendencia.';
+  String get noPriceTrend => 'Adicione pelo menos dois precos para ver a tendencia.';
 
   @override
   String get totalValue => 'Valor total';
@@ -1058,8 +1012,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get hidePrices => 'Ocultar precos por privacidade';
 
   @override
-  String get hidePricesDescription =>
-      'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
+  String get hidePricesDescription => 'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
 
   @override
   String get pricesHidden => 'Precos ocultos.';
@@ -1085,8 +1038,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get baseCurrency => 'Moeda base';
 
   @override
-  String get baseCurrencyDescription =>
-      'Todos os precos sao exibidos nesta moeda.';
+  String get baseCurrencyDescription => 'Todos os precos sao exibidos nesta moeda.';
 
   @override
   String get store => 'Loja';
@@ -1116,15 +1068,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get syncToOpenPrices => 'Compartilhar com Open Prices';
 
   @override
-  String get syncToOpenPricesDescription =>
-      'Contribua com seus dados de preco para o banco de dados comunitario.';
+  String get syncToOpenPricesDescription => 'Contribua com seus dados de preco para o banco de dados comunitario.';
 
   @override
   String get openPricesToken => 'Token da API Open Prices';
 
   @override
-  String get openPricesTokenDescription =>
-      'Token gerado da sua conta do Open Food Facts.';
+  String get openPricesTokenDescription => 'Token gerado da sua conta do Open Food Facts.';
 
   @override
   String get openPricesTokenSaved => 'Token salvo.';
@@ -1164,15 +1114,13 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get openPricesProofExplanation =>
-      'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
+  String get openPricesProofExplanation => 'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
 
   @override
   String get openPricesConsentTitle => 'Contribuir com Open Prices';
 
   @override
-  String get openPricesConsentBody =>
-      'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
+  String get openPricesConsentBody => 'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
 
   @override
   String get iUnderstand => 'Entendi';
@@ -1208,8 +1156,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get emptyShoppingList => 'Sua lista de compras esta vazia';
 
   @override
-  String get emptyShoppingListSub =>
-      'Adicione itens de um produto ou toque em + para adicionar manualmente';
+  String get emptyShoppingListSub => 'Adicione itens de um produto ou toque em + para adicionar manualmente';
 
   @override
   String get deleteItem => 'Excluir item';
@@ -1257,8 +1204,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addCustomItem => 'Adicionar item personalizado';
 
   @override
-  String get noProductsFound =>
-      'Nenhum produto encontrado. Tente um item personalizado.';
+  String get noProductsFound => 'Nenhum produto encontrado. Tente um item personalizado.';
 
   @override
   String get backToSearch => 'Voltar a busca';
@@ -1307,8 +1253,7 @@ class AppLocalizationsPt extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count itens restantes — adicione um codigo de barras ou crie um produto',
+      other: '$count itens restantes — adicione um codigo de barras ou crie um produto',
       one: '1 item restante — adicione um codigo de barras ou crie um produto',
     );
     return '$_temp0';
@@ -1318,8 +1263,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addToPantryAfterPrice => 'Adicionar a sua despensa?';
 
   @override
-  String get addToPantryAfterPriceDesc =>
-      'Registre a quantidade comprada para acompanhar no seu estoque.';
+  String get addToPantryAfterPriceDesc => 'Registre a quantidade comprada para acompanhar no seu estoque.';
 
   @override
   String get howManyBought => 'Quantas unidades voce comprou?';
@@ -1328,15 +1272,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get choosePantry => 'Escolher despensa';
 
   @override
-  String get addToPantrySkipped =>
-      'Preco salvo. Adicione pela pagina do produto para acompanhar.';
+  String get addToPantrySkipped => 'Preco salvo. Adicione pela pagina do produto para acompanhar.';
 
   @override
   String get invalidPriceAmount => 'Digite um valor de preço válido';
 
   @override
-  String get apiSearchWarning =>
-      'Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.';
+  String get apiSearchWarning => 'Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.';
 
   @override
   String get dismiss => 'Dispensar';
@@ -1351,8 +1293,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get testNotification => 'Enviar notificacao de teste';
 
   @override
-  String get testScheduledNotification =>
-      'Enviar notificacao de teste agendada (2 min)';
+  String get testScheduledNotification => 'Enviar notificacao de teste agendada (2 min)';
 
   @override
   String get testNotificationScheduled => 'Notificacao de teste agendada.';
@@ -1439,15 +1380,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get generalNotificationChannelName => 'Notificacoes Gerais';
 
   @override
-  String get generalNotificationChannelDescription =>
-      'Notificacoes padrao do app';
+  String get generalNotificationChannelDescription => 'Notificacoes padrao do app';
 
   @override
   String get testNotificationTitle => 'Teste bem-sucedido';
 
   @override
-  String get testNotificationBody =>
-      'Notificacoes imediatas estao funcionando!';
+  String get testNotificationBody => 'Notificacoes imediatas estao funcionando!';
 
   @override
   String get testScheduledTitle => 'Teste Agendado';
@@ -1526,8 +1465,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryCerealsAndPotatoes => 'Cereais e batatas';
 
   @override
-  String get categoryFruitsAndVegetables =>
-      'Alimentos a base de frutas e vegetais';
+  String get categoryFruitsAndVegetables => 'Alimentos a base de frutas e vegetais';
 
   @override
   String get categoryConfectioneries => 'Confeitaria';
@@ -1773,16 +1711,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get produceLettuce => 'Alface';
 
   @override
-  String get exactAlarmsDeniedHint =>
-      'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
+  String get exactAlarmsDeniedHint => 'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
 
   @override
-  String get notificationRationaleTitle =>
-      'Notificações ajudam você a acompanhar';
+  String get notificationRationaleTitle => 'Notificações ajudam você a acompanhar';
 
   @override
-  String get notificationRationaleBody =>
-      'O Pantry usa notificações para:\n\n- Lembrar quando os alimentos estão perto de vencer\n- Lembrar de adicionar produtos regularmente\n- Confirmar que notificações de teste funcionam\n\nVocê pode mudar isso a qualquer momento em Configurações.';
+  String get notificationRationaleBody => 'O Pantry usa notificações para:\n\n- Lembrar quando os alimentos estão perto de vencer\n- Lembrar de adicionar produtos regularmente\n- Confirmar que notificações de teste funcionam\n\nVocê pode mudar isso a qualquer momento em Configurações.';
 
   @override
   String get notificationRationaleAllow => 'Permitir';
@@ -1869,8 +1804,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get servingsHint => 'ex.: 4';
 
   @override
-  String get setServingsHint =>
-      'Defina o numero de porcoes no editor da receita para ver a nutricao por porcao';
+  String get setServingsHint => 'Defina o numero de porcoes no editor da receita para ver a nutricao por porcao';
 
   @override
   String get addPhoto => 'Adicionar foto';
@@ -1908,15 +1842,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noRecipes => 'Nenhuma receita ainda';
 
   @override
-  String get noRecipesSubtitle =>
-      'Registre receitas para controlar custos e planejar refeições';
+  String get noRecipesSubtitle => 'Registre receitas para controlar custos e planejar refeições';
 
   @override
   String get discardChanges => 'Descartar alterações?';
 
   @override
-  String get discardChangesConfirm =>
-      'Você tem alterações não salvas. Descartá-las?';
+  String get discardChangesConfirm => 'Você tem alterações não salvas. Descartá-las?';
 
   @override
   String get recipeCost => 'Custo da receita';
@@ -1954,8 +1886,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get confirmDiscard => 'Descartar alteracoes?';
 
   @override
-  String get confirmDiscardContent =>
-      'Tem alteracoes nao salvas. Tem certeza que deseja voltar?';
+  String get confirmDiscardContent => 'Tem alteracoes nao salvas. Tem certeza que deseja voltar?';
 
   @override
   String get searchProduct => 'Pesquisar produto';
@@ -1970,8 +1901,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingPage1Title => 'Escanear Codigos de Barras';
 
   @override
-  String get onboardingPage1Desc =>
-      'Adicione rapidamente produtos a sua despensa escaneando os codigos de barras com a sua camera.';
+  String get onboardingPage1Desc => 'Adicione rapidamente produtos a sua despensa escaneando os codigos de barras com a sua camera.';
 
   @override
   String get onboardingPage1Cta => 'Abrir Scanner';
@@ -1980,8 +1910,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingPage2Title => 'Pesquisar Produtos';
 
   @override
-  String get onboardingPage2Desc =>
-      'Navegue por milhoes de produtos na base do Open Food Facts para encontrar exatamente o que precisa.';
+  String get onboardingPage2Desc => 'Navegue por milhoes de produtos na base do Open Food Facts para encontrar exatamente o que precisa.';
 
   @override
   String get onboardingPage2Cta => 'Abrir Pesquisa';
@@ -1990,8 +1919,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingPage3Title => 'Produtos Frescos';
 
   @override
-  String get onboardingPage3Desc =>
-      'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
+  String get onboardingPage3Desc => 'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
 
   @override
   String get onboardingPage3Cta => 'Adicionar Produtos Frescos';
@@ -2000,8 +1928,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingPage4Title => 'Configurar Despensa';
 
   @override
-  String get onboardingPage4Desc =>
-      'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
+  String get onboardingPage4Desc => 'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
 
   @override
   String get onboardingPage4Cta => 'Configurar';
@@ -2010,8 +1937,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingPage5Title => 'Controle Tudo';
 
   @override
-  String get onboardingPage5Desc =>
-      'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
+  String get onboardingPage5Desc => 'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
 
   @override
   String get onboardingPage5Cta => 'Comecar';
@@ -2041,8 +1967,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get inPantryFilter => 'Na Despensa';
 
   @override
-  String get inPantryEmpty =>
-      'Nenhum produto na sua despensa corresponde a esta pesquisa';
+  String get inPantryEmpty => 'Nenhum produto na sua despensa corresponde a esta pesquisa';
 
   @override
   String get inPantrySwipeLabel => 'Ja na despensa';
@@ -2112,7 +2037,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
 class AppLocalizationsPtBr extends AppLocalizationsPt {
-  AppLocalizationsPtBr() : super('pt_BR');
+  AppLocalizationsPtBr(): super('pt_BR');
 
   @override
   String get myPantry => 'Minha Despensa';
@@ -2145,8 +2070,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get emptyPantryTitle => 'Sua despensa está vazia';
 
   @override
-  String get emptyPantrySubtitle =>
-      'Toque no botão abaixo pra escanear seu primeiro produto';
+  String get emptyPantrySubtitle => 'Toque no botão abaixo pra escanear seu primeiro produto';
 
   @override
   String get scanFirstProduct => 'Escanear um código';
@@ -2387,8 +2311,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get delete => 'Excluir';
 
   @override
-  String get failedToLoadInventoryItems =>
-      'Não foi possível carregar os itens do estoque.';
+  String get failedToLoadInventoryItems => 'Não foi possível carregar os itens do estoque.';
 
   @override
   String get enterPositiveNumber => 'Digite um número positivo';
@@ -2400,12 +2323,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get notificationsDisabled => 'Notificações desativadas.';
 
   @override
-  String get notificationPermissionTitle =>
-      'Permissao de Notificacao Necessaria';
+  String get notificationPermissionTitle => 'Permissao de Notificacao Necessaria';
 
   @override
-  String get notificationPermissionBody =>
-      'Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.';
+  String get notificationPermissionBody => 'Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.';
 
   @override
   String get openSettings => 'Abrir Configuracoes';
@@ -2467,8 +2388,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get couldNotCreateInventory => 'Não foi possível criar a despensa.';
 
   @override
-  String get couldNotResolveProduct =>
-      'Não foi possível carregar os detalhes do produto.';
+  String get couldNotResolveProduct => 'Não foi possível carregar os detalhes do produto.';
 
   @override
   String get couldNotRenameInventory => 'Não foi possível renomear a despensa.';
@@ -2480,15 +2400,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get networkError => 'Erro de rede. Verifique sua conexão.';
 
   @override
-  String get fetchProductFailed =>
-      'Não foi possível buscar o produto. Verifique sua conexão.';
+  String get fetchProductFailed => 'Não foi possível buscar o produto. Verifique sua conexão.';
 
   @override
   String get productNotFound => 'Produto nao encontrado no banco de dados.';
 
   @override
-  String get productNotFoundHint =>
-      'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
+  String get productNotFoundHint => 'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
 
   @override
   String get addManually => 'Adicionar manualmente';
@@ -2592,12 +2510,16 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get saveProduct => 'Salvar produto';
 
   @override
-  String get offlineWarning =>
-      'Você está offline — adicionando produto manualmente';
+  String get saveToInventory => 'Salvar no inventario';
 
   @override
-  String get nutriscoreExplanation =>
-      'Nutri-Score é um selo nutricional que classifica produtos de A (melhor) a E (pior) com base na qualidade nutricional. Ajuda a comparar produtos parecidos rapidamente.';
+  String get submitProductToOff => 'Enviar para o Open Food Facts';
+
+  @override
+  String get offlineWarning => 'Você está offline — adicionando produto manualmente';
+
+  @override
+  String get nutriscoreExplanation => 'Nutri-Score é um selo nutricional que classifica produtos de A (melhor) a E (pior) com base na qualidade nutricional. Ajuda a comparar produtos parecidos rapidamente.';
 
   @override
   String nutriscoreNotApplicable(Object category) {
@@ -2605,8 +2527,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   }
 
   @override
-  String get nutriscoreNotApplicableGeneric =>
-      'Nutri-Score não se aplica a essa categoria de produto.';
+  String get nutriscoreNotApplicableGeneric => 'Nutri-Score não se aplica a essa categoria de produto.';
 
   @override
   String get flushCache => 'Limpar cache';
@@ -2615,16 +2536,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get flushCacheSub => 'Excluir dados e imagens em cache';
 
   @override
-  String get flushCacheConfirm =>
-      'Isso vai excluir todos os dados e imagens em cache obtidos do Open Food Facts. Produtos adicionados manualmente e seus itens de estoque serão mantidos. Os produtos em cache serão baixados de novo na próxima vez que você visualizá-los.';
+  String get flushCacheConfirm => 'Isso vai excluir todos os dados e imagens em cache obtidos do Open Food Facts. Produtos adicionados manualmente e seus itens de estoque serão mantidos. Os produtos em cache serão baixados de novo na próxima vez que você visualizá-los.';
 
   @override
-  String get flushCacheSuccess =>
-      'Cache limpo. Os produtos serão atualizados automaticamente.';
+  String get flushCacheSuccess => 'Cache limpo. Os produtos serão atualizados automaticamente.';
 
   @override
-  String get flushCacheFailed =>
-      'Não foi possível limpar o cache. Tente de novo.';
+  String get flushCacheFailed => 'Não foi possível limpar o cache. Tente de novo.';
 
   @override
   String get submissionPending => 'Envio pendente pro Open Food Facts';
@@ -2653,39 +2571,31 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get submissionSuccess => 'Produto enviado pro Open Food Facts.';
 
   @override
-  String get submissionError =>
-      'Falha ao enviar o produto. Toque pra tentar de novo.';
+  String get submissionError => 'Falha ao enviar o produto. Toque pra tentar de novo.';
 
   @override
-  String get submissionPartiallyCompleted =>
-      'Enviado parcialmente pro Open Food Facts';
+  String get submissionPartiallyCompleted => 'Enviado parcialmente pro Open Food Facts';
 
   @override
-  String get submittingMetadata =>
-      'Enviando os detalhes do produto para o Open Food Facts…';
+  String get submittingMetadata => 'Enviando os detalhes do produto para o Open Food Facts…';
 
   @override
   String get preparingSubmission => 'Preparando o envio…';
 
   @override
-  String get submissionCredentialsError =>
-      'O envio falhou porque as credenciais do Open Food Facts não estão configuradas.';
+  String get submissionCredentialsError => 'O envio falhou porque as credenciais do Open Food Facts não estão configuradas.';
 
   @override
-  String get submissionOfflineError =>
-      'Não foi possível conectar ao Open Food Facts. Verifique sua conexão e tente de novo.';
+  String get submissionOfflineError => 'Não foi possível conectar ao Open Food Facts. Verifique sua conexão e tente de novo.';
 
   @override
-  String get submissionRateLimitedError =>
-      'O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.';
+  String get submissionRateLimitedError => 'O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.';
 
   @override
-  String get submissionRejectedError =>
-      'O Open Food Facts rejeitou os dados do produto.';
+  String get submissionRejectedError => 'O Open Food Facts rejeitou os dados do produto.';
 
   @override
-  String get submissionValidationError =>
-      'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
+  String get submissionValidationError => 'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
 
   @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';
@@ -2712,41 +2622,34 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get searchTitle => 'Buscar Produtos';
 
   @override
-  String get searchProductsHint =>
-      'Busque produtos por nome ou código de barras';
+  String get searchProductsHint => 'Busque produtos por nome ou código de barras';
 
   @override
   String get noSearchResults => 'Nenhum produto encontrado';
 
   @override
-  String get productNotFoundSearch =>
-      'Nenhum produto encontrado em Produtos Embalados.';
+  String get productNotFoundSearch => 'Nenhum produto encontrado em Produtos Embalados.';
 
   @override
-  String get productNotFoundBarcodeHint =>
-      'Tente escanear ou digitar o codigo de barras do produto.';
+  String get productNotFoundBarcodeHint => 'Tente escanear ou digitar o codigo de barras do produto.';
 
   @override
-  String get productNotFoundOfflineHint =>
-      'A pesquisa requer conexao com a internet.';
+  String get productNotFoundOfflineHint => 'A pesquisa requer conexao com a internet.';
 
   @override
   String get enterBarcodePrompt => 'Digite ou cole um codigo de barras';
 
   @override
-  String get productNotInDatabase =>
-      'Este codigo de barras nao esta registrado no Open Food Facts.';
+  String get productNotInDatabase => 'Este codigo de barras nao esta registrado no Open Food Facts.';
 
   @override
-  String get productNotInDatabaseHint =>
-      'Voce ainda pode usar este produto localmente.';
+  String get productNotInDatabaseHint => 'Voce ainda pode usar este produto localmente.';
 
   @override
   String get contributeToOffComingSoonTitle => 'Em Breve';
 
   @override
-  String get contributeToOffComingSoonBody =>
-      'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
+  String get contributeToOffComingSoonBody => 'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
 
   @override
   String get saveLocallyAction => 'Salvar Localmente';
@@ -2793,8 +2696,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get settingsAbout => 'Sobre';
 
   @override
-  String get comingSoonDescription =>
-      'Este recurso estará disponível em breve.';
+  String get comingSoonDescription => 'Este recurso estará disponível em breve.';
 
   @override
   String get priceTracking => 'Controle de Preços';
@@ -2806,8 +2708,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get receiptTracking => 'Notas NFC-e';
 
   @override
-  String get receiptTrackingDescription =>
-      'Escanear notas para adicionar produtos.';
+  String get receiptTrackingDescription => 'Escanear notas para adicionar produtos.';
 
   @override
   String get photoCompletenessTitle => 'Fotos dos Produtos';
@@ -2827,8 +2728,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get statsEmptyTitle => 'Nenhum item para analisar';
 
   @override
-  String get statsEmptySubtitle =>
-      'Adicione produtos à sua despensa para ver estatísticas aqui.';
+  String get statsEmptySubtitle => 'Adicione produtos à sua despensa para ver estatísticas aqui.';
 
   @override
   String get addedThisWeekLabel => 'Esta semana';
@@ -2837,8 +2737,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get addedThisMonthLabel => 'Este mês';
 
   @override
-  String get productDataUnavailable =>
-      'Dados do produto indisponíveis — atualize para baixar';
+  String get productDataUnavailable => 'Dados do produto indisponíveis — atualize para baixar';
 
   @override
   String get locationStats => 'Locais';
@@ -2871,20 +2770,16 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get regressionReport => 'Regressao';
 
   @override
-  String get bugReportExplanation =>
-      'Algo esta quebrado ou nao funciona como esperado.';
+  String get bugReportExplanation => 'Algo esta quebrado ou nao funciona como esperado.';
 
   @override
-  String get featureRequestExplanation =>
-      'Sugira uma nova funcionalidade ou melhoria.';
+  String get featureRequestExplanation => 'Sugira uma nova funcionalidade ou melhoria.';
 
   @override
-  String get generalFeedbackExplanation =>
-      'Outros comentarios, duvidas ou sugestoes.';
+  String get generalFeedbackExplanation => 'Outros comentarios, duvidas ou sugestoes.';
 
   @override
-  String get regressionReportExplanation =>
-      'Uma funcionalidade que funcionava antes mas nao funciona mais.';
+  String get regressionReportExplanation => 'Uma funcionalidade que funcionava antes mas nao funciona mais.';
 
   @override
   String get issueTitle => 'Título';
@@ -2896,8 +2791,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get issueDescription => 'Descrição';
 
   @override
-  String get issueDescriptionRequired =>
-      'Descrição obrigatória (mín. 10 caracteres)';
+  String get issueDescriptionRequired => 'Descrição obrigatória (mín. 10 caracteres)';
 
   @override
   String get attachScreenshot => 'Anexar captura de tela';
@@ -2915,8 +2809,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get issueSubmitted => 'Obrigado! Seu relato foi enviado.';
 
   @override
-  String get issueQueuedOffline =>
-      'Você está offline. Seu relato será enviado quando você estiver online.';
+  String get issueQueuedOffline => 'Você está offline. Seu relato será enviado quando você estiver online.';
 
   @override
   String get issueSubmissionFailed => 'Falha ao enviar. Tente novamente.';
@@ -2953,29 +2846,25 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get osLabel => 'SO';
 
   @override
-  String get cameraPermissionDenied =>
-      'Permissao da camera negada. Conceda acesso nas Configuracoes.';
+  String get cameraPermissionDenied => 'Permissao da camera negada. Conceda acesso nas Configuracoes.';
 
   @override
   String get cameraPermissionDeniedTitle => 'Permissão da câmera necessária';
 
   @override
-  String get cameraPermissionDeniedBody =>
-      'O Pantry precisa de acesso à câmera para tirar fotos de produtos.';
+  String get cameraPermissionDeniedBody => 'O Pantry precisa de acesso à câmera para tirar fotos de produtos.';
 
   @override
   String get galleryPermissionDeniedTitle => 'É necessário acesso à galeria';
 
   @override
-  String get galleryPermissionDeniedBody =>
-      'O Pantry precisa de acesso às suas fotos para escolher uma foto existente. Abra as Configurações para permitir o acesso.';
+  String get galleryPermissionDeniedBody => 'O Pantry precisa de acesso às suas fotos para escolher uma foto existente. Abra as Configurações para permitir o acesso.';
 
   @override
   String get cameraNotAvailable => 'Camera nao disponivel neste dispositivo.';
 
   @override
-  String get scannerGenericError =>
-      'Ocorreu um erro inesperado ao iniciar a camera.';
+  String get scannerGenericError => 'Ocorreu um erro inesperado ao iniciar a camera.';
 
   @override
   String get switchToManualEntry => 'Digitar codigo manualmente';
@@ -3038,8 +2927,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   }
 
   @override
-  String get inactivityReminderEnabled =>
-      'Lembrar de adicionar produtos regularmente';
+  String get inactivityReminderEnabled => 'Lembrar de adicionar produtos regularmente';
 
   @override
   String get inactivityThresholdDays => 'Limite de inatividade (dias)';
@@ -3048,12 +2936,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get inactivityReminderChannelName => 'Lembretes de inatividade';
 
   @override
-  String get inactivityReminderChannelDescription =>
-      'Lembra voce de adicionar produtos regularmente';
+  String get inactivityReminderChannelDescription => 'Lembra voce de adicionar produtos regularmente';
 
   @override
-  String get notificationDeniedWarning =>
-      'Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.';
+  String get notificationDeniedWarning => 'Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.';
 
   @override
   String inactivityThresholdSet(int days) {
@@ -3064,8 +2950,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get amoledDarkMode => 'Modo escuro AMOLED';
 
   @override
-  String get amoledDarkModeExplanation =>
-      'Usar fundo preto no modo escuro para economizar bateria em telas AMOLED';
+  String get amoledDarkModeExplanation => 'Usar fundo preto no modo escuro para economizar bateria em telas AMOLED';
 
   @override
   String get amoledDarkModeEnabled => 'Modo escuro AMOLED ativado.';
@@ -3077,8 +2962,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get amoledNudgeTitle => 'Trocar para o modo escuro?';
 
   @override
-  String get amoledNudgeBody =>
-      'O modo escuro pode economizar bateria no seu dispositivo, especialmente se a tela for AMOLED. Voce tambem pode ativar o fundo preto puro nas Configuracoes para economia maxima de energia.';
+  String get amoledNudgeBody => 'O modo escuro pode economizar bateria no seu dispositivo, especialmente se a tela for AMOLED. Voce tambem pode ativar o fundo preto puro nas Configuracoes para economia maxima de energia.';
 
   @override
   String get amoledNudgeEnable => 'Ativar modo escuro';
@@ -3090,16 +2974,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get translationReport => 'Relato de Traducao';
 
   @override
-  String get translationReportExplanation =>
-      'Relate um problema com a traducao de um produto ou sugira uma nova traducao.';
+  String get translationReportExplanation => 'Relate um problema com a traducao de um produto ou sugira uma nova traducao.';
 
   @override
-  String get feedbackRateLimit =>
-      'Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.';
+  String get feedbackRateLimit => 'Voce so pode enviar um relato por minuto e ate 5 por dia. Tente novamente mais tarde.';
 
   @override
-  String get couldNotOpenLinkFallback =>
-      'URL copiada para a area de transferencia.';
+  String get couldNotOpenLinkFallback => 'URL copiada para a area de transferencia.';
 
   @override
   String get includeLogs => 'Incluir registros do app';
@@ -3108,8 +2989,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get includeLogsExplanation => 'Avisos e erros recentes desta sessao';
 
   @override
-  String get logsPrivacyNote =>
-      'Os registros podem conter nomes de produtos e horarios.';
+  String get logsPrivacyNote => 'Os registros podem conter nomes de produtos e horarios.';
 
   @override
   String get price => 'Preco';
@@ -3148,8 +3028,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get viewAllPrices => 'Ver todos';
 
   @override
-  String get noPriceTrend =>
-      'Adicione pelo menos dois precos para ver a tendencia.';
+  String get noPriceTrend => 'Adicione pelo menos dois precos para ver a tendencia.';
 
   @override
   String get totalValue => 'Valor total';
@@ -3164,8 +3043,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get hidePrices => 'Ocultar precos por privacidade';
 
   @override
-  String get hidePricesDescription =>
-      'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
+  String get hidePricesDescription => 'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
 
   @override
   String get pricesHidden => 'Precos ocultos.';
@@ -3191,8 +3069,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get baseCurrency => 'Moeda base';
 
   @override
-  String get baseCurrencyDescription =>
-      'Todos os precos sao exibidos nesta moeda.';
+  String get baseCurrencyDescription => 'Todos os precos sao exibidos nesta moeda.';
 
   @override
   String get store => 'Loja';
@@ -3222,15 +3099,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get syncToOpenPrices => 'Compartilhar com Open Prices';
 
   @override
-  String get syncToOpenPricesDescription =>
-      'Contribua com seus dados de preco para o banco de dados comunitario.';
+  String get syncToOpenPricesDescription => 'Contribua com seus dados de preco para o banco de dados comunitario.';
 
   @override
   String get openPricesToken => 'Token da API Open Prices';
 
   @override
-  String get openPricesTokenDescription =>
-      'Token gerado da sua conta do Open Food Facts.';
+  String get openPricesTokenDescription => 'Token gerado da sua conta do Open Food Facts.';
 
   @override
   String get openPricesTokenSaved => 'Token salvo.';
@@ -3270,15 +3145,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   }
 
   @override
-  String get openPricesProofExplanation =>
-      'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
+  String get openPricesProofExplanation => 'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
 
   @override
   String get openPricesConsentTitle => 'Contribuir com Open Prices';
 
   @override
-  String get openPricesConsentBody =>
-      'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
+  String get openPricesConsentBody => 'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
 
   @override
   String get iUnderstand => 'Entendi';
@@ -3314,8 +3187,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get emptyShoppingList => 'Sua lista de compras esta vazia';
 
   @override
-  String get emptyShoppingListSub =>
-      'Adicione itens de um produto ou toque em + para adicionar manualmente';
+  String get emptyShoppingListSub => 'Adicione itens de um produto ou toque em + para adicionar manualmente';
 
   @override
   String get deleteItem => 'Excluir item';
@@ -3363,8 +3235,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get addCustomItem => 'Adicionar item personalizado';
 
   @override
-  String get noProductsFound =>
-      'Nenhum produto encontrado. Tente um item personalizado.';
+  String get noProductsFound => 'Nenhum produto encontrado. Tente um item personalizado.';
 
   @override
   String get backToSearch => 'Voltar a busca';
@@ -3413,8 +3284,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count itens restantes — adicione um codigo de barras ou crie um produto',
+      other: '$count itens restantes — adicione um codigo de barras ou crie um produto',
       one: '1 item restante — adicione um codigo de barras ou crie um produto',
     );
     return '$_temp0';
@@ -3424,8 +3294,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get addToPantryAfterPrice => 'Adicionar a sua despensa?';
 
   @override
-  String get addToPantryAfterPriceDesc =>
-      'Registre a quantidade comprada para acompanhar no seu estoque.';
+  String get addToPantryAfterPriceDesc => 'Registre a quantidade comprada para acompanhar no seu estoque.';
 
   @override
   String get howManyBought => 'Quantas unidades voce comprou?';
@@ -3434,15 +3303,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get choosePantry => 'Escolher despensa';
 
   @override
-  String get addToPantrySkipped =>
-      'Preco salvo. Adicione pela pagina do produto para acompanhar.';
+  String get addToPantrySkipped => 'Preco salvo. Adicione pela pagina do produto para acompanhar.';
 
   @override
   String get invalidPriceAmount => 'Digite um valor de preço válido';
 
   @override
-  String get apiSearchWarning =>
-      'Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.';
+  String get apiSearchWarning => 'Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.';
 
   @override
   String get dismiss => 'Dispensar';
@@ -3457,8 +3324,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get testNotification => 'Enviar notificação de teste';
 
   @override
-  String get testScheduledNotification =>
-      'Enviar notificação de teste agendada (2 min)';
+  String get testScheduledNotification => 'Enviar notificação de teste agendada (2 min)';
 
   @override
   String get testNotificationScheduled => 'Notificação de teste agendada.';
@@ -3545,15 +3411,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get generalNotificationChannelName => 'Notificações Gerais';
 
   @override
-  String get generalNotificationChannelDescription =>
-      'Notificações padrão do app';
+  String get generalNotificationChannelDescription => 'Notificações padrão do app';
 
   @override
   String get testNotificationTitle => 'Teste bem-sucedido';
 
   @override
-  String get testNotificationBody =>
-      'Notificações imediatas estão funcionando!';
+  String get testNotificationBody => 'Notificações imediatas estão funcionando!';
 
   @override
   String get testScheduledTitle => 'Teste Agendado';
@@ -3632,8 +3496,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get categoryCerealsAndPotatoes => 'Cereais e batatas';
 
   @override
-  String get categoryFruitsAndVegetables =>
-      'Alimentos à base de frutas e vegetais';
+  String get categoryFruitsAndVegetables => 'Alimentos à base de frutas e vegetais';
 
   @override
   String get categoryConfectioneries => 'Confeitaria';
@@ -3879,16 +3742,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get produceLettuce => 'Alface';
 
   @override
-  String get exactAlarmsDeniedHint =>
-      'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
+  String get exactAlarmsDeniedHint => 'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
 
   @override
-  String get notificationRationaleTitle =>
-      'Notificações ajudam você a acompanhar';
+  String get notificationRationaleTitle => 'Notificações ajudam você a acompanhar';
 
   @override
-  String get notificationRationaleBody =>
-      'O Pantry usa notificações para:\n\n- Lembrar quando os alimentos estão perto de vencer\n- Lembrar de adicionar produtos regularmente\n- Confirmar que notificações de teste funcionam\n\nVocê pode mudar isso a qualquer momento em Configurações.';
+  String get notificationRationaleBody => 'O Pantry usa notificações para:\n\n- Lembrar quando os alimentos estão perto de vencer\n- Lembrar de adicionar produtos regularmente\n- Confirmar que notificações de teste funcionam\n\nVocê pode mudar isso a qualquer momento em Configurações.';
 
   @override
   String get notificationRationaleAllow => 'Permitir';
@@ -3975,8 +3835,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get servingsHint => 'ex.: 4';
 
   @override
-  String get setServingsHint =>
-      'Defina o numero de porcoes no editor da receita para ver a nutricao por porcao';
+  String get setServingsHint => 'Defina o numero de porcoes no editor da receita para ver a nutricao por porcao';
 
   @override
   String get addPhoto => 'Adicionar foto';
@@ -4014,15 +3873,13 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get noRecipes => 'Nenhuma receita ainda';
 
   @override
-  String get noRecipesSubtitle =>
-      'Registre receitas para controlar custos e planejar refeições';
+  String get noRecipesSubtitle => 'Registre receitas para controlar custos e planejar refeições';
 
   @override
   String get discardChanges => 'Descartar alterações?';
 
   @override
-  String get discardChangesConfirm =>
-      'Você tem alterações não salvas. Descartá-las?';
+  String get discardChangesConfirm => 'Você tem alterações não salvas. Descartá-las?';
 
   @override
   String get recipeCost => 'Custo da receita';
@@ -4060,8 +3917,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get confirmDiscard => 'Descartar alteracoes?';
 
   @override
-  String get confirmDiscardContent =>
-      'Voce tem alteracoes nao salvas. Tem certeza que deseja voltar?';
+  String get confirmDiscardContent => 'Voce tem alteracoes nao salvas. Tem certeza que deseja voltar?';
 
   @override
   String get searchProduct => 'Pesquisar produto';
@@ -4076,8 +3932,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get onboardingPage1Title => 'Escanear Codigos de Barras';
 
   @override
-  String get onboardingPage1Desc =>
-      'Adicione rapidamente produtos a sua despensa escaneando os codigos de barras com sua camera.';
+  String get onboardingPage1Desc => 'Adicione rapidamente produtos a sua despensa escaneando os codigos de barras com sua camera.';
 
   @override
   String get onboardingPage1Cta => 'Abrir Scanner';
@@ -4086,8 +3941,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get onboardingPage2Title => 'Pesquisar Produtos';
 
   @override
-  String get onboardingPage2Desc =>
-      'Navegue por milhoes de produtos na base do Open Food Facts para encontrar exatamente o que precisa.';
+  String get onboardingPage2Desc => 'Navegue por milhoes de produtos na base do Open Food Facts para encontrar exatamente o que precisa.';
 
   @override
   String get onboardingPage2Cta => 'Abrir Pesquisa';
@@ -4096,8 +3950,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get onboardingPage3Title => 'Produtos Frescos';
 
   @override
-  String get onboardingPage3Desc =>
-      'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
+  String get onboardingPage3Desc => 'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
 
   @override
   String get onboardingPage3Cta => 'Adicionar Produtos Frescos';
@@ -4106,8 +3959,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get onboardingPage4Title => 'Configurar Despensa';
 
   @override
-  String get onboardingPage4Desc =>
-      'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
+  String get onboardingPage4Desc => 'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
 
   @override
   String get onboardingPage4Cta => 'Configurar';
@@ -4116,8 +3968,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get onboardingPage5Title => 'Controle Tudo';
 
   @override
-  String get onboardingPage5Desc =>
-      'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
+  String get onboardingPage5Desc => 'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
 
   @override
   String get onboardingPage5Cta => 'Comecar';
@@ -4147,8 +3998,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get inPantryFilter => 'Na Despensa';
 
   @override
-  String get inPantryEmpty =>
-      'Nenhum produto na sua despensa corresponde a esta pesquisa';
+  String get inPantryEmpty => 'Nenhum produto na sua despensa corresponde a esta pesquisa';
 
   @override
   String get inPantrySwipeLabel => 'Ja na despensa';

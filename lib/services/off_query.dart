@@ -31,8 +31,9 @@ class OffQuery {
 
   /// Converts a two-letter language code to an [OpenFoodFactsLanguage].
   ///
-  /// Returns [OpenFoodFactsLanguage.ENGLISH] for unknown or null codes.
-  static OpenFoodFactsLanguage _codeToLanguage(String? code) {
+  /// Returns [OpenFoodFactsLanguage.ENGLISH] for unknown, empty, or null
+  /// codes.
+  static OpenFoodFactsLanguage codeToLanguage(String? code) {
     if (code == null || code.isEmpty) return OpenFoodFactsLanguage.ENGLISH;
     try {
       return OpenFoodFactsLanguage.fromOffTag(code) ??
@@ -50,7 +51,7 @@ class OffQuery {
   }) {
     return ProductQueryConfiguration(
       barcode,
-      language: _codeToLanguage(language),
+      language: codeToLanguage(language),
       fields: productFields,
       version: ProductQueryVersion.v3,
     );
@@ -68,7 +69,7 @@ class OffQuery {
         SearchTerms(terms: [query]),
         PageSize(size: pageSize),
       ],
-      language: _codeToLanguage(language),
+      language: codeToLanguage(language),
       fields: productFields,
       version: ProductQueryVersion.v3,
     );

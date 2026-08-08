@@ -31,10 +31,20 @@ import 'package:pantry_app/widgets/product_photo_tile.dart';
 /// photos of the nutrition table, ingredients list, and product packaging.
 class AddProductScreen extends ConsumerStatefulWidget {
   /// Creates an [AddProductScreen] for the given [barcode].
-  const AddProductScreen({required this.barcode, super.key});
+  ///
+  /// Set [submitToOff] to true to give the "Submit to Open Food Facts"
+  /// action visual prominence; both actions are always available.
+  const AddProductScreen({
+    required this.barcode,
+    this.submitToOff = false,
+    super.key,
+  });
 
   /// The barcode that was scanned/entered.
   final String barcode;
+
+  /// Whether the submit-to-Open-Food-Facts action is the primary button.
+  final bool submitToOff;
 
   @override
   ConsumerState<AddProductScreen> createState() => _AddProductScreenState();
@@ -171,18 +181,18 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     );
   }
 
-  Future<void> _save() async {
+  /// Validates the form, saves photos, builds the product, and caches it
+  /// locally.
+  ///
+  /// Returns null when validation fails. The built product is cached via
+  /// [ProductRepository.cacheProduct] so both save and submit actions keep
+  /// the entry in the local inventory.
+  Future<Product?> _buildProduct() async {
     if (!_formKey.currentState!.validate()) {
       logInfo('Add-product form validation failed');
-      return;
+      return null;
     }
     _formKey.currentState!.save();
-
-    final notifier = ref.read(productSubmissionProvider.notifier);
-    if (notifier.isSubmitting) {
-      logInfo('Add-product save ignored while a submission is running');
-      return;
-    }
 
     final saved = await _imageService.save(_slots, barcode: widget.barcode);
     _committedPaths.addAll(
@@ -208,6 +218,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       saltG: double.tryParse(_saltG),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
       source: 'manual',
+      languageCode: Localizations.localeOf(context).languageCode,
       nutritionImagePath: saved.nutrition,
       ingredientsImagePath: saved.ingredients,
       productImagePath: saved.product,
@@ -215,6 +226,26 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     logInfo('Manual product entry saved: ${product.name}');
 
     await _cacheLocally(product);
+    return product;
+  }
+
+  /// Saves the product to the local inventory only.
+  Future<void> _saveLocally() async {
+    final product = await _buildProduct();
+    if (product == null || !mounted) return;
+    Navigator.of(context).pop(product);
+  }
+
+  /// Caches the product locally and submits it to Open Food Facts.
+  Future<void> _submitToOff() async {
+    final notifier = ref.read(productSubmissionProvider.notifier);
+    if (notifier.isSubmitting) {
+      logInfo('Add-product submit ignored while a submission is running');
+      return;
+    }
+
+    final product = await _buildProduct();
+    if (product == null || !mounted) return;
     _submittedProduct = product;
 
     // The screen stays open while the submission runs so progress is
@@ -344,11 +375,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 ImageField.product,
               ),
               const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: _save,
-                icon: const Icon(Icons.save),
-                label: Text(l10n.saveProduct),
-              ),
+              _actionButtons(l10n),
               if (progress != null) ...[
                 const SizedBox(height: 16),
                 _submissionPanel(progress),
@@ -396,6 +423,46 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       onAdd: () => _chooseSource(field),
       onTap: () => _openPreview(field),
       onDelete: () => _removeImage(field),
+    );
+  }
+
+  /// Builds the save and submit action buttons.
+  ///
+  /// Both actions are always available so the local save remains a fallback
+  /// when Open Food Facts rejects a submission (e.g. a duplicate). The
+  /// [widget.submitToOff] flag decides which one is rendered as the primary
+  /// filled button.
+  Widget _actionButtons(AppLocalizations l10n) {
+    final submitPrimary = widget.submitToOff;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (submitPrimary)
+          OutlinedButton.icon(
+            onPressed: _saveLocally,
+            icon: const Icon(Icons.save),
+            label: Text(l10n.saveToInventory),
+          )
+        else
+          ElevatedButton.icon(
+            onPressed: _saveLocally,
+            icon: const Icon(Icons.save),
+            label: Text(l10n.saveToInventory),
+          ),
+        const SizedBox(height: 8),
+        if (submitPrimary)
+          ElevatedButton.icon(
+            onPressed: _submitToOff,
+            icon: const Icon(Icons.cloud_upload),
+            label: Text(l10n.submitProductToOff),
+          )
+        else
+          OutlinedButton.icon(
+            onPressed: _submitToOff,
+            icon: const Icon(Icons.cloud_upload),
+            label: Text(l10n.submitProductToOff),
+          ),
+      ],
     );
   }
 

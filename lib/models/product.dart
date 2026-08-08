@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/services/off_query.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 
@@ -344,6 +345,27 @@ abstract class Product with _$Product {
 extension ProductToOff on Product {
   /// Converts this product to an SDK [off.Product].
   off.Product toOffProduct() {
+    final nutriments = <(off.Nutrient, double)>[
+      if (energyKcal != null) (off.Nutrient.energyKCal, energyKcal!),
+      if (proteinG != null) (off.Nutrient.proteins, proteinG!),
+      if (carbsG != null) (off.Nutrient.carbohydrates, carbsG!),
+      if (fatG != null) (off.Nutrient.fat, fatG!),
+      if (fiberG != null) (off.Nutrient.fiber, fiberG!),
+      if (saltG != null) (off.Nutrient.salt, saltG!),
+    ];
+
+    off.Nutriments? offNutriments;
+    if (nutriments.isNotEmpty) {
+      offNutriments = off.Nutriments.empty();
+      for (final element in nutriments) {
+        offNutriments.setValue(
+          element.$1,
+          off.PerSize.oneHundredGrams,
+          element.$2,
+        );
+      }
+    }
+
     return off.Product(
       barcode: barcode,
       productName: name,
@@ -351,6 +373,9 @@ extension ProductToOff on Product {
       categories: category,
       ingredientsText: ingredients,
       servingSize: servingSize,
+      quantity: quantity,
+      lang: OffQuery.codeToLanguage(languageCode),
+      nutriments: offNutriments,
     );
   }
 }

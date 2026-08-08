@@ -78,13 +78,15 @@ void main() {
   /// touches the filesystem (real I/O does not settle under testWidgets
   /// FakeAsync). Real file persistence is covered by the service unit tests.
   ///
-  /// A success-emitting submission service and a stubbed repository are
-  /// provided so the save flow pops the screen as in production. Pass
-  /// [submissionService] to assert on custom progress.
+  /// A mocked repository is provided so [ProductRepository.cacheProduct] is
+  /// a no-op. Pass [submissionService] to assert on submission behavior and
+  /// set [stubSubmissionAsSuccess] to make it emit a completed progress so
+  /// the submit flow pops the screen as in production.
   Future<void> pumpSaveScreen(
     WidgetTester tester,
     Widget screen, {
     MockProductSubmissionService? submissionService,
+    bool stubSubmissionAsSuccess = false,
   }) async {
     when(
       () => imageService.save(
@@ -107,7 +109,7 @@ void main() {
     ).thenAnswer((_) async {});
 
     final service = submissionService ?? MockProductSubmissionService();
-    if (submissionService == null) {
+    if (stubSubmissionAsSuccess) {
       stubSubmission(service, progress: [completedProgress]);
     }
     final repo = createMockProductRepository();
@@ -128,6 +130,48 @@ void main() {
     testWidgets('renders without crashing', (tester) async {
       await pumpApp(tester, const AddProductScreen(barcode: '123'));
       expect(find.byType(AddProductScreen), findsOneWidget);
+    });
+
+    testWidgets('renders both actions always', (tester) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      expect(find.text('Save to inventory'), findsOneWidget);
+      expect(find.text('Submit to Open Food Facts'), findsOneWidget);
+    });
+
+    testWidgets('save to inventory is primary by default', (tester) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      final saveButton = find.ancestor(
+        of: find.text('Save to inventory'),
+        matching: find.byType(ElevatedButton),
+      );
+      final submitButton = find.ancestor(
+        of: find.text('Submit to Open Food Facts'),
+        matching: find.byType(ElevatedButton),
+      );
+      expect(saveButton, findsOneWidget);
+      expect(submitButton, findsNothing);
+    });
+
+    testWidgets('submit to OFF is primary when submitToOff is true', (
+      tester,
+    ) async {
+      await pumpTall(
+        tester,
+        const AddProductScreen(barcode: '123', submitToOff: true),
+      );
+
+      final saveButton = find.ancestor(
+        of: find.text('Save to inventory'),
+        matching: find.byType(ElevatedButton),
+      );
+      final submitButton = find.ancestor(
+        of: find.text('Submit to Open Food Facts'),
+        matching: find.byType(ElevatedButton),
+      );
+      expect(saveButton, findsNothing);
+      expect(submitButton, findsOneWidget);
     });
 
     testWidgets('shows product name field', (tester) async {
@@ -169,7 +213,8 @@ void main() {
       await pumpTall(tester, const AddProductScreen(barcode: '123'));
 
       expect(find.text('Ingredients'), findsOneWidget);
-      expect(find.text('Save product'), findsOneWidget);
+      expect(find.text('Save to inventory'), findsOneWidget);
+      expect(find.text('Submit to Open Food Facts'), findsOneWidget);
       expect(find.text('Nutrition table photo'), findsOneWidget);
       expect(find.text('Ingredients list photo'), findsOneWidget);
       expect(find.text('Product photo'), findsOneWidget);
@@ -178,7 +223,7 @@ void main() {
     testWidgets('shows validation error when name is empty', (tester) async {
       await pumpTall(tester, const AddProductScreen(barcode: '123'));
 
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Save to inventory'));
       await tester.pumpAndSettle();
 
       expect(find.text('This field is required'), findsOneWidget);
@@ -191,16 +236,22 @@ void main() {
         tester.view.resetPhysicalSize();
         tester.view.resetDevicePixelRatio();
       });
-      await pumpSaveScreen(tester, const AddProductScreen(barcode: '123'));
+      final submission = MockProductSubmissionService();
+      await pumpSaveScreen(
+        tester,
+        const AddProductScreen(barcode: '123'),
+        submissionService: submission,
+      );
 
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Product name'),
         'Test Product',
       );
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Save to inventory'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AddProductScreen), findsNothing);
+      verifyZeroInteractions(submission);
     });
 
     testWidgets('saves all nutrition fields and serving size', (tester) async {
@@ -275,7 +326,7 @@ void main() {
         'Milk, Sugar',
       );
 
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Save to inventory'));
       await tester.pumpAndSettle();
 
       expect(captured, isNotNull);
@@ -331,7 +382,7 @@ void main() {
         'Minimal Product',
       );
 
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Save to inventory'));
       await tester.pumpAndSettle();
 
       expect(captured, isNotNull);
@@ -480,11 +531,42 @@ void main() {
 
       await pumpForm(tester, service);
       await fillName(tester);
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Submit to Open Food Facts'));
       await tester.pump();
 
       expect(find.text('Uploading photo 3 of 3…'), findsOneWidget);
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
+
+      completer.complete(const Product(barcode: '123', name: 'Test'));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('ignores a second submit while a submission is in flight', (
+      tester,
+    ) async {
+      final service = MockProductSubmissionService();
+      final completer = Completer<Product>();
+      when(
+        () => service.submitProduct(
+          any(),
+          onProgress: any(named: 'onProgress'),
+        ),
+      ).thenAnswer((_) => completer.future);
+
+      await pumpForm(tester, service);
+      await fillName(tester);
+      await tester.tap(find.text('Submit to Open Food Facts'));
+      await tester.pump();
+
+      await tester.tap(find.text('Submit to Open Food Facts'));
+      await tester.pump();
+
+      verify(
+        () => service.submitProduct(
+          any(),
+          onProgress: any(named: 'onProgress'),
+        ),
+      ).called(1);
 
       completer.complete(const Product(barcode: '123', name: 'Test'));
       await tester.pumpAndSettle();
@@ -498,7 +580,7 @@ void main() {
 
       await pumpPushedForm(tester, service);
       await fillName(tester);
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Submit to Open Food Facts'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AddProductScreen), findsNothing);
@@ -529,7 +611,7 @@ void main() {
 
       await pumpForm(tester, service);
       await fillName(tester);
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Submit to Open Food Facts'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AddProductScreen), findsOneWidget);
@@ -559,7 +641,7 @@ void main() {
 
       await pumpForm(tester, service);
       await fillName(tester);
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Submit to Open Food Facts'));
       await tester.pumpAndSettle();
 
       expect(
@@ -598,7 +680,7 @@ void main() {
 
       await pumpPushedForm(tester, service);
       await fillName(tester);
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Submit to Open Food Facts'));
       await tester.pumpAndSettle();
       expect(find.text('Retry now'), findsOneWidget);
 

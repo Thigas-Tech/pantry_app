@@ -242,6 +242,7 @@ void main() {
           barcode: any(named: 'barcode'),
           imageField: any(named: 'imageField'),
           imagePath: any(named: 'imagePath'),
+          languageCode: any(named: 'languageCode'),
         ),
       ).thenAnswer((_) async => const OffWriteResult.success());
 
@@ -468,6 +469,33 @@ void main() {
   });
 
   group('submitProduct image handling', () {
+    test('forwards the product languageCode to image uploads', () async {
+      final product = productWithAllImages().copyWith(languageCode: 'pt');
+      stubInsert();
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+      when(
+        () => mockApi.uploadProductImage(
+          barcode: any(named: 'barcode'),
+          imageField: any(named: 'imageField'),
+          imagePath: any(named: 'imagePath'),
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+
+      await service.submitProduct(product);
+
+      verify(
+        () => mockApi.uploadProductImage(
+          barcode: any(named: 'barcode'),
+          imageField: any(named: 'imageField'),
+          imagePath: any(named: 'imagePath'),
+          languageCode: 'pt',
+        ),
+      ).called(3);
+    });
+
     test('partial success persists partially_completed status', () async {
       final product = productWithAllImages();
       stubInsert();
@@ -479,6 +507,7 @@ void main() {
           barcode: any(named: 'barcode'),
           imageField: any(named: 'imageField'),
           imagePath: any(named: 'imagePath'),
+          languageCode: any(named: 'languageCode'),
         ),
       ).thenAnswer(
         (invocation) async {
@@ -526,6 +555,7 @@ void main() {
             barcode: any(named: 'barcode'),
             imageField: any(named: 'imageField'),
             imagePath: any(named: 'imagePath'),
+            languageCode: any(named: 'languageCode'),
           ),
         ).thenAnswer(
           (_) async => const OffWriteResult.failure(OffWriteError.rateLimited),
@@ -581,6 +611,7 @@ void main() {
           barcode: any(named: 'barcode'),
           imageField: any(named: 'imageField'),
           imagePath: any(named: 'imagePath'),
+          languageCode: any(named: 'languageCode'),
         ),
       ).thenAnswer(
         (invocation) async {
@@ -605,6 +636,7 @@ void main() {
           barcode: product.barcode,
           imageField: 'front',
           imagePath: product.productImagePath!,
+          languageCode: 'en',
         ),
       ).called(1);
       verify(
@@ -612,6 +644,7 @@ void main() {
           barcode: product.barcode,
           imageField: 'ingredients',
           imagePath: product.ingredientsImagePath!,
+          languageCode: 'en',
         ),
       ).called(1);
       verify(
@@ -619,6 +652,7 @@ void main() {
           barcode: product.barcode,
           imageField: 'nutrition',
           imagePath: product.nutritionImagePath!,
+          languageCode: 'en',
         ),
       ).called(1);
     });
@@ -636,6 +670,7 @@ void main() {
             barcode: any(named: 'barcode'),
             imageField: any(named: 'imageField'),
             imagePath: any(named: 'imagePath'),
+            languageCode: any(named: 'languageCode'),
           ),
         ).thenAnswer(
           (invocation) async {
@@ -660,6 +695,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'nutrition',
             imagePath: product.nutritionImagePath!,
+            languageCode: 'en',
           ),
         ).called(1);
       },
@@ -693,6 +729,7 @@ void main() {
             barcode: any(named: 'barcode'),
             imageField: any(named: 'imageField'),
             imagePath: any(named: 'imagePath'),
+            languageCode: any(named: 'languageCode'),
           ),
         ).thenAnswer((_) async => const OffWriteResult.success());
 
@@ -709,6 +746,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'ingredients',
             imagePath: product.ingredientsImagePath!,
+            languageCode: 'en',
           ),
         ).called(1);
         verifyNever(
@@ -716,6 +754,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'front',
             imagePath: product.productImagePath!,
+            languageCode: 'en',
           ),
         );
         verifyNever(
@@ -723,6 +762,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'nutrition',
             imagePath: product.nutritionImagePath!,
+            languageCode: 'en',
           ),
         );
       },
@@ -750,6 +790,7 @@ void main() {
             barcode: any(named: 'barcode'),
             imageField: any(named: 'imageField'),
             imagePath: any(named: 'imagePath'),
+            languageCode: any(named: 'languageCode'),
           ),
         ).thenAnswer((_) async => const OffWriteResult.success());
 
@@ -761,6 +802,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'front',
             imagePath: product.productImagePath!,
+            languageCode: 'en',
           ),
         ).called(1);
         verify(
@@ -768,6 +810,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'ingredients',
             imagePath: product.ingredientsImagePath!,
+            languageCode: 'en',
           ),
         ).called(1);
         verify(
@@ -775,6 +818,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'nutrition',
             imagePath: product.nutritionImagePath!,
+            languageCode: 'en',
           ),
         ).called(1);
       },
@@ -797,6 +841,7 @@ void main() {
             barcode: any(named: 'barcode'),
             imageField: any(named: 'imageField'),
             imagePath: any(named: 'imagePath'),
+            languageCode: any(named: 'languageCode'),
           ),
         ).thenAnswer((_) async => const OffWriteResult.success());
         when(
@@ -820,6 +865,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'front',
             imagePath: compressedPath,
+            languageCode: 'en',
           ),
         ).called(1);
         verify(
@@ -827,6 +873,7 @@ void main() {
             barcode: product.barcode,
             imageField: 'ingredients',
             imagePath: product.ingredientsImagePath!,
+            languageCode: 'en',
           ),
         ).called(1);
         // The temp file produced by compression is removed after the upload.
@@ -845,6 +892,7 @@ void main() {
           barcode: any(named: 'barcode'),
           imageField: any(named: 'imageField'),
           imagePath: any(named: 'imagePath'),
+          languageCode: any(named: 'languageCode'),
         ),
       ).thenAnswer((_) async => const OffWriteResult.success());
 
@@ -856,6 +904,7 @@ void main() {
           barcode: product.barcode,
           imageField: 'front',
           imagePath: product.productImagePath!,
+          languageCode: 'en',
         ),
       ).called(1);
       verify(
@@ -863,6 +912,7 @@ void main() {
           barcode: product.barcode,
           imageField: 'ingredients',
           imagePath: product.ingredientsImagePath!,
+          languageCode: 'en',
         ),
       ).called(1);
       verify(
@@ -870,6 +920,7 @@ void main() {
           barcode: product.barcode,
           imageField: 'nutrition',
           imagePath: product.nutritionImagePath!,
+          languageCode: 'en',
         ),
       ).called(1);
     });

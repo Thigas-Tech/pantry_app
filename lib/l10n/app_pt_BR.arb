@@ -241,6 +241,8 @@
   "ingredientsImage": "Foto da lista de ingredientes",
   "productImage": "Foto do produto",
   "saveProduct": "Salvar produto",
+  "saveToInventory": "Salvar no inventario",
+  "submitProductToOff": "Enviar para o Open Food Facts",
   "offlineWarning": "Você está offline — adicionando produto manualmente",
   "nutriscoreExplanation": "Nutri-Score é um selo nutricional que classifica produtos de A (melhor) a E (pior) com base na qualidade nutricional. Ajuda a comparar produtos parecidos rapidamente.",
   "nutriscoreNotApplicable": "Nutri-Score não se aplica a esse produto ({category}).",
