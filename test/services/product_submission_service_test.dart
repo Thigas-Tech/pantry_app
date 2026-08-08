@@ -1,18 +1,25 @@
 import 'dart:io';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/product_submission_queue_dao.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/submission_progress.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/product_image_compressor.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class MockOffAdapter extends Mock implements OffAdapter {}
+
+class MockProductImageCompressor extends Mock
+    implements ProductImageCompressor {}
 
 class FakeDatabase extends Fake implements Database {}
 
@@ -25,12 +32,29 @@ const testProduct = Product(
 void main() {
   late MockDatabaseHelper mockDb;
   late MockOffAdapter mockApi;
+  late MockProductImageCompressor mockCompressor;
   late ProductSubmissionService service;
   late Database db;
+
+  /// Stubs the duplicate pre-check so the barcode is unknown to OFF.
+  void stubNoDuplicate() {
+    when(
+      () => mockApi.getByBarcode(
+        any(),
+        languageCode: any(named: 'languageCode'),
+        maxRetries: any(named: 'maxRetries'),
+      ),
+    ).thenThrow(ProductNotFoundException('not found'));
+  }
+
+  void stubInsert() {
+    when(() => mockDb.insertProduct(any())).thenAnswer((_) async {});
+  }
 
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    dotenv.loadFromString(isOptional: true, mergeWith: {});
     registerFallbackValue(FakeDatabase());
     registerFallbackValue('');
     registerFallbackValue(const Product(barcode: '', name: ''));
@@ -39,11 +63,16 @@ void main() {
   setUp(() async {
     mockDb = MockDatabaseHelper();
     mockApi = MockOffAdapter();
-    service = ProductSubmissionService(db: mockDb, api: mockApi);
+    mockCompressor = MockProductImageCompressor();
+    service = ProductSubmissionService(
+      db: mockDb,
+      api: mockApi,
+      imageCompressor: mockCompressor,
+    );
 
     // Create a real in-memory database for queue DAO operations.
     db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await const ProductSubmissionQueueDao().createTable(db);
+    await ProductSubmissionQueueDao().createTable(db);
 
     // Stub the database getter so _queueForRetry uses the real DB.
     when(() => mockDb.database).thenAnswer((_) async => db);
@@ -51,16 +80,22 @@ void main() {
     // Stub the productSubmissionQueueDao getter.
     when(
       () => mockDb.productSubmissionQueueDao,
-    ).thenReturn(const ProductSubmissionQueueDao());
+    ).thenReturn(ProductSubmissionQueueDao());
+
+    // A fresh product defaults to "not a duplicate" unless a test overrides
+    // the getByBarcode stub.
+    stubNoDuplicate();
+
+    // Compression defaults to "no compression needed" (original path used)
+    // unless a test stubs specific source paths.
+    when(
+      () => mockCompressor.compress(sourcePath: any(named: 'sourcePath')),
+    ).thenAnswer((_) async => null);
   });
 
   tearDown(() async {
     await db.close();
   });
-
-  void stubInsert() {
-    when(() => mockDb.insertProduct(any())).thenAnswer((_) async {});
-  }
 
   /// Creates a product with three local image files on disk.
   Product productWithAllImages() {
@@ -317,6 +352,119 @@ void main() {
       );
       expect(events.last.retryAvailable, isFalse);
     });
+
+    test('maps validation failure to validation with no retry', () async {
+      stubInsert();
+      when(
+        () => mockApi.getByBarcode(
+          any(),
+          languageCode: any(named: 'languageCode'),
+          maxRetries: any(named: 'maxRetries'),
+        ),
+      ).thenThrow(ProductNotFoundException(testProduct.barcode));
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer(
+        (_) async => const OffWriteResult.failure(OffWriteError.validation),
+      );
+
+      final events = <SubmissionProgress>[];
+      final result = await service.submitProduct(
+        testProduct,
+        onProgress: events.add,
+      );
+
+      expect(result.submissionStatus, productSubmissionFailed);
+      expect(events.last.errorCategory, SubmissionErrorCategory.validation);
+      expect(events.last.retryAvailable, isFalse);
+      verifyNever(
+        () => mockDb.productSubmissionQueueDao.insert(any(), any()),
+      );
+    });
+  });
+
+  group('duplicate pre-check', () {
+    test(
+      'fails with duplicate when the barcode already exists on OFF',
+      () async {
+        stubInsert();
+        when(
+          () => mockApi.getByBarcode(
+            testProduct.barcode,
+            languageCode: any(named: 'languageCode'),
+            maxRetries: 0,
+          ),
+        ).thenAnswer((_) async => testProduct);
+
+        final events = <SubmissionProgress>[];
+        final result = await service.submitProduct(
+          testProduct,
+          onProgress: events.add,
+        );
+
+        expect(result.submissionStatus, productSubmissionFailed);
+        expect(events.last.step, SubmissionStep.failed);
+        expect(events.last.errorCategory, SubmissionErrorCategory.duplicate);
+        expect(events.last.retryAvailable, isFalse);
+        verifyNever(() => mockApi.submitProduct(any()));
+        verifyNever(
+          () => mockDb.productSubmissionQueueDao.insert(any(), any()),
+        );
+      },
+    );
+
+    test('proceeds when the barcode is unknown to OFF', () async {
+      stubInsert();
+      when(
+        () => mockApi.getByBarcode(
+          testProduct.barcode,
+          languageCode: any(named: 'languageCode'),
+          maxRetries: 0,
+        ),
+      ).thenThrow(ProductNotFoundException(testProduct.barcode));
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+
+      final result = await service.submitProduct(testProduct);
+      expect(result.submissionStatus, productSubmissionSubmitted);
+    });
+
+    test(
+      'proceeds when the duplicate check cannot run (network error)',
+      () async {
+        stubInsert();
+        when(
+          () => mockApi.getByBarcode(
+            testProduct.barcode,
+            languageCode: any(named: 'languageCode'),
+            maxRetries: 0,
+          ),
+        ).thenThrow(FetchFailedException('offline'));
+        when(
+          () => mockApi.submitProduct(any()),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+
+        final result = await service.submitProduct(testProduct);
+        expect(result.submissionStatus, productSubmissionSubmitted);
+      },
+    );
+
+    test('skips the duplicate check when retrying a failed product', () async {
+      final retryProduct = testProduct.copyWith(
+        submissionStatus: productSubmissionFailed,
+      );
+      stubInsert();
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+
+      final result = await service.submitProduct(retryProduct);
+      expect(result.submissionStatus, productSubmissionSubmitted);
+      // Metadata submission was reached: the duplicate gate did not block
+      // the retry even though the server state is fetched for images.
+      verify(() => mockApi.submitProduct(any())).called(1);
+    });
   });
 
   group('submitProduct image handling', () {
@@ -420,6 +568,416 @@ void main() {
           imagePath: any(named: 'imagePath'),
         ),
       );
+    });
+
+    test('continues uploading remaining images when the first fails', () async {
+      final product = productWithAllImages();
+      stubInsert();
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+      when(
+        () => mockApi.uploadProductImage(
+          barcode: any(named: 'barcode'),
+          imageField: any(named: 'imageField'),
+          imagePath: any(named: 'imagePath'),
+        ),
+      ).thenAnswer(
+        (invocation) async {
+          final field = invocation.namedArguments[#imageField] as String;
+          if (field == 'front') {
+            return const OffWriteResult.failure(OffWriteError.network);
+          }
+          return const OffWriteResult.success();
+        },
+      );
+
+      final events = <SubmissionProgress>[];
+      final result = await service.submitProduct(
+        product,
+        onProgress: events.add,
+      );
+
+      expect(result.submissionStatus, productSubmissionPartiallyCompleted);
+      expect(events.last.completedImageCount, 2);
+      verify(
+        () => mockApi.uploadProductImage(
+          barcode: product.barcode,
+          imageField: 'front',
+          imagePath: product.productImagePath!,
+        ),
+      ).called(1);
+      verify(
+        () => mockApi.uploadProductImage(
+          barcode: product.barcode,
+          imageField: 'ingredients',
+          imagePath: product.ingredientsImagePath!,
+        ),
+      ).called(1);
+      verify(
+        () => mockApi.uploadProductImage(
+          barcode: product.barcode,
+          imageField: 'nutrition',
+          imagePath: product.nutritionImagePath!,
+        ),
+      ).called(1);
+    });
+
+    test(
+      'continues uploading remaining images when a middle one fails',
+      () async {
+        final product = productWithAllImages();
+        stubInsert();
+        when(
+          () => mockApi.submitProduct(any()),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+        when(
+          () => mockApi.uploadProductImage(
+            barcode: any(named: 'barcode'),
+            imageField: any(named: 'imageField'),
+            imagePath: any(named: 'imagePath'),
+          ),
+        ).thenAnswer(
+          (invocation) async {
+            final field = invocation.namedArguments[#imageField] as String;
+            if (field == 'ingredients') {
+              return const OffWriteResult.failure(OffWriteError.network);
+            }
+            return const OffWriteResult.success();
+          },
+        );
+
+        final events = <SubmissionProgress>[];
+        final result = await service.submitProduct(
+          product,
+          onProgress: events.add,
+        );
+
+        expect(result.submissionStatus, productSubmissionPartiallyCompleted);
+        expect(events.last.completedImageCount, 2);
+        verify(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'nutrition',
+            imagePath: product.nutritionImagePath!,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'retry skips images the server already has and uploads only missing ones',
+      () async {
+        final product = productWithAllImages().copyWith(
+          submissionStatus: productSubmissionPartiallyCompleted,
+        );
+        stubInsert();
+        when(
+          () => mockApi.getByBarcode(
+            product.barcode,
+            languageCode: any(named: 'languageCode'),
+            maxRetries: 0,
+          ),
+        ).thenAnswer(
+          (_) async => testProduct.copyWith(
+            offProductImageUrl: 'https://images.openfoodfacts.org/front.jpg',
+            offNutritionImageUrl:
+                'https://images.openfoodfacts.org/nutrition.jpg',
+          ),
+        );
+        when(
+          () => mockApi.submitProduct(any()),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+        when(
+          () => mockApi.uploadProductImage(
+            barcode: any(named: 'barcode'),
+            imageField: any(named: 'imageField'),
+            imagePath: any(named: 'imagePath'),
+          ),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+
+        final events = <SubmissionProgress>[];
+        final result = await service.submitProduct(
+          product,
+          onProgress: events.add,
+        );
+
+        expect(result.submissionStatus, productSubmissionSubmitted);
+        expect(events.last.completedImageCount, 3);
+        verify(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'ingredients',
+            imagePath: product.ingredientsImagePath!,
+          ),
+        ).called(1);
+        verifyNever(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'front',
+            imagePath: product.productImagePath!,
+          ),
+        );
+        verifyNever(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'nutrition',
+            imagePath: product.nutritionImagePath!,
+          ),
+        );
+      },
+    );
+
+    test(
+      'retry uploads all images when the server state cannot be fetched',
+      () async {
+        final product = productWithAllImages().copyWith(
+          submissionStatus: productSubmissionPartiallyCompleted,
+        );
+        stubInsert();
+        when(
+          () => mockApi.getByBarcode(
+            product.barcode,
+            languageCode: any(named: 'languageCode'),
+            maxRetries: 0,
+          ),
+        ).thenThrow(FetchFailedException('offline'));
+        when(
+          () => mockApi.submitProduct(any()),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+        when(
+          () => mockApi.uploadProductImage(
+            barcode: any(named: 'barcode'),
+            imageField: any(named: 'imageField'),
+            imagePath: any(named: 'imagePath'),
+          ),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+
+        final result = await service.submitProduct(product);
+
+        expect(result.submissionStatus, productSubmissionSubmitted);
+        verify(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'front',
+            imagePath: product.productImagePath!,
+          ),
+        ).called(1);
+        verify(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'ingredients',
+            imagePath: product.ingredientsImagePath!,
+          ),
+        ).called(1);
+        verify(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'nutrition',
+            imagePath: product.nutritionImagePath!,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'compresses the image before upload and deletes the temp file',
+      () async {
+        final product = productWithAllImages();
+        final tempDir = Directory.systemTemp.createTempSync('pantry_comp_');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final compressedPath = '${tempDir.path}/front_compressed.jpg';
+        File(compressedPath).writeAsBytesSync([9, 9, 9]);
+        stubInsert();
+        when(
+          () => mockApi.submitProduct(any()),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+        when(
+          () => mockApi.uploadProductImage(
+            barcode: any(named: 'barcode'),
+            imageField: any(named: 'imageField'),
+            imagePath: any(named: 'imagePath'),
+          ),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+        when(
+          () => mockCompressor.compress(sourcePath: product.productImagePath!),
+        ).thenAnswer((_) async => compressedPath);
+        when(
+          () => mockCompressor.compress(
+            sourcePath: product.ingredientsImagePath!,
+          ),
+        ).thenAnswer((_) async => null);
+        when(
+          () =>
+              mockCompressor.compress(sourcePath: product.nutritionImagePath!),
+        ).thenAnswer((_) async => null);
+
+        final result = await service.submitProduct(product);
+
+        expect(result.submissionStatus, productSubmissionSubmitted);
+        verify(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'front',
+            imagePath: compressedPath,
+          ),
+        ).called(1);
+        verify(
+          () => mockApi.uploadProductImage(
+            barcode: product.barcode,
+            imageField: 'ingredients',
+            imagePath: product.ingredientsImagePath!,
+          ),
+        ).called(1);
+        // The temp file produced by compression is removed after the upload.
+        expect(File(compressedPath).existsSync(), isFalse);
+      },
+    );
+
+    test('uploads the original path when compression returns null', () async {
+      final product = productWithAllImages();
+      stubInsert();
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+      when(
+        () => mockApi.uploadProductImage(
+          barcode: any(named: 'barcode'),
+          imageField: any(named: 'imageField'),
+          imagePath: any(named: 'imagePath'),
+        ),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+
+      final result = await service.submitProduct(product);
+
+      expect(result.submissionStatus, productSubmissionSubmitted);
+      verify(
+        () => mockApi.uploadProductImage(
+          barcode: product.barcode,
+          imageField: 'front',
+          imagePath: product.productImagePath!,
+        ),
+      ).called(1);
+      verify(
+        () => mockApi.uploadProductImage(
+          barcode: product.barcode,
+          imageField: 'ingredients',
+          imagePath: product.ingredientsImagePath!,
+        ),
+      ).called(1);
+      verify(
+        () => mockApi.uploadProductImage(
+          barcode: product.barcode,
+          imageField: 'nutrition',
+          imagePath: product.nutritionImagePath!,
+        ),
+      ).called(1);
+    });
+
+    test(
+      'does not log the local image path when an image is missing',
+      () async {
+        const missingPath = '/nonexistent/pantry/front.jpg';
+        final product = testProduct.copyWith(productImagePath: missingPath);
+        stubInsert();
+        when(
+          () => mockApi.submitProduct(any()),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+
+        await service.submitProduct(product);
+
+        expect(recentLogs, isNot(contains(missingPath)));
+      },
+    );
+  });
+
+  group('flushQueue', () {
+    test('removes the entry and returns 1 when the product submits', () async {
+      final cached = testProduct.copyWith(
+        submissionStatus: productSubmissionFailed,
+      );
+      final queueDao = ProductSubmissionQueueDao();
+      final database = await mockDb.database;
+      await queueDao.insert(database, testProduct.barcode);
+      stubInsert();
+      when(
+        () => mockDb.getProduct(testProduct.barcode),
+      ).thenAnswer((_) async => cached);
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+
+      final submitted = await service.flushQueue();
+
+      expect(submitted, 1);
+      expect(await queueDao.isQueued(database, testProduct.barcode), isFalse);
+    });
+
+    test('increments the retry count when the submission fails', () async {
+      final cached = testProduct.copyWith(
+        submissionStatus: productSubmissionFailed,
+      );
+      final queueDao = ProductSubmissionQueueDao();
+      final database = await mockDb.database;
+      await queueDao.insert(database, testProduct.barcode);
+      stubInsert();
+      when(
+        () => mockDb.getProduct(testProduct.barcode),
+      ).thenAnswer((_) async => cached);
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer(
+        (_) async => const OffWriteResult.failure(OffWriteError.network),
+      );
+
+      final submitted = await service.flushQueue();
+
+      expect(submitted, 0);
+      final row = (await database.query('product_submission_queue')).single;
+      expect(row['barcode'], testProduct.barcode);
+      expect(row['retry_count'], 1);
+    });
+
+    test(
+      'removes the entry when the cached product is already submitted',
+      () async {
+        final cached = testProduct.copyWith(
+          submissionStatus: productSubmissionSubmitted,
+        );
+        final queueDao = ProductSubmissionQueueDao();
+        final database = await mockDb.database;
+        await queueDao.insert(database, testProduct.barcode);
+        when(
+          () => mockDb.getProduct(testProduct.barcode),
+        ).thenAnswer((_) async => cached);
+
+        final submitted = await service.flushQueue();
+
+        expect(submitted, 0);
+        expect(await queueDao.isQueued(database, testProduct.barcode), isFalse);
+      },
+    );
+
+    test(
+      'removes the entry when the cached product no longer exists',
+      () async {
+        final queueDao = ProductSubmissionQueueDao();
+        final database = await mockDb.database;
+        await queueDao.insert(database, testProduct.barcode);
+        when(
+          () => mockDb.getProduct(testProduct.barcode),
+        ).thenAnswer((_) async => null);
+
+        final submitted = await service.flushQueue();
+
+        expect(submitted, 0);
+        expect(await queueDao.isQueued(database, testProduct.barcode), isFalse);
+      },
+    );
+
+    test('is a no-op when the queue is empty', () async {
+      final submitted = await service.flushQueue();
+      expect(submitted, 0);
     });
   });
 }

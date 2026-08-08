@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/submission_progress.dart';
+import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/services/product_image_compressor.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/redaction.dart';
 
 /// Coordinates the submission of a manually entered product to Open Food Facts.
 ///
@@ -33,10 +36,12 @@ class ProductSubmissionService {
   ProductSubmissionService({
     required this._db,
     required this._api,
-  });
+    ProductImageCompressor? imageCompressor,
+  }) : _imageCompressor = imageCompressor ?? ProductImageCompressor();
 
   final DatabaseHelper _db;
   final OffAdapter _api;
+  final ProductImageCompressor _imageCompressor;
 
   /// Submits [product] to Open Food Facts along with any local images.
   ///
@@ -72,6 +77,27 @@ class ProductSubmissionService {
           totalImageCount: totalImages,
         ),
       );
+
+      // A fresh manual entry must not silently overwrite a barcode that
+      // already exists on Open Food Facts. Retries skip the check so a
+      // partially completed submission (whose metadata already reached the
+      // server) can still recover.
+      if (product.submissionStatus == productSubmissionNotSubmitted) {
+        final duplicate = await _isDuplicate(product);
+        if (duplicate) {
+          logWarning(
+            'Product ${product.barcode}: barcode already exists on OFF',
+          );
+          return _finishFailed(
+            product,
+            onProgress,
+            SubmissionErrorCategory.duplicate,
+            false,
+            totalImages,
+          );
+        }
+      }
+
       final metadataResult = await _api.submitProduct(updated);
       if (!metadataResult.success) {
         logWarning(
@@ -102,7 +128,21 @@ class ProductSubmissionService {
         ),
       ];
 
+      // On a retry the metadata may already be on the server and some image
+      // fields may have been uploaded successfully before the interruption.
+      // Detect those so they are not uploaded again. Fresh submissions skip
+      // this read because the duplicate check already proved the barcode is
+      // unknown.
+      final serverImages =
+          product.submissionStatus == productSubmissionNotSubmitted
+          ? <String>{}
+          : await _existingServerImages(product);
+
       for (final (imageField, imagePath, step) in uploads) {
+        if (serverImages.contains(imageField)) {
+          completedImages++;
+          continue;
+        }
         final result = await _uploadImageIfPresent(
           product: updated,
           imageField: imageField,
@@ -169,7 +209,9 @@ class ProductSubmissionService {
         totalImages,
       );
     } on Exception catch (e) {
-      logError('Submission failed for ${product.barcode}: $e');
+      logError(
+        'Submission failed for ${product.barcode}: ${redactSensitive('$e')}',
+      );
       return _finishFailed(
         product,
         onProgress,
@@ -227,16 +269,74 @@ class ProductSubmissionService {
             await _db.productSubmissionQueueDao.incrementRetry(database, id);
           }
         } on Exception catch (e) {
-          logWarning('Queue flush failed for $barcode: $e');
+          logWarning(
+            'Queue flush failed for $barcode: ${redactSensitive('$e')}',
+          );
           await _db.productSubmissionQueueDao.incrementRetry(database, id);
         }
       }
 
       logInfo('Queue flush completed: $submitted submitted');
     } on Exception catch (e) {
-      logError('Queue flush failed: $e');
+      logError('Queue flush failed: ${redactSensitive('$e')}');
     }
     return submitted;
+  }
+
+  /// Returns true when [product]'s barcode already exists on Open Food Facts.
+  ///
+  /// The check is best-effort: any failure to reach Open Food Facts is
+  /// treated as "not a duplicate" so a flaky check never blocks a legitimate
+  /// submission. Uses no retries so the check fails fast.
+  Future<bool> _isDuplicate(Product product) async {
+    try {
+      await _api.getByBarcode(
+        product.barcode,
+        languageCode: product.languageCode,
+        maxRetries: 0,
+      );
+      return true;
+    } on ProductNotFoundException {
+      return false;
+    } on Exception catch (e) {
+      logWarning(
+        'Duplicate check for ${product.barcode} failed: '
+        '${redactSensitive('$e')}',
+      );
+      return false;
+    }
+  }
+
+  /// Returns the set of image fields that already have an image on Open Food
+  /// Facts for [product]'s barcode.
+  ///
+  /// Best-effort: any failure to reach Open Food Facts returns an empty set
+  /// so a retry conservatively uploads every local image. Uses no retries so
+  /// the check fails fast.
+  Future<Set<String>> _existingServerImages(Product product) async {
+    final present = <String>{};
+    try {
+      final serverProduct = await _api.getByBarcode(
+        product.barcode,
+        languageCode: product.languageCode,
+        maxRetries: 0,
+      );
+      if ((serverProduct.offProductImageUrl ?? '').isNotEmpty) {
+        present.add('front');
+      }
+      if ((serverProduct.offIngredientsImageUrl ?? '').isNotEmpty) {
+        present.add('ingredients');
+      }
+      if ((serverProduct.offNutritionImageUrl ?? '').isNotEmpty) {
+        present.add('nutrition');
+      }
+    } on Exception catch (e) {
+      logWarning(
+        'Could not fetch server images for ${product.barcode}: '
+        '${redactSensitive('$e')}',
+      );
+    }
+    return present;
   }
 
   /// Queues a barcode for background retry if not already queued.
@@ -252,7 +352,9 @@ class ProductSubmissionService {
         logInfo('Product $barcode queued for background retry');
       }
     } on Exception catch (e) {
-      logWarning('Failed to queue $barcode for retry: $e');
+      logWarning(
+        'Failed to queue $barcode for retry: ${redactSensitive('$e')}',
+      );
     }
   }
 
@@ -304,7 +406,7 @@ class ProductSubmissionService {
     }
     final file = File(imagePath);
     if (!await file.exists()) {
-      logWarning('Image not found for $imageField: $imagePath');
+      logWarning('Image not found for $imageField');
       return const OffWriteResult.success();
     }
     _emit(
@@ -316,15 +418,34 @@ class ProductSubmissionService {
         totalImageCount: totalImages,
       ),
     );
+    File? compressed;
     try {
+      var uploadPath = imagePath;
+      final compressedPath = await _imageCompressor.compress(
+        sourcePath: imagePath,
+      );
+      if (compressedPath != null) {
+        compressed = File(compressedPath);
+        uploadPath = compressedPath;
+      }
       return await _api.uploadProductImage(
         barcode: product.barcode,
         imageField: imageField,
-        imagePath: imagePath,
+        imagePath: uploadPath,
       );
     } on Exception catch (e) {
-      logError('Error uploading $imageField image: $e');
+      logError('Error uploading $imageField image: ${redactSensitive('$e')}');
       return const OffWriteResult.failure(OffWriteError.network);
+    } finally {
+      if (compressed != null) {
+        try {
+          await compressed.delete();
+        } on Exception catch (e) {
+          logWarning(
+            'Failed to delete compressed temp image: ${redactSensitive('$e')}',
+          );
+        }
+      }
     }
   }
 
@@ -356,6 +477,7 @@ class ProductSubmissionService {
         SubmissionErrorCategory.missingCredentials,
       OffWriteError.network => SubmissionErrorCategory.network,
       OffWriteError.rateLimited => SubmissionErrorCategory.rateLimited,
+      OffWriteError.validation => SubmissionErrorCategory.validation,
       OffWriteError.serverRejected => SubmissionErrorCategory.serverRejected,
       OffWriteError.unknown => SubmissionErrorCategory.unknown,
     };
@@ -366,6 +488,7 @@ class ProductSubmissionService {
     return switch (error) {
       OffWriteError.missingCredentials ||
       OffWriteError.serverRejected ||
+      OffWriteError.validation ||
       OffWriteError.none => false,
       OffWriteError.network ||
       OffWriteError.rateLimited ||

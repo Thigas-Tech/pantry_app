@@ -18,6 +18,7 @@ import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/off_adapter.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 void main() {
   setUp(() {
@@ -529,6 +530,95 @@ void main() {
         });
       });
 
+      /// Verifies that credentials embedded in an SDK exception never reach
+      /// the logs, even after all retries are exhausted.
+      test(
+        'keeps credentials out of logs when an SDK exception leaks them',
+        () {
+          const leakedPassword = 'REDACTME_PASSWORD_XYZ';
+          dotenv.loadFromString(
+            isOptional: true,
+            mergeWith: {
+              'OFF_USER_ID': 'testuser',
+              'OFF_PASSWORD': leakedPassword,
+            },
+          );
+
+          final adapter = OffAdapter(
+            useStaging: false,
+            onSaveProduct:
+                (user, product, {uriHelper = off.uriHelperFoodProd}) =>
+                    Future.error(
+                      Exception('Bad gateway, form echoed: $leakedPassword'),
+                    ),
+          );
+
+          fakeAsync((async) {
+            const product = Product(barcode: '001', name: 'Test');
+            unawaited(adapter.submitProduct(product));
+            async.elapse(const Duration(seconds: 30));
+            expect(recentLogs, isNot(contains(leakedPassword)));
+          });
+        },
+      );
+
+      /// Verifies [submitProduct] reports [OffWriteError.validation] when
+      /// the server returns an HTTP 400 status.
+      test('reports validation on HTTP 400 status', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onSaveProduct:
+              (user, product, {uriHelper = off.uriHelperFoodProd}) async {
+                return off.Status.fromJson({
+                  'status': 400,
+                  'error': 'Bad request',
+                });
+              },
+        );
+
+        const product = Product(barcode: '001', name: 'Test');
+        final result = await adapter.submitProduct(product);
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.validation);
+      });
+
+      /// Verifies [submitProduct] reports [OffWriteError.validation] when
+      /// the server responds with a non-zero status carrying a verbose
+      /// error message.
+      test('reports validation when status has a verbose message', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onSaveProduct:
+              (user, product, {uriHelper = off.uriHelperFoodProd}) async {
+                return off.Status(
+                  status: 0,
+                  statusVerbose: 'Missing required field: product_name',
+                );
+              },
+        );
+
+        const product = Product(barcode: '001', name: 'Test');
+        final result = await adapter.submitProduct(product);
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.validation);
+      });
+
       /// Verifies [submitProduct] reports [OffWriteError.serverRejected]
       /// when the server returns a non‑success status.
       test('reports serverRejected on non-ok status', () async {
@@ -733,6 +823,48 @@ void main() {
         expect(result.error, OffWriteError.none);
       });
 
+      /// Verifies [uploadProductImage] treats a "status not ok" response
+      /// that carries an image id as success: the server already holds the
+      /// identical image, so re-uploading it is a no-op rather than a
+      /// failure.
+      test(
+        'treats "status not ok" with imgid as already-uploaded success',
+        () async {
+          dotenv.loadFromString(
+            isOptional: true,
+            mergeWith: {
+              'OFF_USER_ID': 'testuser',
+              'OFF_PASSWORD': 'secret',
+            },
+          );
+
+          final tempDir = Directory.systemTemp.createTempSync('pantry_off_');
+          addTearDown(() => tempDir.deleteSync(recursive: true));
+          final imagePath = '${tempDir.path}/front.png';
+          File(imagePath).writeAsBytesSync([1, 2, 3]);
+
+          final adapter = OffAdapter(
+            useStaging: false,
+            onAddProductImage:
+                (user, image, {uriHelper = off.uriHelperFoodProd}) async {
+                  return off.Status.fromJson({
+                    'status': 'status not ok',
+                    'imgid': 99,
+                    'status_verbose': 'The image was already uploaded',
+                  });
+                },
+          );
+
+          final result = await adapter.uploadProductImage(
+            barcode: '001',
+            imageField: 'front',
+            imagePath: imagePath,
+          );
+          expect(result.success, isTrue);
+          expect(result.error, OffWriteError.none);
+        },
+      );
+
       /// Verifies [uploadProductImage] reports [OffWriteError.serverRejected]
       /// when the server returns a non‑success status.
       test('reports serverRejected on non-ok status', () async {
@@ -853,6 +985,52 @@ void main() {
           expect(result, isNotNull);
           expect(result!.success, isFalse);
           expect(result!.error, OffWriteError.rateLimited);
+          expect(attempts, 3);
+        });
+      });
+
+      /// Verifies [uploadProductImage] reports [OffWriteError.network] when
+      /// a single upload hangs longer than the per-upload timeout, without
+      /// blocking forever.
+      test('times out a hung upload after the per-upload timeout', () {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final tempDir = Directory.systemTemp.createTempSync('pantry_off_');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final imagePath = '${tempDir.path}/front.png';
+        File(imagePath).writeAsBytesSync([1, 2, 3]);
+
+        var attempts = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onAddProductImage:
+              (user, image, {uriHelper = off.uriHelperFoodProd}) {
+                attempts++;
+                return Completer<off.Status>().future;
+              },
+        );
+
+        fakeAsync((async) {
+          OffWriteResult? result;
+          unawaited(
+            adapter
+                .uploadProductImage(
+                  barcode: '001',
+                  imageField: 'front',
+                  imagePath: imagePath,
+                )
+                .then((value) => result = value),
+          );
+          async.elapse(const Duration(seconds: 300));
+          expect(result, isNotNull);
+          expect(result!.success, isFalse);
+          expect(result!.error, OffWriteError.network);
           expect(attempts, 3);
         });
       });

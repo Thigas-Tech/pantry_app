@@ -1125,6 +1125,12 @@ abstract class AppLocalizations {
   /// **'Open Food Facts rejected the product data.'**
   String get submissionRejectedError;
 
+  /// No description provided for @submissionValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts rejected the product data because some fields are invalid.'**
+  String get submissionValidationError;
+
   /// No description provided for @productAlreadyInOff.
   ///
   /// In en, this message translates to:

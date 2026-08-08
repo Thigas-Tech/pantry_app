@@ -572,6 +572,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open Food Facts rejected the product data.';
 
   @override
+  String get submissionValidationError =>
+      'Open Food Facts rejected the product data because some fields are invalid.';
+
+  @override
   String get productAlreadyInOff =>
       'This product is already in Open Food Facts.';
 

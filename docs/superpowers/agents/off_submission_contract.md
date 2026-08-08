@@ -107,12 +107,17 @@ normalizes both the integer `1` (metadata) and the string `status ok`
 |----------|----------|
 | Missing credentials | `writeUser` null; every write returns `false`, logs a warning, no network call |
 | Wrong credentials | Server responds non-ok; the write returns `false`; `Status.isWrongUsernameOrPassword()` surfaces `Incorrect user name or password` |
-| Duplicate barcode | Save is an upsert for the submitting user; re-submitting updates the existing product |
+| Duplicate barcode | Save is an upsert for the submitting user; re-submitting updates the existing product. The app adds a pre-submission check: a fresh manual product whose barcode already exists on OFF fails fast with a `duplicate` category and is never submitted or queued. Retries skip the check so partial submissions can recover |
+| Validation error | A metadata-save response with status 400 or a non-empty `statusVerbose`/`error` is categorized `validation`; other non-ok responses stay `serverRejected` |
 | Duplicate image field | New upload is stored; the newest selected photo of each field is displayed, older ones are kept |
+| Already-uploaded image | A `status not ok` response carrying an `imgid` means the identical image already exists; the adapter treats it as success so retries do not loop |
 | HTTP 429 rate limit | `isRateLimitStatus` detects it; write retries with a 5x linear backoff up to `maxRetries`, then returns `false` |
-| Timeout / network error | SDK throws; adapter retries with linear backoff, then returns `false` |
-| Partial image success | `ProductSubmissionService` treats the whole product as failed if any present image upload fails, even when metadata and other images succeeded |
+| Timeout / network error | SDK throws; adapter retries with linear backoff, then returns `false`. Each image upload is additionally bounded by a 60-second `.timeout` |
+| Hung image upload | After 60 seconds the attempt is abandoned, retried up to `maxRetries`, then categorized `network` |
+| Partial image success | `ProductSubmissionService` persists `partially_completed`; on retry it fetches the server state once and skips re-uploading fields that already have an image, then uploads only the missing ones |
+| Large local image | `ProductImageCompressor` re-encodes photos to under 1 MB (JPEG, max side 1600 px, never below the 640 px minimum) in a background isolate before upload |
 | File missing on disk | Image upload returns `false` without a network call |
+| Logging | The OFF password is redacted from every log message via `redactSensitive`; local image paths are never logged |
 
 ## Retry and backoff
 
@@ -125,6 +130,15 @@ base delay by 5. Reads additionally never retry a
 For writes, a rate limit surfaces as a non-ok `off.Status` (the HTTP
 client does not throw on 429). The adapter inspects the status code and
 response body so the retry path actually engages.
+
+## Testability
+
+The submission queue (`ProductSubmissionQueueDao`) takes an injectable
+clock so `next_retry_at` backoff scheduling (2^retry minutes, capped at
+24 h) is exercised deterministically in tests without waiting real
+minutes. The adapter's `retryDelay` already accepts a seeded `Random` for
+jitter, and every SDK call override lets tests simulate failures, hangs,
+and rate limits without touching the network.
 
 ## Testing policy
 

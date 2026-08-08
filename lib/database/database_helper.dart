@@ -97,7 +97,7 @@ class DatabaseHelper {
 
   /// DAO for the product_submission_queue table.
   final ProductSubmissionQueueDao productSubmissionQueueDao =
-      const ProductSubmissionQueueDao();
+      ProductSubmissionQueueDao();
 
   /// DAO for the prices table.
   final PriceDao priceDao = const PriceDao();

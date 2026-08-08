@@ -578,6 +578,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'O Open Food Facts rejeitou os dados do produto.';
 
   @override
+  String get submissionValidationError =>
+      'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
+
+  @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';
 
   @override
@@ -2678,6 +2682,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get submissionRejectedError =>
       'O Open Food Facts rejeitou os dados do produto.';
+
+  @override
+  String get submissionValidationError =>
+      'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
 
   @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';
