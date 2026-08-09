@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Guardar um produto introduzido manualmente agora e separado de o enviar
+  para o Open Food Facts. "Guardar no inventario" apenas mantem o produto na
+  sua despensa; "Enviar para o Open Food Facts" faz isso e envia-o para a
+  base de dados publica de alimentos. Ambas as acoes estao sempre
+  disponiveis, por isso, se um envio for rejeitado, ainda pode manter o
+  produto localmente.
+- Quando o Open Food Facts nao conhece um codigo de barras, o botao
+  "Contribuir para o Open Food Facts" abre agora o formulario de produto
+  pronto para enviar, em vez de mostrar uma mensagem "Em breve".
+- Os envios incluem agora os valores nutricionais do produto, a quantidade
+  da embalagem e o idioma da app, para que o que contribui fique completo e
+  no idioma certo.
+
 - Para um produto introduzido manualmente, a pagina do produto mostra agora
   em que ponto esta o envio para o Open Food Facts. Se falhar, pode voltar
   a tentar ali mesmo, sem voltar ao formulario.
