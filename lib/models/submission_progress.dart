@@ -54,6 +54,9 @@ enum SubmissionErrorCategory {
   /// The server rejected the request with a validation error.
   validation,
 
+  /// The server rejected the Open Food Facts credentials.
+  wrongCredentials,
+
   /// The barcode already exists on Open Food Facts.
   duplicate,
 

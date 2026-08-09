@@ -36,6 +36,11 @@ void main() {
         );
         expect(l10n.productAlreadyInOff, isNotEmpty, reason: '$locale');
         expect(
+          l10n.submissionWrongCredentialsError,
+          isNotEmpty,
+          reason: '$locale',
+        );
+        expect(
           l10n.productAlreadyInOffTitle,
           isNotEmpty,
           reason: '$locale',
@@ -65,6 +70,7 @@ void main() {
         (l) => l.submittingMetadata,
         (l) => l.submissionPartiallyCompleted,
         (l) => l.productAlreadyInOff,
+        (l) => l.submissionWrongCredentialsError,
         (l) => l.galleryPermissionDeniedTitle,
         (l) => l.galleryPermissionDeniedBody,
         (l) => l.fetchProductFailed,

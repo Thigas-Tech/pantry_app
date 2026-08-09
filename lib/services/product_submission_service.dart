@@ -98,6 +98,30 @@ class ProductSubmissionService {
         }
       }
 
+      // Best-effort credential pre-flight. A definitive rejection is a
+      // permanent configuration error: fail fast and do not retry. An
+      // inconclusive check (network) must never block a legitimate
+      // submission, mirroring the duplicate pre-check.
+      final credentialCheck = await _api.validateCredentials();
+      if (credentialCheck == OffWriteError.wrongCredentials) {
+        logWarning(
+          'Product ${product.barcode}: OFF credentials rejected, aborting',
+        );
+        return _finishFailed(
+          product,
+          onProgress,
+          SubmissionErrorCategory.wrongCredentials,
+          false,
+          totalImages,
+        );
+      }
+      if (credentialCheck == OffWriteError.network) {
+        logWarning(
+          'Product ${product.barcode}: credential validation inconclusive, '
+          'proceeding with submission',
+        );
+      }
+
       final metadataResult = await _api.submitProduct(updated);
       if (!metadataResult.success) {
         logWarning(
@@ -479,6 +503,8 @@ class ProductSubmissionService {
       OffWriteError.network => SubmissionErrorCategory.network,
       OffWriteError.rateLimited => SubmissionErrorCategory.rateLimited,
       OffWriteError.validation => SubmissionErrorCategory.validation,
+      OffWriteError.wrongCredentials =>
+        SubmissionErrorCategory.wrongCredentials,
       OffWriteError.serverRejected => SubmissionErrorCategory.serverRejected,
       OffWriteError.unknown => SubmissionErrorCategory.unknown,
     };
@@ -490,6 +516,7 @@ class ProductSubmissionService {
       OffWriteError.missingCredentials ||
       OffWriteError.serverRejected ||
       OffWriteError.validation ||
+      OffWriteError.wrongCredentials ||
       OffWriteError.none => false,
       OffWriteError.network ||
       OffWriteError.rateLimited ||

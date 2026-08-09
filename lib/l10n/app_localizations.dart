@@ -1113,6 +1113,12 @@ abstract class AppLocalizations {
   /// **'Open Food Facts rejected the product data because some fields are invalid.'**
   String get submissionValidationError;
 
+  /// No description provided for @submissionWrongCredentialsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Food Facts rejected your credentials. Submission is disabled. Check the Open Food Facts credentials in the app configuration and use your username, not your email.'**
+  String get submissionWrongCredentialsError;
+
   /// No description provided for @productAlreadyInOff.
   ///
   /// In en, this message translates to:

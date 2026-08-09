@@ -651,6 +651,40 @@ void main() {
       expect(find.text('Retry now'), findsNothing);
     });
 
+    testWidgets(
+      'shows the credentials message without retry for wrong credentials',
+      (
+        tester,
+      ) async {
+        final service = MockProductSubmissionService();
+        stubSubmission(
+          service,
+          progress: const [
+            SubmissionProgress(
+              barcode: '123',
+              step: SubmissionStep.failed,
+              errorCategory: SubmissionErrorCategory.wrongCredentials,
+            ),
+          ],
+        );
+
+        await pumpForm(tester, service);
+        await fillName(tester);
+        await tester.tap(find.text('Submit to Open Food Facts'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'Open Food Facts rejected your credentials. '
+            'Submission is disabled. Check the Open Food Facts credentials '
+            'in the app configuration and use your username, not your email.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Retry now'), findsNothing);
+      },
+    );
+
     testWidgets('retry re-submits and pops on success', (tester) async {
       final service = MockProductSubmissionService();
       var callCount = 0;

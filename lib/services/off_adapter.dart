@@ -27,6 +27,9 @@ enum OffWriteError {
   /// The server rejected the request with a validation error.
   validation,
 
+  /// The server rejected the credentials (wrong user name or password).
+  wrongCredentials,
+
   /// The server rejected the request, e.g. with a generic error.
   serverRejected,
 
@@ -109,12 +112,18 @@ class OffAdapter {
       off.UriProductHelper uriHelper,
     })?
     onAddProductImage,
+    Future<off.LoginStatus?> Function(
+      off.User, {
+      off.UriProductHelper uriHelper,
+    })?
+    onLogin2,
   }) : _onGetProductV3 = onGetProductV3 ?? off.OpenFoodAPIClient.getProductV3,
        _onSearchProducts =
            onSearchProducts ?? off.OpenFoodAPIClient.searchProducts,
        _onSaveProduct = onSaveProduct ?? off.OpenFoodAPIClient.saveProduct,
        _onAddProductImage =
-           onAddProductImage ?? off.OpenFoodAPIClient.addProductImage;
+           onAddProductImage ?? off.OpenFoodAPIClient.addProductImage,
+       _onLogin2 = onLogin2 ?? off.OpenFoodAPIClient.login2;
 
   /// Whether to use the Open Food Facts staging server.
   final bool useStaging;
@@ -147,6 +156,12 @@ class OffAdapter {
     off.UriProductHelper uriHelper,
   })
   _onAddProductImage;
+
+  final Future<off.LoginStatus?> Function(
+    off.User, {
+    off.UriProductHelper uriHelper,
+  })
+  _onLogin2;
 
   /// The product URI helper for the selected environment.
   off.UriProductHelper get _uriHelper =>
@@ -186,14 +201,48 @@ class OffAdapter {
     return body.contains('429 Too Many Requests');
   }
 
+  /// Returns true when [status] indicates that the server rejected the
+  /// credentials (wrong user name or password).
+  ///
+  /// The OFF server can surface this both as JSON (in [off.Status.error] or
+  /// [off.Status.statusVerbose]) and as an HTML error page (in
+  /// [off.Status.body]), so all three fields are checked for the SDK's
+  /// canonical message.
+  @visibleForTesting
+  static bool isWrongCredentials(off.Status status) {
+    const message = off.Status.wrongUserOrPasswordErrorMessage;
+    final fields = <String?>[
+      status.statusVerbose,
+      status.body,
+      status.error,
+    ];
+    return fields.any((f) => f != null && f.contains(message));
+  }
+
+  /// Returns true when [error] indicates that the server rejected the
+  /// credentials.
+  ///
+  /// The SDK wraps some credential failures as generic exceptions whose
+  /// message carries either the canonical text or the V3-style
+  /// "invalid_user_id_and_password" marker.
+  @visibleForTesting
+  static bool isWrongCredentialsError(Object error) {
+    final msg = error.toString();
+    return msg.contains(off.Status.wrongUserOrPasswordErrorMessage) ||
+        msg.contains('invalid_user_id_and_password');
+  }
+
   /// Classifies a non-success [off.Status] returned by the metadata save
   /// endpoint into a specific [OffWriteError].
   ///
-  /// An HTTP 400 status and any response that carries a verbose message or
-  /// an error field are treated as validation failures (the submitted data
-  /// was rejected); everything else is a generic server rejection.
+  /// A status indicating wrong credentials is reported as
+  /// [OffWriteError.wrongCredentials]. An HTTP 400 status and any response
+  /// that carries a verbose message or an error field are treated as
+  /// validation failures (the submitted data was rejected); everything else
+  /// is a generic server rejection.
   @visibleForTesting
   static OffWriteError categorizeSaveStatus(off.Status status) {
+    if (isWrongCredentials(status)) return OffWriteError.wrongCredentials;
     if (status.status == 400) return OffWriteError.validation;
     final hasMessage =
         (status.statusVerbose?.isNotEmpty ?? false) ||
@@ -246,6 +295,47 @@ class OffAdapter {
     final password = AppConfig.offPassword;
     if (userId.isEmpty || password.isEmpty) return null;
     return off.User(userId: userId, password: password);
+  }
+
+  /// Validates the configured OFF credentials against the server.
+  ///
+  /// Returns [OffWriteError.none] when the credentials are accepted,
+  /// [OffWriteError.wrongCredentials] when the server rejects them,
+  /// [OffWriteError.network] when the server could not be reached (including
+  /// when the SDK fails to parse a login response), and
+  /// [OffWriteError.missingCredentials] when no credentials are configured.
+  ///
+  /// Note that [off.OpenFoodAPIClient.login2] accepts a username or an
+  /// email, whereas the write endpoints require the account username; a
+  /// successful validation here does not guarantee a write will be accepted.
+  Future<OffWriteError> validateCredentials() async {
+    final user = writeUser;
+    if (user == null) {
+      logWarning('Cannot validate — no OFF credentials configured');
+      return OffWriteError.missingCredentials;
+    }
+    try {
+      logInfo('Validating OFF credentials against the server');
+      final login = await _onLogin2(user, uriHelper: _uriHelper);
+      if (login == null) {
+        logWarning('OFF credential validation inconclusive (no response)');
+        return OffWriteError.network;
+      }
+      if (!login.successful) {
+        logWarning(
+          'OFF credentials rejected: '
+          '${redactSensitive(login.statusVerbose)}',
+        );
+        return OffWriteError.wrongCredentials;
+      }
+      logInfo('OFF credentials validated — user id ${login.userId}');
+      return OffWriteError.none;
+    } on Exception catch (e) {
+      logWarning(
+        'OFF credential validation failed: ${redactSensitive('$e')}',
+      );
+      return OffWriteError.network;
+    }
   }
 
   /// Fetches a product by barcode from Open Food Facts.
@@ -435,6 +525,9 @@ class OffAdapter {
             'Submission failed for ${product.barcode} after '
             'all retries: ${redactSensitive('$e')}',
           );
+          if (isWrongCredentialsError(e)) {
+            return const OffWriteResult.failure(OffWriteError.wrongCredentials);
+          }
           return OffWriteResult.failure(
             isRateLimitError(e)
                 ? OffWriteError.rateLimited
@@ -516,6 +609,12 @@ class OffAdapter {
           );
           return const OffWriteResult.failure(OffWriteError.rateLimited);
         }
+        if (isWrongCredentials(status)) {
+          logWarning(
+            '$imageField image upload for $barcode rejected the credentials',
+          );
+          return const OffWriteResult.failure(OffWriteError.wrongCredentials);
+        }
         logWarning(
           '$imageField image upload for $barcode returned status '
           '${status.status}: ${redactSensitive('${status.statusVerbose}')}',
@@ -536,6 +635,9 @@ class OffAdapter {
             'Image upload failed for $barcode after '
             'all retries: ${redactSensitive('$e')}',
           );
+          if (isWrongCredentialsError(e)) {
+            return const OffWriteResult.failure(OffWriteError.wrongCredentials);
+          }
           return OffWriteResult.failure(
             isRateLimitError(e)
                 ? OffWriteError.rateLimited

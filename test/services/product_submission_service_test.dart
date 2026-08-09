@@ -86,6 +86,11 @@ void main() {
     // the getByBarcode stub.
     stubNoDuplicate();
 
+    // Credential validation defaults to "passes" unless a test overrides it.
+    when(
+      () => mockApi.validateCredentials(),
+    ).thenAnswer((_) async => OffWriteError.none);
+
     // Compression defaults to "no compression needed" (original path used)
     // unless a test stubs specific source paths.
     when(
@@ -381,6 +386,92 @@ void main() {
       verifyNever(
         () => mockDb.productSubmissionQueueDao.insert(any(), any()),
       );
+    });
+
+    test('maps wrongCredentials failure with no retry and no queue', () async {
+      stubInsert();
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer(
+        (_) async => const OffWriteResult.failure(
+          OffWriteError.wrongCredentials,
+        ),
+      );
+
+      final events = <SubmissionProgress>[];
+      final result = await service.submitProduct(
+        testProduct,
+        onProgress: events.add,
+      );
+
+      expect(result.submissionStatus, productSubmissionFailed);
+      expect(events.last.step, SubmissionStep.failed);
+      expect(
+        events.last.errorCategory,
+        SubmissionErrorCategory.wrongCredentials,
+      );
+      expect(events.last.retryAvailable, isFalse);
+      verifyNever(
+        () => mockDb.productSubmissionQueueDao.insert(any(), any()),
+      );
+    });
+  });
+
+  group('credential pre-flight', () {
+    test('fails fast with wrongCredentials before submitting', () async {
+      stubInsert();
+      when(
+        () => mockApi.validateCredentials(),
+      ).thenAnswer((_) async => OffWriteError.wrongCredentials);
+
+      final events = <SubmissionProgress>[];
+      final result = await service.submitProduct(
+        testProduct,
+        onProgress: events.add,
+      );
+
+      expect(result.submissionStatus, productSubmissionFailed);
+      expect(events.last.step, SubmissionStep.failed);
+      expect(
+        events.last.errorCategory,
+        SubmissionErrorCategory.wrongCredentials,
+      );
+      expect(events.last.retryAvailable, isFalse);
+      verifyNever(() => mockApi.submitProduct(any()));
+      verifyNever(
+        () => mockDb.productSubmissionQueueDao.insert(any(), any()),
+      );
+    });
+
+    test(
+      'proceeds when credential validation is inconclusive (network)',
+      () async {
+        stubInsert();
+        when(
+          () => mockApi.validateCredentials(),
+        ).thenAnswer((_) async => OffWriteError.network);
+        when(
+          () => mockApi.submitProduct(any()),
+        ).thenAnswer((_) async => const OffWriteResult.success());
+
+        final result = await service.submitProduct(testProduct);
+        expect(result.submissionStatus, productSubmissionSubmitted);
+        verify(() => mockApi.submitProduct(any())).called(1);
+      },
+    );
+
+    test('proceeds when credential validation passes', () async {
+      stubInsert();
+      when(
+        () => mockApi.validateCredentials(),
+      ).thenAnswer((_) async => OffWriteError.none);
+      when(
+        () => mockApi.submitProduct(any()),
+      ).thenAnswer((_) async => const OffWriteResult.success());
+
+      final result = await service.submitProduct(testProduct);
+      expect(result.submissionStatus, productSubmissionSubmitted);
+      verify(() => mockApi.submitProduct(any())).called(1);
     });
   });
 

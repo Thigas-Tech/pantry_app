@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- If your Open Food Facts credentials are rejected, the app now says so
+  clearly and does not keep retrying. Use your Open Food Facts username
+  (not your email address) as the user id in the app configuration.
+
 - The home screen no longer shows the recent-scans strip, giving the app a
   cleaner look. You can still find any product through search, your pantry,
   or by scanning its barcode.

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Se suas credenciais do Open Food Facts forem rejeitadas, o aplicativo agora
+  avisa isso claramente e nao continua tentando. Use seu nome de usuario do
+  Open Food Facts (e nao seu endereco de e-mail) como id de usuario na
+  configuracao do aplicativo.
 - A tela inicial ja nao mostra a faixa de verificacoes recentes, deixando o
   aplicativo mais limpo. Voce ainda pode encontrar qualquer produto pela
   pesquisa, pela sua despensa ou escaneando o codigo de barras.

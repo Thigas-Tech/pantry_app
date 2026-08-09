@@ -239,6 +239,23 @@
 
 ### Fixed
 
+- **Distinguish rejected OFF credentials from other submission failures
+  (issue #293)**: when Open Food Facts responds with "Incorrect user name or
+  password" (HTTP 400), the write path now classifies it as a distinct
+  `OffWriteError.wrongCredentials` instead of a generic validation failure.
+  `OffAdapter.submitProduct` and `uploadProductImage` detect the message in
+  the status body, verbose message, error field, or a thrown SDK exception,
+  and `ProductSubmissionService` surfaces it through a new
+  `SubmissionErrorCategory.wrongCredentials` with a clear, non-retryable
+  localized message. A new best-effort `OffAdapter.validateCredentials`
+  pre-flight (via `OpenFoodAPIClient.login2`) aborts a submission fast only
+  when the server definitively rejects the credentials; an inconclusive
+  network check never blocks a legitimate submission. Wrong-credential
+  failures are never queued for background retry.
+  (`lib/services/off_adapter.dart`, `lib/services/product_submission_service.dart`,
+  `lib/models/submission_progress.dart`, `lib/utils/submission_error_label.dart`,
+  `lib/l10n/app_en.arb`)
+
 - **Scanner redirects unknown barcodes to the contribution form**: when a
   scanned (or manually entered) barcode is not found, `ScannerScreen` now
   opens `AddProductScreen` in submit mode (`submitToOff: true`) instead of
