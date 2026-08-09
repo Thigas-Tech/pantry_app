@@ -567,6 +567,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open Food Facts rejected the product data because some fields are invalid.';
 
   @override
+  String get submissionWrongCredentialsError =>
+      'Open Food Facts rejected your credentials. Submission is disabled. Check the Open Food Facts credentials in the app configuration and use your username, not your email.';
+
+  @override
   String get productAlreadyInOff =>
       'This product is already in Open Food Facts.';
 

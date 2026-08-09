@@ -53,6 +53,110 @@ void main() {
       });
     });
 
+    group('validateCredentials', () {
+      off.LoginStatus loginStatus(int status, {String? userId}) {
+        return off.LoginStatus(
+          status: status,
+          statusVerbose: status == 1 ? 'user signed-in' : 'user not signed-in',
+          userId: userId,
+          cookie: null,
+          userDetails: const off.UserDetails(),
+        );
+      }
+
+      test('returns none when the login succeeds', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+        final adapter = OffAdapter(
+          useStaging: false,
+          onLogin2: (user, {uriHelper = off.uriHelperFoodProd}) async {
+            return loginStatus(1, userId: 'testuser');
+          },
+        );
+
+        expect(await adapter.validateCredentials(), OffWriteError.none);
+      });
+
+      test('returns wrongCredentials when the login fails', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'wrong-password',
+          },
+        );
+        final adapter = OffAdapter(
+          useStaging: false,
+          onLogin2: (user, {uriHelper = off.uriHelperFoodProd}) async {
+            return loginStatus(0);
+          },
+        );
+
+        expect(
+          await adapter.validateCredentials(),
+          OffWriteError.wrongCredentials,
+        );
+      });
+
+      test('returns network when login2 returns null', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+        final adapter = OffAdapter(
+          useStaging: false,
+          onLogin2: (user, {uriHelper = off.uriHelperFoodProd}) async {
+            return null;
+          },
+        );
+
+        expect(await adapter.validateCredentials(), OffWriteError.network);
+      });
+
+      test('returns network when login2 throws', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+        final adapter = OffAdapter(
+          useStaging: false,
+          onLogin2: (user, {uriHelper = off.uriHelperFoodProd}) {
+            throw Exception('user details missing');
+          },
+        );
+
+        expect(await adapter.validateCredentials(), OffWriteError.network);
+      });
+
+      test('returns missingCredentials without a network call', () async {
+        var calls = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onLogin2: (user, {uriHelper = off.uriHelperFoodProd}) async {
+            calls++;
+            return loginStatus(1);
+          },
+        );
+
+        expect(
+          await adapter.validateCredentials(),
+          OffWriteError.missingCredentials,
+        );
+        expect(calls, 0);
+      });
+    });
+
     group('parseImageField', () {
       test('returns FRONT for "front"', () {
         expect(OffAdapter.parseImageField('front'), off.ImageField.FRONT);
@@ -357,6 +461,91 @@ void main() {
       });
     });
 
+    group('isWrongCredentials', () {
+      test('detects the message in statusVerbose', () {
+        final status = off.Status(
+          status: 400,
+          statusVerbose: 'Incorrect user name or password',
+        );
+        expect(OffAdapter.isWrongCredentials(status), isTrue);
+      });
+
+      test('detects the message in body', () {
+        final status = off.Status(
+          status: 400,
+          body: '<html><title>Incorrect user name or password</title></html>',
+        );
+        expect(OffAdapter.isWrongCredentials(status), isTrue);
+      });
+
+      test('detects the message in error', () {
+        final status = off.Status(
+          status: 400,
+          error: 'Incorrect user name or password',
+        );
+        expect(OffAdapter.isWrongCredentials(status), isTrue);
+      });
+
+      test('returns false for an unrelated message', () {
+        final status = off.Status(
+          status: 400,
+          statusVerbose: 'Missing required field: product_name',
+        );
+        expect(OffAdapter.isWrongCredentials(status), isFalse);
+      });
+    });
+
+    group('categorizeSaveStatus', () {
+      test('returns wrongCredentials for a wrong-credentials status', () {
+        final status = off.Status(
+          status: 400,
+          statusVerbose: 'Incorrect user name or password',
+        );
+        expect(
+          OffAdapter.categorizeSaveStatus(status),
+          OffWriteError.wrongCredentials,
+        );
+      });
+
+      test('returns wrongCredentials when body carries the message', () {
+        final status = off.Status(
+          status: 400,
+          body: '<html><title>Incorrect user name or password</title></html>',
+        );
+        expect(
+          OffAdapter.categorizeSaveStatus(status),
+          OffWriteError.wrongCredentials,
+        );
+      });
+
+      test('returns validation for a generic 400 status', () {
+        final status = off.Status(status: 400, error: 'Bad request');
+        expect(
+          OffAdapter.categorizeSaveStatus(status),
+          OffWriteError.validation,
+        );
+      });
+
+      test('returns validation when a verbose message is present', () {
+        final status = off.Status(
+          status: 0,
+          statusVerbose: 'Missing required field: product_name',
+        );
+        expect(
+          OffAdapter.categorizeSaveStatus(status),
+          OffWriteError.validation,
+        );
+      });
+
+      test('returns serverRejected for a bare non-ok status', () {
+        final status = off.Status(status: 0);
+        expect(
+          OffAdapter.categorizeSaveStatus(status),
+          OffWriteError.serverRejected,
+        );
+      });
+    });
+
     group('searchProducts', () {
       /// Verifies [searchProducts] returns a list of [Product]s from
       /// the SDK search results.
@@ -589,6 +778,75 @@ void main() {
         expect(result.success, isFalse);
         expect(result.error, OffWriteError.validation);
       });
+
+      /// Verifies [submitProduct] reports
+      /// [OffWriteError.wrongCredentials] when the server rejects the
+      /// credentials, and does NOT retry.
+      test('reports wrongCredentials and does not retry', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        var attempts = 0;
+        final adapter = OffAdapter(
+          useStaging: false,
+          onSaveProduct:
+              (user, product, {uriHelper = off.uriHelperFoodProd}) async {
+                attempts++;
+                return off.Status(
+                  status: 400,
+                  statusVerbose: 'Incorrect user name or password',
+                );
+              },
+        );
+
+        const product = Product(barcode: '001', name: 'Test');
+        final result = await adapter.submitProduct(product);
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.wrongCredentials);
+        expect(attempts, 1);
+      });
+
+      /// Verifies [submitProduct] reports
+      /// [OffWriteError.wrongCredentials] when the SDK exception carries the
+      /// wrong-credentials marker after all retries are exhausted.
+      test(
+        'reports wrongCredentials when the SDK exception carries the marker',
+        () {
+          dotenv.loadFromString(
+            isOptional: true,
+            mergeWith: {
+              'OFF_USER_ID': 'testuser',
+              'OFF_PASSWORD': 'secret',
+            },
+          );
+
+          final adapter = OffAdapter(
+            useStaging: false,
+            onSaveProduct:
+                (user, product, {uriHelper = off.uriHelperFoodProd}) =>
+                    Future.error(
+                      Exception('invalid_user_id_and_password'),
+                    ),
+          );
+
+          fakeAsync((async) {
+            const product = Product(barcode: '001', name: 'Test');
+            OffWriteResult? result;
+            unawaited(
+              adapter.submitProduct(product).then((value) => result = value),
+            );
+            async.elapse(const Duration(seconds: 30));
+            expect(result, isNotNull);
+            expect(result!.success, isFalse);
+            expect(result!.error, OffWriteError.wrongCredentials);
+          });
+        },
+      );
 
       /// Verifies [submitProduct] reports [OffWriteError.validation] when
       /// the server responds with a non-zero status carrying a verbose
@@ -896,6 +1154,43 @@ void main() {
         );
         expect(result.success, isFalse);
         expect(result.error, OffWriteError.serverRejected);
+      });
+
+      /// Verifies [uploadProductImage] reports
+      /// [OffWriteError.wrongCredentials] when the server rejects the
+      /// credentials (it shares the same configured user).
+      test('reports wrongCredentials on wrong-credentials status', () async {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {
+            'OFF_USER_ID': 'testuser',
+            'OFF_PASSWORD': 'secret',
+          },
+        );
+
+        final tempDir = Directory.systemTemp.createTempSync('pantry_off_');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final imagePath = '${tempDir.path}/front.png';
+        File(imagePath).writeAsBytesSync([1, 2, 3]);
+
+        final adapter = OffAdapter(
+          useStaging: false,
+          onAddProductImage:
+              (user, image, {uriHelper = off.uriHelperFoodProd}) async {
+                return off.Status(
+                  status: 400,
+                  statusVerbose: 'Incorrect user name or password',
+                );
+              },
+        );
+
+        final result = await adapter.uploadProductImage(
+          barcode: '001',
+          imageField: 'front',
+          imagePath: imagePath,
+        );
+        expect(result.success, isFalse);
+        expect(result.error, OffWriteError.wrongCredentials);
       });
 
       /// Verifies [uploadProductImage] reports [OffWriteError.network] when

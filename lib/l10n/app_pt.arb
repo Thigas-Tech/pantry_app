@@ -267,6 +267,7 @@
   "submissionRateLimitedError": "O Open Food Facts limitou a frequência da solicitação. Aguarde e tente de novo.",
   "submissionRejectedError": "O Open Food Facts rejeitou os dados do produto.",
   "submissionValidationError": "O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.",
+  "submissionWrongCredentialsError": "O Open Food Facts rejeitou suas credenciais. O envio está desativado. Verifique as credenciais do Open Food Facts na configuração do aplicativo e use seu nome de usuário, não seu e-mail.",
   "productAlreadyInOff": "Este produto já está no Open Food Facts.",
   "productAlreadyInOffTitle": "Já está no Open Food Facts",
   "navHome": "Início",

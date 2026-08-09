@@ -49,6 +49,13 @@ void main() {
       );
     });
 
+    test('wrongCredentials maps to submissionWrongCredentialsError', () {
+      expect(
+        submissionErrorLabel(l10n, SubmissionErrorCategory.wrongCredentials),
+        l10n.submissionWrongCredentialsError,
+      );
+    });
+
     test('duplicate maps to productAlreadyInOff', () {
       expect(
         submissionErrorLabel(l10n, SubmissionErrorCategory.duplicate),

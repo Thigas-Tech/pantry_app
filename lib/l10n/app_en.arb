@@ -283,6 +283,7 @@
   "submissionRateLimitedError": "Open Food Facts rate-limited the request. Please wait and try again.",
   "submissionRejectedError": "Open Food Facts rejected the product data.",
   "submissionValidationError": "Open Food Facts rejected the product data because some fields are invalid.",
+  "submissionWrongCredentialsError": "Open Food Facts rejected your credentials. Submission is disabled. Check the Open Food Facts credentials in the app configuration and use your username, not your email.",
   "productAlreadyInOff": "This product is already in Open Food Facts.",
   "productAlreadyInOffTitle": "Already in Open Food Facts",
   "navHome": "Home",

@@ -573,6 +573,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
 
   @override
+  String get submissionWrongCredentialsError =>
+      'O Open Food Facts rejeitou suas credenciais. O envio está desativado. Verifique as credenciais do Open Food Facts na configuração do aplicativo e use seu nome de usuário, não seu e-mail.';
+
+  @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';
 
   @override
@@ -2661,6 +2665,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get submissionValidationError =>
       'O Open Food Facts rejeitou os dados do produto porque alguns campos são inválidos.';
+
+  @override
+  String get submissionWrongCredentialsError =>
+      'O Open Food Facts rejeitou suas credenciais. O envio está desativado. Verifique as credenciais do Open Food Facts na configuração do aplicativo e use seu nome de usuário, não seu e-mail.';
 
   @override
   String get productAlreadyInOff => 'Este produto já está no Open Food Facts.';

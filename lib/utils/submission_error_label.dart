@@ -16,6 +16,8 @@ String submissionErrorLabel(
     SubmissionErrorCategory.missingCredentials =>
       l10n.submissionCredentialsError,
     SubmissionErrorCategory.validation => l10n.submissionValidationError,
+    SubmissionErrorCategory.wrongCredentials =>
+      l10n.submissionWrongCredentialsError,
     SubmissionErrorCategory.duplicate => l10n.productAlreadyInOff,
     SubmissionErrorCategory.serverRejected => l10n.submissionRejectedError,
     SubmissionErrorCategory.none ||
