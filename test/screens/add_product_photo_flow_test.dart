@@ -640,7 +640,7 @@ void main() {
         await pumpScreen(tester);
         await attachNutritionPhoto(tester);
 
-        await tester.tap(find.text('Save product'));
+        await tester.tap(find.text('Save to inventory'));
         await tester.pumpAndSettle();
 
         expect(find.text('This field is required'), findsOneWidget);
@@ -703,7 +703,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Product name'),
         'Test Product',
       );
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Save to inventory'));
       await tester.pumpAndSettle();
 
       final savedSlots =
@@ -749,7 +749,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Product name'),
         'Test Product',
       );
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Save to inventory'));
       await tester.pumpAndSettle();
 
       verify(
@@ -806,7 +806,7 @@ void main() {
         find.widgetWithText(TextFormField, 'Product name'),
         'Test Product',
       );
-      await tester.tap(find.text('Save product'));
+      await tester.tap(find.text('Save to inventory'));
       await tester.pumpAndSettle();
 
       expect(captured, isNotNull);
