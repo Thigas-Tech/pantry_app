@@ -125,6 +125,30 @@ On transient failure the barcode is queued for background retry.</p>
       }
     }
 
+    &#47;&#47; Best-effort credential pre-flight. A definitive rejection is a
+    &#47;&#47; permanent configuration error: fail fast and do not retry. An
+    &#47;&#47; inconclusive check (network) must never block a legitimate
+    &#47;&#47; submission, mirroring the duplicate pre-check.
+    final credentialCheck = await _api.validateCredentials();
+    if (credentialCheck == OffWriteError.wrongCredentials) {
+      logWarning(
+        &#39;Product ${product.barcode}: OFF credentials rejected, aborting&#39;,
+      );
+      return _finishFailed(
+        product,
+        onProgress,
+        SubmissionErrorCategory.wrongCredentials,
+        false,
+        totalImages,
+      );
+    }
+    if (credentialCheck == OffWriteError.network) {
+      logWarning(
+        &#39;Product ${product.barcode}: credential validation inconclusive, &#39;
+        &#39;proceeding with submission&#39;,
+      );
+    }
+
     final metadataResult = await _api.submitProduct(updated);
     if (!metadataResult.success) {
       logWarning(

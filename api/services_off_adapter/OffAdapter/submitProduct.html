@@ -133,6 +133,9 @@ with the error categorized as <a href="../../services_off_adapter/OffWriteError.
           &#39;Submission failed for ${product.barcode} after &#39;
           &#39;all retries: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
+        if (isWrongCredentialsError(e)) {
+          return const OffWriteResult.failure(OffWriteError.wrongCredentials);
+        }
         return OffWriteResult.failure(
           isRateLimitError(e)
               ? OffWriteError.rateLimited

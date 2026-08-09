@@ -71,6 +71,9 @@
 <li><span class="parameter" id="param-"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/SendImage-class.html">SendImage</a></span>, {</span></li>
 <li><span class="parameter" id="param-uriHelper"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/UriProductHelper-class.html">UriProductHelper</a></span> <span class="parameter-name">uriHelper</span>, </span></li>
 </ol>})?, </span></li>
+<li><span class="parameter" id="param-onLogin2"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/LoginStatus-class.html">LoginStatus</a>?</span>&gt;</span></span> <span class="parameter-name">onLogin2</span>(<ol class="parameter-list"> <li><span class="parameter" id="param-"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/User-class.html">User</a></span>, {</span></li>
+<li><span class="parameter" id="param-uriHelper"><span class="type-annotation"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/UriProductHelper-class.html">UriProductHelper</a></span> <span class="parameter-name">uriHelper</span>, </span></li>
+</ol>})?, </span></li>
 </ol>})
     </section>
     
@@ -113,12 +116,18 @@ for testing.  When omitted the real SDK method is used.</p>
     off.UriProductHelper uriHelper,
   })?
   onAddProductImage,
+  Future&lt;off.LoginStatus?&gt; Function(
+    off.User, {
+    off.UriProductHelper uriHelper,
+  })?
+  onLogin2,
 }) : _onGetProductV3 = onGetProductV3 ?? off.OpenFoodAPIClient.getProductV3,
      _onSearchProducts =
          onSearchProducts ?? off.OpenFoodAPIClient.searchProducts,
      _onSaveProduct = onSaveProduct ?? off.OpenFoodAPIClient.saveProduct,
      _onAddProductImage =
-         onAddProductImage ?? off.OpenFoodAPIClient.addProductImage;</code></pre>
+         onAddProductImage ?? off.OpenFoodAPIClient.addProductImage,
+     _onLogin2 = onLogin2 ?? off.OpenFoodAPIClient.login2;</code></pre>
 </section>
 
 

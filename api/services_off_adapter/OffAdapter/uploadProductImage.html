@@ -141,6 +141,12 @@ error categorized as <a href="../../services_off_adapter/OffWriteError.html">Off
         );
         return const OffWriteResult.failure(OffWriteError.rateLimited);
       }
+      if (isWrongCredentials(status)) {
+        logWarning(
+          &#39;$imageField image upload for $barcode rejected the credentials&#39;,
+        );
+        return const OffWriteResult.failure(OffWriteError.wrongCredentials);
+      }
       logWarning(
         &#39;$imageField image upload for $barcode returned status &#39;
         &#39;${status.status}: ${redactSensitive(&#39;${status.statusVerbose}&#39;)}&#39;,
@@ -161,6 +167,9 @@ error categorized as <a href="../../services_off_adapter/OffWriteError.html">Off
           &#39;Image upload failed for $barcode after &#39;
           &#39;all retries: ${redactSensitive(&#39;$e&#39;)}&#39;,
         );
+        if (isWrongCredentialsError(e)) {
+          return const OffWriteResult.failure(OffWriteError.wrongCredentials);
+        }
         return OffWriteResult.failure(
           isRateLimitError(e)
               ? OffWriteError.rateLimited
