@@ -777,12 +777,6 @@ abstract class AppLocalizations {
   /// **'Failed to fetch product. Please check your connection.'**
   String get fetchProductFailed;
 
-  /// No description provided for @productNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'Product not found in database.'**
-  String get productNotFound;
-
   /// No description provided for @productNotFoundHint.
   ///
   /// In en, this message translates to:

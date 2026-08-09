@@ -182,7 +182,6 @@
   "couldNotDeleteInventory": "Could not delete inventory.",
   "networkError": "Network error. Please check your connection.",
   "fetchProductFailed": "Failed to fetch product. Please check your connection.",
-  "productNotFound": "Product not found in database.",
   "productNotFoundHint": "This product isn't in the Open Food Facts database yet. You can add it manually or contribute it to the community.",
   "addManually": "Add manually",
   "contributeToOpenFoodFacts": "Contribute to Open Food Facts",
