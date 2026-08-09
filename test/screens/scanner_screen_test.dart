@@ -3,11 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
+import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
-import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
@@ -346,15 +345,12 @@ void main() {
     });
 
     testWidgets(
-      'scan failed clears scan resolution so barcode detection works again',
+      'product not found opens the contribute form and clears on return',
       (
         tester,
       ) async {
         SharedPreferences.setMockInitialValues({});
         final mockRepo = createMockProductRepository();
-        when(() => mockRepo.getProduct(any())).thenThrow(
-          ProductNotFoundException('any'),
-        );
 
         await pumpApp(
           tester,
@@ -373,13 +369,65 @@ void main() {
         );
         final notifier = container.read(scannerCameraProvider.notifier);
 
-        // Trigger a barcode scan that will fail (product not found)
-        await notifier.resolveBarcode('9999999999999');
+        // Emit the not-found failure exactly as resolveBarcode does.
+        notifier.state = notifier.state.copyWith(
+          scanResolution: const ScanFailed(
+            'PRODUCT_NOT_FOUND',
+            barcode: '9999999999999',
+          ),
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
 
-        // After ScanFailed is handled, scanResolution must be cleared so the
-        // next barcode detection is not blocked by the null guard.
+        // The scanner redirects to the contribute form in submit mode.
+        final screen = tester.widget<AddProductScreen>(
+          find.byType(AddProductScreen),
+        );
+        expect(screen.barcode, '9999999999999');
+        expect(screen.submitToOff, isTrue);
+
+        // Returning from the form clears the resolution so the next barcode
+        // detection is not blocked by the null guard.
+        final nav = tester.state<NavigatorState>(find.byType(Navigator));
+        unawaited(nav.maybePop());
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+        expect(container.read(scannerCameraProvider).scanResolution, isNull);
+      },
+    );
+
+    testWidgets(
+      'product not found without a barcode does not navigate',
+      (
+        tester,
+      ) async {
+        SharedPreferences.setMockInitialValues({});
+        final mockRepo = createMockProductRepository();
+
+        await pumpApp(
+          tester,
+          const ScannerScreen(),
+          overrides: [
+            productRepositoryProvider.overrideWithValue(mockRepo),
+            scannerCameraProvider.overrideWith(_FakeScannerCamera.new),
+          ],
+          settle: false,
+        );
+        await tester.pump();
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ScannerScreen)),
+          listen: false,
+        );
+        final notifier = container.read(scannerCameraProvider.notifier);
+
+        notifier.state = notifier.state.copyWith(
+          scanResolution: const ScanFailed('PRODUCT_NOT_FOUND'),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(find.byType(AddProductScreen), findsNothing);
         expect(container.read(scannerCameraProvider).scanResolution, isNull);
       },
     );

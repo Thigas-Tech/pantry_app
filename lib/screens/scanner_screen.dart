@@ -7,6 +7,7 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
+import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/plu_service.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -56,10 +57,18 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       case ScanResolved(:final product):
         logInfo('Scan resolved: ${product.name}');
         unawaited(_navigateToProduct(product));
-      case ScanFailed(:final message) when message == 'PRODUCT_NOT_FOUND':
-        final l10n = AppLocalizations.of(context)!;
-        SnackbarHelper.showWarning(context, l10n.productNotFound);
-        ref.read(scannerCameraProvider.notifier).clearResolution();
+      case ScanFailed(:final message, :final barcode)
+          when message == 'PRODUCT_NOT_FOUND':
+        final code = barcode;
+        if (code == null) {
+          logWarning(
+            'Product not found without a barcode — clearing resolution',
+          );
+          ref.read(scannerCameraProvider.notifier).clearResolution();
+        } else {
+          logInfo('Product not found for barcode: $code');
+          unawaited(_navigateToSubmit(code));
+        }
       case ScanFailed(:final message):
         logWarning('Scan resolution failed: $message');
         final l10n = AppLocalizations.of(context)!;
@@ -79,6 +88,27 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       ),
     );
     logInfo('Returned from ProductDetailScreen — clearing resolution');
+    ref.read(scannerCameraProvider.notifier).clearResolution();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(pantryProvider);
+    });
+  }
+
+  /// Opens the contribution form for a [barcode] that is not in the database.
+  ///
+  /// Pushes [AddProductScreen] in submit mode so the user can contribute the
+  /// product to Open Food Facts. When the form closes the scan resolution is
+  /// cleared and the pantry is refreshed in case the product was saved.
+  Future<void> _navigateToSubmit(String barcode) async {
+    logInfo('Navigating to AddProductScreen for contribution: $barcode');
+    final navigator = Navigator.of(context);
+    await navigator.push<void>(
+      MaterialPageRoute(
+        builder: (_) => AddProductScreen(barcode: barcode, submitToOff: true),
+      ),
+    );
+    if (!mounted) return;
+    logInfo('Returned from AddProductScreen — clearing resolution');
     ref.read(scannerCameraProvider.notifier).clearResolution();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(pantryProvider);
