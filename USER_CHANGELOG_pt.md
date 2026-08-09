@@ -11,6 +11,9 @@
 - Quando o Open Food Facts nao conhece um codigo de barras, o botao
   "Contribuir para o Open Food Facts" abre agora o formulario de produto
   pronto para enviar, em vez de mostrar uma mensagem "Em breve".
+- Escanear um produto que nao esta na base de dados do Open Food Facts leva
+  agora diretamente para o formulario para o contribuir, em vez de mostrar
+  apenas uma mensagem "produto nao encontrado".
 - Os envios incluem agora os valores nutricionais do produto, a quantidade
   da embalagem e o idioma da app, para que o que contribui fique completo e
   no idioma certo.

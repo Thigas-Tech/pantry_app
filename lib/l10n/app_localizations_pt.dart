@@ -378,9 +378,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível buscar o produto. Verifique sua conexão.';
 
   @override
-  String get productNotFound => 'Produto nao encontrado no banco de dados.';
-
-  @override
   String get productNotFoundHint =>
       'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
 
@@ -2481,9 +2478,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get fetchProductFailed =>
       'Não foi possível buscar o produto. Verifique sua conexão.';
-
-  @override
-  String get productNotFound => 'Produto nao encontrado no banco de dados.';
 
   @override
   String get productNotFoundHint =>

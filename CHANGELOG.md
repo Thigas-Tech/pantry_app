@@ -228,6 +228,16 @@
 
 ### Fixed
 
+- **Scanner redirects unknown barcodes to the contribution form**: when a
+  scanned (or manually entered) barcode is not found, `ScannerScreen` now
+  opens `AddProductScreen` in submit mode (`submitToOff: true`) instead of
+  only showing a warning snackbar, matching the search panel's
+  "Contribute to Open Food Facts" flow. `ScanFailed` now carries the barcode
+  so the screen can act on it
+  (`lib/providers/scanner_providers.dart`,
+  `lib/screens/scanner_screen.dart`). The unused `productNotFound`
+  localization key was removed from all locales.
+
 - **Final verification for the OFF submission flow (issue #157)**: ran all
   repository quality gates (`dart analyze`, `dart format`,
   `build_runner`, `gen-l10n`, full test suite, debug APK build, `dart doc`)

@@ -34,7 +34,7 @@ User scans barcode
 
 | Exception                      | Meaning                             | UI reaction                       |
 |--------------------------------|-------------------------------------|-----------------------------------|
-| `ProductNotFoundException`     | Barcode unknown to all sources      | Bottom sheet: add manually / contribute |
+| `ProductNotFoundException`     | Barcode unknown to all sources      | Scanner opens the contribution form |
 | `FetchFailedException`         | Network error, no cache             | Error snackbar                    |
 
 ### 3.2 Open Food Facts API

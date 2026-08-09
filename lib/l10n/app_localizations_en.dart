@@ -375,9 +375,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Failed to fetch product. Please check your connection.';
 
   @override
-  String get productNotFound => 'Product not found in database.';
-
-  @override
   String get productNotFoundHint =>
       'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
 

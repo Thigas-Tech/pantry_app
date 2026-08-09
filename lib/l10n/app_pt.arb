@@ -177,7 +177,6 @@
   "couldNotDeleteInventory": "Não foi possível excluir a despensa.",
   "networkError": "Erro de rede. Verifique sua conexão.",
   "fetchProductFailed": "Não foi possível buscar o produto. Verifique sua conexão.",
-  "productNotFound": "Produto nao encontrado no banco de dados.",
   "productNotFoundHint": "Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.",
   "addManually": "Adicionar manualmente",
   "contributeToOpenFoodFacts": "Contribuir pro Open Food Facts",

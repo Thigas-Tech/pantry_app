@@ -100,6 +100,13 @@ void main() {
       const failed = ScanFailed('error');
       expect(failed, isA<ScanResolution>());
       expect(failed.message, 'error');
+      expect(failed.barcode, isNull);
+    });
+
+    test('ScanFailed can carry the barcode', () {
+      const failed = ScanFailed('PRODUCT_NOT_FOUND', barcode: '123');
+      expect(failed.message, 'PRODUCT_NOT_FOUND');
+      expect(failed.barcode, '123');
     });
   });
 
@@ -168,6 +175,7 @@ void main() {
       expect(state.scanResolution, isA<ScanFailed>());
       final failed = state.scanResolution! as ScanFailed;
       expect(failed.message, 'PRODUCT_NOT_FOUND');
+      expect(failed.barcode, barcode);
     });
 
     test('resolveBarcode handles generic exceptions', () async {
