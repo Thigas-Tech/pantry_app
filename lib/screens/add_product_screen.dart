@@ -14,6 +14,7 @@ import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/services/product_image_service.dart';
+import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/camera_permission_dialog.dart';
 import 'package:pantry_app/utils/gallery_permission_dialog.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -74,7 +75,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   /// cleanup must never delete these.
   final Set<String> _committedPaths = <String>{};
 
-  /// The product saved by the last [_save]; used to re-submit on retry.
+  /// The product cached by the last save; used to re-submit on retry.
   Product? _submittedProduct;
 
   @override
@@ -193,6 +194,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       return null;
     }
     _formKey.currentState!.save();
+    final languageCode = Localizations.localeOf(context).languageCode;
 
     final saved = await _imageService.save(_slots, barcode: widget.barcode);
     _committedPaths.addAll(
@@ -218,7 +220,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       saltG: double.tryParse(_saltG),
       lastSynced: DateTime.now().millisecondsSinceEpoch,
       source: 'manual',
-      languageCode: Localizations.localeOf(context).languageCode,
+      languageCode: languageCode,
       nutritionImagePath: saved.nutrition,
       ingredientsImagePath: saved.ingredients,
       productImagePath: saved.product,
@@ -430,8 +432,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   ///
   /// Both actions are always available so the local save remains a fallback
   /// when Open Food Facts rejects a submission (e.g. a duplicate). The
-  /// [widget.submitToOff] flag decides which one is rendered as the primary
-  /// filled button.
+  /// [AddProductScreen.submitToOff] flag decides which one is rendered as the
+  /// primary filled button.
   Widget _actionButtons(AppLocalizations l10n) {
     final submitPrimary = widget.submitToOff;
     return Column(
