@@ -201,6 +201,17 @@
   `lib/utils/redaction.dart`,
   `lib/l10n/app_en.arb`)
 
+### Removed
+
+- **Home-screen "Recent scans" carousel**: the horizontal strip of recent
+  scans with one-tap quick-add was removed from the home screen to reduce
+  UI clutter. Scan history is still recorded locally on every successful
+  scan, and products remain reachable through search, the pantry, and the
+  scanner. The `RecentScansSection` widget, the `quickAdd` scan-history
+  path, and the `recentScans` / `quickAdd` / `quickAddAdded` /
+  `quickAddFailed` l10n keys were deleted.
+  (`lib/screens/home_screen.dart`, `lib/providers/scan_history_provider.dart`)
+
 ### Changed
 
 - **Lint-suppression cleanup**: removed all `// ignore` and

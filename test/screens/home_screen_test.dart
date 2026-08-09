@@ -929,117 +929,31 @@ void main() {
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
-  group('Recent scans section', () {
-    testWidgets('is hidden when scan history is empty', (tester) async {
-      final mockDb = _createMockDb(items: [], inventories: []);
-      when(mockDb.getRecentScanHistory).thenAnswer((_) async => []);
-
-      await pumpApp(
-        tester,
-        const HomeScreen(),
-        imageCacheMock: mockImageCache,
-        overrides: _homeScreenOverrides(
-          mockDb: mockDb,
-          onboardingComplete: true,
+  testWidgets('never renders the recent scans section', (tester) async {
+    final mockDb = _createMockDb(items: [], inventories: []);
+    when(mockDb.getRecentScanHistory).thenAnswer(
+      (_) async => [
+        const ScanHistoryEntry(
+          id: 1,
+          barcode: '1',
+          name: 'Milk',
+          scannedAt: 1000,
         ),
-      );
+      ],
+    );
 
-      expect(find.text('Recent scans'), findsNothing);
-    });
-
-    testWidgets('shows entries when scan history is non-empty', (
+    await pumpApp(
       tester,
-    ) async {
-      final mockDb = _createMockDb(items: [], inventories: []);
-      when(mockDb.getRecentScanHistory).thenAnswer(
-        (_) async => [
-          const ScanHistoryEntry(
-            id: 1,
-            barcode: '1',
-            name: 'Milk',
-            scannedAt: 1000,
-          ),
-        ],
-      );
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: _homeScreenOverrides(
+        mockDb: mockDb,
+        onboardingComplete: true,
+      ),
+    );
 
-      await pumpApp(
-        tester,
-        const HomeScreen(),
-        imageCacheMock: mockImageCache,
-        overrides: _homeScreenOverrides(
-          mockDb: mockDb,
-          onboardingComplete: true,
-        ),
-      );
-
-      expect(find.text('Recent scans'), findsOneWidget);
-      expect(find.text('Milk'), findsOneWidget);
-    });
-
-    testWidgets('is hidden during onboarding', (tester) async {
-      final mockDb = _createMockDb(items: [], inventories: []);
-      when(mockDb.getRecentScanHistory).thenAnswer(
-        (_) async => [
-          const ScanHistoryEntry(
-            id: 1,
-            barcode: '1',
-            name: 'Milk',
-            scannedAt: 1000,
-          ),
-        ],
-      );
-
-      await pumpApp(
-        tester,
-        const HomeScreen(),
-        imageCacheMock: mockImageCache,
-        overrides: _homeScreenOverrides(mockDb: mockDb),
-      );
-
-      expect(find.text('Recent scans'), findsNothing);
-    });
-
-    testWidgets('quick-add adds to inventory and shows feedback', (
-      tester,
-    ) async {
-      const barcode = '5012345678900';
-      final mockDb = _createMockDb(items: [], inventories: []);
-      final mockRepo = createMockProductRepository();
-      when(
-        () => mockRepo.getProductFromCache(barcode),
-      ).thenAnswer((_) async => const Product(barcode: barcode, name: 'Milk'));
-      when(() => mockDb.insertProduct(any())).thenAnswer((_) async {});
-      when(
-        () => mockDb.insertOrMergeInventoryItem(any()),
-      ).thenAnswer((_) async => 1);
-      when(mockDb.getRecentScanHistory).thenAnswer(
-        (_) async => [
-          const ScanHistoryEntry(
-            id: 1,
-            barcode: barcode,
-            name: 'Milk',
-            scannedAt: 1000,
-          ),
-        ],
-      );
-
-      await pumpApp(
-        tester,
-        const HomeScreen(),
-        imageCacheMock: mockImageCache,
-        overrides: _homeScreenOverrides(
-          mockDb: mockDb,
-          mockRepo: mockRepo,
-          onboardingComplete: true,
-        ),
-      );
-
-      expect(find.text('Recent scans'), findsOneWidget);
-      await tester.tap(find.byIcon(Icons.add_circle_outline).first);
-      await tester.pumpAndSettle();
-
-      verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
-      expect(find.text('Added to pantry.'), findsOneWidget);
-    });
+    expect(find.text('Recent scans'), findsNothing);
+    expect(find.text('Milk'), findsNothing);
+    expect(find.byIcon(Icons.add_circle_outline), findsNothing);
   });
 }

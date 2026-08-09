@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The home screen no longer shows the recent-scans strip, giving the app a
+  cleaner look. You can still find any product through search, your pantry,
+  or by scanning its barcode.
+
 - Saving a manually entered product is now separate from submitting it to
   Open Food Facts. "Save to inventory" just keeps the product in your pantry;
   "Submit to Open Food Facts" does that and sends it to the public food
