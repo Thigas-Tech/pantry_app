@@ -447,7 +447,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requiredField => 'This field is required';
 
   @override
-  String get servingSizeHint => 'e.g. 100 g, 1 cookie (28 g)';
+  String get servingSizeHint => 'e.g. 100';
 
   @override
   String get nutritionInfo => 'Nutrition (per 100 g / 100 ml)';

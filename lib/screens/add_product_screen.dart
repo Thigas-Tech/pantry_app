@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/models/product.dart';
@@ -18,6 +19,7 @@ import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/camera_permission_dialog.dart';
 import 'package:pantry_app/utils/gallery_permission_dialog.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/off_units.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/submission_error_label.dart';
@@ -57,7 +59,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   late String _name;
   String _brand = '';
   String _category = '';
-  String _servingSize = '';
+  String _servingSizeAmount = '';
+  String _servingSizeUnit = 'g';
   String _ingredients = '';
 
   String _energyKcal = '';
@@ -211,7 +214,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       brand: _brand.isNotEmpty ? _brand : null,
       category: _category.isNotEmpty ? _category : null,
       ingredients: _ingredients.isNotEmpty ? _ingredients : null,
-      servingSize: _servingSize.isNotEmpty ? _servingSize : null,
+      servingSize: _servingSizeAmount.trim().isNotEmpty
+          ? _formattedServingSize
+          : null,
       energyKcal: double.tryParse(_energyKcal),
       proteinG: double.tryParse(_proteinG),
       carbsG: double.tryParse(_carbsG),
@@ -284,6 +289,33 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     }
   }
 
+  /// Builds the "N unit" serving-size string stored on the product.
+  ///
+  /// Whole amounts are rendered without a trailing decimal (100 to "100 g",
+  /// 1.5 to "1.5 g") so the value round-trips cleanly through the quantity
+  /// parser and stays tidy for Open Food Facts.
+  String get _formattedServingSize {
+    final amount = double.tryParse(_servingSizeAmount.trim());
+    if (amount == null) return '';
+    final text = amount == amount.roundToDouble()
+        ? amount.round().toString()
+        : amount.toString();
+    return '$text $_servingSizeUnit';
+  }
+
+  /// Validates the optional serving-size amount.
+  ///
+  /// An empty amount is valid (the product is saved without a serving size).
+  /// Otherwise the amount must parse as a positive number.
+  String? _validateServingSize(String? value) {
+    if (value == null || value.trim().isEmpty) return null;
+    final amount = double.tryParse(value.trim());
+    if (amount == null || amount <= 0) {
+      return AppLocalizations.of(context)!.enterPositiveNumber;
+    }
+    return null;
+  }
+
   @override
   void dispose() {
     // Remove photos the form never committed to a saved product. Files already
@@ -328,12 +360,39 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 ),
                 onSaved: (v) => _category = v ?? '',
               ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: l10n.servingSize,
-                  hintText: l10n.servingSizeHint,
-                ),
-                onSaved: (v) => _servingSize = v ?? '',
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: l10n.servingSize,
+                        hintText: l10n.servingSizeHint,
+                      ),
+                      validator: _validateServingSize,
+                      onSaved: (v) => _servingSizeAmount = v ?? '',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 120,
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _servingSizeUnit,
+                      items: [
+                        for (final unit in OffUnitCatalog.sdkQuantityUnits)
+                          DropdownMenuItem(
+                            value: unit,
+                            child: Text(l10n.localizeUnit(unit)),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _servingSizeUnit = v!),
+                      decoration: InputDecoration(labelText: l10n.unitLabel),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Text(

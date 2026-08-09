@@ -906,7 +906,7 @@ abstract class AppLocalizations {
   /// No description provided for @servingSizeHint.
   ///
   /// In en, this message translates to:
-  /// **'e.g. 100 g, 1 cookie (28 g)'**
+  /// **'e.g. 100'**
   String get servingSizeHint;
 
   /// No description provided for @nutritionInfo.

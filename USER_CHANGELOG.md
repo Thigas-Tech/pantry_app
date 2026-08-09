@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- When entering a product by hand, you can now choose the serving size unit
+  from a list (grams, milligrams, micrograms, millilitres, or litres) instead
+  of typing it together with the amount.
+- Pantry items can now use milligram and microgram units, so products such
+  as vitamins and supplements keep their correct amounts.
+
 - If your Open Food Facts credentials are rejected, the app now says so
   clearly and does not keep retrying. Use your Open Food Facts username
   (not your email address) as the user id in the app configuration.

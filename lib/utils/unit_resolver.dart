@@ -1,4 +1,5 @@
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/utils/off_units.dart';
 
 /// Context in which a unit system is used.
 enum UnitContext {
@@ -39,9 +40,9 @@ class UnitResolver {
   /// Returns the list of available units for [system].
   static List<String> unitsForSystem(UnitSystem system) {
     if (system == UnitSystem.metric) {
-      return ['pieces', 'g', 'kg', 'ml', 'L'];
+      return OffUnitCatalog.quantityUnits;
     }
-    return ['pieces', 'oz', 'lb', 'fl oz', 'cup', 'tbsp', 'tsp'];
+    return OffUnitCatalog.imperialUnits;
   }
 
   /// Whether [unit] is a metric unit (or neutral like "pieces").
@@ -52,6 +53,8 @@ class UnitResolver {
       case 'pieces':
       case 'g':
       case 'kg':
+      case 'mg':
+      case 'mcg':
       case 'ml':
       case 'L':
         return true;

@@ -71,6 +71,20 @@ void main() {
       expect(result.unit, 'oz');
     });
 
+    test('parses mg quantity', () {
+      final result = parseQuantity(quantity: '500 mg');
+      expect(result, isNotNull);
+      expect(result!.amount, 500);
+      expect(result.unit, 'mg');
+    });
+
+    test('parses mcg quantity', () {
+      final result = parseQuantity(quantity: '200 mcg');
+      expect(result, isNotNull);
+      expect(result!.amount, 200);
+      expect(result.unit, 'mcg');
+    });
+
     test('returns null for empty string', () {
       expect(parseQuantity(quantity: ''), isNull);
     });
@@ -292,6 +306,34 @@ void main() {
 
     test('normalizes grams -> g', () {
       expect(normalizeUnit('grams'), 'g');
+    });
+
+    test('normalizes mg -> mg', () {
+      expect(normalizeUnit('mg'), 'mg');
+    });
+
+    test('normalizes milligram -> mg', () {
+      expect(normalizeUnit('milligram'), 'mg');
+    });
+
+    test('normalizes milligrams -> mg', () {
+      expect(normalizeUnit('milligrams'), 'mg');
+    });
+
+    test('normalizes mcg -> mcg', () {
+      expect(normalizeUnit('mcg'), 'mcg');
+    });
+
+    test('normalizes microgram -> mcg', () {
+      expect(normalizeUnit('microgram'), 'mcg');
+    });
+
+    test('normalizes micrograms -> mcg', () {
+      expect(normalizeUnit('micrograms'), 'mcg');
+    });
+
+    test('normalizes µg -> mcg', () {
+      expect(normalizeUnit('µg'), 'mcg');
     });
 
     test('normalizes kilogram -> kg', () {

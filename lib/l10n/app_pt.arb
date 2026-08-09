@@ -230,7 +230,7 @@
   "enterProductDetails": "Preencha os dados do produto",
   "productNameLabel": "Nome do produto",
   "requiredField": "Campo obrigatório",
-  "servingSizeHint": "ex: 100 g, 1 biscoito (28 g)",
+  "servingSizeHint": "ex: 100",
   "nutritionInfo": "Nutrição (por 100 g / 100 ml)",
   "captureImages": "Fotos",
   "nutritionTableImage": "Foto da tabela nutricional",

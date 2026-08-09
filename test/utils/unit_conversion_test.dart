@@ -20,6 +20,14 @@ void main() {
       expect(UnitConverter.normalizeToGrams(2, 'lb'), closeTo(907.184, 0.001));
     });
 
+    test('converts mg to g', () {
+      expect(UnitConverter.normalizeToGrams(1000, 'mg'), 1.0);
+    });
+
+    test('converts mcg to g', () {
+      expect(UnitConverter.normalizeToGrams(1, 'mcg'), 1e-6);
+    });
+
     test('handles zero', () {
       expect(UnitConverter.normalizeToGrams(0, 'g'), 0.0);
     });
@@ -61,6 +69,18 @@ void main() {
   group('areUnitsCompatible', () {
     test('g and kg are compatible', () {
       expect(UnitConverter.areUnitsCompatible('g', 'kg'), isTrue);
+    });
+
+    test('mg and g are compatible', () {
+      expect(UnitConverter.areUnitsCompatible('mg', 'g'), isTrue);
+    });
+
+    test('mcg and kg are compatible', () {
+      expect(UnitConverter.areUnitsCompatible('mcg', 'kg'), isTrue);
+    });
+
+    test('mg and ml are not compatible', () {
+      expect(UnitConverter.areUnitsCompatible('mg', 'ml'), isFalse);
     });
 
     test('oz and g are compatible', () {
@@ -117,6 +137,14 @@ void main() {
       expect(UnitConverter.convertBack(28.3495, 'oz'), closeTo(1.0, 0.0001));
     });
 
+    test('converts g back to mg', () {
+      expect(UnitConverter.convertBack(1, 'mg'), 1000.0);
+    });
+
+    test('converts g back to mcg', () {
+      expect(UnitConverter.convertBack(1, 'mcg'), 1e6);
+    });
+
     test('converts g back to lb', () {
       expect(UnitConverter.convertBack(453.592, 'lb'), closeTo(1.0, 0.0001));
     });
@@ -140,6 +168,22 @@ void main() {
   group('convert', () {
     test('converts 2 kg to 2000 g', () {
       expect(UnitConverter.convert(2, 'kg', 'g'), 2000.0);
+    });
+
+    test('converts 1000 mg to 1 g', () {
+      expect(UnitConverter.convert(1000, 'mg', 'g'), 1.0);
+    });
+
+    test('converts 1 g to 1000 mg', () {
+      expect(UnitConverter.convert(1, 'g', 'mg'), 1000.0);
+    });
+
+    test('converts 500 mcg to 0.0005 g', () {
+      expect(UnitConverter.convert(500, 'mcg', 'g'), 0.0005);
+    });
+
+    test('converts 2 g to 2e6 mcg', () {
+      expect(UnitConverter.convert(2, 'g', 'mcg'), 2e6);
     });
 
     test('handles near-zero quantity', () {
@@ -504,6 +548,8 @@ void main() {
         'pieces',
         'g',
         'kg',
+        'mg',
+        'mcg',
         'ml',
         'L',
       ]);

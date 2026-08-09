@@ -1,16 +1,17 @@
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/off_units.dart';
 
 /// Normalizes and converts between compatible measurement units.
 ///
 /// Supported unit groups:
-///   - weight: g, kg, oz, lb
+///   - weight: g, kg, mg, mcg, oz, lb
 ///   - volume: ml, L, tbsp, tsp, cup, fl oz
 ///   - count: pieces
 class UnitConverter {
   UnitConverter._();
 
-  static const _weightUnits = {'g', 'kg', 'oz', 'lb'};
+  static const _weightUnits = {'g', 'kg', 'mg', 'mcg', 'oz', 'lb'};
   static const _volumeUnits = {'ml', 'L', 'tbsp', 'tsp', 'cup', 'fl oz'};
 
   static const _ozToG = 28.3495;
@@ -30,6 +31,8 @@ class UnitConverter {
   static double normalizeToGrams(double quantity, String unit) {
     if (unit == 'kg') return quantity * 1000;
     if (unit == 'g') return quantity;
+    if (unit == 'mg') return quantity / 1000;
+    if (unit == 'mcg') return quantity / 1e6;
     if (unit == 'oz') return quantity * _ozToG;
     if (unit == 'lb') return quantity * _lbToG;
     logWarning('normalizeToGrams: unsupported unit $unit, returning 0');
@@ -58,6 +61,8 @@ class UnitConverter {
     }
     if (targetUnit == 'kg') return normalizedQty / 1000;
     if (targetUnit == 'L') return normalizedQty / 1000;
+    if (targetUnit == 'mg') return normalizedQty * 1000;
+    if (targetUnit == 'mcg') return normalizedQty * 1e6;
     if (targetUnit == 'oz') return normalizedQty / _ozToG;
     if (targetUnit == 'lb') return normalizedQty / _lbToG;
     if (targetUnit == 'fl oz') return normalizedQty / _flOzToMl;
@@ -245,11 +250,14 @@ class UnitConverter {
   }
 
   /// Returns the list of available units for the given [system].
+  ///
+  /// Delegates to [OffUnitCatalog] so this list stays in sync with the one
+  /// used by the unit resolver.
   static List<String> allUnitsForSystem(UnitSystem system) {
     if (system == UnitSystem.metric) {
-      return ['pieces', 'g', 'kg', 'ml', 'L'];
+      return OffUnitCatalog.quantityUnits;
     }
-    return ['pieces', 'oz', 'lb', 'fl oz', 'cup', 'tbsp', 'tsp'];
+    return OffUnitCatalog.imperialUnits;
   }
 
   /// Rounds [value] to a reasonable precision for [unit].

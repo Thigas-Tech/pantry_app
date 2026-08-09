@@ -299,7 +299,7 @@ void main() {
       );
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Serving size'),
-        '100 g',
+        '100',
       );
 
       // Nutrition fields — identify each by its label Text sibling in a Row.
@@ -399,6 +399,93 @@ void main() {
       expect(captured!.ingredients, isNull);
       expect(captured!.source, 'manual');
       expect(captured!.nutriscoreGrade, isNull);
+    });
+
+    testWidgets('saves serving size with a selected mg unit', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Product? captured;
+
+      await pumpSaveScreen(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              captured = await Navigator.push<Product>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AddProductScreen(barcode: '123'),
+                ),
+              );
+            },
+            child: const Text('Open form'),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Serving size'),
+        '250',
+      );
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('mg').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.servingSize, '250 mg');
+    });
+
+    testWidgets('shows an error for a non-numeric serving size', (
+      tester,
+    ) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Serving size'),
+        'abc',
+      );
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enter a positive number'), findsOneWidget);
+    });
+
+    testWidgets('shows an error for a zero serving size', (tester) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Serving size'),
+        '0',
+      );
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enter a positive number'), findsOneWidget);
     });
   });
 

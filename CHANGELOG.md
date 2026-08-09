@@ -214,6 +214,20 @@
 
 ### Changed
 
+- **Unit selector for manual products and mg/mcg unit support (issue #294)**:
+  the manual product form's serving size is now a structured amount field
+  with a unit dropdown offering the OFF quantity units (g, mg, mcg, ml, L)
+  derived from the SDK `Unit` enum, instead of a free-text field
+  (`lib/screens/add_product_screen.dart`). The unit lists now come from a
+  single `OffUnitCatalog` (`lib/utils/off_units.dart`) shared by the unit
+  resolver and the unit converter, and the inventory presets gained mg and
+  mcg. The quantity parser now normalizes mg/mcg (including the microgram
+  symbol) so OFF products such as "500 mg" pre-fill correctly, and the unit
+  converter converts mg/mcg to grams for recipe deduction and display.
+  (`lib/utils/off_units.dart`, `lib/utils/unit_resolver.dart`,
+  `lib/utils/unit_conversion.dart`, `lib/utils/quantity_parser.dart`,
+  `lib/screens/add_to_inventory_screen.dart`, `lib/screens/add_product_screen.dart`)
+
 - **Lint-suppression cleanup**: removed all `// ignore` and
   `// ignore_for_file` comments from hand-written code. The `QuantityParser`
   utility class was dissolved into top-level functions (`parseQuantity`,

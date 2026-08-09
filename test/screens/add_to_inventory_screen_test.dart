@@ -157,6 +157,70 @@ void main() {
       expect(dropdown, findsOneWidget);
     });
 
+    testWidgets('pre-fills mg amount and unit from product data', (
+      tester,
+    ) async {
+      final product = productWithQuantity(
+        productQuantity: 500,
+        quantity: '500 mg',
+      );
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          product: product,
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      final quantityField = tester.widget<TextField>(textFields.first);
+      expect(quantityField.controller?.text, '500.0');
+      expect(find.text('mg'), findsOneWidget);
+    });
+
+    testWidgets('pre-fills mcg amount and unit from product data', (
+      tester,
+    ) async {
+      final product = productWithQuantity(
+        productQuantity: 200,
+        quantity: '200 mcg',
+      );
+      await _pumpScreen(
+        tester,
+        AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          product: product,
+        ),
+      );
+
+      final textFields = find.byType(TextField);
+      final quantityField = tester.widget<TextField>(textFields.first);
+      expect(quantityField.controller?.text, '200.0');
+      expect(find.text('mcg'), findsOneWidget);
+    });
+
+    testWidgets('shows custom option for a non-preset unit', (tester) async {
+      await _pumpScreen(
+        tester,
+        const AddToInventoryScreen(
+          barcode: '123456789',
+          inventoryId: 1,
+          productType: ProductType.barcoded,
+          existingItem: InventoryItem(
+            barcode: '123456789',
+            quantity: 2,
+            unit: 'gallon',
+          ),
+        ),
+      );
+
+      expect(find.text('...'), findsOneWidget);
+    });
+
     testWidgets('pre-fills from parsed quantity string alone', (tester) async {
       final product = productWithQuantity(quantity: '3 x 150 g');
       await _pumpScreen(

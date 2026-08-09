@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Ao inserir um produto manualmente, agora voce pode escolher a unidade da
+  porcao a partir de uma lista (gramas, miligramas, microgramas, mililitros
+  ou litros) em vez de digita-la junto com a quantidade.
+- Os itens da despensa agora podem usar unidades de miligrama e micrograma,
+  para que produtos como vitaminas e suplementos mantenham suas quantidades
+  corretas.
+
 - Se suas credenciais do Open Food Facts forem rejeitadas, o aplicativo agora
   avisa isso claramente e nao continua tentando. Use seu nome de usuario do
   Open Food Facts (e nao seu endereco de e-mail) como id de usuario na
