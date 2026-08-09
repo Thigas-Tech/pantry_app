@@ -74,6 +74,8 @@
   <pre class="language-dart"><code class="language-dart">static double normalizeToGrams(double quantity, String unit) {
   if (unit == &#39;kg&#39;) return quantity * 1000;
   if (unit == &#39;g&#39;) return quantity;
+  if (unit == &#39;mg&#39;) return quantity &#47; 1000;
+  if (unit == &#39;mcg&#39;) return quantity &#47; 1e6;
   if (unit == &#39;oz&#39;) return quantity * _ozToG;
   if (unit == &#39;lb&#39;) return quantity * _lbToG;
   logWarning(&#39;normalizeToGrams: unsupported unit $unit, returning 0&#39;);

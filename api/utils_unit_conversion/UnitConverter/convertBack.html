@@ -77,6 +77,8 @@
   }
   if (targetUnit == &#39;kg&#39;) return normalizedQty &#47; 1000;
   if (targetUnit == &#39;L&#39;) return normalizedQty &#47; 1000;
+  if (targetUnit == &#39;mg&#39;) return normalizedQty * 1000;
+  if (targetUnit == &#39;mcg&#39;) return normalizedQty * 1e6;
   if (targetUnit == &#39;oz&#39;) return normalizedQty &#47; _ozToG;
   if (targetUnit == &#39;lb&#39;) return normalizedQty &#47; _lbToG;
   if (targetUnit == &#39;fl oz&#39;) return normalizedQty &#47; _flOzToMl;

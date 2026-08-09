@@ -64,6 +64,8 @@
     
 <section class="desc markdown">
   <p>Returns the list of available units for the given <code>system</code>.</p>
+<p>Delegates to <a href="../../utils_off_units/OffUnitCatalog-class.html">OffUnitCatalog</a> so this list stays in sync with the one
+used by the unit resolver.</p>
 </section>
 
 
@@ -72,9 +74,9 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">static List&lt;String&gt; allUnitsForSystem(UnitSystem system) {
   if (system == UnitSystem.metric) {
-    return [&#39;pieces&#39;, &#39;g&#39;, &#39;kg&#39;, &#39;ml&#39;, &#39;L&#39;];
+    return OffUnitCatalog.quantityUnits;
   }
-  return [&#39;pieces&#39;, &#39;oz&#39;, &#39;lb&#39;, &#39;fl oz&#39;, &#39;cup&#39;, &#39;tbsp&#39;, &#39;tsp&#39;];
+  return OffUnitCatalog.imperialUnits;
 }</code></pre>
 </section>
 
