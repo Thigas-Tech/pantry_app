@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A tela inicial ja nao mostra a faixa de verificacoes recentes, deixando o
+  aplicativo mais limpo. Ainda pode encontrar qualquer produto atraves da
+  pesquisa, da sua despensa ou ao ler o codigo de barras.
 - Guardar um produto introduzido manualmente agora e separado de o enviar
   para o Open Food Facts. "Guardar no inventario" apenas mantem o produto na
   sua despensa; "Enviar para o Open Food Facts" faz isso e envia-o para a

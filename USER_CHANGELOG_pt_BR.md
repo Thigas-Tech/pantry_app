@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- A tela inicial ja nao mostra a faixa de verificacoes recentes, deixando o
+  aplicativo mais limpo. Voce ainda pode encontrar qualquer produto pela
+  pesquisa, pela sua despensa ou escaneando o codigo de barras.
 - Salvar um produto inserido manualmente agora e separado de envia-lo para o
   Open Food Facts. "Salvar no inventario" apenas mantem o produto na sua
   despensa; "Enviar para o Open Food Facts" faz isso e o envia para o banco

@@ -27,7 +27,7 @@ never waste food again.
 - **Price tracking** — record purchase prices with store, date, and currency; view price history and total inventory value
 - **Shopping list** — add items from cached products or free-text, mark as purchased, batch-move to pantry
 - **Store autocomplete** — saved store names persist across uses, suggested in the price entry sheet
-- **Barcode history** — the last 50 scanned barcodes are kept locally and shown as a "Recent scans" strip on the home screen, with one-tap quick-add straight to your pantry
+- **Barcode history** — the last 50 scanned barcodes are kept locally on your device
 
 ## Screenshots
 
