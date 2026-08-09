@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Saving a manually entered product is now separate from submitting it to
+  Open Food Facts. "Save to inventory" just keeps the product in your pantry;
+  "Submit to Open Food Facts" does that and sends it to the public food
+  database. Both are always available, so if a submission is rejected you can
+  still keep the product locally.
+- When Open Food Facts does not know a barcode, the "Contribute to Open Food
+  Facts" button now opens the product form ready to submit instead of showing
+  a "Coming Soon" message.
+- Submissions now include the product's nutrition values, packaging quantity,
+  and the app's language, so what you contribute is complete and in the right
+  language.
+
 - For a manually entered product, the product page now shows where the
   submission to Open Food Facts stands. If it failed, you can retry it
   right there instead of going back to the form.

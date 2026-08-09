@@ -231,6 +231,72 @@ void main() {
         expect(merged.nutritionImagePath, '/a.jpg');
       });
 
+      group('toOffProduct', () {
+        test('maps nutrition values per 100g', () {
+          const product = Product(
+            barcode: '123',
+            name: 'Test',
+            energyKcal: 200,
+            proteinG: 10,
+            carbsG: 30,
+            fatG: 5,
+            fiberG: 3,
+            saltG: 1.5,
+          );
+          final offProduct = product.toOffProduct();
+          final n = offProduct.nutriments!;
+          expect(
+            n.getValue(off.Nutrient.energyKCal, off.PerSize.oneHundredGrams),
+            200,
+          );
+          expect(
+            n.getValue(off.Nutrient.proteins, off.PerSize.oneHundredGrams),
+            10,
+          );
+          expect(
+            n.getValue(off.Nutrient.carbohydrates, off.PerSize.oneHundredGrams),
+            30,
+          );
+          expect(n.getValue(off.Nutrient.fat, off.PerSize.oneHundredGrams), 5);
+          expect(
+            n.getValue(off.Nutrient.fiber, off.PerSize.oneHundredGrams),
+            3,
+          );
+          expect(
+            n.getValue(off.Nutrient.salt, off.PerSize.oneHundredGrams),
+            1.5,
+          );
+        });
+
+        test('omits nutriments when all values are null', () {
+          const product = Product(barcode: '123', name: 'Test');
+          final offProduct = product.toOffProduct();
+          expect(offProduct.nutriments, isNull);
+        });
+
+        test('maps quantity and lang', () {
+          const product = Product(
+            barcode: '123',
+            name: 'Test',
+            quantity: '500 g',
+            languageCode: 'fr',
+          );
+          final offProduct = product.toOffProduct();
+          expect(offProduct.quantity, '500 g');
+          expect(offProduct.lang, off.OpenFoodFactsLanguage.FRENCH);
+        });
+
+        test('falls back to English for unknown language codes', () {
+          const product = Product(
+            barcode: '123',
+            name: 'Test',
+            languageCode: 'zz',
+          );
+          final offProduct = product.toOffProduct();
+          expect(offProduct.lang, off.OpenFoodFactsLanguage.ENGLISH);
+        });
+      });
+
       test('full API response updates all nutrition fields', () {
         const cached = Product(barcode: '1', name: 'Old');
         const api = Product(

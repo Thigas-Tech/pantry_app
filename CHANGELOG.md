@@ -4,6 +4,27 @@
 
 ### Added
 
+- **Separated local save from OFF submission**: the manual product form
+  (`lib/screens/add_product_screen.dart`) now offers two distinct actions.
+  "Save to inventory" caches the product locally only and pops the screen.
+  "Submit to Open Food Facts" caches locally and submits through the existing
+  submission machinery, keeping the inline progress panel and retry button.
+  Both actions are always available (the local save is the fallback when a
+  submission is rejected, e.g. a duplicate), and a new `submitToOff` flag
+  decides which button is visually primary. The search panel's
+  "Contribute to Open Food Facts" action now opens this form in submit mode
+  instead of showing a Coming Soon dialog
+  (`lib/widgets/not_found_flow.dart`, `lib/widgets/search_panel.dart`).
+
+- **Spec-compliant OFF submissions**: `Product.toOffProduct` now maps the six
+  nutrition values (per 100 g), the display quantity, and the product language
+  code onto the SDK product, so submissions carry the data the OFF upload
+  tutorial requires (`lib/models/product.dart`). Image uploads now forward the
+  product's language code so the uploaded photo language matches
+  (`lib/services/product_submission_service.dart`). The reusable
+  `OffQuery.codeToLanguage` helper backs the language fallback
+  (`lib/services/off_query.dart`).
+
 - **Detail-screen submission retry and status**: the product detail screen
   for a manual product now shows its persistent submission status
   (submitted, pending, partially completed, failed, or not submitted) in a

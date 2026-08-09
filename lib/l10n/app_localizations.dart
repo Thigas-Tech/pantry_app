@@ -975,6 +975,18 @@ abstract class AppLocalizations {
   /// **'Save product'**
   String get saveProduct;
 
+  /// No description provided for @saveToInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to inventory'**
+  String get saveToInventory;
+
+  /// No description provided for @submitProductToOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit to Open Food Facts'**
+  String get submitProductToOff;
+
   /// No description provided for @offlineWarning.
   ///
   /// In en, this message translates to:
@@ -1226,18 +1238,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can still use this product locally.'**
   String get productNotInDatabaseHint;
-
-  /// No description provided for @contributeToOffComingSoonTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Coming Soon'**
-  String get contributeToOffComingSoonTitle;
-
-  /// No description provided for @contributeToOffComingSoonBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Direct product contribution to Open Food Facts is not yet available. A GitHub issue has been created to track this feature.'**
-  String get contributeToOffComingSoonBody;
 
   /// No description provided for @saveLocallyAction.
   ///

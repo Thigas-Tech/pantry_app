@@ -486,6 +486,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get saveProduct => 'Salvar produto';
 
   @override
+  String get saveToInventory => 'Salvar no inventario';
+
+  @override
+  String get submitProductToOff => 'Enviar para o Open Food Facts';
+
+  @override
   String get offlineWarning =>
       'Você está offline — adicionando produto manualmente';
 
@@ -634,13 +640,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get productNotInDatabaseHint =>
       'Voce ainda pode usar este produto localmente.';
-
-  @override
-  String get contributeToOffComingSoonTitle => 'Em Breve';
-
-  @override
-  String get contributeToOffComingSoonBody =>
-      'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
 
   @override
   String get saveLocallyAction => 'Salvar Localmente';
@@ -2592,6 +2591,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get saveProduct => 'Salvar produto';
 
   @override
+  String get saveToInventory => 'Salvar no inventario';
+
+  @override
+  String get submitProductToOff => 'Enviar para o Open Food Facts';
+
+  @override
   String get offlineWarning =>
       'Você está offline — adicionando produto manualmente';
 
@@ -2740,13 +2745,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get productNotInDatabaseHint =>
       'Voce ainda pode usar este produto localmente.';
-
-  @override
-  String get contributeToOffComingSoonTitle => 'Em Breve';
-
-  @override
-  String get contributeToOffComingSoonBody =>
-      'A contribuicao direta de produtos ao Open Food Facts ainda nao esta disponivel. Um issue no GitHub foi criado para acompanhar este recurso.';
 
   @override
   String get saveLocallyAction => 'Salvar Localmente';

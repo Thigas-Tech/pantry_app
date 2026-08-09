@@ -247,6 +247,8 @@
   "ingredientsImage": "Ingredients list photo",
   "productImage": "Product photo",
   "saveProduct": "Save product",
+  "saveToInventory": "Save to inventory",
+  "submitProductToOff": "Submit to Open Food Facts",
   "offlineWarning": "You are offline — adding product manually",
   "nutriscoreExplanation": "Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.",
   "nutriscoreNotApplicable": "Nutri-Score is not applicable to this product ({category}).",
@@ -302,8 +304,6 @@
   "enterBarcodePrompt": "Type or paste a barcode number",
   "productNotInDatabase": "This barcode is not registered with Open Food Facts.",
   "productNotInDatabaseHint": "You can still use this product locally.",
-  "contributeToOffComingSoonTitle": "Coming Soon",
-  "contributeToOffComingSoonBody": "Direct product contribution to Open Food Facts is not yet available. A GitHub issue has been created to track this feature.",
   "saveLocallyAction": "Save Locally",
   "totalItemsCount": "Total items: {count}",
   "@totalItemsCount": {

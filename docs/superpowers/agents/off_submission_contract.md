@@ -74,11 +74,20 @@ stay in place before any write is attempted.
 | `categories` | category |
 | `ingredients_text` | ingredients |
 | `serving_size` | servingSize |
+| `quantity` | quantity |
+| `lang` | languageCode (two-letter code, English fallback) |
+| `nutriment_energy-kcal_100g` | energyKcal |
+| `nutriment_proteins_100g` | proteinG |
+| `nutriment_carbohydrates_100g` | carbsG |
+| `nutriment_fat_100g` | fatG |
+| `nutriment_fiber_100g` | fiberG |
+| `nutriment_salt_100g` | saltG |
 
-Optional `lc` (language) and `cc` (country) are not sent today; product
-names submit exactly as stored. Success response is JSON with an integer
-status: `{"status": 1}`. Any response whose status is not 1 is treated
-as failure.
+`lang` is sent on the product payload (via `off.Product.lang`, serialized by
+the SDK as `LanguageHelper.toJson`), not as the `lc` query parameter. The
+optional `cc` (country) is not sent today; product names submit exactly as
+stored. Success response is JSON with an integer status: `{"status": 1}`.
+Any response whose status is not 1 is treated as failure.
 
 ## Image upload contract
 
@@ -88,7 +97,8 @@ as failure.
 - `imagefield` — one of `front`, `ingredients`, `nutrition` (mapped via
   `parseImageField`), optionally suffixed with the language tag, e.g.
   `ingredients_en`
-- `lc` — the language code (defaults to English)
+- `lc` — the language code, forwarded from the product's `languageCode`
+  (defaults to English)
 - file part key `imgupload_<imagefield>[_<lang>]` — the raw image bytes
 
 Supported fields per OFF docs: `front`, `ingredients`, `nutrition`,

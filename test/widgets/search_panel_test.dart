@@ -9,7 +9,9 @@ import 'package:pantry_app/models/search_filter.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/usda_provider.dart';
+import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/widgets/not_found_flow.dart';
@@ -220,6 +222,42 @@ void main() {
         find.text('No products found in Packaged Products.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('contribute to OFF opens AddProductScreen in submit mode', (
+      tester,
+    ) async {
+      final repo = createMockProductRepository();
+      when(() => repo.getProduct(any())).thenThrow(Exception('not found'));
+      await pumpPanel(
+        tester,
+        extraOverrides: [
+          productRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+
+      // Drive the not-found flow to the barcode-not-found stage.
+      await tester.enterText(find.byType(SearchBar), 'unknownproduct');
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pump(const Duration(milliseconds: 1100));
+      await tester.pump();
+      await tester.tap(find.text('Enter Barcode'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Barcode'),
+        '1234567890123',
+      );
+      await tester.tap(find.text('Submit'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Contribute to Open Food Facts'));
+      await tester.pumpAndSettle();
+
+      final screen = tester.widget<AddProductScreen>(
+        find.byType(AddProductScreen),
+      );
+      expect(screen.barcode, '1234567890123');
+      expect(screen.submitToOff, isTrue);
     });
 
     testWidgets('USDA empty results do NOT show NotFoundFlow', (
