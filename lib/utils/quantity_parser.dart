@@ -27,8 +27,8 @@ class ParsedQuantity {
 /// Parses quantity strings from the Open Food Facts API into numeric
 /// amount and normalized unit pairs.
 ///
-/// Handles formats like `"500 ml"`, `"3 x 150 g"`, `"6 eggs"`,
-/// and unit normalization (e.g. `cl` -> `ml`, `kilogram` -> `kg`).
+/// Handles formats like "500 ml", "3 x 150 g", and "6 eggs", plus unit
+/// normalization such as cl to ml, kilogram to kg, and milligram to mg.
 final _multiPack = RegExp(
   r'^(\d+)\s*[xX×]\s*(\d+(?:\.\d+)?)\s*([a-zA-Z]+(?: [a-zA-Z]+)?)',
 );
@@ -44,6 +44,13 @@ const _unitMap = <String, String>{
   'kg': 'kg',
   'kilogram': 'kg',
   'kilograms': 'kg',
+  'mg': 'mg',
+  'milligram': 'mg',
+  'milligrams': 'mg',
+  'mcg': 'mcg',
+  'microgram': 'mcg',
+  'micrograms': 'mcg',
+  'µg': 'mcg',
   'ml': 'ml',
   'milliliter': 'ml',
   'milliliters': 'ml',

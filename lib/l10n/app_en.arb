@@ -235,7 +235,7 @@
   "enterProductDetails": "Enter product details",
   "productNameLabel": "Product name",
   "requiredField": "This field is required",
-  "servingSizeHint": "e.g. 100 g, 1 cookie (28 g)",
+  "servingSizeHint": "e.g. 100",
   "nutritionInfo": "Nutrition (per 100 g / 100 ml)",
   "captureImages": "Photos",
   "nutritionTableImage": "Nutrition table photo",

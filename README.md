@@ -16,7 +16,7 @@ never waste food again.
 - **Multiple pantries** — create, rename, and delete named inventories (e.g. Home, Work)
 - **Expiry tracking** — items grouped into Expired / Expiring Soon / Good on the home screen
 - **Local notifications** — two reminders per item: one day before expiry and on expiry day
-- **Custom units & locations** — pieces / g / kg / ml / L + pantry / fridge / freezer, with custom options
+- **Custom units & locations** — pieces / g / kg / mg / mcg / ml / L + pantry / fridge / freezer, with custom options
 - **Nutrition table** — energy, protein, carbs, fat, fiber, salt per 100 g / 100 ml
 - **Material You** — dynamic colours from your device wallpaper, light/dark/system theme
 - **Undo delete** — restore an accidentally deleted inventory item with a snackbar action

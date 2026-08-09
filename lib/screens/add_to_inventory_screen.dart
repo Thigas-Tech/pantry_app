@@ -8,6 +8,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/off_units.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 
 /// A form screen for creating or editing an inventory item.
@@ -75,7 +76,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
 
   bool get _isProduce => widget.productType == ProductType.produce;
 
-  static const _presetUnits = ['pieces', 'g', 'kg', 'ml', 'L'];
+  static final List<String> _presetUnits = OffUnitCatalog.quantityUnits;
   static const _presetLocations = ['pantry', 'fridge', 'freezer'];
 
   List<String> _units = List.of(_presetUnits);
@@ -268,7 +269,7 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.existingItem != null;
     final unitItems = <DropdownMenuItem<String>>[
-      for (final u in _units.where((u) => _presetUnits.contains(u)))
+      for (final u in _units.where(_presetUnits.contains))
         DropdownMenuItem(value: u, child: Text(l10n.localizeUnit(u))),
       const DropdownMenuItem(value: '__custom__', child: Text('...')),
     ];

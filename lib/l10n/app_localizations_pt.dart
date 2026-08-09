@@ -450,7 +450,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get requiredField => 'Campo obrigatório';
 
   @override
-  String get servingSizeHint => 'ex: 100 g, 1 biscoito (28 g)';
+  String get servingSizeHint => 'ex: 100';
 
   @override
   String get nutritionInfo => 'Nutrição (por 100 g / 100 ml)';
@@ -2544,7 +2544,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get requiredField => 'Campo obrigatório';
 
   @override
-  String get servingSizeHint => 'ex: 100 g, 1 biscoito (28 g)';
+  String get servingSizeHint => 'ex: 100';
 
   @override
   String get nutritionInfo => 'Nutrição (por 100 g / 100 ml)';

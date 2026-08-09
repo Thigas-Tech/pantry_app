@@ -86,7 +86,7 @@ void main() {
       test('returns metric units for metric', () {
         expect(
           UnitResolver.unitsForSystem(UnitSystem.metric),
-          ['pieces', 'g', 'kg', 'ml', 'L'],
+          ['pieces', 'g', 'kg', 'mg', 'mcg', 'ml', 'L'],
         );
       });
 
@@ -105,6 +105,14 @@ void main() {
 
       test('kg is metric', () {
         expect(UnitResolver.isMetricUnit('kg'), isTrue);
+      });
+
+      test('mg is metric', () {
+        expect(UnitResolver.isMetricUnit('mg'), isTrue);
+      });
+
+      test('mcg is metric', () {
+        expect(UnitResolver.isMetricUnit('mcg'), isTrue);
       });
 
       test('ml is metric', () {
