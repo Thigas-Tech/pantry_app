@@ -10,6 +10,9 @@
 - When Open Food Facts does not know a barcode, the "Contribute to Open Food
   Facts" button now opens the product form ready to submit instead of showing
   a "Coming Soon" message.
+- Scanning a product that is not in the Open Food Facts database now takes
+  you straight to the form to contribute it, instead of just showing a
+  "product not found" message.
 - Submissions now include the product's nutrition values, packaging quantity,
   and the app's language, so what you contribute is complete and in the right
   language.
