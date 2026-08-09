@@ -54,19 +54,22 @@
 
     <section class="multi-line-signature">
       const
-      <span class="name ">ScanFailed</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="param-message"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">message</span></span></li>
-</ol>)
+      <span class="name ">ScanFailed</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="param-message"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">message</span>, {</span></li>
+<li><span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">barcode</span>, </span></li>
+</ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../providers_scanner_providers/ScanFailed-class.html">ScanFailed</a> state with an error <code>message</code>.</p>
+<p><code>barcode</code> carries the barcode that failed to resolve, when known, so
+callers can act on it (e.g. open a contribution form).</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const ScanFailed(this.message);</code></pre>
+  <pre class="language-dart"><code class="language-dart">const ScanFailed(this.message, {this.barcode});</code></pre>
 </section>
 
 

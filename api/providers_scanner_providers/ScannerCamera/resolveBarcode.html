@@ -91,7 +91,7 @@ caught and <a href="../../providers_scanner_providers/ScanFailed-class.html">Sca
   } on ProductNotFoundException {
     logInfo(&#39;Product not found for barcode: $barcode&#39;);
     state = state.copyWith(
-      scanResolution: const ScanFailed(&#39;PRODUCT_NOT_FOUND&#39;),
+      scanResolution: ScanFailed(&#39;PRODUCT_NOT_FOUND&#39;, barcode: barcode),
     );
   } on TimeoutException {
     logWarning(&#39;Barcode resolution timed out: $barcode&#39;);
