@@ -99,7 +99,7 @@ barcode-not-found stage when the barcode lookup fails.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="NotFoundFlow.new" class="callable">
-          <span class="name"><a href="../widgets_not_found_flow/NotFoundFlow/NotFoundFlow.html">NotFoundFlow</a></span><span class="signature">({<span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span>, </span><span class="parameter" id="param-onBarcodeSubmitted"><span class="type-annotation">void</span> <span class="parameter-name">onBarcodeSubmitted</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)?, </span><span class="parameter" id="param-onScanBarcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>?</span> <span class="parameter-name">onScanBarcode</span>, </span><span class="parameter" id="param-onContributeToOff"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>?</span> <span class="parameter-name">onContributeToOff</span>, </span><span class="parameter" id="param-onSaveLocally"><span class="type-annotation">void</span> <span class="parameter-name">onSaveLocally</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)?</span>})</span>
+          <span class="name"><a href="../widgets_not_found_flow/NotFoundFlow/NotFoundFlow.html">NotFoundFlow</a></span><span class="signature">({<span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span>, </span><span class="parameter" id="param-onBarcodeSubmitted"><span class="type-annotation">void</span> <span class="parameter-name">onBarcodeSubmitted</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)?, </span><span class="parameter" id="param-onScanBarcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>?</span> <span class="parameter-name">onScanBarcode</span>, </span><span class="parameter" id="param-onContributeToOff"><span class="type-annotation">void</span> <span class="parameter-name">onContributeToOff</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)?, </span><span class="parameter" id="param-onSaveLocally"><span class="type-annotation">void</span> <span class="parameter-name">onSaveLocally</span>(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)?</span>})</span>
         </dt>
         <dd>
           Creates a <a href="../widgets_not_found_flow/NotFoundFlow-class.html">NotFoundFlow</a>.
@@ -151,12 +151,13 @@ barcode-not-found stage when the barcode lookup fails.</p>
 
         <dt id="onContributeToOff" class="property">
   <span class="name"><a href="../widgets_not_found_flow/NotFoundFlow/onContributeToOff.html">onContributeToOff</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a>?</span>
+  <span class="signature">&#8594; void Function<span class="signature">(<span class="parameter" id="param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span></span>)</span>?</span>
   
 
 </dt>
 <dd>
-  Called when the user taps Contribute to Open Food Facts.
+  Called with the barcode when the user taps Contribute to Open Food
+Facts.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>

@@ -70,6 +70,27 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">off.Product toOffProduct() {
+  final nutriments = &lt;(off.Nutrient, double)&gt;[
+    if (energyKcal != null) (off.Nutrient.energyKCal, energyKcal!),
+    if (proteinG != null) (off.Nutrient.proteins, proteinG!),
+    if (carbsG != null) (off.Nutrient.carbohydrates, carbsG!),
+    if (fatG != null) (off.Nutrient.fat, fatG!),
+    if (fiberG != null) (off.Nutrient.fiber, fiberG!),
+    if (saltG != null) (off.Nutrient.salt, saltG!),
+  ];
+
+  off.Nutriments? offNutriments;
+  if (nutriments.isNotEmpty) {
+    offNutriments = off.Nutriments.empty();
+    for (final element in nutriments) {
+      offNutriments.setValue(
+        element.$1,
+        off.PerSize.oneHundredGrams,
+        element.$2,
+      );
+    }
+  }
+
   return off.Product(
     barcode: barcode,
     productName: name,
@@ -77,6 +98,9 @@
     categories: category,
     ingredientsText: ingredients,
     servingSize: servingSize,
+    quantity: quantity,
+    lang: OffQuery.codeToLanguage(languageCode),
+    nutriments: offNutriments,
   );
 }</code></pre>
 </section>

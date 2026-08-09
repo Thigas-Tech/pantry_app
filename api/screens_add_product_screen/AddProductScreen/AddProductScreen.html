@@ -55,19 +55,26 @@
     <section class="multi-line-signature">
       const
       <span class="name ">AddProductScreen</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span></li>
+<li><span class="parameter" id="param-submitToOff"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">submitToOff</span> = <span class="default-value">false</span>, </span></li>
 <li><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span>, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates an <a href="../../screens_add_product_screen/AddProductScreen-class.html">AddProductScreen</a> for the given <code>barcode</code>.</p>
+<p>Set <code>submitToOff</code> to true to give the "Submit to Open Food Facts"
+action visual prominence; both actions are always available.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">const AddProductScreen({required this.barcode, super.key});</code></pre>
+  <pre class="language-dart"><code class="language-dart">const AddProductScreen({
+  required this.barcode,
+  this.submitToOff = false,
+  super.key,
+});</code></pre>
 </section>
 
 

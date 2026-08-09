@@ -78,7 +78,7 @@ in the given <code>language</code> (two-letter code like 'en', 'fr', 'pt').</p>
 }) {
   return ProductQueryConfiguration(
     barcode,
-    language: _codeToLanguage(language),
+    language: codeToLanguage(language),
     fields: productFields,
     version: ProductQueryVersion.v3,
   );

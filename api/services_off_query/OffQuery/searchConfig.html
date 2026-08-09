@@ -83,7 +83,7 @@ by name or barcode prefix, in the given <code>language</code>.</p>
       SearchTerms(terms: [query]),
       PageSize(size: pageSize),
     ],
-    language: _codeToLanguage(language),
+    language: codeToLanguage(language),
     fields: productFields,
     version: ProductQueryVersion.v3,
   );

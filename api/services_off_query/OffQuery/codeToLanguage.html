@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the contributeToOffComingSoonBody property from the AppLocalizations class, for the Dart programming language.">
-  <title>contributeToOffComingSoonBody property - AppLocalizations class - app_localizations library - Dart API</title>
+  <meta name="description" content="API docs for the codeToLanguage method from the OffQuery class, for the Dart programming language.">
+  <title>codeToLanguage method - OffQuery class - off_query library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../l10n_app_localizations/">l10n&#47;app_localizations.dart</a></li>
-    <li><a href="../../l10n_app_localizations/AppLocalizations-class.html">AppLocalizations</a></li>
-    <li class="self-crumb">contributeToOffComingSoonBody property</li>
+    <li><a href="../../services_off_query/">services&#47;off_query.dart</a></li>
+    <li><a href="../../services_off_query/OffQuery-class.html">OffQuery</a></li>
+    <li class="self-crumb">codeToLanguage static method</li>
   </ol>
-  <div class="self-name">contributeToOffComingSoonBody</div>
+  <div class="self-name">codeToLanguage</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,44 +46,47 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="l10n_app_localizations&#47;AppLocalizations-class-sidebar.html"
+    data-above-sidebar="services_off_query&#47;OffQuery-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-property">contributeToOffComingSoonBody</span> property 
+<h1><span class="kind-method">codeToLanguage</span> static method 
 </h1></div>
 
-    
-
-    
-        
-  <section id="getter">
     <section class="multi-line-signature">
       
-      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-      get
-      <span class="name ">contributeToOffComingSoonBody</span>
+<span class="returntype"><a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/OpenFoodFactsLanguage.html">OpenFoodFactsLanguage</a></span>
+<span class="name ">codeToLanguage</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="codeToLanguage-param-code"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">code</span></span></li>
+</ol>)
+
       
 
     </section>
     
 <section class="desc markdown">
-  <p>No description provided for @contributeToOffComingSoonBody.</p>
-<p>In en, this message translates to:
-<strong>'Direct product contribution to Open Food Facts is not yet available. A GitHub issue has been created to track this feature.'</strong></p>
+  <p>Converts a two-letter language code to an <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/OpenFoodFactsLanguage.html">OpenFoodFactsLanguage</a>.</p>
+<p>Returns <a href="https://pub.dev/documentation/openfoodfacts/3.30.2/openfoodfacts/OpenFoodFactsLanguage.html">OpenFoodFactsLanguage.ENGLISH</a> for unknown, empty, or null
+codes.</p>
 </section>
+
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">String get contributeToOffComingSoonBody;</code></pre>
+  <pre class="language-dart"><code class="language-dart">static OpenFoodFactsLanguage codeToLanguage(String? code) {
+  if (code == null || code.isEmpty) return OpenFoodFactsLanguage.ENGLISH;
+  try {
+    return OpenFoodFactsLanguage.fromOffTag(code) ??
+        OpenFoodFactsLanguage.ENGLISH;
+  } on Object catch (_) {
+    return OpenFoodFactsLanguage.ENGLISH;
+  }
+}</code></pre>
 </section>
 
-  </section>
 
-
-</div> <!-- /.main-content -->
-<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
-  <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
 <header id="header-search-sidebar" class="hidden-l">
   <form class="search-sidebar" role="search">
     <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
@@ -91,15 +94,15 @@
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../l10n_app_localizations/">app_localizations</a></li>
-    <li><a href="../../l10n_app_localizations/AppLocalizations-class.html">AppLocalizations</a></li>
-    <li class="self-crumb">contributeToOffComingSoonBody property</li>
+    <li><a href="../../services_off_query/">off_query</a></li>
+    <li><a href="../../services_off_query/OffQuery-class.html">OffQuery</a></li>
+    <li class="self-crumb">codeToLanguage static method</li>
 </ol>
 
-  <h5>AppLocalizations class</h5>
-  <div id="dartdoc-sidebar-left-content"></div>
-</div><!--/.sidebar-offcanvas-->
-<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+    <h5>OffQuery class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
 </div><!--/.sidebar-offcanvas-->
 </main>
 <footer>
