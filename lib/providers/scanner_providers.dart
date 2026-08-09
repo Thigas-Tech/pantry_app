@@ -42,10 +42,16 @@ class ScanResolved extends ScanResolution {
 /// A barcode or PLU resolution attempt failed.
 class ScanFailed extends ScanResolution {
   /// Creates a [ScanFailed] state with an error [message].
-  const ScanFailed(this.message);
+  ///
+  /// [barcode] carries the barcode that failed to resolve, when known, so
+  /// callers can act on it (e.g. open a contribution form).
+  const ScanFailed(this.message, {this.barcode});
 
   /// The error message describing why resolution failed.
   final String message;
+
+  /// The barcode that failed to resolve, when known.
+  final String? barcode;
 }
 
 // ---------------------------------------------------------------------------
@@ -289,7 +295,7 @@ class ScannerCamera extends _$ScannerCamera {
     } on ProductNotFoundException {
       logInfo('Product not found for barcode: $barcode');
       state = state.copyWith(
-        scanResolution: const ScanFailed('PRODUCT_NOT_FOUND'),
+        scanResolution: ScanFailed('PRODUCT_NOT_FOUND', barcode: barcode),
       );
     } on TimeoutException {
       logWarning('Barcode resolution timed out: $barcode');
