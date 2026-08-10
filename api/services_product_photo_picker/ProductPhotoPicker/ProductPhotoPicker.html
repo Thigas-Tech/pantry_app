@@ -58,13 +58,17 @@
 <li><span class="parameter" id="param-cameraPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_photo_permission/PhotoPermissionStatus.html">PhotoPermissionStatus</a></span>&gt;</span></span> <span class="parameter-name">cameraPermissionCheck</span>()?, </span></li>
 <li><span class="parameter" id="param-galleryPermissionCheck"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_photo_permission/PhotoPermissionStatus.html">PhotoPermissionStatus</a></span>&gt;</span></span> <span class="parameter-name">galleryPermissionCheck</span>()?, </span></li>
 <li><span class="parameter" id="param-isGalleryPermissionRequired"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">isGalleryPermissionRequired</span>()?, </span></li>
+<li><span class="parameter" id="param-cameraCapture"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_camera_capture_result/CameraCaptureResult-class.html">CameraCaptureResult</a></span>&gt;</span></span> <span class="parameter-name">cameraCapture</span>()?, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../services_product_photo_picker/ProductPhotoPicker-class.html">ProductPhotoPicker</a>.</p>
-<p><code>imagePicker</code>, <code>cameraPermissionCheck</code>, <code>galleryPermissionCheck</code>, and
-<code>isGalleryPermissionRequired</code> are injectable for tests.</p>
+<p><code>imagePicker</code>, <code>cameraPermissionCheck</code>, <code>galleryPermissionCheck</code>,
+<code>isGalleryPermissionRequired</code>, and <code>cameraCapture</code> are injectable for
+tests. <code>cameraCapture</code> drives the in-app camera flow and defaults to a
+real implementation that selects the rear lens and pushes
+<a href="../../screens_camera_capture_screen/CameraCaptureScreen-class.html">CameraCaptureScreen</a>.</p>
 </section>
 
 
@@ -76,13 +80,15 @@
   Future&lt;PhotoPermissionStatus&gt; Function()? cameraPermissionCheck,
   Future&lt;PhotoPermissionStatus&gt; Function()? galleryPermissionCheck,
   bool Function()? isGalleryPermissionRequired,
+  Future&lt;CameraCaptureResult&gt; Function()? cameraCapture,
 }) : _imagePicker = imagePicker ?? ImagePicker(),
      _cameraPermissionCheck =
          cameraPermissionCheck ?? _requestCameraPermission,
      _galleryPermissionCheck =
          galleryPermissionCheck ?? _requestGalleryPermission,
      _isGalleryPermissionRequired =
-         isGalleryPermissionRequired ?? _isGalleryPermissionRequiredDefault;</code></pre>
+         isGalleryPermissionRequired ?? _isGalleryPermissionRequiredDefault,
+     _cameraCapture = cameraCapture ?? _captureWithInAppCamera;</code></pre>
 </section>
 
 

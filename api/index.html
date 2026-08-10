@@ -185,7 +185,7 @@ flutter test --concurrency=2 --coverage  # With coverage
 | OFF SDK            | openfoodfacts                   |
 | Code generation    | freezed, json_serializable      |
 | Barcode scanning   | mobile_scanner (Google ML Kit)  |
-| Image capture      | image_picker                    |
+| Image capture      | camera + image_picker           |
 | Notifications      | flutter_local_notifications     |
 | Connectivity       | internet_connection_checker     |
 | Testing            | flutter_test + mocktail         |
@@ -660,6 +660,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="camera_capture_result">
+  <span class="name"><a href="models_camera_capture_result/">models/camera_capture_result</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="image_field">
   <span class="name"><a href="models_image_field/">models/image_field</a></span> 
 
@@ -1052,6 +1059,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="camera_capture_screen">
+  <span class="name"><a href="screens_camera_capture_screen/">screens/camera_capture_screen</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="coming_soon_screen">
   <span class="name"><a href="screens_coming_soon_screen/">screens/coming_soon_screen</a></span> 
 
@@ -1173,6 +1187,20 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="auth_service">
   <span class="name"><a href="services_auth_service/">services/auth_service</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="camera_image_processor">
+  <span class="name"><a href="services_camera_image_processor/">services/camera_image_processor</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="camera_service">
+  <span class="name"><a href="services_camera_service/">services/camera_service</a></span> 
 
 </dt>
 <dd>
@@ -1425,6 +1453,13 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="logger">
   <span class="name"><a href="utils_logger/">utils/logger</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="navigator_key">
+  <span class="name"><a href="utils_navigator_key/">utils/navigator_key</a></span> 
 
 </dt>
 <dd>
@@ -1797,6 +1832,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="l10n_l10n_extensions/">l10n/l10n_extensions</a></li>
       <li><a href="main/">main</a></li>
       <li><a href="models_auth_user/">models/auth_user</a></li>
+      <li><a href="models_camera_capture_result/">models/camera_capture_result</a></li>
       <li><a href="models_image_field/">models/image_field</a></li>
       <li><a href="models_inventory_item/">models/inventory_item</a></li>
       <li><a href="models_inventory_with_product/">models/inventory_with_product</a></li>
@@ -1853,6 +1889,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="providers_usda_provider/">providers/usda_provider</a></li>
       <li><a href="screens_add_product_screen/">screens/add_product_screen</a></li>
       <li><a href="screens_add_to_inventory_screen/">screens/add_to_inventory_screen</a></li>
+      <li><a href="screens_camera_capture_screen/">screens/camera_capture_screen</a></li>
       <li><a href="screens_coming_soon_screen/">screens/coming_soon_screen</a></li>
       <li><a href="screens_feedback_screen/">screens/feedback_screen</a></li>
       <li><a href="screens_home_screen/">screens/home_screen</a></li>
@@ -1871,6 +1908,8 @@ dart pub global run dhttpd --path doc/api
       <li><a href="screens_shopping_list_screen/">screens/shopping_list_screen</a></li>
       <li><a href="screens_stats_screen/">screens/stats_screen</a></li>
       <li><a href="services_auth_service/">services/auth_service</a></li>
+      <li><a href="services_camera_image_processor/">services/camera_image_processor</a></li>
+      <li><a href="services_camera_service/">services/camera_service</a></li>
       <li><a href="services_currency_service/">services/currency_service</a></li>
       <li><a href="services_exceptions/">services/exceptions</a></li>
       <li><a href="services_firebase_auth_service/">services/firebase_auth_service</a></li>
@@ -1907,6 +1946,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="utils_date_helpers/">utils/date_helpers</a></li>
       <li><a href="utils_gallery_permission_dialog/">utils/gallery_permission_dialog</a></li>
       <li><a href="utils_logger/">utils/logger</a></li>
+      <li><a href="utils_navigator_key/">utils/navigator_key</a></li>
       <li><a href="utils_nutrient_catalog/">utils/nutrient_catalog</a></li>
       <li><a href="utils_nutrient_conversion/">utils/nutrient_conversion</a></li>
       <li><a href="utils_nutriscore/">utils/nutriscore</a></li>

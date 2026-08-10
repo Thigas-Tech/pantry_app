@@ -67,8 +67,9 @@
 <p>Returns a <a href="../../models_photo_pick_result/PhotoPicked-class.html">PhotoPicked</a> with the chosen file, a <a href="../../models_photo_pick_result/PhotoPermissionDenied-class.html">PhotoPermissionDenied</a>
 when the camera permission is refused (permanentlyDenied is true when
 the user cannot be prompted again), a <a href="../../models_photo_pick_result/PhotoGalleryPermissionDenied-class.html">PhotoGalleryPermissionDenied</a>
-when gallery access is denied, or a <a href="../../models_photo_pick_result/PhotoPickCancelled-class.html">PhotoPickCancelled</a> when the user
-dismisses the picker.</p>
+when gallery access is denied, a <a href="../../models_photo_pick_result/PhotoCameraUnavailable-class.html">PhotoCameraUnavailable</a> when no camera
+can be opened, or a <a href="../../models_photo_pick_result/PhotoPickCancelled-class.html">PhotoPickCancelled</a> when the user dismisses the
+picker.</p>
 </section>
 
 
@@ -82,6 +83,9 @@ dismisses the picker.</p>
       return PhotoPermissionDenied(
         permanentlyDenied: status == PhotoPermissionStatus.permanentlyDenied,
       );
+    }
+    if (_supportsInAppCamera) {
+      return _captureFromInAppCamera();
     }
     return _pickImage(ImageSource.camera);
   }
