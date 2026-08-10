@@ -74,6 +74,7 @@
 <li><span class="parameter" id="param-fatG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fatG</span>, </span></li>
 <li><span class="parameter" id="param-fiberG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">fiberG</span>, </span></li>
 <li><span class="parameter" id="param-saltG"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">saltG</span>, </span></li>
+<li><span class="parameter" id="param-additionalNutrients"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(&lt;ProductNutrient&gt;[])</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product_nutrient/ProductNutrient-class.html">ProductNutrient</a></span>&gt;</span></span> <span class="parameter-name">additionalNutrients</span>, </span></li>
 <li><span class="parameter" id="param-lastSynced"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">lastSynced</span>, </span></li>
 <li><span class="parameter" id="param-nutriscoreGrade"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreGrade</span>, </span></li>
 <li><span class="parameter" id="param-nutriscoreNotApplicableCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">nutriscoreNotApplicableCategory</span>, </span></li>
@@ -205,6 +206,17 @@ and may not be present for every product.</p>
 
   &#47;&#47;&#47; Salt content in **grams per 100 g** (or 100 ml).
   double? saltG,
+
+  &#47;&#47;&#47; Additional nutrients beyond the six core fields, each carrying its
+  &#47;&#47;&#47; own value and unit.
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; These are the non-core contributors (vitamins, minerals, fats,
+  &#47;&#47;&#47; sugars, percent nutrients) imported from Open Food Facts or entered
+  &#47;&#47;&#47; on the manual nutrition editor. Each entry stores a human-friendly
+  &#47;&#47;&#47; value in its own [ProductNutrient.unit] (e.g. vitamin C in mg); the
+  &#47;&#47;&#47; conversion back to grams happens when submitting to Open Food Facts.
+  &#47;&#47;&#47; Defaults to an empty list.
+  @Default(&lt;ProductNutrient&gt;[]) List&lt;ProductNutrient&gt; additionalNutrients,
 
   &#47;&#47;&#47; Epoch timestamp (milliseconds since Unix epoch) of when the product
   &#47;&#47;&#47; data was last fetched from the API or submitted by the user.

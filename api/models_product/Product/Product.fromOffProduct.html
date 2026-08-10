@@ -76,6 +76,21 @@ SDK does not carry them. The <code>lastSynced</code> timestamp is set to now.</p
   String languageCode = &#39;en&#39;,
 }) {
   final n = offProduct.nutriments;
+  final additional = &lt;ProductNutrient&gt;[
+    if (n != null)
+      for (final nutrient in NutrientCatalog.nutrients)
+        if (n.getValue(nutrient, off.PerSize.oneHundredGrams)
+            case final double grams)
+          ProductNutrient(
+            offTag: nutrient.offTag,
+            value: NutrientConverter.convert(
+              grams,
+              &#39;g&#39;,
+              NutrientCatalog.canonicalUnitFor(nutrient),
+            ),
+            unit: NutrientCatalog.canonicalUnitFor(nutrient),
+          ),
+  ];
   return Product(
     barcode: offProduct.barcode ?? &#39;&#39;,
     name: offProduct.productName ?? &#39;Unknown&#39;,
@@ -103,6 +118,7 @@ SDK does not carry them. The <code>lastSynced</code> timestamp is set to now.</p
     fatG: n?.getValue(off.Nutrient.fat, off.PerSize.oneHundredGrams),
     fiberG: n?.getValue(off.Nutrient.fiber, off.PerSize.oneHundredGrams),
     saltG: n?.getValue(off.Nutrient.salt, off.PerSize.oneHundredGrams),
+    additionalNutrients: additional,
     lastSynced: DateTime.now().millisecondsSinceEpoch,
     nutriscoreGrade: offProduct.nutriscore,
     languageCode: languageCode,

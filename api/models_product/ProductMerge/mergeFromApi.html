@@ -92,6 +92,10 @@ prevent incomplete API responses from overwriting cached data.</p>
     fatG: api.fatG ?? fatG,
     fiberG: api.fiberG ?? fiberG,
     saltG: api.saltG ?? saltG,
+    additionalNutrients: mergeAdditionalNutrients(
+      api.additionalNutrients,
+      additionalNutrients,
+    ),
     imageUrl: nonEmpty(api.imageUrl) ?? imageUrl,
     offNutritionImageUrl:
         nonEmpty(api.offNutritionImageUrl) ?? offNutritionImageUrl,

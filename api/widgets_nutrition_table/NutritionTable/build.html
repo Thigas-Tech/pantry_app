@@ -118,6 +118,11 @@ Widget build(BuildContext context) {
     _NutrientRow(l10n.fat, &#39;${product.fatG ?? &#39;-&#39;} g&#39;),
     _NutrientRow(l10n.fiber, &#39;${product.fiberG ?? &#39;-&#39;} g&#39;),
     _NutrientRow(l10n.salt, &#39;${product.saltG ?? &#39;-&#39;} g&#39;),
+    for (final nutrient in product.additionalNutrients)
+      _NutrientRow(
+        _labelFor(context, nutrient),
+        &#39;${_formatValue(nutrient.value)} ${nutrient.unit}&#39;,
+      ),
   ];
 
   return Table(

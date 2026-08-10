@@ -95,6 +95,10 @@ already exists in the local cache (from a previous API fetch).</p>
     fatG: manual.fatG ?? fatG,
     fiberG: manual.fiberG ?? fiberG,
     saltG: manual.saltG ?? saltG,
+    additionalNutrients: mergeAdditionalNutrients(
+      manual.additionalNutrients,
+      additionalNutrients,
+    ),
 
     &#47;&#47; Local image paths from the manual form.
     nutritionImagePath: manual.nutritionImagePath ?? nutritionImagePath,

@@ -101,6 +101,9 @@ If <code>createdAt</code> is omitted it is set to <code>lastRefreshedAt</code>.<
     fatG: product.fatG,
     fiberG: product.fiberG,
     saltG: product.saltG,
+    additionalNutrients: product.additionalNutrients.isNotEmpty
+        ? product.additionalNutrients
+        : null,
     nutriscoreGrade: product.nutriscoreGrade,
     imageUrl: product.imageUrl,
     offNutritionImageUrl: product.offNutritionImageUrl,

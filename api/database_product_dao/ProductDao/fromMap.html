@@ -85,6 +85,9 @@
   fatG: (map[&#39;fat_g&#39;] as num?)?.toDouble(),
   fiberG: (map[&#39;fiber_g&#39;] as num?)?.toDouble(),
   saltG: (map[&#39;salt_g&#39;] as num?)?.toDouble(),
+  additionalNutrients: decodeAdditionalNutrients(
+    map[&#39;additional_nutrients&#39;] as String?,
+  ),
   lastSynced: map[&#39;last_synced&#39;] as int?,
   nutriscoreGrade: map[&#39;nutriscore_grade&#39;] as String?,
   nutriscoreNotApplicableCategory:

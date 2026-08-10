@@ -77,6 +77,10 @@
     if (fatG != null) (off.Nutrient.fat, fatG!),
     if (fiberG != null) (off.Nutrient.fiber, fiberG!),
     if (saltG != null) (off.Nutrient.salt, saltG!),
+    for (final extra in additionalNutrients)
+      if (NutrientCatalog.nutrientFromOffTag(extra.offTag)
+          case final off.Nutrient nutrient)
+        (nutrient, NutrientConverter.convert(extra.value, extra.unit, &#39;g&#39;)),
   ];
 
   off.Nutriments? offNutriments;

@@ -104,7 +104,7 @@ like <a href="https://api.flutter.dev/flutter/dart-collection/HashSet-class.html
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-int get hashCode =&gt; Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(categoriesHierarchy),category,ingredients,servingSize,servingQuantity,quantity,productQuantity,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,languageCode,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus,pluCode,productType,usdaServingAmount,usdaServingUnit,usdaGramWeight]);</code></pre>
+int get hashCode =&gt; Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(categoriesHierarchy),category,ingredients,servingSize,servingQuantity,quantity,productQuantity,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,const DeepCollectionEquality().hash(additionalNutrients),lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,languageCode,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus,pluCode,productType,usdaServingAmount,usdaServingUnit,usdaGramWeight]);</code></pre>
 </section>
 
   </section>

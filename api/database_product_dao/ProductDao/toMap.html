@@ -85,6 +85,9 @@
   &#39;fat_g&#39;: p.fatG,
   &#39;fiber_g&#39;: p.fiberG,
   &#39;salt_g&#39;: p.saltG,
+  &#39;additional_nutrients&#39;: p.additionalNutrients.isNotEmpty
+      ? jsonEncode(p.additionalNutrients.map((n) =&gt; n.toJson()).toList())
+      : null,
   &#39;last_synced&#39;: p.lastSynced,
   &#39;nutriscore_grade&#39;: p.nutriscoreGrade,
   &#39;nutriscore_not_applicable_category&#39;: p.nutriscoreNotApplicableCategory,
