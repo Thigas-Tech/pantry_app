@@ -16,10 +16,13 @@ enum PhotoPreviewAction {
 
   /// The user wants to remove the photo.
   delete,
+
+  /// The user wants to crop and rotate the current photo.
+  crop,
 }
 
-/// A full-screen preview of a product photo with retake, replace, and
-/// delete actions.
+/// A full-screen preview of a product photo with retake, replace, delete,
+/// and crop actions.
 ///
 /// Pops the route with a [PhotoPreviewAction] describing what the user
 /// chose. Every action is available through visible buttons so no custom
@@ -61,6 +64,18 @@ class ProductPhotoPreview extends StatelessWidget {
             onPressed: () => _pop(context, PhotoPreviewAction.close),
           ),
         ),
+        actions: [
+          Semantics(
+            button: true,
+            label: l10n.cropPhoto,
+            excludeSemantics: true,
+            child: IconButton(
+              icon: const Icon(Icons.crop),
+              tooltip: l10n.cropPhoto,
+              onPressed: () => _pop(context, PhotoPreviewAction.crop),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: InteractiveViewer(

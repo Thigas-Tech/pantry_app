@@ -148,6 +148,7 @@ void main() {
       expect(find.text('Replace photo'), findsOneWidget);
       expect(find.text('Delete photo'), findsOneWidget);
       expect(find.byTooltip('Close'), findsOneWidget);
+      expect(find.byTooltip('Crop photo'), findsOneWidget);
     });
 
     testWidgets('retake pops with PhotoPreviewAction.retake', (tester) async {
@@ -206,6 +207,20 @@ void main() {
       expect(await harness.routeFuture, PhotoPreviewAction.close);
     });
 
+    testWidgets('crop pops with PhotoPreviewAction.crop', (tester) async {
+      final harness = await pushPreview(
+        tester,
+        imageFile,
+        label: 'Product photo',
+      );
+
+      await tester.tap(find.byTooltip('Crop photo'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ProductPhotoPreview), findsNothing);
+      expect(await harness.routeFuture, PhotoPreviewAction.crop);
+    });
+
     testWidgets('actions are exposed as accessible buttons', (tester) async {
       await pushPreview(tester, imageFile, label: 'Product photo');
 
@@ -214,6 +229,7 @@ void main() {
         'Replace photo',
         'Delete photo',
         'Close',
+        'Crop photo',
       ]) {
         final node = tester.getSemantics(find.bySemanticsLabel(label));
         expect(

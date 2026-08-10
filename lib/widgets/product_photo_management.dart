@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import 'package:pantry_app/utils/camera_permission_dialog.dart';
 import 'package:pantry_app/utils/gallery_permission_dialog.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/photo_crop_screen.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -27,9 +29,9 @@ import 'package:pantry_app/widgets/product_photo_tile.dart';
 ///
 /// Renders the nutrition, ingredients, and product photo slots using the
 /// shared [ProductPhotoTile] and [ProductPhotoPreview] components. Tapping a
-/// filled slot opens the preview with retake, replace, and delete actions;
-/// empty slots offer an add-photo affordance backed by [ProductPhotoPicker]
-/// and [ProductImageService].
+/// filled slot opens the preview with retake, replace, delete, and crop
+/// actions; empty slots offer an add-photo affordance backed by
+/// [ProductPhotoPicker] and [ProductImageService].
 ///
 /// Every mutation builds an updated [Product] (with the touched slot path
 /// replaced or cleared), persists it through [DatabaseHelper.insertProduct]
@@ -231,8 +233,63 @@ class ProductPhotoManagement extends ConsumerWidget {
         await _pick(context, ref, field, PhotoSource.camera);
       case PhotoPreviewAction.replace:
         await _chooseSource(context, ref, field);
+      case PhotoPreviewAction.crop:
+        await _cropPhoto(context, ref, field);
       case PhotoPreviewAction.delete:
         await _removePhoto(context, ref, field);
+    }
+  }
+
+  /// Crops and rotates [field]'s photo and replaces the slot with the result.
+  ///
+  /// The original file is left untouched (the crop is non-destructive); the
+  /// previous managed copy becomes an orphan that the detail screen removes
+  /// on dispose, matching the replace flow.
+  Future<void> _cropPhoto(
+    BuildContext context,
+    WidgetRef ref,
+    ImageField field,
+  ) async {
+    final image = _fileFor(_pathFor(field));
+    if (image == null) return;
+    final cropped = await showPhotoCropScreen(
+      context,
+      inputFile: image,
+      label: _labelFor(context, field),
+    );
+    if (!context.mounted || cropped == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final slots = _slotsFrom();
+    final imageService = ref.read(productImageServiceProvider);
+    final updatedSlots = await imageService.assign(
+      slots,
+      field,
+      cropped,
+      barcode: product.barcode,
+    );
+    // The managed slot now owns the pixels; drop the temp crop file so no
+    // system-temp copy is left behind.
+    unawaited(_deleteTempFile(cropped));
+    if (!context.mounted) return;
+    final managedPath = updatedSlots.forField(field)?.path;
+    if (managedPath == null) {
+      SnackbarHelper.showWarning(context, l10n.couldNotAttachImage);
+      return;
+    }
+    final updated = _withPath(field, managedPath);
+    await _persist(ref, updated);
+    onChanged(updated);
+    logInfo('Cropped ${field.name} photo for ${product.barcode}');
+  }
+
+  /// Best-effort removal of [file], logging any failure.
+  Future<void> _deleteTempFile(File file) async {
+    try {
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } on Object catch (e) {
+      logWarning('Could not delete temp crop file ${file.path}: $e');
     }
   }
 

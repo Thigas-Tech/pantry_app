@@ -27,6 +27,7 @@ import 'package:pantry_app/utils/off_units.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/submission_error_label.dart';
+import 'package:pantry_app/widgets/photo_crop_screen.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -260,8 +261,52 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         await _pick(field, PhotoSource.camera);
       case PhotoPreviewAction.replace:
         await _chooseSource(field);
+      case PhotoPreviewAction.crop:
+        await _cropImage(field);
       case PhotoPreviewAction.delete:
         _removeImage(field);
+    }
+  }
+
+  /// Crops and rotates [field]'s photo and replaces the slot with the result.
+  ///
+  /// The original file is left untouched (the crop is non-destructive); the
+  /// previous pick is superseded and the uncommitted slots are cleaned up on
+  /// dispose when the form is abandoned.
+  Future<void> _cropImage(ImageField field) async {
+    final image = _imageFor(field);
+    if (image == null) return;
+    final l10n = AppLocalizations.of(context)!;
+    final cropped = await showPhotoCropScreen(
+      context,
+      inputFile: image,
+      label: _labelFor(field),
+    );
+    if (!mounted || cropped == null) return;
+    final updated = await _imageService.assign(
+      _slots,
+      field,
+      cropped,
+      barcode: widget.barcode,
+    );
+    // The managed slot now owns the pixels; drop the temp crop file so no
+    // system-temp copy is left behind.
+    unawaited(_deleteTempFile(cropped));
+    if (!mounted) return;
+    setState(() => _slots = updated);
+    if (updated.forField(field) == null) {
+      SnackbarHelper.showWarning(context, l10n.couldNotAttachImage);
+    }
+  }
+
+  /// Best-effort removal of [file], logging any failure.
+  Future<void> _deleteTempFile(File file) async {
+    try {
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } on Object catch (e) {
+      logWarning('Could not delete temp crop file ${file.path}: $e');
     }
   }
 

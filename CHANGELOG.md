@@ -229,6 +229,21 @@
   `lib/utils/redaction.dart`,
   `lib/l10n/app_en.arb`)
 
+- **Crop and rotate product photos**: the photo preview
+  (`lib/widgets/product_photo_preview.dart`) gains a crop action that opens a
+  full-screen crop editor (`lib/widgets/photo_crop_screen.dart`) with a
+  resizable crop grid and rotate-left/rotate-right controls. Applying crops
+  through `ProductPhotoCropper` (`lib/services/product_photo_cropper.dart`),
+  which reuses `crop_image`'s grid math so the output matches what was shown,
+  downscales to at most 1600 px, and encodes JPEG in a background isolate.
+  Both the detail-screen photo manager
+  (`lib/widgets/product_photo_management.dart`) and the manual product form
+  (`lib/screens/add_product_screen.dart`) replace the slot with the cropped
+  file. Crops smaller than the OFF minimum (640 px) are rejected with a
+  localized warning, the crop is non-destructive (the source is never
+  touched), and cancelling keeps the original photo.
+  (`lib/l10n/app_en.arb`)
+
 ### Removed
 
 - **Home-screen "Recent scans" carousel**: the horizontal strip of recent

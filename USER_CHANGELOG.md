@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Product photos can now be cropped and rotated before you save them. When
+  you preview a photo you will find a crop action that lets you adjust the
+  framing and orientation; the cropped photo replaces the original. Cropping
+  a photo down too small is blocked so the product's photos always stay
+  sharp enough.
+
 - Taking a product photo now always opens the back camera instead of the
   front one.
 

@@ -27,7 +27,7 @@ ProductDetailScreen
 ├── ProductSubmissionStatus (manual products only; status chip + retry)
 │   └── Live progress panel while a submission for this barcode is in flight
 ├── ProductPhotoManagement (manual products only)
-│   └── ProductPhotoTile x3 (preview / replace / delete with undo snackbar)
+│   └── ProductPhotoTile x3 (preview / replace / delete / crop with undo snackbar)
 └── "Add to Inventory" button
 
 AddProductScreen (manual entry when offline or barcode not found)
@@ -37,7 +37,8 @@ AddProductScreen (manual entry when offline or barcode not found)
 └── ProductPhotoTile x3 (nutrition table, ingredients, product photos)
     ├── Empty slot -> PhotoSourceChooser (camera / gallery bottom sheet)
     ├── Filled slot -> ProductPhotoPreview (full screen)
-    │   └── Close / Retake (camera) / Replace (source chooser) / Delete (undo snackbar)
+    │   └── Close / Retake (camera) / Replace (source chooser) / Delete (undo snackbar) / Crop
+    │       └── PhotoCropScreen (crop grid + rotate; Apply -> ProductPhotoCropper)
     └── Camera permission denied -> showCameraPermissionDialog ("Open Settings")
 
 SearchScreen

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- As fotos dos produtos agora podem ser recortadas e rotacionadas antes de
+  salvar. Ao visualizar uma foto, voce encontrara uma acao de recorte que
+  permite ajustar o enquadramento e a orientacao; a foto recortada substitui
+  a original. Recortar uma foto em um tamanho pequeno demais e bloqueado para
+  que as fotos dos produtos permaneçam sempre nitidas.
+
 - Tirar uma foto de produto agora abre sempre a camara traseira em vez da
   frontal.
 
