@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pantry_app/firebase_cache_config.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_nutrient.dart';
 
 part 'product_cache_entry.freezed.dart';
 part 'product_cache_entry.g.dart';
@@ -99,6 +100,13 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// Salt in grams per 100 g.
     @JsonKey(includeIfNull: false) double? saltG,
 
+    /// Additional nutrients beyond the six core fields.
+    ///
+    /// Mirrors [Product.additionalNutrients] so the shared cache can round-
+    /// trip the extra nutrients across devices. Omitted from the document
+    /// when empty or null.
+    @JsonKey(includeIfNull: false) List<ProductNutrient>? additionalNutrients,
+
     /// The Nutri-Score grade ('a' through 'e'), or 'not-applicable'.
     @JsonKey(includeIfNull: false) String? nutriscoreGrade,
 
@@ -173,6 +181,9 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       fatG: product.fatG,
       fiberG: product.fiberG,
       saltG: product.saltG,
+      additionalNutrients: product.additionalNutrients.isNotEmpty
+          ? product.additionalNutrients
+          : null,
       nutriscoreGrade: product.nutriscoreGrade,
       imageUrl: product.imageUrl,
       offNutritionImageUrl: product.offNutritionImageUrl,
@@ -206,6 +217,7 @@ extension ProductCacheEntryConversions on ProductCacheEntry {
       fatG: fatG,
       fiberG: fiberG,
       saltG: saltG,
+      additionalNutrients: additionalNutrients ?? const <ProductNutrient>[],
       nutriscoreGrade: nutriscoreGrade,
       imageUrl: imageUrl,
       offNutritionImageUrl: offNutritionImageUrl,

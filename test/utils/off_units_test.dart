@@ -41,6 +41,52 @@ void main() {
     });
   });
 
+  group('OffUnitCatalog.canonicalToSdkUnit', () {
+    test('resolves canonical weight and volume units', () {
+      expect(OffUnitCatalog.canonicalToSdkUnit('g'), off.Unit.G);
+      expect(OffUnitCatalog.canonicalToSdkUnit('mg'), off.Unit.MILLI_G);
+      expect(OffUnitCatalog.canonicalToSdkUnit('mcg'), off.Unit.MICRO_G);
+      expect(OffUnitCatalog.canonicalToSdkUnit('L'), off.Unit.L);
+      expect(OffUnitCatalog.canonicalToSdkUnit('ml'), off.Unit.MILLI_L);
+    });
+
+    test('resolves nutrition-only units', () {
+      expect(OffUnitCatalog.canonicalToSdkUnit('kcal'), off.Unit.KCAL);
+      expect(OffUnitCatalog.canonicalToSdkUnit('kj'), off.Unit.KJ);
+      expect(OffUnitCatalog.canonicalToSdkUnit('%'), off.Unit.PERCENT);
+    });
+
+    test('round-trips every canonical spelling through the map', () {
+      for (final entry in OffUnitCatalog.sdkUnitToCanonical.entries) {
+        expect(
+          OffUnitCatalog.canonicalToSdkUnit(entry.value),
+          entry.key,
+          reason: '${entry.value} must resolve back to ${entry.key}',
+        );
+      }
+    });
+
+    test('returns null for units outside the SDK enum', () {
+      expect(OffUnitCatalog.canonicalToSdkUnit('kg'), isNull);
+      expect(OffUnitCatalog.canonicalToSdkUnit('pieces'), isNull);
+      expect(OffUnitCatalog.canonicalToSdkUnit(''), isNull);
+    });
+  });
+
+  group('OffUnitCatalog nutrient unit sets', () {
+    test('nutrientWeightUnits offers g, mg, mcg', () {
+      expect(OffUnitCatalog.nutrientWeightUnits, ['g', 'mg', 'mcg']);
+    });
+
+    test('energyUnits offers kcal and kj', () {
+      expect(OffUnitCatalog.energyUnits, ['kcal', 'kj']);
+    });
+
+    test('percentUnits offers only the percent unit', () {
+      expect(OffUnitCatalog.percentUnits, ['%']);
+    });
+  });
+
   group('OffUnitCatalog.sdkQuantityUnits', () {
     test('contains only OFF quantity units in canonical order', () {
       expect(

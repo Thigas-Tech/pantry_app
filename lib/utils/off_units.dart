@@ -30,6 +30,33 @@ class OffUnitCatalog {
     off.Unit.IU: 'IU',
   };
 
+  /// Reverse lookup from an app-canonical unit spelling back to the SDK
+  /// [off.Unit] member.
+  ///
+  /// Complements [sdkUnitToCanonical] for the nutrition editor, which needs
+  /// to convert a stored canonical unit back to a [off.Unit] when building
+  /// an SDK [off.Nutriments] for submission. Returns null for spellings that
+  /// have no SDK member (e.g. 'kg', 'pieces').
+  static off.Unit? canonicalToSdkUnit(String unit) {
+    for (final entry in sdkUnitToCanonical.entries) {
+      if (entry.value == unit) return entry.key;
+    }
+    return null;
+  }
+
+  /// Weight unit options offered by the nutrition editor.
+  ///
+  /// These are the units an additional nutrient value can be entered in;
+  /// Open Food Facts stores weight nutrients per 100 g in grams, and the
+  /// value is converted back to grams before submission.
+  static final List<String> nutrientWeightUnits = ['g', 'mg', 'mcg'];
+
+  /// Energy unit options offered by the nutrition editor.
+  static final List<String> energyUnits = ['kcal', 'kj'];
+
+  /// Percent unit options offered by the nutrition editor.
+  static final List<String> percentUnits = ['%'];
+
   /// OFF-conformant quantity units for the structured serving-size input.
   ///
   /// Contains only the weight and volume members of the SDK enum. App-only

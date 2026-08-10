@@ -6,6 +6,7 @@ import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_nutrient.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_history_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
@@ -59,6 +60,31 @@ void main() {
       final result = await db.getProduct('nonexistent');
       expect(result, isNull);
     });
+
+    test('insert and getProduct round-trips additional nutrients', () async {
+      const product = Product(
+        barcode: '123',
+        name: 'Test',
+        energyKcal: 100,
+        additionalNutrients: [
+          ProductNutrient(offTag: 'vitamin-c', value: 20, unit: 'mg'),
+          ProductNutrient(offTag: 'sodium', value: 0.5, unit: 'g'),
+        ],
+      );
+      await db.insertProduct(product);
+      final fetched = await db.getProduct('123');
+      expect(fetched!.additionalNutrients, product.additionalNutrients);
+    });
+
+    test(
+      'insert and getProduct round-trips empty additional nutrients',
+      () async {
+        const product = Product(barcode: '123', name: 'Test');
+        await db.insertProduct(product);
+        final fetched = await db.getProduct('123');
+        expect(fetched!.additionalNutrients, isEmpty);
+      },
+    );
   });
 
   group('Inventories CRUD', () {

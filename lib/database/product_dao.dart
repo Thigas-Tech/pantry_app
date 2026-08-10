@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_nutrient.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
@@ -14,6 +15,35 @@ import 'package:sqflite/sqflite.dart';
 class ProductDao {
   /// Creates a [ProductDao].
   const ProductDao();
+
+  /// Decodes the additional_nutrients JSON column into a nutrient list.
+  ///
+  /// Returns an empty list when the column is null, empty, or holds corrupt
+  /// JSON so a malformed row never crashes a product read.
+  /// Decodes the additional_nutrients JSON column into nutrient objects.
+  ///
+  /// Returns an empty list for null, blank, non-list, or corrupt JSON and
+  /// skips entries whose shape does not match [ProductNutrient] so a single
+  /// bad row never breaks the whole product.
+  static List<ProductNutrient> decodeAdditionalNutrients(String? raw) {
+    if (raw == null || raw.isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const [];
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .where(
+            (entry) =>
+                entry['offTag'] is String &&
+                entry['value'] is num &&
+                entry['unit'] is String,
+          )
+          .map(ProductNutrient.fromJson)
+          .toList();
+    } on FormatException {
+      return const [];
+    }
+  }
 
   /// Converts a [Product] to a map for database insertion.
   Map<String, dynamic> toMap(Product p) => {
@@ -31,6 +61,9 @@ class ProductDao {
     'fat_g': p.fatG,
     'fiber_g': p.fiberG,
     'salt_g': p.saltG,
+    'additional_nutrients': p.additionalNutrients.isNotEmpty
+        ? jsonEncode(p.additionalNutrients.map((n) => n.toJson()).toList())
+        : null,
     'last_synced': p.lastSynced,
     'nutriscore_grade': p.nutriscoreGrade,
     'nutriscore_not_applicable_category': p.nutriscoreNotApplicableCategory,
@@ -66,6 +99,9 @@ class ProductDao {
     fatG: (map['fat_g'] as num?)?.toDouble(),
     fiberG: (map['fiber_g'] as num?)?.toDouble(),
     saltG: (map['salt_g'] as num?)?.toDouble(),
+    additionalNutrients: decodeAdditionalNutrients(
+      map['additional_nutrients'] as String?,
+    ),
     lastSynced: map['last_synced'] as int?,
     nutriscoreGrade: map['nutriscore_grade'] as String?,
     nutriscoreNotApplicableCategory:

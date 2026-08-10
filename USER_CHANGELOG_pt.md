@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Ao introduzir informacao nutricional manualmente, agora pode escolher a
+  unidade de cada nutriente (gramas, miligramas ou microgramas para a maioria
+  dos nutrientes; quilocalorias ou quilojoules para a energia) e adicionar
+  nutrientes extra, como vitaminas, minerais, acucares ou gorduras, que nao
+  fazem parte da lista padrao. Os valores sao guardados numa unidade
+  consistente e mostrados na tabela nutricional do produto.
+
 - Ao introduzir um produto manualmente, agora pode escolher a unidade da
   porcao a partir de uma lista (gramas, miligramas, microgramas, mililitros
   ou litros) em vez de a escrever juntamente com a quantidade.

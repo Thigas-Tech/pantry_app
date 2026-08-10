@@ -1,9 +1,12 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/product_nutrient.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/off_query.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
+import 'package:pantry_app/utils/nutrient_catalog.dart';
+import 'package:pantry_app/utils/nutrient_conversion.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 
 part 'product.freezed.dart';
@@ -177,6 +180,17 @@ abstract class Product with _$Product {
     /// Salt content in **grams per 100 g** (or 100 ml).
     double? saltG,
 
+    /// Additional nutrients beyond the six core fields, each carrying its
+    /// own value and unit.
+    ///
+    /// These are the non-core contributors (vitamins, minerals, fats,
+    /// sugars, percent nutrients) imported from Open Food Facts or entered
+    /// on the manual nutrition editor. Each entry stores a human-friendly
+    /// value in its own [ProductNutrient.unit] (e.g. vitamin C in mg); the
+    /// conversion back to grams happens when submitting to Open Food Facts.
+    /// Defaults to an empty list.
+    @Default(<ProductNutrient>[]) List<ProductNutrient> additionalNutrients,
+
     /// Epoch timestamp (milliseconds since Unix epoch) of when the product
     /// data was last fetched from the API or submitted by the user.
     ///
@@ -306,6 +320,21 @@ abstract class Product with _$Product {
     String languageCode = 'en',
   }) {
     final n = offProduct.nutriments;
+    final additional = <ProductNutrient>[
+      if (n != null)
+        for (final nutrient in NutrientCatalog.nutrients)
+          if (n.getValue(nutrient, off.PerSize.oneHundredGrams)
+              case final double grams)
+            ProductNutrient(
+              offTag: nutrient.offTag,
+              value: NutrientConverter.convert(
+                grams,
+                'g',
+                NutrientCatalog.canonicalUnitFor(nutrient),
+              ),
+              unit: NutrientCatalog.canonicalUnitFor(nutrient),
+            ),
+    ];
     return Product(
       barcode: offProduct.barcode ?? '',
       name: offProduct.productName ?? 'Unknown',
@@ -333,6 +362,7 @@ abstract class Product with _$Product {
       fatG: n?.getValue(off.Nutrient.fat, off.PerSize.oneHundredGrams),
       fiberG: n?.getValue(off.Nutrient.fiber, off.PerSize.oneHundredGrams),
       saltG: n?.getValue(off.Nutrient.salt, off.PerSize.oneHundredGrams),
+      additionalNutrients: additional,
       lastSynced: DateTime.now().millisecondsSinceEpoch,
       nutriscoreGrade: offProduct.nutriscore,
       languageCode: languageCode,
@@ -352,6 +382,10 @@ extension ProductToOff on Product {
       if (fatG != null) (off.Nutrient.fat, fatG!),
       if (fiberG != null) (off.Nutrient.fiber, fiberG!),
       if (saltG != null) (off.Nutrient.salt, saltG!),
+      for (final extra in additionalNutrients)
+        if (NutrientCatalog.nutrientFromOffTag(extra.offTag)
+            case final off.Nutrient nutrient)
+          (nutrient, NutrientConverter.convert(extra.value, extra.unit, 'g')),
     ];
 
     off.Nutriments? offNutriments;
@@ -419,6 +453,29 @@ extension ProductToOff on Product {
 /// API data (Nutri-Score, nutrition facts, images) that the user did not
 /// explicitly override.
 extension ProductMerge on Product {
+  /// Merges additional nutrient lists element-wise by nutrient tag.
+  ///
+  /// The [winner] entries override [base] entries with the same tag; tags
+  /// only present in [base] are preserved; tags only present in [winner]
+  /// are appended at the end. Order follows [base] then the appended
+  /// winner-only tags. An empty [winner] preserves [base] untouched so a
+  /// sparse manual form or an API response without additional nutrients
+  /// never wipes cached values.
+  List<ProductNutrient> mergeAdditionalNutrients(
+    List<ProductNutrient> winner,
+    List<ProductNutrient> base,
+  ) {
+    if (winner.isEmpty) return base;
+    if (base.isEmpty) return winner;
+    final winnerByTag = {for (final n in winner) n.offTag: n};
+    final baseByTag = {for (final n in base) n.offTag: n};
+    return <ProductNutrient>[
+      for (final n in base) winnerByTag[n.offTag] ?? n,
+      for (final n in winner)
+        if (!baseByTag.containsKey(n.offTag)) n,
+    ];
+  }
+
   /// Merges data from an API-fetched [api] product into this product,
   /// preserving local-only fields that the API does not return.
   ///
@@ -443,6 +500,10 @@ extension ProductMerge on Product {
       fatG: api.fatG ?? fatG,
       fiberG: api.fiberG ?? fiberG,
       saltG: api.saltG ?? saltG,
+      additionalNutrients: mergeAdditionalNutrients(
+        api.additionalNutrients,
+        additionalNutrients,
+      ),
       imageUrl: nonEmpty(api.imageUrl) ?? imageUrl,
       offNutritionImageUrl:
           nonEmpty(api.offNutritionImageUrl) ?? offNutritionImageUrl,
@@ -488,6 +549,10 @@ extension ProductMerge on Product {
       fatG: manual.fatG ?? fatG,
       fiberG: manual.fiberG ?? fiberG,
       saltG: manual.saltG ?? saltG,
+      additionalNutrients: mergeAdditionalNutrients(
+        manual.additionalNutrients,
+        additionalNutrients,
+      ),
 
       // Local image paths from the manual form.
       nutritionImagePath: manual.nutritionImagePath ?? nutritionImagePath,

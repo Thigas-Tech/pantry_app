@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_nutrient.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -275,6 +276,39 @@ void main() {
       expect(res['nutrition'], 1);
       expect(res['ingredients'], 1);
       expect(res['product'], 1);
+    });
+  });
+
+  group('ProductDao additional nutrients', () {
+    const product = Product(
+      barcode: '1234567890123',
+      name: 'Test Product',
+      additionalNutrients: [
+        ProductNutrient(offTag: 'vitamin-c', value: 20, unit: 'mg'),
+        ProductNutrient(offTag: 'sodium', value: 0.5, unit: 'g'),
+      ],
+    );
+
+    test('insert and get round-trips additional nutrients', () async {
+      final db = await dbHelper.database;
+      await dao.insert(db, product);
+      final fetched = await dao.get(db, product.barcode);
+      expect(fetched, isNotNull);
+      expect(fetched!.additionalNutrients, product.additionalNutrients);
+    });
+
+    test('decodeAdditionalNutrients returns empty for null or blank', () {
+      expect(ProductDao.decodeAdditionalNutrients(null), isEmpty);
+      expect(ProductDao.decodeAdditionalNutrients(''), isEmpty);
+    });
+
+    test('decodeAdditionalNutrients returns empty for corrupt JSON', () {
+      expect(ProductDao.decodeAdditionalNutrients('not json'), isEmpty);
+      expect(ProductDao.decodeAdditionalNutrients('{"a":1}'), isEmpty);
+      expect(
+        ProductDao.decodeAdditionalNutrients('[{"offTag":5}]'),
+        isEmpty,
+      );
     });
   });
 

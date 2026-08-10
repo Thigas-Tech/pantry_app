@@ -40,7 +40,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Thirteen tables are created on first launch (version 33):
+/// Thirteen tables are created on first launch (version 35):
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -128,7 +128,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 34;
+  static const int databaseVersion = 35;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -203,6 +203,7 @@ class DatabaseHelper {
         fat_g REAL,
         fiber_g REAL,
         salt_g REAL,
+        additional_nutrients TEXT,
         last_synced INTEGER,
         nutriscore_grade TEXT,
         nutriscore_not_applicable_category TEXT,

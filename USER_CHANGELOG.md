@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- When entering nutrition by hand, you can now pick the unit for each
+  nutrient (grams, milligrams, or micrograms for most nutrients; kilocalories
+  or kilojoules for energy) and add extra nutrients such as vitamins,
+  minerals, sugars, or fats that are not part of the standard list. Values
+  are stored in a consistent unit and shown on the product's nutrition table.
+
 - When entering a product by hand, you can now choose the serving size unit
   from a list (grams, milligrams, micrograms, millilitres, or litres) instead
   of typing it together with the amount.

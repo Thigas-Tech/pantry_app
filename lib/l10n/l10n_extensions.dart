@@ -1,3 +1,4 @@
+import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/l10n/app_localizations.dart';
 
 /// Extension on [AppLocalizations] providing convenience methods for
@@ -66,6 +67,109 @@ extension AppLocalizationsX on AppLocalizations {
         return unitLiter;
       default:
         return unit;
+    }
+  }
+
+  /// Returns the localized name for an [off.Nutrient].
+  ///
+  /// Covers the curated set offered by the nutrition editor and displayed by
+  /// the nutrition table. Unknown nutrients fall back to the SDK tag.
+  String localizeNutrient(off.Nutrient nutrient) {
+    switch (nutrient) {
+      case off.Nutrient.saturatedFat:
+        return nutrientSaturatedFat;
+      case off.Nutrient.monounsaturatedFat:
+        return nutrientMonounsaturatedFat;
+      case off.Nutrient.polyunsaturatedFat:
+        return nutrientPolyunsaturatedFat;
+      case off.Nutrient.transFat:
+        return nutrientTransFat;
+      case off.Nutrient.cholesterol:
+        return nutrientCholesterol;
+      case off.Nutrient.omega3:
+        return nutrientOmega3;
+      case off.Nutrient.omega6:
+        return nutrientOmega6;
+      case off.Nutrient.sugars:
+        return nutrientSugars;
+      case off.Nutrient.addedSugars:
+        return nutrientAddedSugars;
+      case off.Nutrient.starch:
+        return nutrientStarch;
+      case off.Nutrient.sugarAlcohol:
+        return nutrientSugarAlcohol;
+      case off.Nutrient.solubleFiber:
+        return nutrientSolubleFiber;
+      case off.Nutrient.insolubleFiber:
+        return nutrientInsolubleFiber;
+      case off.Nutrient.sodium:
+        return nutrientSodium;
+      case off.Nutrient.potassium:
+        return nutrientPotassium;
+      case off.Nutrient.calcium:
+        return nutrientCalcium;
+      case off.Nutrient.iron:
+        return nutrientIron;
+      case off.Nutrient.magnesium:
+        return nutrientMagnesium;
+      case off.Nutrient.phosphorus:
+        return nutrientPhosphorus;
+      case off.Nutrient.zinc:
+        return nutrientZinc;
+      case off.Nutrient.copper:
+        return nutrientCopper;
+      case off.Nutrient.manganese:
+        return nutrientManganese;
+      case off.Nutrient.selenium:
+        return nutrientSelenium;
+      case off.Nutrient.chromium:
+        return nutrientChromium;
+      case off.Nutrient.molybdenum:
+        return nutrientMolybdenum;
+      case off.Nutrient.fluoride:
+        return nutrientFluoride;
+      case off.Nutrient.iodine:
+        return nutrientIodine;
+      case off.Nutrient.chloride:
+        return nutrientChloride;
+      case off.Nutrient.vitaminA:
+        return nutrientVitaminA;
+      case off.Nutrient.vitaminC:
+        return nutrientVitaminC;
+      case off.Nutrient.vitaminD:
+        return nutrientVitaminD;
+      case off.Nutrient.vitaminE:
+        return nutrientVitaminE;
+      case off.Nutrient.vitaminK:
+        return nutrientVitaminK;
+      case off.Nutrient.vitaminB1:
+        return nutrientVitaminB1;
+      case off.Nutrient.vitaminB2:
+        return nutrientVitaminB2;
+      case off.Nutrient.vitaminPP:
+        return nutrientVitaminPP;
+      case off.Nutrient.vitaminB6:
+        return nutrientVitaminB6;
+      case off.Nutrient.vitaminB9:
+        return nutrientVitaminB9;
+      case off.Nutrient.vitaminB12:
+        return nutrientVitaminB12;
+      case off.Nutrient.biotin:
+        return nutrientBiotin;
+      case off.Nutrient.pantothenicAcid:
+        return nutrientPantothenicAcid;
+      case off.Nutrient.choline:
+        return nutrientCholine;
+      case off.Nutrient.caffeine:
+        return nutrientCaffeine;
+      case off.Nutrient.alcohol:
+        return nutrientAlcohol;
+      case off.Nutrient.cocoa:
+        return nutrientCocoa;
+      case off.Nutrient.fruitsVegetablesNuts:
+        return nutrientFruitsVegetablesNuts;
+      case _:
+        return nutrient.offTag;
     }
   }
 

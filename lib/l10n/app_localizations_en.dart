@@ -453,6 +453,156 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nutritionInfo => 'Nutrition (per 100 g / 100 ml)';
 
   @override
+  String get enterValidNumber => 'Enter a valid number';
+
+  @override
+  String get addNutrient => 'Add nutrient';
+
+  @override
+  String get removeNutrient => 'Remove nutrient';
+
+  @override
+  String get chooseNutrient => 'Choose a nutrient';
+
+  @override
+  String get nutrientSaturatedFat => 'Saturated fat';
+
+  @override
+  String get nutrientMonounsaturatedFat => 'Monounsaturated fat';
+
+  @override
+  String get nutrientPolyunsaturatedFat => 'Polyunsaturated fat';
+
+  @override
+  String get nutrientTransFat => 'Trans fat';
+
+  @override
+  String get nutrientCholesterol => 'Cholesterol';
+
+  @override
+  String get nutrientOmega3 => 'Omega-3';
+
+  @override
+  String get nutrientOmega6 => 'Omega-6';
+
+  @override
+  String get nutrientSugars => 'Sugars';
+
+  @override
+  String get nutrientAddedSugars => 'Added sugars';
+
+  @override
+  String get nutrientStarch => 'Starch';
+
+  @override
+  String get nutrientSugarAlcohol => 'Sugar alcohols';
+
+  @override
+  String get nutrientSolubleFiber => 'Soluble fiber';
+
+  @override
+  String get nutrientInsolubleFiber => 'Insoluble fiber';
+
+  @override
+  String get nutrientSodium => 'Sodium';
+
+  @override
+  String get nutrientPotassium => 'Potassium';
+
+  @override
+  String get nutrientCalcium => 'Calcium';
+
+  @override
+  String get nutrientIron => 'Iron';
+
+  @override
+  String get nutrientMagnesium => 'Magnesium';
+
+  @override
+  String get nutrientPhosphorus => 'Phosphorus';
+
+  @override
+  String get nutrientZinc => 'Zinc';
+
+  @override
+  String get nutrientCopper => 'Copper';
+
+  @override
+  String get nutrientManganese => 'Manganese';
+
+  @override
+  String get nutrientSelenium => 'Selenium';
+
+  @override
+  String get nutrientChromium => 'Chromium';
+
+  @override
+  String get nutrientMolybdenum => 'Molybdenum';
+
+  @override
+  String get nutrientFluoride => 'Fluoride';
+
+  @override
+  String get nutrientIodine => 'Iodine';
+
+  @override
+  String get nutrientChloride => 'Chloride';
+
+  @override
+  String get nutrientVitaminA => 'Vitamin A';
+
+  @override
+  String get nutrientVitaminC => 'Vitamin C';
+
+  @override
+  String get nutrientVitaminD => 'Vitamin D';
+
+  @override
+  String get nutrientVitaminE => 'Vitamin E';
+
+  @override
+  String get nutrientVitaminK => 'Vitamin K';
+
+  @override
+  String get nutrientVitaminB1 => 'Vitamin B1';
+
+  @override
+  String get nutrientVitaminB2 => 'Vitamin B2';
+
+  @override
+  String get nutrientVitaminPP => 'Vitamin PP (niacin)';
+
+  @override
+  String get nutrientVitaminB6 => 'Vitamin B6';
+
+  @override
+  String get nutrientVitaminB9 => 'Vitamin B9 (folate)';
+
+  @override
+  String get nutrientVitaminB12 => 'Vitamin B12';
+
+  @override
+  String get nutrientBiotin => 'Biotin';
+
+  @override
+  String get nutrientPantothenicAcid => 'Pantothenic acid';
+
+  @override
+  String get nutrientCholine => 'Choline';
+
+  @override
+  String get nutrientCaffeine => 'Caffeine';
+
+  @override
+  String get nutrientAlcohol => 'Alcohol';
+
+  @override
+  String get nutrientCocoa => 'Cocoa';
+
+  @override
+  String get nutrientFruitsVegetablesNuts => 'Fruits, vegetables, nuts';
+
+  @override
   String get captureImages => 'Photos';
 
   @override
