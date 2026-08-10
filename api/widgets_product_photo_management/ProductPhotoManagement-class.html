@@ -58,9 +58,9 @@
 product detail screen.</p>
 <p>Renders the nutrition, ingredients, and product photo slots using the
 shared <a href="../widgets_product_photo_tile/ProductPhotoTile-class.html">ProductPhotoTile</a> and <a href="../widgets_product_photo_preview/ProductPhotoPreview-class.html">ProductPhotoPreview</a> components. Tapping a
-filled slot opens the preview with retake, replace, and delete actions;
-empty slots offer an add-photo affordance backed by <a href="../services_product_photo_picker/ProductPhotoPicker-class.html">ProductPhotoPicker</a>
-and <a href="../services_product_image_service/ProductImageService-class.html">ProductImageService</a>.</p>
+filled slot opens the preview with retake, replace, delete, and crop
+actions; empty slots offer an add-photo affordance backed by
+<a href="../services_product_photo_picker/ProductPhotoPicker-class.html">ProductPhotoPicker</a> and <a href="../services_product_image_service/ProductImageService-class.html">ProductImageService</a>.</p>
 <p>Every mutation builds an updated <a href="../models_product/Product-class.html">Product</a> (with the touched slot path
 replaced or cleared), persists it through <a href="../database_database_helper/DatabaseHelper/insertProduct.html">DatabaseHelper.insertProduct</a>
 (a raw upsert so a cleared path really is removed, unlike

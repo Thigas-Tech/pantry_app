@@ -126,6 +126,18 @@ Widget build(BuildContext context) {
           onPressed: () =&gt; _pop(context, PhotoPreviewAction.close),
         ),
       ),
+      actions: [
+        Semantics(
+          button: true,
+          label: l10n.cropPhoto,
+          excludeSemantics: true,
+          child: IconButton(
+            icon: const Icon(Icons.crop),
+            tooltip: l10n.cropPhoto,
+            onPressed: () =&gt; _pop(context, PhotoPreviewAction.crop),
+          ),
+        ),
+      ],
     ),
     body: Center(
       child: InteractiveViewer(
