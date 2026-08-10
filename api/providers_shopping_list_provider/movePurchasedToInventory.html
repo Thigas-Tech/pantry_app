@@ -66,9 +66,9 @@
   <p>Moves purchased items (with barcodes) to the active inventory.</p>
 <p>For each purchased item with a barcode, the product is ensured to exist
 in the cache, and an inventory item is created (or merged if the same
-barcode already exists in the target inventory). Price data on the
-shopping item is saved to the prices table. The shopping item is then
-deleted.</p>
+batch — same barcode, unit, location, and no expiry — already exists in
+the target inventory). Price data on the shopping item is saved to the
+prices table. The shopping item is then deleted.</p>
 <p>Items without a barcode or with no matching product in the cache are
 skipped.</p>
 <p>Returns a <a href="../providers_shopping_list_provider/MoveToInventoryResult-class.html">MoveToInventoryResult</a> with counts of moved and skipped items.
@@ -125,8 +125,10 @@ Runs inside a SQLite transaction — all-or-nothing.</p>
 
       final existingInv = await txn.query(
         &#39;inventory&#39;,
-        where: &#39;barcode = ? AND inventory_id = ?&#39;,
-        whereArgs: [item.barcode, inventoryId],
+        where:
+            &#39;barcode = ? AND inventory_id = ?&#39;
+            &#39; AND expiry_date IS NULL AND unit = ? AND location = ?&#39;,
+        whereArgs: [item.barcode, inventoryId, item.unit, &#39;pantry&#39;],
         limit: 1,
       );
       if (existingInv.isNotEmpty) {

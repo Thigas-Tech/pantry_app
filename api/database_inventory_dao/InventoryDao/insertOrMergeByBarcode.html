@@ -65,9 +65,14 @@
     
 <section class="desc markdown">
   <p>Inserts an inventory item, merging quantities with an existing item
-that has the same barcode and inventoryId.</p>
-<p>When an item with the same barcode AND inventory_id already exists,
-the quantities are summed instead of creating a duplicate row.
+that represents the same batch.</p>
+<p>An item is considered the same batch when it has the same barcode,
+inventoryId, expiry date, unit, and location. When such an item already
+exists, the quantities are summed instead of creating a duplicate row.
+Items that differ on any of these fields (for example a different expiry
+date) are inserted as a new row, keeping each batch separate. NULL
+values are compared with the null-safe IS operator so items without an
+expiry date merge with each other but stay separate from dated batches.
 The operation runs inside a SQLite transaction to prevent race
 conditions.</p>
 </section>
@@ -82,8 +87,16 @@ conditions.</p>
     return await db.transaction&lt;int&gt;((txn) async {
       final existing = await txn.query(
         &#39;inventory&#39;,
-        where: &#39;barcode = ? AND inventory_id = ?&#39;,
-        whereArgs: [item.barcode, item.inventoryId],
+        where:
+            &#39;barcode = ? AND inventory_id = ?&#39;
+            &#39; AND expiry_date IS ? AND unit IS ? AND location IS ?&#39;,
+        whereArgs: [
+          item.barcode,
+          item.inventoryId,
+          item.expiryDate,
+          item.unit,
+          item.location,
+        ],
         limit: 1,
       );
       if (existing.isNotEmpty) {
