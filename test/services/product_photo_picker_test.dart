@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/models/camera_capture_result.dart';
 import 'package:pantry_app/models/photo_permission.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/services/product_photo_picker.dart';
@@ -19,6 +21,7 @@ void main() {
   late bool galleryRequired;
   var cameraCheckCalls = 0;
   var galleryCheckCalls = 0;
+  var cameraCaptureCalls = 0;
 
   setUpAll(() {
     registerFallbackValue(ImageSource.camera);
@@ -33,6 +36,7 @@ void main() {
     galleryRequired = false;
     cameraCheckCalls = 0;
     galleryCheckCalls = 0;
+    cameraCaptureCalls = 0;
   });
 
   tearDown(() async {
@@ -41,7 +45,9 @@ void main() {
     }
   });
 
-  ProductPhotoPicker buildPicker() {
+  ProductPhotoPicker buildPicker({
+    Future<CameraCaptureResult> Function()? cameraCapture,
+  }) {
     return ProductPhotoPicker(
       imagePicker: mockPicker,
       cameraPermissionCheck: () async {
@@ -53,6 +59,12 @@ void main() {
         return galleryStatus;
       },
       isGalleryPermissionRequired: () => galleryRequired,
+      cameraCapture:
+          cameraCapture ??
+          () async {
+            cameraCaptureCalls++;
+            return const CameraCaptureCancelled();
+          },
     );
   }
 
@@ -65,19 +77,46 @@ void main() {
   group('ProductPhotoPicker.pick', () {
     test('picks a camera photo when permission is granted', () async {
       final file = await createImage();
-      when(
-        () => mockPicker.pickImage(
-          source: ImageSource.camera,
-          maxWidth: any(named: 'maxWidth'),
-          maxHeight: any(named: 'maxHeight'),
-          imageQuality: any(named: 'imageQuality'),
-        ),
-      ).thenAnswer((_) async => XFile(file.path));
+      final picker = buildPicker(
+        cameraCapture: () async => CameraCaptured(file),
+      );
 
-      final result = await buildPicker().pick(PhotoSource.camera);
+      final result = await picker.pick(PhotoSource.camera);
 
       expect(result, isA<PhotoPicked>());
       expect((result as PhotoPicked).file.path, file.path);
+      verifyNever(() => mockPicker.pickImage(source: ImageSource.camera));
+    });
+
+    test(
+      'camera capture runs instead of the system picker on mobile',
+      () async {
+        final file = await createImage();
+        final picker = buildPicker(
+          cameraCapture: () async => CameraCaptured(file),
+        );
+
+        await picker.pick(PhotoSource.camera);
+
+        verifyNever(
+          () => mockPicker.pickImage(source: any(named: 'source')),
+        );
+      },
+    );
+
+    test('maps a cancelled camera capture to a cancelled pick', () async {
+      final result = await buildPicker().pick(PhotoSource.camera);
+
+      expect(result, isA<PhotoPickCancelled>());
+      expect(cameraCaptureCalls, 1);
+    });
+
+    test('maps an unavailable camera capture to an unavailable pick', () async {
+      final result = await buildPicker(
+        cameraCapture: () async => const CameraCaptureUnavailable(),
+      ).pick(PhotoSource.camera);
+
+      expect(result, isA<PhotoCameraUnavailable>());
     });
 
     test(
@@ -89,6 +128,7 @@ void main() {
 
         expect(result, isA<PhotoPermissionDenied>());
         expect((result as PhotoPermissionDenied).permanentlyDenied, isFalse);
+        expect(cameraCaptureCalls, 0);
         verifyNever(
           () => mockPicker.pickImage(source: any(named: 'source')),
         );
@@ -104,6 +144,7 @@ void main() {
 
         expect(result, isA<PhotoPermissionDenied>());
         expect((result as PhotoPermissionDenied).permanentlyDenied, isTrue);
+        expect(cameraCaptureCalls, 0);
         verifyNever(
           () => mockPicker.pickImage(source: any(named: 'source')),
         );
@@ -144,9 +185,36 @@ void main() {
       expect(result, isA<PhotoPicked>());
       expect((result as PhotoPicked).file.path, file.path);
       expect(cameraCheckCalls, 0);
+      expect(cameraCaptureCalls, 0);
     });
 
     test('requests a constrained image to keep OFF uploads small', () async {
+      final file = await createImage();
+      when(
+        () => mockPicker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 1600,
+          maxHeight: 1600,
+          imageQuality: 85,
+        ),
+      ).thenAnswer((_) async => XFile(file.path));
+
+      final result = await buildPicker().pick(PhotoSource.gallery);
+
+      expect(result, isA<PhotoPicked>());
+      verify(
+        () => mockPicker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 1600,
+          maxHeight: 1600,
+          imageQuality: 85,
+        ),
+      ).called(1);
+    });
+
+    test('falls back to the system camera app on desktop', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
       final file = await createImage();
       when(
         () => mockPicker.pickImage(
@@ -168,6 +236,7 @@ void main() {
           imageQuality: 85,
         ),
       ).called(1);
+      expect(cameraCaptureCalls, 0);
     });
   });
 

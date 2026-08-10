@@ -282,6 +282,41 @@ void main() {
       );
       verify(() => mockDb.insertProduct(any())).called(1);
     });
+
+    testWidgets('reports a localized warning when the camera is unavailable', (
+      tester,
+    ) async {
+      await pumpWidget(
+        tester,
+        product: manualProduct(nutrition: nutritionFile.path),
+      );
+
+      when(
+        () => mockPicker.pick(any()),
+      ).thenAnswer((_) async => const PhotoCameraUnavailable());
+
+      await tester.tap(
+        find.widgetWithText(ProductPhotoTile, 'Nutrition table photo'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(ProductPhotoPreview), findsOneWidget);
+
+      await tester.tap(find.text('Replace photo'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Take a new photo'));
+      await tester.pumpAndSettle();
+
+      verify(() => mockPicker.pick(PhotoSource.camera)).called(1);
+      expect(find.text('Camera not available on this device.'), findsOneWidget);
+      verifyNever(
+        () => mockImageService.assign(
+          any(),
+          any(),
+          any(),
+          barcode: any(named: 'barcode'),
+        ),
+      );
+    });
   });
 
   group('ProductPhotoManagement delete', () {

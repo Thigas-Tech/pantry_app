@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Taking a product photo now always opens the back camera instead of the
+  front one.
+
 - When entering nutrition by hand, you can now pick the unit for each
   nutrient (grams, milligrams, or micrograms for most nutrients; kilocalories
   or kilojoules for energy) and add extra nutrients such as vitamins,

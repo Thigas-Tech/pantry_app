@@ -35,6 +35,7 @@ import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/services/notification_background_handler.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/navigator_key.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,13 +45,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// transitions, and passed to [MaterialApp.scaffoldMessengerKey].
 final GlobalKey<ScaffoldMessengerState> rootMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
-
-/// Global navigator key for notification-tap deep linking.
-///
-/// Used by [_handleNotificationTap] to push [ProductDetailScreen] when the
-/// user taps a notification. This key is passed to [MaterialApp.navigatorKey]
-/// so that routes can be pushed from outside the widget tree.
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// The single [ProviderContainer] shared by the entire app.
 ///
@@ -460,7 +454,7 @@ void _handleNotificationTap(
 
 /// Looks up the product by [barcode] and navigates to its detail screen.
 Future<void> _navigateToProduct(String barcode) async {
-  final context = navigatorKey.currentContext;
+  final context = appNavigatorKey.currentContext;
   if (context == null) {
     logWarning('No navigator context for notification tap');
     return;
@@ -623,7 +617,7 @@ class PantryApp extends ConsumerWidget {
 
         return MaterialApp(
           title: 'Pantry',
-          navigatorKey: navigatorKey,
+          navigatorKey: appNavigatorKey,
           scaffoldMessengerKey: rootMessengerKey,
           theme: ThemeData(colorScheme: lightScheme, useMaterial3: true),
           darkTheme: ThemeData(colorScheme: darkScheme, useMaterial3: true),

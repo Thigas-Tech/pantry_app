@@ -1052,6 +1052,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get photoSourceGallery => 'Escolher uma foto existente';
 
   @override
+  String get takePhoto => 'Tirar foto';
+
+  @override
   String uploadingPhotos(int current, int total) {
     return 'Enviando foto $current de $total…';
   }
@@ -3294,6 +3297,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get photoSourceGallery => 'Escolher uma foto existente';
+
+  @override
+  String get takePhoto => 'Tirar foto';
 
   @override
   String uploadingPhotos(int current, int total) {

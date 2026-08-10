@@ -201,6 +201,8 @@ class ProductPhotoManagement extends ConsumerWidget {
         }
       case PhotoGalleryPermissionDenied():
         await showGalleryPermissionDialog(context);
+      case PhotoCameraUnavailable():
+        SnackbarHelper.showWarning(context, l10n.cameraNotAvailable);
       case PhotoPickCancelled():
         break;
     }

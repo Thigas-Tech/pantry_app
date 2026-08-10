@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Tirar uma foto de produto agora abre sempre a camara traseira em vez da
+  frontal.
+
 - Ao introduzir informacao nutricional manualmente, agora pode escolher a
   unidade de cada nutriente (gramas, miligramas ou microgramas para a maioria
   dos nutrientes; quilocalorias ou quilojoules para a energia) e adicionar
