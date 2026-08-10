@@ -296,6 +296,27 @@
 
 ### Fixed
 
+- **Quick-add of the same product with a different expiry date (issue #296)**:
+  adding a second instance with a different expiry date now creates a new
+  inventory row instead of merging into the existing one and discarding the
+  new expiry. `InventoryDao.insertOrMergeByBarcode` now merges only when the
+  existing row is the same batch (same barcode, inventory, expiry date, unit,
+  and location), using NULL-safe comparisons so items without an expiry still
+  merge together but stay separate from dated batches. The add-to-pantry paths
+  that bypassed the merge (product detail screen and search swipe-to-add) now
+  go through the batch-aware merge via a new
+  `ProductRepository.addOrMergeInventoryItem`, and the move-to-inventory flow
+  in `ShoppingListProvider` merges only into undated rows. A new v36 migration
+  replaces the unique index on `inventory(barcode, inventory_id)` with a
+  non-unique index (kept for query performance), since the unique constraint
+  made multiple batches per barcode impossible.
+  (`lib/database/inventory_dao.dart`,
+  `lib/database/migrations/v36_nonunique_inventory_index.dart`,
+  `lib/services/product_repository.dart`,
+  `lib/screens/product_detail_screen.dart`,
+  `lib/widgets/search_panel.dart`,
+  `lib/providers/shopping_list_provider.dart`)
+
 - **Product photos open the rear camera (issue #297)**: taking a photo for a
   product (nutrition table, ingredients, or front image) now opens an in-app
   camera preview that deterministically selects the back lens via

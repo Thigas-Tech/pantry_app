@@ -1050,7 +1050,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             '''Added inventory item (${_product.barcode}) — qty: ${result.quantity} ${result.unit}, loc: ${result.location}''',
           );
           await repo.cacheProduct(_product);
-          final newId = await repo.addInventoryItem(result);
+          final newId = await repo.addOrMergeInventoryItem(result);
           final savedItem = result.copyWith(id: newId);
           await _rescheduleInactivityReminder();
           await notificationService.scheduleExpiryReminders(

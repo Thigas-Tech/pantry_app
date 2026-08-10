@@ -98,6 +98,8 @@ Version history:
 | v31 -> v32 | Added `scan_history` table with indexes on scanned_at and barcode |
 | v32 -> v33 | Added `inventory_id` column on `recipes` (backfilled to first inventory) + `idx_recipes_inventory_id` index |
 | v33 -> v34 | Added `inventory_id` column on `prices` (backfilled to first inventory) + `idx_prices_inventory_id` index |
+| v34 -> v35 | Added `additional_nutrients` column on `products` |
+| v35 -> v36 | Replaced the unique index on `inventory(barcode, inventory_id)` with a non-unique index so distinct expiry batches can coexist |
 
 ### 2.4 Connectivity layer
 

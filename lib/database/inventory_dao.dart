@@ -56,10 +56,15 @@ class InventoryDao {
   }
 
   /// Inserts an inventory item, merging quantities with an existing item
-  /// that has the same barcode and inventoryId.
+  /// that represents the same batch.
   ///
-  /// When an item with the same barcode AND inventory_id already exists,
-  /// the quantities are summed instead of creating a duplicate row.
+  /// An item is considered the same batch when it has the same barcode,
+  /// inventoryId, expiry date, unit, and location. When such an item already
+  /// exists, the quantities are summed instead of creating a duplicate row.
+  /// Items that differ on any of these fields (for example a different expiry
+  /// date) are inserted as a new row, keeping each batch separate. NULL
+  /// values are compared with the null-safe IS operator so items without an
+  /// expiry date merge with each other but stay separate from dated batches.
   /// The operation runs inside a SQLite transaction to prevent race
   /// conditions.
   Future<int> insertOrMergeByBarcode(Database db, InventoryItem item) async {
@@ -68,8 +73,16 @@ class InventoryDao {
       return await db.transaction<int>((txn) async {
         final existing = await txn.query(
           'inventory',
-          where: 'barcode = ? AND inventory_id = ?',
-          whereArgs: [item.barcode, item.inventoryId],
+          where:
+              'barcode = ? AND inventory_id = ?'
+              ' AND expiry_date IS ? AND unit IS ? AND location IS ?',
+          whereArgs: [
+            item.barcode,
+            item.inventoryId,
+            item.expiryDate,
+            item.unit,
+            item.location,
+          ],
           limit: 1,
         );
         if (existing.isNotEmpty) {

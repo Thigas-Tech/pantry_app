@@ -40,7 +40,7 @@ void main() {
 
   group('fresh-install schema parity', () {
     test(
-      'fresh install includes the v29 unique inventory index',
+      'fresh install includes the inventory barcode/inventory index',
       () async {
         final db = DatabaseHelper.withPath(_uniqueDbPath());
         final database = await db.database;
@@ -132,7 +132,7 @@ void main() {
     );
 
     test(
-      'onCreate schema matches a full migration replay (0 to 35)',
+      'onCreate schema matches a full migration replay (0 to 36)',
       () async {
         // Fresh-install path: onCreate builds the schema directly.
         final fresh = DatabaseHelper.withPath(_uniqueDbPath());
@@ -140,7 +140,7 @@ void main() {
 
         // Upgrade path: replay every migration from scratch.
         final replayDb = await databaseFactory.openDatabase(_uniqueDbPath());
-        await MigrationRunner(allMigrations()).run(replayDb, 0, 35);
+        await MigrationRunner(allMigrations()).run(replayDb, 0, 36);
 
         final freshTables = await _tableNames(freshDb);
         final replayTables = await _tableNames(replayDb);

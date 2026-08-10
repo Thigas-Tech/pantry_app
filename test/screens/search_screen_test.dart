@@ -549,13 +549,15 @@ void main() {
 
   group('add to inventory', () {
     testWidgets(
-      'swipe-to-add calls repo.cacheProduct and repo.addInventoryItem',
+      'swipe-to-add calls repo.cacheProduct and repo.addOrMergeInventoryItem',
       (
         tester,
       ) async {
         final mockRepo = createMockProductRepository();
         when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async {});
-        when(() => mockRepo.addInventoryItem(any())).thenAnswer((_) async => 1);
+        when(
+          () => mockRepo.addOrMergeInventoryItem(any()),
+        ).thenAnswer((_) async => 1);
         when(
           () => mockDb.searchProducts('milk'),
         ).thenAnswer((_) async => [localProduct]);
@@ -583,7 +585,7 @@ void main() {
 
         verify(() => mockRepo.cacheProduct(localProduct)).called(1);
         verify(
-          () => mockRepo.addInventoryItem(
+          () => mockRepo.addOrMergeInventoryItem(
             any(
               that: isA<InventoryItem>().having(
                 (i) => i.barcode,
@@ -602,7 +604,9 @@ void main() {
     ) async {
       final mockRepo = createMockProductRepository();
       when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async => {});
-      when(() => mockRepo.addInventoryItem(any())).thenAnswer((_) async => 1);
+      when(
+        () => mockRepo.addOrMergeInventoryItem(any()),
+      ).thenAnswer((_) async => 1);
       when(
         () => mockRepo.deleteInventoryItem(any()),
       ).thenAnswer((_) async => 1);

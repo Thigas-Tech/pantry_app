@@ -742,7 +742,7 @@ void main() {
         ),
       ).thenAnswer((_) async => []);
       when(
-        () => mockRepo.addInventoryItem(any()),
+        () => mockRepo.addOrMergeInventoryItem(any()),
       ).thenAnswer((_) => Future<int>.value(1));
       when(
         () => mockRepo.cacheProduct(any()),
@@ -767,7 +767,7 @@ void main() {
       tester.state<NavigatorState>(find.byType(Navigator)).pop(newItem);
       await tester.pumpAndSettle();
 
-      verify(() => mockRepo.addInventoryItem(newItem)).called(1);
+      verify(() => mockRepo.addOrMergeInventoryItem(newItem)).called(1);
       verify(
         () => mockNotif.scheduleExpiryReminders(
           any(),
@@ -1497,7 +1497,7 @@ void main() {
         ),
       ).thenAnswer((_) async => []);
       when(
-        () => mockRepo.addInventoryItem(any()),
+        () => mockRepo.addOrMergeInventoryItem(any()),
       ).thenAnswer((_) => Future<int>.value(42));
       when(
         () => mockRepo.cacheProduct(any()),
