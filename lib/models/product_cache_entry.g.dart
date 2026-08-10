@@ -29,6 +29,9 @@ _ProductCacheEntry _$ProductCacheEntryFromJson(Map<String, dynamic> json) =>
       fatG: (json['fatG'] as num?)?.toDouble(),
       fiberG: (json['fiberG'] as num?)?.toDouble(),
       saltG: (json['saltG'] as num?)?.toDouble(),
+      additionalNutrients: (json['additionalNutrients'] as List<dynamic>?)
+          ?.map((e) => ProductNutrient.fromJson(e as Map<String, dynamic>))
+          .toList(),
       nutriscoreGrade: json['nutriscoreGrade'] as String?,
       imageUrl: json['imageUrl'] as String?,
       offNutritionImageUrl: json['offNutritionImageUrl'] as String?,
@@ -62,6 +65,7 @@ Map<String, dynamic> _$ProductCacheEntryToJson(_ProductCacheEntry instance) =>
       'fatG': ?instance.fatG,
       'fiberG': ?instance.fiberG,
       'saltG': ?instance.saltG,
+      'additionalNutrients': ?instance.additionalNutrients,
       'nutriscoreGrade': ?instance.nutriscoreGrade,
       'imageUrl': ?instance.imageUrl,
       'offNutritionImageUrl': ?instance.offNutritionImageUrl,

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_nutrient.dart';
+import 'package:pantry_app/utils/nutrient_catalog.dart';
 
 /// A styled table that displays the nutritional values of a [Product].
 ///
-/// Each row shows a nutrient name and its amount per 100 g / 100 ml.
-/// The header uses the theme's primary container colour, and data rows
+/// Each row shows a nutrient name and its amount per 100 g / 100 ml. The
+/// header uses the theme's primary container colour, and data rows
 /// alternate between transparent and a subtle primary overlay for
 /// readability in both light and dark themes.
+///
+/// The six core rows (energy, protein, carbs, fat, fiber, salt) are always
+/// shown; any additional nutrients stored on the product are rendered below
+/// them with their persisted unit.
 class NutritionTable extends StatelessWidget {
   /// Creates a [NutritionTable] for the given [product].
   const NutritionTable({required this.product, super.key});
@@ -26,6 +33,11 @@ class NutritionTable extends StatelessWidget {
       _NutrientRow(l10n.fat, '${product.fatG ?? '-'} g'),
       _NutrientRow(l10n.fiber, '${product.fiberG ?? '-'} g'),
       _NutrientRow(l10n.salt, '${product.saltG ?? '-'} g'),
+      for (final nutrient in product.additionalNutrients)
+        _NutrientRow(
+          _labelFor(context, nutrient),
+          '${_formatValue(nutrient.value)} ${nutrient.unit}',
+        ),
     ];
 
     return Table(
@@ -86,6 +98,23 @@ class NutritionTable extends StatelessWidget {
       ],
     );
   }
+
+  /// Returns the localized label for an additional nutrient.
+  ///
+  /// Falls back to the nutrient's Open Food Facts tag when the nutrient is
+  /// not part of the curated catalog.
+  String _labelFor(BuildContext context, ProductNutrient nutrient) {
+    final nutrientType = NutrientCatalog.nutrientFromOffTag(nutrient.offTag);
+    if (nutrientType == null) return nutrient.offTag;
+    return AppLocalizations.of(context)!.localizeNutrient(nutrientType);
+  }
+
+  /// Formats a nutrient value for display.
+  ///
+  /// Whole numbers render without a trailing decimal (20 to "20") so the
+  /// table reads cleanly; fractional values keep their decimals.
+  String _formatValue(double value) =>
+      value == value.roundToDouble() ? value.round().toString() : '$value';
 }
 
 class _NutrientRow {

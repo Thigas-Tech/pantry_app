@@ -4,6 +4,34 @@
 
 ### Added
 
+- **Nutrition editor for all Open Food Facts nutrients**: the manual product
+  form (`lib/screens/add_product_screen.dart`) keeps the six core rows
+  (energy, protein, carbs, fat, fiber, salt) but adds a per-row unit
+  dropdown (g/mg/mcg for macros, kcal/kJ for energy). An "Add nutrient"
+  action opens a picker of curated contributor nutrients (vitamins,
+  minerals, fats, sugars, percent nutrients) so the user can add and remove
+  rows; values are converted to each nutrient's canonical unit before
+  storage. The nutrition table
+  (`lib/widgets/nutrition_table.dart`) renders these additional nutrients
+  below the six core rows with their persisted unit.
+
+- **Additional-nutrient model and persistence**: a new `ProductNutrient`
+  freezed model (`lib/models/product_nutrient.dart`) stores an OFF nutrient
+  tag, a value, and its app-canonical unit. `Product.additionalNutrients`
+  holds the list; `Product.fromOffProduct` imports curated nutrients from
+  the API (converting grams to the nutrient's typical unit), and
+  `Product.toOffProduct` converts them back to grams for submission. The
+  Firebase product cache (`lib/models/product_cache_entry.dart`) round-trips
+  the list, and a new v35 migration adds the `additional_nutrients` JSON
+  column to the local `products` table.
+
+- **Nutrient catalog and conversion helpers**: `NutrientCatalog`
+  (`lib/utils/nutrient_catalog.dart`) curates the supported nutrients, their
+  allowed unit sets, and the tag lookup; `NutrientConverter`
+  (`lib/utils/nutrient_conversion.dart`) converts between g/mg/mcg and
+  kcal/kJ; `OffUnitCatalog.canonicalToSdkUnit` maps app-canonical unit
+  spellings back to the SDK enum for submission.
+
 - **Separated local save from OFF submission**: the manual product form
   (`lib/screens/add_product_screen.dart`) now offers two distinct actions.
   "Save to inventory" caches the product locally only and pops the screen.

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/product_nutrient.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
@@ -440,7 +441,7 @@ void main() {
         '250',
       );
 
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.tap(find.byKey(const ValueKey('serving-size-unit')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('mg').last);
       await tester.pumpAndSettle();
@@ -486,6 +487,303 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Enter a positive number'), findsOneWidget);
+    });
+  });
+
+  group('AddProductScreen nutrition editor', () {
+    Future<void> enterNutritionValue(
+      WidgetTester tester,
+      String label,
+      String value,
+    ) async {
+      final row = find.ancestor(
+        of: find.text(label),
+        matching: find.byType(Row),
+      );
+      await tester.enterText(
+        find.descendant(of: row, matching: find.byType(TextFormField)),
+        value,
+      );
+    }
+
+    testWidgets('shows the Add nutrient button', (tester) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+      expect(find.text('Add nutrient'), findsOneWidget);
+    });
+
+    testWidgets('adds a nutrient row via the picker', (tester) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      await tester.tap(find.text('Add nutrient'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Choose a nutrient'), findsOneWidget);
+      await tester.tap(find.text('Saturated fat'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Saturated fat'), findsOneWidget);
+    });
+
+    testWidgets('does not offer an already-added nutrient again', (
+      tester,
+    ) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      await tester.tap(find.text('Add nutrient'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Saturated fat'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add nutrient'));
+      await tester.pumpAndSettle();
+      final inPicker = find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.text('Saturated fat'),
+      );
+      expect(inPicker, findsNothing);
+    });
+
+    testWidgets('removes an added nutrient row', (tester) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      await tester.tap(find.text('Add nutrient'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Saturated fat'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.remove_circle_outline));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Saturated fat'), findsNothing);
+    });
+
+    testWidgets('saves an added nutrient with converted value and unit', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Product? captured;
+      await pumpSaveScreen(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              captured = await Navigator.push<Product>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AddProductScreen(barcode: '123'),
+                ),
+              );
+            },
+            child: const Text('Open form'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await tester.tap(find.text('Add nutrient'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sodium'));
+      await tester.pumpAndSettle();
+
+      await enterNutritionValue(tester, 'Sodium', '0.5');
+      // Sodium default unit is grams, so 0.5 g stays 0.5 g.
+      await tester.ensureVisible(find.text('Save to inventory'));
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.additionalNutrients, const [
+        ProductNutrient(offTag: 'sodium', value: 0.5, unit: 'g'),
+      ]);
+    });
+
+    testWidgets('converts a core row value to the canonical unit on save', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Product? captured;
+      await pumpSaveScreen(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              captured = await Navigator.push<Product>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AddProductScreen(barcode: '123'),
+                ),
+              );
+            },
+            child: const Text('Open form'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await enterNutritionValue(tester, 'Protein', '500');
+      // Change the protein unit dropdown to mg.
+      final proteinRow = find.ancestor(
+        of: find.text('Protein'),
+        matching: find.byType(Row),
+      );
+      await tester.tap(
+        find.descendant(
+          of: proteinRow,
+          matching: find.byType(DropdownButtonFormField<String>),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('mg').last);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save to inventory'));
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.proteinG, 0.5);
+    });
+
+    testWidgets('keeps the default units unchanged when saving', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Product? captured;
+      await pumpSaveScreen(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              captured = await Navigator.push<Product>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AddProductScreen(barcode: '123'),
+                ),
+              );
+            },
+            child: const Text('Open form'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await enterNutritionValue(tester, 'Energy', '200');
+      await enterNutritionValue(tester, 'Salt', '0.5');
+
+      await tester.ensureVisible(find.text('Save to inventory'));
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.energyKcal, 200);
+      expect(captured!.saltG, 0.5);
+    });
+
+    testWidgets('shows a validation error for invalid nutrient input', (
+      tester,
+    ) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await enterNutritionValue(tester, 'Protein', 'abc');
+
+      await tester.ensureVisible(find.text('Save to inventory'));
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enter a valid number'), findsOneWidget);
+    });
+
+    testWidgets('rejects a negative nutrient value', (tester) async {
+      await pumpTall(tester, const AddProductScreen(barcode: '123'));
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Test Product',
+      );
+      await enterNutritionValue(tester, 'Protein', '-5');
+
+      await tester.ensureVisible(find.text('Save to inventory'));
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enter a valid number'), findsOneWidget);
+    });
+
+    testWidgets('empty nutrition rows are valid and omitted', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      Product? captured;
+      await pumpSaveScreen(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              captured = await Navigator.push<Product>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AddProductScreen(barcode: '123'),
+                ),
+              );
+            },
+            child: const Text('Open form'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Product name'),
+        'Minimal Product',
+      );
+      await tester.ensureVisible(find.text('Save to inventory'));
+      await tester.tap(find.text('Save to inventory'));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.additionalNutrients, isEmpty);
     });
   });
 

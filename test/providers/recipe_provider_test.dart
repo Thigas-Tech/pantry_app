@@ -450,7 +450,7 @@ void main() {
       ' not the active inventory',
       (tester) async {
         await tester.runAsync(() async {
-          await MigrationRunner(allMigrations()).run(db, 0, 34);
+          await MigrationRunner(allMigrations()).run(db, 0, 35);
           await const PriceDao().insert(
             db,
             const Price(
