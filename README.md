@@ -173,7 +173,7 @@ flutter test --concurrency=2 --coverage  # With coverage
 | OFF SDK            | openfoodfacts                   |
 | Code generation    | freezed, json_serializable      |
 | Barcode scanning   | mobile_scanner (Google ML Kit)  |
-| Image capture      | image_picker                    |
+| Image capture      | camera + image_picker           |
 | Notifications      | flutter_local_notifications     |
 | Connectivity       | internet_connection_checker     |
 | Testing            | flutter_test + mocktail         |

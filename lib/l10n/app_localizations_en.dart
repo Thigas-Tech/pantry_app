@@ -1044,6 +1044,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get photoSourceGallery => 'Choose an existing photo';
 
   @override
+  String get takePhoto => 'Take photo';
+
+  @override
   String uploadingPhotos(int current, int total) {
     return 'Uploading photo $current of $total…';
   }

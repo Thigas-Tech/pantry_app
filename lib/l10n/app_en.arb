@@ -470,6 +470,7 @@
   "previewPhoto": "Preview photo",
   "photoSourceCamera": "Take a new photo",
   "photoSourceGallery": "Choose an existing photo",
+  "takePhoto": "Take photo",
   "uploadingPhotos": "Uploading photo {current} of {total}…",
   "@uploadingPhotos": {
     "placeholders": {

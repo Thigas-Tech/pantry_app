@@ -2001,6 +2001,12 @@ abstract class AppLocalizations {
   /// **'Choose an existing photo'**
   String get photoSourceGallery;
 
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
   /// No description provided for @uploadingPhotos.
   ///
   /// In en, this message translates to:

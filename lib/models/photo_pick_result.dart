@@ -37,3 +37,13 @@ class PhotoPickCancelled extends PhotoPickResult {
   /// Creates a [PhotoPickCancelled].
   const PhotoPickCancelled();
 }
+
+/// No usable camera could be opened on the device.
+///
+/// This is distinct from a permission denial: the camera permission was
+/// granted but no camera device is available or the camera failed to
+/// initialize.
+class PhotoCameraUnavailable extends PhotoPickResult {
+  /// Creates a [PhotoCameraUnavailable].
+  const PhotoCameraUnavailable();
+}

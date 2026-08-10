@@ -281,6 +281,24 @@
 
 ### Fixed
 
+- **Product photos open the rear camera (issue #297)**: taking a photo for a
+  product (nutrition table, ingredients, or front image) now opens an in-app
+  camera preview that deterministically selects the back lens via
+  `availableCameras()`, instead of delegating to the system camera app which
+  restored its last-used (often front) lens. The `camera` plugin powers the
+  preview on Android, iOS, and web; on desktop the flow falls back to
+  image_picker with a rear-camera hint. Captured photos are re-encoded to
+  1600 x 1600 px at quality 85 so stored files and OFF uploads stay small, and
+  a new `PhotoCameraUnavailable` result surfaces a localized message when no
+  camera can be opened.
+  (`lib/screens/camera_capture_screen.dart`,
+  `lib/services/camera_service.dart`,
+  `lib/services/camera_image_processor.dart`,
+  `lib/models/camera_capture_result.dart`,
+  `lib/models/photo_pick_result.dart`,
+  `lib/services/product_photo_picker.dart`,
+  `lib/utils/navigator_key.dart`)
+
 - **Distinguish rejected OFF credentials from other submission failures
   (issue #293)**: when Open Food Facts responds with "Incorrect user name or
   password" (HTTP 400), the write path now classifies it as a distinct

@@ -237,14 +237,22 @@ User scans barcode
 - `ProductPhotoPicker` (at `lib/services/product_photo_picker.dart`)
   picks product photos from the camera or the device gallery for the
   manual product form.
+- Camera picks open an in-app preview (`CameraCaptureScreen` at
+  `lib/screens/camera_capture_screen.dart`) on Android, iOS, and web so
+  the rear lens is selected deterministically via `CameraService`
+  (`availableCameras()` + `CameraLensDirection.back`). On desktop, where
+  the `camera` plugin has no implementation, camera picks fall back to the
+  system camera app through image_picker with a rear-camera hint.
 - Camera picks first request the camera permission; gallery picks go
-  through the system picker and never request a permission. Both sources
-  compress the result to 1600 x 1600 px at quality 85 so Open Food Facts
-  uploads stay small.
-- `ImagePicker` and the camera permission check are injectable for tests;
-  the result is modeled by the sealed `PhotoPickResult` type
-  (`PhotoPicked`, `PhotoPermissionDenied`, `PhotoPickCancelled`).
-  Exposed to screens via `productPhotoPickerProvider`.
+  through the system picker and never request a permission. Captured photos
+  are re-encoded to 1600 x 1600 px at quality 85 (`CameraImageProcessor`)
+  and image_picker picks apply the same limits at pick time, so Open Food
+  Facts uploads stay small.
+- `ImagePicker`, the camera permission check, and the in-app camera capture
+  are injectable for tests; the result is modeled by the sealed
+  `PhotoPickResult` type (`PhotoPicked`, `PhotoPermissionDenied`,
+  `PhotoCameraUnavailable`, `PhotoPickCancelled`). Exposed to screens via
+  `productPhotoPickerProvider`.
 - Camera permission denials surface a dialog with an "Open Settings"
   action (`showCameraPermissionDialog` at
   `lib/utils/camera_permission_dialog.dart`).

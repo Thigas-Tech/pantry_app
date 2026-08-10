@@ -630,6 +630,7 @@
   "previewPhoto": "Visualizar foto",
   "photoSourceCamera": "Tirar uma nova foto",
   "photoSourceGallery": "Escolher uma foto existente",
+  "takePhoto": "Tirar foto",
   "uploadingPhotos": "Enviando foto {current} de {total}…",
   "@uploadingPhotos": {
     "placeholders": {
