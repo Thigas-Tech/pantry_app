@@ -1323,14 +1323,20 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test('rejects a duplicate barcode in the same inventory', () async {
-      // The setUp already inserted barcode1 in inventory 1. A second
-      // insert of the same (barcode, inventory_id) must fail because the
-      // unique index (v29) is enforced on fresh installs.
-      await expectLater(
-        db.insertInventoryItem(const InventoryItem(barcode: 'barcode1')),
-        throwsA(isA<Exception>()),
+    test('allows a duplicate barcode in the same inventory', () async {
+      // The setUp already inserted barcode1 in inventory 1. Since v36 the
+      // inventory (barcode, inventory_id) index is non-unique, so a second
+      // insert with the same barcode succeeds (distinct batches are allowed).
+      final id = await db.insertInventoryItem(
+        const InventoryItem(barcode: 'barcode1'),
       );
+
+      expect(id, greaterThan(0));
+      final items = await db.getInventoryItemsByBarcode(
+        'barcode1',
+        inventoryId: 1,
+      );
+      expect(items, hasLength(2));
     });
   });
 

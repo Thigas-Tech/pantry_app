@@ -128,7 +128,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 35;
+  static const int databaseVersion = 36;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -255,8 +255,7 @@ class DatabaseHelper {
       'CREATE INDEX idx_inventory_date_added ON inventory(date_added)',
     );
     await db.execute(
-      'CREATE UNIQUE INDEX IF NOT EXISTS '
-      'idx_inventory_barcode_inventory_id '
+      'CREATE INDEX IF NOT EXISTS idx_inventory_barcode_inventory_id '
       'ON inventory(barcode, inventory_id)',
     );
 

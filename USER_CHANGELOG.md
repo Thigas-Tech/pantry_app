@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Adding the same product a second time with a different expiry date now keeps
+  the two as separate pantry entries, each with its own expiry. Two entries
+  are merged only when they are truly the same batch (same expiry date,
+  unit, and storage location).
+
 - Product photos can now be cropped and rotated before you save them. When
   you preview a photo you will find a crop action that lets you adjust the
   framing and orientation; the cropped photo replaces the original. Cropping

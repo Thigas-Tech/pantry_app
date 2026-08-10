@@ -191,7 +191,7 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
 
     try {
       await repo.cacheProduct(product);
-      final newId = await repo.addInventoryItem(item);
+      final newId = await repo.addOrMergeInventoryItem(item);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.invalidate(pantryProvider);
       });

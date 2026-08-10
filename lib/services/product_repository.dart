@@ -222,6 +222,19 @@ class ProductRepository {
     return _db.insertInventoryItem(item);
   }
 
+  /// Inserts an inventory item, merging with an existing row that
+  /// represents the same batch (same barcode, inventory, expiry, unit, and
+  /// location). Returns the ID of the merged or newly inserted row.
+  ///
+  /// This is the batch-aware add path: a second instance with a different
+  /// expiry date creates a new row instead of being merged away.
+  Future<int> addOrMergeInventoryItem(InventoryItem item) {
+    logInfo(
+      '''Adding or merging inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location}, expiry: ${item.expiryDate} (inventory ${item.inventoryId})''',
+    );
+    return _db.insertOrMergeInventoryItem(item);
+  }
+
   /// Resolves a [Product] for [produceName] with a synthetic barcode.
   ///
   /// Generates the barcode produce-$produceName, then delegates to

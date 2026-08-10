@@ -202,9 +202,9 @@ class MoveToInventoryResult {
 ///
 /// For each purchased item with a barcode, the product is ensured to exist
 /// in the cache, and an inventory item is created (or merged if the same
-/// barcode already exists in the target inventory). Price data on the
-/// shopping item is saved to the prices table. The shopping item is then
-/// deleted.
+/// batch — same barcode, unit, location, and no expiry — already exists in
+/// the target inventory). Price data on the shopping item is saved to the
+/// prices table. The shopping item is then deleted.
 ///
 /// Items without a barcode or with no matching product in the cache are
 /// skipped.
@@ -257,8 +257,10 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
 
       final existingInv = await txn.query(
         'inventory',
-        where: 'barcode = ? AND inventory_id = ?',
-        whereArgs: [item.barcode, inventoryId],
+        where:
+            'barcode = ? AND inventory_id = ?'
+            ' AND expiry_date IS NULL AND unit = ? AND location = ?',
+        whereArgs: [item.barcode, inventoryId, item.unit, 'pantry'],
         limit: 1,
       );
       if (existingInv.isNotEmpty) {

@@ -221,4 +221,163 @@ void main() {
       expect(dist['freezer'], 1);
     });
   });
+
+  group('InventoryDao insertOrMergeByBarcode', () {
+    setUp(() async {
+      final db = await dbHelper.database;
+      await productDao.insert(db, const Product(barcode: '123', name: 'Coke'));
+    });
+
+    test('merges quantity for the same batch', () async {
+      final db = await dbHelper.database;
+      final id = await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(
+          barcode: '123',
+          quantity: 2,
+          expiryDate: '2026-12-31',
+        ),
+      );
+      final mergedId = await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(
+          barcode: '123',
+          quantity: 3,
+          expiryDate: '2026-12-31',
+        ),
+      );
+
+      expect(mergedId, id);
+      final items = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(items, hasLength(1));
+      expect(items.first.quantity, 5);
+      expect(items.first.expiryDate, '2026-12-31');
+    });
+
+    test('creates a second row when the expiry date differs', () async {
+      final db = await dbHelper.database;
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(
+          barcode: '123',
+          quantity: 2,
+          expiryDate: '2026-12-31',
+        ),
+      );
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(
+          barcode: '123',
+          quantity: 3,
+          expiryDate: '2027-01-15',
+        ),
+      );
+
+      final items = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(items, hasLength(2));
+      expect(
+        items.map((i) => i.expiryDate),
+        containsAll(['2026-12-31', '2027-01-15']),
+      );
+      expect(items.first.quantity, 2);
+      expect(items.last.quantity, 3);
+    });
+
+    test('merges when both rows have a NULL expiry date', () async {
+      final db = await dbHelper.database;
+      final id = await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(barcode: '123', quantity: 2),
+      );
+      final mergedId = await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(barcode: '123', quantity: 4),
+      );
+
+      expect(mergedId, id);
+      final items = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(items, hasLength(1));
+      expect(items.first.quantity, 6);
+      expect(items.first.expiryDate, isNull);
+    });
+
+    test('creates separate rows for NULL vs set expiry', () async {
+      final db = await dbHelper.database;
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(barcode: '123', quantity: 2),
+      );
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(
+          barcode: '123',
+          quantity: 3,
+          expiryDate: '2027-01-15',
+        ),
+      );
+
+      final items = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(items, hasLength(2));
+    });
+
+    test('creates separate rows when the unit differs', () async {
+      final db = await dbHelper.database;
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(barcode: '123', quantity: 2),
+      );
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(barcode: '123', quantity: 3, unit: 'kg'),
+      );
+
+      final items = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(items, hasLength(2));
+    });
+
+    test('creates separate rows when the location differs', () async {
+      final db = await dbHelper.database;
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(barcode: '123'),
+      );
+      await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(barcode: '123', location: 'fridge'),
+      );
+
+      final items = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(items, hasLength(2));
+    });
+
+    test('keeps batches scoped to their inventory', () async {
+      final db = await dbHelper.database;
+      final workId = await dbHelper.createInventory('Work');
+      final homeId = await dao.insertOrMergeByBarcode(
+        db,
+        const InventoryItem(
+          barcode: '123',
+          quantity: 2,
+          expiryDate: '2026-12-31',
+        ),
+      );
+      final workMergedId = await dao.insertOrMergeByBarcode(
+        db,
+        InventoryItem(
+          barcode: '123',
+          quantity: 5,
+          expiryDate: '2026-12-31',
+          inventoryId: workId,
+        ),
+      );
+
+      expect(workMergedId, isNot(homeId));
+      final homeItems = await dao.listByBarcode(db, '123', inventoryId: 1);
+      final workItems = await dao.listByBarcode(db, '123', inventoryId: workId);
+      expect(homeItems, hasLength(1));
+      expect(homeItems.first.quantity, 2);
+      expect(workItems, hasLength(1));
+      expect(workItems.first.quantity, 5);
+    });
+  });
 }

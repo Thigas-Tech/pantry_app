@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Adicionar o mesmo produto uma segunda vez com uma data de validade diferente
+  agora mantem as duas entradas separadas na despensa, cada uma com sua data
+  de validade. Duas entradas so sao combinadas quando sao verdadeiramente o
+  mesmo lote (mesma data de validade, mesma unidade e mesma localizacao de
+  armazenamento).
+
 - As fotos dos produtos agora podem ser recortadas e rotacionadas antes de
   salvar. Ao visualizar uma foto, voce encontrara uma acao de recorte que
   permite ajustar o enquadramento e a orientacao; a foto recortada substitui
