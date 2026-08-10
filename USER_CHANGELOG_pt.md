@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- As fotos dos produtos agora podem ser recortadas e rodadas antes de as
+  guardar. Quando pre-visualizar uma foto, encontrara uma acao de recorte que
+  permite ajustar o enquadramento e a orientacao; a foto recortada substitui
+  a original. Recortar uma foto para um tamanho demasiado pequeno e bloqueado
+  para que as fotos dos produtos se mantenham sempre nitidas.
+
 - Tirar uma foto de produto agora abre sempre a camara traseira em vez da
   frontal.
 

@@ -1034,7 +1034,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String get deletePhoto => 'Excluir foto';
 
   @override
+  String get cropPhoto => 'Recortar foto';
+
+  @override
   String get photoRemoved => 'Foto removida.';
+
+  @override
+  String get applyCrop => 'Aplicar';
+
+  @override
+  String get rotateLeft => 'Girar para a esquerda';
+
+  @override
+  String get rotateRight => 'Girar para a direita';
+
+  @override
+  String get cropFailed => 'Não foi possível recortar a foto.';
+
+  @override
+  String get cropTooSmall =>
+      'A foto recortada é pequena demais. Recorte uma área maior.';
 
   @override
   String get choosePhotoSourceTitle => 'Escolher origem da foto';
@@ -3281,7 +3300,26 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get deletePhoto => 'Excluir foto';
 
   @override
+  String get cropPhoto => 'Recortar foto';
+
+  @override
   String get photoRemoved => 'Foto removida.';
+
+  @override
+  String get applyCrop => 'Aplicar';
+
+  @override
+  String get rotateLeft => 'Girar para a esquerda';
+
+  @override
+  String get rotateRight => 'Girar para a direita';
+
+  @override
+  String get cropFailed => 'Não foi possível recortar a foto.';
+
+  @override
+  String get cropTooSmall =>
+      'A foto recortada é pequena demais. Recorte uma área maior.';
 
   @override
   String get choosePhotoSourceTitle => 'Escolher origem da foto';

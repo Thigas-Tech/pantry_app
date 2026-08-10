@@ -1965,11 +1965,47 @@ abstract class AppLocalizations {
   /// **'Delete photo'**
   String get deletePhoto;
 
+  /// No description provided for @cropPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop photo'**
+  String get cropPhoto;
+
   /// No description provided for @photoRemoved.
   ///
   /// In en, this message translates to:
   /// **'Photo removed.'**
   String get photoRemoved;
+
+  /// No description provided for @applyCrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get applyCrop;
+
+  /// No description provided for @rotateLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate left'**
+  String get rotateLeft;
+
+  /// No description provided for @rotateRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate right'**
+  String get rotateRight;
+
+  /// No description provided for @cropFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not crop photo.'**
+  String get cropFailed;
+
+  /// No description provided for @cropTooSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'The cropped photo is too small. Crop a larger area.'**
+  String get cropTooSmall;
 
   /// No description provided for @choosePhotoSourceTitle.
   ///

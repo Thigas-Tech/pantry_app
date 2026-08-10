@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crop_image/crop_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
@@ -10,13 +14,16 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
+import 'package:pantry_app/providers/product_photo_cropper_provider.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/services/product_image_service.dart';
+import 'package:pantry_app/services/product_photo_cropper.dart';
 import 'package:pantry_app/services/product_photo_picker.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
+import 'package:pantry_app/widgets/photo_crop_screen.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -28,6 +35,31 @@ class MockProductImageService extends Mock implements ProductImageService {}
 
 class MockProductSubmissionService extends Mock
     implements ProductSubmissionService {}
+
+class MockProductPhotoCropper extends Mock implements ProductPhotoCropper {}
+
+/// Loads [file] into the global image cache on the live event loop.
+///
+/// [precacheImage] cannot be used after a widget already resolved the same
+/// [FileImage] key: that resolve runs in the fake-async zone and leaves a
+/// pending cache entry that never completes, which makes pumpAndSettle spin
+/// on the crop screen's animated placeholder forever. Resolving the stream
+/// here, before any widget mounts, keeps the cache entry complete.
+Future<void> precacheFileImage(File file) {
+  final completer = Completer<void>();
+  final stream = FileImage(file).resolve(ImageConfiguration.empty);
+  late final ImageStreamListener listener;
+  listener = ImageStreamListener(
+    (info, syncCall) {
+      if (!completer.isCompleted) completer.complete();
+    },
+    onError: (error, stackTrace) {
+      if (!completer.isCompleted) completer.completeError(error, stackTrace);
+    },
+  );
+  stream.addListener(listener);
+  return completer.future.then((_) => stream.removeListener(listener));
+}
 
 /// A minimal 1x1 transparent PNG so [Image.file] decodes in tests.
 final Uint8List kTransparentPng = Uint8List.fromList(const <int>[
@@ -115,6 +147,8 @@ void main() {
     registerFallbackValue(const ProductPhotoSlots.empty());
     registerFallbackValue(const Product(barcode: '', name: ''));
     registerFallbackValue('123');
+    registerFallbackValue(CropRotation.up);
+    registerFallbackValue(const Rect.fromLTWH(0, 0, 1, 1));
   });
 
   setUp(() async {
@@ -193,7 +227,10 @@ void main() {
     }
   });
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(
+    WidgetTester tester, {
+    List<Override> extraOverrides = const [],
+  }) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -212,6 +249,7 @@ void main() {
           mockSubmissionService,
         ),
         productRepositoryProvider.overrideWithValue(mockRepo),
+        ...extraOverrides,
       ],
     );
     await tester.pumpAndSettle();
@@ -447,6 +485,77 @@ void main() {
       expect(
         find.descendant(of: tile, matching: find.byType(Image)),
         findsNothing,
+      );
+    });
+
+    testWidgets('preview crop replaces the slot with the cropped photo', (
+      tester,
+    ) async {
+      final bigFile = File('${tempDir.path}/big.png');
+      final sourceImage = img.Image(width: 800, height: 800);
+      img.fill(sourceImage, color: img.ColorRgb8(10, 20, 30));
+      bigFile.writeAsBytesSync(img.encodePng(sourceImage));
+      final cropped = File('${tempDir.path}/cropped.png')
+        ..writeAsBytesSync(kTransparentPng);
+      final mockCropper = MockProductPhotoCropper();
+      when(
+        () => mockCropper.crop(
+          sourcePath: any(named: 'sourcePath'),
+          cropRect: any(named: 'cropRect'),
+          rotation: any(named: 'rotation'),
+        ),
+      ).thenAnswer((_) async => cropped);
+
+      await pumpScreen(
+        tester,
+        extraOverrides: [
+          productPhotoCropperProvider.overrideWithValue(mockCropper),
+        ],
+      );
+      // Warm the cache before the tile mounts so the crop screen renders its
+      // grid instead of an animated placeholder pumpAndSettle never finishes.
+      await tester.runAsync(() => precacheFileImage(bigFile));
+      when(
+        () => mockPicker.pick(any()),
+      ).thenAnswer((_) async => PhotoPicked(bigFile));
+      await attachNutritionPhoto(tester);
+
+      await tester.tap(
+        find.widgetWithText(ProductPhotoTile, 'Nutrition table photo'),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(ProductPhotoPreview), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Crop photo'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PhotoCropScreen), findsOneWidget);
+
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PhotoCropScreen), findsNothing);
+      verify(
+        () => mockCropper.crop(
+          sourcePath: bigFile.path,
+          cropRect: const Rect.fromLTWH(0, 0, 1, 1),
+          rotation: CropRotation.up,
+        ),
+      ).called(1);
+      verify(
+        () => mockImageService.assign(
+          any(),
+          any(),
+          cropped,
+          barcode: '123',
+        ),
+      ).called(1);
+      final tile = find.widgetWithText(
+        ProductPhotoTile,
+        'Nutrition table photo',
+      );
+      expect(
+        find.descendant(of: tile, matching: find.byType(Image)),
+        findsOneWidget,
       );
     });
 

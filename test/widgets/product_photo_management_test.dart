@@ -7,11 +7,15 @@
 /// undo flow that clears the product path in the database.
 library;
 
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crop_image/crop_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/image_field.dart';
@@ -20,9 +24,12 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
+import 'package:pantry_app/providers/product_photo_cropper_provider.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/services/product_image_service.dart';
+import 'package:pantry_app/services/product_photo_cropper.dart';
 import 'package:pantry_app/services/product_photo_picker.dart';
+import 'package:pantry_app/widgets/photo_crop_screen.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
 import 'package:pantry_app/widgets/product_photo_management.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
@@ -34,6 +41,31 @@ class MockProductPhotoPicker extends Mock implements ProductPhotoPicker {}
 class MockProductImageService extends Mock implements ProductImageService {}
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+
+class MockProductPhotoCropper extends Mock implements ProductPhotoCropper {}
+
+/// Loads [file] into the global image cache on the live event loop.
+///
+/// [precacheImage] cannot be used after a widget already resolved the same
+/// [FileImage] key: that resolve runs in the fake-async zone and leaves a
+/// pending cache entry that never completes, which makes pumpAndSettle spin
+/// on the crop screen's animated placeholder forever. Resolving the stream
+/// here, before any widget mounts, keeps the cache entry complete.
+Future<void> precacheFileImage(File file) {
+  final completer = Completer<void>();
+  final stream = FileImage(file).resolve(ImageConfiguration.empty);
+  late final ImageStreamListener listener;
+  listener = ImageStreamListener(
+    (info, syncCall) {
+      if (!completer.isCompleted) completer.complete();
+    },
+    onError: (error, stackTrace) {
+      if (!completer.isCompleted) completer.completeError(error, stackTrace);
+    },
+  );
+  stream.addListener(listener);
+  return completer.future.then((_) => stream.removeListener(listener));
+}
 
 /// A minimal 1x1 transparent PNG so [Image.file] decodes in tests.
 final Uint8List kTransparentPng = Uint8List.fromList(const <int>[
@@ -122,6 +154,8 @@ void main() {
     registerFallbackValue(ImageField.nutrition);
     registerFallbackValue(const ProductPhotoSlots.empty());
     registerFallbackValue(const Product(barcode: '', name: ''));
+    registerFallbackValue(CropRotation.up);
+    registerFallbackValue(const Rect.fromLTWH(0, 0, 1, 1));
   });
 
   setUp(() async {
@@ -183,6 +217,7 @@ void main() {
   Future<void> pumpWidget(
     WidgetTester tester, {
     required Product product,
+    List<Override> extraOverrides = const [],
   }) async {
     await pumpApp(
       tester,
@@ -196,6 +231,7 @@ void main() {
         productPhotoPickerProvider.overrideWithValue(mockPicker),
         productImageServiceProvider.overrideWithValue(mockImageService),
         databaseProvider.overrideWithValue(mockDb),
+        ...extraOverrides,
       ],
     );
     await tester.pumpAndSettle();
@@ -316,6 +352,129 @@ void main() {
           barcode: any(named: 'barcode'),
         ),
       );
+    });
+  });
+
+  group('ProductPhotoManagement crop', () {
+    testWidgets(
+      'cropping a photo opens the crop screen, assigns the slot, and persists',
+      (tester) async {
+        final source = File('${tempDir.path}/source.png');
+        final sourceImage = img.Image(width: 800, height: 800);
+        img.fill(sourceImage, color: img.ColorRgb8(10, 20, 30));
+        source.writeAsBytesSync(img.encodePng(sourceImage));
+        final cropped = File('${tempDir.path}/cropped.png')
+          ..writeAsBytesSync(kTransparentPng);
+        final mockCropper = MockProductPhotoCropper();
+        when(
+          () => mockCropper.crop(
+            sourcePath: any(named: 'sourcePath'),
+            cropRect: any(named: 'cropRect'),
+            rotation: any(named: 'rotation'),
+          ),
+        ).thenAnswer((_) async => cropped);
+
+        // Warm the image cache BEFORE any widget mounts so the crop screen
+        // renders its grid instead of an animated placeholder that
+        // pumpAndSettle can never finish.
+        await tester.runAsync(() => precacheFileImage(source));
+
+        await pumpWidget(
+          tester,
+          product: manualProduct(nutrition: source.path),
+          extraOverrides: [
+            productPhotoCropperProvider.overrideWithValue(mockCropper),
+          ],
+        );
+
+        await tester.tap(
+          find.widgetWithText(ProductPhotoTile, 'Nutrition table photo'),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(ProductPhotoPreview), findsOneWidget);
+
+        await tester.tap(find.byTooltip('Crop photo'));
+        await tester.pumpAndSettle();
+        expect(find.byType(PhotoCropScreen), findsOneWidget);
+
+        await tester.tap(find.text('Apply'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(PhotoCropScreen), findsNothing);
+        verify(
+          () => mockCropper.crop(
+            sourcePath: source.path,
+            cropRect: const Rect.fromLTWH(0, 0, 1, 1),
+            rotation: CropRotation.up,
+          ),
+        ).called(1);
+        verify(
+          () => mockImageService.assign(
+            any(),
+            any(),
+            any(),
+            barcode: '123456789',
+          ),
+        ).called(1);
+        expect(changedProducts, isNotEmpty);
+        expect(changedProducts.last.nutritionImagePath, cropped.path);
+        verify(() => mockDb.insertProduct(any())).called(1);
+      },
+    );
+
+    testWidgets('cancelling the crop keeps the slot and persists nothing', (
+      tester,
+    ) async {
+      final source = File('${tempDir.path}/source.png');
+      final sourceImage = img.Image(width: 800, height: 800);
+      img.fill(sourceImage, color: img.ColorRgb8(10, 20, 30));
+      source.writeAsBytesSync(img.encodePng(sourceImage));
+      final mockCropper = MockProductPhotoCropper();
+      when(
+        () => mockCropper.crop(
+          sourcePath: any(named: 'sourcePath'),
+          cropRect: any(named: 'cropRect'),
+          rotation: any(named: 'rotation'),
+        ),
+      ).thenAnswer((_) async => null);
+
+      await tester.runAsync(() => precacheFileImage(source));
+      await pumpWidget(
+        tester,
+        product: manualProduct(nutrition: source.path),
+        extraOverrides: [
+          productPhotoCropperProvider.overrideWithValue(mockCropper),
+        ],
+      );
+
+      await tester.tap(
+        find.widgetWithText(ProductPhotoTile, 'Nutrition table photo'),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Crop photo'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PhotoCropScreen), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PhotoCropScreen), findsNothing);
+      verifyNever(
+        () => mockCropper.crop(
+          sourcePath: any(named: 'sourcePath'),
+          cropRect: any(named: 'cropRect'),
+          rotation: any(named: 'rotation'),
+        ),
+      );
+      verifyNever(
+        () => mockImageService.assign(
+          any(),
+          any(),
+          any(),
+          barcode: any(named: 'barcode'),
+        ),
+      );
+      expect(changedProducts, isEmpty);
     });
   });
 

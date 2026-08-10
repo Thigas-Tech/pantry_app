@@ -1026,7 +1026,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deletePhoto => 'Delete photo';
 
   @override
+  String get cropPhoto => 'Crop photo';
+
+  @override
   String get photoRemoved => 'Photo removed.';
+
+  @override
+  String get applyCrop => 'Apply';
+
+  @override
+  String get rotateLeft => 'Rotate left';
+
+  @override
+  String get rotateRight => 'Rotate right';
+
+  @override
+  String get cropFailed => 'Could not crop photo.';
+
+  @override
+  String get cropTooSmall =>
+      'The cropped photo is too small. Crop a larger area.';
 
   @override
   String get choosePhotoSourceTitle => 'Choose photo source';

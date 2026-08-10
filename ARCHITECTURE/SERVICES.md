@@ -290,3 +290,26 @@ User scans barcode
   `productImageServiceProvider` (`lib/providers/product_image_service_provider.dart`).
 - The slot snapshot is modeled by the immutable `ProductPhotoSlots`
   (`lib/models/product_photo_slots.dart`).
+
+### 3.23 Product photo cropper
+
+- `ProductPhotoCropper` (at `lib/services/product_photo_cropper.dart`)
+  produces cropped and rotated copies of local product photos for the
+  manual form and the product detail screen.
+- Cropping is delegated to `CropController.getCroppedBitmap` from the
+  `crop_image` package so the output matches the grid and rotation shown by
+  the `CropImage` widget in the crop screen (`lib/widgets/photo_crop_screen.dart`).
+  The crop rectangle is normalized 0..1 in the displayed (post-rotation)
+  coordinate space; the output is downscaled so its longest side never
+  exceeds 1600 px and encoded as JPEG in a background isolate via
+  `compute` (the decode and crop canvas stay on the main isolate because
+  `ui.Image` cannot cross isolates).
+- The source file is never modified, so cropping is non-destructive. The
+  caller owns the returned file and must delete it once copied into its
+  managed slot. Crops whose predicted output side falls below the OFF
+  minimum of 640 px (`minimumDimension`) are rejected by the crop screen
+  with a localized warning.
+- Exposed to the crop screen via `productPhotoCropperProvider`
+  (`lib/providers/product_photo_cropper_provider.dart`); widget tests
+  override this provider with a fake cropper so the wiring is testable
+  without encoding real images.
