@@ -41,5 +41,26 @@ void main() {
       expect(a, equals(b));
       expect(a, isNot(equals(c)));
     });
+
+    test('package fields default to null', () {
+      const price = Price(barcode: '123', price: 5.99);
+      expect(price.packageQuantity, isNull);
+      expect(price.packageUnit, isNull);
+    });
+
+    test('copyWith sets package fields', () {
+      const price = Price(
+        barcode: '123',
+        price: 9.99,
+        packageQuantity: 12,
+        packageUnit: 'pieces',
+      );
+      expect(price.packageQuantity, 12);
+      expect(price.packageUnit, 'pieces');
+
+      final cleared = price.copyWith(packageQuantity: null, packageUnit: null);
+      expect(cleared.packageQuantity, isNull);
+      expect(cleared.packageUnit, isNull);
+    });
   });
 }

@@ -404,6 +404,66 @@ void main() {
       expect(find.text(r'$4.99'), findsOneWidget);
     });
 
+    testWidgets(
+      'shows the per-unit price when the price has a package size',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({});
+        final item = createItem(name: 'Eggs', quantity: 12, unit: 'pieces');
+
+        await pumpApp(
+          tester,
+          InventoryCard(item: item),
+          imageCacheMock: mockImageCache,
+          overrides: [
+            productRepositoryProvider.overrideWithValue(
+              MockProductRepository(),
+            ),
+            settingsProvider.overrideWith(
+              _FakePriceTrackingSettingsNotifier.new,
+            ),
+            latestPriceProvider(('123', 1)).overrideWith(
+              (ref) => const Price(
+                barcode: '123',
+                price: 9.99,
+                packageQuantity: 12,
+                packageUnit: 'pieces',
+              ),
+            ),
+          ],
+        );
+
+        expect(find.text(r'$9.99'), findsOneWidget);
+        expect(find.textContaining('/unit'), findsOneWidget);
+      },
+    );
+
+    testWidgets('hides the per-unit price without a package size', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final item = createItem(name: 'Eggs', quantity: 12, unit: 'pieces');
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+          settingsProvider.overrideWith(
+            _FakePriceTrackingSettingsNotifier.new,
+          ),
+          latestPriceProvider(('123', 1)).overrideWith(
+            (ref) => const Price(barcode: '123', price: 9.99),
+          ),
+        ],
+      );
+
+      expect(find.text(r'$9.99'), findsOneWidget);
+      expect(find.textContaining('/unit'), findsNothing);
+    });
+
     testWidgets('hides the price when the active inventory has none', (
       tester,
     ) async {

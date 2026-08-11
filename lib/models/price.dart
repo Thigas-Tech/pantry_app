@@ -100,6 +100,20 @@ abstract class Price with _$Price {
     /// Free-form notes about this price observation.
     String? notes,
 
+    /// The size of the package this price applies to (e.g. 12 for a dozen
+    /// eggs, 1 for a 1 L bottle, 500 for a 500 g bag).
+    ///
+    /// When set together with [packageUnit], recipe cost and statistics are
+    /// scaled by the quantity actually used instead of charging the full
+    /// package price. May be null for legacy prices recorded before this
+    /// field existed.
+    double? packageQuantity,
+
+    /// The unit for [packageQuantity] (e.g. 'pieces', 'g', 'kg', 'ml', 'L').
+    ///
+    /// Null whenever [packageQuantity] is null.
+    String? packageUnit,
+
     /// Epoch timestamp (milliseconds since Unix epoch) of when this record
     /// was created locally.
     int? dateAdded,

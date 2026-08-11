@@ -28,6 +28,8 @@ import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/recipe_nutri_score_service.dart';
 import 'package:pantry_app/services/recipe_nutrition_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/price_calculator.dart';
+import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -340,6 +342,13 @@ Future<double> calculateRecipeCost(WidgetRef ref, int recipeId) async {
 /// Sums the latest price of each [ingredients] row found in the prices table
 /// for the given [inventoryId], converted to [baseCurrency].
 ///
+/// Each ingredient's cost is scaled by the fraction of the package actually
+/// used when a package size can be resolved. The package size is looked up
+/// in this order: the price row itself, the product's packaging quantity,
+/// then an inventory row for the same barcode. When no package size can be
+/// resolved, or the units are incompatible, the full price is charged
+/// (legacy behavior).
+///
 /// Ingredients without a barcode, or with no price recorded in [inventoryId],
 /// contribute zero. Returns 0.0 when nothing can be priced.
 Future<double> calculateIngredientCost(
@@ -354,7 +363,7 @@ Future<double> calculateIngredientCost(
     if (ingredient.barcode == null || ingredient.barcode!.isEmpty) continue;
 
     final rows = await database.rawQuery(
-      'SELECT price, currency FROM prices'
+      'SELECT price, currency, package_quantity, package_unit FROM prices'
       ' WHERE barcode = ? AND inventory_id = ?'
       ' ORDER BY date_purchased DESC LIMIT 1',
       [ingredient.barcode, inventoryId],
@@ -364,10 +373,87 @@ Future<double> calculateIngredientCost(
     final price = (rows.first['price'] as num?)?.toDouble() ?? 0.0;
     final currency = rows.first['currency'] as String? ?? baseCurrency;
 
-    total += await currencyService.convert(price, currency, baseCurrency);
+    var cost = price;
+    final packageSize = await _resolvePackageSize(
+      database,
+      ingredient.barcode!,
+      inventoryId,
+      priceRow: rows.first,
+    );
+    if (packageSize != null) {
+      cost =
+          PriceCalculator.scaledIngredientCost(
+            price: price,
+            ingredientQuantity: ingredient.quantity,
+            ingredientUnit: ingredient.unit,
+            packageQuantity: packageSize.packageQuantity,
+            packageUnit: packageSize.packageUnit,
+          ) ??
+          price;
+    }
+
+    total += await currencyService.convert(cost, currency, baseCurrency);
   }
 
   return total;
+}
+
+/// Resolves the package size for [barcode] to scale recipe ingredient costs.
+///
+/// Checks, in order:
+///   1. The [priceRow]'s own package_quantity / package_unit columns.
+///   2. The product's packaging quantity ([Product.quantity] /
+///      [Product.productQuantity]), parsing multi-pack strings like
+///      "3 x 150 g" to their per-unit value.
+///   3. The first inventory row for [barcode] in [inventoryId], treating its
+///      stored quantity and unit as a best-effort package size.
+///
+/// Returns null when no usable package size is found.
+Future<({double packageQuantity, String packageUnit})?> _resolvePackageSize(
+  Database database,
+  String barcode,
+  int inventoryId, {
+  required Map<String, dynamic> priceRow,
+}) async {
+  final priceQty = (priceRow['package_quantity'] as num?)?.toDouble();
+  final priceUnit = priceRow['package_unit'] as String?;
+  if (priceQty != null && priceUnit != null && priceQty > 0) {
+    return (packageQuantity: priceQty, packageUnit: priceUnit);
+  }
+
+  final productRows = await database.query(
+    'products',
+    columns: ['quantity', 'product_quantity'],
+    where: 'barcode = ?',
+    whereArgs: [barcode],
+    limit: 1,
+  );
+  if (productRows.isNotEmpty) {
+    final parsed = parseQuantity(
+      productQuantity: (productRows.first['product_quantity'] as num?)
+          ?.toDouble(),
+      quantity: productRows.first['quantity'] as String?,
+    );
+    if (parsed != null) {
+      return (packageQuantity: parsed.amount, packageUnit: parsed.unit);
+    }
+  }
+
+  final inventoryRows = await database.rawQuery(
+    'SELECT quantity, unit FROM inventory'
+    ' WHERE barcode = ? AND inventory_id = ?'
+    ' ORDER BY expiry_date ASC NULLS LAST',
+    [barcode, inventoryId],
+  );
+  if (inventoryRows.isNotEmpty) {
+    final rowQty = (inventoryRows.first['quantity'] as num?)?.toDouble();
+    final rowUnit = inventoryRows.first['unit'] as String? ?? 'pieces';
+    if (rowQty != null && rowQty > 0) {
+      return (packageQuantity: rowQty, packageUnit: rowUnit);
+    }
+  }
+
+  return null;
 }
 
 /// Calculates the average cost across all recipes in the active inventory.

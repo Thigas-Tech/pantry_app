@@ -90,6 +90,21 @@ void main() {
       await dao.clear(db);
       expect(await dao.count(db), 0);
     });
+
+    test('insert and get round-trips packaging quantity fields', () async {
+      final db = await dbHelper.database;
+      const packaged = Product(
+        barcode: '777',
+        name: 'Eggs',
+        quantity: '12 x 1',
+        productQuantity: 12,
+      );
+      await dao.insert(db, packaged);
+      final fetched = await dao.get(db, '777');
+      expect(fetched, isNotNull);
+      expect(fetched!.quantity, '12 x 1');
+      expect(fetched.productQuantity, 12);
+    });
   });
 
   group('ProductDao search', () {

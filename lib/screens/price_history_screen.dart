@@ -12,6 +12,7 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart'
     show PriceVisibilityToggle;
+import 'package:pantry_app/widgets/unit_price_label.dart';
 
 /// Displays the price history for a single product.
 ///
@@ -161,7 +162,14 @@ class _PriceHistoryTile extends ConsumerWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          subtitle: price.store != null ? Text(price.store!) : null,
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (price.store != null) Text(price.store!),
+              UnitPriceLabel(price: price),
+            ],
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

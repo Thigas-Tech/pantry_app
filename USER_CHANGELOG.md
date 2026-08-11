@@ -114,6 +114,16 @@
   belongs to, so switching pantries never mixes in prices from another one.
   Ingredients with no price recorded in that pantry are counted as costing
   nothing.
+- Recipe costs now reflect the amount actually used instead of the whole
+  package: a recipe using 2 eggs from a pack of 12 accounts for only a sixth
+  of the pack's price.
+- When you record a price you can add the package size (for example
+  12 pieces, 500 g, or 1 L). A per-unit price is then shown under the price,
+  such as R$ 0,83 per piece or R$ 8,00 per kg, making products in different
+  pack sizes easier to compare. The per-unit price stays hidden when you have
+  chosen to hide prices.
+- Pantry totals and average item prices now take into account how much of
+  each product you hold, so the numbers match your actual stock.
 
 ## [0.0.9+5]
 

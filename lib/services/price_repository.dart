@@ -4,6 +4,8 @@ import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/open_prices_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/price_calculator.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
 
 export 'open_prices_service.dart' show SyncResult;
 
@@ -104,6 +106,49 @@ class PriceRepository {
     String baseCurrency,
   ) => _currencyService.convert(amount, fromCurrency, baseCurrency);
 
+  /// Builds a per-unit price label for [price] (e.g. "R$ 0,83/unit",
+  /// "R$ 0,80/100 g", "R$ 8,00/kg", "R$ 5,00/L"), or null when the price
+  /// carries no usable package size.
+  ///
+  /// The display unit is derived from the package size: per piece, per 100 g,
+  /// per kg (when the package is at least one kilogram), per L (when the
+  /// package is at least one liter), or per 100 ml otherwise. The localized
+  /// suffix strings are supplied by the caller so this method stays free of
+  /// l10n dependencies.
+  String? unitPriceLabel(
+    Price price, {
+    required String perPiece,
+    required String perHundredGrams,
+    required String perKilogram,
+    required String perLiter,
+    required String perHundredMilliliters,
+  }) {
+    final unitPrice = PriceCalculator.unitPrice(
+      price: price.price,
+      packageQuantity: price.packageQuantity,
+      packageUnit: price.packageUnit,
+    );
+    final packageQty = price.packageQuantity;
+    final packageUnit = price.packageUnit;
+    if (unitPrice == null || packageQty == null || packageUnit == null) {
+      return null;
+    }
+
+    final scaled = switch (unitPrice.unit) {
+      'g' =>
+        UnitConverter.normalizeToGrams(packageQty, packageUnit) >= 1000
+            ? (amount: unitPrice.amount * 1000, suffix: perKilogram)
+            : (amount: unitPrice.amount * 100, suffix: perHundredGrams),
+      'ml' =>
+        UnitConverter.normalizeToMilliliters(packageQty, packageUnit) >= 1000
+            ? (amount: unitPrice.amount * 1000, suffix: perLiter)
+            : (amount: unitPrice.amount * 100, suffix: perHundredMilliliters),
+      _ => (amount: unitPrice.amount, suffix: perPiece),
+    };
+
+    return '${formatPrice(scaled.amount, price.currency)}${scaled.suffix}';
+  }
+
   // ---------------------------------------------------------------------------
   // Aggregations (scoped to an inventory)
   // ---------------------------------------------------------------------------
@@ -137,12 +182,13 @@ class PriceRepository {
     return double.tryParse(total.toStringAsFixed(2));
   }
 
-  /// Returns the average of the most recent price per distinct product in
-  /// the given inventory, converted to [baseCurrency], or null if no
-  /// prices exist.
+  /// Returns the quantity-weighted average of the most recent price per
+  /// distinct product in the given inventory, converted to [baseCurrency],
+  /// or null if no prices exist.
   ///
   /// Each price is converted individually before averaging so that
-  /// mixed-currency inventories produce a meaningful average.
+  /// mixed-currency inventories produce a meaningful average. Products held
+  /// in larger quantities contribute proportionally more to the average.
   Future<double?> averageItemPrice(
     int inventoryId, {
     String baseCurrency = 'USD',
@@ -155,14 +201,16 @@ class PriceRepository {
     if (rows.isEmpty) return null;
 
     var sum = 0.0;
-    var count = 0;
+    var totalQty = 0.0;
     for (final row in rows) {
       final price = (row['price'] as num).toDouble();
       final currency = row['currency'] as String;
-      sum += await convertToBase(price, currency, baseCurrency);
-      count++;
+      final qty = (row['total_quantity'] as num?)?.toDouble() ?? 1;
+      sum += await convertToBase(price, currency, baseCurrency) * qty;
+      totalQty += qty;
     }
-    final avg = sum / count;
+    if (totalQty == 0) return null;
+    final avg = sum / totalQty;
     return double.tryParse(avg.toStringAsFixed(2));
   }
 
