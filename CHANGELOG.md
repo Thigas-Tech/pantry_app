@@ -244,6 +244,48 @@
   touched), and cancelling keeps the original photo.
   (`lib/l10n/app_en.arb`)
 
+- **Package size on price records (issue #308)**: `Price` now carries
+  `packageQuantity` and `packageUnit` so a recorded price knows how much
+  product it covers. A v37 migration adds `package_quantity REAL` and
+  `package_unit TEXT` to the `prices` table, and `PriceDao` table creation,
+  `toMap`, and `fromMap` round-trip the new columns. The price entry sheet
+  gains optional package quantity + unit fields (validated to be positive)
+  and pre-fills them in edit mode.
+  (`lib/models/price.dart`, `lib/database/price_dao.dart`,
+  `lib/database/migrations/v37_prices_package.dart`,
+  `lib/widgets/price_entry_sheet.dart`)
+
+- **Product packaging quantity persisted (issue #308)**: the `products`
+  table gains `quantity TEXT` and `product_quantity REAL` in the same v37
+  migration; `ProductDao` round-trips them, and the off product adapter and
+  quantity parser handle multi-pack strings like "3 x 150 g", using the
+  per-unit value for scaling.
+  (`lib/database/product_dao.dart`, `lib/models/product.dart`,
+  `lib/utils/quantity_parser.dart`)
+
+- **Price calculator (issue #308)**: new pure helpers
+  (`lib/utils/price_calculator.dart`): `scaledIngredientCost` computes the
+  cost of the amount of a packaged product actually used, and `unitPrice`
+  derives the per-piece / per-100 g / per-kg / per-L / per-100 ml unit value
+  from the package size. Both return null on missing, zero, or non-finite
+  sizes and on incompatible units, avoiding any division by zero or invented
+  density (there is no g-to-pieces conversion).
+
+- **Per-unit price labels (issue #308)**: `PriceRepository.unitPriceLabel`
+  builds labels like "R$ 0,83/unit" ("/100 g", "/kg", "/L", "/100 ml")
+  from `PriceCalculator.unitPrice`, or null when no usable package size
+  exists. The inventory card and price-history tiles render the per-unit
+  price under the flat price via `UnitPriceLabel`, hidden when unresolvable
+  and masked by `PriceMask` when prices are hidden.
+  (`lib/services/price_repository.dart`, `lib/widgets/unit_price_label.dart`,
+  `lib/widgets/inventory_card.dart`, `lib/screens/price_history_screen.dart`)
+
+- **Open Prices price_per (issue #308)**: `OpenPricesApiClient.submitPrice`
+  sends the derived `price_per` field (UNIT or KILOGRAM per the package
+  unit), and `RemotePrice` parses `price_per` plus the product quantity from
+  API responses. The placeholder sync flow contract is unchanged.
+  (`lib/services/open_prices_api_client.dart`)
+
 ### Removed
 
 - **Home-screen "Recent scans" carousel**: the horizontal strip of recent
@@ -293,6 +335,23 @@
   `lib/services/product_photo_picker.dart`,
   `lib/utils/gallery_permission_dialog.dart`,
   `lib/screens/add_product_screen.dart`)
+
+- **Recipe costs scale by package usage (issue #308)**:
+  `calculateIngredientCost` now scales each ingredient's cost by the
+  fraction of the package actually used. The package size is resolved in
+  order: the price row's own package size, the product's packaging quantity
+  (multi-pack strings parsed per-unit), then an inventory row for the
+  barcode. When no size resolves or the units are incompatible, the full
+  price is charged (legacy behavior). Cook-history costs use the same
+  scoring path so detail, list, and cook views stay consistent.
+  (`lib/providers/recipe_provider.dart`)
+
+- **Statistics weight by held quantity (issue #308)**: total inventory
+  value, average item price, and the DAO-level monthly-expenditure and
+  store-spending queries multiply each latest price by the total quantity
+  held, so mixed-currency inventories and multi-unit holdings reflect real
+  stock.
+  (`lib/database/price_dao.dart`)
 
 ### Fixed
 

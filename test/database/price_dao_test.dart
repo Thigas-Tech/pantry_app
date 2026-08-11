@@ -79,6 +79,30 @@ void main() {
       await dao.delete(db, id);
       expect(await dao.getById(db, id), isNull);
     });
+
+    test('package fields round-trip through toMap and fromMap', () async {
+      final db = await dbHelper.database;
+      const packaged = Price(
+        barcode: '123',
+        price: 9.99,
+        packageQuantity: 12,
+        packageUnit: 'pieces',
+      );
+      final id = await dao.insert(db, packaged);
+      final fetched = await dao.getById(db, id);
+      expect(fetched, isNotNull);
+      expect(fetched!.packageQuantity, 12);
+      expect(fetched.packageUnit, 'pieces');
+
+      final nulled = packaged.copyWith(
+        packageQuantity: null,
+        packageUnit: null,
+      );
+      await dao.update(db, nulled.copyWith(id: id));
+      final refetched = await dao.getById(db, id);
+      expect(refetched!.packageQuantity, isNull);
+      expect(refetched.packageUnit, isNull);
+    });
   });
 
   group('PriceDao inventory scoping', () {
@@ -253,6 +277,24 @@ void main() {
       expect(await dao.pricedItemCount(db, 1), 2);
     });
 
+    test('totalInventoryValue scales by inventory quantity', () async {
+      final db = await dbHelper.database;
+      final p1Rows = await inventoryDao.listByBarcode(db, 'p1', inventoryId: 1);
+      await inventoryDao.update(db, p1Rows.first.copyWith(quantity: 3));
+
+      // Latest prices p1=10, p2=20; p1 held 3 units => 10*3 + 20*1.
+      expect(await dao.totalInventoryValue(db, 1), 50.0);
+    });
+
+    test('averageItemPrice is weighted by inventory quantity', () async {
+      final db = await dbHelper.database;
+      final p1Rows = await inventoryDao.listByBarcode(db, 'p1', inventoryId: 1);
+      await inventoryDao.update(db, p1Rows.first.copyWith(quantity: 3));
+
+      // Quantity-weighted average (10*3 + 20*1) / (3 + 1).
+      expect(await dao.averageItemPrice(db, 1), 12.5);
+    });
+
     test('stats ignore prices recorded in other inventories', () async {
       final db = await dbHelper.database;
       await dbHelper.inventoriesDao.create(db, 'Work');
@@ -274,6 +316,74 @@ void main() {
       expect(await dao.totalInventoryValue(db, 1), 30.0);
       expect(await dao.averageItemPrice(db, 1), 15.0);
       expect(await dao.pricedItemCount(db, 1), 2);
+    });
+  });
+
+  group('PriceDao monthly and store spending scale by quantity', () {
+    setUp(() async {
+      final db = await dbHelper.database;
+      const productDao = ProductDao();
+
+      await productDao.insert(
+        db,
+        const Product(barcode: 'm1', name: 'Monthly 1'),
+      );
+      await productDao.insert(
+        db,
+        const Product(barcode: 's1', name: 'Store 1'),
+      );
+
+      // m1 held 2 units at a price of 10 in June 2026.
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'm1', quantity: 2),
+      );
+      await dao.insert(
+        db,
+        Price(
+          barcode: 'm1',
+          price: 10,
+          datePurchased: DateTime(2026, 6, 15).millisecondsSinceEpoch,
+        ),
+      );
+
+      // s1 held 4 units at a price of 5 in store "Big Box".
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 's1', quantity: 4),
+      );
+      await dao.insert(
+        db,
+        Price(
+          barcode: 's1',
+          price: 5,
+          store: 'Big Box',
+          datePurchased: DateTime(2026, 6, 20).millisecondsSinceEpoch,
+        ),
+      );
+    });
+
+    test(
+      'monthlyExpenditure multiplies the latest price by quantity',
+      () async {
+        final db = await dbHelper.database;
+        final rows = await dao.monthlyExpenditure(db, inventoryId: 1);
+
+        expect(rows, hasLength(1));
+        expect(rows.first['month'], '2026-06');
+        // 10 * 2 + 5 * 4 = 40.
+        expect((rows.first['total'] as num).toDouble(), 40.0);
+      },
+    );
+
+    test('storeSpending multiplies the latest price by quantity', () async {
+      final db = await dbHelper.database;
+      final rows = await dao.storeSpending(db, inventoryId: 1);
+
+      expect(rows, hasLength(1));
+      expect(rows.first['store'], 'Big Box');
+      // 5 * 4 = 20.
+      expect((rows.first['total'] as num).toDouble(), 20.0);
     });
   });
 

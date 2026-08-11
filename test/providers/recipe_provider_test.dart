@@ -134,12 +134,42 @@ Future<void> _pumpWithRealIo(
   }
 }
 
-/// Creates the prices table in [db] and inserts [prices].
+/// Creates the full schema in [db] and inserts [prices].
+///
+/// Running the migrations also creates the products and inventory tables so
+/// the package-size resolver in [calculateIngredientCost] can be exercised.
 Future<void> _seedPrices(Database db, List<Price> prices) async {
-  await const PriceDao().createTable(db);
+  await MigrationRunner(allMigrations()).run(db, 0, 37);
   for (final price in prices) {
     await const PriceDao().insert(db, price);
   }
+}
+
+/// Inserts a minimal product row for [barcode] with optional packaging data.
+Future<void> _insertProduct(
+  Database db, {
+  required String barcode,
+  String? quantity,
+  double? productQuantity,
+}) async {
+  await db.insert('products', {
+    'barcode': barcode,
+    'name': 'Test Product',
+    'quantity': quantity,
+    'product_quantity': productQuantity,
+    'source': 'api',
+  });
+}
+
+/// Computes the ingredient cost for [ingredients] in inventory 1.
+Future<double> _cost(Database db, List<RecipeIngredient> ingredients) {
+  return calculateIngredientCost(
+    db,
+    ingredients,
+    inventoryId: 1,
+    baseCurrency: 'USD',
+    currencyService: CurrencyService(),
+  );
 }
 
 void main() {
@@ -338,6 +368,119 @@ void main() {
       );
       expect(cost, 0.0);
     });
+
+    test(
+      'scales cost by the price package size (2 eggs from a 12-pack)',
+      () async {
+        await _seedPrices(db, const [
+          Price(
+            barcode: '001',
+            price: 9.99,
+            datePurchased: 3000,
+            packageQuantity: 12,
+            packageUnit: 'pieces',
+          ),
+        ]);
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Eggs',
+            barcode: '001',
+            quantity: 2,
+          ),
+        ];
+
+        final cost = await _cost(db, ingredients);
+        expect(cost, closeTo(1.665, 0.001));
+      },
+    );
+
+    test(
+      'scales cost by the product packaging quantity (250 ml from 1 L)',
+      () async {
+        await _seedPrices(db, const [
+          Price(barcode: '001', price: 5, datePurchased: 3000),
+        ]);
+        await _insertProduct(db, barcode: '001', quantity: '1 L');
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Milk',
+            barcode: '001',
+            quantity: 250,
+            unit: 'ml',
+          ),
+        ];
+
+        final cost = await _cost(db, ingredients);
+        expect(cost, closeTo(1.25, 0.001));
+      },
+    );
+
+    test('uses per-unit value for multi-pack product quantities', () async {
+      await _seedPrices(db, const [
+        Price(barcode: '001', price: 10, datePurchased: 3000),
+      ]);
+      await _insertProduct(
+        db,
+        barcode: '001',
+        quantity: '3 x 150 g',
+        productQuantity: 450,
+      );
+      const ingredients = [
+        RecipeIngredient(
+          recipeId: 1,
+          name: 'Pasta',
+          barcode: '001',
+          quantity: 300,
+          unit: 'g',
+        ),
+      ];
+
+      final cost = await _cost(db, ingredients);
+      expect(cost, closeTo(20.0, 0.001));
+    });
+
+    test('scales cost by an inventory row quantity as a last resort', () async {
+      await _seedPrices(db, const [
+        Price(barcode: '001', price: 3, datePurchased: 3000),
+      ]);
+      await db.insert('inventory', {
+        'barcode': '001',
+        'inventory_id': 1,
+        'quantity': 10,
+        'unit': 'pieces',
+      });
+      const ingredients = [
+        RecipeIngredient(
+          recipeId: 1,
+          name: 'Eggs',
+          barcode: '001',
+          quantity: 2,
+        ),
+      ];
+
+      final cost = await _cost(db, ingredients);
+      expect(cost, closeTo(0.6, 0.001));
+    });
+
+    test('charges full price when package units are incompatible', () async {
+      await _seedPrices(db, const [
+        Price(barcode: '001', price: 9.99, datePurchased: 3000),
+      ]);
+      await _insertProduct(db, barcode: '001', quantity: '500 g');
+      const ingredients = [
+        RecipeIngredient(
+          recipeId: 1,
+          name: 'Eggs',
+          barcode: '001',
+          quantity: 2,
+        ),
+      ];
+
+      final cost = await _cost(db, ingredients);
+      expect(cost, closeTo(9.99, 0.001));
+    });
   });
 
   group('calculateRecipeCost inventory scoping', () {
@@ -450,7 +593,7 @@ void main() {
       ' not the active inventory',
       (tester) async {
         await tester.runAsync(() async {
-          await MigrationRunner(allMigrations()).run(db, 0, 35);
+          await MigrationRunner(allMigrations()).run(db, 0, 37);
           await const PriceDao().insert(
             db,
             const Price(
@@ -468,12 +611,6 @@ void main() {
               datePurchased: 2000,
             ),
           );
-          await db.insert('inventory', {
-            'barcode': '001',
-            'inventory_id': 2,
-            'quantity': 10,
-            'unit': 'pieces',
-          });
         });
 
         when(() => mockDb.getRecipe(1)).thenAnswer(

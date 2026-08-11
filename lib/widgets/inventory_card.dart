@@ -26,6 +26,7 @@ import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
+import 'package:pantry_app/widgets/unit_price_label.dart';
 
 /// A tappable card representing one inventory item on the home screen.
 ///
@@ -274,16 +275,26 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
             final formatted = repo.formatPrice(price.price, price.currency);
             return Padding(
               padding: const EdgeInsets.only(top: 2),
-              child: PriceMask(
-                formattedPrice: formatted,
-                child: Text(
-                  formatted,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w600,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PriceMask(
+                    formattedPrice: formatted,
+                    child: Text(
+                      formatted,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
+                  UnitPriceLabel(
+                    price: price,
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                ],
               ),
             );
           },

@@ -39,7 +39,17 @@ mixin _$Price {
  String? get receiptSeries;/// NFC-e receipt number (reserved for future tax receipt integration).
  String? get receiptNumber;/// NFC-e line-item index (reserved for future tax receipt integration).
  int? get receiptItemIndex;/// Free-form notes about this price observation.
- String? get notes;/// Epoch timestamp (milliseconds since Unix epoch) of when this record
+ String? get notes;/// The size of the package this price applies to (e.g. 12 for a dozen
+/// eggs, 1 for a 1 L bottle, 500 for a 500 g bag).
+///
+/// When set together with [packageUnit], recipe cost and statistics are
+/// scaled by the quantity actually used instead of charging the full
+/// package price. May be null for legacy prices recorded before this
+/// field existed.
+ double? get packageQuantity;/// The unit for [packageQuantity] (e.g. 'pieces', 'g', 'kg', 'ml', 'L').
+///
+/// Null whenever [packageQuantity] is null.
+ String? get packageUnit;/// Epoch timestamp (milliseconds since Unix epoch) of when this record
 /// was created locally.
  int? get dateAdded;/// The inventory (pantry) this price observation belongs to.
 ///
@@ -56,16 +66,16 @@ $PriceCopyWith<Price> get copyWith => _$PriceCopyWithImpl<Price>(this as Price, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Price&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.price, price) || other.price == price)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.id, id) || other.id == id)&&(identical(other.store, store) || other.store == store)&&(identical(other.isDiscounted, isDiscounted) || other.isDiscounted == isDiscounted)&&(identical(other.regularPrice, regularPrice) || other.regularPrice == regularPrice)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus)&&(identical(other.openPricesId, openPricesId) || other.openPricesId == openPricesId)&&(identical(other.locationOsmId, locationOsmId) || other.locationOsmId == locationOsmId)&&(identical(other.locationOsmType, locationOsmType) || other.locationOsmType == locationOsmType)&&(identical(other.receiptSeries, receiptSeries) || other.receiptSeries == receiptSeries)&&(identical(other.receiptNumber, receiptNumber) || other.receiptNumber == receiptNumber)&&(identical(other.receiptItemIndex, receiptItemIndex) || other.receiptItemIndex == receiptItemIndex)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Price&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.price, price) || other.price == price)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.id, id) || other.id == id)&&(identical(other.store, store) || other.store == store)&&(identical(other.isDiscounted, isDiscounted) || other.isDiscounted == isDiscounted)&&(identical(other.regularPrice, regularPrice) || other.regularPrice == regularPrice)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus)&&(identical(other.openPricesId, openPricesId) || other.openPricesId == openPricesId)&&(identical(other.locationOsmId, locationOsmId) || other.locationOsmId == locationOsmId)&&(identical(other.locationOsmType, locationOsmType) || other.locationOsmType == locationOsmType)&&(identical(other.receiptSeries, receiptSeries) || other.receiptSeries == receiptSeries)&&(identical(other.receiptNumber, receiptNumber) || other.receiptNumber == receiptNumber)&&(identical(other.receiptItemIndex, receiptItemIndex) || other.receiptItemIndex == receiptItemIndex)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.packageQuantity, packageQuantity) || other.packageQuantity == packageQuantity)&&(identical(other.packageUnit, packageUnit) || other.packageUnit == packageUnit)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,barcode,price,currency,id,store,isDiscounted,regularPrice,datePurchased,syncStatus,openPricesId,locationOsmId,locationOsmType,receiptSeries,receiptNumber,receiptItemIndex,notes,dateAdded,inventoryId);
+int get hashCode => Object.hashAll([runtimeType,barcode,price,currency,id,store,isDiscounted,regularPrice,datePurchased,syncStatus,openPricesId,locationOsmId,locationOsmType,receiptSeries,receiptNumber,receiptItemIndex,notes,packageQuantity,packageUnit,dateAdded,inventoryId]);
 
 @override
 String toString() {
-  return 'Price(barcode: $barcode, price: $price, currency: $currency, id: $id, store: $store, isDiscounted: $isDiscounted, regularPrice: $regularPrice, datePurchased: $datePurchased, syncStatus: $syncStatus, openPricesId: $openPricesId, locationOsmId: $locationOsmId, locationOsmType: $locationOsmType, receiptSeries: $receiptSeries, receiptNumber: $receiptNumber, receiptItemIndex: $receiptItemIndex, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId)';
+  return 'Price(barcode: $barcode, price: $price, currency: $currency, id: $id, store: $store, isDiscounted: $isDiscounted, regularPrice: $regularPrice, datePurchased: $datePurchased, syncStatus: $syncStatus, openPricesId: $openPricesId, locationOsmId: $locationOsmId, locationOsmType: $locationOsmType, receiptSeries: $receiptSeries, receiptNumber: $receiptNumber, receiptItemIndex: $receiptItemIndex, notes: $notes, packageQuantity: $packageQuantity, packageUnit: $packageUnit, dateAdded: $dateAdded, inventoryId: $inventoryId)';
 }
 
 
@@ -76,7 +86,7 @@ abstract mixin class $PriceCopyWith<$Res>  {
   factory $PriceCopyWith(Price value, $Res Function(Price) _then) = _$PriceCopyWithImpl;
 @useResult
 $Res call({
- String barcode, double price, String currency, int? id, String? store, bool isDiscounted, double? regularPrice, int? datePurchased, String syncStatus, int? openPricesId, String? locationOsmId, String? locationOsmType, String? receiptSeries, String? receiptNumber, int? receiptItemIndex, String? notes, int? dateAdded, int inventoryId
+ String barcode, double price, String currency, int? id, String? store, bool isDiscounted, double? regularPrice, int? datePurchased, String syncStatus, int? openPricesId, String? locationOsmId, String? locationOsmType, String? receiptSeries, String? receiptNumber, int? receiptItemIndex, String? notes, double? packageQuantity, String? packageUnit, int? dateAdded, int inventoryId
 });
 
 
@@ -93,7 +103,7 @@ class _$PriceCopyWithImpl<$Res>
 
 /// Create a copy of Price
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? price = null,Object? currency = null,Object? id = freezed,Object? store = freezed,Object? isDiscounted = null,Object? regularPrice = freezed,Object? datePurchased = freezed,Object? syncStatus = null,Object? openPricesId = freezed,Object? locationOsmId = freezed,Object? locationOsmType = freezed,Object? receiptSeries = freezed,Object? receiptNumber = freezed,Object? receiptItemIndex = freezed,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? price = null,Object? currency = null,Object? id = freezed,Object? store = freezed,Object? isDiscounted = null,Object? regularPrice = freezed,Object? datePurchased = freezed,Object? syncStatus = null,Object? openPricesId = freezed,Object? locationOsmId = freezed,Object? locationOsmType = freezed,Object? receiptSeries = freezed,Object? receiptNumber = freezed,Object? receiptItemIndex = freezed,Object? notes = freezed,Object? packageQuantity = freezed,Object? packageUnit = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
   return _then(_self.copyWith(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
@@ -111,6 +121,8 @@ as String?,receiptSeries: freezed == receiptSeries ? _self.receiptSeries : recei
 as String?,receiptNumber: freezed == receiptNumber ? _self.receiptNumber : receiptNumber // ignore: cast_nullable_to_non_nullable
 as String?,receiptItemIndex: freezed == receiptItemIndex ? _self.receiptItemIndex : receiptItemIndex // ignore: cast_nullable_to_non_nullable
 as int?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
+as String?,packageQuantity: freezed == packageQuantity ? _self.packageQuantity : packageQuantity // ignore: cast_nullable_to_non_nullable
+as double?,packageUnit: freezed == packageUnit ? _self.packageUnit : packageUnit // ignore: cast_nullable_to_non_nullable
 as String?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
 as int?,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
 as int,
@@ -198,10 +210,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  int? dateAdded,  int inventoryId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  double? packageQuantity,  String? packageUnit,  int? dateAdded,  int inventoryId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Price() when $default != null:
-return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.dateAdded,_that.inventoryId);case _:
+return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.packageQuantity,_that.packageUnit,_that.dateAdded,_that.inventoryId);case _:
   return orElse();
 
 }
@@ -219,10 +231,10 @@ return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  int? dateAdded,  int inventoryId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  double? packageQuantity,  String? packageUnit,  int? dateAdded,  int inventoryId)  $default,) {final _that = this;
 switch (_that) {
 case _Price():
-return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.dateAdded,_that.inventoryId);case _:
+return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.packageQuantity,_that.packageUnit,_that.dateAdded,_that.inventoryId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -239,10 +251,10 @@ return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  int? dateAdded,  int inventoryId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  double price,  String currency,  int? id,  String? store,  bool isDiscounted,  double? regularPrice,  int? datePurchased,  String syncStatus,  int? openPricesId,  String? locationOsmId,  String? locationOsmType,  String? receiptSeries,  String? receiptNumber,  int? receiptItemIndex,  String? notes,  double? packageQuantity,  String? packageUnit,  int? dateAdded,  int inventoryId)?  $default,) {final _that = this;
 switch (_that) {
 case _Price() when $default != null:
-return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.dateAdded,_that.inventoryId);case _:
+return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_that.isDiscounted,_that.regularPrice,_that.datePurchased,_that.syncStatus,_that.openPricesId,_that.locationOsmId,_that.locationOsmType,_that.receiptSeries,_that.receiptNumber,_that.receiptItemIndex,_that.notes,_that.packageQuantity,_that.packageUnit,_that.dateAdded,_that.inventoryId);case _:
   return null;
 
 }
@@ -254,7 +266,7 @@ return $default(_that.barcode,_that.price,_that.currency,_that.id,_that.store,_t
 
 
 class _Price implements Price {
-  const _Price({required this.barcode, required this.price, this.currency = 'USD', this.id, this.store, this.isDiscounted = false, this.regularPrice, this.datePurchased, this.syncStatus = priceSyncLocalOnly, this.openPricesId, this.locationOsmId, this.locationOsmType, this.receiptSeries, this.receiptNumber, this.receiptItemIndex, this.notes, this.dateAdded, this.inventoryId = 1});
+  const _Price({required this.barcode, required this.price, this.currency = 'USD', this.id, this.store, this.isDiscounted = false, this.regularPrice, this.datePurchased, this.syncStatus = priceSyncLocalOnly, this.openPricesId, this.locationOsmId, this.locationOsmType, this.receiptSeries, this.receiptNumber, this.receiptItemIndex, this.notes, this.packageQuantity, this.packageUnit, this.dateAdded, this.inventoryId = 1});
   
 
 /// The product barcode this price is associated with.
@@ -298,6 +310,18 @@ class _Price implements Price {
 @override final  int? receiptItemIndex;
 /// Free-form notes about this price observation.
 @override final  String? notes;
+/// The size of the package this price applies to (e.g. 12 for a dozen
+/// eggs, 1 for a 1 L bottle, 500 for a 500 g bag).
+///
+/// When set together with [packageUnit], recipe cost and statistics are
+/// scaled by the quantity actually used instead of charging the full
+/// package price. May be null for legacy prices recorded before this
+/// field existed.
+@override final  double? packageQuantity;
+/// The unit for [packageQuantity] (e.g. 'pieces', 'g', 'kg', 'ml', 'L').
+///
+/// Null whenever [packageQuantity] is null.
+@override final  String? packageUnit;
 /// Epoch timestamp (milliseconds since Unix epoch) of when this record
 /// was created locally.
 @override final  int? dateAdded;
@@ -317,16 +341,16 @@ _$PriceCopyWith<_Price> get copyWith => __$PriceCopyWithImpl<_Price>(this, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Price&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.price, price) || other.price == price)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.id, id) || other.id == id)&&(identical(other.store, store) || other.store == store)&&(identical(other.isDiscounted, isDiscounted) || other.isDiscounted == isDiscounted)&&(identical(other.regularPrice, regularPrice) || other.regularPrice == regularPrice)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus)&&(identical(other.openPricesId, openPricesId) || other.openPricesId == openPricesId)&&(identical(other.locationOsmId, locationOsmId) || other.locationOsmId == locationOsmId)&&(identical(other.locationOsmType, locationOsmType) || other.locationOsmType == locationOsmType)&&(identical(other.receiptSeries, receiptSeries) || other.receiptSeries == receiptSeries)&&(identical(other.receiptNumber, receiptNumber) || other.receiptNumber == receiptNumber)&&(identical(other.receiptItemIndex, receiptItemIndex) || other.receiptItemIndex == receiptItemIndex)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Price&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.price, price) || other.price == price)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.id, id) || other.id == id)&&(identical(other.store, store) || other.store == store)&&(identical(other.isDiscounted, isDiscounted) || other.isDiscounted == isDiscounted)&&(identical(other.regularPrice, regularPrice) || other.regularPrice == regularPrice)&&(identical(other.datePurchased, datePurchased) || other.datePurchased == datePurchased)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus)&&(identical(other.openPricesId, openPricesId) || other.openPricesId == openPricesId)&&(identical(other.locationOsmId, locationOsmId) || other.locationOsmId == locationOsmId)&&(identical(other.locationOsmType, locationOsmType) || other.locationOsmType == locationOsmType)&&(identical(other.receiptSeries, receiptSeries) || other.receiptSeries == receiptSeries)&&(identical(other.receiptNumber, receiptNumber) || other.receiptNumber == receiptNumber)&&(identical(other.receiptItemIndex, receiptItemIndex) || other.receiptItemIndex == receiptItemIndex)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.packageQuantity, packageQuantity) || other.packageQuantity == packageQuantity)&&(identical(other.packageUnit, packageUnit) || other.packageUnit == packageUnit)&&(identical(other.dateAdded, dateAdded) || other.dateAdded == dateAdded)&&(identical(other.inventoryId, inventoryId) || other.inventoryId == inventoryId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,barcode,price,currency,id,store,isDiscounted,regularPrice,datePurchased,syncStatus,openPricesId,locationOsmId,locationOsmType,receiptSeries,receiptNumber,receiptItemIndex,notes,dateAdded,inventoryId);
+int get hashCode => Object.hashAll([runtimeType,barcode,price,currency,id,store,isDiscounted,regularPrice,datePurchased,syncStatus,openPricesId,locationOsmId,locationOsmType,receiptSeries,receiptNumber,receiptItemIndex,notes,packageQuantity,packageUnit,dateAdded,inventoryId]);
 
 @override
 String toString() {
-  return 'Price(barcode: $barcode, price: $price, currency: $currency, id: $id, store: $store, isDiscounted: $isDiscounted, regularPrice: $regularPrice, datePurchased: $datePurchased, syncStatus: $syncStatus, openPricesId: $openPricesId, locationOsmId: $locationOsmId, locationOsmType: $locationOsmType, receiptSeries: $receiptSeries, receiptNumber: $receiptNumber, receiptItemIndex: $receiptItemIndex, notes: $notes, dateAdded: $dateAdded, inventoryId: $inventoryId)';
+  return 'Price(barcode: $barcode, price: $price, currency: $currency, id: $id, store: $store, isDiscounted: $isDiscounted, regularPrice: $regularPrice, datePurchased: $datePurchased, syncStatus: $syncStatus, openPricesId: $openPricesId, locationOsmId: $locationOsmId, locationOsmType: $locationOsmType, receiptSeries: $receiptSeries, receiptNumber: $receiptNumber, receiptItemIndex: $receiptItemIndex, notes: $notes, packageQuantity: $packageQuantity, packageUnit: $packageUnit, dateAdded: $dateAdded, inventoryId: $inventoryId)';
 }
 
 
@@ -337,7 +361,7 @@ abstract mixin class _$PriceCopyWith<$Res> implements $PriceCopyWith<$Res> {
   factory _$PriceCopyWith(_Price value, $Res Function(_Price) _then) = __$PriceCopyWithImpl;
 @override @useResult
 $Res call({
- String barcode, double price, String currency, int? id, String? store, bool isDiscounted, double? regularPrice, int? datePurchased, String syncStatus, int? openPricesId, String? locationOsmId, String? locationOsmType, String? receiptSeries, String? receiptNumber, int? receiptItemIndex, String? notes, int? dateAdded, int inventoryId
+ String barcode, double price, String currency, int? id, String? store, bool isDiscounted, double? regularPrice, int? datePurchased, String syncStatus, int? openPricesId, String? locationOsmId, String? locationOsmType, String? receiptSeries, String? receiptNumber, int? receiptItemIndex, String? notes, double? packageQuantity, String? packageUnit, int? dateAdded, int inventoryId
 });
 
 
@@ -354,7 +378,7 @@ class __$PriceCopyWithImpl<$Res>
 
 /// Create a copy of Price
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? price = null,Object? currency = null,Object? id = freezed,Object? store = freezed,Object? isDiscounted = null,Object? regularPrice = freezed,Object? datePurchased = freezed,Object? syncStatus = null,Object? openPricesId = freezed,Object? locationOsmId = freezed,Object? locationOsmType = freezed,Object? receiptSeries = freezed,Object? receiptNumber = freezed,Object? receiptItemIndex = freezed,Object? notes = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? price = null,Object? currency = null,Object? id = freezed,Object? store = freezed,Object? isDiscounted = null,Object? regularPrice = freezed,Object? datePurchased = freezed,Object? syncStatus = null,Object? openPricesId = freezed,Object? locationOsmId = freezed,Object? locationOsmType = freezed,Object? receiptSeries = freezed,Object? receiptNumber = freezed,Object? receiptItemIndex = freezed,Object? notes = freezed,Object? packageQuantity = freezed,Object? packageUnit = freezed,Object? dateAdded = freezed,Object? inventoryId = null,}) {
   return _then(_Price(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
@@ -372,6 +396,8 @@ as String?,receiptSeries: freezed == receiptSeries ? _self.receiptSeries : recei
 as String?,receiptNumber: freezed == receiptNumber ? _self.receiptNumber : receiptNumber // ignore: cast_nullable_to_non_nullable
 as String?,receiptItemIndex: freezed == receiptItemIndex ? _self.receiptItemIndex : receiptItemIndex // ignore: cast_nullable_to_non_nullable
 as int?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
+as String?,packageQuantity: freezed == packageQuantity ? _self.packageQuantity : packageQuantity // ignore: cast_nullable_to_non_nullable
+as double?,packageUnit: freezed == packageUnit ? _self.packageUnit : packageUnit // ignore: cast_nullable_to_non_nullable
 as String?,dateAdded: freezed == dateAdded ? _self.dateAdded : dateAdded // ignore: cast_nullable_to_non_nullable
 as int?,inventoryId: null == inventoryId ? _self.inventoryId : inventoryId // ignore: cast_nullable_to_non_nullable
 as int,

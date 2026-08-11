@@ -121,6 +121,17 @@
   que a receita pertence, para que trocar de despensa nunca misture precos de
   outra. Ingredientes sem preco registrado nessa despensa contam como custando
   zero.
+- Os custos das receitas agora refletem a quantidade realmente usada em vez
+  do pacote inteiro: uma receita que usa 2 ovos de um pacote de 12 conta
+  apenas um sexto do preco do pacote.
+- Ao registrar um preco, voce pode informar o tamanho do pacote (por exemplo,
+  12 unidades, 500 g ou 1 L). Um preco unitario e mostrado abaixo do preco,
+  como R$ 0,83 por unidade ou R$ 8,00 por kg, facilitando a comparacao entre
+  produtos com embalagens de tamanhos diferentes. O preco unitario continua
+  oculto se voce tiver escolhido ocultar os precos.
+- Os totais da despensa e o preco medio dos itens agora levam em conta a
+  quantidade de cada produto que voce tem, para que os numeros reflitam o
+  estoque real.
 
 ## [0.0.9+5]
 

@@ -97,6 +97,16 @@ void main() {
       ).thenAnswer((_) async => []);
     }
 
+    when(
+      () => mockSqfliteDb.query(
+        any(),
+        columns: any(named: 'columns'),
+        where: any(named: 'where'),
+        whereArgs: any(named: 'whereArgs'),
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) async => []);
+
     final notifier = FakeSettingsNotifier(settings);
 
     await pumpApp(

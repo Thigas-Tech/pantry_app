@@ -78,6 +78,48 @@ void main() {
     expect(find.text(r'$5.00'), findsOneWidget);
   });
 
+  testWidgets('shows the per-unit price when the price has a package size', (
+    tester,
+  ) async {
+    final packagedPrices = [
+      const Price(
+        barcode: 'test-barcode',
+        price: 9.99,
+        store: 'Store A',
+        datePurchased: 1719792000000,
+        packageQuantity: 12,
+        packageUnit: 'pieces',
+      ),
+    ];
+
+    await pumpApp(
+      tester,
+      const PriceHistoryScreen(barcode: barcode, productName: productName),
+      overrides: [
+        priceHistoryProvider((
+          barcode,
+          1,
+        )).overrideWith((ref) => packagedPrices),
+      ],
+    );
+
+    expect(find.textContaining('/unit'), findsOneWidget);
+  });
+
+  testWidgets('hides the per-unit price without a package size', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      const PriceHistoryScreen(barcode: barcode, productName: productName),
+      overrides: [
+        priceHistoryProvider((barcode, 1)).overrideWith((ref) => testPrices),
+      ],
+    );
+
+    expect(find.textContaining('/unit'), findsNothing);
+  });
+
   testWidgets('is scoped to the active inventory', (tester) async {
     // Inventory 1 has no prices; inventory 2 does. The screen must read the
     // (barcode, 1) key and show the empty state.
