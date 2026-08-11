@@ -1294,11 +1294,14 @@ Items that require paid hosting, external server infrastructure, or cloud
 storage costs.
 
 - [x] **Product prices + inventory total value** — new `prices` SQLite
-  table, `PriceDao`, `Price` freezed model. Dual-source: local user‑entered
-  prices and Open Prices API (`prices.openfoodfacts.org`). Price badge on
-  `InventoryCard` (unit price), `InventoryTile` (price + store), total
-  value in `StatsScreen`. Price editing via bottom sheet. Open Prices
-  submissions upload proof photo.
+  table, `PriceDao`, `Price` freezed model (package size + unit across
+  `Price`/`products` via migration v37, `PriceCalculator` per-unit math and
+  recipe cost scaling; see `ARCHITECTURE/PRICE_TRACKING.md`). Dual-source:
+  local user‑entered prices and Open Prices API
+  (`prices.openfoodfacts.org`). Price badge on `InventoryCard` (flat +
+  per‑unit price), `InventoryTile` (price + store), total value in
+  `StatsScreen`. Price editing via bottom sheet. Open Prices proof upload
+  is not yet implemented (sync marks prices synced locally).
 
   **Implementation (Phase 1 — local‑first)**:
   1. Create `Price` model (`lib/models/price.dart`).
@@ -1428,8 +1431,8 @@ storage costs.
 
 ### Documentation tied to paid features
 
-- [ ] **Price tracking doc** — add section to `ARCHITECTURE/INDEX.md`
-  documenting local + Open Prices API data flow, conflict resolution, and
+- [x] **Price tracking doc** — `ARCHITECTURE/PRICE_TRACKING.md` documents
+  local + Open Prices API data flow, conflict resolution (planned), and the
   proof‑photo requirement.
 
 ---

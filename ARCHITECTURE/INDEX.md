@@ -7,6 +7,7 @@ An offline-first Flutter application for managing pantry inventory and expiry da
 - [Overview](OVERVIEW.md)
 - [Database Layer](DATABASE.md)
 - [Service Layer](SERVICES.md)
+- [Price Tracking](PRICE_TRACKING.md)
 - [Provider Layer](PROVIDERS.md)
 - [UI Structure](UI_STRUCTURE.md)
 - [Models](MODELS.md)

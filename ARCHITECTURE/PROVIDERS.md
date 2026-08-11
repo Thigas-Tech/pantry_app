@@ -20,9 +20,9 @@
 | `productSubmissionServiceProvider` | `Provider` | OFF product submission |
 | `githubIssueServiceProvider` | `Provider` | GitHub Issues API wrapper |
 | `priceRepositoryProvider` | `Provider` | Price CRUD + Open Prices sync |
-| `priceHistoryProvider` | `FutureProvider.family` | Price history for a barcode |
-| `latestPriceProvider` | `FutureProvider.family` | Latest price for a barcode |
-| `pricesHiddenProvider` | `FutureProvider` | Price visibility toggle |
+| `priceHistoryProvider` | `FutureProvider.family` | Price history for (barcode, inventoryId) |
+| `latestPriceProvider` | `FutureProvider.family` | Latest price for (barcode, inventoryId) |
+| `pricesHiddenProvider` | `Provider<bool>` | Price visibility toggle (privacy mask) |
 | `inventoryValueProvider` | `FutureProvider` | Total inventory value |
 | `averagePriceProvider` | `FutureProvider` | Average item price |
 | `pricedItemCountProvider` | `FutureProvider` | Count of priced items |

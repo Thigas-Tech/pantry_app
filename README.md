@@ -24,7 +24,7 @@ never waste food again.
 - **Pull-to-refresh** — updates cached product data from Open Food Facts when online
 - **Nutri-Score** — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products
 - **Manual product entry** — full form with nutrition table and camera capture when a barcode is unknown or you're offline
-- **Price tracking** — record purchase prices with store, date, and currency; view price history and total inventory value
+- **Price tracking** — record purchase prices with store, date, currency, and package size; view price history, per-unit prices, and total inventory value
 - **Shopping list** — add items from cached products or free-text, mark as purchased, batch-move to pantry
 - **Store autocomplete** — saved store names persist across uses, suggested in the price entry sheet
 - **Barcode history** — the last 50 scanned barcodes are kept locally on your device
@@ -133,6 +133,8 @@ lib/
     plu_service.dart             # PLU code lookup for produce
     product_submission_service.dart  # OFF offline submission queue
   utils/               # Logger, snackbar helpers
+    price_calculator.dart   # Unit-aware price math (per-unit price, scaled cost)
+    unit_conversion.dart    # Unit normalization & conversion
   widgets/             # Reusable components
 test/                  # Unit and widget tests
 ```
