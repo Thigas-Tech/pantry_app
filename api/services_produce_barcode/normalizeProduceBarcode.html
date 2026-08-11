@@ -64,12 +64,12 @@
     
 <section class="desc markdown">
   <p>Returns the canonical form of a produce barcode if <code>barcode</code> starts with
-<code>produce-</code>, or the original <code>barcode</code> unchanged otherwise.</p>
+produce-, or the original <code>barcode</code> unchanged otherwise.</p>
 <p>This is used to normalize existing synthetic barcodes before lookup so that
-<code>produce-Apple</code>, <code>produce-apple</code>, and <code>produce-  Apple  </code> all resolve to
-the same canonical key <code>produce-apple</code>.</p>
-<p>Example: <code>normalizeProduceBarcode('produce-Organic Banana')</code>
-  -&gt; <code>'produce-organic_banana'</code></p>
+produce-Apple, produce-apple, and produce-  Apple  all resolve to
+the same canonical key produce-apple.</p>
+<p>Example: normalizeProduceBarcode('produce-Organic Banana')
+-&gt; produce-organic_banana</p>
 </section>
 
 

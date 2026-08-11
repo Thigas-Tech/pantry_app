@@ -129,7 +129,7 @@ sensible defaults matching a minimal or unknown product.</p>
   @JsonKey(includeIfNull: false) String? servingSize,
 
   &#47;&#47;&#47; The normalized numeric serving quantity from the OFF API
-  &#47;&#47;&#47; (e.g. `30.0` for a serving size of &quot;30 g&quot;).
+  &#47;&#47;&#47; (e.g. [30.0] for a serving size of &quot;30 g&quot;).
   @JsonKey(includeIfNull: false) double? servingQuantity,
 
   &#47;&#47;&#47; The display quantity as printed on packaging (e.g. &quot;500 ml&quot;).
@@ -184,14 +184,14 @@ sensible defaults matching a minimal or unknown product.</p>
   &#47;&#47;&#47; Schema version for forward compatibility.
   @Default(1) int schemaVersion,
 
-  &#47;&#47;&#47; The `amount` from the first USDA foodPortion (e.g. `1.0`).
+  &#47;&#47;&#47; The amount from the first USDA foodPortion (e.g. 1.0).
   @JsonKey(includeIfNull: false) double? usdaServingAmount,
 
-  &#47;&#47;&#47; The `measureUnit.name` from the first USDA foodPortion
-  &#47;&#47;&#47; (e.g. `&quot;fruit&quot;`, `&quot;cup&quot;`).
+  &#47;&#47;&#47; The measureUnit.name from the first USDA foodPortion
+  &#47;&#47;&#47; (e.g. &quot;fruit&quot;, &quot;cup&quot;).
   @JsonKey(includeIfNull: false) String? usdaServingUnit,
 
-  &#47;&#47;&#47; The `gramWeight` from the first USDA foodPortion (e.g. `182.0`).
+  &#47;&#47;&#47; The gramWeight from the first USDA foodPortion (e.g. 182.0).
   @JsonKey(includeIfNull: false) double? usdaGramWeight,
 }) = _ProductCacheEntry;</code></pre>
 </section>
