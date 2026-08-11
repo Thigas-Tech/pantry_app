@@ -73,7 +73,7 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     @JsonKey(includeIfNull: false) String? servingSize,
 
     /// The normalized numeric serving quantity from the OFF API
-    /// (e.g. `30.0` for a serving size of "30 g").
+    /// (e.g. [30.0] for a serving size of "30 g").
     @JsonKey(includeIfNull: false) double? servingQuantity,
 
     /// The display quantity as printed on packaging (e.g. "500 ml").
@@ -128,14 +128,14 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     /// Schema version for forward compatibility.
     @Default(1) int schemaVersion,
 
-    /// The `amount` from the first USDA foodPortion (e.g. `1.0`).
+    /// The amount from the first USDA foodPortion (e.g. 1.0).
     @JsonKey(includeIfNull: false) double? usdaServingAmount,
 
-    /// The `measureUnit.name` from the first USDA foodPortion
-    /// (e.g. `"fruit"`, `"cup"`).
+    /// The measureUnit.name from the first USDA foodPortion
+    /// (e.g. "fruit", "cup").
     @JsonKey(includeIfNull: false) String? usdaServingUnit,
 
-    /// The `gramWeight` from the first USDA foodPortion (e.g. `182.0`).
+    /// The gramWeight from the first USDA foodPortion (e.g. 182.0).
     @JsonKey(includeIfNull: false) double? usdaGramWeight,
   }) = _ProductCacheEntry;
 

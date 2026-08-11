@@ -103,7 +103,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   late Product _product;
 
   /// The photo persistence service, captured in [initState] so it is safe to
-  /// use from [dispose] (where `ref` is unavailable).
+  /// use from [dispose] (where [ref] is unavailable).
   late final ProductImageService _imageService;
 
   @override

@@ -7,8 +7,8 @@ const kOnboardingKey = 'onboarding_complete';
 
 /// Tracks whether the user has completed the empty-pantry onboarding.
 ///
-/// Returns `true` once the user has added their first item to any inventory.
-/// Once set to `true` the flag is never cleared, so the onboarding is never
+/// Returns true once the user has added their first item to any inventory.
+/// Once set to true the flag is never cleared, so the onboarding is never
 /// shown again — even if the user later empties their pantry.
 class OnboardingNotifier extends Notifier<bool> {
   @override
@@ -16,7 +16,7 @@ class OnboardingNotifier extends Notifier<bool> {
 
   /// Sets the persisted state from [SharedPreferences] before the first frame.
   ///
-  /// Called synchronously from `main` so the correct value is available on
+  /// Called synchronously from main so the correct value is available on
   /// the very first frame, avoiding a flash of the onboarding flow for
   /// returning users.
   void initial({required bool value}) {

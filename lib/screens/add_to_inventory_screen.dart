@@ -47,7 +47,7 @@ class AddToInventoryScreen extends StatefulWidget {
   /// The display name of the product, used for serving weight lookups.
   ///
   /// When null for produce items, the name is extracted from the barcode
-  /// by stripping the `produce-` prefix.
+  /// by stripping the produce- prefix.
   final String? produceName;
 
   /// The OFF product with quantity data used to pre-fill the amount and

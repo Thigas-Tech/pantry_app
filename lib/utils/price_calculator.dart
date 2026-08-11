@@ -48,8 +48,8 @@ class PriceCalculator {
   /// multiplies the package [price] by the fraction used.
   ///
   /// Returns:
-  ///   - `0.0` when the ingredient quantity is zero (nothing is used);
-  ///   - `null` when the package size is missing, zero, negative, or
+  ///   - 0.0 when the ingredient quantity is zero (nothing is used);
+  ///   - null when the package size is missing, zero, negative, or
   ///     non-finite, when [packageUnit] is missing, when the units belong
   ///     to different measurement groups, or when the inputs are non-finite.
   static double? scaledIngredientCost({
