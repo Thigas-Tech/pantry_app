@@ -121,8 +121,8 @@ independently of <a href="../database_database_helper/DatabaseHelper-class.html"
 
 </dt>
 <dd>
-  Returns the average of the most recent price for each distinct product
-in the given inventory.
+  Returns the quantity-weighted average of the most recent price for
+each distinct product in the given inventory.
   
 
 </dd>
@@ -268,7 +268,7 @@ deleted.
 </dt>
 <dd>
   Returns the most recent price per distinct product in the inventory,
-with currency, for currency-aware averaging by the caller.
+with the total held quantity, for currency-aware averaging by the caller.
   
 
 </dd>
@@ -404,8 +404,9 @@ have at least one price.
 </dt>
 <dd>
   Returns the total value of the most recent price for each distinct
-product in the given inventory, summed together. Currency conversion
-is not applied here — the caller should convert via CurrencyService.
+product in the given inventory, multiplied by the held quantity,
+summed together. Currency conversion is not applied here — the caller
+should convert via CurrencyService.
   
 
 </dd>
@@ -419,8 +420,8 @@ is not applied here — the caller should convert via CurrencyService.
 </dt>
 <dd>
   Returns the total inventory value broken down by currency, using the
-most recent price per distinct product. Each row contains currency
-and subtotal columns.
+most recent price per distinct product multiplied by the held
+quantity. Each row contains currency and subtotal columns.
   
 
 </dd>

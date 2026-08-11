@@ -89,6 +89,8 @@
       receipt_number TEXT,
       receipt_item_index INTEGER,
       notes TEXT,
+      package_quantity REAL,
+      package_unit TEXT,
       date_added INTEGER NOT NULL,
       inventory_id INTEGER NOT NULL DEFAULT 1,
       FOREIGN KEY (barcode) REFERENCES products(barcode),

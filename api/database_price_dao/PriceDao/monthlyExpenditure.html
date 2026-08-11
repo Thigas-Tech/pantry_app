@@ -82,11 +82,14 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
     final result = await db.rawQuery(
       &#39;&#39;&#39;
       WITH inventory_barcodes AS (
-        SELECT DISTINCT barcode FROM inventory
+        SELECT barcode, SUM(quantity) AS total_quantity
+        FROM inventory
         WHERE inventory_id = ?
+        GROUP BY barcode
       ),
       latest_prices AS (
         SELECT p.barcode, p.price, p.date_purchased,
+          ib.total_quantity,
           ROW_NUMBER() OVER (
             PARTITION BY p.barcode ORDER BY p.date_purchased DESC
           ) AS rn
@@ -96,7 +99,7 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
       )
       SELECT
         strftime(&#39;%Y-%m&#39;, date_purchased &#47; 1000, &#39;unixepoch&#39;) AS month,
-        SUM(price) AS total
+        SUM(price * total_quantity) AS total
       FROM latest_prices
       WHERE rn = 1
       GROUP BY month

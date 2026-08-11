@@ -65,8 +65,9 @@
     
 <section class="desc markdown">
   <p>Returns the total value of the most recent price for each distinct
-product in the given inventory, summed together. Currency conversion
-is not applied here — the caller should convert via CurrencyService.</p>
+product in the given inventory, multiplied by the held quantity,
+summed together. Currency conversion is not applied here — the caller
+should convert via CurrencyService.</p>
 <p>Returns null when no items in the inventory have prices.</p>
 </section>
 
@@ -77,7 +78,7 @@ is not applied here — the caller should convert via CurrencyService.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;double?&gt; totalInventoryValue(Database db, int inventoryId) async {
   final result = await db.rawQuery(
     &#39;&#39;&#39;
-    SELECT SUM(p.price) as total
+    SELECT SUM(p.price * i.total_quantity) as total
     FROM prices p
     INNER JOIN (
       SELECT barcode, MAX(date_purchased) as max_date
@@ -86,8 +87,13 @@ is not applied here — the caller should convert via CurrencyService.</p>
       GROUP BY barcode
     ) latest ON p.barcode = latest.barcode
       AND p.date_purchased = latest.max_date
-    INNER JOIN inventory i ON i.barcode = p.barcode
-    WHERE i.inventory_id = ? AND p.inventory_id = ?
+    INNER JOIN (
+      SELECT barcode, SUM(quantity) as total_quantity
+      FROM inventory
+      WHERE inventory_id = ?
+      GROUP BY barcode
+    ) i ON i.barcode = p.barcode
+    WHERE p.inventory_id = ?
   &#39;&#39;&#39;,
     [inventoryId, inventoryId, inventoryId],
   );

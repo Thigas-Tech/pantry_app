@@ -82,11 +82,14 @@ Returns raw rows {store, total, item_count}.</p>
     final result = await db.rawQuery(
       &#39;&#39;&#39;
       WITH inventory_barcodes AS (
-        SELECT DISTINCT barcode FROM inventory
+        SELECT barcode, SUM(quantity) AS total_quantity
+        FROM inventory
         WHERE inventory_id = ?
+        GROUP BY barcode
       ),
       latest_prices AS (
         SELECT p.barcode, p.price, p.store,
+          ib.total_quantity,
           ROW_NUMBER() OVER (
             PARTITION BY p.barcode ORDER BY p.date_purchased DESC
           ) AS rn
@@ -97,7 +100,7 @@ Returns raw rows {store, total, item_count}.</p>
       )
       SELECT
         store,
-        SUM(price) AS total,
+        SUM(price * total_quantity) AS total,
         COUNT(*) AS item_count
       FROM latest_prices
       WHERE rn = 1

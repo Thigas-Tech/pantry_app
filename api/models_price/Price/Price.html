@@ -70,6 +70,8 @@
 <li><span class="parameter" id="param-receiptNumber"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">receiptNumber</span>, </span></li>
 <li><span class="parameter" id="param-receiptItemIndex"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">receiptItemIndex</span>, </span></li>
 <li><span class="parameter" id="param-notes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">notes</span>, </span></li>
+<li><span class="parameter" id="param-packageQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">packageQuantity</span>, </span></li>
+<li><span class="parameter" id="param-packageUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">packageUnit</span>, </span></li>
 <li><span class="parameter" id="param-dateAdded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">dateAdded</span>, </span></li>
 <li><span class="parameter" id="param-inventoryId"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(1)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
 </ol>})
@@ -141,6 +143,20 @@
 
   &#47;&#47;&#47; Free-form notes about this price observation.
   String? notes,
+
+  &#47;&#47;&#47; The size of the package this price applies to (e.g. 12 for a dozen
+  &#47;&#47;&#47; eggs, 1 for a 1 L bottle, 500 for a 500 g bag).
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; When set together with [packageUnit], recipe cost and statistics are
+  &#47;&#47;&#47; scaled by the quantity actually used instead of charging the full
+  &#47;&#47;&#47; package price. May be null for legacy prices recorded before this
+  &#47;&#47;&#47; field existed.
+  double? packageQuantity,
+
+  &#47;&#47;&#47; The unit for [packageQuantity] (e.g. &#39;pieces&#39;, &#39;g&#39;, &#39;kg&#39;, &#39;ml&#39;, &#39;L&#39;).
+  &#47;&#47;&#47;
+  &#47;&#47;&#47; Null whenever [packageQuantity] is null.
+  String? packageUnit,
 
   &#47;&#47;&#47; Epoch timestamp (milliseconds since Unix epoch) of when this record
   &#47;&#47;&#47; was created locally.

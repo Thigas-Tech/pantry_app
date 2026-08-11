@@ -137,9 +137,9 @@ user's base currency for display.</p>
 
 </dt>
 <dd>
-  Returns the average of the most recent price per distinct product in
-the given inventory, converted to <code>baseCurrency</code>, or null if no
-prices exist.
+  Returns the quantity-weighted average of the most recent price per
+distinct product in the given inventory, converted to <code>baseCurrency</code>,
+or null if no prices exist.
   
 
 </dd>
@@ -314,6 +314,21 @@ least one price.
   Returns the sum of the most recent price per distinct product in
 the given inventory, converted to <code>baseCurrency</code>, or null if no
 prices exist.
+  
+
+</dd>
+
+        <dt id="unitPriceLabel" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/unitPriceLabel.html">unitPriceLabel</a></span><span class="signature">(<wbr><span class="parameter" id="unitPriceLabel-param-price"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a></span> <span class="parameter-name">price</span>, {</span><span class="parameter" id="unitPriceLabel-param-perPiece"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">perPiece</span>, </span><span class="parameter" id="unitPriceLabel-param-perHundredGrams"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">perHundredGrams</span>, </span><span class="parameter" id="unitPriceLabel-param-perKilogram"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">perKilogram</span>, </span><span class="parameter" id="unitPriceLabel-param-perLiter"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">perLiter</span>, </span><span class="parameter" id="unitPriceLabel-param-perHundredMilliliters"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">perHundredMilliliters</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Builds a per-unit price label for <code>price</code> (e.g. "R$ 0,83/unit",
+"R$ 0,80/100 g", "R$ 8,00/kg", "R$ 5,00/L"), or null when the price
+carries no usable package size.
   
 
 </dd>

@@ -65,8 +65,8 @@
     
 <section class="desc markdown">
   <p>Returns the most recent price per distinct product in the inventory,
-with currency, for currency-aware averaging by the caller.</p>
-<p>Returns a list of maps with price, currency keys.</p>
+with the total held quantity, for currency-aware averaging by the caller.</p>
+<p>Returns a list of maps with price, currency, total_quantity keys.</p>
 </section>
 
 
@@ -79,7 +79,7 @@ with currency, for currency-aware averaging by the caller.</p>
 ) async {
   final result = await db.rawQuery(
     &#39;&#39;&#39;
-    SELECT p.price, p.currency
+    SELECT p.price, p.currency, i.total_quantity
     FROM prices p
     INNER JOIN (
       SELECT barcode, MAX(date_purchased) as max_date
@@ -88,8 +88,13 @@ with currency, for currency-aware averaging by the caller.</p>
       GROUP BY barcode
     ) latest ON p.barcode = latest.barcode
       AND p.date_purchased = latest.max_date
-    INNER JOIN inventory i ON i.barcode = p.barcode
-    WHERE i.inventory_id = ? AND p.inventory_id = ?
+    INNER JOIN (
+      SELECT barcode, SUM(quantity) as total_quantity
+      FROM inventory
+      WHERE inventory_id = ?
+      GROUP BY barcode
+    ) i ON i.barcode = p.barcode
+    WHERE p.inventory_id = ?
   &#39;&#39;&#39;,
     [inventoryId, inventoryId, inventoryId],
   );

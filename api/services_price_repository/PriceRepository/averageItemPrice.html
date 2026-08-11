@@ -64,11 +64,12 @@
     </section>
     
 <section class="desc markdown">
-  <p>Returns the average of the most recent price per distinct product in
-the given inventory, converted to <code>baseCurrency</code>, or null if no
-prices exist.</p>
+  <p>Returns the quantity-weighted average of the most recent price per
+distinct product in the given inventory, converted to <code>baseCurrency</code>,
+or null if no prices exist.</p>
 <p>Each price is converted individually before averaging so that
-mixed-currency inventories produce a meaningful average.</p>
+mixed-currency inventories produce a meaningful average. Products held
+in larger quantities contribute proportionally more to the average.</p>
 </section>
 
 
@@ -87,14 +88,16 @@ mixed-currency inventories produce a meaningful average.</p>
   if (rows.isEmpty) return null;
 
   var sum = 0.0;
-  var count = 0;
+  var totalQty = 0.0;
   for (final row in rows) {
     final price = (row[&#39;price&#39;] as num).toDouble();
     final currency = row[&#39;currency&#39;] as String;
-    sum += await convertToBase(price, currency, baseCurrency);
-    count++;
+    final qty = (row[&#39;total_quantity&#39;] as num?)?.toDouble() ?? 1;
+    sum += await convertToBase(price, currency, baseCurrency) * qty;
+    totalQty += qty;
   }
-  final avg = sum &#47; count;
+  if (totalQty == 0) return null;
+  final avg = sum &#47; totalQty;
   return double.tryParse(avg.toStringAsFixed(2));
 }</code></pre>
 </section>

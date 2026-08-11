@@ -65,8 +65,8 @@
     
 <section class="desc markdown">
   <p>Returns the total inventory value broken down by currency, using the
-most recent price per distinct product. Each row contains currency
-and subtotal columns.</p>
+most recent price per distinct product multiplied by the held
+quantity. Each row contains currency and subtotal columns.</p>
 <p>When all prices use the same currency, this returns a single row.
 When no items have prices, this returns an empty list.</p>
 </section>
@@ -81,7 +81,7 @@ When no items have prices, this returns an empty list.</p>
 ) async {
   final result = await db.rawQuery(
     &#39;&#39;&#39;
-    SELECT p.currency, SUM(p.price) as subtotal
+    SELECT p.currency, SUM(p.price * i.total_quantity) as subtotal
     FROM prices p
     INNER JOIN (
       SELECT barcode, MAX(date_purchased) as max_date
@@ -90,8 +90,13 @@ When no items have prices, this returns an empty list.</p>
       GROUP BY barcode
     ) latest ON p.barcode = latest.barcode
       AND p.date_purchased = latest.max_date
-    INNER JOIN inventory i ON i.barcode = p.barcode
-    WHERE i.inventory_id = ? AND p.inventory_id = ?
+    INNER JOIN (
+      SELECT barcode, SUM(quantity) as total_quantity
+      FROM inventory
+      WHERE inventory_id = ?
+      GROUP BY barcode
+    ) i ON i.barcode = p.barcode
+    WHERE p.inventory_id = ?
     GROUP BY p.currency
   &#39;&#39;&#39;,
     [inventoryId, inventoryId, inventoryId],

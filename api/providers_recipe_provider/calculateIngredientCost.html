@@ -69,6 +69,12 @@
 <section class="desc markdown">
   <p>Sums the latest price of each <code>ingredients</code> row found in the prices table
 for the given <code>inventoryId</code>, converted to <code>baseCurrency</code>.</p>
+<p>Each ingredient's cost is scaled by the fraction of the package actually
+used when a package size can be resolved. The package size is looked up
+in this order: the price row itself, the product's packaging quantity,
+then an inventory row for the same barcode. When no package size can be
+resolved, or the units are incompatible, the full price is charged
+(legacy behavior).</p>
 <p>Ingredients without a barcode, or with no price recorded in <code>inventoryId</code>,
 contribute zero. Returns 0.0 when nothing can be priced.</p>
 </section>
@@ -89,7 +95,7 @@ contribute zero. Returns 0.0 when nothing can be priced.</p>
     if (ingredient.barcode == null || ingredient.barcode!.isEmpty) continue;
 
     final rows = await database.rawQuery(
-      &#39;SELECT price, currency FROM prices&#39;
+      &#39;SELECT price, currency, package_quantity, package_unit FROM prices&#39;
       &#39; WHERE barcode = ? AND inventory_id = ?&#39;
       &#39; ORDER BY date_purchased DESC LIMIT 1&#39;,
       [ingredient.barcode, inventoryId],
@@ -99,7 +105,26 @@ contribute zero. Returns 0.0 when nothing can be priced.</p>
     final price = (rows.first[&#39;price&#39;] as num?)?.toDouble() ?? 0.0;
     final currency = rows.first[&#39;currency&#39;] as String? ?? baseCurrency;
 
-    total += await currencyService.convert(price, currency, baseCurrency);
+    var cost = price;
+    final packageSize = await _resolvePackageSize(
+      database,
+      ingredient.barcode!,
+      inventoryId,
+      priceRow: rows.first,
+    );
+    if (packageSize != null) {
+      cost =
+          PriceCalculator.scaledIngredientCost(
+            price: price,
+            ingredientQuantity: ingredient.quantity,
+            ingredientUnit: ingredient.unit,
+            packageQuantity: packageSize.packageQuantity,
+            packageUnit: packageSize.packageUnit,
+          ) ??
+          price;
+    }
+
+    total += await currencyService.convert(cost, currency, baseCurrency);
   }
 
   return total;
