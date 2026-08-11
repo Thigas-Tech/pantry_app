@@ -132,15 +132,21 @@ User scans barcode
 
 ### 3.8 Price repository
 
-- `PriceRepository` -- wraps `File` (currently no proof upload; prices
-  stored locally), `PriceDao`, `CurrencyService`, and `OpenPricesService`.
-- All price CRUD delegates to `PriceDao`. The repository normalises currency
-  via `CurrencyService` when displaying prices.
-- `OpenPricesService.syncPendingPrices()` flushes pending prices (with proof
-  photos) to the Open Prices API. Currently marks all pending prices as synced
-  locally while proof upload is stubbed.
-- `refreshInventoryPrices()` fetches fresh prices from the API for all
-  products in a pantry, used by pull-to-refresh on the stats screen.
+- `PriceRepository` -- wraps `DatabaseHelper` (PriceDao), `CurrencyService`,
+  and `OpenPricesService`. Exposed to screens via `priceRepositoryProvider`.
+- All price CRUD delegates to `PriceDao`. Formatting calls
+  `CurrencyService` to convert prices to the user's base currency for
+  display; writes always keep the original currency.
+- `unitPriceLabel(price, ...)` builds a localized per-unit label ("R$ 0,83/
+  unit", "/100 g", "/kg", "/L", "/100 ml") from a `Price`'s package fields,
+  via `PriceCalculator.unitPrice`. Returns null when no usable package size
+  exists.
+- Aggregations (`totalInventoryValue`, `averageItemPrice`,
+  `pricedItemCount`) are scoped to an inventory and weight by the held
+  quantity in SQL (see `PriceDao`).
+- Sync helpers: `getPendingSyncPrices()` and `syncToOpenPrices()`, which
+  delegates to `OpenPricesService.syncPendingPrices` (currently a local-only
+  placeholder -- no HTTP).
 
 ### 3.9 Currency service
 
@@ -154,12 +160,32 @@ User scans barcode
 
 - `OpenPricesApiClient` -- HTTP client for
   [Open Prices API](https://prices.openfoodfacts.org/api/docs).
-- `fetchPricesByBarcode(barcode)` returns `List<RemotePrice>`.
-- `submitPrice(price, proofPhoto)` posts a new price observation (stub -- proof
-  photo upload not yet wired).
-- `validateToken(token)` checks whether an API token is valid.
+  Base URL: `https://prices.openfoodfacts.org/api/v1` (prod) or
+  `https://prices.openfoodfacts.net/api/v1` (pre-prod). Bearer token read
+  from `AppConfig.openPricesToken` or overridden via the `token` constructor
+  parameter.
+- `fetchPricesByBarcode(barcode)` returns a paginated `FetchPricesResult`
+  of `RemotePrice` (id, product_code, price, currency, product name, store,
+  date). `price_per` and product quantity fields are not parsed yet.
+- `validateToken()` probes a lightweight authenticated endpoint and returns
+  whether the configured token is valid.
+- `submitPrice(...)` posts a price to `POST /api/v1/prices`. It requires a
+  `proofId` (mandatory on the API) and is currently a placeholder -- the app
+  never creates proofs, and `price_per` / `receipt_quantity` are not sent.
+  No exceptions are thrown; failures return `SubmitPriceResult(success: false)`.
 
-### 3.11 Shopping list
+### 3.11 Open Prices service
+
+- `OpenPricesService` -- coordinates syncing local prices to Open Prices.
+  When no token is configured, all operations short-circuit to empty results
+  (local-only mode).
+- `fetchPricesByBarcode(barcode)` gates the API read behind `hasToken` and
+  delegates to `OpenPricesApiClient`.
+- `syncPendingPrices()` reads `pending` prices and marks them `synced`
+  directly in the database without any HTTP request. Proof upload and price
+  creation are blocked by the missing receipt-capture feature.
+
+### 3.12 Shopping list
 
 - `ShoppingListDao` -- all shopping list CRUD scoped to the active inventory.
   Items can have optional barcode links to products, quantities, units, and
@@ -168,13 +194,13 @@ User scans barcode
   `providers/shopping_list_provider.dart` manage state invalidation and DB
   writes.
 
-### 3.12 Photo service
+### 3.13 Photo service
 
 - `PhotoService` -- manages price tag photos keyed by shopping item ID.
   `deletePhotoForItem` removes the photo when a shopping item is deleted.
   Used by the shopping list flow to clean up cached photos.
 
-### 3.13 Store persistence
+### 3.14 Store persistence
 
 - `StoreDao` -- stores saved store names in the `stores` table (version 19
   migration). `insert` is case-insensitive and deduplicates. `getAll` returns
@@ -184,7 +210,7 @@ User scans barcode
 - New store names submitted through the price entry sheet are automatically
   persisted to the `stores` table.
 
-### 3.14 USDA API client
+### 3.15 USDA API client
 
 - `UsdaApiClient` -- HTTP client for the
   [USDA FoodData Central API](https://fdc.nal.usda.gov/).
@@ -194,37 +220,37 @@ User scans barcode
 - API key is read from `.env` (`USDA_API_KEY`) and sent as a URL query
   parameter. Returns a distinct `usdaAuthFailed` message on 403.
 
-### 3.15 Produce category mapper
+### 3.16 Produce category mapper
 
 - `ProduceCategoryMapper` -- maps PLU codes and produce names to OFF
   taxonomy categories with a fallback heuristic based on produce type
   (fruit, vegetable, herb, mushroom).
 
-### 3.16 Produce nutrition fallback
+### 3.17 Produce nutrition fallback
 
 - `ProduceNutritionFallback` -- hard-coded approximate nutrition values
   for ~70 common produce items (energy, protein, carbs, fat, fiber).
   Used when the USDA API is unreachable or the PLU code is not in the
   USDA database.
 
-### 3.17 Produce serving presets
+### 3.18 Produce serving presets
 
 - `ProduceServingPresets` -- maps ~35 produce names to Small/Medium/Large
   serving sizes with `servingWeightG` defaults for the weight/unit toggle.
 
-### 3.18 Produce purchase tracker
+### 3.19 Produce purchase tracker
 
 - `ProducePurchaseTracker` -- tracks how often the user buys each produce
   item via SharedPreferences. Used by the quick-add carousel to surface
   frequently-bought items.
 
-### 3.19 PLU service
+### 3.20 PLU service
 
 - `PluService` -- local lookup table of ~70 common PLU codes (e.g. 4011
   for Banana) mapped to produce names. Used for barcode-less produce
   entry on the scanner screen.
 
-### 3.20 Changelog loader
+### 3.21 Changelog loader
 
 - `ChangelogLoader` utility at `lib/utils/changelog_loader.dart` provides
   `loadLocalizedChangelog(Locale)` that resolves locale-specific
@@ -232,7 +258,7 @@ User scans barcode
   the "What's New" sheet to display user-facing changelog in the app's
   current language.
 
-### 3.21 Product photo picker
+### 3.22 Product photo picker
 
 - `ProductPhotoPicker` (at `lib/services/product_photo_picker.dart`)
   picks product photos from the camera or the device gallery for the
@@ -257,7 +283,7 @@ User scans barcode
   action (`showCameraPermissionDialog` at
   `lib/utils/camera_permission_dialog.dart`).
 
-### 3.22 Product image service
+### 3.23 Product image service
 
 - `ProductImageService` (at `lib/services/product_image_service.dart`) is
   the testable boundary for product photo persistence in the manual form.
@@ -291,7 +317,7 @@ User scans barcode
 - The slot snapshot is modeled by the immutable `ProductPhotoSlots`
   (`lib/models/product_photo_slots.dart`).
 
-### 3.23 Product photo cropper
+### 3.24 Product photo cropper
 
 - `ProductPhotoCropper` (at `lib/services/product_photo_cropper.dart`)
   produces cropped and rotated copies of local product photos for the

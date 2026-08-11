@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Documentation
+
+- **Price tracking architecture doc**: new `ARCHITECTURE/PRICE_TRACKING.md`
+  documents the local + Open Prices data flow, the `prices`/`products`
+  package-size schema (v37), unit-aware price math and recipe cost scaling,
+  the proof-photo requirement, and the currently placeholder sync. Added to
+  `ARCHITECTURE/INDEX.md`; refreshed `ARCHITECTURE/DATABASE.md`,
+  `ARCHITECTURE/SERVICES.md`, `ARCHITECTURE/PROVIDERS.md`,
+  `ARCHITECTURE/UI_STRUCTURE.md`, `ARCHITECTURE/MODELS.md`,
+  `ARCHITECTURE/OVERVIEW.md` (corrected to 13 tables),
+  `docs/superpowers/agents/stale_info_checklist.md`, `README.md`, `TODO.md`
+  and the schema header comment in `lib/database/database_helper.dart`.
+
 ### Added
 
 - **Nutrition editor for all Open Food Facts nutrients**: the manual product
@@ -280,10 +293,14 @@
   (`lib/services/price_repository.dart`, `lib/widgets/unit_price_label.dart`,
   `lib/widgets/inventory_card.dart`, `lib/screens/price_history_screen.dart`)
 
-- **Open Prices price_per (issue #308)**: `OpenPricesApiClient.submitPrice`
-  sends the derived `price_per` field (UNIT or KILOGRAM per the package
-  unit), and `RemotePrice` parses `price_per` plus the product quantity from
-  API responses. The placeholder sync flow contract is unchanged.
+- **Open Prices price_per (issue #308, partial)**: the intended
+  `OpenPricesApiClient.submitPrice` change to send the derived `price_per`
+  field (UNIT or KILOGRAM per the package unit), and for `RemotePrice` to
+  parse `price_per` plus the product quantity, is **not yet implemented** --
+  `submitPrice` still sends no `price_per` and `RemotePrice` parses only the
+  basic fields. The package-size plumbing (model, v37 migration, recipe cost
+  scaling, per-unit labels) landed under issue #309. See
+  `ARCHITECTURE/PRICE_TRACKING.md`.
   (`lib/services/open_prices_api_client.dart`)
 
 ### Removed

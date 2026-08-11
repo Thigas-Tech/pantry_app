@@ -1,6 +1,6 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 34)
+### 2.1 Schema (version 37)
 
 Thirteen tables:
 
@@ -11,7 +11,7 @@ Thirteen tables:
 | `inventory` | Instances of products in a pantry. FK -> products, inventories |
 | `feedback_queue` | Offline queue for GitHub issue reports |
 | `product_submission_queue` | Offline queue for OFF product submissions |
-| `prices` | Purchase price observations per barcode, scoped to their owning inventory via `inventory_id` |
+| `prices` | Purchase price observations per barcode, scoped to their owning inventory via `inventory_id`, with optional package size for per-unit pricing |
 | `shopping_list` | Items the user intends to buy |
 | `stores` | Saved store names for autocomplete on price entry |
 | `firebase_cache_meta` | Tracks last-refresh timestamps for product cache entries synced to Firestore |
@@ -31,7 +31,7 @@ Each table has a dedicated Data Access Object:
 | `InventoriesDao` | CRUD named pantries, migrations |
 | `FeedbackQueueDao` | CRUD offline feedback queue |
 | `ProductSubmissionQueueDao` | CRUD offline submission queue |
-| `PriceDao` | CRUD prices, aggregation queries (total value, average) |
+| `PriceDao` | CRUD prices, quantity-scaled aggregation queries (total value, average, monthly/store spending) |
 | `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
 | `StoreDao` | CRUD saved store names, case-insensitive lookup |
 | `FirebaseCacheMetaDao` | CRUD Firestore cache sync metadata, next-refresh tracking |
@@ -59,7 +59,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v34).
+- `_onUpgrade` handles version bumps (currently v1 -> v37).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -100,6 +100,7 @@ Version history:
 | v33 -> v34 | Added `inventory_id` column on `prices` (backfilled to first inventory) + `idx_prices_inventory_id` index |
 | v34 -> v35 | Added `additional_nutrients` column on `products` |
 | v35 -> v36 | Replaced the unique index on `inventory(barcode, inventory_id)` with a non-unique index so distinct expiry batches can coexist |
+| v36 -> v37 | Added `package_quantity` / `package_unit` to `prices` and `quantity` / `product_quantity` to `products` for unit-aware price math |
 
 ### 2.4 Connectivity layer
 

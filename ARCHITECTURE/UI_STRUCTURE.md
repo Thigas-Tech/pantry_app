@@ -13,7 +13,7 @@ HomeScreen
     ├── RefreshIndicator (pull-to-refresh)
     └── ListView.builder (RepaintBoundary on each card)
         ├── SectionHeader (expired / expiring soon / good)
-        └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot)
+        └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot, flat + per-unit price)
 
 ProductDetailScreen
 ├── AppBar (name, OFF link)
@@ -23,7 +23,7 @@ ProductDetailScreen
 ├── NutritionTable (energy, protein, carbs, fat, fiber, salt)
 ├── Ingredients (ExpansionTile)
 ├── InventoryTiles (location icon, qty, expiry, edit/delete)
-├── PriceHistorySection (latest price, store, date; tap for history)
+├── PriceHistorySection (latest price, store, date, per-unit label; tap for history)
 ├── ProductSubmissionStatus (manual products only; status chip + retry)
 │   └── Live progress panel while a submission for this barcode is in flight
 ├── ProductPhotoManagement (manual products only)
@@ -87,10 +87,16 @@ ShoppingListScreen
 └── FAB -> AddToShoppingListSheet (search cached products or manual entry)
 
 PriceEntrySheet (bottom sheet, reused from multiple screens)
-├── Amount field (POS-style calculator with locale-aware decimal)
+├── Amount field (TextFormField with locale-aware decimal formatter)
 ├── Store field (Autocomplete from saved stores, "+ Add new store" button)
 ├── Date picker
 ├── Discounted toggle
 ├── Notes field
 └── Submit button
+
+PriceHistoryScreen (per product barcode)
+├── AppBar (product name)
+├── PriceVisibilityToggle (privacy mask)
+├── Price rows (date, flat price, store, sync status, per-unit UnitPriceLabel)
+└── Empty state (no prices) with "Add price" button
 ```
