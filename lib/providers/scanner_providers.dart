@@ -122,7 +122,7 @@ class ScannerCameraState {
 /// Provides a [MobileScannerController] for the scanner camera.
 ///
 /// Created lazily and disposed when the provider is no longer watched
-/// (auto-dispose). The controller is created with `autoStart` `false` so
+/// (auto-dispose). The controller is created with autoStart false so
 /// that permission is checked before calling [MobileScannerController.start].
 final Provider<MobileScannerController> mobileScannerControllerProvider =
     Provider.autoDispose<MobileScannerController>(
@@ -142,7 +142,7 @@ final Provider<MobileScannerController> mobileScannerControllerProvider =
 
 /// Notifier that manages the scanner camera lifecycle and scan resolution.
 ///
-/// Owns the [MobileScannerController] (created with `autoStart` `false`),
+/// Owns the [MobileScannerController] (created with autoStart false),
 /// tracks camera streaming state, handles permission requests, and resolves
 /// barcodes/PLU codes via [productRepositoryProvider].
 @riverpod

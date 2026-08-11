@@ -13,7 +13,7 @@ import 'package:pantry_app/utils/off_units.dart';
 ///
 /// The curated set deliberately excludes:
 /// - the six core nutrients, which have dedicated editor rows;
-/// - pet-food-only nutrients (`probablyPetFood`, e.g. crude protein);
+/// - pet-food-only nutrients (probablyPetFood, e.g. crude protein);
 /// - read-only or computed tags (nutrition-score-fr/uk, carbon-footprint,
 ///   glycemic-index, water-hardness, acidity, ph, energy-from-fat);
 /// - nutrients whose typical unit has no editor representation.

@@ -83,10 +83,10 @@ const _unitMap = <String, String>{
 ///
 /// Priority:
 /// 1. Uses [productQuantity] and [productQuantityUnit] when both present,
-///    but for multi-pack strings like `"3 x 150 g"` the per-unit value is
+///    but for multi-pack strings like "3 x 150 g" the per-unit value is
 ///    extracted from the [quantity] string instead of the normalized total.
 /// 2. Falls back to parsing the raw [quantity] string.
-/// 3. Returns `null` when nothing is parseable.
+/// 3. Returns null when nothing is parseable.
 ParsedQuantity? parseQuantity({
   double? productQuantity,
   String? productQuantityUnit,
@@ -114,9 +114,9 @@ ParsedQuantity? parseQuantity({
 /// Parses a raw OFF quantity string into [ParsedQuantity].
 ///
 /// Handles:
-/// - `"500 ml"` -> amount=500, unit=ml
-/// - `"3 x 150 g"` -> amount=150, unit=g  (per-unit value)
-/// - `"6 eggs"` -> amount=6, unit=pieces
+/// - "500 ml" -> amount=500, unit=ml
+/// - "3 x 150 g" -> amount=150, unit=g  (per-unit value)
+/// - "6 eggs" -> amount=6, unit=pieces
 ParsedQuantity? _parseQuantityString(String quantity) {
   final trimmed = quantity.trim();
   if (trimmed.isEmpty) return null;
@@ -160,7 +160,7 @@ ParsedQuantity? _parseQuantityString(String quantity) {
 /// unit `"g"`. This matches the design decision to pre-fill produce
 /// items in weight mode with gram weights from the USDA API.
 ///
-/// Returns `null` when no usable gram weight is available.
+/// Returns null when no usable gram weight is available.
 ParsedQuantity? parseUsdaQuantity({
   double? usdaServingAmount,
   String? usdaServingUnit,
@@ -176,10 +176,10 @@ ParsedQuantity? parseUsdaQuantity({
 ///
 /// Priority:
 /// 1. Uses [servingQuantity] as the amount when > 0, and extracts the unit
-///    from [servingSize] (e.g. `servingQuantity: 30, servingSize: "30g"`
+///    from [servingSize] (e.g. servingQuantity: 30, servingSize: "30g"]
 ///    returns amount=30, unit="g").
 /// 2. Falls back to parsing the [servingSize] string entirely.
-/// 3. Returns `null` when nothing is parseable.
+/// 3. Returns null when nothing is parseable.
 ParsedQuantity? parseServingQuantity({
   double? servingQuantity,
   String? servingSize,
@@ -201,7 +201,7 @@ ParsedQuantity? parseServingQuantity({
 
 /// Normalizes an OFF unit string to the app's internal representation.
 ///
-/// Returns `null` for unrecognised or empty units.
+/// Returns null for unrecognised or empty units.
 String? normalizeUnit(String? unit) {
   if (unit == null || unit.isEmpty) return null;
   final lower = unit.trim().toLowerCase();

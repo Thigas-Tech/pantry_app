@@ -168,7 +168,7 @@ class DatabaseHelper {
     return join(documentsDir.path, 'pantry.db');
   }
 
-  /// Runs `PRAGMA quick_check` on the database after open.
+  /// Runs [PRAGMA quick_check] on the database after open.
   ///
   /// Logs a warning when corruption is detected. This is a non-fatal check
   /// -- the app continues even if the integrity check reports issues.

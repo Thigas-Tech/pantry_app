@@ -579,7 +579,7 @@ class ProductRepository {
   ///
   /// Queries [FirebaseCacheMetaDao] for the global refresh entry instead of
   /// reading from local preferences. When the entry is missing or its
-  /// `nextRefreshAt` column has passed, the cache is considered overdue.
+  /// nextRefreshAt column has passed, the cache is considered overdue.
   Future<bool> isCacheOverdue() async {
     final db = await _db.database;
     final entry = await _metaDao.getGlobalRefreshTime(db);

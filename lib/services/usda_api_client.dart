@@ -90,7 +90,7 @@ class UsdaApiClient {
   /// Base URL for the FoodData Central API v1.
   static const _baseUrl = 'https://api.nal.usda.gov/fdc/v1';
 
-  /// Returns `true` when [description] does not contain any non-produce
+  /// Returns true when [description] does not contain any non-produce
   /// marker as a standalone word, meaning it represents raw, unprocessed
   /// produce. Uses word-boundary matching to avoid false positives on
   /// embedded substrings (e.g., "bread" in "breadfruit").
@@ -216,8 +216,8 @@ class UsdaApiClient {
 
   /// Fetches the full food item from the USDA detail endpoint.
   ///
-  /// Calls `/v1/food/{fdcId}?format=full` and returns the raw JSON
-  /// response body as a [Map]. Returns `null` on any error.
+  /// Calls /v1/food/{fdcId}?format=full and returns the raw JSON
+  /// response body as a Map. Returns null on any error.
   Future<Map<String, dynamic>?> _fetchFoodDetails(int fdcId) async {
     if (_apiKey.isEmpty) return null;
 
@@ -237,8 +237,8 @@ class UsdaApiClient {
   /// Enriches a [Product] with USDA foodPortions data.
   ///
   /// Calls the detail endpoint for the given product. Only Foundation
-  /// food items have foodPortions — SR Legacy items return `null`.
-  /// Returns the enriched product or `null` when no portion data is
+  /// food items have foodPortions — SR Legacy items return null.
+  /// Returns the enriched product or null when no portion data is
   /// available.
   Future<Product?> enrichProductWithServingData(Product product) async {
     final fdcIdStr = product.barcode.replaceFirst('plu-', '');

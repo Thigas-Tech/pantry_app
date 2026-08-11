@@ -7,7 +7,7 @@ import 'package:pantry_app/providers/settings_provider.dart';
 
 /// Provides the price history for a specific barcode in the given inventory.
 ///
-/// Keyed by a `(barcode, inventoryId)` record so each pantry keeps an
+/// Keyed by a (barcode, inventoryId) record so each pantry keeps an
 /// independent, cache-isolated history.
 final FutureProviderFamily<List<Price>, (String, int)> priceHistoryProvider =
     FutureProvider.autoDispose.family<List<Price>, (String, int)>(
@@ -22,7 +22,7 @@ final FutureProviderFamily<List<Price>, (String, int)> priceHistoryProvider =
 /// Provides the most recent price for a specific barcode in the given
 /// inventory, or null.
 ///
-/// Keyed by a `(barcode, inventoryId)` record.
+/// Keyed by a (barcode, inventoryId) record.
 final FutureProviderFamily<Price?, (String, int)> latestPriceProvider =
     FutureProvider.autoDispose.family<Price?, (String, int)>(
       (ref, args) {

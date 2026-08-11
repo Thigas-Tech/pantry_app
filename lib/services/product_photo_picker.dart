@@ -17,7 +17,7 @@ import 'package:permission_handler/permission_handler.dart';
 /// Picks product photos from the camera or the device gallery.
 ///
 /// Camera picks open an in-app preview ([CameraCaptureScreen]) on platforms
-/// with a `camera` plugin implementation (Android, iOS, web) so the rear lens
+/// with a camera plugin implementation (Android, iOS, web) so the rear lens
 /// can be selected deterministically. On other platforms they fall back to the
 /// system camera app via image_picker. Camera picks first request the camera
 /// permission. Gallery picks go through the system picker and only request a
@@ -72,7 +72,7 @@ class ProductPhotoPicker {
   /// default is false on the supported platforms.
   static bool _isGalleryPermissionRequiredDefault() => false;
 
-  /// Whether the `camera` plugin supports in-app capture on this platform.
+  /// Whether the camera plugin supports in-app capture on this platform.
   ///
   /// The plugin has no desktop implementation, so desktop keeps delegating to
   /// the system camera app.
