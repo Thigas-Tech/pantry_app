@@ -66,7 +66,7 @@ never waste food again.</p>
 <li><strong>Pull-to-refresh</strong> — updates cached product data from Open Food Facts when online</li>
 <li><strong>Nutri-Score</strong> — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products</li>
 <li><strong>Manual product entry</strong> — full form with nutrition table and camera capture when a barcode is unknown or you're offline</li>
-<li><strong>Price tracking</strong> — record purchase prices with store, date, and currency; view price history and total inventory value</li>
+<li><strong>Price tracking</strong> — record purchase prices with store, date, currency, and package size; view price history, per-unit prices, and total inventory value</li>
 <li><strong>Shopping list</strong> — add items from cached products or free-text, mark as purchased, batch-move to pantry</li>
 <li><strong>Store autocomplete</strong> — saved store names persist across uses, suggested in the price entry sheet</li>
 <li><strong>Barcode history</strong> — the last 50 scanned barcodes are kept locally on your device</li>
@@ -153,6 +153,8 @@ flutter build appbundle --debug
     plu_service.dart             # PLU code lookup for produce
     product_submission_service.dart  # OFF offline submission queue
   utils/               # Logger, snackbar helpers
+    price_calculator.dart   # Unit-aware price math (per-unit price, scaled cost)
+    unit_conversion.dart    # Unit normalization &amp; conversion
   widgets/             # Reusable components
 test/                  # Unit and widget tests
 </code></pre>
