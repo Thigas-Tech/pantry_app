@@ -27,7 +27,6 @@
   (`lib/providers/recipe_provider.dart`,
   `lib/database/database_helper.dart`,
   `test/providers/q3_null_row_regression_test.dart`)
->>>>>>> origin/main
 
 ### Documentation
 
