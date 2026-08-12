@@ -1308,6 +1308,12 @@ abstract class AppLocalizations {
   /// **'Failed to flush cache. Please try again.'**
   String get flushCacheFailed;
 
+  /// No description provided for @changelogLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the changelog.'**
+  String get changelogLoadFailed;
+
   /// No description provided for @submissionPending.
   ///
   /// In en, this message translates to:

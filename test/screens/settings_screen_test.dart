@@ -287,6 +287,47 @@ void main() {
     expect(find.text("What's new"), findsOneWidget);
   });
 
+  /// Verifies that a changelog load failure shows the changelog-specific
+  /// error snackbar, not the cache-flush message.
+  testWidgets('whats new load failure shows changelog error snackbar', (
+    tester,
+  ) async {
+    // Simulate missing changelog assets: the asset channel resolves with
+    // null data, which makes rootBundle.loadString throw a FlutterError.
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          ..setMockMessageHandler('flutter/assets', (message) async {
+            return null;
+          });
+    addTearDown(() {
+      messenger.setMockMessageHandler('flutter/assets', null);
+    });
+
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+      ],
+    );
+
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text("What's new"));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text("What's new"));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Could not load the changelog.'), findsOneWidget);
+    expect(find.text('Failed to flush cache. Please try again.'), findsNothing);
+  });
+
   /// Verifies toggling notifications ON shows rationale dialog first time.
   testWidgets('notif toggle shows rationale dialog on first attempt', (
     tester,

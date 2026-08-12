@@ -69,6 +69,60 @@
 
 ### Fixed
 
+- **Duplicate service singletons**: `FirebaseCacheProvider` and
+  `ProductRepositoryProvider` constructed their own `UsdaApiClient`, and
+  `recipe_provider` defined a private `CurrencyService` provider plus a
+  third direct construction inside `cookRecipe`. All now consume the shared
+  `usdaApiClientProvider` / `currencyServiceProvider`, so tests override
+  one instance and no HTTP clients are silently duplicated. A source-scan
+  guard test (`test/providers/provider_singleton_guard_test.dart`) fails
+  if a direct construction is reintroduced.
+  (`lib/providers/firebase_cache_provider.dart`,
+  `lib/providers/product_repository_provider.dart`,
+  `lib/providers/recipe_provider.dart`,
+  `test/providers/provider_singleton_guard_test.dart`)
+
+- **Single dependency-injection path for singletons**: `DatabaseHelper` and
+  `ImageCacheService` were constructed directly in six startup/screen
+  sites (main.dart x5, settings_screen) in addition to their providers,
+  giving two DI paths for the same singletons. The shared `appContainer`
+  is now created before `_handleAppUpdate` and every site reads
+  `databaseProvider` / `imageCacheProvider`. A source-scan guard test
+  (`test/database/database_helper_di_guard_test.dart`) fails if a direct
+  construction is reintroduced outside the owning files.
+  (`lib/main.dart`, `lib/screens/settings_screen.dart`,
+  `test/database/database_helper_di_guard_test.dart`)
+
+- **Connectivity-gated background cache refresh**: the scheduled refresh
+  fired even while offline, contradicting the documented offline-first
+  contract (ARCHITECTURE/PERFORMANCE.md §11.3). The decision moved into a
+  testable [CacheRefreshCoordinator] (`lib/services/`) that skips the
+  refresh when the device is offline or the cache is fresh, records the
+  refresh timestamp before firing, refreshes inventories in parallel, and
+  tolerates per-inventory failures. `main.dart` now reads the coordinator
+  via `cacheRefreshCoordinatorProvider`; partial successes invalidate the
+  pantry UI. Six unit tests cover the offline, fresh-cache, ordering,
+  failure-tolerance, and empty-inventory paths. The PERFORMANCE.md §11.5
+  claim that the home list uses `ListView.builder` was corrected to match
+  the eager `ListView(children:)` implementation.
+  (`lib/services/cache_refresh_coordinator.dart`,
+  `lib/providers/cache_refresh_coordinator_provider.dart`,
+  `lib/main.dart`, `ARCHITECTURE/PERFORMANCE.md`,
+  `test/services/cache_refresh_coordinator_test.dart`)
+
+- **Changelog error snackbar**: opening "What's New" when the changelog
+  assets cannot be loaded showed the cache-flush failure message ("Failed to
+  flush cache") instead of a changelog-specific error. The failure path also
+  caught only `Exception`, but asset loading throws `FlutterError` (an
+  `Error`), so the handler was unreachable. The snackbar now shows a
+  localized "Could not load the changelog." message and the catch handles
+  any load failure. New ARB key `changelogLoadFailed` (en, pt, pt_BR) with
+  a widget test that simulates missing assets via the `flutter/assets`
+  channel.
+  (`lib/screens/settings_screen.dart`,
+  `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`,
+  `test/screens/settings_screen_test.dart`)
+
 - **SQLite version compatibility**: FEFO and price-statistics queries used
   `NULLS LAST` (SQLite 3.30+) and `ROW_NUMBER() OVER` (SQLite 3.25+),
   which crash on devices whose system SQLite predates those versions

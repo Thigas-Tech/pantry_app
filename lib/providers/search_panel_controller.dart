@@ -13,7 +13,6 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
-import 'package:pantry_app/widgets/search_panel.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'search_panel_controller.g.dart';
@@ -89,10 +88,10 @@ class SearchPanelState {
   }
 }
 
-/// Notifier that owns all search state and execution for [SearchPanel].
+/// Notifier that owns all search state and execution for the search panel.
 ///
 /// This is an auto-dispose provider family keyed by the search debounce
-/// duration, so state lives exactly as long as the hosting [SearchPanel]
+/// duration, so state lives exactly as long as the hosting search panel
 /// widget and each panel instance is isolated.
 ///
 /// The notifier handles query changes (debounced and on-submit), source

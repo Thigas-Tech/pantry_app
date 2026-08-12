@@ -14,6 +14,7 @@ import 'package:pantry_app/models/recipe_cache_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/recipe_nutrition.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
@@ -45,11 +46,6 @@ RecipeDao recipeDao(Ref ref) {
 @Riverpod(keepAlive: true)
 RecipeIngredientDao recipeIngredientDao(Ref ref) {
   return const RecipeIngredientDao();
-}
-
-@Riverpod(keepAlive: true)
-CurrencyService _currencyService(Ref ref) {
-  return CurrencyService();
 }
 
 /// Provides all recipes for the active inventory, ordered by updated_at
@@ -331,7 +327,7 @@ Future<double> calculateRecipeCost(WidgetRef ref, int recipeId) async {
     ingredients,
     inventoryId: inventoryId,
     baseCurrency: settings.baseCurrency,
-    currencyService: ref.read(_currencyServiceProvider),
+    currencyService: ref.read(currencyServiceProvider),
   );
 }
 
@@ -603,7 +599,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
   final inventoryId = recipe?.inventoryId ?? activeInventoryId;
   final ingredients = await db.getRecipeIngredients(recipeId);
   final settings = ref.read(settingsProvider);
-  final currencyService = CurrencyService();
+  final currencyService = ref.read(currencyServiceProvider);
   final baseCurrency = settings.baseCurrency;
 
   if (ingredients.isEmpty) throw const RecipeCookException({});

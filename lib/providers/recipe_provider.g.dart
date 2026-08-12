@@ -107,48 +107,6 @@ final class RecipeIngredientDaoProvider
 String _$recipeIngredientDaoHash() =>
     r'6f7843d53e1d155f417b179d6290b1bb67d5e0a4';
 
-@ProviderFor(_currencyService)
-final _currencyServiceProvider = _CurrencyServiceProvider._();
-
-final class _CurrencyServiceProvider
-    extends
-        $FunctionalProvider<CurrencyService, CurrencyService, CurrencyService>
-    with $Provider<CurrencyService> {
-  _CurrencyServiceProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'_currencyServiceProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$_currencyServiceHash();
-
-  @$internal
-  @override
-  $ProviderElement<CurrencyService> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  CurrencyService create(Ref ref) {
-    return _currencyService(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(CurrencyService value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<CurrencyService>(value),
-    );
-  }
-}
-
-String _$_currencyServiceHash() => r'960b4626fd1f5ee1a99537b2f52507979f390e16';
-
 /// Provides all recipes for the active inventory, ordered by updated_at
 /// descending.
 ///

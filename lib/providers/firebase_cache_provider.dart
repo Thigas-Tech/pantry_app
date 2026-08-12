@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/services/firebase_cache_client.dart';
 import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/firebase_firestore_client_adapter.dart';
@@ -55,7 +56,7 @@ FirebaseCacheService firebaseCache(Ref ref) {
   return FirebaseCacheService(
     db: db,
     firebaseClient: client,
-    usdaClient: UsdaApiClient(),
+    usdaClient: ref.read(usdaApiClientProvider),
     offAdapter: api,
   );
 }
