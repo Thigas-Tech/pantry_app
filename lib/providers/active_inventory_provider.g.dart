@@ -78,7 +78,7 @@ final class ActiveInventoryNotifierProvider
 }
 
 String _$activeInventoryNotifierHash() =>
-    r'df0d5f9bfa2a8645f704ad8ccbeaf005985b4ef7';
+    r'ae6aa4ebea275afdcffa0afe1f7ec4dd4bbff6f0';
 
 /// Holds the ID of the currently selected inventory (pantry).
 ///

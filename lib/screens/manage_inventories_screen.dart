@@ -46,7 +46,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
               if (index < list.length) {
                 final inv = list[index];
                 return Dismissible(
-                  key: ValueKey('manage-inv-${inv['id'] as int}'),
+                  key: ValueKey('manage-inv-${inv.id}'),
                   direction: DismissDirection.endToStart,
                   background: Container(
                     alignment: Alignment.centerRight,
@@ -57,30 +57,30 @@ class ManageInventoriesScreen extends ConsumerWidget {
                   confirmDismiss: (_) => _confirmDelete(
                     context,
                     ref,
-                    inv['id'] as int,
-                    inv['name'] as String,
+                    inv.id,
+                    inv.name,
                   ),
                   child: ListTile(
                     title: Text(
-                      l10n.displayInventoryName(inv['name'] as String),
+                      l10n.displayInventoryName(inv.name),
                     ),
                     subtitle: Text(
-                      l10n.itemsCount((inv['item_count'] as int?) ?? 0),
+                      l10n.itemsCount(inv.itemCount),
                     ),
-                    trailing: (inv['id'] as int) == activeId
+                    trailing: inv.id == activeId
                         ? const Icon(Icons.check, color: Colors.teal)
                         : null,
                     onTap: () {
                       ref
                           .read(activeInventoryProvider.notifier)
-                          .setActiveInventory(inv['id'] as int);
+                          .setActiveInventory(inv.id);
                       Navigator.of(context).pop();
                     },
                     onLongPress: () => _showRenameDialog(
                       context,
                       ref,
-                      inv['id'] as int,
-                      inv['name'] as String,
+                      inv.id,
+                      inv.name,
                     ),
                   ),
                 );
@@ -244,7 +244,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
           if (inventories.isNotEmpty) {
             ref
                 .read(activeInventoryProvider.notifier)
-                .setActiveInventory(inventories.first['id'] as int);
+                .setActiveInventory(inventories.first.id);
           }
         }
         if (context.mounted) {

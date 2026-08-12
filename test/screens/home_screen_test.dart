@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/scan_history_entry.dart';
@@ -138,7 +139,9 @@ List<Override> _homeScreenOverrides({
 }) {
   return [
     databaseProvider.overrideWithValue(mockDb),
-    inventoryListProvider.overrideWith((ref) => inventories),
+    inventoryListProvider.overrideWith(
+      (ref) => inventories.map(InventorySummary.fromMap).toList(),
+    ),
     onboardingProvider.overrideWith(
       () => FakeOnboardingNotifier(initialValue: onboardingComplete),
     ),
@@ -185,7 +188,7 @@ void main() {
       settle: false,
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
-        inventoryListProvider.overrideWith((ref) => <Map<String, dynamic>>[]),
+        inventoryListProvider.overrideWith((ref) => <InventorySummary>[]),
         activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
         productRepositoryProvider.overrideWithValue(
           createMockProductRepository(),
@@ -904,7 +907,7 @@ void main() {
         databaseProvider.overrideWithValue(mockDb),
         inventoryListProvider.overrideWith(
           (ref) => [
-            {'id': 1, 'name': 'Home'},
+            InventorySummary.fromMap({'id': 1, 'name': 'Home'}),
           ],
         ),
         activeInventoryProvider.overrideWith(

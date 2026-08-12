@@ -26,7 +26,7 @@ mixin _$ProductCacheEntry {
 @JsonKey(includeIfNull: false) List<String>? get categoriesHierarchy;/// The full ingredients list as plain text.
 @JsonKey(includeIfNull: false) String? get ingredients;/// The suggested serving size (e.g. "15 g").
 @JsonKey(includeIfNull: false) String? get servingSize;/// The normalized numeric serving quantity from the OFF API
-/// (e.g. `30.0` for a serving size of "30 g").
+/// (e.g. [30.0] for a serving size of "30 g").
 @JsonKey(includeIfNull: false) double? get servingQuantity;/// The display quantity as printed on packaging (e.g. "500 ml").
 @JsonKey(includeIfNull: false) String? get quantity;/// Normalized numeric product quantity in g or ml.
 @JsonKey(includeIfNull: false) double? get productQuantity;/// Energy in kilocalories per 100 g.
@@ -47,10 +47,10 @@ mixin _$ProductCacheEntry {
 @JsonKey(includeIfNull: false) String? get offIngredientsImageUrl;/// URL to the product packaging image on the OFF CDN.
 @JsonKey(includeIfNull: false) String? get offProductImageUrl;/// The locale used when fetching this product (e.g. 'en', 'pt').
  String get languageCode;/// Schema version for forward compatibility.
- int get schemaVersion;/// The `amount` from the first USDA foodPortion (e.g. `1.0`).
-@JsonKey(includeIfNull: false) double? get usdaServingAmount;/// The `measureUnit.name` from the first USDA foodPortion
-/// (e.g. `"fruit"`, `"cup"`).
-@JsonKey(includeIfNull: false) String? get usdaServingUnit;/// The `gramWeight` from the first USDA foodPortion (e.g. `182.0`).
+ int get schemaVersion;/// The amount from the first USDA foodPortion (e.g. 1.0).
+@JsonKey(includeIfNull: false) double? get usdaServingAmount;/// The measureUnit.name from the first USDA foodPortion
+/// (e.g. "fruit", "cup").
+@JsonKey(includeIfNull: false) String? get usdaServingUnit;/// The gramWeight from the first USDA foodPortion (e.g. 182.0).
 @JsonKey(includeIfNull: false) double? get usdaGramWeight;
 /// Create a copy of ProductCacheEntry
 /// with the given fields replaced by the non-null parameter values.
@@ -307,7 +307,7 @@ class _ProductCacheEntry extends ProductCacheEntry {
 /// The suggested serving size (e.g. "15 g").
 @override@JsonKey(includeIfNull: false) final  String? servingSize;
 /// The normalized numeric serving quantity from the OFF API
-/// (e.g. `30.0` for a serving size of "30 g").
+/// (e.g. [30.0] for a serving size of "30 g").
 @override@JsonKey(includeIfNull: false) final  double? servingQuantity;
 /// The display quantity as printed on packaging (e.g. "500 ml").
 @override@JsonKey(includeIfNull: false) final  String? quantity;
@@ -358,12 +358,12 @@ class _ProductCacheEntry extends ProductCacheEntry {
 @override@JsonKey() final  String languageCode;
 /// Schema version for forward compatibility.
 @override@JsonKey() final  int schemaVersion;
-/// The `amount` from the first USDA foodPortion (e.g. `1.0`).
+/// The amount from the first USDA foodPortion (e.g. 1.0).
 @override@JsonKey(includeIfNull: false) final  double? usdaServingAmount;
-/// The `measureUnit.name` from the first USDA foodPortion
-/// (e.g. `"fruit"`, `"cup"`).
+/// The measureUnit.name from the first USDA foodPortion
+/// (e.g. "fruit", "cup").
 @override@JsonKey(includeIfNull: false) final  String? usdaServingUnit;
-/// The `gramWeight` from the first USDA foodPortion (e.g. `182.0`).
+/// The gramWeight from the first USDA foodPortion (e.g. 182.0).
 @override@JsonKey(includeIfNull: false) final  double? usdaGramWeight;
 
 /// Create a copy of ProductCacheEntry

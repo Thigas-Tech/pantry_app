@@ -56,7 +56,7 @@ final class ThemeModeNotifierProvider
   }
 }
 
-String _$themeModeNotifierHash() => r'7bfd92d9d22a1171555cf56bf910efd26ee236f9';
+String _$themeModeNotifierHash() => r'38978c05bdd50ebd4a761cf5d21b2cda13548301';
 
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
