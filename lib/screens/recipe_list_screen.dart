@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -52,16 +53,16 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
             builder: (context, ref, child) {
               final inventoriesAsync = ref.watch(inventoryListProvider);
               final activeId = ref.watch<int>(activeInventoryProvider);
-              final inventories = inventoriesAsync.asData?.value
-                  .cast<Map<String, dynamic>>();
-              final match = inventories?.firstWhere(
-                (inv) => inv['id'] == activeId,
-                orElse: () => <String, dynamic>{'name': l10n.myPantry},
-              );
+              final inventories = inventoriesAsync.asData?.value;
+              InventorySummary? match;
+              for (final inv in inventories ?? const <InventorySummary>[]) {
+                if (inv.id == activeId) {
+                  match = inv;
+                  break;
+                }
+              }
               final name = match != null
-                  ? l10n.displayInventoryName(
-                      (match['name'] as String?) ?? l10n.myPantry,
-                    )
+                  ? l10n.displayInventoryName(match.name)
                   : null;
               return InventorySwitcherCard(
                 name: name,

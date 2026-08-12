@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
+import 'package:pantry_app/models/inventory_product_option.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -337,11 +338,14 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
 /// Provides distinct product barcodes and names from the active inventory
 /// for the "From your pantry" suggestions in the add-to-shopping-list sheet.
 @riverpod
-Future<List<Map<String, dynamic>>> inventoryProducts(
+Future<List<InventoryProductOption>> inventoryProducts(
   Ref ref,
-) {
+) async {
   final db = ref.watch(databaseProvider);
   final inventoryId = ref.watch(activeInventoryProvider);
   logInfo('Fetching distinct products from inventory $inventoryId');
-  return db.getDistinctProductsFromInventory(inventoryId: inventoryId);
+  final rows = await db.getDistinctProductsFromInventory(
+    inventoryId: inventoryId,
+  );
+  return rows.map(InventoryProductOption.fromMap).toList();
 }

@@ -298,13 +298,13 @@ final inventoryProductsProvider = InventoryProductsProvider._();
 final class InventoryProductsProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<Map<String, dynamic>>>,
-          List<Map<String, dynamic>>,
-          FutureOr<List<Map<String, dynamic>>>
+          AsyncValue<List<InventoryProductOption>>,
+          List<InventoryProductOption>,
+          FutureOr<List<InventoryProductOption>>
         >
     with
-        $FutureModifier<List<Map<String, dynamic>>>,
-        $FutureProvider<List<Map<String, dynamic>>> {
+        $FutureModifier<List<InventoryProductOption>>,
+        $FutureProvider<List<InventoryProductOption>> {
   /// Provides distinct product barcodes and names from the active inventory
   /// for the "From your pantry" suggestions in the add-to-shopping-list sheet.
   InventoryProductsProvider._()
@@ -323,14 +323,14 @@ final class InventoryProductsProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<Map<String, dynamic>>> $createElement(
+  $FutureProviderElement<List<InventoryProductOption>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<Map<String, dynamic>>> create(Ref ref) {
+  FutureOr<List<InventoryProductOption>> create(Ref ref) {
     return inventoryProducts(ref);
   }
 }
 
-String _$inventoryProductsHash() => r'6b67a531bac3c8c0ae5d7ba1df4f7bde419cc788';
+String _$inventoryProductsHash() => r'305efa596b0d06182b1a7d4df314a1f6ad3e7529';

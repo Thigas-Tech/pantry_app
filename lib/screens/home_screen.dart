@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -158,6 +159,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  /// Returns the display name for the inventory with [activeId] from
+  /// [inventories], falling back to [fallback] when not found.
+  String _inventoryName(
+    List<InventorySummary> inventories,
+    int activeId,
+    String fallback,
+  ) {
+    for (final inv in inventories) {
+      if (inv.id == activeId) return inv.name;
+    }
+    return fallback;
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -230,18 +244,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               if (inventories.asData?.value != null) ...[
                 InventorySwitcherCard(
                   name: l10n.displayInventoryName(
-                    (inventories.asData!.value
-                                .cast<Map<String, dynamic>>()
-                                .firstWhere(
-                                  (inv) =>
-                                      inv['id'] ==
-                                      ref.read(activeInventoryProvider),
-                                  orElse: () => <String, dynamic>{
-                                    'name': l10n.myPantry,
-                                  },
-                                )['name']
-                            as String?) ??
-                        l10n.myPantry,
+                    _inventoryName(
+                      inventories.asData?.value ?? const [],
+                      ref.read(activeInventoryProvider),
+                      l10n.myPantry,
+                    ),
                   ),
                   nutriscoreGrade: averageNutriscore,
                   onTap: () async {
@@ -341,7 +348,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final inventories = ref.read(inventoryListProvider).asData?.value ?? [];
     final activeId = ref.read(activeInventoryProvider);
     final targetInventories = inventories
-        .where((inv) => inv['id'] != activeId)
+        .where((inv) => inv.id != activeId)
         .toList();
 
     final l10n = AppLocalizations.of(context)!;
@@ -366,8 +373,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ...targetInventories.map(
               (inv) => ListTile(
                 leading: const Icon(Icons.inventory_2),
-                title: Text(l10n.displayInventoryName(inv['name'] as String)),
-                onTap: () => Navigator.pop(ctx, inv['id'] as int),
+                title: Text(l10n.displayInventoryName(inv.name)),
+                onTap: () => Navigator.pop(ctx, inv.id),
               ),
             ),
           ],

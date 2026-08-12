@@ -8,24 +8,24 @@ part of 'inventory_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provides the list of all inventories (id, name).
+/// Provides the list of all inventories as typed [InventorySummary] rows.
 
 @ProviderFor(inventoryList)
 final inventoryListProvider = InventoryListProvider._();
 
-/// Provides the list of all inventories (id, name).
+/// Provides the list of all inventories as typed [InventorySummary] rows.
 
 final class InventoryListProvider
     extends
         $FunctionalProvider<
-          AsyncValue<List<Map<String, dynamic>>>,
-          List<Map<String, dynamic>>,
-          FutureOr<List<Map<String, dynamic>>>
+          AsyncValue<List<InventorySummary>>,
+          List<InventorySummary>,
+          FutureOr<List<InventorySummary>>
         >
     with
-        $FutureModifier<List<Map<String, dynamic>>>,
-        $FutureProvider<List<Map<String, dynamic>>> {
-  /// Provides the list of all inventories (id, name).
+        $FutureModifier<List<InventorySummary>>,
+        $FutureProvider<List<InventorySummary>> {
+  /// Provides the list of all inventories as typed [InventorySummary] rows.
   InventoryListProvider._()
     : super(
         from: null,
@@ -42,17 +42,17 @@ final class InventoryListProvider
 
   @$internal
   @override
-  $FutureProviderElement<List<Map<String, dynamic>>> $createElement(
+  $FutureProviderElement<List<InventorySummary>> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<List<Map<String, dynamic>>> create(Ref ref) {
+  FutureOr<List<InventorySummary>> create(Ref ref) {
     return inventoryList(ref);
   }
 }
 
-String _$inventoryListHash() => r'05835531b94bd53b38034b3191e8b6ce376c7d28';
+String _$inventoryListHash() => r'59ddcc78fdaccc1bca6f4c2022939424a8624cba';
 
 /// Provides the count of inventory items in the active pantry.
 
@@ -138,7 +138,7 @@ final class TotalInventoryCountProvider
 }
 
 String _$totalInventoryCountHash() =>
-    r'ca400fc7bad25ba1097d25b0f0614ed768d428b6';
+    r'a6e8f3750601590fed1be6d76e79ce993e9f5f94';
 
 /// Provides the average Nutri-Score letter for the active inventory.
 ///
