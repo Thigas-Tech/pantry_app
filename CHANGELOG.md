@@ -52,6 +52,21 @@
   `test/database/recipe_dao_test.dart`,
   `test/database/database_helper_test.dart`)
 
+### Changed
+
+- **All providers migrated to `@riverpod` codegen**: the remaining 27
+  hand-written provider files became annotated functions/classes with
+  committed `.g.dart` files, completing the migration (3 files already
+  used codegen). Lifecycle semantics are preserved exactly: plain
+  `Provider`/`StreamProvider`/`Notifier` became `@Riverpod(keepAlive:
+  true)`, autoDispose/family providers became plain `@riverpod`, and the
+  recipe providers keep their runtime `ref.keepAlive()` calls. Provider
+  names and family signatures are unchanged, so no call sites or test
+  overrides were touched. ARCHITECTURE/PROVIDERS.md documents the
+  convention (including the `Ref`-typed function parameters and the
+  `flutter_riverpod` import needed for `select`).
+  (`lib/providers/*.dart`, `ARCHITECTURE/PROVIDERS.md`)
+
 ### Fixed
 
 - **SQLite version compatibility**: FEFO and price-statistics queries used

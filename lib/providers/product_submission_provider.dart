@@ -10,13 +10,12 @@ part 'product_submission_provider.g.dart';
 
 /// Exposes observable, durable progress for an Open Food Facts submission.
 ///
-/// The notifier owns the submission lifecycle: [submit] starts a
-/// background submission, [state] holds the latest [SubmissionProgress]
-/// snapshot (null when idle), and [isSubmitting] reports whether a
-/// submission is running. Because [productSubmissionProvider] is a plain
-/// keep-alive notifier provider (not autoDispose), progress outlives the
-/// screen that started the submission, so a user can navigate away while
-/// uploads continue.
+/// The notifier owns the submission lifecycle: submit starts a background
+/// submission, state holds the latest progress snapshot (null when idle),
+/// and isSubmitting reports whether a submission is running. Because
+/// [productSubmissionProvider] is a plain keep-alive notifier provider (not
+/// autoDispose), progress outlives the screen that started the submission,
+/// so a user can navigate away while uploads continue.
 @Riverpod(keepAlive: true)
 class ProductSubmissionNotifier extends _$ProductSubmissionNotifier {
   bool _inFlight = false;

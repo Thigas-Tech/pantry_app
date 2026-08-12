@@ -1,5 +1,36 @@
 ## 4. Provider layer (`lib/providers/`)
 
+### 4.0 Provider declaration convention
+
+All providers MUST be declared with `@riverpod` code generation
+(`riverpod_annotation` + `riverpod_generator`, see the Riverpod docs on
+code generation). Hand-written `final xxxProvider = ...` declarations are
+banned in new code; every provider file carries a `part 'xxx.g.dart'`
+directive and its generated file is committed.
+
+Lifecycle rules (preserve the manual semantics exactly when migrating):
+
+| Manual form | Codegen form |
+|---|---|
+| `Provider` (keepAlive) | `@Riverpod(keepAlive: true)` on the function |
+| `FutureProvider` / `StreamProvider` (keepAlive) | `@Riverpod(keepAlive: true)` with an `async`/`async*` function |
+| `.autoDispose` variants and families | plain `@riverpod` (autoDispose is the default) |
+| `Notifier` / `AsyncNotifier` | `@Riverpod(keepAlive: true)` class extending `_$X` |
+
+Function-based providers take a plain `Ref` parameter (this generator
+version does not emit per-provider `XxxRef` classes). Class-based
+notifiers keep their public methods; the generated provider name is the
+function/class name with the `Provider` suffix, so call sites and test
+overrides never change.
+
+The `select` extension lives in `flutter_riverpod` — import it where
+`ref.watch(someProvider.select(...))` or provider-type doc references
+(`[Provider]`, `[StreamProvider]`, ...) are used.
+
+Once the migration is complete, `riverpod_lint`'s
+`avoid_manual_providers` rule can be enabled in `analysis_options.yaml`
+to enforce the convention mechanically.
+
 | Provider | Type | Purpose |
 |---|---|---|
 | `databaseProvider` | `Provider` | Singleton `DatabaseHelper` |
