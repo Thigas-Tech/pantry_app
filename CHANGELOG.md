@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Fixed
+
+- **SQLite row null-safety (audit Q3)**: removed remaining non-null
+  assertions on SQL row values in `checkIngredientShortages` and
+  `cookRecipe` (`quantity` is a nullable schema column and is now read with
+  a `?? 0` fallback; a missing `id` row is skipped) and in
+  `getBarcodesInInventory` (null/empty barcode rows are filtered out).
+  Regression tests cover NULL-quantity rows in both shortage checks and the
+  cook FEFO transaction.
+  (`lib/providers/recipe_provider.dart`,
+  `lib/database/database_helper.dart`,
+  `test/providers/q3_null_row_regression_test.dart`)
+
 ### Documentation
 
 - **Price tracking architecture doc**: new `ARCHITECTURE/PRICE_TRACKING.md`
