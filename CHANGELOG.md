@@ -107,7 +107,6 @@
   (`lib/screens/settings_screen.dart`,
   `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`,
   `test/screens/settings_screen_test.dart`)
->>>>>>> origin/main
 
 - **SQLite version compatibility**: FEFO and price-statistics queries used
   `NULLS LAST` (SQLite 3.30+) and `ROW_NUMBER() OVER` (SQLite 3.25+),
