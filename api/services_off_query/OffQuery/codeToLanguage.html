@@ -77,7 +77,10 @@ codes.</p>
   try {
     return OpenFoodFactsLanguage.fromOffTag(code) ??
         OpenFoodFactsLanguage.ENGLISH;
-  } on Object catch (_) {
+  } on Object catch (e) {
+    logWarning(
+      &#39;Unknown OFF language code $code, falling back to English: $e&#39;,
+    );
     return OpenFoodFactsLanguage.ENGLISH;
   }
 }</code></pre>

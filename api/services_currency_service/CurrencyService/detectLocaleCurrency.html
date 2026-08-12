@@ -131,7 +131,8 @@ ISO 4217 currency codes. Falls back to 'USD'.</p>
       &#39;VN&#39; =&gt; &#39;VND&#39;,
       _ =&gt; &#39;USD&#39;,
     };
-  } on Object catch (_) {
+  } on Object catch (e) {
+    logWarning(&#39;Locale currency detection failed, falling back to USD: $e&#39;);
     return &#39;USD&#39;;
   }
 }</code></pre>

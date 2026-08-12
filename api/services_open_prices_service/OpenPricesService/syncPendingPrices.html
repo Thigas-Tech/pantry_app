@@ -86,6 +86,7 @@ synced locally without making HTTP requests.</p>
 
   var synced = 0;
   var failed = 0;
+  var stuckPending = 0;
 
   for (final price in pending) {
     try {
@@ -99,9 +100,21 @@ synced locally without making HTTP requests.</p>
         await _db.updatePrice(
           price.copyWith(syncStatus: priceSyncFailed),
         );
-      } on Exception catch (_) {}
+      } on Exception catch (inner) {
+        logError(
+          &#39;Failed to mark price ${price.id} as failed: $inner&#39;,
+        );
+        stuckPending++;
+      }
       failed++;
     }
+  }
+
+  if (stuckPending &gt; 0) {
+    logWarning(
+      &#39;$stuckPending prices remain stuck in pending state &#39;
+      &#39;(both sync and failure marking failed)&#39;,
+    );
   }
 
   logInfo(

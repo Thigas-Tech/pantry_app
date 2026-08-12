@@ -85,8 +85,8 @@ prevents setState during build errors.</p>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(pantryProvider);
     });
-  } on Exception catch (_) {
-    &#47;&#47; Overdue cache check is non-critical; failure is logged by the repo.
+  } on Exception catch (e) {
+    logWarning(&#39;Overdue cache refresh failed: $e&#39;);
   }
 }</code></pre>
 </section>

@@ -77,7 +77,8 @@ loaded.</p>
 
   try {
     return await rootBundle.loadString(path);
-  } on Object catch (_) {
+  } on Object catch (e) {
+    logWarning(&#39;Failed to load changelog for $locale, falling back: $e&#39;);
     return rootBundle.loadString(&#39;USER_CHANGELOG.md&#39;);
   }
 }</code></pre>
