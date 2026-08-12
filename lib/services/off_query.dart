@@ -1,4 +1,5 @@
 import 'package:openfoodfacts/openfoodfacts.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// Centralized query configuration for Open Food Facts SDK calls.
 ///
@@ -38,7 +39,10 @@ class OffQuery {
     try {
       return OpenFoodFactsLanguage.fromOffTag(code) ??
           OpenFoodFactsLanguage.ENGLISH;
-    } on Object catch (_) {
+    } on Object catch (e) {
+      logWarning(
+        'Unknown OFF language code $code, falling back to English: $e',
+      );
       return OpenFoodFactsLanguage.ENGLISH;
     }
   }

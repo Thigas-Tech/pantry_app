@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 /// Returns the asset path for the changelog file for the given [locale].
 ///
@@ -26,7 +27,8 @@ Future<String> loadLocalizedChangelog(Locale locale) async {
 
   try {
     return await rootBundle.loadString(path);
-  } on Object catch (_) {
+  } on Object catch (e) {
+    logWarning('Failed to load changelog for $locale, falling back: $e');
     return rootBundle.loadString('USER_CHANGELOG.md');
   }
 }

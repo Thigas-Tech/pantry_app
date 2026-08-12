@@ -4,6 +4,7 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'home_screen_controller.g.dart';
@@ -117,8 +118,8 @@ class HomeScreenController extends _$HomeScreenController {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.invalidate(pantryProvider);
       });
-    } on Exception catch (_) {
-      // Overdue cache check is non-critical; failure is logged by the repo.
+    } on Exception catch (e) {
+      logWarning('Overdue cache refresh failed: $e');
     }
   }
 }

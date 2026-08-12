@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Silent exception swallowing (audit Q4)**: theme-mode load/persist
+  failures in `theme_provider.dart` are now logged via `logWarning` instead
+  of being swallowed; a price whose failure-marking also fails in
+  `open_prices_service.syncPendingPrices` is now logged and reported
+  instead of silently staying "pending" forever. Near-silent catch blocks
+  in `home_screen_controller`, `active_inventory_provider`,
+  `settings_provider`, `currency_service`, `off_query`, `changelog_loader`
+  and `price_entry_sheet` now log a warning too.
+  (`lib/providers/theme_provider.dart`,
+  `lib/services/open_prices_service.dart`,
+  `test/providers/theme_provider_test.dart`,
+  `test/services/open_prices_service_test.dart`)
+
 ### Documentation
 
 - **Price tracking architecture doc**: new `ARCHITECTURE/PRICE_TRACKING.md`

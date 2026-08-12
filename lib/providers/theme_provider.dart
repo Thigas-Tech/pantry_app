@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:pantry_app/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,7 +43,9 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
           orElse: () => ThemeModeOption.system,
         );
       }
-    } on Exception catch (_) {}
+    } on Exception catch (e) {
+      logWarning('Failed to load theme mode from preferences: $e');
+    }
   }
 
   /// Updates the theme mode and persists the choice.
@@ -55,6 +58,8 @@ class ThemeModeNotifier extends _$ThemeModeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_key, mode.name);
-    } on Exception catch (_) {}
+    } on Exception catch (e) {
+      logWarning('Failed to persist theme mode ${mode.name}: $e');
+    }
   }
 }
