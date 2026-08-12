@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Opening "What's New" when the changelog cannot be loaded now shows a clear
+  error message instead of the cache-flush failure message.
+
 - Adding the same product a second time with a different expiry date now keeps
   the two as separate pantry entries, each with its own expiry. Two entries
   are merged only when they are truly the same batch (same expiry date,
