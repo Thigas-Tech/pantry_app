@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
-import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
@@ -771,10 +770,10 @@ class SettingsScreen extends ConsumerWidget {
       if (!context.mounted) return;
 
       await showWhatsNewSheet(context, rawChangelog: raw);
-    } on Exception catch (e) {
+    } on Object catch (e) {
       logError('Failed to show changelog from settings: $e');
       if (context.mounted) {
-        SnackbarHelper.showError(context, l10n.flushCacheFailed);
+        SnackbarHelper.showError(context, l10n.changelogLoadFailed);
       }
     }
   }
@@ -1155,7 +1154,7 @@ class SettingsScreen extends ConsumerWidget {
   ) async {
     try {
       final notifService = ref.read(notificationServiceProvider);
-      final db = DatabaseHelper();
+      final db = ref.read(databaseProvider);
       final database = await db.database;
       final inventories = await db.getInventories();
       final items = <InventoryItem>[];

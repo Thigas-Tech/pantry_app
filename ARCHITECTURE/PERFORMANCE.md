@@ -53,11 +53,17 @@ rolling refresh window. Benefits:
 - Animate repeatedly (e.g., badge transitions, progress indicators)
 - Are embedded in a scrolling parent but have static content
 
-Each `InventoryCard` in the main inventory `ListView.builder` is
-wrapped in `RepaintBoundary` with `ValueKey(item.id)`. This prevents parent
-scroll events from triggering card repaints and enables efficient widget
-recycling. Cards that load network images or toggle selection do not
-force their siblings to repaint.
+Each `InventoryCard` in the main inventory list is wrapped in
+`RepaintBoundary` with `ValueKey(item.id)`. This prevents parent scroll
+events from triggering card repaints. Cards that load network images or
+toggle selection do not force their siblings to repaint.
+
+> **Note**: the main inventory list is currently an eager `ListView(
+> children:)` (home_screen.dart). Converting it to a lazy
+> `ListView.builder` with a flattened section index is tracked in the
+> performance backlog; the `RepaintBoundary` + `ValueKey` pattern above
+> is already in place and is a prerequisite for efficient widget
+> recycling once the list becomes lazy.
 
 ### 11.6 Thread strategy
 
