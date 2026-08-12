@@ -64,6 +64,11 @@
     
 <section class="desc markdown">
   <p>Converts a <a href="../../models_recipe/Recipe-class.html">Recipe</a> to a map for database insertion.</p>
+<p>Emits the derived search_text column via <a href="../../utils_search_utils/buildRecipeSearchText.html">buildRecipeSearchText</a> so
+every write path (DAO insert/update and the DatabaseHelper
+transaction helpers, which all funnel through this map) keeps the
+normalized search text in sync with the recipe name and
+instructions.</p>
 </section>
 
 
@@ -79,6 +84,7 @@
   &#39;created_at&#39;: recipe.createdAt,
   &#39;updated_at&#39;: recipe.updatedAt,
   &#39;inventory_id&#39;: recipe.inventoryId,
+  &#39;search_text&#39;: buildRecipeSearchText(recipe),
 };</code></pre>
 </section>
 
