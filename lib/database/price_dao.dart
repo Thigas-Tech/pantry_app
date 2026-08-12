@@ -267,21 +267,20 @@ class PriceDao {
       SELECT SUM(p.price * i.total_quantity) as total
       FROM prices p
       INNER JOIN (
-        SELECT barcode, MAX(date_purchased) as max_date
-        FROM prices
-        WHERE inventory_id = ?
-        GROUP BY barcode
-      ) latest ON p.barcode = latest.barcode
-        AND p.date_purchased = latest.max_date
-      INNER JOIN (
         SELECT barcode, SUM(quantity) as total_quantity
         FROM inventory
         WHERE inventory_id = ?
         GROUP BY barcode
       ) i ON i.barcode = p.barcode
       WHERE p.inventory_id = ?
+        AND p.id = (
+          SELECT id FROM prices p2
+          WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
+          ORDER BY p2.date_purchased DESC, p2.id DESC
+          LIMIT 1
+        )
     ''',
-      [inventoryId, inventoryId, inventoryId],
+      [inventoryId, inventoryId],
     );
     final total = result.first['total'] as double?;
     return total;
@@ -302,22 +301,21 @@ class PriceDao {
       SELECT p.currency, SUM(p.price * i.total_quantity) as subtotal
       FROM prices p
       INNER JOIN (
-        SELECT barcode, MAX(date_purchased) as max_date
-        FROM prices
-        WHERE inventory_id = ?
-        GROUP BY barcode
-      ) latest ON p.barcode = latest.barcode
-        AND p.date_purchased = latest.max_date
-      INNER JOIN (
         SELECT barcode, SUM(quantity) as total_quantity
         FROM inventory
         WHERE inventory_id = ?
         GROUP BY barcode
       ) i ON i.barcode = p.barcode
       WHERE p.inventory_id = ?
+        AND p.id = (
+          SELECT id FROM prices p2
+          WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
+          ORDER BY p2.date_purchased DESC, p2.id DESC
+          LIMIT 1
+        )
       GROUP BY p.currency
     ''',
-      [inventoryId, inventoryId, inventoryId],
+      [inventoryId, inventoryId],
     );
     return result;
   }
@@ -335,21 +333,20 @@ class PriceDao {
       SELECT p.price, p.currency, i.total_quantity
       FROM prices p
       INNER JOIN (
-        SELECT barcode, MAX(date_purchased) as max_date
-        FROM prices
-        WHERE inventory_id = ?
-        GROUP BY barcode
-      ) latest ON p.barcode = latest.barcode
-        AND p.date_purchased = latest.max_date
-      INNER JOIN (
         SELECT barcode, SUM(quantity) as total_quantity
         FROM inventory
         WHERE inventory_id = ?
         GROUP BY barcode
       ) i ON i.barcode = p.barcode
       WHERE p.inventory_id = ?
+        AND p.id = (
+          SELECT id FROM prices p2
+          WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
+          ORDER BY p2.date_purchased DESC, p2.id DESC
+          LIMIT 1
+        )
     ''',
-      [inventoryId, inventoryId, inventoryId],
+      [inventoryId, inventoryId],
     );
     return result;
   }
@@ -365,21 +362,20 @@ class PriceDao {
              SUM(i.total_quantity) as total_qty
       FROM prices p
       INNER JOIN (
-        SELECT barcode, MAX(date_purchased) as max_date
-        FROM prices
-        WHERE inventory_id = ?
-        GROUP BY barcode
-      ) latest ON p.barcode = latest.barcode
-        AND p.date_purchased = latest.max_date
-      INNER JOIN (
         SELECT barcode, SUM(quantity) as total_quantity
         FROM inventory
         WHERE inventory_id = ?
         GROUP BY barcode
       ) i ON i.barcode = p.barcode
       WHERE p.inventory_id = ?
+        AND p.id = (
+          SELECT id FROM prices p2
+          WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
+          ORDER BY p2.date_purchased DESC, p2.id DESC
+          LIMIT 1
+        )
     ''',
-      [inventoryId, inventoryId, inventoryId],
+      [inventoryId, inventoryId],
     );
     final total = result.first['total'] as double?;
     final totalQty = result.first['total_qty'] as double?;
@@ -460,19 +456,22 @@ class PriceDao {
         ),
         latest_prices AS (
           SELECT p.barcode, p.price, p.date_purchased,
-            ib.total_quantity,
-            ROW_NUMBER() OVER (
-              PARTITION BY p.barcode ORDER BY p.date_purchased DESC
-            ) AS rn
+            ib.total_quantity
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
           WHERE p.inventory_id = ?
+            AND p.id = (
+              SELECT id FROM prices p2
+              WHERE p2.barcode = p.barcode
+                AND p2.inventory_id = p.inventory_id
+              ORDER BY p2.date_purchased DESC, p2.id DESC
+              LIMIT 1
+            )
         )
         SELECT
           strftime('%Y-%m', date_purchased / 1000, 'unixepoch') AS month,
           SUM(price * total_quantity) AS total
         FROM latest_prices
-        WHERE rn = 1
         GROUP BY month
         ORDER BY month ASC
       ''',
@@ -508,21 +507,24 @@ class PriceDao {
         ),
         latest_prices AS (
           SELECT p.barcode, p.price, p.store,
-            ib.total_quantity,
-            ROW_NUMBER() OVER (
-              PARTITION BY p.barcode ORDER BY p.date_purchased DESC
-            ) AS rn
+            ib.total_quantity
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
           WHERE p.store IS NOT NULL AND p.store != ''
             AND p.inventory_id = ?
+            AND p.id = (
+              SELECT id FROM prices p2
+              WHERE p2.barcode = p.barcode
+                AND p2.inventory_id = p.inventory_id
+              ORDER BY p2.date_purchased DESC, p2.id DESC
+              LIMIT 1
+            )
         )
         SELECT
           store,
           SUM(price * total_quantity) AS total,
           COUNT(*) AS item_count
         FROM latest_prices
-        WHERE rn = 1
         GROUP BY store
         ORDER BY total DESC
       ''',
@@ -555,14 +557,18 @@ class PriceDao {
           WHERE inventory_id = ?
         ),
         latest_prices AS (
-          SELECT p.barcode, p.store,
-            ROW_NUMBER() OVER (
-              PARTITION BY p.barcode ORDER BY p.date_purchased DESC
-            ) AS rn
+          SELECT p.barcode, p.store
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
           WHERE p.store IS NOT NULL AND p.store != ''
             AND p.inventory_id = ?
+            AND p.id = (
+              SELECT id FROM prices p2
+              WHERE p2.barcode = p.barcode
+                AND p2.inventory_id = p.inventory_id
+              ORDER BY p2.date_purchased DESC, p2.id DESC
+              LIMIT 1
+            )
         )
         SELECT
           lp.store,
@@ -578,7 +584,7 @@ class PriceDao {
           ) AS avg_score
         FROM latest_prices lp
         INNER JOIN products pr ON lp.barcode = pr.barcode
-        WHERE lp.rn = 1 AND pr.nutriscore_grade IS NOT NULL
+        WHERE pr.nutriscore_grade IS NOT NULL
         GROUP BY lp.store
         ORDER BY avg_score DESC
       ''',

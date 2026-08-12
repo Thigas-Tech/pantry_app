@@ -319,6 +319,107 @@ void main() {
     });
   });
 
+  group('PriceDao latest-price tie handling', () {
+    test('same-day duplicate purchases are not double-counted', () async {
+      final db = await dbHelper.database;
+      const productDao = ProductDao();
+      await productDao.insert(
+        db,
+        const Product(barcode: 'tie1', name: 'Tie Product'),
+      );
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'tie1', quantity: 2),
+      );
+
+      // Two purchases on the same day (identical date_purchased) with
+      // different prices. The latest row (highest id) must win: 20 * 2.
+      await dao.insert(
+        db,
+        const Price(barcode: 'tie1', price: 10, datePurchased: 1000),
+      );
+      await dao.insert(
+        db,
+        const Price(barcode: 'tie1', price: 20, datePurchased: 1000),
+      );
+
+      expect(await dao.totalInventoryValue(db, 1), 40.0);
+      expect(await dao.averageItemPrice(db, 1), 20.0);
+
+      final byCurrency = await dao.totalInventoryValueByCurrency(db, 1);
+      expect(byCurrency, hasLength(1));
+      expect((byCurrency.first['subtotal'] as num).toDouble(), 40.0);
+
+      final latest = await dao.latestPricesWithCurrency(db, 1);
+      expect(latest, hasLength(1));
+      expect((latest.first['price'] as num).toDouble(), 20.0);
+    });
+
+    test('monthlyExpenditure counts same-day duplicates once', () async {
+      final db = await dbHelper.database;
+      const productDao = ProductDao();
+      await productDao.insert(
+        db,
+        const Product(barcode: 'tie2', name: 'Tie Monthly'),
+      );
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'tie2'),
+      );
+      final sameDay = DateTime(2026, 6, 15).millisecondsSinceEpoch;
+      await dao.insert(
+        db,
+        Price(barcode: 'tie2', price: 10, datePurchased: sameDay),
+      );
+      await dao.insert(
+        db,
+        Price(barcode: 'tie2', price: 30, datePurchased: sameDay),
+      );
+
+      final rows = await dao.monthlyExpenditure(db, inventoryId: 1);
+      expect(rows, hasLength(1));
+      expect(rows.first['month'], '2026-06');
+      expect((rows.first['total'] as num).toDouble(), 30.0);
+    });
+
+    test('storeSpending counts same-day duplicates once', () async {
+      final db = await dbHelper.database;
+      const productDao = ProductDao();
+      await productDao.insert(
+        db,
+        const Product(barcode: 'tie3', name: 'Tie Store'),
+      );
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'tie3'),
+      );
+      final sameDay = DateTime(2026, 6, 15).millisecondsSinceEpoch;
+      await dao.insert(
+        db,
+        Price(
+          barcode: 'tie3',
+          price: 10,
+          store: 'Corner Shop',
+          datePurchased: sameDay,
+        ),
+      );
+      await dao.insert(
+        db,
+        Price(
+          barcode: 'tie3',
+          price: 30,
+          store: 'Corner Shop',
+          datePurchased: sameDay,
+        ),
+      );
+
+      final rows = await dao.storeSpending(db, inventoryId: 1);
+      expect(rows, hasLength(1));
+      expect(rows.first['store'], 'Corner Shop');
+      expect((rows.first['total'] as num).toDouble(), 30.0);
+    });
+  });
+
   group('PriceDao monthly and store spending scale by quantity', () {
     setUp(() async {
       final db = await dbHelper.database;

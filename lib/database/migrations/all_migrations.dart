@@ -29,6 +29,7 @@ import 'package:pantry_app/database/migrations/v34_prices_inventory.dart';
 import 'package:pantry_app/database/migrations/v35_additional_nutrients.dart';
 import 'package:pantry_app/database/migrations/v36_nonunique_inventory_index.dart';
 import 'package:pantry_app/database/migrations/v37_prices_package.dart';
+import 'package:pantry_app/database/migrations/v38_index_optimizations.dart';
 import 'package:pantry_app/database/migrations/v3_normalize_units.dart';
 import 'package:pantry_app/database/migrations/v4_nutriscore_grade.dart';
 import 'package:pantry_app/database/migrations/v5_nutriscore_not_applicable.dart';
@@ -76,4 +77,5 @@ List<Migration> allMigrations() => [
   MigrationV35(),
   MigrationV36(),
   MigrationV37(),
+  MigrationV38(),
 ];

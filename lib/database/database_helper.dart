@@ -128,7 +128,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 37;
+  static const int databaseVersion = 38;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -155,12 +155,14 @@ class DatabaseHelper {
         onUpgrade: _onUpgrade,
         onDowngrade: onDatabaseDowngradeDelete,
         onOpen: (db) async {
-          await _checkIntegrity(db);
           await db.execute('PRAGMA foreign_keys = ON');
           final mode = await db.rawQuery('PRAGMA journal_mode');
           if (mode.first['journal_mode'] != 'wal') {
             logWarning('WAL journal mode is not active on database open');
           }
+          // Refresh the query planner statistics; cheap and recommended
+          // after any schema or data changes.
+          await db.execute('PRAGMA optimize');
         },
       );
       logInfo('Database opened successfully');
@@ -252,12 +254,8 @@ class DatabaseHelper {
       )
     ''');
 
-    await db.execute('CREATE INDEX idx_barcode ON products(barcode)');
     await db.execute('CREATE INDEX idx_search_text ON products(search_text)');
     await db.execute('CREATE INDEX idx_expiry ON inventory(expiry_date)');
-    await db.execute(
-      'CREATE INDEX idx_inventory_barcode ON inventory(barcode)',
-    );
     await db.execute(
       'CREATE INDEX idx_inventory_id ON inventory(inventory_id)',
     );
@@ -268,12 +266,20 @@ class DatabaseHelper {
       'CREATE INDEX IF NOT EXISTS idx_inventory_barcode_inventory_id '
       'ON inventory(barcode, inventory_id)',
     );
+    await db.execute(
+      'CREATE INDEX idx_products_source ON products(source)',
+    );
 
     await feedbackQueueDao.createTable(db);
 
     await productSubmissionQueueDao.createTable(db);
 
     await priceDao.createTable(db);
+
+    await db.execute(
+      'CREATE INDEX idx_prices_barcode_inventory_date'
+      ' ON prices(barcode, inventory_id, date_purchased)',
+    );
 
     await _createShoppingListTable(db);
 
@@ -289,6 +295,10 @@ class DatabaseHelper {
         ' ON recipes($col)',
       );
     }
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_recipes_inventory_updated'
+      ' ON recipes(inventory_id, updated_at)',
+    );
 
     await recipeIngredientDao.createTable(db);
 
@@ -311,19 +321,16 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     logInfo('Database upgrade: $oldVersion → $newVersion');
-    final result = await MigrationRunner(allMigrations()).run(
+    await MigrationRunner(allMigrations()).run(
       db,
       oldVersion,
       newVersion,
     );
-    if (result.isSuccess) {
-      logInfo('Database upgrade completed successfully');
-    } else {
-      logWarning(
-        'Database upgrade completed with failures: '
-        '${result.failed}',
-      );
-    }
+    logInfo('Database upgrade completed successfully');
+    // Verify the upgraded database is structurally sound. Running this
+    // only after upgrades avoids the per-launch cost of quick_check on
+    // large databases.
+    await _checkIntegrity(db);
   }
 
   // --------------------- Product (delegating to ProductDao) -------
@@ -447,6 +454,9 @@ class DatabaseHelper {
         );
         logInfo('Removed $deletedPrices old price rows');
       }
+
+      // Refresh query planner statistics after the bulk deletions.
+      await db.execute('PRAGMA optimize');
 
       logInfo('Cleanup finished');
     } on Exception catch (e) {
@@ -1042,7 +1052,7 @@ class DatabaseHelper {
     final db = await database;
     return db.rawQuery(
       'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
-      ' ORDER BY expiry_date ASC NULLS LAST',
+      ' ORDER BY (expiry_date IS NULL), expiry_date ASC',
       [barcode, inventoryId],
     );
   }
@@ -1063,7 +1073,7 @@ class DatabaseHelper {
       'SELECT i.* FROM inventory i'
       ' INNER JOIN products p ON p.barcode = i.barcode'
       ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
-      ' ORDER BY i.expiry_date ASC NULLS LAST',
+      ' ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC',
       ['%$normalized%', inventoryId],
     );
   }

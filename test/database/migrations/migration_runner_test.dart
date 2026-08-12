@@ -97,7 +97,7 @@ void main() {
       await db.close();
     });
 
-    test('continues after a migration failure', () async {
+    test('throws on a migration failure', () async {
       final db = await databaseFactory.openDatabase(inMemoryDatabasePath);
 
       final runner = MigrationRunner([
@@ -106,16 +106,16 @@ void main() {
         _FailingMigration(),
       ]);
 
-      final result = await runner.run(db, 0, 3);
+      await expectLater(
+        runner.run(db, 0, 3),
+        throwsA(isA<Exception>()),
+      );
 
-      expect(result.succeeded, containsAll([1, 2]));
-      expect(result.failed, contains(3));
-
-      // v1 and v2 changes should be visible.
+      // Earlier migrations ran, but the exception propagates so the
+      // surrounding upgrade transaction can roll back and retry later.
       final columns = await db.rawQuery("PRAGMA table_info('test_table')");
       final columnNames = columns.map((c) => c['name'] as String?).toList();
       expect(columnNames, contains('id'));
-      expect(columnNames, contains('name'));
 
       await db.close();
     });

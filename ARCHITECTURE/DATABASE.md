@@ -1,6 +1,6 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 37)
+### 2.1 Schema (version 38)
 
 Thirteen tables:
 
@@ -59,7 +59,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v37).
+- `_onUpgrade` handles version bumps (currently v1 -> v38).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -101,6 +101,7 @@ Version history:
 | v34 -> v35 | Added `additional_nutrients` column on `products` |
 | v35 -> v36 | Replaced the unique index on `inventory(barcode, inventory_id)` with a non-unique index so distinct expiry batches can coexist |
 | v36 -> v37 | Added `package_quantity` / `package_unit` to `prices` and `quantity` / `product_quantity` to `products` for unit-aware price math |
+| v37 -> v38 | Dropped redundant indexes (`idx_barcode` on the products PK, `idx_inventory_barcode` covered by the composite); added `idx_prices_barcode_inventory_date`, `idx_recipes_inventory_updated`, `idx_products_source` |
 
 **Migration v30 search_text backfill**: the recipe `search_text` backfill
 intentionally runs in Dart via `normalizeForSearch()` instead of raw SQL.
@@ -109,6 +110,31 @@ eszett, Latin Extended-A), and the performance gain of a raw-SQL backfill
 is marginal for typical recipe counts. Correctness is prioritized over
 that optimization; regression tests lock in diacritic removal, case and
 whitespace normalization, and idempotency.
+
+### 2.3a PRAGMA configuration
+
+`DatabaseHelper` applies the following PRAGMAs when opening the database:
+
+| PRAGMA | Value | Rationale |
+|---|---|---|
+| `foreign_keys` | ON | Enforces referential integrity (children are never orphaned by parent deletes). |
+| `journal_mode` | WAL | Better read/write concurrency and crash safety than the default DELETE journal. |
+| `synchronous` | FULL | Safest durability guarantee; with WAL it syncs on every commit. Slightly slower than NORMAL, chosen for correctness. |
+| `cache_size` | -2000 (2 MB) | SQLite default page cache, tuned down for mobile memory constraints. |
+| `mmap_size` | 268435456 (256 MB) | Cap for memory-mapped I/O; pages are mapped on demand, so the cap is a limit, not an allocation. |
+
+`PRAGMA quick_check` runs only after a schema upgrade (not on every open,
+to keep startup fast on large databases). `PRAGMA optimize` runs on every
+open and after `cleanupOldEntries` to refresh query-planner statistics.
+
+**SQLite version compatibility**: the app targets `minSdk 24` (Android
+7.0, system SQLite 3.9.2). All SQL must therefore stay within SQLite
+3.9.2 syntax — notably no `NULLS LAST` (3.30+) and no window functions
+like `ROW_NUMBER() OVER` (3.25+). `test/database/sqlite_compatibility_test.dart`
+scans `lib/` and fails if either syntax is reintroduced. FEFO ordering
+uses the portable `ORDER BY (expiry_date IS NULL), expiry_date ASC`, and
+"latest price per barcode" uses a correlated subquery
+(`ORDER BY date_purchased DESC, id DESC LIMIT 1`).
 
 ### 2.4 Connectivity layer
 

@@ -3,6 +3,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
+import 'package:pantry_app/database/migrations/migration_runner.dart';
+import 'package:pantry_app/database/migrations/v13_shopping_list_table.dart';
+import 'package:pantry_app/database/migrations/v20_backfill_inventory_id.dart';
+import 'package:pantry_app/database/migrations/v24_firebase_cache_meta.dart';
+import 'package:pantry_app/database/migrations/v28_normalize_produce_barcodes.dart';
+import 'package:pantry_app/database/migrations/v3_normalize_units.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
@@ -296,6 +302,37 @@ void main() {
 
         final homeRecipes = await db.getAllRecipes(1);
         expect(homeRecipes.map((r) => r.name), ['Home Soup']);
+      },
+    );
+
+    test(
+      "deleteInventory nulls that inventory's shopping list items",
+      () async {
+        final workId = await db.createInventory('Work');
+        await db.insertShoppingItem(
+          ShoppingItem(
+            name: 'Work Milk',
+            inventoryId: workId,
+          ),
+        );
+        await db.insertShoppingItem(
+          const ShoppingItem(
+            name: 'Home Bread',
+            inventoryId: 1,
+          ),
+        );
+
+        await db.deleteInventory(workId);
+
+        // The work item keeps its row but loses the dangling inventory ref,
+        // mirroring the ON DELETE SET NULL FK intent that foreign-key
+        // enforcement cannot apply here (FK is off during the delete).
+        final all = await db.getShoppingList();
+        final workItem = all.firstWhere((i) => i.name == 'Work Milk');
+        expect(workItem.inventoryId, isNull);
+
+        final homeItem = all.firstWhere((i) => i.name == 'Home Bread');
+        expect(homeItem.inventoryId, 1);
       },
     );
 
@@ -688,15 +725,19 @@ void main() {
       });
       await v2Db.close();
 
-      final dbHelper = DatabaseHelper.withPath(v2Path);
-      final items = await dbHelper.getInventoryItems(inventoryId: 1);
+      // Reopen and run only the v3 migration. The hand-rolled v2 schema
+      // above is intentionally minimal (only the tables v3 touches), so
+      // the full v3→v38 chain cannot apply to it — run the migration
+      // under test directly instead.
+      final migratedDb = await openDatabase(v2Path);
+      await MigrationRunner([MigrationV3()]).run(migratedDb, 2, 3);
 
-      final unitA = items.firstWhere((i) => i.barcode == 'a').unit;
-      final unitB = items.firstWhere((i) => i.barcode == 'b').unit;
+      final rows = await migratedDb.query('inventory');
+      final unitA = rows.firstWhere((r) => r['barcode'] == 'a')['unit'];
+      final unitB = rows.firstWhere((r) => r['barcode'] == 'b')['unit'];
       expect(unitA, 'pieces');
       expect(unitB, 'kg');
 
-      final migratedDb = await dbHelper.database;
       await migratedDb.close();
       tempDir.deleteSync(recursive: true);
     });
@@ -867,16 +908,21 @@ void main() {
       );
       await v12Db.close();
 
-      final dbHelper = DatabaseHelper.withPath(v12Path);
-      await dbHelper.database;
+      // Reopen and run only the v13 migration. The hand-rolled v12 schema
+      // above is intentionally minimal, so the full v13→v38 chain cannot
+      // apply to it — run the migration under test directly instead.
+      final migratedDb = await openDatabase(v12Path);
+      await MigrationRunner([MigrationV13()]).run(migratedDb, 12, 13);
 
-      const item = ShoppingItem(name: 'Milk');
-      await dbHelper.insertShoppingItem(item);
-      final items = await dbHelper.getShoppingList();
+      final id = await migratedDb.insert('shopping_list', {
+        'name': 'Milk',
+        'date_added': DateTime.now().millisecondsSinceEpoch,
+      });
+      expect(id, isNonNegative);
+      final items = await migratedDb.query('shopping_list');
       expect(items.length, 1);
-      expect(items[0].name, 'Milk');
+      expect(items[0]['name'], 'Milk');
 
-      final migratedDb = await dbHelper.database;
       await migratedDb.close();
       tempDir.deleteSync(recursive: true);
     });
@@ -936,15 +982,17 @@ void main() {
       );
       await v19Db.close();
 
-      final dbHelper = DatabaseHelper.withPath(v19Path);
-      await dbHelper.database;
+      // Reopen and run only the v20 migration. The hand-rolled v19 schema
+      // above is intentionally minimal, so the full v20→v38 chain cannot
+      // apply to it — run the migration under test directly instead.
+      final migratedDb = await openDatabase(v19Path);
+      await MigrationRunner([MigrationV20()]).run(migratedDb, 19, 20);
 
-      final items = await dbHelper.getShoppingList();
+      final items = await migratedDb.query('shopping_list');
       expect(items.length, 2);
-      expect(items[0].inventoryId, isNotNull);
-      expect(items[1].inventoryId, 1);
+      expect(items[0]['inventory_id'], isNotNull);
+      expect(items[1]['inventory_id'], 1);
 
-      final migratedDb = await dbHelper.database;
       await migratedDb.close();
       tempDir.deleteSync(recursive: true);
     });
@@ -1071,9 +1119,12 @@ void main() {
         );
         await v23Db.close();
 
-        // Open with current DatabaseHelper — migration runs.
-        final dbHelper = DatabaseHelper.withPath(v23Path);
-        final migratedDb = await dbHelper.database;
+        // Reopen and run only the v24 migration. The hand-rolled v23
+        // schema above is intentionally minimal, so the full v24→v38
+        // chain cannot apply to it — run the migration under test
+        // directly instead.
+        final migratedDb = await openDatabase(v23Path);
+        await MigrationRunner([MigrationV24()]).run(migratedDb, 23, 24);
 
         // Verify firebase_cache_meta table exists.
         final tableResult = await migratedDb.rawQuery(
@@ -1082,33 +1133,34 @@ void main() {
         );
         expect(tableResult, isNotEmpty);
 
-        // Verify migration is idempotent (reopen doesn't error).
-        await migratedDb.close();
-        final dbHelper2 = DatabaseHelper.withPath(v23Path);
-        await dbHelper2.database;
+        // Verify migration is idempotent.
+        await MigrationRunner([MigrationV24()]).run(migratedDb, 23, 24);
 
         // Verify existing data is intact.
-        final product = await dbHelper2.getProduct('test-barcode-123');
-        expect(product, isNotNull);
-        expect(product!.name, 'Surviving Product');
+        final products = await migratedDb.query(
+          'products',
+          where: 'barcode = ?',
+          whereArgs: ['test-barcode-123'],
+        );
+        expect(products, isNotEmpty);
+        expect(products.first['name'], 'Surviving Product');
 
         // Verify we can insert into the new table.
-        final metaDb = await dbHelper2.database;
         await const FirebaseCacheMetaDao().upsert(
-          metaDb,
+          migratedDb,
           'test-barcode-123',
           'barcoded',
           lastRefreshedAt: 1000,
           nextRefreshAt: 1000 + (180 * 24 * 60 * 60 * 1000),
         );
         final metaEntry = await const FirebaseCacheMetaDao().get(
-          metaDb,
+          migratedDb,
           'test-barcode-123',
         );
         expect(metaEntry, isNotNull);
         expect(metaEntry!['cache_type'], 'barcoded');
 
-        await metaDb.close();
+        await migratedDb.close();
         tempDir.deleteSync(recursive: true);
       },
     );
@@ -1169,6 +1221,101 @@ void main() {
         inventoryId: 1,
       );
       expect(rows, isEmpty);
+    });
+  });
+
+  group('getInventoryRowsByBarcode', () {
+    Future<void> seedItem({
+      required String barcode,
+      required double quantity,
+      String? expiryDate,
+    }) {
+      return db.insertInventoryItem(
+        InventoryItem(
+          barcode: barcode,
+          expiryDate: expiryDate,
+          quantity: quantity,
+        ),
+      );
+    }
+
+    test('returns rows ordered by expiry ascending', () async {
+      await db.insertProduct(
+        const Product(barcode: 'fefo', name: 'Fefo'),
+      );
+      await seedItem(
+        barcode: 'fefo',
+        expiryDate: '2026-06-10',
+        quantity: 1,
+      );
+      await seedItem(
+        barcode: 'fefo',
+        expiryDate: '2026-05-01',
+        quantity: 2,
+      );
+
+      final rows = await db.getInventoryRowsByBarcode(
+        barcode: 'fefo',
+        inventoryId: 1,
+      );
+      expect(rows.map((r) => r['expiry_date']), [
+        '2026-05-01',
+        '2026-06-10',
+      ]);
+    });
+
+    test('sorts null-expiry rows last (FEFO deduction)', () async {
+      await db.insertProduct(
+        const Product(barcode: 'fefo2', name: 'Fefo2'),
+      );
+      await seedItem(
+        barcode: 'fefo2',
+        expiryDate: '2026-06-10',
+        quantity: 1,
+      );
+      await seedItem(
+        barcode: 'fefo2',
+        quantity: 3,
+      );
+      await seedItem(
+        barcode: 'fefo2',
+        expiryDate: '2026-05-01',
+        quantity: 2,
+      );
+
+      final rows = await db.getInventoryRowsByBarcode(
+        barcode: 'fefo2',
+        inventoryId: 1,
+      );
+      expect(rows.map((r) => r['expiry_date']), [
+        '2026-05-01',
+        '2026-06-10',
+        null,
+      ]);
+    });
+
+    test('sorts null-expiry rows last for product-name fallback', () async {
+      await db.insertProduct(
+        const Product(barcode: 'fefo3', name: 'Fefo Three'),
+      );
+      await seedItem(
+        barcode: 'fefo3',
+        expiryDate: '2026-06-10',
+        quantity: 1,
+      );
+      await seedItem(
+        barcode: 'fefo3',
+        quantity: 4,
+      );
+
+      final rows = await db.getInventoryRowsByProductName(
+        name: 'fefo three',
+        inventoryId: 1,
+      );
+      expect(rows.map((r) => r['expiry_date']), [
+        '2026-06-10',
+        null,
+      ]);
     });
   });
 
@@ -1259,9 +1406,12 @@ void main() {
       );
       await v27Db.close();
 
-      // Open with current DatabaseHelper — migration runs.
-      final dbHelper = DatabaseHelper.withPath(v27Path);
-      final migratedDb = await dbHelper.database;
+      // Reopen and run only the v28 migration. The hand-rolled v27 schema
+      // above is intentionally minimal (only the tables v28 touches), so
+      // the full v28→v38 chain cannot apply to it — run the migration
+      // under test directly instead.
+      final migratedDb = await openDatabase(v27Path);
+      await MigrationRunner([MigrationV28()]).run(migratedDb, 27, 28);
 
       // Verify products table normalization.
       final products = await migratedDb.rawQuery(
@@ -1300,16 +1450,14 @@ void main() {
       expect(sl.first['barcode'], 'produce-organic_banana');
 
       // Verify migration is idempotent.
-      await migratedDb.close();
-      final dbHelper2 = DatabaseHelper.withPath(v27Path);
-      final migratedDb2 = await dbHelper2.database;
-      final doubleNormalized = await migratedDb2.rawQuery(
+      await MigrationRunner([MigrationV28()]).run(migratedDb, 27, 28);
+      final doubleNormalized = await migratedDb.rawQuery(
         "SELECT barcode FROM products WHERE barcode LIKE 'produce-%' "
         "AND barcode != 'produce-' || LOWER(TRIM(SUBSTR(barcode, 9)))",
       );
       expect(doubleNormalized, isEmpty);
 
-      await migratedDb2.close();
+      await migratedDb.close();
       tempDir.deleteSync(recursive: true);
     });
   });

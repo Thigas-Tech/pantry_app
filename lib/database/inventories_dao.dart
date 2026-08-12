@@ -35,47 +35,61 @@ class InventoriesDao {
   /// Deletes the inventory with the given [id] and all its items.
   ///
   /// Also deletes the inventory's recipes, their ingredients, and their
-  /// history, mirroring item-delete semantics.
+  /// history, mirroring item-delete semantics. Shopping list items for
+  /// that inventory are kept but lose their inventory reference, matching
+  /// the ON DELETE SET NULL intent of the shopping_list FK.
   ///
   /// Price rows are intentionally NOT deleted — they are barcode observations
   /// that remain useful if the product is re-added to another pantry. Foreign
   /// key enforcement is temporarily disabled so the no-action
   /// prices.inventory_id FK does not block the parent delete (mirrors
-  /// clearCachedProducts).
+  /// clearCachedProducts). All deletions run inside a single transaction.
   Future<void> delete(Database db, int id) async {
     await db.execute('PRAGMA foreign_keys = OFF');
     try {
-      final recipeRows = await db.query(
-        'recipes',
-        columns: ['id'],
-        where: 'inventory_id = ?',
-        whereArgs: [id],
-      );
-      final recipeIds = recipeRows
-          .map((r) => r['id'] as int?)
-          .whereType<int>()
-          .toList();
-      if (recipeIds.isNotEmpty) {
-        final placeholders = recipeIds.map((_) => '?').join(',');
-        await db.delete(
-          'recipe_history',
-          where: 'recipe_id IN ($placeholders)',
-          whereArgs: recipeIds,
-        );
-        await db.delete(
-          'recipe_ingredients',
-          where: 'recipe_id IN ($placeholders)',
-          whereArgs: recipeIds,
-        );
-        await db.delete(
+      await db.transaction((txn) async {
+        final recipeRows = await txn.query(
           'recipes',
+          columns: ['id'],
           where: 'inventory_id = ?',
           whereArgs: [id],
         );
-      }
+        final recipeIds = recipeRows
+            .map((r) => r['id'] as int?)
+            .whereType<int>()
+            .toList();
+        if (recipeIds.isNotEmpty) {
+          final placeholders = recipeIds.map((_) => '?').join(',');
+          await txn.delete(
+            'recipe_history',
+            where: 'recipe_id IN ($placeholders)',
+            whereArgs: recipeIds,
+          );
+          await txn.delete(
+            'recipe_ingredients',
+            where: 'recipe_id IN ($placeholders)',
+            whereArgs: recipeIds,
+          );
+          await txn.delete(
+            'recipes',
+            where: 'inventory_id = ?',
+            whereArgs: [id],
+          );
+        }
 
-      await db.delete('inventory', where: 'inventory_id = ?', whereArgs: [id]);
-      await db.delete('inventories', where: 'id = ?', whereArgs: [id]);
+        await txn.update(
+          'shopping_list',
+          {'inventory_id': null},
+          where: 'inventory_id = ?',
+          whereArgs: [id],
+        );
+        await txn.delete(
+          'inventory',
+          where: 'inventory_id = ?',
+          whereArgs: [id],
+        );
+        await txn.delete('inventories', where: 'id = ?', whereArgs: [id]);
+      });
     } finally {
       await db.execute('PRAGMA foreign_keys = ON');
     }
