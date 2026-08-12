@@ -78,6 +78,9 @@ ordered by expiry date (oldest first).</p>
   String barcode, {
   required int inventoryId,
 }) async {
+  if (inventoryId &lt;= 0) {
+    throw ArgumentError(&#39;inventory id must be positive&#39;);
+  }
   try {
     final result = await db.query(
       &#39;inventory&#39;,

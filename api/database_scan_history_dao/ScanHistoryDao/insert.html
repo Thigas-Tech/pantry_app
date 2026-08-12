@@ -72,6 +72,12 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; insert(DatabaseExecutor db, ScanHistoryEntry entry) async {
+  if (entry.barcode.isEmpty) {
+    throw ArgumentError(&#39;scan barcode must not be empty&#39;);
+  }
+  if (entry.name.isEmpty) {
+    throw ArgumentError(&#39;scan name must not be empty&#39;);
+  }
   logInfo(&#39;Inserting scan history for ${entry.barcode}&#39;);
   try {
     final id = await db.insert(&#39;scan_history&#39;, toMap(entry));

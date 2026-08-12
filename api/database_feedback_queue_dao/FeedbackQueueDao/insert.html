@@ -81,6 +81,12 @@
   String? label,
   String? screenshotPath,
 }) {
+  if (title.isEmpty) {
+    throw ArgumentError(&#39;feedback title must not be empty&#39;);
+  }
+  if (body.isEmpty) {
+    throw ArgumentError(&#39;feedback body must not be empty&#39;);
+  }
   return db.insert(&#39;feedback_queue&#39;, {
     &#39;title&#39;: title,
     &#39;body&#39;: body,

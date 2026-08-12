@@ -72,6 +72,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; create(Database db, String name) {
+  if (name.trim().isEmpty) {
+    throw ArgumentError(&#39;inventory name must not be empty&#39;);
+  }
   return db.insert(&#39;inventories&#39;, {
     &#39;name&#39;: name,
     &#39;created_at&#39;: DateTime.now().millisecondsSinceEpoch,

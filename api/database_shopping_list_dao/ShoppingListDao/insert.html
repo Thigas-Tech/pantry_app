@@ -72,6 +72,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; insert(Database db, ShoppingItem item) async {
+  if (item.name.isEmpty) {
+    throw ArgumentError(&#39;shopping item name must not be empty&#39;);
+  }
   logInfo(&#39;Inserting shopping item: ${item.name}&#39;);
   try {
     final id = await db.insert(&#39;shopping_list&#39;, toMap(item));

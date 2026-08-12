@@ -72,6 +72,12 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; insert(Database db, RecipeIngredient item) async {
+  if (item.recipeId &lt;= 0) {
+    throw ArgumentError(&#39;recipe id must be positive&#39;);
+  }
+  if (item.name.isEmpty) {
+    throw ArgumentError(&#39;ingredient name must not be empty&#39;);
+  }
   logInfo(&#39;Inserting recipe ingredient: ${item.name}&#39;);
   try {
     final id = await db.insert(&#39;recipe_ingredients&#39;, toMap(item));

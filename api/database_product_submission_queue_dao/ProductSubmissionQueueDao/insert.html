@@ -73,6 +73,9 @@ this is a no-op due to the UNIQUE constraint.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; insert(Database db, String barcode) async {
+  if (barcode.isEmpty) {
+    throw ArgumentError(&#39;submission barcode must not be empty&#39;);
+  }
   logInfo(&#39;Queuing submission for barcode $barcode&#39;);
   try {
     final now = _now().millisecondsSinceEpoch;

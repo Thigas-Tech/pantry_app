@@ -65,6 +65,7 @@
     
 <section class="desc markdown">
   <p>Inserts a new inventory item.</p>
+<p>Throws <a href="https://api.flutter.dev/flutter/dart-core/ArgumentError-class.html">ArgumentError</a> if the barcode is empty.</p>
 </section>
 
 
@@ -72,6 +73,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; insert(Database db, InventoryItem item) async {
+  if (item.barcode.isEmpty) {
+    throw ArgumentError(&#39;inventory barcode must not be empty&#39;);
+  }
   logInfo(
     &#39;Inserting inventory item: ${item.barcode} — &#39;
     &#39;qty: ${item.quantity} ${item.unit}, loc: ${item.location}&#39;,

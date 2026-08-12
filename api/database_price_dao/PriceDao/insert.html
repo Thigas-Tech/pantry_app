@@ -72,6 +72,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; insert(Database db, Price price) async {
+  if (price.barcode.isEmpty) {
+    throw ArgumentError(&#39;price barcode must not be empty&#39;);
+  }
   logInfo(&#39;Inserting price for barcode ${price.barcode}&#39;);
   try {
     final id = await db.insert(&#39;prices&#39;, toMap(price));

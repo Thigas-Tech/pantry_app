@@ -78,6 +78,9 @@ optionally filtered by location.</p>
   required int inventoryId,
   String? location,
 }) async {
+  if (inventoryId &lt;= 0) {
+    throw ArgumentError(&#39;inventory id must be positive&#39;);
+  }
   try {
     var where = &#39;inventory_id = ?&#39;;
     final whereArgs = &lt;dynamic&gt;[inventoryId];
