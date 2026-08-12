@@ -91,6 +91,11 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   await dotenv.load();
   logInfo(&#39;Environment loaded&#39;);
 
+  &#47;&#47; Create the shared container before any startup task that needs
+  &#47;&#47; services, so everything (including _handleAppUpdate) consumes the
+  &#47;&#47; same singleton instances as the widget tree.
+  appContainer = ProviderContainer();
+
   if (AppConfig.firebaseEnabled) {
     try {
       await Firebase.initializeApp();
@@ -129,10 +134,6 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
 
   await _handleAppUpdate();
 
-  &#47;&#47; Create the shared container and init the notification service before
-  &#47;&#47; runApp so that any widget reading notificationServiceProvider on the
-  &#47;&#47; first frame sees an initialized (or gracefully-failed) service.
-  appContainer = ProviderContainer();
   try {
     final prefs = await SharedPreferences.getInstance();
     final onboardingCompleted = prefs.getBool(kOnboardingKey) ?? false;
