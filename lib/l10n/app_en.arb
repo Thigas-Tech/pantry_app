@@ -308,6 +308,7 @@
   "flushCacheConfirm": "This will delete all cached product data and images fetched from Open Food Facts. Manually entered products and your inventory items will be preserved. Cached products will be re-fetched the next time you view them.",
   "flushCacheSuccess": "Cached products flushed. They will refresh automatically.",
   "flushCacheFailed": "Failed to flush cache. Please try again.",
+  "changelogLoadFailed": "Could not load the changelog.",
   "submissionPending": "Pending submission to Open Food Facts",
   "submissionSubmitted": "Submitted to Open Food Facts",
   "submissionFailed": "Failed to submit product. Tap to retry.",

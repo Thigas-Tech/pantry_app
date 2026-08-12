@@ -770,10 +770,10 @@ class SettingsScreen extends ConsumerWidget {
       if (!context.mounted) return;
 
       await showWhatsNewSheet(context, rawChangelog: raw);
-    } on Exception catch (e) {
+    } on Object catch (e) {
       logError('Failed to show changelog from settings: $e');
       if (context.mounted) {
-        SnackbarHelper.showError(context, l10n.flushCacheFailed);
+        SnackbarHelper.showError(context, l10n.changelogLoadFailed);
       }
     }
   }

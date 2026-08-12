@@ -649,6 +649,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get flushCacheFailed => 'Não foi possível limpar o cache. Tente de novo.';
 
   @override
+  String get changelogLoadFailed => 'Não foi possível carregar o changelog.';
+
+  @override
   String get submissionPending => 'Envio pendente pro Open Food Facts';
 
   @override
@@ -2852,6 +2855,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get flushCacheFailed => 'Não foi possível limpar o cache. Tente de novo.';
+
+  @override
+  String get changelogLoadFailed => 'Não foi possível carregar o changelog.';
 
   @override
   String get submissionPending => 'Envio pendente pro Open Food Facts';
