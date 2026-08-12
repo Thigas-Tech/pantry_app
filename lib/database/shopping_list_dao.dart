@@ -80,6 +80,9 @@ class ShoppingListDao {
 
   /// Inserts a shopping list item and returns its row ID.
   Future<int> insert(Database db, ShoppingItem item) async {
+    if (item.name.isEmpty) {
+      throw ArgumentError('shopping item name must not be empty');
+    }
     logInfo('Inserting shopping item: ${item.name}');
     try {
       final id = await db.insert('shopping_list', toMap(item));
