@@ -72,9 +72,9 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteSelected() async {
   if (state.selectedIds.isEmpty) return;
-  final db = ref.read(databaseProvider);
+  final repo = ref.read(productRepositoryProvider);
   for (final id in state.selectedIds) {
-    await db.deleteInventoryItem(id);
+    await repo.deleteInventoryItem(id);
   }
   WidgetsBinding.instance.addPostFrameCallback((_) {
     ref.invalidate(pantryProvider);
