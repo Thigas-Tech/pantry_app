@@ -39,6 +39,9 @@ class ProductSubmissionQueueDao {
   /// Queues a barcode for submission. If the barcode is already queued,
   /// this is a no-op due to the UNIQUE constraint.
   Future<void> insert(Database db, String barcode) async {
+    if (barcode.isEmpty) {
+      throw ArgumentError('submission barcode must not be empty');
+    }
     logInfo('Queuing submission for barcode $barcode');
     try {
       final now = _now().millisecondsSinceEpoch;

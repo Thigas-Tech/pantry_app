@@ -12,6 +12,9 @@ class InventoriesDao {
 
   /// Creates a new inventory (pantry) with the given [name].
   Future<int> create(Database db, String name) {
+    if (name.trim().isEmpty) {
+      throw ArgumentError('inventory name must not be empty');
+    }
     return db.insert('inventories', {
       'name': name,
       'created_at': DateTime.now().millisecondsSinceEpoch,

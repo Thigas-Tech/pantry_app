@@ -52,6 +52,12 @@ class RecipeIngredientDao {
 
   /// Inserts a recipe ingredient and returns its row ID.
   Future<int> insert(Database db, RecipeIngredient item) async {
+    if (item.recipeId <= 0) {
+      throw ArgumentError('recipe id must be positive');
+    }
+    if (item.name.isEmpty) {
+      throw ArgumentError('ingredient name must not be empty');
+    }
     logInfo('Inserting recipe ingredient: ${item.name}');
     try {
       final id = await db.insert('recipe_ingredients', toMap(item));

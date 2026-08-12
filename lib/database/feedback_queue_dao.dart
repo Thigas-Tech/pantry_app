@@ -34,6 +34,12 @@ class FeedbackQueueDao {
     String? label,
     String? screenshotPath,
   }) {
+    if (title.isEmpty) {
+      throw ArgumentError('feedback title must not be empty');
+    }
+    if (body.isEmpty) {
+      throw ArgumentError('feedback body must not be empty');
+    }
     return db.insert('feedback_queue', {
       'title': title,
       'body': body,

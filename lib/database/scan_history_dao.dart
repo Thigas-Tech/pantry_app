@@ -59,6 +59,12 @@ class ScanHistoryDao {
 
   /// Inserts a scan history entry and returns its row ID.
   Future<int> insert(DatabaseExecutor db, ScanHistoryEntry entry) async {
+    if (entry.barcode.isEmpty) {
+      throw ArgumentError('scan barcode must not be empty');
+    }
+    if (entry.name.isEmpty) {
+      throw ArgumentError('scan name must not be empty');
+    }
     logInfo('Inserting scan history for ${entry.barcode}');
     try {
       final id = await db.insert('scan_history', toMap(entry));

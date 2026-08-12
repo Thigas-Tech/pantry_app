@@ -40,7 +40,12 @@ class InventoryDao {
   );
 
   /// Inserts a new inventory item.
+  ///
+  /// Throws [ArgumentError] if the barcode is empty.
   Future<int> insert(Database db, InventoryItem item) async {
+    if (item.barcode.isEmpty) {
+      throw ArgumentError('inventory barcode must not be empty');
+    }
     logInfo(
       'Inserting inventory item: ${item.barcode} — '
       'qty: ${item.quantity} ${item.unit}, loc: ${item.location}',
@@ -117,6 +122,9 @@ class InventoryDao {
     required int inventoryId,
     String? location,
   }) async {
+    if (inventoryId <= 0) {
+      throw ArgumentError('inventory id must be positive');
+    }
     try {
       var where = 'inventory_id = ?';
       final whereArgs = <dynamic>[inventoryId];
@@ -147,6 +155,9 @@ class InventoryDao {
     String barcode, {
     required int inventoryId,
   }) async {
+    if (inventoryId <= 0) {
+      throw ArgumentError('inventory id must be positive');
+    }
     try {
       final result = await db.query(
         'inventory',

@@ -100,6 +100,9 @@ class PriceDao {
 
   /// Inserts a price row and returns its row ID.
   Future<int> insert(Database db, Price price) async {
+    if (price.barcode.isEmpty) {
+      throw ArgumentError('price barcode must not be empty');
+    }
     logInfo('Inserting price for barcode ${price.barcode}');
     try {
       final id = await db.insert('prices', toMap(price));
