@@ -83,7 +83,7 @@ stock. Returns a <a href="../providers_recipe_provider/CookResult-class.html">Co
   final inventoryId = recipe?.inventoryId ?? activeInventoryId;
   final ingredients = await db.getRecipeIngredients(recipeId);
   final settings = ref.read(settingsProvider);
-  final currencyService = CurrencyService();
+  final currencyService = ref.read(currencyServiceProvider);
   final baseCurrency = settings.baseCurrency;
 
   if (ingredients.isEmpty) throw const RecipeCookException({});

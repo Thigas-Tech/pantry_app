@@ -112,7 +112,7 @@ holds no mutable state.</p>
   return FirebaseCacheService(
     db: db,
     firebaseClient: client,
-    usdaClient: UsdaApiClient(),
+    usdaClient: ref.read(usdaApiClientProvider),
     offAdapter: api,
   );
 });</code></pre>

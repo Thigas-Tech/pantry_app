@@ -99,7 +99,7 @@ in widgets that need to call repository methods inside <a href="https://api.flut
   return ProductRepository(
     db,
     api,
-    usdaClient: UsdaApiClient(),
+    usdaClient: ref.read(usdaApiClientProvider),
     firebaseCache: firebaseCache,
     metaDao: db.firebaseCacheMetaDao,
   );
