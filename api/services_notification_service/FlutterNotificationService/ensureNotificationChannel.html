@@ -74,6 +74,10 @@
   <p>Creates a notification channel with the given <code>channelId</code>.</p>
 <p>Uses <a href="https://pub.dev/documentation/flutter_local_notifications/22.2.0/flutter_local_notifications/AndroidNotificationChannelAction.html">AndroidNotificationChannelAction.createIfNotExists</a> so existing
 user-configured channel settings are never overwritten.</p>
+<p>The default <code>channelName</code> and <code>channelDescription</code> are deliberately
+English: Android creates the channel once at app start and does not
+update its name when the app language changes, so localizing them
+would only apply to fresh installs.</p>
 </section>
 
 

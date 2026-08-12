@@ -109,9 +109,10 @@ and</li>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 Widget build(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
   if (_isNotApplicable(grade)) {
     return Semantics(
-      label: &#39;Nutri-Score, not applicable&#39;,
+      label: l10n.nutriscoreNotApplicableSemantics,
       child: Container(
         width: size,
         height: size,
@@ -136,7 +137,7 @@ Widget build(BuildContext context) {
   final color = _colorForGrade(grade);
   if (color == null) return const SizedBox.shrink();
   return Semantics(
-    label: &#39;Nutri-Score ${grade!.toUpperCase()}&#39;,
+    label: l10n.nutriscoreGradeSemantics(grade!.toUpperCase()),
     child: Container(
       width: size,
       height: size,
