@@ -54,6 +54,23 @@
 
 ### Fixed
 
+- **Connectivity-gated background cache refresh**: the scheduled refresh
+  fired even while offline, contradicting the documented offline-first
+  contract (ARCHITECTURE/PERFORMANCE.md §11.3). The decision moved into a
+  testable [CacheRefreshCoordinator] (`lib/services/`) that skips the
+  refresh when the device is offline or the cache is fresh, records the
+  refresh timestamp before firing, refreshes inventories in parallel, and
+  tolerates per-inventory failures. `main.dart` now reads the coordinator
+  via `cacheRefreshCoordinatorProvider`; partial successes invalidate the
+  pantry UI. Six unit tests cover the offline, fresh-cache, ordering,
+  failure-tolerance, and empty-inventory paths. The PERFORMANCE.md §11.5
+  claim that the home list uses `ListView.builder` was corrected to match
+  the eager `ListView(children:)` implementation.
+  (`lib/services/cache_refresh_coordinator.dart`,
+  `lib/providers/cache_refresh_coordinator_provider.dart`,
+  `lib/main.dart`, `ARCHITECTURE/PERFORMANCE.md`,
+  `test/services/cache_refresh_coordinator_test.dart`)
+
 - **SQLite version compatibility**: FEFO and price-statistics queries used
   `NULLS LAST` (SQLite 3.30+) and `ROW_NUMBER() OVER` (SQLite 3.25+),
   which crash on devices whose system SQLite predates those versions

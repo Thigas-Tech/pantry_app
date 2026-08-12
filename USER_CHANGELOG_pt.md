@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A atualizacao de produtos em segundo plano ja nao e executada enquanto
+  voce esta offline. Os produtos em cache so sao atualizados quando o
+  dispositivo tem conectividade, reduzindo pedidos de rede falhados em
+  segundo plano.
+
 - Adicionar o mesmo produto uma segunda vez com uma data de validade diferente
   agora mantem as duas entradas separadas na despensa, cada uma com a sua data
   de validade. Duas entradas so sao combinadas quando sao verdadeiramente o
