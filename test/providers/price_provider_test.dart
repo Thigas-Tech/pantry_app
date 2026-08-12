@@ -18,7 +18,7 @@ class FakeSettingsNotifier extends SettingsNotifier {
   final Settings initial;
 
   @override
-  Settings build() => initial;
+  Future<Settings> build() async => initial;
 }
 
 void main() {

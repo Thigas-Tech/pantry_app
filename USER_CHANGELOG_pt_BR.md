@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- O app nao mostra mais brevemente a despensa, o tema ou as configuracoes
+  erradas logo apos a abertura: os valores salvos agora sao carregados
+  antes do primeiro quadro ser renderizado.
 ## Unreleased
 
 - As mensagens de erro agora mostram uma mensagem generica e amigavel em

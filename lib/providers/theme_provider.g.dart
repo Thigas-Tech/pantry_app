@@ -11,6 +11,7 @@ part of 'theme_provider.dart';
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
+/// Loads the persisted mode in [build] so no placeholder value flashes.
 /// Used by [themeModeProvider] so that any widget can read or change the
 /// theme mode.
 
@@ -20,13 +21,15 @@ final themeModeProvider = ThemeModeNotifierProvider._();
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
+/// Loads the persisted mode in [build] so no placeholder value flashes.
 /// Used by [themeModeProvider] so that any widget can read or change the
 /// theme mode.
 final class ThemeModeNotifierProvider
-    extends $NotifierProvider<ThemeModeNotifier, ThemeModeOption> {
+    extends $AsyncNotifierProvider<ThemeModeNotifier, ThemeModeOption> {
   /// A notifier that holds the current [ThemeModeOption] and persists it to
   /// [SharedPreferences] under the theme_mode key.
   ///
+  /// Loads the persisted mode in [build] so no placeholder value flashes.
   /// Used by [themeModeProvider] so that any widget can read or change the
   /// theme mode.
   ThemeModeNotifierProvider._()
@@ -46,35 +49,28 @@ final class ThemeModeNotifierProvider
   @$internal
   @override
   ThemeModeNotifier create() => ThemeModeNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ThemeModeOption value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ThemeModeOption>(value),
-    );
-  }
 }
 
-String _$themeModeNotifierHash() => r'38978c05bdd50ebd4a761cf5d21b2cda13548301';
+String _$themeModeNotifierHash() => r'fef597261d1cdde6467f6cd4934d4a60148013ef';
 
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
+/// Loads the persisted mode in [build] so no placeholder value flashes.
 /// Used by [themeModeProvider] so that any widget can read or change the
 /// theme mode.
 
-abstract class _$ThemeModeNotifier extends $Notifier<ThemeModeOption> {
-  ThemeModeOption build();
+abstract class _$ThemeModeNotifier extends $AsyncNotifier<ThemeModeOption> {
+  FutureOr<ThemeModeOption> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<ThemeModeOption, ThemeModeOption>;
+    final ref = this.ref as $Ref<AsyncValue<ThemeModeOption>, ThemeModeOption>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<ThemeModeOption, ThemeModeOption>,
-              ThemeModeOption,
+              AnyNotifier<AsyncValue<ThemeModeOption>, ThemeModeOption>,
+              AsyncValue<ThemeModeOption>,
               Object?,
               Object?
             >;

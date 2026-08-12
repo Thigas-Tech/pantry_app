@@ -21,7 +21,7 @@ class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 
   @override
   void setActiveInventory(int newValue) {}
@@ -29,7 +29,7 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 
 class FakeSettingsNotifier extends SettingsNotifier {
   @override
-  Settings build() => const Settings();
+  Future<Settings> build() async => const Settings();
 }
 
 void main() {
@@ -144,8 +144,12 @@ class _CookTestWidget extends ConsumerWidget {
               .read(recipeServiceProvider)
               .cookRecipe(
                 1,
-                activeInventoryId: ref.read(activeInventoryProvider),
-                baseCurrency: ref.read(settingsProvider).baseCurrency,
+                activeInventoryId: await ref.read(
+                  activeInventoryProvider.future,
+                ),
+                baseCurrency: (await ref.read(
+                  settingsProvider.future,
+                )).baseCurrency,
               );
         } on Exception {
           // Silently ignore -- we only care that the invalidation

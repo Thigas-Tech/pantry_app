@@ -53,7 +53,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
           Consumer(
             builder: (context, ref, child) {
               final inventoriesAsync = ref.watch(inventoryListProvider);
-              final activeId = ref.watch<int>(activeInventoryProvider);
+              final activeId = ref.watch(activeInventoryProvider).value ?? 1;
               final inventories = inventoriesAsync.asData?.value;
               InventorySummary? match;
               for (final inv in inventories ?? const <InventorySummary>[]) {
@@ -84,7 +84,8 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
           ),
           Consumer(
             builder: (context, ref, child) {
-              final settings = ref.watch(settingsProvider);
+              final settings =
+                  ref.watch(settingsProvider).value ?? const Settings();
               if (!settings.priceTrackingEnabled) {
                 return const SizedBox.shrink();
               }
@@ -189,7 +190,7 @@ class _AverageCostBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef widgetRef) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final currencyCode = settings.baseCurrency;
     final symbol = currencySymbolFor(currencyCode);
 
@@ -197,8 +198,10 @@ class _AverageCostBanner extends ConsumerWidget {
       future: ref
           .read(recipeServiceProvider)
           .calculateAverageRecipeCost(
-            activeInventoryId: ref.read(activeInventoryProvider),
-            baseCurrency: ref.read(settingsProvider).baseCurrency,
+            activeInventoryId: ref.read(activeInventoryProvider).value ?? 1,
+            baseCurrency:
+                (ref.watch(settingsProvider).value ?? const Settings())
+                    .baseCurrency,
           ),
       builder: (context, snapshot) {
         final cost = snapshot.data ?? 0.0;
@@ -246,7 +249,7 @@ class _RecipeCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final currencyCode = settings.baseCurrency;
     final symbol = currencySymbolFor(currencyCode);
 
@@ -386,8 +389,9 @@ class _RecipeCostLabel extends ConsumerWidget {
           .read(recipeServiceProvider)
           .calculateRecipeCost(
             recipeId,
-            activeInventoryId: ref.read(activeInventoryProvider),
-            baseCurrency: ref.read(settingsProvider).baseCurrency,
+            activeInventoryId: ref.read(activeInventoryProvider).value ?? 1,
+            baseCurrency: (ref.read(settingsProvider).value ?? const Settings())
+                .baseCurrency,
           ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();

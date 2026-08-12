@@ -22,7 +22,7 @@ part 'pantry_provider.g.dart';
 class Pantry extends _$Pantry {
   @override
   Future<List<InventoryWithProduct>> build() async {
-    final activeId = ref.watch(activeInventoryProvider);
+    final activeId = await ref.watch(activeInventoryProvider.future);
     final db = ref.watch(databaseProvider);
     final rows = await db.getInventoryWithProduct(inventoryId: activeId);
     return rows.map(InventoryWithProduct.fromMap).toList();
@@ -34,7 +34,7 @@ class Pantry extends _$Pantry {
   /// the invalidation chain is triggered during a widget build cycle (e.g.
   /// TickerMode.didChangeDependencies resuming paused subscriptions).
   Future<void> refresh() async {
-    final activeId = ref.read(activeInventoryProvider);
+    final activeId = await ref.read(activeInventoryProvider.future);
     final repo = ref.read(productRepositoryProvider);
     await repo.refreshInventoryProducts(activeId);
     await repo.setLastRefreshTime();

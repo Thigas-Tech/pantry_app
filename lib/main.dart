@@ -24,7 +24,6 @@ import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
-import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -118,17 +117,6 @@ Future<void> main() async {
   logInfo('InternetConnectionChecker configured with OFF endpoints');
 
   await _handleAppUpdate();
-
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingCompleted = prefs.getBool(kOnboardingKey) ?? false;
-    appContainer
-        .read(onboardingProvider.notifier)
-        .initial(value: onboardingCompleted);
-    logInfo('Onboarding flag loaded: $onboardingCompleted');
-  } on Exception catch (e) {
-    logWarning('Failed to load onboarding flag before runApp: $e');
-  }
 
   try {
     final notifService = appContainer.read(notificationServiceProvider);
@@ -488,7 +476,7 @@ Future<void> _rescheduleNotifications() async {
       );
       items.addAll(invItems);
     }
-    final settings = appContainer.read(settingsProvider);
+    final settings = await appContainer.read(settingsProvider.future);
     if (!settings.notificationsEnabled) {
       logInfo('Notifications disabled in settings, skipping reschedule');
       return;
@@ -538,7 +526,7 @@ Future<void> _scheduleInactivityReminder() async {
     }
     final db = appContainer.read(databaseProvider);
     final lastAddDateEpoch = await db.getLastAddDate();
-    final settings = appContainer.read(settingsProvider);
+    final settings = await appContainer.read(settingsProvider.future);
 
     if (!settings.inactivityReminderEnabled) {
       logInfo('Inactivity reminder disabled in settings, skipping');
@@ -573,7 +561,8 @@ class PantryApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeModeOption = ref.watch(themeModeProvider);
+    final themeModeOption =
+        ref.watch(themeModeProvider).value ?? ThemeModeOption.system;
     final themeMode = switch (themeModeOption) {
       ThemeModeOption.light => ThemeMode.light,
       ThemeModeOption.dark => ThemeMode.dark,
@@ -591,7 +580,7 @@ class PantryApp extends ConsumerWidget {
               brightness: Brightness.dark,
             );
 
-        final settings = ref.watch(settingsProvider);
+        final settings = ref.watch(settingsProvider).value ?? const Settings();
         final darkScheme = settings.amoledDarkMode
             ? rawDarkScheme.copyWith(
                 surface: Colors.black,

@@ -23,7 +23,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final inventoriesAsync = ref.watch(inventoryListProvider);
-    final activeId = ref.watch<int>(activeInventoryProvider);
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.manageInventories)),
@@ -230,7 +230,7 @@ class ManageInventoriesScreen extends ConsumerWidget {
 
         // If the deleted inventory was the active one,
         // switch to the first remaining.
-        final activeId = ref.read<int>(activeInventoryProvider);
+        final activeId = await ref.read(activeInventoryProvider.future);
         if (activeId == id) {
           final inventories = await ref.read(inventoryListProvider.future);
           if (inventories.isNotEmpty) {

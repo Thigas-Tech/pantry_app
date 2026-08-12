@@ -163,7 +163,7 @@ class _TestSettingsNotifier extends SettingsNotifier {
   final Settings _settings;
 
   @override
-  Settings build() => _settings;
+  Future<Settings> build() async => _settings;
 }
 
 void main() {

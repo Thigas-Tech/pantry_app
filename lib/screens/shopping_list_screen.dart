@@ -63,7 +63,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen>
           .read(shoppingListServiceProvider)
           .addShoppingItem(
             item,
-            activeInventoryId: ref.read(activeInventoryProvider),
+            activeInventoryId: await ref.read(activeInventoryProvider.future),
           );
       invalidateShoppingList(ref);
     }
@@ -115,7 +115,7 @@ class _MoveToInventoryButton extends ConsumerWidget {
           final result = await ref
               .read(shoppingListServiceProvider)
               .movePurchasedToInventory(
-                inventoryId: ref.read(activeInventoryProvider),
+                inventoryId: await ref.read(activeInventoryProvider.future),
               );
           invalidateShoppingList(ref);
           if (!context.mounted) return;
@@ -176,14 +176,14 @@ class _ClearPurchasedButton extends ConsumerWidget {
         );
         if (confirm != true) return;
         final db = ref.read(databaseProvider);
-        final inventoryId = ref.read(activeInventoryProvider);
+        final inventoryId = await ref.read(activeInventoryProvider.future);
         final purchasedItems = await db.getPurchasedShoppingItems(
           inventoryId: inventoryId,
         );
         final deleted = await ref
             .read(shoppingListServiceProvider)
             .clearPurchasedShoppingItems(
-              inventoryId: ref.read(activeInventoryProvider),
+              inventoryId: await ref.read(activeInventoryProvider.future),
             );
         invalidateShoppingList(ref);
         if (!context.mounted) return;
@@ -197,7 +197,9 @@ class _ClearPurchasedButton extends ConsumerWidget {
                     .read(shoppingListServiceProvider)
                     .addShoppingItem(
                       item.copyWith(isPurchased: false),
-                      activeInventoryId: ref.read(activeInventoryProvider),
+                      activeInventoryId: await ref.read(
+                        activeInventoryProvider.future,
+                      ),
                     );
               }
               invalidateShoppingList(ref);
@@ -230,7 +232,8 @@ class _ShareButton extends ConsumerWidget {
           ..writeln();
 
         if (pending.isNotEmpty) {
-          final settings = ref.watch(settingsProvider);
+          final settings =
+              ref.watch(settingsProvider).value ?? const Settings();
           final shoppingSystem = UnitResolver.systemFor(
             settings: settings,
             context: UnitContext.inventory,
@@ -442,8 +445,8 @@ class _ShoppingItemTile extends ConsumerWidget {
                         .read(shoppingListServiceProvider)
                         .addShoppingItem(
                           item,
-                          activeInventoryId: ref.read(
-                            activeInventoryProvider,
+                          activeInventoryId: await ref.read(
+                            activeInventoryProvider.future,
                           ),
                         );
                     invalidateShoppingList(ref);
@@ -519,8 +522,8 @@ class _ShoppingItemTile extends ConsumerWidget {
                                 .read(shoppingListServiceProvider)
                                 .addShoppingItem(
                                   item,
-                                  activeInventoryId: ref.read(
-                                    activeInventoryProvider,
+                                  activeInventoryId: await ref.read(
+                                    activeInventoryProvider.future,
                                   ),
                                 );
                             invalidateShoppingList(ref);
@@ -542,7 +545,7 @@ class _ShoppingItemTile extends ConsumerWidget {
     AppLocalizations l10n,
     WidgetRef ref,
   ) {
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final shoppingSystem = UnitResolver.systemFor(
       settings: settings,
       context: UnitContext.inventory,

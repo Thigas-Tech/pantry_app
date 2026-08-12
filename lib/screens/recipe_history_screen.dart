@@ -63,7 +63,7 @@ class _RecipeHistoryScreenState extends ConsumerState<RecipeHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final symbol = currencySymbolFor(settings.baseCurrency);
 
     return Scaffold(

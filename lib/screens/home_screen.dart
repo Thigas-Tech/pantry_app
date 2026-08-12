@@ -178,16 +178,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final l10n = AppLocalizations.of(context)!;
     final pantryAsync = ref.watch(pantryProvider);
     final controller = ref.watch(homeScreenControllerProvider);
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
-    final expiringSoonDays = ref.watch(
-      settingsProvider.select((s) => s.expiringSoonDays),
-    );
+    final priceTrackingEnabled =
+        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
+    final expiringSoonDays =
+        ref.watch(settingsProvider).value?.expiringSoonDays ?? 3;
 
     final inventories = ref.watch(inventoryListProvider);
     final averageNutriscore = ref.watch(averageNutriscoreProvider).value;
-    final onboardingComplete = ref.watch(onboardingProvider);
+    final onboardingComplete = ref.watch(onboardingProvider).value ?? false;
 
     ref.listen(totalInventoryCountProvider, (prev, next) {
       final prevValue = prev?.asData?.value ?? 0;
@@ -246,7 +244,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   name: l10n.displayInventoryName(
                     _inventoryName(
                       inventories.asData?.value ?? const [],
-                      ref.read(activeInventoryProvider),
+                      ref.read(activeInventoryProvider).value ?? 1,
                       l10n.myPantry,
                     ),
                   ),
@@ -346,7 +344,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final controller = ref.watch(homeScreenControllerProvider);
     if (controller.selectedIds.isEmpty) return;
     final inventories = ref.read(inventoryListProvider).asData?.value ?? [];
-    final activeId = ref.read(activeInventoryProvider);
+    final activeId = await ref.read(activeInventoryProvider.future);
+    if (!mounted) return;
     final targetInventories = inventories
         .where((inv) => inv.id != activeId)
         .toList();

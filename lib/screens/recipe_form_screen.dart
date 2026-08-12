@@ -230,7 +230,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
 
   Future<void> _showPantryPicker() async {
     final db = ref.read(databaseProvider);
-    final inventoryId = ref.read(activeInventoryProvider);
+    final inventoryId = await ref.read(activeInventoryProvider.future);
     final items = await db.getDistinctProductsFromInventory(
       inventoryId: inventoryId,
     );
@@ -310,7 +310,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
         if (barcode != null && barcode.isNotEmpty) {
           product = await repo.getProductFromCache(barcode);
         }
-        final settings = ref.read(settingsProvider);
+        final settings = await ref.read(settingsProvider.future);
         _addIngredient(
           name: item['name'] as String? ?? item['barcode'] as String,
           barcode: item['barcode'] as String?,
@@ -329,7 +329,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     if (product != null && mounted) {
       final repo = ref.read(productRepositoryProvider);
       final cached = await repo.getProductFromCache(product.barcode);
-      final settings = ref.read(settingsProvider);
+      final settings = await ref.read(settingsProvider.future);
       _addIngredient(
         name: product.name,
         barcode: product.barcode,
@@ -359,7 +359,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final settings = ref.read(settingsProvider);
+      final settings = await ref.read(settingsProvider.future);
       final recipeSystem = UnitResolver.systemFor(
         settings: settings,
         context: UnitContext.recipeIngredients,
@@ -398,7 +398,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
             servings: int.tryParse(_servingsController.text) ?? 0,
             imagePath: _imagePath,
             ingredients: ingredients,
-            activeInventoryId: ref.read(activeInventoryProvider),
+            activeInventoryId: await ref.read(activeInventoryProvider.future),
           );
 
       if (!mounted) return;
@@ -446,7 +446,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final recipeSystem = UnitResolver.systemFor(
       settings: settings,
       context: UnitContext.recipeIngredients,

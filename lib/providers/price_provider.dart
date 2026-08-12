@@ -33,7 +33,7 @@ Future<Price?> latestPrice(Ref ref, (String, int) args) {
 /// Whether prices are hidden for privacy.
 @Riverpod(keepAlive: true)
 bool pricesHidden(Ref ref) {
-  return ref.watch(settingsProvider).pricesHidden;
+  return ref.watch(settingsProvider).value?.pricesHidden ?? false;
 }
 
 /// Provides the total value of the currently active inventory, converted
@@ -41,11 +41,11 @@ bool pricesHidden(Ref ref) {
 @riverpod
 Future<double?> inventoryValue(Ref ref) async {
   final repo = ref.watch(priceRepositoryProvider);
-  final activeId = ref.watch(activeInventoryProvider);
-  final settings = ref.watch(settingsProvider);
+  final activeId = ref.watch(activeInventoryProvider.future);
+  final settings = ref.watch(settingsProvider.future);
   final value = await repo.totalInventoryValue(
-    activeId,
-    baseCurrency: settings.baseCurrency,
+    await activeId,
+    baseCurrency: (await settings).baseCurrency,
   );
   if (value == null) return null;
   return double.tryParse(value.toStringAsFixed(2));
@@ -56,11 +56,11 @@ Future<double?> inventoryValue(Ref ref) async {
 @riverpod
 Future<double?> averagePrice(Ref ref) async {
   final repo = ref.watch(priceRepositoryProvider);
-  final activeId = ref.watch(activeInventoryProvider);
-  final settings = ref.watch(settingsProvider);
+  final activeId = ref.watch(activeInventoryProvider.future);
+  final settings = ref.watch(settingsProvider.future);
   final avg = await repo.averageItemPrice(
-    activeId,
-    baseCurrency: settings.baseCurrency,
+    await activeId,
+    baseCurrency: (await settings).baseCurrency,
   );
   if (avg == null) return null;
   return double.tryParse(avg.toStringAsFixed(2));
@@ -70,7 +70,7 @@ Future<double?> averagePrice(Ref ref) async {
 @riverpod
 Future<int> pricedItemCount(Ref ref) {
   final repo = ref.watch(priceRepositoryProvider);
-  final activeId = ref.watch(activeInventoryProvider);
+  final activeId = ref.watch(activeInventoryProvider).value ?? 1;
   return repo.pricedItemCount(activeId);
 }
 

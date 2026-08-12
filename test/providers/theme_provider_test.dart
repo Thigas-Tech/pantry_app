@@ -32,15 +32,13 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
-    expect(container.read(themeModeProvider), ThemeModeOption.system);
-
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await container.read(themeModeProvider.future);
 
     expect(
       recentLogs,
       contains('Failed to load theme mode from preferences'),
     );
-    expect(container.read(themeModeProvider), ThemeModeOption.system);
+    expect(container.read(themeModeProvider).value, ThemeModeOption.system);
   });
 
   test('logs a warning when the theme mode cannot be persisted', () async {
@@ -49,6 +47,8 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
 
+    await container.read(themeModeProvider.future);
+
     container
         .read(themeModeProvider.notifier)
         .setThemeMode(ThemeModeOption.dark);
@@ -56,7 +56,7 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
     expect(recentLogs, contains('Failed to persist theme mode dark'));
-    expect(container.read(themeModeProvider), ThemeModeOption.dark);
+    expect(container.read(themeModeProvider).value, ThemeModeOption.dark);
   });
 
   test('loads the persisted theme mode', () async {
@@ -66,8 +66,8 @@ void main() {
     addTearDown(container.dispose);
 
     container.read(themeModeProvider);
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await container.read(themeModeProvider.future);
 
-    expect(container.read(themeModeProvider), ThemeModeOption.dark);
+    expect(container.read(themeModeProvider).value, ThemeModeOption.dark);
   });
 }

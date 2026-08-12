@@ -17,37 +17,35 @@ PhotoService photoService(Ref ref) {
 
 /// Provides all shopping list items, scoped to the active inventory.
 @riverpod
-Future<List<ShoppingItem>> shoppingList(Ref ref) {
+Future<List<ShoppingItem>> shoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
+  final inventoryId = await ref.watch(activeInventoryProvider.future);
   return db.getShoppingList(inventoryId: inventoryId);
 }
 
 /// Provides only pending (not purchased) shopping list items, scoped to the
 /// active inventory.
 @riverpod
-Future<List<ShoppingItem>> pendingShoppingList(Ref ref) {
+Future<List<ShoppingItem>> pendingShoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
+  final inventoryId = await ref.watch(activeInventoryProvider.future);
   return db.getPendingShoppingItems(inventoryId: inventoryId);
 }
 
 /// Provides only purchased shopping list items, scoped to the active inventory.
 @riverpod
-Future<List<ShoppingItem>> purchasedShoppingList(
-  Ref ref,
-) {
+Future<List<ShoppingItem>> purchasedShoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
+  final inventoryId = await ref.watch(activeInventoryProvider.future);
   return db.getPurchasedShoppingItems(inventoryId: inventoryId);
 }
 
 /// Provides the count of pending (not purchased) items, scoped to the active
 /// inventory.
 @riverpod
-Future<int> pendingShoppingCount(Ref ref) {
+Future<int> pendingShoppingCount(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
+  final inventoryId = await ref.watch(activeInventoryProvider.future);
   return db.getPendingShoppingCount(inventoryId: inventoryId);
 }
 
@@ -69,7 +67,7 @@ Future<List<InventoryProductOption>> inventoryProducts(
   Ref ref,
 ) async {
   final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
+  final inventoryId = await ref.watch(activeInventoryProvider.future);
   logInfo('Fetching distinct products from inventory $inventoryId');
   final rows = await db.getDistinctProductsFromInventory(
     inventoryId: inventoryId,

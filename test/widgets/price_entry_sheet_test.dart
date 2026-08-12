@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/price.dart';
@@ -18,7 +19,7 @@ class FakeSettingsNotifier extends SettingsNotifier {
   final Settings initial;
 
   @override
-  Settings build() => initial;
+  Future<Settings> build() async => initial;
 }
 
 void main() {
@@ -110,6 +111,11 @@ void main() {
           storesProvider.overrideWith((ref) => const <Store>[]),
         ],
       );
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(ElevatedButton)),
+      );
+      await container.read(settingsProvider.future);
 
       await openSheet(tester);
 

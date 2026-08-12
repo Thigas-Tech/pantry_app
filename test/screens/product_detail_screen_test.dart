@@ -288,13 +288,13 @@ InventoryItem makeItem({
 /// A fake [ActiveInventoryNotifier] that always holds 1.
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 }
 
 /// A fake [SettingsNotifier] that returns imperial settings globally.
 class FakeSettingsNotifierImperial extends SettingsNotifier {
   @override
-  Settings build() => const Settings(
+  Future<Settings> build() async => const Settings(
     unitSystem: UnitSystem.imperial,
   );
 }

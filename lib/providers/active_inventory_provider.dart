@@ -22,55 +22,35 @@ part 'active_inventory_provider.g.dart';
 @Riverpod(keepAlive: true)
 class ActiveInventoryNotifier extends _$ActiveInventoryNotifier {
   @override
-  int build() {
-    unawaited(_validateAndLoad());
-    return 1;
+  Future<int> build() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getInt('active_inventory_id');
+    final targetId = stored ?? 1;
+
+    final inventories = await _fetchInventories();
+    if (inventories == null) return targetId;
+
+    final exists = inventories.any((i) => i['id'] == targetId);
+    if (exists) return targetId;
+
+    final resolvedId = _fallbackId(inventories);
+    if (resolvedId != targetId) {
+      unawaited(prefs.setInt('active_inventory_id', resolvedId));
+    }
+    return resolvedId;
   }
 
   /// Updates the active inventory ID and persists the change.
   void setActiveInventory(int id) {
-    state = id;
+    state = AsyncValue.data(id);
     unawaited(_persist(id));
-  }
-
-  /// Loads the persisted inventory ID and validates it against the database.
-  ///
-  /// If the persisted ID does not exist (inventory was deleted), falls back
-  /// to the first available inventory or reseeds the default.
-  Future<void> _validateAndLoad() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      if (!ref.mounted) return;
-      final stored = prefs.getInt('active_inventory_id');
-      if (!ref.mounted) return;
-      final targetId = stored ?? 1;
-
-      final inventories = await _fetchInventories();
-      if (!ref.mounted) return;
-      if (inventories == null) return;
-
-      final exists = inventories.any((i) => i['id'] == targetId);
-      if (exists) {
-        if (targetId != state) {
-          state = targetId;
-        }
-        return;
-      }
-
-      final resolvedId = _fallbackId(inventories);
-      unawaited(prefs.setInt('active_inventory_id', resolvedId));
-      state = resolvedId;
-    } on Exception catch (e) {
-      logWarning('Failed to load persisted active inventory: $e');
-    }
   }
 
   /// Fetches all inventories, returning null when the DB is unavailable.
   Future<List<Map<String, dynamic>>?> _fetchInventories() async {
     try {
       final db = ref.read(databaseProvider);
-      final result = await db.getInventories();
-      return result;
+      return await db.getInventories();
     } on Exception catch (e) {
       logWarning('Failed to load inventories during validation: $e');
       return null;

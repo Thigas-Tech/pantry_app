@@ -21,9 +21,9 @@ part 'recipe_provider.g.dart';
 /// Watches [activeInventoryProvider] so the list automatically reloads when
 /// the user switches pantries.
 @riverpod
-Future<List<Recipe>> allRecipes(Ref ref) {
+Future<List<Recipe>> allRecipes(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  final activeId = ref.watch(activeInventoryProvider);
+  final activeId = await ref.watch(activeInventoryProvider.future);
   return db.getAllRecipes(activeId);
 }
 

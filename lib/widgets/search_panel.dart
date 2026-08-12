@@ -179,8 +179,8 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
 
   Future<void> _addToInventory(Product product) async {
     final repo = ref.read(productRepositoryProvider);
-    final activeId = ref.read(activeInventoryProvider);
     final l10n = AppLocalizations.of(context)!;
+    final activeId = await ref.read(activeInventoryProvider.future);
 
     final item = InventoryItem(
       barcode: product.barcode,
@@ -256,15 +256,18 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
                         .read(productRepositoryProvider)
                         .cacheProduct(product)
                         .then(
-                          (_) => ref
-                              .read(shoppingListServiceProvider)
-                              .addShoppingItem(
-                                item,
-                                activeInventoryId: ref.read(
-                                  activeInventoryProvider,
-                                ),
-                              )
-                              .then((_) => invalidateShoppingList(ref)),
+                          (_) async {
+                            final activeId = await ref.read(
+                              activeInventoryProvider.future,
+                            );
+                            await ref
+                                .read(shoppingListServiceProvider)
+                                .addShoppingItem(
+                                  item,
+                                  activeInventoryId: activeId,
+                                );
+                            invalidateShoppingList(ref);
+                          },
                         ),
                   );
                   SnackbarHelper.showInfo(context, l10n.addToShoppingList);

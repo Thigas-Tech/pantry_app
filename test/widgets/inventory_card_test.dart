@@ -16,7 +16,7 @@ import '../helpers/pump_app.dart';
 
 class _FakeSettingsNotifierImperial extends SettingsNotifier {
   @override
-  Settings build() => const Settings(
+  Future<Settings> build() async => const Settings(
     unitSystem: UnitSystem.imperial,
     preferredWeightUnit: WeightUnitPreference.auto,
     preferredVolumeUnit: VolumeUnitPreference.auto,
@@ -494,5 +494,5 @@ void main() {
 
 class _FakePriceTrackingSettingsNotifier extends SettingsNotifier {
   @override
-  Settings build() => const Settings(priceTrackingEnabled: true);
+  Future<Settings> build() async => const Settings(priceTrackingEnabled: true);
 }

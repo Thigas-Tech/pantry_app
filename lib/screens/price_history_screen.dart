@@ -36,12 +36,11 @@ class PriceHistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final activeId = ref.watch(activeInventoryProvider);
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
     final historyAsync = ref.watch(priceHistoryProvider((barcode, activeId)));
 
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
+    final priceTrackingEnabled =
+        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -81,7 +80,7 @@ class PriceHistoryScreen extends ConsumerWidget {
     Price price,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final activeId = ref.read(activeInventoryProvider);
+    final activeId = await ref.read(activeInventoryProvider.future);
     if (price.id != null) {
       try {
         await ref.read(priceRepositoryProvider).deletePrice(price.id!);

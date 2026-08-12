@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- The app no longer briefly shows the wrong pantry, theme, or settings
+  right after launch: persisted values now load before the first frame
+  renders.
 ## Unreleased
 
 - Error messages now show a friendly, generic message instead of raw

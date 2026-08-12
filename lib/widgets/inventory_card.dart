@@ -172,15 +172,18 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                       barcode: widget.item.barcode,
                     );
                     unawaited(
-                      ref
-                          .read(shoppingListServiceProvider)
-                          .addShoppingItem(
-                            item,
-                            activeInventoryId: ref.read(
-                              activeInventoryProvider,
-                            ),
-                          )
-                          .then((_) => invalidateShoppingList(ref)),
+                      () async {
+                        final activeId = await ref.read(
+                          activeInventoryProvider.future,
+                        );
+                        await ref
+                            .read(shoppingListServiceProvider)
+                            .addShoppingItem(
+                              item,
+                              activeInventoryId: activeId,
+                            );
+                        invalidateShoppingList(ref);
+                      }(),
                     );
                     SnackbarHelper.showInfo(context, l10n.addToShoppingList);
                   },
@@ -243,7 +246,7 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
   }
 
   Widget _buildSubtitle(AppLocalizations l10n) {
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final inventorySystem = UnitResolver.systemFor(
       settings: settings,
       context: UnitContext.inventory,
@@ -270,10 +273,10 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
   }
 
   Widget _buildPriceLine(AppLocalizations l10n) {
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     if (!settings.priceTrackingEnabled) return const SizedBox.shrink();
 
-    final activeId = ref.watch(activeInventoryProvider);
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
     final priceAsync = ref.watch(
       latestPriceProvider((widget.item.barcode, activeId)),
     );

@@ -34,7 +34,7 @@ import '../services/mock_notification_service.dart';
 /// A controllable fake for [ThemeModeNotifier].
 class FakeThemeModeNotifier extends ThemeModeNotifier {
   @override
-  ThemeModeOption build() => ThemeModeOption.system;
+  Future<ThemeModeOption> build() async => ThemeModeOption.system;
 }
 
 /// A controllable fake for the settings notifier.
@@ -43,19 +43,19 @@ class FakeThemeModeNotifier extends ThemeModeNotifier {
 ///   retentionDays (int, defaults to 60)
 class FakeSettingsNotifier extends SettingsNotifier {
   @override
-  Settings build() => const Settings();
+  Future<Settings> build() async => const Settings();
 }
 
 /// A fake with [Settings.notificationsEnabled] set to false.
 class FakeSettingsNotifierNotifsOff extends SettingsNotifier {
   @override
-  Settings build() => const Settings(notificationsEnabled: false);
+  Future<Settings> build() async => const Settings(notificationsEnabled: false);
 }
 
 /// A fake with imperial unit system.
 class FakeSettingsNotifierImperial extends SettingsNotifier {
   @override
-  Settings build() => const Settings(
+  Future<Settings> build() async => const Settings(
     unitSystem: UnitSystem.imperial,
     preferredWeightUnit: WeightUnitPreference.pounds,
     preferredVolumeUnit: VolumeUnitPreference.cups,

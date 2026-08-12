@@ -401,7 +401,7 @@ class SearchPanelController extends _$SearchPanelController {
     int capturedRequestId,
   ) async {
     final normalizedQuery = normalizeForSearch(query.trim());
-    final activeId = ref.read(activeInventoryProvider);
+    final activeId = await ref.read(activeInventoryProvider.future);
     final db = ref.read(databaseProvider);
     final items = await db.getInventoryWithProduct(inventoryId: activeId);
     if (capturedRequestId != _requestId || !ref.mounted) {
@@ -459,7 +459,7 @@ class SearchPanelController extends _$SearchPanelController {
     }
 
     final barcodes = results.map((r) => r.product.barcode).toSet();
-    final activeId = ref.read(activeInventoryProvider);
+    final activeId = await ref.read(activeInventoryProvider.future);
     final db = ref.read(databaseProvider);
     final inPantryBarcodes = await db.getBarcodesInInventory(
       barcodes,

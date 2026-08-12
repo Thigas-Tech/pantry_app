@@ -11,12 +11,12 @@ import '../helpers/pump_app.dart';
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 }
 
 class _FakeSettingsNotifierImperial extends SettingsNotifier {
   @override
-  Settings build() => const Settings(
+  Future<Settings> build() async => const Settings(
     unitSystem: UnitSystem.imperial,
     preferredWeightUnit: WeightUnitPreference.auto,
     preferredVolumeUnit: VolumeUnitPreference.auto,

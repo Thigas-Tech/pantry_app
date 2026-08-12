@@ -17,6 +17,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/search_filter.dart';
 
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -115,6 +116,9 @@ void main() {
         apiServiceProvider.overrideWithValue(mockApi),
         usdaApiClientProvider.overrideWithValue(mockUsda),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+        activeInventoryProvider.overrideWith(
+          FakeActiveInventoryNotifier.new,
+        ),
         ...extraOverrides,
       ],
       settle: false,

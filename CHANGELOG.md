@@ -4,6 +4,19 @@
 
 ### Fixed
 
+- **Placeholder-state notifiers (audit Q5)**: active inventory, settings,
+  theme mode and the onboarding flag are now AsyncNotifiers that load
+  their persisted values in build — no more first-frame placeholder values
+  (fake inventory 1, default settings, system theme, onboarding flash) and
+  no more pre-runApp seeding in main.dart. Consumers await
+  provider.future in async paths and unwrap with a safe default in build.
+  (lib/providers/active_inventory_provider.dart,
+  lib/providers/settings_provider.dart,
+  lib/providers/theme_provider.dart,
+  lib/providers/onboarding_provider.dart, lib/main.dart,
+  lib/providers/*, lib/screens/*, lib/widgets/*,
+  test/helpers/pump_app.dart)
+
 - **Business logic moved out of providers (audit Q1)**: recipe logic
   (save/delete, cost calculation, shortage checks, the cook FEFO
   transaction) moved from recipe_provider.dart (772 -> ~180 lines) into a

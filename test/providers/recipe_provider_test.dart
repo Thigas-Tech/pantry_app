@@ -37,17 +37,17 @@ class _MutableActiveInventory extends ActiveInventoryNotifier {
   final int initial;
 
   @override
-  int build() => initial;
+  Future<int> build() async => initial;
 
   @override
   void setActiveInventory(int id) {
-    state = id;
+    state = AsyncValue.data(id);
   }
 }
 
 class FakeSettingsNotifier extends SettingsNotifier {
   @override
-  Settings build() => const Settings();
+  Future<Settings> build() async => const Settings();
 }
 
 class _CookRecipeButton extends ConsumerWidget {
@@ -62,8 +62,12 @@ class _CookRecipeButton extends ConsumerWidget {
               .read(recipeServiceProvider)
               .cookRecipe(
                 1,
-                activeInventoryId: ref.read(activeInventoryProvider),
-                baseCurrency: ref.read(settingsProvider).baseCurrency,
+                activeInventoryId: await ref.read(
+                  activeInventoryProvider.future,
+                ),
+                baseCurrency: (await ref.read(
+                  settingsProvider.future,
+                )).baseCurrency,
               );
         } on Exception {
           // cookRecipe is asserted via pre-flight mock interactions.
@@ -96,8 +100,10 @@ class _CostButton extends ConsumerWidget {
             .read(recipeServiceProvider)
             .calculateRecipeCost(
               recipeId,
-              activeInventoryId: ref.read(activeInventoryProvider),
-              baseCurrency: ref.read(settingsProvider).baseCurrency,
+              activeInventoryId: await ref.read(activeInventoryProvider.future),
+              baseCurrency: (await ref.read(
+                settingsProvider.future,
+              )).baseCurrency,
             );
         capture.done = true;
       },
@@ -129,8 +135,12 @@ class _CookButton extends ConsumerWidget {
               .read(recipeServiceProvider)
               .cookRecipe(
                 1,
-                activeInventoryId: ref.read(activeInventoryProvider),
-                baseCurrency: ref.read(settingsProvider).baseCurrency,
+                activeInventoryId: await ref.read(
+                  activeInventoryProvider.future,
+                ),
+                baseCurrency: (await ref.read(
+                  settingsProvider.future,
+                )).baseCurrency,
               );
         } on Exception catch (e) {
           capture.error = e;

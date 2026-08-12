@@ -23,7 +23,7 @@ class MockProductRepository2 extends Mock implements ProductRepository {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 }
 
 void main() {

@@ -92,7 +92,7 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
   void initState() {
     super.initState();
     final existing = widget.existingPrice;
-    final base = ref.read(settingsProvider).baseCurrency;
+    final base = ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
     _currency = existing?.currency ?? widget.existingCurrency ?? base;
     _decimalSep = decimalSeparatorFor(_currency);
     _date = existing?.datePurchased != null

@@ -62,7 +62,7 @@ final class AllRecipesProvider
   }
 }
 
-String _$allRecipesHash() => r'bf79441f7f55125cd908c1a3243cdd98a2e70086';
+String _$allRecipesHash() => r'7f51fcf1827279802883f284bbd7c94360c8af89';
 
 /// Provides ingredients for a specific recipe.
 
