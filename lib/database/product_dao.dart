@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:core';
 
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
@@ -135,7 +136,7 @@ class ProductDao {
 
   /// Inserts a product into the local cache (upsert).
   ///
-  /// Throws [ArgumentError] if [product.barcode] is empty.
+  /// Throws an [ArgumentError] if the product barcode is empty.
   Future<void> insert(Database db, Product product) async {
     if (product.barcode.isEmpty) {
       throw ArgumentError('product barcode must not be empty');

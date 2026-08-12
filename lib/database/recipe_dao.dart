@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -63,7 +65,7 @@ class RecipeDao {
   /// If [Recipe.createdAt] or [Recipe.updatedAt] is 0, the current epoch
   /// timestamp is used.
   ///
-  /// Throws [ArgumentError] if [recipe.name] is empty.
+  /// Throws [ArgumentError] if the recipe name is empty.
   Future<int> insert(Database db, Recipe recipe) async {
     if (recipe.name.isEmpty) {
       throw ArgumentError('recipe name must not be empty');
@@ -136,7 +138,7 @@ class RecipeDao {
   /// existing row, so an update never silently moves a recipe to another
   /// inventory. updatedAt is set to the current epoch timestamp.
   ///
-  /// Throws [ArgumentError] if [recipe.id] is non-positive.
+  /// Throws [ArgumentError] if id is non-positive.
   Future<int> update(Database db, Recipe recipe) async {
     if (recipe.id == null || recipe.id! <= 0) {
       throw ArgumentError('recipe id must be positive');
