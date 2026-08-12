@@ -75,9 +75,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
                     ),
                   );
                   if (result == true && context.mounted) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ref.invalidate(allRecipesProvider);
-                    });
+                    ref.invalidate(allRecipesProvider);
                   }
                 },
               );
@@ -115,9 +113,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
                 builder: (_) => const RecipeFormScreen(),
               ),
             ).then((_) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                ref.invalidate(allRecipesProvider);
-              });
+              if (context.mounted) ref.invalidate(allRecipesProvider);
             }),
           );
         },
@@ -165,12 +161,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
 
     return RefreshIndicator(
       onRefresh: () async {
-        final completer = Completer<void>();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(allRecipesProvider);
-          completer.complete();
-        });
-        await completer.future;
+        ref.invalidate(allRecipesProvider);
         await ref.read(allRecipesProvider.future);
       },
       child: ListView(
@@ -335,9 +326,7 @@ class _RecipeCard extends ConsumerWidget {
                   builder: (_) => RecipeDetailScreen(recipeId: recipe.id!),
                 ),
               ).then((_) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ref.invalidate(allRecipesProvider);
-                });
+                if (context.mounted) ref.invalidate(allRecipesProvider);
               }),
             );
           },

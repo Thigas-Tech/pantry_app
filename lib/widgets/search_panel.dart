@@ -122,9 +122,7 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
           )
           .then((_) {
             if (!context.mounted) return;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              ref.invalidate(pantryProvider);
-            });
+            ref.invalidate(pantryProvider);
           }),
     );
   }
@@ -192,18 +190,16 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
     try {
       await repo.cacheProduct(product);
       final newId = await repo.addOrMergeInventoryItem(item);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.invalidate(pantryProvider);
-      });
+      if (!mounted) return;
+      ref.invalidate(pantryProvider);
       if (!mounted) return;
       SnackbarHelper.showUndo(
         context,
         l10n.addToPantry,
         () async {
           await repo.deleteInventoryItem(newId);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.invalidate(pantryProvider);
-          });
+          if (!mounted) return;
+          ref.invalidate(pantryProvider);
           if (mounted) {
             SnackbarHelper.showInfo(context, l10n.removedFromPantry);
           }

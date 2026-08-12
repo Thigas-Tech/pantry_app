@@ -66,10 +66,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               loading: () => Center(child: ProgressIndicatorHelper.build()),
               error: (error, _) => ErrorView(
                 message: l10n.errorGeneric,
-                onRetry: () =>
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ref.invalidate(statsProvider);
-                    }),
+                onRetry: () => ref.invalidate(statsProvider),
               ),
             ),
     );
@@ -112,9 +109,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(statsProvider);
-        });
+        ref.invalidate(statsProvider);
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),

@@ -89,9 +89,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     );
     logInfo('Returned from ProductDetailScreen — clearing resolution');
     ref.read(scannerCameraProvider.notifier).clearResolution();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(pantryProvider);
-    });
+    if (!mounted) return;
+    ref.invalidate(pantryProvider);
   }
 
   /// Opens the contribution form for a [barcode] that is not in the database.
@@ -110,9 +109,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     if (!mounted) return;
     logInfo('Returned from AddProductScreen — clearing resolution');
     ref.read(scannerCameraProvider.notifier).clearResolution();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(pantryProvider);
-    });
+    if (!mounted) return;
+    ref.invalidate(pantryProvider);
   }
 
   void _submitBarcode(String barcode) {
