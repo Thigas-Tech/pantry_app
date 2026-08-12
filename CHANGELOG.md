@@ -54,6 +54,19 @@
 
 ### Fixed
 
+- **Duplicate service singletons**: `FirebaseCacheProvider` and
+  `ProductRepositoryProvider` constructed their own `UsdaApiClient`, and
+  `recipe_provider` defined a private `CurrencyService` provider plus a
+  third direct construction inside `cookRecipe`. All now consume the shared
+  `usdaApiClientProvider` / `currencyServiceProvider`, so tests override
+  one instance and no HTTP clients are silently duplicated. A source-scan
+  guard test (`test/providers/provider_singleton_guard_test.dart`) fails
+  if a direct construction is reintroduced.
+  (`lib/providers/firebase_cache_provider.dart`,
+  `lib/providers/product_repository_provider.dart`,
+  `lib/providers/recipe_provider.dart`,
+  `test/providers/provider_singleton_guard_test.dart`)
+
 - **Single dependency-injection path for singletons**: `DatabaseHelper` and
   `ImageCacheService` were constructed directly in six startup/screen
   sites (main.dart x5, settings_screen) in addition to their providers,
