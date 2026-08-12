@@ -11,20 +11,25 @@ void main() {
   });
 
   group('v30 recipe indexes and search', () {
-    Future<Database> buildV29Db() async {
+    Future<Database> buildV29Db({
+      String? name,
+      String? instructions,
+    }) async {
       final db = await databaseFactory.openDatabase(inMemoryDatabasePath);
       final runner = MigrationRunner(allMigrations());
       await runner.run(db, 0, 29);
 
       // Insert a recipe to verify index benefit.
-      await db.insert('recipes', {
-        'name': 'Test Recipe',
-        'instructions': 'Do stuff',
-        'servings': 2,
-        'image_path': '',
-        'created_at': 100,
-        'updated_at': 200,
-      });
+      if (name != null) {
+        await db.insert('recipes', {
+          'name': name,
+          'instructions': instructions ?? '',
+          'servings': 2,
+          'image_path': '',
+          'created_at': 100,
+          'updated_at': 200,
+        });
+      }
 
       return db;
     }
@@ -66,7 +71,10 @@ void main() {
     });
 
     test('backfills search_text for existing recipes', () async {
-      final db = await buildV29Db();
+      final db = await buildV29Db(
+        name: 'Test Recipe',
+        instructions: 'Do stuff',
+      );
 
       final runner = MigrationRunner(allMigrations());
       await runner.run(db, 29, 30);
@@ -81,6 +89,81 @@ void main() {
         reason: 'search_text should be backfilled',
       );
 
+      await db.close();
+    });
+
+    test('backfills search_text with diacritics removed', () async {
+      final db = await buildV29Db(
+        name: 'Crème Brûlée',
+        instructions: 'à la mode',
+      );
+
+      await MigrationRunner(allMigrations()).run(db, 29, 30);
+
+      final rows = await db.rawQuery(
+        "SELECT search_text FROM recipes WHERE name = 'Crème Brûlée'",
+      );
+      expect(rows, isNotEmpty);
+      expect(rows.first['search_text'], 'creme brulee a la mode');
+      await db.close();
+    });
+
+    test(
+      'backfills search_text lowercased with whitespace collapsed',
+      () async {
+        final db = await buildV29Db(
+          name: '  Café   CRÈME  ',
+          instructions: '',
+        );
+
+        await MigrationRunner(allMigrations()).run(db, 29, 30);
+
+        final rows = await db.rawQuery('SELECT search_text FROM recipes');
+        expect(rows, isNotEmpty);
+        expect(rows.first['search_text'], 'cafe creme');
+        await db.close();
+      },
+    );
+
+    test('backfills search_text from empty instructions', () async {
+      final db = await buildV29Db(
+        name: 'Test Recipe',
+        instructions: '',
+      );
+
+      await MigrationRunner(allMigrations()).run(db, 29, 30);
+
+      final rows = await db.rawQuery('SELECT search_text FROM recipes');
+      expect(rows, isNotEmpty);
+      expect(rows.first['search_text'], 'test recipe');
+      await db.close();
+    });
+
+    test('runs cleanly when the recipes table is empty', () async {
+      final db = await buildV29Db();
+
+      await MigrationRunner(allMigrations()).run(db, 29, 30);
+
+      expect(await columnExists(db, 'recipes', 'search_text'), isTrue);
+      final rows = await db.rawQuery('SELECT search_text FROM recipes');
+      expect(rows, isEmpty);
+      await db.close();
+    });
+
+    test('leaves search_text unchanged when run twice', () async {
+      final db = await buildV29Db(
+        name: 'Crème Brûlée',
+        instructions: 'à la mode',
+      );
+
+      final runner = MigrationRunner(allMigrations());
+      await runner.run(db, 29, 30);
+      final firstRun = await db.rawQuery('SELECT search_text FROM recipes');
+      await runner.run(db, 29, 30);
+      final secondRun = await db.rawQuery('SELECT search_text FROM recipes');
+
+      expect(secondRun, firstRun);
+      expect(secondRun.first['search_text'], 'creme brulee a la mode');
       await db.close();
     });
 
@@ -103,7 +186,10 @@ void main() {
     });
 
     test('RecipeDao.search returns results', () async {
-      final db = await buildV29Db();
+      final db = await buildV29Db(
+        name: 'Test Recipe',
+        instructions: 'Do stuff',
+      );
 
       await MigrationRunner(allMigrations()).run(db, 29, 30);
 

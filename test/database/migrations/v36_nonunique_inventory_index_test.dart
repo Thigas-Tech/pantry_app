@@ -69,6 +69,22 @@ void main() {
       await db.close();
     });
 
+    test('index is non-unique at the schema level', () async {
+      final db = await buildPreV36Db();
+      await MigrationRunner(allMigrations()).run(db, 35, 36);
+
+      final indexList = await db.rawQuery(
+        "PRAGMA index_list('inventory')",
+      );
+      final match = indexList.where(
+        (row) => row['name'] == 'idx_inventory_barcode_inventory_id',
+      );
+      expect(match, hasLength(1));
+      expect(match.first['unique'], 0);
+
+      await db.close();
+    });
+
     test('is idempotent when run twice', () async {
       final db = await buildPreV36Db();
       final runner = MigrationRunner(allMigrations());

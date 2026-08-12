@@ -15,6 +15,30 @@
   `docs/superpowers/agents/stale_info_checklist.md`, `README.md`, `TODO.md`
   and the schema header comment in `lib/database/database_helper.dart`.
 
+- **Migration v30 search_text backfill decision documented**: the recipe
+  `search_text` backfill intentionally stays Dart-based
+  (`normalizeForSearch()`) instead of raw SQL because SQLite string
+  functions cannot strip diacritics; the performance gain is marginal for
+  typical recipe counts, so correctness is prioritized. The rationale is
+  recorded in the `MigrationV30` doc comment and
+  `ARCHITECTURE/DATABASE.md`. New migration regression tests lock in
+  diacritic removal, case and whitespace normalization, empty-table and
+  empty-instruction handling, and data-level idempotency.
+  (`lib/database/migrations/v30_recipe_indexes_and_search.dart`,
+  `ARCHITECTURE/DATABASE.md`,
+  `test/database/migrations/v30_recipe_indexes_test.dart`)
+
+- **Migration test coverage gaps filled (V32-V36)**: migration tests now
+  also assert the `idx_scan_history_barcode` index and an `image_url`
+  round-trip (v32), the fallback backfill id when the `inventories` table
+  is empty plus the `NOT NULL DEFAULT 1` constraint for rows inserted
+  after the migration (v33, v34), and the non-unique flag of the
+  `idx_inventory_barcode_inventory_id` index via PRAGMA (v36).
+  (`test/database/migrations/v32_scan_history_test.dart`,
+  `test/database/migrations/v33_recipes_inventory_test.dart`,
+  `test/database/migrations/v34_prices_inventory_test.dart`,
+  `test/database/migrations/v36_nonunique_inventory_index_test.dart`)
+
 ### Added
 
 - **Nutrition editor for all Open Food Facts nutrients**: the manual product

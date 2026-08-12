@@ -96,5 +96,73 @@ void main() {
 
       await db.close();
     });
+
+    test('backfills to the fallback id when inventories is empty', () async {
+      // Build a pre-v33 schema with recipes but no inventories rows at all.
+      final db = await databaseFactory.openDatabase(inMemoryDatabasePath);
+      await db.execute('''
+        CREATE TABLE inventories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          created_at INTEGER NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE recipes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          instructions TEXT NOT NULL DEFAULT '',
+          servings INTEGER NOT NULL DEFAULT 0,
+          image_path TEXT NOT NULL DEFAULT '',
+          search_text TEXT,
+          created_at INTEGER NOT NULL,
+          updated_at INTEGER NOT NULL
+        )
+      ''');
+      await db.insert('recipes', {
+        'name': 'Soup',
+        'instructions': 'Cook',
+        'servings': 2,
+        'image_path': '',
+        'created_at': 100,
+        'updated_at': 200,
+      });
+
+      await MigrationV33().up(db);
+
+      final rows = await db.rawQuery(
+        "SELECT inventory_id FROM recipes WHERE name = 'Soup'",
+      );
+      expect(rows, isNotEmpty);
+      expect(rows.first['inventory_id'], 1);
+
+      await db.close();
+    });
+
+    test(
+      'defaults inventory_id to 1 for rows inserted after migration',
+      () async {
+        final db = await buildPreV33Db();
+        await MigrationV33().up(db);
+
+        final id = await db.insert('recipes', {
+          'name': 'New Recipe',
+          'instructions': '',
+          'servings': 1,
+          'image_path': '',
+          'created_at': 300,
+          'updated_at': 300,
+        });
+        expect(id, isNonNegative);
+
+        final rows = await db.rawQuery(
+          "SELECT inventory_id FROM recipes WHERE name = 'New Recipe'",
+        );
+        expect(rows, isNotEmpty);
+        expect(rows.first['inventory_id'], 1);
+
+        await db.close();
+      },
+    );
   });
 }

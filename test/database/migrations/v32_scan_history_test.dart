@@ -62,6 +62,42 @@ void main() {
       await db.close();
     });
 
+    test('creates the barcode index on scan_history', () async {
+      final db = await buildV31Db();
+
+      await MigrationRunner(allMigrations()).run(db, 31, 32);
+
+      final indexes = await db.rawQuery(
+        'SELECT name FROM sqlite_master'
+        " WHERE type='index' AND name='idx_scan_history_barcode'",
+      );
+      expect(indexes, hasLength(1));
+
+      await db.close();
+    });
+
+    test('round-trips an image_url value', () async {
+      final db = await buildV31Db();
+
+      await MigrationRunner(allMigrations()).run(db, 31, 32);
+
+      final id = await db.insert('scan_history', {
+        'barcode': '5012345678900',
+        'name': 'Test Product',
+        'scanned_at': 1000,
+        'image_url': 'https://example.com/photo.jpg',
+      });
+      final rows = await db.query(
+        'scan_history',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      expect(rows, hasLength(1));
+      expect(rows.first['image_url'], 'https://example.com/photo.jpg');
+
+      await db.close();
+    });
+
     test('is idempotent when run twice', () async {
       final db = await buildV31Db();
 
