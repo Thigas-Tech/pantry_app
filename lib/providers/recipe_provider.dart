@@ -479,12 +479,15 @@ Future<Map<String, double>> checkIngredientShortages(
 ) async {
   final grouped = <String, _GroupedIngredient>{};
   for (final ing in ingredients) {
-    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
-    grouped.putIfAbsent(
-      ing.barcode!,
-      () => _GroupedIngredient(name: ing.name, unit: ing.unit),
-    );
-    grouped[ing.barcode!]!.totalQuantity += ing.quantity;
+    final barcode = ing.barcode;
+    if (barcode == null || barcode.isEmpty) continue;
+    grouped
+            .putIfAbsent(
+              barcode,
+              () => _GroupedIngredient(name: ing.name, unit: ing.unit),
+            )
+            .totalQuantity +=
+        ing.quantity;
   }
 
   final shortages = <String, double>{};
@@ -503,7 +506,7 @@ Future<Map<String, double>> checkIngredientShortages(
     }
     var available = 0.0;
     for (final row in rows) {
-      final rowQty = (row['quantity']! as num).toDouble();
+      final rowQty = (row['quantity'] as num?)?.toDouble() ?? 0;
       final rowUnit = row['unit'] as String? ?? 'pieces';
       if (UnitConverter.areUnitsCompatible(grp.unit, rowUnit)) {
         available += UnitConverter.convert(rowQty, rowUnit, grp.unit);
@@ -629,12 +632,15 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
 
   final grouped = <String, _GroupedIngredient>{};
   for (final ing in ingredients) {
-    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
-    grouped.putIfAbsent(
-      ing.barcode!,
-      () => _GroupedIngredient(name: ing.name, unit: ing.unit),
-    );
-    grouped[ing.barcode!]!.totalQuantity += ing.quantity;
+    final barcode = ing.barcode;
+    if (barcode == null || barcode.isEmpty) continue;
+    grouped
+            .putIfAbsent(
+              barcode,
+              () => _GroupedIngredient(name: ing.name, unit: ing.unit),
+            )
+            .totalQuantity +=
+        ing.quantity;
   }
 
   return database
@@ -659,8 +665,9 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
           }
           for (final row in rows) {
             if (remaining <= 0) break;
-            final rowId = row['id']! as int;
-            final rowQty = (row['quantity']! as num).toDouble();
+            final rowId = row['id'] as int?;
+            if (rowId == null) continue;
+            final rowQty = (row['quantity'] as num?)?.toDouble() ?? 0;
             final rowUnit = row['unit'] as String? ?? 'pieces';
             double effectiveQty;
             double Function(double consumed) toRowUnits;

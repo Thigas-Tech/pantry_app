@@ -543,7 +543,12 @@ class DatabaseHelper {
       'WHERE barcode IN ($placeholders) AND inventory_id = ?',
       [...barcodes, inventoryId],
     );
-    return rows.map((r) => r['barcode']! as String).toSet();
+    final result = <String>{};
+    for (final row in rows) {
+      final barcode = row['barcode'] as String?;
+      if (barcode != null && barcode.isNotEmpty) result.add(barcode);
+    }
+    return result;
   }
 
   /// Returns distinct product barcodes and names from the active inventory,
