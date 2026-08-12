@@ -78,9 +78,7 @@
     state.selectedIds.toList(),
     targetInventoryId,
   );
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    ref.invalidate(pantryProvider);
-  });
+  if (ref.mounted) ref.invalidate(pantryProvider);
   exitSelectionMode();
 }</code></pre>
 </section>

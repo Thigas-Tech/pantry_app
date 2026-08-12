@@ -249,10 +249,10 @@ stock. Returns a <a href="../providers_recipe_provider/CookResult-class.html">Co
       .then((result) {
         unawaited(
           Future.microtask(() {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              invalidateRecipes(ref);
+            invalidateRecipes(ref);
+            if (ref.context.mounted) {
               ref.invalidate(pantryProvider);
-            });
+            }
           }),
         );
         return result;

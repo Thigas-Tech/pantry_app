@@ -120,9 +120,7 @@ Widget build(BuildContext context, WidgetRef ref) {
       loading: () =&gt; Center(child: ProgressIndicatorHelper.build()),
       error: (err, _) =&gt; ErrorView(
         message: l10n.inventoryLoadFailed,
-        onRetry: () =&gt; WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(inventoryListProvider);
-        }),
+        onRetry: () =&gt; ref.invalidate(inventoryListProvider),
       ),
       data: (list) {
         if (list.isEmpty) {

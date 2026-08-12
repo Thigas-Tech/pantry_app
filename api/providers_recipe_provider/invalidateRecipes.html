@@ -64,12 +64,9 @@
     
 <section class="desc markdown">
   <p>Invalidates all recipe-related providers.</p>
-<p>Call this after every mutation so the UI refreshes. Invalidation is
-deferred to the next frame via <a href="https://api.flutter.dev/flutter/scheduler/SchedulerBinding/addPostFrameCallback.html">WidgetsBinding.addPostFrameCallback</a> to
-prevent build-phase crashes when called from async gaps (e.g. database
-transactions). The <a href="https://api.flutter.dev/flutter/widgets/BuildContext/mounted.html">BuildContext.mounted</a> guard prevents crashes when the
-widget has been disposed before the callback fires, such as during widget
-tests.</p>
+<p>Call this after every mutation so the UI refreshes. The
+<a href="https://api.flutter.dev/flutter/widgets/BuildContext/mounted.html">BuildContext.mounted</a> guard prevents crashes when the widget has been
+disposed before the invalidation runs, such as during widget tests.</p>
 </section>
 
 
@@ -77,11 +74,9 @@ tests.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void invalidateRecipes(WidgetRef ref) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (ref.context.mounted) {
-      ref.invalidate(allRecipesProvider);
-    }
-  });
+  if (ref.context.mounted) {
+    ref.invalidate(allRecipesProvider);
+  }
 }</code></pre>
 </section>
 

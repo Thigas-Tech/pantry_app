@@ -76,9 +76,7 @@
   for (final id in state.selectedIds) {
     await repo.deleteInventoryItem(id);
   }
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    ref.invalidate(pantryProvider);
-  });
+  if (ref.mounted) ref.invalidate(pantryProvider);
   exitSelectionMode();
 }</code></pre>
 </section>

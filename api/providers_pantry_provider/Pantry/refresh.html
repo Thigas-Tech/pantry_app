@@ -77,9 +77,7 @@ TickerMode.didChangeDependencies resuming paused subscriptions).</p>
   final repo = ref.read(productRepositoryProvider);
   await repo.refreshInventoryProducts(activeId);
   await repo.setLastRefreshTime();
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    ref.invalidateSelf();
-  });
+  ref.invalidateSelf();
 }</code></pre>
 </section>
 

@@ -82,9 +82,7 @@ prevents setState during build errors.</p>
     final activeId = ref.read(activeInventoryProvider);
     await repo.refreshInventoryProducts(activeId);
     await repo.setLastRefreshTime();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(pantryProvider);
-    });
+    if (ref.mounted) ref.invalidate(pantryProvider);
   } on Exception catch (e) {
     logWarning(&#39;Overdue cache refresh failed: $e&#39;);
   }
