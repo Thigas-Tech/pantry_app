@@ -1,7 +1,9 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -39,7 +41,7 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         inventoryListProvider.overrideWith(
-          (ref) => <Map<String, dynamic>>[],
+          (ref) => <InventorySummary>[],
         ),
         inventoryCountProvider.overrideWith((ref) => 0),
         activeInventoryProvider.overrideWith(
@@ -75,7 +77,7 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         inventoryListProvider.overrideWith(
-          (ref) => <Map<String, dynamic>>[],
+          (ref) => <InventorySummary>[],
         ),
         inventoryCountProvider.overrideWith((ref) => 0),
         activeInventoryProvider.overrideWith(

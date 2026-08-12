@@ -1,17 +1,3 @@
-/// @file ManageInventoriesScreen widget tests.
-///
-/// Tests for the inventory management screen.  We verify:
-/// - Loading spinner while the inventory list is being fetched.
-/// - Error message when fetching fails.
-/// - Empty state when there are no inventories.
-/// - List of inventories with item count and active check mark.
-/// - Tapping an inventory sets it as active and pops the screen.
-/// - Long‑press opens a rename dialog; renaming updates the inventory list.
-/// - "Create new pantry" tile opens a dialog; creating adds an inventory.
-/// - Delete action (from rename dialog) asks for confirmation; confirming
-///   deletes the inventory.
-/// - Error snackbars are shown when create/rename/delete fail.
-library;
 
 import 'dart:async';
 
@@ -19,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart'; // Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/services/product_repository.dart';
+
 import '../helpers/pump_app.dart';
 
 // ---------- Fakes -----------------------------------------------------------
@@ -62,7 +50,7 @@ List<Override> screenOverrides({
 }) {
   return [
     inventoryListProvider.overrideWith(
-      (ref) => List<Map<String, dynamic>>.from(inventories),
+      (ref) => inventories.map(InventorySummary.fromMap).toList(),
     ),
     activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
     if (mockRepo != null) productRepositoryProvider.overrideWithValue(mockRepo),
@@ -95,7 +83,7 @@ void main() {
   // --------------------------------------------------------------------------
 
   testWidgets('shows loading spinner while fetching', (tester) async {
-    final completer = Completer<List<Map<String, dynamic>>>();
+    final completer = Completer<List<InventorySummary>>();
     await pumpApp(
       tester,
       const ManageInventoriesScreen(),

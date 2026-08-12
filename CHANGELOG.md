@@ -4,6 +4,20 @@
 
 ### Fixed
 
+- **Raw DB maps exposed to UI (audit Q6)**: `inventoryListProvider` now
+  returns typed `InventorySummary` rows (id, name, createdAt, itemCount)
+  and `inventoryProductsProvider` returns `InventoryProductOption`
+  (barcode, name, imageUrl, productType) instead of raw maps. Consumers
+  (home_screen, manage_inventories_screen, recipe_list_screen,
+  quantity_and_pantry_sheet, add_to_shopping_list_sheet) use typed
+  access — the home screen's `asData!.value.cast().firstWhere(...)`
+  force-unwrap chain is gone.
+  (lib/models/inventory_summary.dart,
+  lib/models/inventory_product_option.dart,
+  lib/providers/inventory_provider.dart,
+  lib/providers/shopping_list_provider.dart,
+  test/models/inventory_summary_test.dart)
+
 - **Layering bypass (audit Q8)**: `HomeScreenController.deleteSelected`
   and `moveSelected` now delegate to `ProductRepository` (via
   `productRepositoryProvider`) instead of calling the database facade

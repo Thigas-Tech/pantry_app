@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
+
 import '../helpers/pump_app.dart';
 
 class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
@@ -118,8 +120,8 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         inventoryListProvider.overrideWith(
-          (ref) => <Map<String, dynamic>>[
-            {'id': 1, 'name': 'Home'},
+          (ref) => [
+            InventorySummary.fromMap({'id': 1, 'name': 'Home'}),
           ],
         ),
         activeInventoryProvider.overrideWith(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
+import 'package:pantry_app/models/inventory_product_option.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
@@ -185,12 +186,12 @@ class _AddToShoppingListSheetState
   }
 
   ShoppingItem _inventoryEntryToItem(
-    Map<String, dynamic> entry,
+    InventoryProductOption entry,
   ) {
-    final name = entry['name'] as String? ?? entry['barcode'] as String;
+    final name = entry.name ?? entry.barcode;
     return ShoppingItem(
       name: name,
-      barcode: entry['barcode'] as String,
+      barcode: entry.barcode,
     );
   }
 
@@ -207,12 +208,12 @@ class _AddToShoppingListSheetState
     Navigator.of(context).pop(_productToItem(product));
   }
 
-  Future<void> _addFromInventory(Map<String, dynamic> entry) async {
-    final barcode = entry['barcode'] as String?;
+  Future<void> _addFromInventory(InventoryProductOption entry) async {
+    final barcode = entry.barcode;
     logInfo(
-      'Add from inventory — barcode=$barcode name=${entry['name']}',
+      'Add from inventory — barcode=$barcode name=${entry.name}',
     );
-    if (barcode != null && barcode.isNotEmpty) {
+    if (barcode.isNotEmpty) {
       final existing = await ref
           .read(productRepositoryProvider)
           .getProductFromCache(barcode);
@@ -238,10 +239,10 @@ class _AddToShoppingListSheetState
   }
 
   Widget _buildPantryEntryAvatar(
-    Map<String, dynamic> entry,
+    InventoryProductOption entry,
     ThemeData theme,
   ) {
-    final imageUrl = entry['image_url'] as String?;
+    final imageUrl = entry.imageUrl;
     if (imageUrl != null && imageUrl.isNotEmpty) {
       final ratio = MediaQuery.devicePixelRatioOf(context);
       return ClipOval(
@@ -264,10 +265,10 @@ class _AddToShoppingListSheetState
   }
 
   Widget _fallbackPantryAvatar(
-    Map<String, dynamic> entry,
+    InventoryProductOption entry,
     ThemeData theme,
   ) {
-    final productType = entry['product_type'] as String?;
+    final productType = entry.productType;
     if (productType == 'produce') {
       return CircleAvatar(
         backgroundColor: Colors.green.shade100,
@@ -432,7 +433,7 @@ class _AddToShoppingListSheetState
   Widget _buildInitialState(
     AppLocalizations l10n,
     ThemeData theme,
-    AsyncValue<List<Map<String, dynamic>>> inventoryProducts,
+    AsyncValue<List<InventoryProductOption>> inventoryProducts,
   ) {
     return inventoryProducts.when(
       data: (products) {
@@ -469,7 +470,7 @@ class _AddToShoppingListSheetState
               );
             }
             final entry = products[index - 1];
-            final name = entry['name'] as String? ?? entry['barcode'] as String;
+            final name = entry.name ?? entry.barcode;
             return ListTile(
               leading: _buildPantryEntryAvatar(entry, theme),
               title: Text(

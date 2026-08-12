@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 
@@ -63,11 +64,10 @@ class _QuantityAndPantrySheetState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final inventoriesAsync = ref.watch(inventoryListProvider);
-    final inventories =
-        inventoriesAsync.asData?.value ?? <Map<String, dynamic>>[];
+    final inventories = inventoriesAsync.asData?.value ?? <InventorySummary>[];
 
     if (_selectedInventoryId == 1 && inventories.isNotEmpty) {
-      _selectedInventoryId = inventories.first['id'] as int;
+      _selectedInventoryId = inventories.first.id;
     }
 
     return Padding(
@@ -121,11 +121,9 @@ class _QuantityAndPantrySheetState
                   items: inventories
                       .map(
                         (inv) => DropdownMenuItem<int>(
-                          value: inv['id'] as int,
+                          value: inv.id,
                           child: Text(
-                            l10n.displayInventoryName(
-                              inv['name'] as String? ?? '',
-                            ),
+                            l10n.displayInventoryName(inv.name),
                           ),
                         ),
                       )

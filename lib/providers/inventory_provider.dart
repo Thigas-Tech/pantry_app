@@ -1,3 +1,4 @@
+import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
@@ -5,11 +6,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'inventory_provider.g.dart';
 
-/// Provides the list of all inventories (id, name).
+/// Provides the list of all inventories as typed [InventorySummary] rows.
 @Riverpod(keepAlive: true)
-Future<List<Map<String, dynamic>>> inventoryList(Ref ref) {
+Future<List<InventorySummary>> inventoryList(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  return db.getInventories();
+  final rows = await db.getInventories();
+  return rows.map(InventorySummary.fromMap).toList();
 }
 
 /// Provides the count of inventory items in the active pantry.
@@ -29,8 +31,9 @@ Future<int> totalInventoryCount(Ref ref) async {
   final inventories = await db.getInventories();
   var total = 0;
   for (final inv in inventories) {
+    final summary = InventorySummary.fromMap(inv);
     final rows = await db.getInventoryWithProduct(
-      inventoryId: inv['id'] as int,
+      inventoryId: summary.id,
     );
     total += rows.length;
   }

@@ -124,7 +124,7 @@ void main() {
 
       final list = await container.read(inventoryListProvider.future);
       expect(list.length, 2);
-      expect(list.first['name'], 'Home');
+      expect(list.first.name, 'Home');
     });
   });
 

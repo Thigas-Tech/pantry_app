@@ -52,23 +52,23 @@ mixin _$Product {
  String? get ingredients;/// The suggested serving size, typically with a unit (e.g. "15 g",
 /// "1 cookie (28 g)").
  String? get servingSize;/// The normalized numeric serving quantity from the OFF API
-/// (e.g. `30.0` for a serving size of "30 g").
+/// (e.g. 30.0 for a serving size of "30 g").
 ///
-/// Sourced from the OFF API `serving_quantity` field. When available,
+/// Sourced from the OFF API serving_quantity field. When available,
 /// this is used by [parseServingQuantity] as the amount for pre-fill, with
-/// the unit extracted from the [String] serving size.
+/// the unit extracted from the String serving size.
  double? get servingQuantity;/// The display quantity as printed on the packaging (e.g. "500 ml",
 /// "3 x 150 g", "6 eggs").
 ///
-/// Sourced from the OFF API `quantity` field. When available, this is
+/// Sourced from the OFF API quantity field. When available, this is
 /// used to pre-fill the amount and unit fields in the add-to-inventory
 /// form. May be null for products that have no packaging data.
- String? get quantity;/// The normalized numeric quantity in g or ml (e.g. `500` for "500 ml",
-/// `450` for "3 x 150 g").
+ String? get quantity;/// The normalized numeric quantity in g or ml (e.g. 500 for "500 ml",
+/// 450 for "3 x 150 g").
 ///
-/// Sourced from the OFF API `product_quantity` field. This is the total
+/// Sourced from the OFF API product_quantity field. This is the total
 /// quantity, not the per-unit value for multi-pack items. For pre-fill,
-/// [parseQuantity] extracts the per-unit value from [quantity]
+/// [parseQuantity] extracts the per-unit value from quantity
 /// instead.
  double? get productQuantity;/// Energy content in **kilocalories per 100 g** (or 100 ml).
 ///
@@ -160,17 +160,17 @@ mixin _$Product {
 /// - [ProductType.barcoded] — scanned from manufacturer barcode (default).
 /// - [ProductType.produce] — identified by PLU code as fresh produce.
 /// - [ProductType.custom] — manually entered by the user.
- ProductType get productType;/// The `amount` from the first USDA foodPortion (e.g. `1.0` for a single
+ ProductType get productType;/// The amount from the first USDA foodPortion (e.g. 1.0 for a single
 /// apple). Populated by [UsdaApiClient.enrichProductWithServingData].
 ///
 /// Only meaningful for produce items fetched from USDA. Null for OFF
 /// products, manually entered items, or when USDA has no portion data.
- double? get usdaServingAmount;/// The `measureUnit.name` from the first USDA foodPortion
-/// (e.g. `"fruit"`, `"cup"`, `"medium"`).
+ double? get usdaServingAmount;/// The measureUnit.name from the first USDA foodPortion
+/// (e.g. "fruit", "cup", "medium").
 ///
 /// Only meaningful for produce items fetched from USDA. Null for OFF
 /// products, manually entered items, or when USDA has no portion data.
- String? get usdaServingUnit;/// The `gramWeight` from the first USDA foodPortion (e.g. `182.0` for a
+ String? get usdaServingUnit;/// The gramWeight from the first USDA foodPortion (e.g. 182.0 for a
 /// medium apple). This is the primary pre-fill value via
 /// [parseUsdaQuantity].
 ///
@@ -468,25 +468,25 @@ class _Product implements Product {
 /// "1 cookie (28 g)").
 @override final  String? servingSize;
 /// The normalized numeric serving quantity from the OFF API
-/// (e.g. `30.0` for a serving size of "30 g").
+/// (e.g. 30.0 for a serving size of "30 g").
 ///
-/// Sourced from the OFF API `serving_quantity` field. When available,
+/// Sourced from the OFF API serving_quantity field. When available,
 /// this is used by [parseServingQuantity] as the amount for pre-fill, with
-/// the unit extracted from the [String] serving size.
+/// the unit extracted from the String serving size.
 @override final  double? servingQuantity;
 /// The display quantity as printed on the packaging (e.g. "500 ml",
 /// "3 x 150 g", "6 eggs").
 ///
-/// Sourced from the OFF API `quantity` field. When available, this is
+/// Sourced from the OFF API quantity field. When available, this is
 /// used to pre-fill the amount and unit fields in the add-to-inventory
 /// form. May be null for products that have no packaging data.
 @override final  String? quantity;
-/// The normalized numeric quantity in g or ml (e.g. `500` for "500 ml",
-/// `450` for "3 x 150 g").
+/// The normalized numeric quantity in g or ml (e.g. 500 for "500 ml",
+/// 450 for "3 x 150 g").
 ///
-/// Sourced from the OFF API `product_quantity` field. This is the total
+/// Sourced from the OFF API product_quantity field. This is the total
 /// quantity, not the per-unit value for multi-pack items. For pre-fill,
-/// [parseQuantity] extracts the per-unit value from [quantity]
+/// [parseQuantity] extracts the per-unit value from quantity
 /// instead.
 @override final  double? productQuantity;
 /// Energy content in **kilocalories per 100 g** (or 100 ml).
@@ -612,19 +612,19 @@ class _Product implements Product {
 /// - [ProductType.produce] — identified by PLU code as fresh produce.
 /// - [ProductType.custom] — manually entered by the user.
 @override@JsonKey() final  ProductType productType;
-/// The `amount` from the first USDA foodPortion (e.g. `1.0` for a single
+/// The amount from the first USDA foodPortion (e.g. 1.0 for a single
 /// apple). Populated by [UsdaApiClient.enrichProductWithServingData].
 ///
 /// Only meaningful for produce items fetched from USDA. Null for OFF
 /// products, manually entered items, or when USDA has no portion data.
 @override final  double? usdaServingAmount;
-/// The `measureUnit.name` from the first USDA foodPortion
-/// (e.g. `"fruit"`, `"cup"`, `"medium"`).
+/// The measureUnit.name from the first USDA foodPortion
+/// (e.g. "fruit", "cup", "medium").
 ///
 /// Only meaningful for produce items fetched from USDA. Null for OFF
 /// products, manually entered items, or when USDA has no portion data.
 @override final  String? usdaServingUnit;
-/// The `gramWeight` from the first USDA foodPortion (e.g. `182.0` for a
+/// The gramWeight from the first USDA foodPortion (e.g. 182.0 for a
 /// medium apple). This is the primary pre-fill value via
 /// [parseUsdaQuantity].
 ///
