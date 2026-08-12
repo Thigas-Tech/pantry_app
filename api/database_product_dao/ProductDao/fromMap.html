@@ -103,10 +103,9 @@
   offNutritionImageUrl: map[&#39;off_nutrition_image_url&#39;] as String?,
   offIngredientsImageUrl: map[&#39;off_ingredients_image_url&#39;] as String?,
   offProductImageUrl: map[&#39;off_product_image_url&#39;] as String?,
-  categoriesHierarchy: map[&#39;categories_hierarchy&#39;] != null
-      ? (jsonDecode(map[&#39;categories_hierarchy&#39;] as String) as List&lt;dynamic&gt;)
-            .cast&lt;String&gt;()
-      : null,
+  categoriesHierarchy: decodeCategoriesHierarchy(
+    map[&#39;categories_hierarchy&#39;] as String?,
+  ),
   languageCode: (map[&#39;language_code&#39;] as String?) ?? &#39;en&#39;,
   pluCode: map[&#39;plu_code&#39;] as String?,
   productType: map[&#39;product_type&#39;] != null

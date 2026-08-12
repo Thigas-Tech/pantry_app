@@ -63,10 +63,8 @@
     </section>
     
 <section class="desc markdown">
-  <p>Decodes the additional_nutrients JSON column into a nutrient list.</p>
-<p>Returns an empty list when the column is null, empty, or holds corrupt
-JSON so a malformed row never crashes a product read.
-Decodes the additional_nutrients JSON column into nutrient objects.</p>
+  <p>Decodes the additional_nutrients JSON column into a list of
+<a href="../../models_product_nutrient/ProductNutrient-class.html">ProductNutrient</a> entries.</p>
 <p>Returns an empty list for null, blank, non-list, or corrupt JSON and
 skips entries whose shape does not match <a href="../../models_product_nutrient/ProductNutrient-class.html">ProductNutrient</a> so a single
 bad row never breaks the whole product.</p>

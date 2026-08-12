@@ -68,7 +68,9 @@
   <p>Runs every migration whose version is &lt;= <code>newVersion</code> and &gt; <code>oldVersion</code>.</p>
 <p>The upgrade window: migrations with a version greater than <code>oldVersion</code>
 and less than or equal to <code>newVersion</code> are applied.</p>
-<p>Returns a <a href="../../database_migrations_migration_runner/MigrationResult-class.html">MigrationResult</a> describing the outcome.</p>
+<p>Throws the first failing migration's exception after logging it, so
+sqflite rolls back the whole upgrade and retries on the next launch.
+Returns a <a href="../../database_migrations_migration_runner/MigrationResult-class.html">MigrationResult</a> describing the outcome on success.</p>
 </section>
 
 
@@ -96,7 +98,7 @@ and less than or equal to <code>newVersion</code> are applied.</p>
       results[m.version] = const MigrationStatusSuccess();
     } on Exception catch (e) {
       logWarning(&#39;Migration v${m.version} failed: $e&#39;);
-      results[m.version] = MigrationStatusFailure(e.toString());
+      rethrow;
     }
   }
 

@@ -89,21 +89,24 @@ Returns raw rows {store, total, item_count}.</p>
       ),
       latest_prices AS (
         SELECT p.barcode, p.price, p.store,
-          ib.total_quantity,
-          ROW_NUMBER() OVER (
-            PARTITION BY p.barcode ORDER BY p.date_purchased DESC
-          ) AS rn
+          ib.total_quantity
         FROM prices p
         INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
         WHERE p.store IS NOT NULL AND p.store != &#39;&#39;
           AND p.inventory_id = ?
+          AND p.id = (
+            SELECT id FROM prices p2
+            WHERE p2.barcode = p.barcode
+              AND p2.inventory_id = p.inventory_id
+            ORDER BY p2.date_purchased DESC, p2.id DESC
+            LIMIT 1
+          )
       )
       SELECT
         store,
         SUM(price * total_quantity) AS total,
         COUNT(*) AS item_count
       FROM latest_prices
-      WHERE rn = 1
       GROUP BY store
       ORDER BY total DESC
     &#39;&#39;&#39;,

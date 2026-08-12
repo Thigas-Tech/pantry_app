@@ -85,7 +85,7 @@ barcode lookup returns no results.</p>
     &#39;SELECT i.* FROM inventory i&#39;
     &#39; INNER JOIN products p ON p.barcode = i.barcode&#39;
     &#39; WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?&#39;
-    &#39; ORDER BY i.expiry_date ASC NULLS LAST&#39;,
+    &#39; ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC&#39;,
     [&#39;%$normalized%&#39;, inventoryId],
   );
 }</code></pre>

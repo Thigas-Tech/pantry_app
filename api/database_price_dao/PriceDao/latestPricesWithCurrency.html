@@ -82,21 +82,20 @@ with the total held quantity, for currency-aware averaging by the caller.</p>
     SELECT p.price, p.currency, i.total_quantity
     FROM prices p
     INNER JOIN (
-      SELECT barcode, MAX(date_purchased) as max_date
-      FROM prices
-      WHERE inventory_id = ?
-      GROUP BY barcode
-    ) latest ON p.barcode = latest.barcode
-      AND p.date_purchased = latest.max_date
-    INNER JOIN (
       SELECT barcode, SUM(quantity) as total_quantity
       FROM inventory
       WHERE inventory_id = ?
       GROUP BY barcode
     ) i ON i.barcode = p.barcode
     WHERE p.inventory_id = ?
+      AND p.id = (
+        SELECT id FROM prices p2
+        WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
+        ORDER BY p2.date_purchased DESC, p2.id DESC
+        LIMIT 1
+      )
   &#39;&#39;&#39;,
-    [inventoryId, inventoryId, inventoryId],
+    [inventoryId, inventoryId],
   );
   return result;
 }</code></pre>

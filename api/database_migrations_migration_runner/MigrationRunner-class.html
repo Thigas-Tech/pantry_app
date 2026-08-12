@@ -58,8 +58,9 @@
 <p>The runner:</p>
 <ul>
 <li>Only runs migrations with a version in the upgrade window</li>
-<li>Catches per-migration errors, logs them, and continues</li>
-<li>Returns a summary of which versions succeeded / failed</li>
+<li>Logs each migration's elapsed time</li>
+<li>Aborts on the first failure so the upgrade transaction rolls back
+and the database version stays unchanged (retried on next launch)</li>
 </ul>
 </section>
 

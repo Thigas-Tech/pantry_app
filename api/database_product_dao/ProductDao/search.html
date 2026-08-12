@@ -68,8 +68,11 @@
   <p>Searches the products table by name or barcode.</p>
 <p>The search is accent- and case-insensitive because both the query
 and the stored search_text column are normalized identically.</p>
-<p><strong>Filtering</strong>: uses LIKE '%escaped%' on the indexed search_text
-column to quickly narrow candidates.</p>
+<p><strong>Filtering</strong>: uses a leading- and trailing-wildcard LIKE on the
+search_text column. SQLite cannot use a B-tree index for a
+leading-wildcard LIKE, so this is a full scan of the products table;
+acceptable for typical cache sizes (FTS5 would be the option if the
+cache grows large).</p>
 <p>Throws <a href="https://api.flutter.dev/flutter/dart-core/ArgumentError-class.html">ArgumentError</a> if <code>query</code> is empty.</p>
 </section>
 

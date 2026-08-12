@@ -79,7 +79,7 @@ ordered by expiry_date ASC (nulls last) for FEFO deduction.</p>
   final db = await database;
   return db.rawQuery(
     &#39;SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?&#39;
-    &#39; ORDER BY expiry_date ASC NULLS LAST&#39;,
+    &#39; ORDER BY (expiry_date IS NULL), expiry_date ASC&#39;,
     [barcode, inventoryId],
   );
 }</code></pre>

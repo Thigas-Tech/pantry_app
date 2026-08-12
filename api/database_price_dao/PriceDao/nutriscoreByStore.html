@@ -88,14 +88,18 @@ Returns raw rows {store, avg_score}.</p>
         WHERE inventory_id = ?
       ),
       latest_prices AS (
-        SELECT p.barcode, p.store,
-          ROW_NUMBER() OVER (
-            PARTITION BY p.barcode ORDER BY p.date_purchased DESC
-          ) AS rn
+        SELECT p.barcode, p.store
         FROM prices p
         INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
         WHERE p.store IS NOT NULL AND p.store != &#39;&#39;
           AND p.inventory_id = ?
+          AND p.id = (
+            SELECT id FROM prices p2
+            WHERE p2.barcode = p.barcode
+              AND p2.inventory_id = p.inventory_id
+            ORDER BY p2.date_purchased DESC, p2.id DESC
+            LIMIT 1
+          )
       )
       SELECT
         lp.store,
@@ -111,7 +115,7 @@ Returns raw rows {store, avg_score}.</p>
         ) AS avg_score
       FROM latest_prices lp
       INNER JOIN products pr ON lp.barcode = pr.barcode
-      WHERE lp.rn = 1 AND pr.nutriscore_grade IS NOT NULL
+      WHERE pr.nutriscore_grade IS NOT NULL
       GROUP BY lp.store
       ORDER BY avg_score DESC
     &#39;&#39;&#39;,
