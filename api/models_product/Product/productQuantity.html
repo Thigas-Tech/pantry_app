@@ -67,23 +67,23 @@
     </section>
     
 <section class="desc markdown">
-  <p>The normalized numeric quantity in g or ml (e.g. <code>500</code> for "500 ml",
-<code>450</code> for "3 x 150 g").</p>
-<p>Sourced from the OFF API <code>product_quantity</code> field. This is the total
+  <p>The normalized numeric quantity in g or ml (e.g. 500 for "500 ml",
+450 for "3 x 150 g").</p>
+<p>Sourced from the OFF API product_quantity field. This is the total
 quantity, not the per-unit value for multi-pack items. For pre-fill,
-<a href="../../utils_quantity_parser/parseQuantity.html">parseQuantity</a> extracts the per-unit value from <code>quantity</code>
+<a href="../../utils_quantity_parser/parseQuantity.html">parseQuantity</a> extracts the per-unit value from quantity
 instead.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">String? get quantity;&#47;&#47;&#47; The normalized numeric quantity in g or ml (e.g. `500` for &quot;500 ml&quot;,
-&#47;&#47;&#47; `450` for &quot;3 x 150 g&quot;).
+  <pre class="language-dart"><code class="language-dart">String? get quantity;&#47;&#47;&#47; The normalized numeric quantity in g or ml (e.g. 500 for &quot;500 ml&quot;,
+&#47;&#47;&#47; 450 for &quot;3 x 150 g&quot;).
 &#47;&#47;&#47;
-&#47;&#47;&#47; Sourced from the OFF API `product_quantity` field. This is the total
+&#47;&#47;&#47; Sourced from the OFF API product_quantity field. This is the total
 &#47;&#47;&#47; quantity, not the per-unit value for multi-pack items. For pre-fill,
-&#47;&#47;&#47; [parseQuantity] extracts the per-unit value from [quantity]
+&#47;&#47;&#47; [parseQuantity] extracts the per-unit value from quantity
 &#47;&#47;&#47; instead.
 double? get productQuantity;</code></pre>
 </section>

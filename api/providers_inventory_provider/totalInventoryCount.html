@@ -83,8 +83,9 @@ Future&lt;int&gt; totalInventoryCount(Ref ref) async {
   final inventories = await db.getInventories();
   var total = 0;
   for (final inv in inventories) {
+    final summary = InventorySummary.fromMap(inv);
     final rows = await db.getInventoryWithProduct(
-      inventoryId: inv[&#39;id&#39;] as int,
+      inventoryId: summary.id,
     );
     total += rows.length;
   }

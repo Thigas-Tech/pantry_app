@@ -135,7 +135,7 @@ Widget build(BuildContext context, WidgetRef ref) {
             if (index &lt; list.length) {
               final inv = list[index];
               return Dismissible(
-                key: ValueKey(&#39;manage-inv-${inv[&#39;id&#39;] as int}&#39;),
+                key: ValueKey(&#39;manage-inv-${inv.id}&#39;),
                 direction: DismissDirection.endToStart,
                 background: Container(
                   alignment: Alignment.centerRight,
@@ -146,30 +146,30 @@ Widget build(BuildContext context, WidgetRef ref) {
                 confirmDismiss: (_) =&gt; _confirmDelete(
                   context,
                   ref,
-                  inv[&#39;id&#39;] as int,
-                  inv[&#39;name&#39;] as String,
+                  inv.id,
+                  inv.name,
                 ),
                 child: ListTile(
                   title: Text(
-                    l10n.displayInventoryName(inv[&#39;name&#39;] as String),
+                    l10n.displayInventoryName(inv.name),
                   ),
                   subtitle: Text(
-                    l10n.itemsCount((inv[&#39;item_count&#39;] as int?) ?? 0),
+                    l10n.itemsCount(inv.itemCount),
                   ),
-                  trailing: (inv[&#39;id&#39;] as int) == activeId
+                  trailing: inv.id == activeId
                       ? const Icon(Icons.check, color: Colors.teal)
                       : null,
                   onTap: () {
                     ref
                         .read(activeInventoryProvider.notifier)
-                        .setActiveInventory(inv[&#39;id&#39;] as int);
+                        .setActiveInventory(inv.id);
                     Navigator.of(context).pop();
                   },
                   onLongPress: () =&gt; _showRenameDialog(
                     context,
                     ref,
-                    inv[&#39;id&#39;] as int,
-                    inv[&#39;name&#39;] as String,
+                    inv.id,
+                    inv.name,
                   ),
                 ),
               );

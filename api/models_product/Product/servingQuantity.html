@@ -68,21 +68,21 @@
     
 <section class="desc markdown">
   <p>The normalized numeric serving quantity from the OFF API
-(e.g. <code>30.0</code> for a serving size of "30 g").</p>
-<p>Sourced from the OFF API <code>serving_quantity</code> field. When available,
+(e.g. 30.0 for a serving size of "30 g").</p>
+<p>Sourced from the OFF API serving_quantity field. When available,
 this is used by <a href="../../utils_quantity_parser/parseServingQuantity.html">parseServingQuantity</a> as the amount for pre-fill, with
-the unit extracted from the <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a> serving size.</p>
+the unit extracted from the String serving size.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">String? get servingSize;&#47;&#47;&#47; The normalized numeric serving quantity from the OFF API
-&#47;&#47;&#47; (e.g. `30.0` for a serving size of &quot;30 g&quot;).
+&#47;&#47;&#47; (e.g. 30.0 for a serving size of &quot;30 g&quot;).
 &#47;&#47;&#47;
-&#47;&#47;&#47; Sourced from the OFF API `serving_quantity` field. When available,
+&#47;&#47;&#47; Sourced from the OFF API serving_quantity field. When available,
 &#47;&#47;&#47; this is used by [parseServingQuantity] as the amount for pre-fill, with
-&#47;&#47;&#47; the unit extracted from the [String] serving size.
+&#47;&#47;&#47; the unit extracted from the String serving size.
 double? get servingQuantity;</code></pre>
 </section>
 
