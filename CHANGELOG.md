@@ -54,6 +54,19 @@
 
 ### Fixed
 
+- **Changelog error snackbar**: opening "What's New" when the changelog
+  assets cannot be loaded showed the cache-flush failure message ("Failed to
+  flush cache") instead of a changelog-specific error. The failure path also
+  caught only `Exception`, but asset loading throws `FlutterError` (an
+  `Error`), so the handler was unreachable. The snackbar now shows a
+  localized "Could not load the changelog." message and the catch handles
+  any load failure. New ARB key `changelogLoadFailed` (en, pt, pt_BR) with
+  a widget test that simulates missing assets via the `flutter/assets`
+  channel.
+  (`lib/screens/settings_screen.dart`,
+  `lib/l10n/app_en.arb`, `lib/l10n/app_pt.arb`, `lib/l10n/app_pt_BR.arb`,
+  `test/screens/settings_screen_test.dart`)
+
 - **SQLite version compatibility**: FEFO and price-statistics queries used
   `NULLS LAST` (SQLite 3.30+) and `ROW_NUMBER() OVER` (SQLite 3.25+),
   which crash on devices whose system SQLite predates those versions
