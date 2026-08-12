@@ -3,6 +3,7 @@ import 'dart:core';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/search_utils.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Data-access layer for the recipes table.
@@ -37,6 +38,12 @@ class RecipeDao {
   }
 
   /// Converts a [Recipe] to a map for database insertion.
+  ///
+  /// Emits the derived search_text column via [buildRecipeSearchText] so
+  /// every write path (DAO insert/update and the DatabaseHelper
+  /// transaction helpers, which all funnel through this map) keeps the
+  /// normalized search text in sync with the recipe name and
+  /// instructions.
   Map<String, dynamic> toMap(Recipe recipe) => {
     if (recipe.id != null) 'id': recipe.id,
     'name': recipe.name,
@@ -46,6 +53,7 @@ class RecipeDao {
     'created_at': recipe.createdAt,
     'updated_at': recipe.updatedAt,
     'inventory_id': recipe.inventoryId,
+    'search_text': buildRecipeSearchText(recipe),
   };
 
   /// Converts a database row map into a [Recipe].

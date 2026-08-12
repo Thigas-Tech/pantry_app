@@ -298,6 +298,59 @@ void main() {
         expect(homeRecipes.map((r) => r.name), ['Home Soup']);
       },
     );
+
+    test(
+      'insertRecipeWithIngredients writes search_text',
+      () async {
+        final recipeId = await db.insertRecipeWithIngredients(
+          const Recipe(
+            name: 'Crème Brûlée',
+            instructions: 'à la mode',
+          ),
+          const [
+            RecipeIngredient(recipeId: 0, name: 'Sugar'),
+          ],
+        );
+
+        final database = await db.database;
+        final rows = await database.rawQuery(
+          'SELECT search_text FROM recipes WHERE id = ?',
+          [recipeId],
+        );
+        expect(rows, isNotEmpty);
+        expect(rows.first['search_text'], 'creme brulee a la mode');
+      },
+    );
+
+    test(
+      'updateRecipeWithIngredients recomputes search_text on rename',
+      () async {
+        final recipeId = await db.insertRecipeWithIngredients(
+          const Recipe(
+            name: 'Crème Brûlée',
+            instructions: 'à la mode',
+          ),
+          const [
+            RecipeIngredient(recipeId: 0, name: 'Sugar'),
+          ],
+        );
+
+        await db.updateRecipeWithIngredients(
+          Recipe(id: recipeId, name: 'Café au Lait', instructions: 'Heat milk'),
+          const [
+            RecipeIngredient(recipeId: 0, name: 'Milk'),
+          ],
+        );
+
+        final database = await db.database;
+        final rows = await database.rawQuery(
+          'SELECT search_text FROM recipes WHERE id = ?',
+          [recipeId],
+        );
+        expect(rows, isNotEmpty);
+        expect(rows.first['search_text'], 'cafe au lait heat milk');
+      },
+    );
   });
 
   group('Inventory Item CRUD', () {

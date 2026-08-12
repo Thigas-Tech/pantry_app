@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
 import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/utils/search_utils.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -146,6 +147,64 @@ void main() {
     test('delete returns 0 for non-existent id', () async {
       final affected = await dao.delete(db, 999);
       expect(affected, 0);
+    });
+  });
+
+  group('RecipeDao search_text', () {
+    test('toMap includes search_text', () {
+      const recipe = Recipe(
+        name: 'Crème Brûlée',
+        instructions: 'à la mode',
+      );
+      expect(
+        dao.toMap(recipe)['search_text'],
+        buildRecipeSearchText(recipe),
+      );
+    });
+
+    test('insert persists search_text', () async {
+      final id = await dao.insert(
+        db,
+        const Recipe(
+          name: 'Crème Brûlée',
+          instructions: 'à la mode',
+        ),
+      );
+
+      final rows = await db.rawQuery(
+        'SELECT search_text FROM recipes WHERE id = ?',
+        [id],
+      );
+      expect(rows, isNotEmpty);
+      expect(rows.first['search_text'], 'creme brulee a la mode');
+    });
+
+    test('update recomputes search_text on rename', () async {
+      final id = await dao.insert(
+        db,
+        const Recipe(
+          name: 'Crème Brûlée',
+          instructions: 'à la mode',
+          createdAt: 100,
+          updatedAt: 100,
+        ),
+      );
+      await dao.update(
+        db,
+        Recipe(
+          id: id,
+          name: 'Café au Lait',
+          instructions: 'Heat milk',
+          createdAt: 100,
+        ),
+      );
+
+      final rows = await db.rawQuery(
+        'SELECT search_text FROM recipes WHERE id = ?',
+        [id],
+      );
+      expect(rows, isNotEmpty);
+      expect(rows.first['search_text'], 'cafe au lait heat milk');
     });
   });
 
