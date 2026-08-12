@@ -173,6 +173,8 @@
   "couldNotDeleteInventory": "Não foi possível excluir a despensa.",
   "networkError": "Erro de rede. Verifique sua conexão.",
   "fetchProductFailed": "Não foi possível buscar o produto. Verifique sua conexão.",
+  "errorGeneric": "Algo deu errado. Tente novamente.",
+  "productNotFound": "Produto não encontrado.",
   "productNotFoundHint": "Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.",
   "addManually": "Adicionar manualmente",
   "contributeToOpenFoodFacts": "Contribuir pro Open Food Facts",
@@ -298,6 +300,13 @@
     }
   },
   "nutriscoreNotApplicableGeneric": "Nutri-Score não se aplica a essa categoria de produto.",
+  "nutriscoreNotApplicableSemantics": "Nutri-Score, não aplicável",
+  "nutriscoreGradeSemantics": "Nutri-Score {grade}",
+  "@nutriscoreGradeSemantics": {
+    "placeholders": {
+      "grade": {}
+    }
+  },
   "flushCache": "Limpar cache",
   "flushCacheSub": "Excluir dados e imagens em cache",
   "flushCacheConfirm": "Isso vai excluir todos os dados e imagens em cache obtidos do Open Food Facts. Produtos adicionados manualmente e seus itens de estoque serão mantidos. Os produtos em cache serão baixados de novo na próxima vez que você visualizá-los.",
@@ -926,7 +935,7 @@
   "onboardingPage5Cta": "Comecar",
   "onboardingSkip": "Pular",
   "onboardingBack": "Voltar",
-  "searchSourceLabel": "Pesquisar em",
+  "searchSourceLabel": "Pesquisar em:",
   "searchSourceOff": "Produtos Embalados",
   "searchSourceUsda": "Produtos Frescos",
   "searchSourceInventory": "Minha Despensa",

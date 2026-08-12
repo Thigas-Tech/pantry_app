@@ -1,61 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
+
+/// Pumps the badge inside a MaterialApp with full localization support.
+Future<void> _pumpBadge(WidgetTester tester, Widget child) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: child),
+      ),
+    ),
+  );
+}
 
 void main() {
   group('NutriScoreBadge', () {
     testWidgets('renders badge for valid grade a', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'a')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'a'));
       expect(find.text('A'), findsOneWidget);
     });
 
     testWidgets('renders badge for valid grade e', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'e')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'e'));
       expect(find.text('E'), findsOneWidget);
     });
 
     testWidgets('renders nothing for null grade', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: null)),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: null));
       expect(find.byType(Container), findsNothing);
     });
 
     testWidgets('renders nothing for invalid grade', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'x')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'x'));
       expect(find.byType(Container), findsNothing);
     });
 
     testWidgets('renders dashed badge for not-applicable', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: NutriScoreBadge(grade: 'not-applicable'),
-        ),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'not-applicable'));
       expect(find.text('—'), findsOneWidget);
     });
 
     testWidgets('renders dashed badge for NOT-APPLICABLE casing', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: NutriScoreBadge(grade: 'NOT-APPLICABLE'),
-        ),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'NOT-APPLICABLE'));
       expect(find.text('—'), findsOneWidget);
     });
 
     testWidgets('renders badge for uppercase grade', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'C')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'C'));
       expect(find.text('C'), findsOneWidget);
     });
 
@@ -81,41 +85,31 @@ void main() {
 
   group('NutriScoreBadge semantics', () {
     testWidgets('has semantics label for grade a', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'a')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'a'));
       final node = tester.getSemantics(find.byType(NutriScoreBadge));
       expect(node.label, contains('Nutri-Score A'));
     });
 
     testWidgets('has semantics label for grade e', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'e')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'e'));
       final node = tester.getSemantics(find.byType(NutriScoreBadge));
       expect(node.label, contains('Nutri-Score E'));
     });
 
     testWidgets('label is uppercase for lowercase grade input', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'c')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'c'));
       final node = tester.getSemantics(find.byType(NutriScoreBadge));
       expect(node.label, contains('Nutri-Score C'));
     });
 
     testWidgets('no semantics label for null grade', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: null)),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: null));
       final node = tester.getSemantics(find.byType(NutriScoreBadge));
       expect(node.label, '');
     });
 
     testWidgets('no semantics label for invalid grade', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: NutriScoreBadge(grade: 'x')),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'x'));
       final node = tester.getSemantics(find.byType(NutriScoreBadge));
       expect(node.label, '');
     });
@@ -123,11 +117,7 @@ void main() {
     testWidgets('has semantics label for not-applicable grade', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: NutriScoreBadge(grade: 'not-applicable'),
-        ),
-      );
+      await _pumpBadge(tester, const NutriScoreBadge(grade: 'not-applicable'));
       final node = tester.getSemantics(find.byType(NutriScoreBadge));
       expect(node.label, contains('not applicable'));
     });

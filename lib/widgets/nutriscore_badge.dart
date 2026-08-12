@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/utils/nutriscore.dart';
 
 /// Displays the Nutri-Score grade of a product as a coloured badge.
@@ -28,9 +29,10 @@ class NutriScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     if (_isNotApplicable(grade)) {
       return Semantics(
-        label: 'Nutri-Score, not applicable',
+        label: l10n.nutriscoreNotApplicableSemantics,
         child: Container(
           width: size,
           height: size,
@@ -55,7 +57,7 @@ class NutriScoreBadge extends StatelessWidget {
     final color = _colorForGrade(grade);
     if (color == null) return const SizedBox.shrink();
     return Semantics(
-      label: 'Nutri-Score ${grade!.toUpperCase()}',
+      label: l10n.nutriscoreGradeSemantics(grade!.toUpperCase()),
       child: Container(
         width: size,
         height: size,

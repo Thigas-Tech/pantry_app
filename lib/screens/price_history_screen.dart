@@ -70,7 +70,7 @@ class PriceHistoryScreen extends ConsumerWidget {
           );
         },
         loading: () => Center(child: ProgressIndicatorHelper.build()),
-        error: (error, _) => Center(child: Text(error.toString())),
+        error: (error, _) => Center(child: Text(l10n.errorGeneric)),
       ),
     );
   }
@@ -103,7 +103,7 @@ class PriceHistoryScreen extends ConsumerWidget {
       } on Exception catch (e) {
         logError('Failed to delete price: $e');
         if (context.mounted) {
-          SnackbarHelper.showError(context, e.toString());
+          SnackbarHelper.showError(context, l10n.errorGeneric);
         }
       }
     }

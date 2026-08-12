@@ -29,6 +29,11 @@ abstract class NotificationService {
   ///
   /// Uses [AndroidNotificationChannelAction.createIfNotExists] so existing
   /// user-configured channel settings are never overwritten.
+  ///
+  /// The default [channelName] and [channelDescription] are deliberately
+  /// English: Android creates the channel once at app start and does not
+  /// update its name when the app language changes, so localizing them
+  /// would only apply to fresh installs.
   Future<void> ensureNotificationChannel({
     String channelId = 'expiry_channel',
     String channelName = 'Expiry reminders',

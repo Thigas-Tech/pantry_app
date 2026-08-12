@@ -452,7 +452,8 @@ Future<void> _navigateToProduct(String barcode) async {
     if (product == null) {
       logWarning('Product not found for barcode: $barcode');
       if (!context.mounted) return;
-      SnackbarHelper.showInfo(context, 'Product not found');
+      final l10n = AppLocalizations.of(context)!;
+      SnackbarHelper.showInfo(context, l10n.productNotFound);
       return;
     }
 

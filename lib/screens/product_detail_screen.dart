@@ -301,7 +301,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     } on Exception catch (e) {
                       logError('Failed to switch product language: $e');
                       if (context.mounted) {
-                        SnackbarHelper.showError(context, e.toString());
+                        SnackbarHelper.showError(context, l10n.errorGeneric);
                       }
                     }
                   },
@@ -772,7 +772,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       } on Exception catch (e) {
         logError('Failed to add price: $e');
         if (context.mounted) {
-          SnackbarHelper.showError(context, e.toString());
+          SnackbarHelper.showError(context, l10n.errorGeneric);
         }
       }
     }
@@ -802,7 +802,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       } on Exception catch (e) {
         logError('Failed to update price: $e');
         if (context.mounted) {
-          SnackbarHelper.showError(context, e.toString());
+          SnackbarHelper.showError(context, l10n.errorGeneric);
         }
       }
     }

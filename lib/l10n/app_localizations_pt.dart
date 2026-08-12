@@ -360,6 +360,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get fetchProductFailed => 'Não foi possível buscar o produto. Verifique sua conexão.';
 
   @override
+  String get errorGeneric => 'Algo deu errado. Tente novamente.';
+
+  @override
+  String get productNotFound => 'Produto não encontrado.';
+
+  @override
   String get productNotFoundHint => 'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
 
   @override
@@ -632,6 +638,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nutriscoreNotApplicableGeneric => 'Nutri-Score não se aplica a essa categoria de produto.';
+
+  @override
+  String get nutriscoreNotApplicableSemantics => 'Nutri-Score, não aplicável';
+
+  @override
+  String nutriscoreGradeSemantics(Object grade) {
+    return 'Nutri-Score $grade';
+  }
 
   @override
   String get flushCache => 'Limpar cache';
@@ -2126,7 +2140,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingBack => 'Voltar';
 
   @override
-  String get searchSourceLabel => 'Pesquisar em';
+  String get searchSourceLabel => 'Pesquisar em:';
 
   @override
   String get searchSourceOff => 'Produtos Embalados';
@@ -2568,6 +2582,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get fetchProductFailed => 'Não foi possível buscar o produto. Verifique sua conexão.';
 
   @override
+  String get errorGeneric => 'Algo deu errado. Tente novamente.';
+
+  @override
+  String get productNotFound => 'Produto não encontrado.';
+
+  @override
   String get productNotFoundHint => 'Esse produto ainda não está no Open Food Facts. Você pode adicionar manualmente ou contribuir pra comunidade.';
 
   @override
@@ -2840,6 +2860,14 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get nutriscoreNotApplicableGeneric => 'Nutri-Score não se aplica a essa categoria de produto.';
+
+  @override
+  String get nutriscoreNotApplicableSemantics => 'Nutri-Score, não aplicável';
+
+  @override
+  String nutriscoreGradeSemantics(Object grade) {
+    return 'Nutri-Score $grade';
+  }
 
   @override
   String get flushCache => 'Limpar cache';
@@ -4334,7 +4362,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get onboardingBack => 'Voltar';
 
   @override
-  String get searchSourceLabel => 'Pesquisar em';
+  String get searchSourceLabel => 'Pesquisar em:';
 
   @override
   String get searchSourceOff => 'Produtos Embalados';

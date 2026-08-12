@@ -750,6 +750,18 @@ abstract class AppLocalizations {
   /// **'Failed to fetch product. Please check your connection.'**
   String get fetchProductFailed;
 
+  /// No description provided for @errorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get errorGeneric;
+
+  /// No description provided for @productNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Product not found.'**
+  String get productNotFound;
+
   /// No description provided for @productNotFoundHint.
   ///
   /// In en, this message translates to:
@@ -1277,6 +1289,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nutri-Score is not applicable to this product category.'**
   String get nutriscoreNotApplicableGeneric;
+
+  /// No description provided for @nutriscoreNotApplicableSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutri-Score, not applicable'**
+  String get nutriscoreNotApplicableSemantics;
+
+  /// No description provided for @nutriscoreGradeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutri-Score {grade}'**
+  String nutriscoreGradeSemantics(Object grade);
 
   /// No description provided for @flushCache.
   ///
@@ -4089,7 +4113,7 @@ abstract class AppLocalizations {
   /// No description provided for @searchSourceLabel.
   ///
   /// In en, this message translates to:
-  /// **'Search in'**
+  /// **'Search in:'**
   String get searchSourceLabel;
 
   /// No description provided for @searchSourceOff.

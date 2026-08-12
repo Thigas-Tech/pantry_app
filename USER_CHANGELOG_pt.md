@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## Unreleased
+
+- As mensagens de erro agora mostram uma mensagem generica e amigavel em
+  vez de detalhes tecnicos brutos, enquanto o app ainda registra o erro
+  completo para depuracao.
+
+- As notificacoes de "Produto nao encontrado" agora usam o idioma do app, e
+  as opcoes de tamanho de porcao de produtos (Pequeno, Medio, Grande) sao
+  localizadas.
 - A atualizacao de produtos em segundo plano ja nao e executada enquanto
   voce esta offline. Os produtos em cache so sao atualizados quando o
   dispositivo tem conectividade, reduzindo pedidos de rede falhados em

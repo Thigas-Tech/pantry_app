@@ -65,7 +65,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               data: (stats) => _buildBody(context, l10n, stats, ref),
               loading: () => Center(child: ProgressIndicatorHelper.build()),
               error: (error, _) => ErrorView(
-                message: error.toString(),
+                message: l10n.errorGeneric,
                 onRetry: () =>
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ref.invalidate(statsProvider);

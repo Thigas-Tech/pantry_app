@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## Unreleased
+
+- Error messages now show a friendly, generic message instead of raw
+  technical error details, while the app still records the full error for
+  debugging.
+
+- "Product not found" notifications now use the app language, and the
+  produce serving-size options (Small, Medium, Large) are localized.
 - Background product refresh no longer runs while you are offline. Cached
   products are refreshed only when the device has connectivity, so fewer
   failed network requests happen in the background.
