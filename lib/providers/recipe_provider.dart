@@ -5,7 +5,6 @@ import 'package:crypto/crypto.dart';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
 import 'package:pantry_app/database/recipe_ingredient_dao.dart';
@@ -31,43 +30,46 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/price_calculator.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:sqflite/sqflite.dart';
 
+part 'recipe_provider.g.dart';
+
 /// Provides a singleton [RecipeDao] instance.
-final recipeDaoProvider = Provider<RecipeDao>((ref) {
+@Riverpod(keepAlive: true)
+RecipeDao recipeDao(Ref ref) {
   return const RecipeDao();
-});
+}
 
 /// Provides a singleton [RecipeIngredientDao] instance.
-final recipeIngredientDaoProvider = Provider<RecipeIngredientDao>((ref) {
+@Riverpod(keepAlive: true)
+RecipeIngredientDao recipeIngredientDao(Ref ref) {
   return const RecipeIngredientDao();
-});
+}
 
-final _currencyServiceProvider = Provider<CurrencyService>((ref) {
+@Riverpod(keepAlive: true)
+CurrencyService _currencyService(Ref ref) {
   return CurrencyService();
-});
+}
 
 /// Provides all recipes for the active inventory, ordered by updated_at
 /// descending.
 ///
 /// Watches [activeInventoryProvider] so the list automatically reloads when
 /// the user switches pantries.
-final FutureProvider<List<Recipe>> allRecipesProvider =
-    FutureProvider.autoDispose<List<Recipe>>((ref) {
-      final db = ref.watch(databaseProvider);
-      final activeId = ref.watch(activeInventoryProvider);
-      return db.getAllRecipes(activeId);
-    });
+@riverpod
+Future<List<Recipe>> allRecipes(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  final activeId = ref.watch(activeInventoryProvider);
+  return db.getAllRecipes(activeId);
+}
 
 /// Provides ingredients for a specific recipe.
-final FutureProviderFamily<List<RecipeIngredient>, int>
-allRecipeIngredientsProvider = FutureProvider.autoDispose
-    .family<List<RecipeIngredient>, int>(
-      (ref, recipeId) {
-        final db = ref.watch(databaseProvider);
-        return db.getRecipeIngredients(recipeId);
-      },
-    );
+@riverpod
+Future<List<RecipeIngredient>> allRecipeIngredients(Ref ref, int recipeId) {
+  final db = ref.watch(databaseProvider);
+  return db.getRecipeIngredients(recipeId);
+}
 
 /// Invalidates all recipe-related providers.
 ///
@@ -181,45 +183,43 @@ String _computeSharedRecipeId(String name, int createdAt, int inventoryId) {
 ///
 /// Returns [RecipeNutrition] computed from the recipe's ingredients and their
 /// product nutrition data. Auto-disposes when no listener remains.
-final FutureProviderFamily<RecipeNutrition?, int> recipeNutritionProvider =
-    FutureProvider.autoDispose.family<RecipeNutrition?, int>(
-      (ref, recipeId) async {
-        ref.keepAlive();
-        final db = ref.watch(databaseProvider);
-        final repo = ref.read(productRepositoryProvider);
-        final ingredients = await db.getRecipeIngredients(recipeId);
-        if (ingredients.isEmpty) return null;
+@riverpod
+Future<RecipeNutrition?> recipeNutrition(Ref ref, int recipeId) async {
+  ref.keepAlive();
+  final db = ref.watch(databaseProvider);
+  final repo = ref.read(productRepositoryProvider);
+  final ingredients = await db.getRecipeIngredients(recipeId);
+  if (ingredients.isEmpty) return null;
 
-        final recipe = await db.getRecipe(recipeId);
-        final servings = recipe?.servings ?? 0;
+  final recipe = await db.getRecipe(recipeId);
+  final servings = recipe?.servings ?? 0;
 
-        final barcodes = ingredients
-            .map((i) => i.barcode)
-            .where((b) => b != null && b.isNotEmpty)
-            .cast<String>()
-            .toSet()
-            .toList();
+  final barcodes = ingredients
+      .map((i) => i.barcode)
+      .where((b) => b != null && b.isNotEmpty)
+      .cast<String>()
+      .toSet()
+      .toList();
 
-        final productsByBarcode = <String, Product>{};
-        for (final barcode in barcodes) {
-          try {
-            final product = await repo.getProduct(barcode);
-            productsByBarcode[barcode] = product;
-          } on Exception catch (e) {
-            logWarning(
-              'Could not fetch product $barcode for recipe nutrition: $e',
-            );
-          }
-        }
+  final productsByBarcode = <String, Product>{};
+  for (final barcode in barcodes) {
+    try {
+      final product = await repo.getProduct(barcode);
+      productsByBarcode[barcode] = product;
+    } on Exception catch (e) {
+      logWarning(
+        'Could not fetch product $barcode for recipe nutrition: $e',
+      );
+    }
+  }
 
-        final nutritionService = RecipeNutritionService();
-        return nutritionService.aggregate(
-          ingredients,
-          productsByBarcode,
-          servings: servings,
-        );
-      },
-    );
+  final nutritionService = RecipeNutritionService();
+  return nutritionService.aggregate(
+    ingredients,
+    productsByBarcode,
+    servings: servings,
+  );
+}
 
 /// A record pairing a [RecipeIngredient] with its optional [Product].
 ///
@@ -235,78 +235,74 @@ typedef IngredientWithProduct = ({
 /// Fetches each ingredient's product via [ProductRepository] so that images
 /// are available for display. Ingredients without a barcode get a null
 /// product.
-final FutureProviderFamily<List<IngredientWithProduct>, int>
-recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
-    .family<List<IngredientWithProduct>, int>(
-      (ref, recipeId) async {
-        ref.keepAlive();
-        final db = ref.watch(databaseProvider);
-        final repo = ref.read(productRepositoryProvider);
-        final ingredients = await db.getRecipeIngredients(recipeId);
+@riverpod
+Future<List<IngredientWithProduct>> recipeIngredientsWithProducts(
+  Ref ref,
+  int recipeId,
+) async {
+  ref.keepAlive();
+  final db = ref.watch(databaseProvider);
+  final repo = ref.read(productRepositoryProvider);
+  final ingredients = await db.getRecipeIngredients(recipeId);
 
-        final barcodes = ingredients
-            .map((i) => i.barcode)
-            .where((b) => b != null && b.isNotEmpty)
-            .cast<String>()
-            .toSet()
-            .toList();
+  final barcodes = ingredients
+      .map((i) => i.barcode)
+      .where((b) => b != null && b.isNotEmpty)
+      .cast<String>()
+      .toSet()
+      .toList();
 
-        final productsByBarcode = <String, Product>{};
-        for (final barcode in barcodes) {
-          try {
-            final product = await repo.getProduct(barcode);
-            productsByBarcode[barcode] = product;
-          } on Exception catch (e) {
-            logWarning(
-              'Could not fetch product $barcode for ingredient image: $e',
-            );
-          }
-        }
+  final productsByBarcode = <String, Product>{};
+  for (final barcode in barcodes) {
+    try {
+      final product = await repo.getProduct(barcode);
+      productsByBarcode[barcode] = product;
+    } on Exception catch (e) {
+      logWarning(
+        'Could not fetch product $barcode for ingredient image: $e',
+      );
+    }
+  }
 
-        return ingredients
-            .map(
-              (ing) => (
-                ingredient: ing,
-                product: ing.barcode != null
-                    ? productsByBarcode[ing.barcode]
-                    : null,
-              ),
-            )
-            .toList();
-      },
-    );
+  return ingredients
+      .map(
+        (ing) => (
+          ingredient: ing,
+          product: ing.barcode != null ? productsByBarcode[ing.barcode] : null,
+        ),
+      )
+      .toList();
+}
 
 /// Provides the Nutri-Score grade for a recipe.
 ///
 /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
 /// known scores.
-final FutureProviderFamily<String?, int> recipeNutriScoreProvider =
-    FutureProvider.autoDispose.family<String?, int>(
-      (ref, recipeId) async {
-        ref.keepAlive();
-        final db = ref.watch(databaseProvider);
-        final ingredients = await db.getRecipeIngredients(recipeId);
-        if (ingredients.isEmpty) return null;
+@riverpod
+Future<String?> recipeNutriScore(Ref ref, int recipeId) async {
+  ref.keepAlive();
+  final db = ref.watch(databaseProvider);
+  final ingredients = await db.getRecipeIngredients(recipeId);
+  if (ingredients.isEmpty) return null;
 
-        final barcodes = ingredients
-            .map((i) => i.barcode)
-            .where((b) => b != null && b.isNotEmpty)
-            .cast<String>()
-            .toSet()
-            .toList();
+  final barcodes = ingredients
+      .map((i) => i.barcode)
+      .where((b) => b != null && b.isNotEmpty)
+      .cast<String>()
+      .toSet()
+      .toList();
 
-        final productsByBarcode = <String, Product>{};
-        for (final barcode in barcodes) {
-          final product = await db.getProduct(barcode);
-          if (product != null) {
-            productsByBarcode[barcode] = product;
-          }
-        }
+  final productsByBarcode = <String, Product>{};
+  for (final barcode in barcodes) {
+    final product = await db.getProduct(barcode);
+    if (product != null) {
+      productsByBarcode[barcode] = product;
+    }
+  }
 
-        final scoreService = RecipeNutriScoreService();
-        return scoreService.compute(ingredients, productsByBarcode);
-      },
-    );
+  final scoreService = RecipeNutriScoreService();
+  return scoreService.compute(ingredients, productsByBarcode);
+}
 
 /// Calculates the total cost of a recipe by summing ingredient prices.
 ///
