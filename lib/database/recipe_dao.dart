@@ -62,7 +62,15 @@ class RecipeDao {
   ///
   /// If [Recipe.createdAt] or [Recipe.updatedAt] is 0, the current epoch
   /// timestamp is used.
+  ///
+  /// Throws [ArgumentError] if [db] is null or [recipe.name] is empty.
   Future<int> insert(Database db, Recipe recipe) async {
+    if (db == null) {
+      throw ArgumentError('db must not be null');
+    }
+    if (recipe.name == null || recipe.name!.isEmpty) {
+      throw ArgumentError('recipe name must not be empty');
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
     final stamped = recipe.createdAt == 0
         ? recipe.copyWith(createdAt: now)
@@ -83,7 +91,15 @@ class RecipeDao {
   }
 
   /// Returns the recipe with the given [id], or null.
+  ///
+  /// Throws [ArgumentError] if [db] is null or [id] is non-positive.
   Future<Recipe?> get(Database db, int id) async {
+    if (db == null) {
+      throw ArgumentError('db must not be null');
+    }
+    if (id <= 0) {
+      throw ArgumentError('recipe id must be positive');
+    }
     try {
       final result = await db.query(
         'recipes',
@@ -100,7 +116,15 @@ class RecipeDao {
 
   /// Returns all recipes for the given [inventoryId],
   /// ordered by updated_at descending.
+  ///
+  /// Throws [ArgumentError] if [db] is null or [inventoryId] is non-positive.
   Future<List<Recipe>> listAll(Database db, int inventoryId) async {
+    if (db == null) {
+      throw ArgumentError('db must not be null');
+    }
+    if (inventoryId <= 0) {
+      throw ArgumentError('inventory id must be positive');
+    }
     try {
       final result = await db.query(
         'recipes',
@@ -120,7 +144,15 @@ class RecipeDao {
   /// The original createdAt and inventory_id fields are preserved from the
   /// existing row, so an update never silently moves a recipe to another
   /// inventory. updatedAt is set to the current epoch timestamp.
+  ///
+  /// Throws [ArgumentError] if [db] is null or [recipe.id] is non-positive.
   Future<int> update(Database db, Recipe recipe) async {
+    if (db == null) {
+      throw ArgumentError('db must not be null');
+    }
+    if (recipe.id == null || recipe.id! <= 0) {
+      throw ArgumentError('recipe id must be positive');
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
 
     // Preserve original createdAt and inventoryId from the database.
@@ -151,7 +183,15 @@ class RecipeDao {
   }
 
   /// Deletes the recipe with the given [id]. Returns rows deleted.
+  ///
+  /// Throws [ArgumentError] if [db] is null or [id] is non-positive.
   Future<int> delete(Database db, int id) async {
+    if (db == null) {
+      throw ArgumentError('db must not be null');
+    }
+    if (id <= 0) {
+      throw ArgumentError('recipe id must be positive');
+    }
     logInfo('Deleting recipe $id');
     try {
       final affected = await db.delete(
