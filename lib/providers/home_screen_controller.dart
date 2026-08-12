@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
-import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -72,9 +71,9 @@ class HomeScreenController extends _$HomeScreenController {
   /// Invalidates [pantryProvider] afterwards so the UI reflects the change.
   Future<void> deleteSelected() async {
     if (state.selectedIds.isEmpty) return;
-    final db = ref.read(databaseProvider);
+    final repo = ref.read(productRepositoryProvider);
     for (final id in state.selectedIds) {
-      await db.deleteInventoryItem(id);
+      await repo.deleteInventoryItem(id);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(pantryProvider);
@@ -87,8 +86,8 @@ class HomeScreenController extends _$HomeScreenController {
   /// Invalidates [pantryProvider] afterwards so the UI reflects the change.
   Future<void> moveSelected(int targetInventoryId) async {
     if (state.selectedIds.isEmpty) return;
-    final db = ref.read(databaseProvider);
-    await db.moveItemsToInventory(
+    final repo = ref.read(productRepositoryProvider);
+    await repo.moveItemsToInventory(
       state.selectedIds.toList(),
       targetInventoryId,
     );

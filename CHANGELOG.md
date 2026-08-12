@@ -4,6 +4,15 @@
 
 ### Fixed
 
+- **Layering bypass (audit Q8)**: `HomeScreenController.deleteSelected`
+  and `moveSelected` now delegate to `ProductRepository` (via
+  `productRepositoryProvider`) instead of calling the database facade
+  directly — one DI path, matching the repository wrapping of the same
+  operations. New unit tests verify the delegation and the empty-selection
+  no-op.
+  (`lib/providers/home_screen_controller.dart`,
+  `test/providers/home_screen_controller_test.dart`)
+
 - **Silent exception swallowing (audit Q4)**: theme-mode load/persist
   failures in `theme_provider.dart` are now logged via `logWarning` instead
   of being swallowed; a price whose failure-marking also fails in
