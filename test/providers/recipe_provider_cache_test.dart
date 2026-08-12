@@ -24,11 +24,11 @@ class _MutableActiveInventory extends ActiveInventoryNotifier {
   final int initial;
 
   @override
-  int build() => initial;
+  Future<int> build() async => initial;
 
   @override
   void setActiveInventory(int id) {
-    state = id;
+    state = AsyncValue.data(id);
   }
 }
 
@@ -132,6 +132,9 @@ void main() {
           overrides: [
             databaseProvider.overrideWithValue(mockDb),
             firebaseCacheProvider.overrideWithValue(mockCache),
+            activeInventoryProvider.overrideWith(
+              () => _MutableActiveInventory(1),
+            ),
           ],
           child: const _SaveRecipeTestWidget(
             name: 'Soup',
@@ -160,6 +163,9 @@ void main() {
           overrides: [
             databaseProvider.overrideWithValue(mockDb),
             firebaseCacheProvider.overrideWithValue(mockCache),
+            activeInventoryProvider.overrideWith(
+              () => _MutableActiveInventory(1),
+            ),
           ],
           child: const _SaveRecipeTestWidget(
             name: 'Soup',
@@ -193,6 +199,9 @@ void main() {
           overrides: [
             databaseProvider.overrideWithValue(mockDb),
             firebaseCacheProvider.overrideWithValue(mockCache),
+            activeInventoryProvider.overrideWith(
+              () => _MutableActiveInventory(1),
+            ),
           ],
           child: const _SaveRecipeTestWidget(
             name: 'Soup',

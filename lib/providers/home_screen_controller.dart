@@ -106,7 +106,7 @@ class HomeScreenController extends _$HomeScreenController {
       final online = await ref.read(hasConnectionProvider.future);
       if (!online) return;
       if (!await repo.isCacheOverdue()) return;
-      final activeId = ref.read(activeInventoryProvider);
+      final activeId = await ref.read(activeInventoryProvider.future);
       await repo.refreshInventoryProducts(activeId);
       await repo.setLastRefreshTime();
       if (ref.mounted) ref.invalidate(pantryProvider);

@@ -46,12 +46,12 @@ class _TestSettingsNotifier extends SettingsNotifier {
   final Settings _settings;
 
   @override
-  Settings build() => _settings;
+  Future<Settings> build() async => _settings;
 }
 
 class _TestActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 }
 
 void main() {

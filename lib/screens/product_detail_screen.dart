@@ -134,17 +134,16 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
-    final activeId = ref.watch<int>(activeInventoryProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
     final repo = ref.watch(productRepositoryProvider);
     final inventoryFuture = repo.getInventoryForBarcode(
       _product.barcode,
       inventoryId: activeId,
     );
 
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
+    final priceTrackingEnabled =
+        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
 
     // When a submission for this product reaches a terminal state (e.g. one
     // started from the add-product screen), refresh the displayed product so
@@ -455,7 +454,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// Builds the price section with latest price, add/edit, and history.
   Widget _buildPriceSection(BuildContext context, AppLocalizations l10n) {
     final barcode = _product.barcode;
-    final activeId = ref.watch(activeInventoryProvider);
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
     final priceAsync = ref.watch(latestPriceProvider((barcode, activeId)));
     final historyAsync = ref.watch(priceHistoryProvider((barcode, activeId)));
 
@@ -721,7 +720,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     if (price != null) {
       try {
         await ref.read(productRepositoryProvider).cacheProduct(_product);
-        final activeId = ref.read(activeInventoryProvider);
+        final activeId = await ref.read(activeInventoryProvider.future);
         final scoped = price.copyWith(inventoryId: activeId);
         await ref.read(priceRepositoryProvider).addPrice(scoped);
         if (!context.mounted) return;
@@ -735,7 +734,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             price.store != null &&
             price.store!.isNotEmpty) {
           final repo = ref.read(productRepositoryProvider);
-          final activeId = ref.read(activeInventoryProvider);
+          final activeId = await ref.read(activeInventoryProvider.future);
           final existingItems = await repo.getInventoryForBarcode(
             _product.barcode,
             inventoryId: activeId,
@@ -798,7 +797,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         await ref.read(priceRepositoryProvider).updatePrice(updated);
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.priceUpdated);
-          final activeId = ref.read(activeInventoryProvider);
+          final activeId = await ref.read(activeInventoryProvider.future);
           ref
             ..invalidate(
               latestPriceProvider((_product.barcode, activeId)),
@@ -841,7 +840,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       onDismissed: (_) => _deleteItem(item),
       child: _InventoryTile(
         item: item,
-        settings: ref.read(settingsProvider),
+        settings: ref.read(settingsProvider).value ?? const Settings(),
         onEdit: () => _openAddEditScreen(existing: item),
         onDelete: () => _deleteItem(item),
         onQuantityChanged: (newQty) => _updateQuantity(item, newQty),
@@ -977,7 +976,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       await notificationService.cancelInactivityReminder();
       final db = ref.read(databaseProvider);
       final lastAddDateEpoch = await db.getLastAddDate();
-      final settings = ref.read(settingsProvider);
+      final settings = await ref.read(settingsProvider.future);
       await notificationService.scheduleInactivityReminder(
         lastAddDateEpoch: lastAddDateEpoch,
         thresholdDays: settings.inactivityThresholdDays,
@@ -994,7 +993,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   /// Opens the [AddToInventoryScreen] for creating or editing an item.
   Future<void> _openAddEditScreen({InventoryItem? existing}) async {
-    final activeId = ref.read<int>(activeInventoryProvider);
+    final activeId = await ref.read(activeInventoryProvider.future);
+    if (!mounted) return;
 
     // Suggest an expiry date based on the product category.
     String? suggested;

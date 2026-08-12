@@ -206,18 +206,10 @@ class Settings {
 @Riverpod(keepAlive: true)
 class SettingsNotifier extends _$SettingsNotifier {
   @override
-  Settings build() {
-    unawaited(_loadFromPrefs());
-    return Settings(
-      baseCurrency: _detectLocaleCurrency(),
-    );
-  }
-
-  Future<void> _loadFromPrefs() async {
+  Future<Settings> build() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (!ref.mounted) return;
-      state = Settings(
+      return Settings(
         notificationsEnabled: prefs.getBool('notificationsEnabled') ?? true,
         retentionDays: prefs.getInt('retentionDays') ?? 60,
         expiringSoonDays: prefs.getInt('expiringSoonDays') ?? 3,
@@ -272,6 +264,9 @@ class SettingsNotifier extends _$SettingsNotifier {
       );
     } on Exception catch (e) {
       logWarning('Failed to load settings from SharedPreferences: $e');
+      return Settings(
+        baseCurrency: _detectLocaleCurrency(),
+      );
     }
   }
 
@@ -281,116 +276,170 @@ class SettingsNotifier extends _$SettingsNotifier {
   /// Deprecated: use individual setter methods instead.
   @Deprecated('Use individual setter methods instead')
   void replace(Settings settings) {
-    state = settings;
+    state = AsyncValue.data(settings);
     unawaited(_persist(settings));
   }
 
   /// Sets whether expiry notifications are enabled.
   void setNotificationsEnabled({required bool value}) {
-    state = state.copyWith(notificationsEnabled: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      notificationsEnabled: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the number of days before cleanup.
   void setRetentionDays(int value) {
-    state = state.copyWith(retentionDays: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      retentionDays: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the number of days for "expiring soon".
   void setExpiringSoonDays(int value) {
-    state = state.copyWith(expiringSoonDays: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      expiringSoonDays: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets whether the inactivity reminder is enabled.
   void setInactivityReminderEnabled({required bool value}) {
-    state = state.copyWith(inactivityReminderEnabled: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      inactivityReminderEnabled: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the inactivity threshold in days.
   void setInactivityThresholdDays(int value) {
-    state = state.copyWith(inactivityThresholdDays: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      inactivityThresholdDays: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets whether AMOLED dark mode is enabled.
   void setAmoledDarkMode({required bool value}) {
-    state = state.copyWith(amoledDarkMode: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      amoledDarkMode: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets whether price tracking is enabled.
   void setPriceTrackingEnabled({required bool value}) {
-    state = state.copyWith(priceTrackingEnabled: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      priceTrackingEnabled: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the price retention period in days.
   void setPriceRetentionDays(int value) {
-    state = state.copyWith(priceRetentionDays: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      priceRetentionDays: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets whether prices are hidden.
   void setPricesHidden({required bool value}) {
-    state = state.copyWith(pricesHidden: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      pricesHidden: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the base currency code (ISO 4217).
   void setBaseCurrency(String value) {
-    state = state.copyWith(baseCurrency: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      baseCurrency: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets whether Open Prices sync is enabled.
   void setOpenPricesSyncEnabled({required bool value}) {
-    state = state.copyWith(openPricesSyncEnabled: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      openPricesSyncEnabled: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the Open Prices API bearer token.
   void setOpenPricesToken(String value) {
-    state = state.copyWith(openPricesToken: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      openPricesToken: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the global unit system.
   void setUnitSystem(UnitSystem value) {
-    state = state.copyWith(unitSystem: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      unitSystem: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the per-context override for serving size display.
   void setUnitSystemServingSize(UnitSystem? value) {
-    state = state.copyWith(unitSystemServingSize: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      unitSystemServingSize: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the per-context override for recipe ingredients.
   void setUnitSystemRecipeIngredients(UnitSystem? value) {
-    state = state.copyWith(unitSystemRecipeIngredients: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      unitSystemRecipeIngredients: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the per-context override for inventory display.
   void setUnitSystemInventory(UnitSystem? value) {
-    state = state.copyWith(unitSystemInventory: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      unitSystemInventory: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the preferred weight unit for imperial mode.
   void setPreferredWeightUnit(WeightUnitPreference value) {
-    state = state.copyWith(preferredWeightUnit: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      preferredWeightUnit: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   /// Sets the preferred volume unit for imperial mode.
   void setPreferredVolumeUnit(VolumeUnitPreference value) {
-    state = state.copyWith(preferredVolumeUnit: value);
-    unawaited(_persist(state));
+    final updated = (state.value ?? const Settings()).copyWith(
+      preferredVolumeUnit: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
   }
 
   Future<void> _persist(Settings settings) async {

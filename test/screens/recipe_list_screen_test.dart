@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -29,16 +30,16 @@ class FakeSettingsNotifier extends SettingsNotifier {
   final Settings settings;
 
   @override
-  Settings build() => settings;
+  Future<Settings> build() async => settings;
 }
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 
   @override
   void setActiveInventory(int id) {
-    state = id;
+    state = AsyncValue.data(id);
   }
 }
 

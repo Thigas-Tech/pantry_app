@@ -179,8 +179,8 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
 
   Future<void> _addToInventory(Product product) async {
     final repo = ref.read(productRepositoryProvider);
-    final activeId = ref.read(activeInventoryProvider);
     final l10n = AppLocalizations.of(context)!;
+    final activeId = await ref.read(activeInventoryProvider.future);
 
     final item = InventoryItem(
       barcode: product.barcode,

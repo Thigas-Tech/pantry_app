@@ -138,7 +138,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final priceTrackingEnabled = settings.priceTrackingEnabled;
     final currencyCode = settings.baseCurrency;
     final symbol = currencySymbolFor(currencyCode);

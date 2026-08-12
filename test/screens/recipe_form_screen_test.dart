@@ -20,7 +20,7 @@ class MockProductRepository2 extends Mock implements ProductRepository {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 
   @override
   void setActiveInventory(int newValue) {}
@@ -28,7 +28,7 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 
 class FakeSettingsNotifierImperial extends SettingsNotifier {
   @override
-  Settings build() => const Settings(
+  Future<Settings> build() async => const Settings(
     unitSystem: UnitSystem.imperial,
   );
 }
@@ -36,7 +36,7 @@ class FakeSettingsNotifierImperial extends SettingsNotifier {
 /// Fake with metric global but imperial override for recipe ingredients.
 class FakeSettingsNotifierRecipeImperial extends SettingsNotifier {
   @override
-  Settings build() => const Settings(
+  Future<Settings> build() async => const Settings(
     unitSystemRecipeIngredients: UnitSystem.imperial,
   );
 }
@@ -709,7 +709,7 @@ void main() {
 /// Fake with imperial global but metric override for recipe ingredients.
 class _FakeSettingsNotifierMetricOverride extends SettingsNotifier {
   @override
-  Settings build() => const Settings(
+  Future<Settings> build() async => const Settings(
     unitSystem: UnitSystem.imperial,
     unitSystemRecipeIngredients: UnitSystem.metric,
   );

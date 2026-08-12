@@ -17,27 +17,27 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('initial state is false', () {
+    test('initial state is false', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(container.read(onboardingProvider), false);
+      expect(await container.read(onboardingProvider.future), false);
     });
 
-    test('initial setter sets state to true', () {
+    test('loads a persisted true flag from SharedPreferences', () async {
+      SharedPreferences.setMockInitialValues({'onboarding_complete': true});
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(onboardingProvider.notifier).initial(value: true);
-      expect(container.read(onboardingProvider), true);
+      expect(await container.read(onboardingProvider.future), true);
     });
 
-    test('initial setter sets state to false', () {
+    test('loads a persisted false flag from SharedPreferences', () async {
+      SharedPreferences.setMockInitialValues({'onboarding_complete': false});
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(onboardingProvider.notifier).initial(value: false);
-      expect(container.read(onboardingProvider), false);
+      expect(await container.read(onboardingProvider.future), false);
     });
 
     test('markComplete sets state to true', () async {
@@ -46,7 +46,7 @@ void main() {
 
       await container.read(onboardingProvider.notifier).markComplete();
 
-      expect(container.read(onboardingProvider), true);
+      expect(container.read(onboardingProvider).value, true);
     });
 
     test('markComplete persists to SharedPreferences', () async {
@@ -57,8 +57,7 @@ void main() {
       container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(onboardingProvider.notifier).initial(value: true);
-      expect(container.read(onboardingProvider), true);
+      expect(await container.read(onboardingProvider.future), true);
     });
   });
 }

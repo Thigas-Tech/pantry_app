@@ -52,7 +52,7 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   int getRecordedLastSetValue() => _lastSetValue;
 
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 
   @override
   void setActiveInventory(int newValue) {
@@ -126,7 +126,7 @@ class FakeOnboardingNotifier extends OnboardingNotifier {
   final bool initialValue;
 
   @override
-  bool build() => initialValue;
+  Future<bool> build() async => initialValue;
 }
 
 List<Override> _homeScreenOverrides({

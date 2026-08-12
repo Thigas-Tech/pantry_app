@@ -97,7 +97,10 @@ void main() {
               notificationsEnabled: false,
             ),
           );
-      expect(container.read(settingsProvider).notificationsEnabled, false);
+      expect(
+        container.read(settingsProvider).value!.notificationsEnabled,
+        false,
+      );
 
       container.dispose();
     });
@@ -168,10 +171,10 @@ void main() {
       container.dispose();
     });
 
-    test('build returns a valid Settings object', () {
+    test('build returns a valid Settings object', () async {
       SharedPreferences.setMockInitialValues({});
       final container = ProviderContainer();
-      final settings = container.read(settingsProvider);
+      final settings = await container.read(settingsProvider.future);
       expect(settings, isA<Settings>());
       expect(settings.notificationsEnabled, isA<bool>());
       expect(settings.retentionDays, isA<int>());
@@ -187,7 +190,10 @@ void main() {
           .setUnitSystem(
             UnitSystem.imperial,
           );
-      expect(container.read(settingsProvider).unitSystem, UnitSystem.imperial);
+      expect(
+        container.read(settingsProvider).value!.unitSystem,
+        UnitSystem.imperial,
+      );
       container.dispose();
     });
 

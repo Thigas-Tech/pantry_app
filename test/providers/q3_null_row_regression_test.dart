@@ -29,7 +29,7 @@ class MockTransaction extends Mock implements Transaction {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 
   @override
   void setActiveInventory(int newValue) {}
@@ -37,7 +37,7 @@ class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
 
 class FakeSettingsNotifier extends SettingsNotifier {
   @override
-  Settings build() => const Settings();
+  Future<Settings> build() async => const Settings();
 }
 
 void main() {

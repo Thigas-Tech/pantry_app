@@ -253,7 +253,8 @@ class _OnboardingSettingsPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Consumer(
         builder: (context, ref, _) {
-          final settings = ref.watch(settingsProvider);
+          final settings =
+              ref.watch(settingsProvider).value ?? const Settings();
 
           return Column(
             children: [

@@ -14,7 +14,7 @@ import '../helpers/pump_app.dart';
 
 class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 
   @override
   void setActiveInventory(int newValue) {}

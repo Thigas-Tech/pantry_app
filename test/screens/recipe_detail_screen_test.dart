@@ -22,7 +22,7 @@ class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
-  int build() => 1;
+  Future<int> build() async => 1;
 
   @override
   void setActiveInventory(int newValue) {}

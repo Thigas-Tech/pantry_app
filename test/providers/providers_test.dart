@@ -71,36 +71,36 @@ void main() {
       mockContainer.dispose();
     });
 
-    test('defaults to 1', () {
+    test('defaults to 1', () async {
       /// The active inventory ID should initially be 1 (the "Home" inventory).
-      final id = mockContainer.read(activeInventoryProvider);
+      final id = await mockContainer.read(activeInventoryProvider.future);
       expect(id, 1);
     });
 
-    test('can be changed', () {
+    test('can be changed', () async {
       /// Changing the notifier’s state updates the provider’s value.
       mockContainer
           .read(activeInventoryProvider.notifier)
           .setActiveInventory(2);
 
-      final id = mockContainer.read(activeInventoryProvider);
+      final id = await mockContainer.read(activeInventoryProvider.future);
       expect(id, 2);
     });
   });
 
   group('settingsProvider', () {
-    test('defaults to sensible values', () {
+    test('defaults to sensible values', () async {
       /// Notifications are enabled and retention is 60 days by default.
-      final settings = container.read(settingsProvider);
+      final settings = await container.read(settingsProvider.future);
       expect(settings.notificationsEnabled, isTrue);
       expect(settings.retentionDays, 60);
     });
   });
 
   group('themeModeProvider', () {
-    test('defaults to system', () {
+    test('defaults to system', () async {
       /// The initial theme mode should follow the system setting.
-      final mode = container.read(themeModeProvider);
+      final mode = await container.read(themeModeProvider.future);
       expect(mode, ThemeModeOption.system);
     });
   });

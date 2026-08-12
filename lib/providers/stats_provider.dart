@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
@@ -22,14 +21,11 @@ part 'stats_provider.g.dart';
 /// release memory when leaving the Stats tab.
 @riverpod
 Future<PantryStats> stats(Ref ref) async {
-  final activeId = ref.watch(activeInventoryProvider);
+  final activeId = await ref.watch(activeInventoryProvider.future);
   final db = ref.watch(databaseProvider);
-  final expiringSoonDays = ref.watch(
-    settingsProvider.select((s) => s.expiringSoonDays),
-  );
-  final baseCurrency = ref.watch(
-    settingsProvider.select((s) => s.baseCurrency),
-  );
+  final settings = await ref.watch(settingsProvider.future);
+  final expiringSoonDays = settings.expiringSoonDays;
+  final baseCurrency = settings.baseCurrency;
   final priceRepo = ref.read(priceRepositoryProvider);
   final database = await db.database;
 

@@ -17,7 +17,7 @@ final settingsProvider = SettingsNotifierProvider._();
 /// A notifier that holds the current [Settings] and persists every field
 /// to [SharedPreferences].
 final class SettingsNotifierProvider
-    extends $NotifierProvider<SettingsNotifier, Settings> {
+    extends $AsyncNotifierProvider<SettingsNotifier, Settings> {
   /// A notifier that holds the current [Settings] and persists every field
   /// to [SharedPreferences].
   SettingsNotifierProvider._()
@@ -37,32 +37,24 @@ final class SettingsNotifierProvider
   @$internal
   @override
   SettingsNotifier create() => SettingsNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Settings value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<Settings>(value),
-    );
-  }
 }
 
-String _$settingsNotifierHash() => r'4683452daa8cedc6d5f0cb48eb82fa1f27b54514';
+String _$settingsNotifierHash() => r'a8dcba65857803935301247ca58bd46edfacf59a';
 
 /// A notifier that holds the current [Settings] and persists every field
 /// to [SharedPreferences].
 
-abstract class _$SettingsNotifier extends $Notifier<Settings> {
-  Settings build();
+abstract class _$SettingsNotifier extends $AsyncNotifier<Settings> {
+  FutureOr<Settings> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<Settings, Settings>;
+    final ref = this.ref as $Ref<AsyncValue<Settings>, Settings>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<Settings, Settings>,
-              Settings,
+              AnyNotifier<AsyncValue<Settings>, Settings>,
+              AsyncValue<Settings>,
               Object?,
               Object?
             >;

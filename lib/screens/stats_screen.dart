@@ -48,9 +48,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     final statsAsync = ref.watch(statsProvider);
     final previousStats = statsAsync.asData?.value;
 
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
+    final priceTrackingEnabled =
+        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -679,15 +678,14 @@ Widget _buildMonthlySpending(
   WidgetRef ref,
 ) {
   final theme = Theme.of(context);
-  final priceTrackingEnabled = ref.read(
-    settingsProvider.select((s) => s.priceTrackingEnabled),
-  );
+  final priceTrackingEnabled =
+      ref.read(settingsProvider).value?.priceTrackingEnabled ?? false;
   if (!priceTrackingEnabled || stats.monthlySpending.isEmpty) {
     return const SizedBox.shrink();
   }
 
   final repo = ref.read(priceRepositoryProvider);
-  final baseCurrency = ref.read(settingsProvider).baseCurrency;
+  final baseCurrency = ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
   final spots = <FlSpot>[];
   for (var i = 0; i < stats.monthlySpending.length; i++) {
     final entry = stats.monthlySpending[i];
@@ -808,15 +806,14 @@ Widget _buildStoreSpending(
   WidgetRef ref,
 ) {
   final theme = Theme.of(context);
-  final priceTrackingEnabled = ref.read(
-    settingsProvider.select((s) => s.priceTrackingEnabled),
-  );
+  final priceTrackingEnabled =
+      ref.read(settingsProvider).value?.priceTrackingEnabled ?? false;
   if (!priceTrackingEnabled || stats.storeSpending.isEmpty) {
     return const SizedBox.shrink();
   }
 
   final repo = ref.read(priceRepositoryProvider);
-  final baseCurrency = ref.read(settingsProvider).baseCurrency;
+  final baseCurrency = ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
   final topStores = stats.storeSpending.take(10).toList();
 
   return Column(
@@ -1000,15 +997,13 @@ class _PricingSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.priceTrackingEnabled),
-    );
+    final priceTrackingEnabled =
+        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
     if (!priceTrackingEnabled) return const SizedBox.shrink();
 
     final repo = ref.watch(priceRepositoryProvider);
-    final baseCurrency = ref.watch(
-      settingsProvider.select((s) => s.baseCurrency),
-    );
+    final baseCurrency =
+        ref.watch(settingsProvider).value?.baseCurrency ?? 'USD';
     final totalFormatted = repo.formatPrice(stats.totalValue, baseCurrency);
     final avgFormatted = repo.formatPrice(stats.averagePrice, baseCurrency);
 

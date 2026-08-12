@@ -54,7 +54,11 @@ final class HomeScreenControllerProvider
 }
 
 String _$homeScreenControllerHash() =>
+<<<<<<< Updated upstream
     r'c1bdbe9bcc8b87baf8ae9c52800ee28bb6fb448e';
+=======
+    r'd2defe9929e0326c58e579f843aed77954df8ee1';
+>>>>>>> Stashed changes
 
 /// Notifier that manages ephemeral home screen UI state.
 ///

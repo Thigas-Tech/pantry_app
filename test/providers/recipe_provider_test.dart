@@ -37,17 +37,17 @@ class _MutableActiveInventory extends ActiveInventoryNotifier {
   final int initial;
 
   @override
-  int build() => initial;
+  Future<int> build() async => initial;
 
   @override
   void setActiveInventory(int id) {
-    state = id;
+    state = AsyncValue.data(id);
   }
 }
 
 class FakeSettingsNotifier extends SettingsNotifier {
   @override
-  Settings build() => const Settings();
+  Future<Settings> build() async => const Settings();
 }
 
 class _CookRecipeButton extends ConsumerWidget {

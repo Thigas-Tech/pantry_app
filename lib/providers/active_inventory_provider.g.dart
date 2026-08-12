@@ -37,7 +37,7 @@ final activeInventoryProvider = ActiveInventoryNotifierProvider._();
 /// Defaults to 1 (the built‑in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
 final class ActiveInventoryNotifierProvider
-    extends $NotifierProvider<ActiveInventoryNotifier, int> {
+    extends $AsyncNotifierProvider<ActiveInventoryNotifier, int> {
   /// Holds the ID of the currently selected inventory (pantry).
   ///
   /// The value is persisted to [SharedPreferences] under the key
@@ -67,18 +67,10 @@ final class ActiveInventoryNotifierProvider
   @$internal
   @override
   ActiveInventoryNotifier create() => ActiveInventoryNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(int value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<int>(value),
-    );
-  }
 }
 
 String _$activeInventoryNotifierHash() =>
-    r'ae6aa4ebea275afdcffa0afe1f7ec4dd4bbff6f0';
+    r'bc7fe0f5c29eb95f9cf3ab952aba1dbf3747ed3c';
 
 /// Holds the ID of the currently selected inventory (pantry).
 ///
@@ -93,17 +85,17 @@ String _$activeInventoryNotifierHash() =>
 /// Defaults to 1 (the built‑in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
 
-abstract class _$ActiveInventoryNotifier extends $Notifier<int> {
-  int build();
+abstract class _$ActiveInventoryNotifier extends $AsyncNotifier<int> {
+  FutureOr<int> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<int, int>;
+    final ref = this.ref as $Ref<AsyncValue<int>, int>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<int, int>,
-              int,
+              AnyNotifier<AsyncValue<int>, int>,
+              AsyncValue<int>,
               Object?,
               Object?
             >;

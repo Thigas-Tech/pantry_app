@@ -36,8 +36,9 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final themeMode = ref.watch(themeModeProvider);
-    final settings = ref.watch(settingsProvider);
+    final themeMode =
+        ref.watch(themeModeProvider).value ?? ThemeModeOption.system;
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings)),
@@ -673,7 +674,10 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final current = ref.read(settingsProvider).preferredWeightUnit;
+    final current = (await ref.read(
+      settingsProvider.future,
+    )).preferredWeightUnit;
+    if (!context.mounted) return;
     final result = await showDialog<WeightUnitPreference>(
       context: context,
       builder: (ctx) {
@@ -715,7 +719,10 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final current = ref.read(settingsProvider).preferredVolumeUnit;
+    final current = (await ref.read(
+      settingsProvider.future,
+    )).preferredVolumeUnit;
+    if (!context.mounted) return;
     final result = await showDialog<VolumeUnitPreference>(
       context: context,
       builder: (ctx) {
@@ -790,7 +797,8 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _showThemeDialog(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.read(themeModeProvider);
+    final current = await ref.read(themeModeProvider.future);
+    if (!context.mounted) return;
     final selected = await showDialog<ThemeModeOption>(
       context: context,
       builder: (ctx) => SimpleDialog(
@@ -827,7 +835,8 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _showRetentionDialog(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.read(settingsProvider);
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
     final days = await _showDaysDialog(
       context,
       title: l10n.dataRetentionDialogTitle,
@@ -848,7 +857,8 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.read(settingsProvider);
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
     final days = await _showDaysDialog(
       context,
       title: l10n.expiringSoonDaysDialogTitle,
@@ -866,7 +876,8 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _showCurrencyPicker(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.read(settingsProvider);
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
     final currencies = [
       'USD',
       'BRL',
@@ -943,7 +954,8 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.read(settingsProvider);
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
     final days = await _showDaysDialog(
       context,
       title: l10n.priceRetentionDays,
@@ -990,7 +1002,8 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.read(settingsProvider);
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
     final controller = TextEditingController(text: current.openPricesToken);
     final result = await showDialog<String>(
       context: context,
@@ -1065,7 +1078,8 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.read(settingsProvider);
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
     final days = await _showDaysDialog(
       context,
       title: l10n.inactivityThresholdDays,
@@ -1162,7 +1176,7 @@ class SettingsScreen extends ConsumerWidget {
         );
         items.addAll(invItems);
       }
-      final settings = ref.read(settingsProvider);
+      final settings = await ref.read(settingsProvider.future);
       await notifService.rescheduleAllItems(
         items,
         expiringSoonTitle: l10n.expiringSoon,

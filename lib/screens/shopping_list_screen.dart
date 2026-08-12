@@ -176,7 +176,7 @@ class _ClearPurchasedButton extends ConsumerWidget {
         );
         if (confirm != true) return;
         final db = ref.read(databaseProvider);
-        final inventoryId = ref.read(activeInventoryProvider);
+        final inventoryId = await ref.read(activeInventoryProvider.future);
         final purchasedItems = await db.getPurchasedShoppingItems(
           inventoryId: inventoryId,
         );
@@ -230,7 +230,8 @@ class _ShareButton extends ConsumerWidget {
           ..writeln();
 
         if (pending.isNotEmpty) {
-          final settings = ref.watch(settingsProvider);
+          final settings =
+              ref.watch(settingsProvider).value ?? const Settings();
           final shoppingSystem = UnitResolver.systemFor(
             settings: settings,
             context: UnitContext.inventory,
@@ -542,7 +543,7 @@ class _ShoppingItemTile extends ConsumerWidget {
     AppLocalizations l10n,
     WidgetRef ref,
   ) {
-    final settings = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider).value ?? const Settings();
     final shoppingSystem = UnitResolver.systemFor(
       settings: settings,
       context: UnitContext.inventory,

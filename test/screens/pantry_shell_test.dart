@@ -7,8 +7,11 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
+import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 
@@ -44,8 +47,11 @@ void main() {
         ),
         inventoryCountProvider.overrideWith((ref) => 0),
         activeInventoryProvider.overrideWith(
-          ActiveInventoryNotifier.new,
+          FakeActiveInventoryNotifier.new,
         ),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        onboardingProvider.overrideWith(FakeOnboardingNotifier.new),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         connectivityProvider.overrideWith((ref) => const Stream.empty()),
         productRepositoryProvider.overrideWithValue(
@@ -80,8 +86,11 @@ void main() {
         ),
         inventoryCountProvider.overrideWith((ref) => 0),
         activeInventoryProvider.overrideWith(
-          ActiveInventoryNotifier.new,
+          FakeActiveInventoryNotifier.new,
         ),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        onboardingProvider.overrideWith(FakeOnboardingNotifier.new),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         connectivityProvider.overrideWith((ref) => const Stream.empty()),
         productRepositoryProvider.overrideWithValue(

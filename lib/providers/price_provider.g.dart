@@ -243,7 +243,7 @@ final class PricesHiddenProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$pricesHiddenHash() => r'8ab6f850d2460d148c4a6035a5cf04ee78b32cce';
+String _$pricesHiddenHash() => r'a2e69ff8cf5b35a63a71631590cc4170ba26fd9d';
 
 /// Provides the total value of the currently active inventory, converted
 /// to the user's base currency.
@@ -284,7 +284,7 @@ final class InventoryValueProvider
   }
 }
 
-String _$inventoryValueHash() => r'd9e645833b4cb41c40986c7643944fa40569f29d';
+String _$inventoryValueHash() => r'a0c7326063f689b5f0920bbc759c629414953c0c';
 
 /// Provides the average item price in the currently active inventory,
 /// converted to the user's base currency.
@@ -325,7 +325,7 @@ final class AveragePriceProvider
   }
 }
 
-String _$averagePriceHash() => r'fc25459f76001be01a7569b4158b89b5fead20bc';
+String _$averagePriceHash() => r'1c238360e6a80a4bc52b525732aaa6d763c64e1e';
 
 /// Provides the count of priced items in the currently active inventory.
 
@@ -363,7 +363,7 @@ final class PricedItemCountProvider
   }
 }
 
-String _$pricedItemCountHash() => r'9295cc32dac0cc68912ad12cb97cc5625512e74f';
+String _$pricedItemCountHash() => r'00a05a6f3475067b3d4e3768217f63b0082795cd';
 
 /// Provides the count of prices pending sync to Open Prices.
 
