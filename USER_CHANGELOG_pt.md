@@ -7,6 +7,10 @@
   dispositivo tem conectividade, reduzindo pedidos de rede falhados em
   segundo plano.
 
+- Abrir "O que ha de novo" quando o changelog nao pode ser carregado agora
+  mostra uma mensagem de erro clara em vez da mensagem de falha na limpeza
+  do cache.
+
 - Adicionar o mesmo produto uma segunda vez com uma data de validade diferente
   agora mantem as duas entradas separadas na despensa, cada uma com a sua data
   de validade. Duas entradas so sao combinadas quando sao verdadeiramente o
