@@ -73,8 +73,10 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           .read(recipeServiceProvider)
           .cookRecipe(
             widget.recipeId,
-            activeInventoryId: ref.read(activeInventoryProvider),
-            baseCurrency: ref.read(settingsProvider).baseCurrency,
+            activeInventoryId: await ref.read(activeInventoryProvider.future),
+            baseCurrency: (await ref.read(
+              settingsProvider.future,
+            )).baseCurrency,
           );
       logInfo('Recipe ${widget.recipeId} cooked successfully');
       if (!mounted) return;
@@ -133,6 +135,20 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
       SnackbarHelper.showError(context, l10n.recipeCookFailed);
       setState(() => _isCooking = false);
     }
+  }
+
+  /// Computes the recipe cost for the widget's recipe, resolving the
+  /// active inventory and base currency asynchronously.
+  Future<double> _recipeCost() async {
+    final activeId = await ref.read(activeInventoryProvider.future);
+    final baseCurrency = (await ref.read(settingsProvider.future)).baseCurrency;
+    return ref
+        .read(recipeServiceProvider)
+        .calculateRecipeCost(
+          widget.recipeId,
+          activeInventoryId: activeId,
+          baseCurrency: baseCurrency,
+        );
   }
 
   @override
@@ -273,13 +289,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   const SizedBox(height: 16),
                 ],
                 FutureBuilder<double>(
-                  future: ref
-                      .read(recipeServiceProvider)
-                      .calculateRecipeCost(
-                        widget.recipeId,
-                        activeInventoryId: ref.read(activeInventoryProvider),
-                        baseCurrency: ref.read(settingsProvider).baseCurrency,
-                      ),
+                  future: _recipeCost(),
                   builder: (context, snapshot) {
                     final cost = snapshot.data ?? 0.0;
                     final formatted = '$symbol${cost.toStringAsFixed(2)}';

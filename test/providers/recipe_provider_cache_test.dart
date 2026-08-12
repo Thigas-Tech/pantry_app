@@ -61,7 +61,9 @@ class _SaveRecipeTestWidgetState extends ConsumerState<_SaveRecipeTestWidget> {
                 name: widget.name,
                 existingRecipeId: widget.existingRecipeId,
                 ingredients: widget.ingredients,
-                activeInventoryId: ref.read(activeInventoryProvider),
+                activeInventoryId: await ref.read(
+                  activeInventoryProvider.future,
+                ),
               );
         } on Exception {
           // Expected for negative tests.

@@ -64,4 +64,4 @@ final class RecipeServiceProvider
   }
 }
 
-String _$recipeServiceHash() => r'01cf5b164b8c13b2b88db9bec5a91b0e20f296f7';
+String _$recipeServiceHash() => r'1cc59a19dd0bfee58d19b953ae7a895f05201436';

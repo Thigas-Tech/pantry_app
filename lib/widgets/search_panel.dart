@@ -256,15 +256,18 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
                         .read(productRepositoryProvider)
                         .cacheProduct(product)
                         .then(
-                          (_) => ref
-                              .read(shoppingListServiceProvider)
-                              .addShoppingItem(
-                                item,
-                                activeInventoryId: ref.read(
-                                  activeInventoryProvider,
-                                ),
-                              )
-                              .then((_) => invalidateShoppingList(ref)),
+                          (_) async {
+                            final activeId = await ref.read(
+                              activeInventoryProvider.future,
+                            );
+                            await ref
+                                .read(shoppingListServiceProvider)
+                                .addShoppingItem(
+                                  item,
+                                  activeInventoryId: activeId,
+                                );
+                            invalidateShoppingList(ref);
+                          },
                         ),
                   );
                   SnackbarHelper.showInfo(context, l10n.addToShoppingList);

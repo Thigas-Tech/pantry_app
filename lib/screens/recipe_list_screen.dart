@@ -198,8 +198,10 @@ class _AverageCostBanner extends ConsumerWidget {
       future: ref
           .read(recipeServiceProvider)
           .calculateAverageRecipeCost(
-            activeInventoryId: ref.read(activeInventoryProvider),
-            baseCurrency: ref.read(settingsProvider).baseCurrency,
+            activeInventoryId: ref.read(activeInventoryProvider).value ?? 1,
+            baseCurrency:
+                (ref.watch(settingsProvider).value ?? const Settings())
+                    .baseCurrency,
           ),
       builder: (context, snapshot) {
         final cost = snapshot.data ?? 0.0;
@@ -387,8 +389,9 @@ class _RecipeCostLabel extends ConsumerWidget {
           .read(recipeServiceProvider)
           .calculateRecipeCost(
             recipeId,
-            activeInventoryId: ref.read(activeInventoryProvider),
-            baseCurrency: ref.read(settingsProvider).baseCurrency,
+            activeInventoryId: ref.read(activeInventoryProvider).value ?? 1,
+            baseCurrency: (ref.read(settingsProvider).value ?? const Settings())
+                .baseCurrency,
           ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();

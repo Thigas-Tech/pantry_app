@@ -172,15 +172,18 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                       barcode: widget.item.barcode,
                     );
                     unawaited(
-                      ref
-                          .read(shoppingListServiceProvider)
-                          .addShoppingItem(
-                            item,
-                            activeInventoryId: ref.read(
-                              activeInventoryProvider,
-                            ),
-                          )
-                          .then((_) => invalidateShoppingList(ref)),
+                      () async {
+                        final activeId = await ref.read(
+                          activeInventoryProvider.future,
+                        );
+                        await ref
+                            .read(shoppingListServiceProvider)
+                            .addShoppingItem(
+                              item,
+                              activeInventoryId: activeId,
+                            );
+                        invalidateShoppingList(ref);
+                      }(),
                     );
                     SnackbarHelper.showInfo(context, l10n.addToShoppingList);
                   },

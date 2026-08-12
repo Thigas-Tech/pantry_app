@@ -63,7 +63,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen>
           .read(shoppingListServiceProvider)
           .addShoppingItem(
             item,
-            activeInventoryId: ref.read(activeInventoryProvider),
+            activeInventoryId: await ref.read(activeInventoryProvider.future),
           );
       invalidateShoppingList(ref);
     }
@@ -115,7 +115,7 @@ class _MoveToInventoryButton extends ConsumerWidget {
           final result = await ref
               .read(shoppingListServiceProvider)
               .movePurchasedToInventory(
-                inventoryId: ref.read(activeInventoryProvider),
+                inventoryId: await ref.read(activeInventoryProvider.future),
               );
           invalidateShoppingList(ref);
           if (!context.mounted) return;
@@ -183,7 +183,7 @@ class _ClearPurchasedButton extends ConsumerWidget {
         final deleted = await ref
             .read(shoppingListServiceProvider)
             .clearPurchasedShoppingItems(
-              inventoryId: ref.read(activeInventoryProvider),
+              inventoryId: await ref.read(activeInventoryProvider.future),
             );
         invalidateShoppingList(ref);
         if (!context.mounted) return;
@@ -197,7 +197,9 @@ class _ClearPurchasedButton extends ConsumerWidget {
                     .read(shoppingListServiceProvider)
                     .addShoppingItem(
                       item.copyWith(isPurchased: false),
-                      activeInventoryId: ref.read(activeInventoryProvider),
+                      activeInventoryId: await ref.read(
+                        activeInventoryProvider.future,
+                      ),
                     );
               }
               invalidateShoppingList(ref);
@@ -443,8 +445,8 @@ class _ShoppingItemTile extends ConsumerWidget {
                         .read(shoppingListServiceProvider)
                         .addShoppingItem(
                           item,
-                          activeInventoryId: ref.read(
-                            activeInventoryProvider,
+                          activeInventoryId: await ref.read(
+                            activeInventoryProvider.future,
                           ),
                         );
                     invalidateShoppingList(ref);
@@ -520,8 +522,8 @@ class _ShoppingItemTile extends ConsumerWidget {
                                 .read(shoppingListServiceProvider)
                                 .addShoppingItem(
                                   item,
-                                  activeInventoryId: ref.read(
-                                    activeInventoryProvider,
+                                  activeInventoryId: await ref.read(
+                                    activeInventoryProvider.future,
                                   ),
                                 );
                             invalidateShoppingList(ref);

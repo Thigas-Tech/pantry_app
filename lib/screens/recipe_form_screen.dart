@@ -398,7 +398,7 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
             servings: int.tryParse(_servingsController.text) ?? 0,
             imagePath: _imagePath,
             ingredients: ingredients,
-            activeInventoryId: ref.read(activeInventoryProvider),
+            activeInventoryId: await ref.read(activeInventoryProvider.future),
           );
 
       if (!mounted) return;

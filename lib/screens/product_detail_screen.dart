@@ -429,13 +429,18 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   barcode: _product.barcode,
                 );
                 unawaited(
-                  ref
-                      .read(shoppingListServiceProvider)
-                      .addShoppingItem(
-                        item,
-                        activeInventoryId: ref.read(activeInventoryProvider),
-                      )
-                      .then((_) => invalidateShoppingList(ref)),
+                  () async {
+                    final activeId = await ref.read(
+                      activeInventoryProvider.future,
+                    );
+                    await ref
+                        .read(shoppingListServiceProvider)
+                        .addShoppingItem(
+                          item,
+                          activeInventoryId: activeId,
+                        );
+                    invalidateShoppingList(ref);
+                  }(),
                 );
                 SnackbarHelper.showInfo(
                   context,

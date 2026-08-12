@@ -284,7 +284,7 @@ final class InventoryValueProvider
   }
 }
 
-String _$inventoryValueHash() => r'a0c7326063f689b5f0920bbc759c629414953c0c';
+String _$inventoryValueHash() => r'c77318f3b7f8b9ad8e5171bbd37b6c110f147fe0';
 
 /// Provides the average item price in the currently active inventory,
 /// converted to the user's base currency.
@@ -325,7 +325,7 @@ final class AveragePriceProvider
   }
 }
 
-String _$averagePriceHash() => r'1c238360e6a80a4bc52b525732aaa6d763c64e1e';
+String _$averagePriceHash() => r'22ba0938d0b28ce250851f09f16981632005bb21';
 
 /// Provides the count of priced items in the currently active inventory.
 

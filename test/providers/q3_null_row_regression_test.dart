@@ -190,17 +190,24 @@ void main() {
             home: _CookButton(
               onCook: (ref) {
                 unawaited(
-                  ref
-                      .read(recipeServiceProvider)
-                      .cookRecipe(
-                        1,
-                        activeInventoryId: ref.read(activeInventoryProvider),
-                        baseCurrency: ref.read(settingsProvider).baseCurrency,
-                      )
-                      .then((_) {
-                        cookCompleted = true;
-                      }),
+                  () async {
+                    final activeId = await ref.read(
+                      activeInventoryProvider.future,
+                    );
+                    final baseCurrency = (await ref.read(
+                      settingsProvider.future,
+                    )).baseCurrency;
+                    await ref
+                        .read(recipeServiceProvider)
+                        .cookRecipe(
+                          1,
+                          activeInventoryId: activeId,
+                          baseCurrency: baseCurrency,
+                        );
+                    cookCompleted = true;
+                  }(),
                 );
+                return;
               },
             ),
           ),
@@ -208,10 +215,9 @@ void main() {
       );
 
       await tester.tap(find.text('Cook'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-
+      await _pumpWithRealIo(tester, done: () => cookCompleted);
       expect(cookCompleted, isTrue);
+
       verify(
         () => mockTxn.delete(
           'inventory',
@@ -221,6 +227,21 @@ void main() {
       ).called(1);
     });
   });
+}
+
+/// Pumps real-async windows until [done] flips, so ffi-sqflite isolates can
+/// deliver their results to the test's fake-async zone.
+Future<void> _pumpWithRealIo(
+  WidgetTester tester, {
+  required bool Function() done,
+  int maxTurns = 200,
+}) async {
+  for (var i = 0; i < maxTurns && !done(); i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pump();
+  }
 }
 
 class _CookButton extends ConsumerWidget {
