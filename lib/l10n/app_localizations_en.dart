@@ -39,7 +39,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyPantryTitle => 'Your pantry is empty';
 
   @override
-  String get emptyPantrySubtitle => 'Tap the button below to scan your first product';
+  String get emptyPantrySubtitle =>
+      'Tap the button below to scan your first product';
 
   @override
   String get scanFirstProduct => 'Scan a barcode';
@@ -283,7 +284,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationPermissionTitle => 'Notification Permission Required';
 
   @override
-  String get notificationPermissionBody => 'To receive expiry reminders, grant notification permission in your device settings.';
+  String get notificationPermissionBody =>
+      'To receive expiry reminders, grant notification permission in your device settings.';
 
   @override
   String get openSettings => 'Open Settings';
@@ -357,7 +359,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get networkError => 'Network error. Please check your connection.';
 
   @override
-  String get fetchProductFailed => 'Failed to fetch product. Please check your connection.';
+  String get fetchProductFailed =>
+      'Failed to fetch product. Please check your connection.';
 
   @override
   String get errorGeneric => 'Something went wrong. Please try again.';
@@ -366,7 +369,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNotFound => 'Product not found.';
 
   @override
-  String get productNotFoundHint => 'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
+  String get productNotFoundHint =>
+      'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
 
   @override
   String get addManually => 'Add manually';
@@ -629,7 +633,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineWarning => 'You are offline — adding product manually';
 
   @override
-  String get nutriscoreExplanation => 'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.';
+  String get nutriscoreExplanation =>
+      'Nutri-Score is a nutrition label that rates products from A (best) to E (worst) based on their nutritional quality. It helps compare similar products at a glance.';
 
   @override
   String nutriscoreNotApplicable(Object category) {
@@ -637,7 +642,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nutriscoreNotApplicableGeneric => 'Nutri-Score is not applicable to this product category.';
+  String get nutriscoreNotApplicableGeneric =>
+      'Nutri-Score is not applicable to this product category.';
 
   @override
   String get nutriscoreNotApplicableSemantics => 'Nutri-Score, not applicable';
@@ -654,10 +660,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get flushCacheSub => 'Delete cached product data and images';
 
   @override
-  String get flushCacheConfirm => 'This will delete all cached product data and images fetched from Open Food Facts. Manually entered products and your inventory items will be preserved. Cached products will be re-fetched the next time you view them.';
+  String get flushCacheConfirm =>
+      'This will delete all cached product data and images fetched from Open Food Facts. Manually entered products and your inventory items will be preserved. Cached products will be re-fetched the next time you view them.';
 
   @override
-  String get flushCacheSuccess => 'Cached products flushed. They will refresh automatically.';
+  String get flushCacheSuccess =>
+      'Cached products flushed. They will refresh automatically.';
 
   @override
   String get flushCacheFailed => 'Failed to flush cache. Please try again.';
@@ -695,34 +703,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get submissionError => 'Failed to submit product. Tap to retry.';
 
   @override
-  String get submissionPartiallyCompleted => 'Partially submitted to Open Food Facts';
+  String get submissionPartiallyCompleted =>
+      'Partially submitted to Open Food Facts';
 
   @override
-  String get submittingMetadata => 'Submitting product details to Open Food Facts…';
+  String get submittingMetadata =>
+      'Submitting product details to Open Food Facts…';
 
   @override
   String get preparingSubmission => 'Preparing submission…';
 
   @override
-  String get submissionCredentialsError => 'Submission failed because Open Food Facts credentials are not configured.';
+  String get submissionCredentialsError =>
+      'Submission failed because Open Food Facts credentials are not configured.';
 
   @override
-  String get submissionOfflineError => 'Could not reach Open Food Facts. Check your connection and retry.';
+  String get submissionOfflineError =>
+      'Could not reach Open Food Facts. Check your connection and retry.';
 
   @override
-  String get submissionRateLimitedError => 'Open Food Facts rate-limited the request. Please wait and try again.';
+  String get submissionRateLimitedError =>
+      'Open Food Facts rate-limited the request. Please wait and try again.';
 
   @override
-  String get submissionRejectedError => 'Open Food Facts rejected the product data.';
+  String get submissionRejectedError =>
+      'Open Food Facts rejected the product data.';
 
   @override
-  String get submissionValidationError => 'Open Food Facts rejected the product data because some fields are invalid.';
+  String get submissionValidationError =>
+      'Open Food Facts rejected the product data because some fields are invalid.';
 
   @override
-  String get submissionWrongCredentialsError => 'Open Food Facts rejected your credentials. Submission is disabled. Check the Open Food Facts credentials in the app configuration and use your username, not your email.';
+  String get submissionWrongCredentialsError =>
+      'Open Food Facts rejected your credentials. Submission is disabled. Check the Open Food Facts credentials in the app configuration and use your username, not your email.';
 
   @override
-  String get productAlreadyInOff => 'This product is already in Open Food Facts.';
+  String get productAlreadyInOff =>
+      'This product is already in Open Food Facts.';
 
   @override
   String get productAlreadyInOffTitle => 'Already in Open Food Facts';
@@ -755,19 +772,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNotFoundSearch => 'No products found in Packaged Products.';
 
   @override
-  String get productNotFoundBarcodeHint => 'Try scanning or entering the product’s barcode.';
+  String get productNotFoundBarcodeHint =>
+      'Try scanning or entering the product’s barcode.';
 
   @override
-  String get productNotFoundOfflineHint => 'Search requires an internet connection.';
+  String get productNotFoundOfflineHint =>
+      'Search requires an internet connection.';
 
   @override
   String get enterBarcodePrompt => 'Type or paste a barcode number';
 
   @override
-  String get productNotInDatabase => 'This barcode is not registered with Open Food Facts.';
+  String get productNotInDatabase =>
+      'This barcode is not registered with Open Food Facts.';
 
   @override
-  String get productNotInDatabaseHint => 'You can still use this product locally.';
+  String get productNotInDatabaseHint =>
+      'You can still use this product locally.';
 
   @override
   String get saveLocallyAction => 'Save Locally';
@@ -820,7 +841,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceTracking => 'Price Tracking';
 
   @override
-  String get priceTrackingDescription => 'Record purchase prices and track how much you spend.';
+  String get priceTrackingDescription =>
+      'Record purchase prices and track how much you spend.';
 
   @override
   String get receiptTracking => 'NFC-e Receipts';
@@ -846,7 +868,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsEmptyTitle => 'No items to analyze';
 
   @override
-  String get statsEmptySubtitle => 'Add products to your pantry to see statistics here.';
+  String get statsEmptySubtitle =>
+      'Add products to your pantry to see statistics here.';
 
   @override
   String get addedThisWeekLabel => 'This week';
@@ -855,7 +878,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addedThisMonthLabel => 'This month';
 
   @override
-  String get productDataUnavailable => 'Product data unavailable — pull to refresh when online';
+  String get productDataUnavailable =>
+      'Product data unavailable — pull to refresh when online';
 
   @override
   String get locationStats => 'Locations';
@@ -888,16 +912,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get regressionReport => 'Regression';
 
   @override
-  String get bugReportExplanation => 'Something is broken or not working as expected.';
+  String get bugReportExplanation =>
+      'Something is broken or not working as expected.';
 
   @override
-  String get featureRequestExplanation => 'Suggest a new feature or improvement.';
+  String get featureRequestExplanation =>
+      'Suggest a new feature or improvement.';
 
   @override
-  String get generalFeedbackExplanation => 'Other comments, questions, or suggestions.';
+  String get generalFeedbackExplanation =>
+      'Other comments, questions, or suggestions.';
 
   @override
-  String get regressionReportExplanation => 'A feature that used to work but no longer does.';
+  String get regressionReportExplanation =>
+      'A feature that used to work but no longer does.';
 
   @override
   String get issueTitle => 'Title';
@@ -909,7 +937,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get issueDescription => 'Description';
 
   @override
-  String get issueDescriptionRequired => 'Description is required (min 10 characters)';
+  String get issueDescriptionRequired =>
+      'Description is required (min 10 characters)';
 
   @override
   String get attachScreenshot => 'Attach screenshot';
@@ -927,7 +956,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get issueSubmitted => 'Thanks! Your report has been submitted.';
 
   @override
-  String get issueQueuedOffline => 'You are offline. Your report will be submitted when you are back online.';
+  String get issueQueuedOffline =>
+      'You are offline. Your report will be submitted when you are back online.';
 
   @override
   String get issueSubmissionFailed => 'Failed to submit. Please try again.';
@@ -964,25 +994,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get osLabel => 'OS';
 
   @override
-  String get cameraPermissionDenied => 'Camera permission denied. Grant access in Settings.';
+  String get cameraPermissionDenied =>
+      'Camera permission denied. Grant access in Settings.';
 
   @override
   String get cameraPermissionDeniedTitle => 'Camera permission needed';
 
   @override
-  String get cameraPermissionDeniedBody => 'Pantry needs camera access to take product photos.';
+  String get cameraPermissionDeniedBody =>
+      'Pantry needs camera access to take product photos.';
 
   @override
   String get galleryPermissionDeniedTitle => 'Gallery access needed';
 
   @override
-  String get galleryPermissionDeniedBody => 'Pantry needs access to your photos to choose an existing photo. Open Settings to allow access.';
+  String get galleryPermissionDeniedBody =>
+      'Pantry needs access to your photos to choose an existing photo. Open Settings to allow access.';
 
   @override
   String get cameraNotAvailable => 'Camera not available on this device.';
 
   @override
-  String get scannerGenericError => 'An unexpected error occurred while starting the camera.';
+  String get scannerGenericError =>
+      'An unexpected error occurred while starting the camera.';
 
   @override
   String get switchToManualEntry => 'Enter barcode manually';
@@ -1027,7 +1061,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cropFailed => 'Could not crop photo.';
 
   @override
-  String get cropTooSmall => 'The cropped photo is too small. Crop a larger area.';
+  String get cropTooSmall =>
+      'The cropped photo is too small. Crop a larger area.';
 
   @override
   String get choosePhotoSourceTitle => 'Choose photo source';
@@ -1075,10 +1110,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inactivityReminderChannelName => 'Inactivity reminders';
 
   @override
-  String get inactivityReminderChannelDescription => 'Reminds you to add products regularly';
+  String get inactivityReminderChannelDescription =>
+      'Reminds you to add products regularly';
 
   @override
-  String get notificationDeniedWarning => 'Notifications are disabled. Expiry and inactivity reminders will only show when you open the app. Enable them in Settings at any time.';
+  String get notificationDeniedWarning =>
+      'Notifications are disabled. Expiry and inactivity reminders will only show when you open the app. Enable them in Settings at any time.';
 
   @override
   String inactivityThresholdSet(int days) {
@@ -1089,7 +1126,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amoledDarkMode => 'AMOLED dark mode';
 
   @override
-  String get amoledDarkModeExplanation => 'Use pure black surfaces in dark mode to save power on AMOLED displays';
+  String get amoledDarkModeExplanation =>
+      'Use pure black surfaces in dark mode to save power on AMOLED displays';
 
   @override
   String get amoledDarkModeEnabled => 'AMOLED dark mode enabled.';
@@ -1101,7 +1139,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amoledNudgeTitle => 'Switch to dark mode?';
 
   @override
-  String get amoledNudgeBody => 'Dark mode can save battery life on your device, especially if it has an AMOLED screen. You can also enable pure-black surfaces in Settings for maximum power savings.';
+  String get amoledNudgeBody =>
+      'Dark mode can save battery life on your device, especially if it has an AMOLED screen. You can also enable pure-black surfaces in Settings for maximum power savings.';
 
   @override
   String get amoledNudgeEnable => 'Enable dark mode';
@@ -1113,10 +1152,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get translationReport => 'Translation Report';
 
   @override
-  String get translationReportExplanation => 'Report an issue with a product translation or suggest a new translation.';
+  String get translationReportExplanation =>
+      'Report an issue with a product translation or suggest a new translation.';
 
   @override
-  String get feedbackRateLimit => 'You can only submit one report per minute and up to 5 per day. Please try again later.';
+  String get feedbackRateLimit =>
+      'You can only submit one report per minute and up to 5 per day. Please try again later.';
 
   @override
   String get couldNotOpenLinkFallback => 'URL copied to clipboard.';
@@ -1125,10 +1166,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get includeLogs => 'Include app logs';
 
   @override
-  String get includeLogsExplanation => 'Recent warnings and errors from this session';
+  String get includeLogsExplanation =>
+      'Recent warnings and errors from this session';
 
   @override
-  String get logsPrivacyNote => 'Logs may contain product names and timestamps.';
+  String get logsPrivacyNote =>
+      'Logs may contain product names and timestamps.';
 
   @override
   String get price => 'Price';
@@ -1182,7 +1225,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hidePrices => 'Hide prices for privacy';
 
   @override
-  String get hidePricesDescription => 'Replace price values with masked text everywhere, including the stats screen.';
+  String get hidePricesDescription =>
+      'Replace price values with masked text everywhere, including the stats screen.';
 
   @override
   String get pricesHidden => 'Prices hidden.';
@@ -1208,7 +1252,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get baseCurrency => 'Base currency';
 
   @override
-  String get baseCurrencyDescription => 'All prices are shown in this currency.';
+  String get baseCurrencyDescription =>
+      'All prices are shown in this currency.';
 
   @override
   String get store => 'Store';
@@ -1238,13 +1283,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncToOpenPrices => 'Share with Open Prices';
 
   @override
-  String get syncToOpenPricesDescription => 'Contribute your price data to the community food-price database.';
+  String get syncToOpenPricesDescription =>
+      'Contribute your price data to the community food-price database.';
 
   @override
   String get openPricesToken => 'Open Prices API Token';
 
   @override
-  String get openPricesTokenDescription => 'Token generated from your Open Food Facts account.';
+  String get openPricesTokenDescription =>
+      'Token generated from your Open Food Facts account.';
 
   @override
   String get openPricesTokenSaved => 'Token saved.';
@@ -1284,13 +1331,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get openPricesProofExplanation => 'To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.';
+  String get openPricesProofExplanation =>
+      'To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.';
 
   @override
   String get openPricesConsentTitle => 'Contribute to Open Prices';
 
   @override
-  String get openPricesConsentBody => 'Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.';
+  String get openPricesConsentBody =>
+      'Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.';
 
   @override
   String get iUnderstand => 'I understand';
@@ -1326,7 +1375,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emptyShoppingList => 'Your shopping list is empty';
 
   @override
-  String get emptyShoppingListSub => 'Add items from a product or tap + to add manually';
+  String get emptyShoppingListSub =>
+      'Add items from a product or tap + to add manually';
 
   @override
   String get deleteItem => 'Delete item';
@@ -1423,7 +1473,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items left — add a barcode or create a product to move them',
+      other:
+          '$count items left — add a barcode or create a product to move them',
       one: '1 item left — add a barcode or create a product to move it',
     );
     return '$_temp0';
@@ -1433,7 +1484,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToPantryAfterPrice => 'Add to your pantry?';
 
   @override
-  String get addToPantryAfterPriceDesc => 'Record the amount you bought to track it in your inventory.';
+  String get addToPantryAfterPriceDesc =>
+      'Record the amount you bought to track it in your inventory.';
 
   @override
   String get howManyBought => 'How many did you buy?';
@@ -1442,13 +1494,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choosePantry => 'Choose a pantry';
 
   @override
-  String get addToPantrySkipped => 'Price saved. Add from product page to track inventory.';
+  String get addToPantrySkipped =>
+      'Price saved. Add from product page to track inventory.';
 
   @override
   String get invalidPriceAmount => 'Enter a valid price amount';
 
   @override
-  String get apiSearchWarning => 'Could not fetch all online results. Some products may be missing.';
+  String get apiSearchWarning =>
+      'Could not fetch all online results. Some products may be missing.';
 
   @override
   String get dismiss => 'Dismiss';
@@ -1463,7 +1517,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotification => 'Send test notification';
 
   @override
-  String get testScheduledNotification => 'Send scheduled test notification (2 min)';
+  String get testScheduledNotification =>
+      'Send scheduled test notification (2 min)';
 
   @override
   String get testNotificationScheduled => 'Test notification scheduled.';
@@ -1571,7 +1626,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalNotificationChannelName => 'General Notifications';
 
   @override
-  String get generalNotificationChannelDescription => 'Standard app notifications';
+  String get generalNotificationChannelDescription =>
+      'Standard app notifications';
 
   @override
   String get testNotificationTitle => 'Test Successful';
@@ -1902,13 +1958,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get produceLettuce => 'Lettuce';
 
   @override
-  String get exactAlarmsDeniedHint => 'Scheduled test notifications may be delayed because exact alarms are not granted. Grant it in Settings > Notifications > Schedule exact alarms.';
+  String get exactAlarmsDeniedHint =>
+      'Scheduled test notifications may be delayed because exact alarms are not granted. Grant it in Settings > Notifications > Schedule exact alarms.';
 
   @override
   String get notificationRationaleTitle => 'Notifications help you keep track';
 
   @override
-  String get notificationRationaleBody => 'Pantry uses notifications to:\n\n- Remind you when food is about to expire\n- Nudge you to add products regularly\n- Confirm that test notifications work\n\nYou can change this anytime in Settings.';
+  String get notificationRationaleBody =>
+      'Pantry uses notifications to:\n\n- Remind you when food is about to expire\n- Nudge you to add products regularly\n- Confirm that test notifications work\n\nYou can change this anytime in Settings.';
 
   @override
   String get notificationRationaleAllow => 'Allow';
@@ -1995,7 +2053,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get servingsHint => 'e.g. 4';
 
   @override
-  String get setServingsHint => 'Set the number of servings in the recipe editor to see per-portion nutrition';
+  String get setServingsHint =>
+      'Set the number of servings in the recipe editor to see per-portion nutrition';
 
   @override
   String get addPhoto => 'Add photo';
@@ -2033,7 +2092,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecipes => 'No recipes yet';
 
   @override
-  String get noRecipesSubtitle => 'Register recipes to track costs and plan meals';
+  String get noRecipesSubtitle =>
+      'Register recipes to track costs and plan meals';
 
   @override
   String get discardChanges => 'Discard changes?';
@@ -2077,7 +2137,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDiscard => 'Discard changes?';
 
   @override
-  String get confirmDiscardContent => 'You have unsaved changes. Are you sure you want to go back?';
+  String get confirmDiscardContent =>
+      'You have unsaved changes. Are you sure you want to go back?';
 
   @override
   String get searchProduct => 'Search product';
@@ -2092,7 +2153,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage1Title => 'Scan Barcodes';
 
   @override
-  String get onboardingPage1Desc => 'Quickly add products to your pantry by scanning their barcodes with your camera.';
+  String get onboardingPage1Desc =>
+      'Quickly add products to your pantry by scanning their barcodes with your camera.';
 
   @override
   String get onboardingPage1Cta => 'Open Scanner';
@@ -2101,7 +2163,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage2Title => 'Search Products';
 
   @override
-  String get onboardingPage2Desc => 'Browse millions of products from the Open Food Facts database to find exactly what you need.';
+  String get onboardingPage2Desc =>
+      'Browse millions of products from the Open Food Facts database to find exactly what you need.';
 
   @override
   String get onboardingPage2Cta => 'Open Search';
@@ -2110,7 +2173,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage3Title => 'Fresh Produce';
 
   @override
-  String get onboardingPage3Desc => 'Add common fruits and vegetables with a single tap. Perfect for bananas, apples, tomatoes, and more.';
+  String get onboardingPage3Desc =>
+      'Add common fruits and vegetables with a single tap. Perfect for bananas, apples, tomatoes, and more.';
 
   @override
   String get onboardingPage3Cta => 'Add Produce';
@@ -2119,7 +2183,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage4Title => 'Configure Your Pantry';
 
   @override
-  String get onboardingPage4Desc => 'Set up price tracking, currency, and data preferences to get the most out of Pantry.';
+  String get onboardingPage4Desc =>
+      'Set up price tracking, currency, and data preferences to get the most out of Pantry.';
 
   @override
   String get onboardingPage4Cta => 'Set Up';
@@ -2128,7 +2193,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage5Title => 'Track Everything';
 
   @override
-  String get onboardingPage5Desc => 'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.';
+  String get onboardingPage5Desc =>
+      'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.';
 
   @override
   String get onboardingPage5Cta => 'Get Started';

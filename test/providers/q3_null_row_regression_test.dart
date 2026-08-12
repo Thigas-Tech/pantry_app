@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -9,12 +10,18 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/firebase_cache_provider.dart';
+import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/services/firebase_cache_service.dart';
+import 'package:pantry_app/services/recipe_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+
+class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
 
 class MockDatabase extends Mock implements Database {}
 
@@ -35,6 +42,7 @@ class FakeSettingsNotifier extends SettingsNotifier {
 
 void main() {
   setUpAll(() {
+    dotenv.loadFromString(isOptional: true, mergeWith: {});
     registerFallbackValue(const Recipe(name: ''));
     registerFallbackValue(const RecipeIngredient(recipeId: 0, name: ''));
   });
@@ -72,11 +80,12 @@ void main() {
         ),
       ];
 
-      final shortages = await checkIngredientShortages(
+      final service = RecipeService(
         mockDb,
-        ingredients,
-        1,
+        MockFirebaseCacheService(),
+        CurrencyService(),
       );
+      final shortages = await service.checkIngredientShortages(ingredients, 1);
 
       expect(shortages, {'Eggs': 2.0});
     });
@@ -169,6 +178,7 @@ void main() {
         ProviderScope(
           overrides: [
             databaseProvider.overrideWithValue(mockDb),
+            firebaseCacheProvider.overrideWithValue(MockFirebaseCacheService()),
             activeInventoryProvider.overrideWith(
               FakeActiveInventoryNotifier.new,
             ),
@@ -180,9 +190,16 @@ void main() {
             home: _CookButton(
               onCook: (ref) {
                 unawaited(
-                  cookRecipe(ref, 1).then((_) {
-                    cookCompleted = true;
-                  }),
+                  ref
+                      .read(recipeServiceProvider)
+                      .cookRecipe(
+                        1,
+                        activeInventoryId: ref.read(activeInventoryProvider),
+                        baseCurrency: ref.read(settingsProvider).baseCurrency,
+                      )
+                      .then((_) {
+                        cookCompleted = true;
+                      }),
                 );
               },
             ),

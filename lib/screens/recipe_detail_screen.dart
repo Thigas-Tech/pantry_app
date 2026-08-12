@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/recipe_form_screen.dart';
 import 'package:pantry_app/screens/recipe_history_screen.dart';
@@ -68,7 +69,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     setState(() => _isCooking = true);
     logInfo('Cooking recipe ${widget.recipeId}...');
     try {
-      final result = await cookRecipe(ref, widget.recipeId);
+      final result = await ref
+          .read(recipeServiceProvider)
+          .cookRecipe(
+            widget.recipeId,
+            activeInventoryId: ref.read(activeInventoryProvider),
+            baseCurrency: ref.read(settingsProvider).baseCurrency,
+          );
       logInfo('Recipe ${widget.recipeId} cooked successfully');
       if (!mounted) return;
       SnackbarHelper.showUndo(
@@ -266,7 +273,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   const SizedBox(height: 16),
                 ],
                 FutureBuilder<double>(
-                  future: calculateRecipeCost(ref, widget.recipeId),
+                  future: ref
+                      .read(recipeServiceProvider)
+                      .calculateRecipeCost(
+                        widget.recipeId,
+                        activeInventoryId: ref.read(activeInventoryProvider),
+                        baseCurrency: ref.read(settingsProvider).baseCurrency,
+                      ),
                   builder: (context, snapshot) {
                     final cost = snapshot.data ?? 0.0;
                     final formatted = '$symbol${cost.toStringAsFixed(2)}';

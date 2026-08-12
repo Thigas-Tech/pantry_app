@@ -23,6 +23,14 @@ linter:
     # ----- Disabled (Riverpod notifiers use methods, not setters) -----
     use_setters_to_change_properties: false
 
+    # ----- Disabled (Flutter SDK version skew) -----
+    # unnecessary_unawaited fires only on newer SDKs whose APIs are
+    # annotated @awaitNotRequired (e.g. Navigator.push in Flutter 3.47);
+    # the project's pinned local SDK (3.12) lacks the annotation, so
+    # removing unawaited() here would break the local discarded_futures
+    # gate. Keeping the explicit unawaited() calls satisfies both.
+    unnecessary_unawaited: false
+
     # ----- Error prevention -----
     always_declare_return_types: true
     avoid_dynamic_calls: true
@@ -80,3 +88,10 @@ analyzer:
     - "**app_localizations*.dart"
     - "**firebase_options.dart"
     - "tools/**"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**

@@ -4,6 +4,23 @@
 
 ### Fixed
 
+- **Business logic moved out of providers (audit Q1)**: recipe logic
+  (save/delete, cost calculation, shortage checks, the cook FEFO
+  transaction) moved from recipe_provider.dart (772 -> ~180 lines) into a
+  new [RecipeService], and shopping list logic (add/toggle/delete,
+  price updates, move-purchased-to-inventory) moved from
+  shopping_list_provider.dart into a new [ShoppingListService]. Both take
+  DAOs/services as constructor dependencies, are exposed via keepAlive
+  providers, and every screen call site now reads the service directly.
+  All the moved logic is now testable without a ProviderContainer (the
+  tests were ported and strengthened).
+  (lib/services/recipe_service.dart,
+  lib/services/shopping_list_service.dart,
+  lib/providers/recipe_service_provider.dart,
+  lib/providers/shopping_list_service_provider.dart,
+  lib/providers/recipe_provider.dart,
+  lib/providers/shopping_list_provider.dart, lib/screens/*, lib/widgets/*)
+
 - **Legacy post-frame invalidate dance (audit Q7)**: all 30
   addPostFrameCallback((_) => ref.invalidate(...)) sites now call
   ref.invalidate directly after their async gap, with a context.mounted /

@@ -17,6 +17,7 @@ import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
@@ -170,7 +171,17 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                       name: name,
                       barcode: widget.item.barcode,
                     );
-                    unawaited(addShoppingItem(ref, item));
+                    unawaited(
+                      ref
+                          .read(shoppingListServiceProvider)
+                          .addShoppingItem(
+                            item,
+                            activeInventoryId: ref.read(
+                              activeInventoryProvider,
+                            ),
+                          )
+                          .then((_) => invalidateShoppingList(ref)),
+                    );
                     SnackbarHelper.showInfo(context, l10n.addToShoppingList);
                   },
                 ),

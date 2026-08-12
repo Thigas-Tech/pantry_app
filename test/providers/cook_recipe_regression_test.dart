@@ -10,7 +10,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -140,7 +140,13 @@ class _CookTestWidget extends ConsumerWidget {
     return ElevatedButton(
       onPressed: () async {
         try {
-          await cookRecipe(ref, 1);
+          await ref
+              .read(recipeServiceProvider)
+              .cookRecipe(
+                1,
+                activeInventoryId: ref.read(activeInventoryProvider),
+                baseCurrency: ref.read(settingsProvider).baseCurrency,
+              );
         } on Exception {
           // Silently ignore -- we only care that the invalidation
           // that follows does not throw setState-during-build.

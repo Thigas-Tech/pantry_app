@@ -8,53 +8,6 @@ part of 'shopping_list_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provides a singleton [ShoppingListDao] instance.
-
-@ProviderFor(shoppingListDao)
-final shoppingListDaoProvider = ShoppingListDaoProvider._();
-
-/// Provides a singleton [ShoppingListDao] instance.
-
-final class ShoppingListDaoProvider
-    extends
-        $FunctionalProvider<ShoppingListDao, ShoppingListDao, ShoppingListDao>
-    with $Provider<ShoppingListDao> {
-  /// Provides a singleton [ShoppingListDao] instance.
-  ShoppingListDaoProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'shoppingListDaoProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$shoppingListDaoHash();
-
-  @$internal
-  @override
-  $ProviderElement<ShoppingListDao> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  ShoppingListDao create(Ref ref) {
-    return shoppingListDao(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ShoppingListDao value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ShoppingListDao>(value),
-    );
-  }
-}
-
-String _$shoppingListDaoHash() => r'9c5ed6e4ff762b4fe717e4ca2cd47eaaf2c02e60';
-
 /// Provides a singleton [PhotoService] instance.
 
 @ProviderFor(photoService)

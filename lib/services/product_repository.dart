@@ -114,7 +114,7 @@ class ProductRepository {
         );
         // The service already tried OFF internally.  Skip the direct OFF
         // call (step 2) and proceed to the fallback chain.
-        return _fallbackOrThrow(barcode, lang);
+        return await _fallbackOrThrow(barcode, lang);
       } on ProductNotFoundException {
         rethrow;
       } on Exception catch (e) {

@@ -88,7 +88,7 @@ class ProductSubmissionService {
           logWarning(
             'Product ${product.barcode}: barcode already exists on OFF',
           );
-          return _finishFailed(
+          return await _finishFailed(
             product,
             onProgress,
             SubmissionErrorCategory.duplicate,
@@ -107,7 +107,7 @@ class ProductSubmissionService {
         logWarning(
           'Product ${product.barcode}: OFF credentials rejected, aborting',
         );
-        return _finishFailed(
+        return await _finishFailed(
           product,
           onProgress,
           SubmissionErrorCategory.wrongCredentials,
@@ -127,7 +127,7 @@ class ProductSubmissionService {
         logWarning(
           'Product ${product.barcode}: metadata submission failed',
         );
-        return _finishFailed(
+        return await _finishFailed(
           product,
           onProgress,
           _categorize(metadataResult.error),
@@ -225,7 +225,7 @@ class ProductSubmissionService {
         return updated;
       }
 
-      return _finishFailed(
+      return await _finishFailed(
         product,
         onProgress,
         _categorize(failures.first.error),

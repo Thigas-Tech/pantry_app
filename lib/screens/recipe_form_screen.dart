@@ -11,7 +11,7 @@ import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/product_picker_screen.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
@@ -389,15 +389,17 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
         },
       ).toList();
 
-      await saveRecipe(
-        ref,
-        existingRecipeId: widget.existingRecipeId,
-        name: _nameController.text.trim(),
-        instructions: _instructionsController.text.trim(),
-        servings: int.tryParse(_servingsController.text) ?? 0,
-        imagePath: _imagePath,
-        ingredients: ingredients,
-      );
+      await ref
+          .read(recipeServiceProvider)
+          .saveRecipe(
+            existingRecipeId: widget.existingRecipeId,
+            name: _nameController.text.trim(),
+            instructions: _instructionsController.text.trim(),
+            servings: int.tryParse(_servingsController.text) ?? 0,
+            imagePath: _imagePath,
+            ingredients: ingredients,
+            activeInventoryId: ref.read(activeInventoryProvider),
+          );
 
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;
