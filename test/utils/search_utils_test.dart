@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 
 void main() {
@@ -104,6 +105,40 @@ void main() {
         name: 'Café',
       );
       expect(buildSearchText(p), 'cafe 12345');
+    });
+  });
+
+  group('buildRecipeSearchText', () {
+    test('combines name and instructions with diacritics removed', () {
+      const recipe = Recipe(
+        name: 'Crème Brûlée',
+        instructions: 'à la mode',
+      );
+      expect(buildRecipeSearchText(recipe), 'creme brulee a la mode');
+    });
+
+    test('returns only the name when instructions are empty', () {
+      const recipe = Recipe(name: 'Test Recipe');
+      expect(buildRecipeSearchText(recipe), 'test recipe');
+    });
+
+    test('lowercases and collapses whitespace', () {
+      const recipe = Recipe(
+        name: '  Café   CRÈME  ',
+        instructions: '  ',
+      );
+      expect(buildRecipeSearchText(recipe), 'cafe creme');
+    });
+
+    test('matches the v30 migration composition', () {
+      const recipe = Recipe(
+        name: 'Crème Brûlée',
+        instructions: 'à la mode',
+      );
+      expect(
+        buildRecipeSearchText(recipe),
+        normalizeForSearch('${recipe.name} ${recipe.instructions}'),
+      );
     });
   });
 }

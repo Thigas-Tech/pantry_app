@@ -39,6 +39,19 @@
   `test/database/migrations/v34_prices_inventory_test.dart`,
   `test/database/migrations/v36_nonunique_inventory_index_test.dart`)
 
+- **Recipe search_text maintained at write time**: `RecipeDao.toMap` now
+  emits the derived `search_text` column via the new
+  `buildRecipeSearchText` helper, so recipes created or edited through any
+  write path (DAO insert/update and the
+  `insertRecipeWithIngredients`/`updateRecipeWithIngredients` transaction
+  helpers) keep the normalized search text in sync with their name and
+  instructions. The composition mirrors the v30 migration backfill, and
+  tests cover diacritics, empty instructions, and renames.
+  (`lib/utils/search_utils.dart`, `lib/database/recipe_dao.dart`,
+  `test/utils/search_utils_test.dart`,
+  `test/database/recipe_dao_test.dart`,
+  `test/database/database_helper_test.dart`)
+
 ### Added
 
 - **Nutrition editor for all Open Food Facts nutrients**: the manual product
