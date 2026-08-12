@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Background product refresh no longer runs while you are offline. Cached
+  products are refreshed only when the device has connectivity, so fewer
+  failed network requests happen in the background.
+
 - Opening "What's New" when the changelog cannot be loaded now shows a clear
   error message instead of the cache-flush failure message.
 

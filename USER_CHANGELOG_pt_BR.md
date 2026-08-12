@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- A atualizacao de produtos em segundo plano nao e mais executada enquanto
+  voce esta offline. Os produtos em cache so sao atualizados quando o
+  dispositivo tem conectividade, reduzindo pedidos de rede falhados em
+  segundo plano.
+
 - Abrir "O que ha de novo" quando o changelog nao pode ser carregado agora
   mostra uma mensagem de erro clara em vez da mensagem de falha na limpeza
   do cache.

@@ -19,18 +19,18 @@ import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
-import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/cache_refresh_coordinator_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
-import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/services/cache_refresh_coordinator.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/services/notification_background_handler.dart';
@@ -320,30 +320,15 @@ Future<void> _handleAppUpdate() async {
 /// a background refresh for every inventory.
 ///
 /// Runs after the app starts. This is a best‑effort operation — failures are
-/// silently logged but never propagated.
+/// silently logged but never propagated. The connectivity gate and the
+/// overdue check live in [CacheRefreshCoordinator].
 Future<void> _scheduleCacheRefresh() async {
   try {
-    final repo = appContainer.read(productRepositoryProvider);
-    if (!await repo.isCacheOverdue()) {
-      logInfo('Cache is fresh — skipping scheduled refresh');
-      return;
+    final coordinator = appContainer.read(cacheRefreshCoordinatorProvider);
+    final refreshed = await coordinator.refreshIfOverdue();
+    if (refreshed > 0) {
+      appContainer.invalidate(pantryProvider);
     }
-    logInfo('Cache is overdue — scheduling background refresh');
-    // Set the timestamp *before* firing refreshes so that
-    // [HomeScreen._refreshIfOverdue] sees a non‑overdue cache and
-    // does not duplicate the work.
-    await repo.setLastRefreshTime();
-    final db = appContainer.read(databaseProvider);
-    final inventories = await db.getInventories();
-    await Future.wait(
-      inventories.map(
-        (inv) => repo.refreshInventoryProducts(inv['id'] as int),
-      ),
-    );
-    logInfo(
-      'Refreshed products for ${inventories.length} inventories',
-    );
-    appContainer.invalidate(pantryProvider);
   } on Exception catch (e) {
     logError('Scheduled cache refresh failed: $e');
   }
