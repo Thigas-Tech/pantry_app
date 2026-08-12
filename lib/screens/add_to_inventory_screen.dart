@@ -325,10 +325,19 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
               if (_isProduce && !_produceIsWeightMode)
                 DropdownButtonFormField<String>(
                   initialValue: _selectedSize,
-                  items: const [
-                    DropdownMenuItem(value: 'Small', child: Text('Small')),
-                    DropdownMenuItem(value: 'Medium', child: Text('Medium')),
-                    DropdownMenuItem(value: 'Large', child: Text('Large')),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'Small',
+                      child: Text(l10n.servingSmall),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Medium',
+                      child: Text(l10n.servingMedium),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Large',
+                      child: Text(l10n.servingLarge),
+                    ),
                   ],
                   onChanged: (v) {
                     setState(() => _selectedSize = v!);

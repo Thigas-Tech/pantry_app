@@ -360,6 +360,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fetchProductFailed => 'Failed to fetch product. Please check your connection.';
 
   @override
+  String get errorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get productNotFound => 'Product not found.';
+
+  @override
   String get productNotFoundHint => 'This product isn\'t in the Open Food Facts database yet. You can add it manually or contribute it to the community.';
 
   @override
@@ -632,6 +638,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutriscoreNotApplicableGeneric => 'Nutri-Score is not applicable to this product category.';
+
+  @override
+  String get nutriscoreNotApplicableSemantics => 'Nutri-Score, not applicable';
+
+  @override
+  String nutriscoreGradeSemantics(Object grade) {
+    return 'Nutri-Score $grade';
+  }
 
   @override
   String get flushCache => 'Flush cache';
@@ -2126,7 +2140,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingBack => 'Back';
 
   @override
-  String get searchSourceLabel => 'Search in';
+  String get searchSourceLabel => 'Search in:';
 
   @override
   String get searchSourceOff => 'Packaged Products';

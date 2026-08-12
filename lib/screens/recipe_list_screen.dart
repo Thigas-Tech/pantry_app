@@ -101,7 +101,7 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
           return recipesAsync.when(
             data: (recipes) => _buildContent(context, l10n, recipes, ref),
             loading: () => Center(child: ProgressIndicatorHelper.build()),
-            error: (e, _) => Center(child: Text('$e')),
+            error: (e, _) => Center(child: Text(l10n.errorGeneric)),
           );
         },
       ),
