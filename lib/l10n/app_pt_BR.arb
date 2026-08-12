@@ -302,6 +302,7 @@
   "flushCacheConfirm": "Isso vai excluir todos os dados e imagens em cache obtidos do Open Food Facts. Produtos adicionados manualmente e seus itens de estoque serão mantidos. Os produtos em cache serão baixados de novo na próxima vez que você visualizá-los.",
   "flushCacheSuccess": "Cache limpo. Os produtos serão atualizados automaticamente.",
   "flushCacheFailed": "Não foi possível limpar o cache. Tente de novo.",
+  "changelogLoadFailed": "Não foi possível carregar o changelog.",
   "submissionPending": "Envio pendente pro Open Food Facts",
   "submissionSubmitted": "Enviado pro Open Food Facts",
   "submissionFailed": "Falha no envio pro Open Food Facts",

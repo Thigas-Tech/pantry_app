@@ -649,6 +649,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get flushCacheFailed => 'Failed to flush cache. Please try again.';
 
   @override
+  String get changelogLoadFailed => 'Could not load the changelog.';
+
+  @override
   String get submissionPending => 'Pending submission to Open Food Facts';
 
   @override
