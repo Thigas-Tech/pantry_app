@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(pricedItemCount)</li>
+    </ol>
+  </div>
+          <a href="../providers_price_provider/PricedItemCountProvider-class.html">PricedItemCountProvider</a>
           <span class="name ">pricedItemCountProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,12 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProvider&lt;int&gt; pricedItemCountProvider =
-    FutureProvider.autoDispose&lt;int&gt;((ref) {
-      final repo = ref.watch(priceRepositoryProvider);
-      final activeId = ref.watch(activeInventoryProvider);
-      return repo.pricedItemCount(activeId);
-    });</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(pricedItemCount)
+final pricedItemCountProvider = PricedItemCountProvider._();</code></pre>
 </section>
 
 

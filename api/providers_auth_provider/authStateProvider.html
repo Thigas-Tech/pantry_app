@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/StreamProvider-class.html">StreamProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_auth_user/AuthUser-class.html">AuthUser</a>?</span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(authState)</li>
+    </ol>
+  </div>
+          <a href="../providers_auth_provider/AuthStateProvider-class.html">AuthStateProvider</a>
           <span class="name ">authStateProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -69,9 +74,8 @@ until the first auth state event is emitted.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final authStateProvider = StreamProvider&lt;AuthUser?&gt;((ref) {
-  return ref.watch(authServiceProvider).authStateChanges;
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(authState)
+final authStateProvider = AuthStateProvider._();</code></pre>
 </section>
 
 

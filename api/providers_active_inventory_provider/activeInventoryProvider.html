@@ -54,22 +54,35 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_active_inventory_provider/ActiveInventoryNotifier-class.html">ActiveInventoryNotifier</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(ActiveInventoryNotifier)</li>
+    </ol>
+  </div>
+          <a href="../providers_active_inventory_provider/ActiveInventoryNotifierProvider-class.html">ActiveInventoryNotifierProvider</a>
           <span class="name ">activeInventoryProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
         </section>
         
 <section class="desc markdown">
-  <p>The provider for <a href="../providers_active_inventory_provider/ActiveInventoryNotifier-class.html">ActiveInventoryNotifier</a>.</p>
+  <p>Holds the ID of the currently selected inventory (pantry).</p>
+<p>The value is persisted to <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a> under the key
+active_inventory_id so that the selection survives app restarts.
+On initialization the provider reads the persisted value and validates
+that the corresponding inventory still exists in the database. If the
+persisted inventory was deleted, the provider falls back to the first
+available inventory or, when no inventories exist, reseeds the default
+"Home" inventory.</p>
+<p>Defaults to 1 (the built‑in "Home" inventory created during migration)
+on the very first run or when no persisted value is found.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final activeInventoryProvider = NotifierProvider&lt;ActiveInventoryNotifier, int&gt;(
-  ActiveInventoryNotifier.new,
-);</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(ActiveInventoryNotifier)
+final activeInventoryProvider = ActiveInventoryNotifierProvider._();</code></pre>
 </section>
 
 

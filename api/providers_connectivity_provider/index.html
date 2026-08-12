@@ -61,6 +61,27 @@
     
 
 
+    <section class="summary offset-anchor" id="classes">
+      <h2>Classes</h2>
+      <dl>
+          <dt id="ConnectivityProvider">
+  <span class="name "><a href="../providers_connectivity_provider/ConnectivityProvider-class.html">ConnectivityProvider</a></span> 
+
+</dt>
+<dd>
+  Provides a reactive stream of internet connectivity status.
+</dd>
+
+          <dt id="HasConnectionProvider">
+  <span class="name "><a href="../providers_connectivity_provider/HasConnectionProvider-class.html">HasConnectionProvider</a></span> 
+
+</dt>
+<dd>
+  Provides a one-shot connectivity check.
+</dd>
+
+      </dl>
+    </section>
 
 
 
@@ -72,7 +93,7 @@
       <dl class="properties">
           <dt id="connectivityProvider" class="property">
   <span class="name"><a href="../providers_connectivity_provider/connectivityProvider.html">connectivityProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/StreamProvider-class.html">StreamProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_connectivity_provider/ConnectivityProvider-class.html">ConnectivityProvider</a></span>
   
 
 </dt>
@@ -84,7 +105,7 @@
 
           <dt id="hasConnectionProvider" class="property">
   <span class="name"><a href="../providers_connectivity_provider/hasConnectionProvider.html">hasConnectionProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_connectivity_provider/HasConnectionProvider-class.html">HasConnectionProvider</a></span>
   
 
 </dt>
@@ -100,6 +121,19 @@
     <section class="summary offset-anchor" id="functions">
       <h2>Functions</h2>
       <dl class="callables">
+          <dt id="connectivity" class="callable">
+  <span class="name"><a href="../providers_connectivity_provider/connectivity.html">connectivity</a></span><span class="signature">(<wbr><span class="parameter" id="connectivity-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Stream-class.html">Stream</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides a reactive stream of internet connectivity status.
+  
+
+</dd>
+
           <dt id="debounceConnectivityStatus" class="callable">
   <span class="name"><a href="../providers_connectivity_provider/debounceConnectivityStatus.html">debounceConnectivityStatus</a></span><span class="signature">(<wbr><span class="parameter" id="debounceConnectivityStatus-param-source"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Stream-class.html">Stream</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/internet_connection_checker/3.0.1/internet_connection_checker/InternetConnectionStatus.html">InternetConnectionStatus</a></span>&gt;</span></span> <span class="parameter-name">source</span>, {</span><span class="parameter" id="debounceConnectivityStatus-param-debounceDuration"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">debounceDuration</span> = <span class="default-value">const Duration(seconds: 3)</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Stream-class.html">Stream</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
@@ -109,6 +143,19 @@
 </dt>
 <dd>
   Debounces offline transitions on a connectivity status stream.
+  
+
+</dd>
+
+          <dt id="hasConnection" class="callable">
+  <span class="name"><a href="../providers_connectivity_provider/hasConnection.html">hasConnection</a></span><span class="signature">(<wbr><span class="parameter" id="hasConnection-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides a one-shot connectivity check.
   
 
 </dd>

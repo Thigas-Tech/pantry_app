@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>, <span class="type-parameter">(<span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span></span>)</span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(priceHistory)</li>
+    </ol>
+  </div>
+          <a href="../providers_price_provider/PriceHistoryFamily-class.html">PriceHistoryFamily</a>
           <span class="name ">priceHistoryProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -69,15 +74,8 @@ independent, cache-isolated history.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;List&lt;Price&gt;, (String, int)&gt; priceHistoryProvider =
-    FutureProvider.autoDispose.family&lt;List&lt;Price&gt;, (String, int)&gt;(
-      (ref, args) {
-        final (barcode, inventoryId) = args;
-        return ref
-            .watch(priceRepositoryProvider)
-            .getPriceHistory(barcode, inventoryId: inventoryId);
-      },
-    );</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(priceHistory)
+final priceHistoryProvider = PriceHistoryFamily._();</code></pre>
 </section>
 
 

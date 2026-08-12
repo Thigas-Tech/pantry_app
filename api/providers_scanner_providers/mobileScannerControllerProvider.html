@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/mobile_scanner/7.4.0/mobile_scanner/MobileScannerController-class.html">MobileScannerController</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(mobileScannerController)</li>
+    </ol>
+  </div>
+          <a href="../providers_scanner_providers/MobileScannerControllerProvider-class.html">MobileScannerControllerProvider</a>
           <span class="name ">mobileScannerControllerProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -70,17 +75,8 @@ that permission is checked before calling <a href="https://pub.dev/documentation
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final Provider&lt;MobileScannerController&gt; mobileScannerControllerProvider =
-    Provider.autoDispose&lt;MobileScannerController&gt;(
-      (ref) {
-        final controller = MobileScannerController(
-          autoStart: false,
-          autoZoom: true,
-        );
-        ref.onDispose(controller.dispose);
-        return controller;
-      },
-    );</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(mobileScannerController)
+final mobileScannerControllerProvider = MobileScannerControllerProvider._();</code></pre>
 </section>
 
 

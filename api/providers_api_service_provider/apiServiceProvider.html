@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(apiService)</li>
+    </ol>
+  </div>
+          <a href="../providers_api_service_provider/ApiServiceProvider-class.html">ApiServiceProvider</a>
           <span class="name ">apiServiceProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -71,9 +76,8 @@ following the convention established by the official smooth-app.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final apiServiceProvider = Provider&lt;OffAdapter&gt;((ref) {
-  return OffAdapter(useStaging: AppConfig.useOffStaging);
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(apiService)
+final apiServiceProvider = ApiServiceProvider._();</code></pre>
 </section>
 
 

@@ -64,12 +64,71 @@
     <section class="summary offset-anchor" id="classes">
       <h2>Classes</h2>
       <dl>
+          <dt id="InventoryProductsProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/InventoryProductsProvider-class.html">InventoryProductsProvider</a></span> 
+
+</dt>
+<dd>
+  Provides distinct product barcodes and names from the active inventory
+for the "From your pantry" suggestions in the add-to-shopping-list sheet.
+</dd>
+
           <dt id="MoveToInventoryResult">
   <span class="name "><a href="../providers_shopping_list_provider/MoveToInventoryResult-class.html">MoveToInventoryResult</a></span> 
 
 </dt>
 <dd>
   Holds the result of a move-to-inventory operation.
+</dd>
+
+          <dt id="PendingShoppingCountProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/PendingShoppingCountProvider-class.html">PendingShoppingCountProvider</a></span> 
+
+</dt>
+<dd>
+  Provides the count of pending (not purchased) items, scoped to the active
+inventory.
+</dd>
+
+          <dt id="PendingShoppingListProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/PendingShoppingListProvider-class.html">PendingShoppingListProvider</a></span> 
+
+</dt>
+<dd>
+  Provides only pending (not purchased) shopping list items, scoped to the
+active inventory.
+</dd>
+
+          <dt id="PhotoServiceProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/PhotoServiceProvider-class.html">PhotoServiceProvider</a></span> 
+
+</dt>
+<dd>
+  Provides a singleton <a href="../services_photo_service/PhotoService-class.html">PhotoService</a> instance.
+</dd>
+
+          <dt id="PurchasedShoppingListProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/PurchasedShoppingListProvider-class.html">PurchasedShoppingListProvider</a></span> 
+
+</dt>
+<dd>
+  Provides only purchased shopping list items, scoped to the active inventory.
+</dd>
+
+          <dt id="ShoppingListDaoProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/ShoppingListDaoProvider-class.html">ShoppingListDaoProvider</a></span> 
+
+</dt>
+<dd>
+  Provides a singleton <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a> instance.
+</dd>
+
+          <dt id="ShoppingListProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/ShoppingListProvider-class.html">ShoppingListProvider</a></span> 
+
+</dt>
+<dd>
+  Provides all shopping list items, scoped to the active inventory.
 </dd>
 
       </dl>
@@ -85,7 +144,7 @@
       <dl class="properties">
           <dt id="inventoryProductsProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/inventoryProductsProvider.html">inventoryProductsProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/InventoryProductsProvider-class.html">InventoryProductsProvider</a></span>
   
 
 </dt>
@@ -98,7 +157,7 @@ for the "From your pantry" suggestions in the add-to-shopping-list sheet.
 
           <dt id="pendingShoppingCountProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/pendingShoppingCountProvider.html">pendingShoppingCountProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/PendingShoppingCountProvider-class.html">PendingShoppingCountProvider</a></span>
   
 
 </dt>
@@ -111,7 +170,7 @@ inventory.
 
           <dt id="pendingShoppingListProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/pendingShoppingListProvider.html">pendingShoppingListProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/PendingShoppingListProvider-class.html">PendingShoppingListProvider</a></span>
   
 
 </dt>
@@ -124,7 +183,7 @@ active inventory.
 
           <dt id="photoServiceProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/photoServiceProvider.html">photoServiceProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_photo_service/PhotoService-class.html">PhotoService</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/PhotoServiceProvider-class.html">PhotoServiceProvider</a></span>
   
 
 </dt>
@@ -136,7 +195,7 @@ active inventory.
 
           <dt id="purchasedShoppingListProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/purchasedShoppingListProvider.html">purchasedShoppingListProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/PurchasedShoppingListProvider-class.html">PurchasedShoppingListProvider</a></span>
   
 
 </dt>
@@ -148,7 +207,7 @@ active inventory.
 
           <dt id="shoppingListDaoProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/shoppingListDaoProvider.html">shoppingListDaoProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/ShoppingListDaoProvider-class.html">ShoppingListDaoProvider</a></span>
   
 
 </dt>
@@ -160,7 +219,7 @@ active inventory.
 
           <dt id="shoppingListProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/shoppingListProvider.html">shoppingListProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/ShoppingListProvider-class.html">ShoppingListProvider</a></span>
   
 
 </dt>
@@ -229,6 +288,20 @@ item with the same barcode and unit already exists.
 
 </dd>
 
+          <dt id="inventoryProducts" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/inventoryProducts.html">inventoryProducts</a></span><span class="signature">(<wbr><span class="parameter" id="inventoryProducts-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides distinct product barcodes and names from the active inventory
+for the "From your pantry" suggestions in the add-to-shopping-list sheet.
+  
+
+</dd>
+
           <dt id="movePurchasedToInventory" class="callable">
   <span class="name"><a href="../providers_shopping_list_provider/movePurchasedToInventory.html">movePurchasedToInventory</a></span><span class="signature">(<wbr><span class="parameter" id="movePurchasedToInventory-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_shopping_list_provider/MoveToInventoryResult-class.html">MoveToInventoryResult</a></span>&gt;</span></span>
@@ -238,6 +311,86 @@ item with the same barcode and unit already exists.
 </dt>
 <dd>
   Moves purchased items (with barcodes) to the active inventory.
+  
+
+</dd>
+
+          <dt id="pendingShoppingCount" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/pendingShoppingCount.html">pendingShoppingCount</a></span><span class="signature">(<wbr><span class="parameter" id="pendingShoppingCount-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides the count of pending (not purchased) items, scoped to the active
+inventory.
+  
+
+</dd>
+
+          <dt id="pendingShoppingList" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/pendingShoppingList.html">pendingShoppingList</a></span><span class="signature">(<wbr><span class="parameter" id="pendingShoppingList-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides only pending (not purchased) shopping list items, scoped to the
+active inventory.
+  
+
+</dd>
+
+          <dt id="photoService" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/photoService.html">photoService</a></span><span class="signature">(<wbr><span class="parameter" id="photoService-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../services_photo_service/PhotoService-class.html">PhotoService</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides a singleton <a href="../services_photo_service/PhotoService-class.html">PhotoService</a> instance.
+  
+
+</dd>
+
+          <dt id="purchasedShoppingList" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/purchasedShoppingList.html">purchasedShoppingList</a></span><span class="signature">(<wbr><span class="parameter" id="purchasedShoppingList-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides only purchased shopping list items, scoped to the active inventory.
+  
+
+</dd>
+
+          <dt id="shoppingList" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/shoppingList.html">shoppingList</a></span><span class="signature">(<wbr><span class="parameter" id="shoppingList-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides all shopping list items, scoped to the active inventory.
+  
+
+</dd>
+
+          <dt id="shoppingListDao" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/shoppingListDao.html">shoppingListDao</a></span><span class="signature">(<wbr><span class="parameter" id="shoppingListDao-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides a singleton <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a> instance.
   
 
 </dd>

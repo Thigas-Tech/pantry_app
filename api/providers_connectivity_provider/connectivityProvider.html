@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/StreamProvider-class.html">StreamProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(connectivity)</li>
+    </ol>
+  </div>
+          <a href="../providers_connectivity_provider/ConnectivityProvider-class.html">ConnectivityProvider</a>
           <span class="name ">connectivityProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -78,19 +83,8 @@ responses).</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final connectivityProvider = StreamProvider&lt;bool&gt;((ref) async* {
-  try {
-    final initial = await InternetConnectionChecker.instance.hasConnection
-        .timeout(const Duration(seconds: 3));
-    yield initial;
-  } on TimeoutException {
-    logWarning(&#39;Initial connectivity check timed out — defaulting to offline&#39;);
-    yield false;
-  }
-  yield* debounceConnectivityStatus(
-    InternetConnectionChecker.instance.onStatusChange,
-  );
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(connectivity)
+final connectivityProvider = ConnectivityProvider._();</code></pre>
 </section>
 
 

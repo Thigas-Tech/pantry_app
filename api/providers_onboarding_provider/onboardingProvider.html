@@ -54,22 +54,29 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_onboarding_provider/OnboardingNotifier-class.html">OnboardingNotifier</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(OnboardingNotifier)</li>
+    </ol>
+  </div>
+          <a href="../providers_onboarding_provider/OnboardingNotifierProvider-class.html">OnboardingNotifierProvider</a>
           <span class="name ">onboardingProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
         </section>
         
 <section class="desc markdown">
-  <p>Provider for <a href="../providers_onboarding_provider/OnboardingNotifier-class.html">OnboardingNotifier</a>.</p>
+  <p>Tracks whether the user has completed the empty-pantry onboarding.</p>
+<p>Returns true once the user has added their first item to any inventory.
+Once set to true the flag is never cleared, so the onboarding is never
+shown again — even if the user later empties their pantry.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final onboardingProvider = NotifierProvider&lt;OnboardingNotifier, bool&gt;(
-  OnboardingNotifier.new,
-);</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(OnboardingNotifier)
+final onboardingProvider = OnboardingNotifierProvider._();</code></pre>
 </section>
 
 

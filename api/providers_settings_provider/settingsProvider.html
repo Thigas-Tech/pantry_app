@@ -54,22 +54,27 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_settings_provider/SettingsNotifier-class.html">SettingsNotifier</a></span>, <span class="type-parameter"><a href="../providers_settings_provider/Settings-class.html">Settings</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(SettingsNotifier)</li>
+    </ol>
+  </div>
+          <a href="../providers_settings_provider/SettingsNotifierProvider-class.html">SettingsNotifierProvider</a>
           <span class="name ">settingsProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
         </section>
         
 <section class="desc markdown">
-  <p>The provider for <a href="../providers_settings_provider/SettingsNotifier-class.html">SettingsNotifier</a>.</p>
+  <p>A notifier that holds the current <a href="../providers_settings_provider/Settings-class.html">Settings</a> and persists every field
+to <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a>.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final settingsProvider = NotifierProvider&lt;SettingsNotifier, Settings&gt;(
-  SettingsNotifier.new,
-);</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(SettingsNotifier)
+final settingsProvider = SettingsNotifierProvider._();</code></pre>
 </section>
 
 

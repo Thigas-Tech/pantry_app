@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(averageNutriscore)</li>
+    </ol>
+  </div>
+          <a href="../providers_inventory_provider/AverageNutriscoreProvider-class.html">AverageNutriscoreProvider</a>
           <span class="name ">averageNutriscoreProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -69,27 +74,8 @@ current pantry have <a href="../widgets_nutriscore_badge/NutriScoreBadge-class.h
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final averageNutriscoreProvider = FutureProvider&lt;String?&gt;((ref) async {
-  final items = await ref.watch(pantryProvider.future);
-  final scores = &lt;int&gt;[];
-  for (final item in items) {
-    if (item.nutriscoreGrade != null) {
-      final numeric = NutriScoreBadge.toNumeric(item.nutriscoreGrade);
-      if (numeric != null) scores.add(numeric);
-    }
-  }
-  if (scores.isEmpty) return null;
-  final avg = scores.reduce((a, b) =&gt; a + b) &#47; scores.length;
-  final rounded = avg.round();
-  return switch (rounded) {
-    5 =&gt; &#39;a&#39;,
-    4 =&gt; &#39;b&#39;,
-    3 =&gt; &#39;c&#39;,
-    2 =&gt; &#39;d&#39;,
-    1 =&gt; &#39;e&#39;,
-    _ =&gt; null,
-  };
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(averageNutriscore)
+final averageNutriscoreProvider = AverageNutriscoreProvider._();</code></pre>
 </section>
 
 

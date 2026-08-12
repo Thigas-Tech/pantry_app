@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_recipe_provider/IngredientWithProduct.html">IngredientWithProduct</a></span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(recipeIngredientsWithProducts)</li>
+    </ol>
+  </div>
+          <a href="../providers_recipe_provider/RecipeIngredientsWithProductsFamily-class.html">RecipeIngredientsWithProductsFamily</a>
           <span class="name ">recipeIngredientsWithProductsProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -70,46 +75,9 @@ product.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;List&lt;IngredientWithProduct&gt;, int&gt;
-recipeIngredientsWithProductsProvider = FutureProvider.autoDispose
-    .family&lt;List&lt;IngredientWithProduct&gt;, int&gt;(
-      (ref, recipeId) async {
-        ref.keepAlive();
-        final db = ref.watch(databaseProvider);
-        final repo = ref.read(productRepositoryProvider);
-        final ingredients = await db.getRecipeIngredients(recipeId);
-
-        final barcodes = ingredients
-            .map((i) =&gt; i.barcode)
-            .where((b) =&gt; b != null &amp;&amp; b.isNotEmpty)
-            .cast&lt;String&gt;()
-            .toSet()
-            .toList();
-
-        final productsByBarcode = &lt;String, Product&gt;{};
-        for (final barcode in barcodes) {
-          try {
-            final product = await repo.getProduct(barcode);
-            productsByBarcode[barcode] = product;
-          } on Exception catch (e) {
-            logWarning(
-              &#39;Could not fetch product $barcode for ingredient image: $e&#39;,
-            );
-          }
-        }
-
-        return ingredients
-            .map(
-              (ing) =&gt; (
-                ingredient: ing,
-                product: ing.barcode != null
-                    ? productsByBarcode[ing.barcode]
-                    : null,
-              ),
-            )
-            .toList();
-      },
-    );</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(recipeIngredientsWithProducts)
+final recipeIngredientsWithProductsProvider =
+    RecipeIngredientsWithProductsFamily._();</code></pre>
 </section>
 
 

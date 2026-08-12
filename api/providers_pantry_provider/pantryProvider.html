@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncNotifierProvider-class.html">AsyncNotifierProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_pantry_provider/Pantry-class.html">Pantry</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_with_product/InventoryWithProduct-class.html">InventoryWithProduct</a></span>&gt;</span></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(Pantry)</li>
+    </ol>
+  </div>
+          <a href="../providers_pantry_provider/PantryProvider-class.html">PantryProvider</a>
           <span class="name ">pantryProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -62,14 +67,21 @@
         
 <section class="desc markdown">
   <p>Provides the joined list of inventory items for the currently active
-pantry. Watched by the home screen and invalidated after mutations.</p>
+pantry.</p>
+<p>This keep-alive async notifier provider is watched by the home screen to
+display the pantry contents grouped by expiry status. It reads the active
+inventory ID from <a href="../providers_active_inventory_provider/activeInventoryProvider.html">activeInventoryProvider</a> and calls
+<a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">DatabaseHelper.getInventoryWithProduct</a> with that ID.</p>
+<p>Mutations (add, delete, move) should be performed through the notifier
+methods, which update the provider state automatically so that any
+widget watching <a href="../providers_pantry_provider/pantryProvider.html">pantryProvider</a> is notified immediately.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final pantryProvider =
-    AsyncNotifierProvider&lt;Pantry, List&lt;InventoryWithProduct&gt;&gt;(Pantry.new);</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(Pantry)
+final pantryProvider = PantryProvider._();</code></pre>
 </section>
 
 

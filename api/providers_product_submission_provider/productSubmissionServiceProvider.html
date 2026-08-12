@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_product_submission_service/ProductSubmissionService-class.html">ProductSubmissionService</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(productSubmissionService)</li>
+    </ol>
+  </div>
+          <a href="../providers_product_submission_provider/ProductSubmissionServiceProvider-class.html">ProductSubmissionServiceProvider</a>
           <span class="name ">productSubmissionServiceProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,13 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final productSubmissionServiceProvider = Provider&lt;ProductSubmissionService&gt;(
-  (ref) {
-    final db = ref.watch(databaseProvider);
-    final api = ref.watch(apiServiceProvider);
-    return ProductSubmissionService(db: db, api: api);
-  },
-);</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(productSubmissionService)
+final productSubmissionServiceProvider = ProductSubmissionServiceProvider._();</code></pre>
 </section>
 
 

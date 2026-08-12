@@ -64,6 +64,31 @@
     <section class="summary offset-anchor" id="classes">
       <h2>Classes</h2>
       <dl>
+          <dt id="AllRecipeIngredientsFamily">
+  <span class="name "><a href="../providers_recipe_provider/AllRecipeIngredientsFamily-class.html">AllRecipeIngredientsFamily</a></span> 
+
+</dt>
+<dd>
+  Provides ingredients for a specific recipe.
+</dd>
+
+          <dt id="AllRecipeIngredientsProvider">
+  <span class="name "><a href="../providers_recipe_provider/AllRecipeIngredientsProvider-class.html">AllRecipeIngredientsProvider</a></span> 
+
+</dt>
+<dd>
+  Provides ingredients for a specific recipe.
+</dd>
+
+          <dt id="AllRecipesProvider">
+  <span class="name "><a href="../providers_recipe_provider/AllRecipesProvider-class.html">AllRecipesProvider</a></span> 
+
+</dt>
+<dd>
+  Provides all recipes for the active inventory, ordered by updated_at
+descending.
+</dd>
+
           <dt id="CookResult">
   <span class="name "><a href="../providers_recipe_provider/CookResult-class.html">CookResult</a></span> 
 
@@ -80,6 +105,70 @@
   A snapshot of an inventory row before it was modified by cooking.
 </dd>
 
+          <dt id="RecipeDaoProvider">
+  <span class="name "><a href="../providers_recipe_provider/RecipeDaoProvider-class.html">RecipeDaoProvider</a></span> 
+
+</dt>
+<dd>
+  Provides a singleton <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a> instance.
+</dd>
+
+          <dt id="RecipeIngredientDaoProvider">
+  <span class="name "><a href="../providers_recipe_provider/RecipeIngredientDaoProvider-class.html">RecipeIngredientDaoProvider</a></span> 
+
+</dt>
+<dd>
+  Provides a singleton <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a> instance.
+</dd>
+
+          <dt id="RecipeIngredientsWithProductsFamily">
+  <span class="name "><a href="../providers_recipe_provider/RecipeIngredientsWithProductsFamily-class.html">RecipeIngredientsWithProductsFamily</a></span> 
+
+</dt>
+<dd>
+  Provides ingredients with their product data (including image URL).
+</dd>
+
+          <dt id="RecipeIngredientsWithProductsProvider">
+  <span class="name "><a href="../providers_recipe_provider/RecipeIngredientsWithProductsProvider-class.html">RecipeIngredientsWithProductsProvider</a></span> 
+
+</dt>
+<dd>
+  Provides ingredients with their product data (including image URL).
+</dd>
+
+          <dt id="RecipeNutriScoreFamily">
+  <span class="name "><a href="../providers_recipe_provider/RecipeNutriScoreFamily-class.html">RecipeNutriScoreFamily</a></span> 
+
+</dt>
+<dd>
+  Provides the Nutri-Score grade for a recipe.
+</dd>
+
+          <dt id="RecipeNutriScoreProvider">
+  <span class="name "><a href="../providers_recipe_provider/RecipeNutriScoreProvider-class.html">RecipeNutriScoreProvider</a></span> 
+
+</dt>
+<dd>
+  Provides the Nutri-Score grade for a recipe.
+</dd>
+
+          <dt id="RecipeNutritionFamily">
+  <span class="name "><a href="../providers_recipe_provider/RecipeNutritionFamily-class.html">RecipeNutritionFamily</a></span> 
+
+</dt>
+<dd>
+  Provides aggregated nutrition data for a recipe.
+</dd>
+
+          <dt id="RecipeNutritionProvider">
+  <span class="name "><a href="../providers_recipe_provider/RecipeNutritionProvider-class.html">RecipeNutritionProvider</a></span> 
+
+</dt>
+<dd>
+  Provides aggregated nutrition data for a recipe.
+</dd>
+
       </dl>
     </section>
 
@@ -93,7 +182,7 @@
       <dl class="properties">
           <dt id="allRecipeIngredientsProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/allRecipeIngredientsProvider.html">allRecipeIngredientsProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_recipe_provider/AllRecipeIngredientsFamily-class.html">AllRecipeIngredientsFamily</a></span>
   
 
 </dt>
@@ -105,7 +194,7 @@
 
           <dt id="allRecipesProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/allRecipesProvider.html">allRecipesProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe/Recipe-class.html">Recipe</a></span>&gt;</span></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_recipe_provider/AllRecipesProvider-class.html">AllRecipesProvider</a></span>
   
 
 </dt>
@@ -118,7 +207,7 @@ descending.
 
           <dt id="recipeDaoProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/recipeDaoProvider.html">recipeDaoProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeDaoProvider-class.html">RecipeDaoProvider</a></span>
   
 
 </dt>
@@ -130,7 +219,7 @@ descending.
 
           <dt id="recipeIngredientDaoProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/recipeIngredientDaoProvider.html">recipeIngredientDaoProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeIngredientDaoProvider-class.html">RecipeIngredientDaoProvider</a></span>
   
 
 </dt>
@@ -142,7 +231,7 @@ descending.
 
           <dt id="recipeIngredientsWithProductsProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/recipeIngredientsWithProductsProvider.html">recipeIngredientsWithProductsProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_recipe_provider/IngredientWithProduct.html">IngredientWithProduct</a></span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeIngredientsWithProductsFamily-class.html">RecipeIngredientsWithProductsFamily</a></span>
   
 
 </dt>
@@ -154,7 +243,7 @@ descending.
 
           <dt id="recipeNutriScoreProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/recipeNutriScoreProvider.html">recipeNutriScoreProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeNutriScoreFamily-class.html">RecipeNutriScoreFamily</a></span>
   
 
 </dt>
@@ -166,7 +255,7 @@ descending.
 
           <dt id="recipeNutritionProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/recipeNutritionProvider.html">recipeNutritionProvider</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_nutrition/RecipeNutrition-class.html">RecipeNutrition</a>?</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeNutritionFamily-class.html">RecipeNutritionFamily</a></span>
   
 
 </dt>
@@ -182,6 +271,33 @@ descending.
     <section class="summary offset-anchor" id="functions">
       <h2>Functions</h2>
       <dl class="callables">
+          <dt id="allRecipeIngredients" class="callable">
+  <span class="name"><a href="../providers_recipe_provider/allRecipeIngredients.html">allRecipeIngredients</a></span><span class="signature">(<wbr><span class="parameter" id="allRecipeIngredients-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="allRecipeIngredients-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides ingredients for a specific recipe.
+  
+
+</dd>
+
+          <dt id="allRecipes" class="callable">
+  <span class="name"><a href="../providers_recipe_provider/allRecipes.html">allRecipes</a></span><span class="signature">(<wbr><span class="parameter" id="allRecipes-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe/Recipe-class.html">Recipe</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides all recipes for the active inventory, ordered by updated_at
+descending.
+  
+
+</dd>
+
           <dt id="calculateAverageRecipeCost" class="callable">
   <span class="name"><a href="../providers_recipe_provider/calculateAverageRecipeCost.html">calculateAverageRecipeCost</a></span><span class="signature">(<wbr><span class="parameter" id="calculateAverageRecipeCost-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span>
@@ -272,6 +388,71 @@ checks availability against inventory.
 </dt>
 <dd>
   Invalidates all recipe-related providers.
+  
+
+</dd>
+
+          <dt id="recipeDao" class="callable">
+  <span class="name"><a href="../providers_recipe_provider/recipeDao.html">recipeDao</a></span><span class="signature">(<wbr><span class="parameter" id="recipeDao-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides a singleton <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a> instance.
+  
+
+</dd>
+
+          <dt id="recipeIngredientDao" class="callable">
+  <span class="name"><a href="../providers_recipe_provider/recipeIngredientDao.html">recipeIngredientDao</a></span><span class="signature">(<wbr><span class="parameter" id="recipeIngredientDao-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides a singleton <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a> instance.
+  
+
+</dd>
+
+          <dt id="recipeIngredientsWithProducts" class="callable">
+  <span class="name"><a href="../providers_recipe_provider/recipeIngredientsWithProducts.html">recipeIngredientsWithProducts</a></span><span class="signature">(<wbr><span class="parameter" id="recipeIngredientsWithProducts-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="recipeIngredientsWithProducts-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_recipe_provider/IngredientWithProduct.html">IngredientWithProduct</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides ingredients with their product data (including image URL).
+  
+
+</dd>
+
+          <dt id="recipeNutriScore" class="callable">
+  <span class="name"><a href="../providers_recipe_provider/recipeNutriScore.html">recipeNutriScore</a></span><span class="signature">(<wbr><span class="parameter" id="recipeNutriScore-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="recipeNutriScore-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides the Nutri-Score grade for a recipe.
+  
+
+</dd>
+
+          <dt id="recipeNutrition" class="callable">
+  <span class="name"><a href="../providers_recipe_provider/recipeNutrition.html">recipeNutrition</a></span><span class="signature">(<wbr><span class="parameter" id="recipeNutrition-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="recipeNutrition-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_nutrition/RecipeNutrition-class.html">RecipeNutrition</a>?</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides aggregated nutrition data for a recipe.
   
 
 </dd>

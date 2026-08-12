@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the stats function from the stats_provider library, for the Dart programming language.">
+  <title>stats function - stats_provider library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../static-assets/styles.css?v1">
+  <link rel="icon" href="../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../providers_stats_provider/">providers&#47;stats_provider.dart</a></li>
+    <li class="self-crumb">stats function</li>
+  </ol>
+  <div class="self-name">stats</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="providers_stats_provider&#47;providers_stats_provider-library-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-function">stats</span> function 
+ 
+</h1></div>
+
+    <section class="multi-line-signature">
+        
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/riverpod-constant.html">riverpod</a></li>
+    </ol>
+  </div>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_pantry_stats/PantryStats-class.html">PantryStats</a></span>&gt;</span></span>
+<span class="name ">stats</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="stats-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span></li>
+</ol>)
+
+        
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Aggregated statistics for the active pantry inventory.</p>
+<p>Computed from SQL aggregation queries in <a href="../database_product_dao/ProductDao-class.html">ProductDao</a> and
+<a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>. Depends on <a href="../providers_active_inventory_provider/activeInventoryProvider.html">activeInventoryProvider</a> so it
+refreshes when the user switches pantries. Auto-disposes to
+release memory when leaving the Stats tab.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@riverpod
+Future&lt;PantryStats&gt; stats(Ref ref) async {
+  final activeId = ref.watch(activeInventoryProvider);
+  final db = ref.watch(databaseProvider);
+  final expiringSoonDays = ref.watch(
+    settingsProvider.select((s) =&gt; s.expiringSoonDays),
+  );
+  final baseCurrency = ref.watch(
+    settingsProvider.select((s) =&gt; s.baseCurrency),
+  );
+  final priceRepo = ref.read(priceRepositoryProvider);
+  final database = await db.database;
+
+  final results = await Future.wait([
+    db.productDao.count(database),
+    db.inventoryDao.count(database, inventoryId: activeId),
+    db.productDao.nutriscoreDistribution(database),
+    db.productDao.categoryDistribution(database),
+    db.productDao.sourceDistribution(database),
+    db.productDao.photoCompleteness(database),
+    db.productDao.offPhotoCompleteness(database),
+    db.inventoryDao.locationDistribution(database, inventoryId: activeId),
+    db.inventoryDao.expiryDistribution(
+      database,
+      inventoryId: activeId,
+      expiringSoonDays: expiringSoonDays,
+    ),
+    db.inventoryDao.weeklyAdditions(database, inventoryId: activeId),
+    db.productDao.productsWithCategories(database),
+    database.rawQuery(
+      &#39;SELECT COUNT(*) AS cnt, COALESCE(SUM(cost_at_time), 0) AS total_cost&#39;
+      &#39; FROM recipe_history&#39;
+      &#39; WHERE made_at &gt;= ?&#39;,
+      [
+        DateTime.now()
+            .subtract(const Duration(days: 30))
+            .millisecondsSinceEpoch,
+      ],
+    ),
+    database.rawQuery(
+      &#39;SELECT recipe_id, COUNT(*) AS cnt FROM recipe_history&#39;
+      &#39; GROUP BY recipe_id ORDER BY cnt DESC LIMIT 1&#39;,
+    ),
+    db.priceDao.monthlyExpenditure(database, inventoryId: activeId),
+    db.priceDao.storeSpending(database, inventoryId: activeId),
+    db.priceDao.nutriscoreByStore(database, inventoryId: activeId),
+  ]);
+
+  final prodCount = results[0] as int;
+  final itemCount = results[1] as int;
+  final nutriDist = results[2] as Map&lt;String, int&gt;;
+  final srcDist = results[4] as Map&lt;String, int&gt;;
+  final localPhoto = results[5] as Map&lt;String, int&gt;;
+  final offPhoto = results[6] as Map&lt;String, int&gt;;
+  final locDist = results[7] as Map&lt;String, int&gt;;
+  final expiryDist = results[8] as Map&lt;String, int&gt;;
+  final weekly = results[9] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final productCategories = results[10] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final recipeHistoryRows = results[11] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final mostCookedRows = results[12] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final monthlyRows = results[13] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final storeRows = results[14] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  final nutriscoreByStoreRows = results[15] as List&lt;Map&lt;String, dynamic&gt;&gt;;
+  &#47;&#47; Compute parent categories from hierarchy data.
+  final parentCounts = &lt;String, int&gt;{};
+  for (final row in productCategories) {
+    final parent = parentCategory(
+      row[&#39;category&#39;] as String?,
+      row[&#39;categories_hierarchy&#39;] as String?,
+    );
+    if (parent != null) {
+      parentCounts[parent] = (parentCounts[parent] ?? 0) + 1;
+    }
+  }
+  final sortedParents = parentCounts.entries.toList()
+    ..sort((a, b) =&gt; b.value.compareTo(a.value));
+
+  var nutriSum = 0;
+  var nutriCount = 0;
+  for (final entry in nutriDist.entries) {
+    final val = nutriscoreGradeToNumeric(entry.key);
+    if (val != null) {
+      nutriSum += val * entry.value;
+      nutriCount += entry.value;
+    }
+  }
+  final avgNutri = nutriCount &gt; 0 ? nutriSum &#47; nutriCount : 0.0;
+
+  var addedAll = 0;
+  for (final w in weekly) {
+    addedAll += w[&#39;cnt&#39;] as int;
+  }
+
+  final mealsCooked = (recipeHistoryRows.first[&#39;cnt&#39;] as num?)?.toInt() ?? 0;
+  final totalRecipeCost =
+      (recipeHistoryRows.first[&#39;total_cost&#39;] as num?)?.toDouble() ?? 0.0;
+  var mostCookedRecipe = &#39;&#39;;
+  if (mostCookedRows.isNotEmpty) {
+    final topRecipeId = (mostCookedRows.first[&#39;recipe_id&#39;] as num?)?.toInt();
+    if (topRecipeId != null) {
+      final topRecipe = await db.getRecipe(topRecipeId);
+      mostCookedRecipe = topRecipe?.name ?? &#39;&#39;;
+    }
+  }
+
+  return PantryStats(
+    totalProducts: prodCount,
+    totalItems: itemCount,
+    averageNutriscoreNumeric: avgNutri,
+    totalValue:
+        await priceRepo.totalInventoryValue(
+          activeId,
+          baseCurrency: baseCurrency,
+        ) ??
+        0,
+    averagePrice:
+        await priceRepo.averageItemPrice(
+          activeId,
+          baseCurrency: baseCurrency,
+        ) ??
+        0,
+    pricedItemCount: await priceRepo.pricedItemCount(activeId),
+    expiredCount: expiryDist[&#39;expired&#39;] ?? 0,
+    expiringSoonCount: expiryDist[&#39;expiring&#39;] ?? 0,
+    goodCount: expiryDist[&#39;good&#39;] ?? 0,
+    addedThisWeek: addedAll,
+    addedThisMonth: addedAll,
+    weeklyAdditions: weekly
+        .map(
+          (w) =&gt; WeeklyCount(
+            weekLabel: w[&#39;week&#39;] as String,
+            count: w[&#39;cnt&#39;] as int,
+          ),
+        )
+        .toList(),
+    itemsByLocation: locDist,
+    categoriesTop: sortedParents
+        .take(10)
+        .map(
+          (e) =&gt; CategoryCount(category: e.key, count: e.value),
+        )
+        .toList(),
+    nutriscoreDistribution: nutriDist,
+    itemsBySource: srcDist,
+    localPhotos: PhotoStats(
+      total: localPhoto[&#39;total&#39;] ?? 0,
+      withNutrition: localPhoto[&#39;nutrition&#39;] ?? 0,
+      withIngredients: localPhoto[&#39;ingredients&#39;] ?? 0,
+      withProduct: localPhoto[&#39;product&#39;] ?? 0,
+    ),
+    offPhotos: PhotoStats(
+      total: offPhoto[&#39;total&#39;] ?? 0,
+      withNutrition: offPhoto[&#39;nutrition&#39;] ?? 0,
+      withIngredients: offPhoto[&#39;ingredients&#39;] ?? 0,
+      withProduct: offPhoto[&#39;product&#39;] ?? 0,
+    ),
+    monthlySpending: monthlyRows
+        .map(
+          (r) =&gt; MonthlySpending(
+            month: r[&#39;month&#39;] as String,
+            total: (r[&#39;total&#39;] as num?)?.toDouble() ?? 0,
+          ),
+        )
+        .toList(),
+    storeSpending: storeRows
+        .map(
+          (r) =&gt; StoreSpending(
+            store: r[&#39;store&#39;] as String,
+            total: (r[&#39;total&#39;] as num?)?.toDouble() ?? 0,
+            itemCount: r[&#39;item_count&#39;] as int? ?? 0,
+          ),
+        )
+        .toList(),
+    nutriscoreByStore: nutriscoreByStoreRows
+        .map(
+          (r) =&gt; StoreNutriscore(
+            store: r[&#39;store&#39;] as String,
+            averageScore: (r[&#39;avg_score&#39;] as num?)?.toDouble() ?? 0,
+          ),
+        )
+        .toList(),
+    mealsCooked: mealsCooked,
+    totalRecipeCost: totalRecipeCost,
+    mostCookedRecipe: mostCookedRecipe,
+  );
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../index.html">pantry_app</a></li>
+    <li><a href="../providers_stats_provider/">stats_provider</a></li>
+    <li class="self-crumb">stats function</li>
+</ol>
+
+    <h5>stats_provider library</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-left-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.9+5
+  </span>
+  
+</footer>
+
+
+<script src="../static-assets/highlight.pack.js?v1"></script>
+<script src="../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

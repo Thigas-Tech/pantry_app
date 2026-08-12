@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(totalInventoryCount)</li>
+    </ol>
+  </div>
+          <a href="../providers_inventory_provider/TotalInventoryCountProvider-class.html">TotalInventoryCountProvider</a>
           <span class="name ">totalInventoryCountProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -69,18 +74,8 @@ so the empty-pantry onboarding can auto-dismiss.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final totalInventoryCountProvider = FutureProvider&lt;int&gt;((ref) async {
-  final db = ref.watch(databaseProvider);
-  final inventories = await db.getInventories();
-  var total = 0;
-  for (final inv in inventories) {
-    final rows = await db.getInventoryWithProduct(
-      inventoryId: inv[&#39;id&#39;] as int,
-    );
-    total += rows.length;
-  }
-  return total;
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(totalInventoryCount)
+final totalInventoryCountProvider = TotalInventoryCountProvider._();</code></pre>
 </section>
 
 

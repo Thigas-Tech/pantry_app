@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_notification_service_interface/NotificationService-class.html">NotificationService</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(notificationService)</li>
+    </ol>
+  </div>
+          <a href="../providers_notification_service_provider/NotificationServiceProvider-class.html">NotificationServiceProvider</a>
           <span class="name ">notificationServiceProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -70,9 +75,8 @@ startup (see main.dart) because it requires platform channels.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final notificationServiceProvider = Provider&lt;NotificationService&gt;((ref) {
-  return FlutterNotificationService();
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(notificationService)
+final notificationServiceProvider = NotificationServiceProvider._();</code></pre>
 </section>
 
 

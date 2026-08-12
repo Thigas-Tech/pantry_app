@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_firebase_cache_service/FirebaseCacheService-class.html">FirebaseCacheService</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(firebaseCache)</li>
+    </ol>
+  </div>
+          <a href="../providers_firebase_cache_provider/FirebaseCacheProvider-class.html">FirebaseCacheProvider</a>
           <span class="name ">firebaseCacheProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -73,49 +78,19 @@ is created in disabled mode without any Firebase interaction.</p>
 <ul>
 <li>The database provider for cache metadata.</li>
 <li>The API service provider (OFF SDK wrapper).</li>
-<li><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> — created inline for USDA fallback lookups.</li>
+<li><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> for USDA fallback lookups.</li>
 </ul>
 <h2 id="lifetime">Lifetime</h2>
-<p>This is a plain <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a> (not auto-dispose) so the service lives for
-the entire app session. The service is stateless between lookups; it
-holds no mutable state.</p>
-<ul>
-<li><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> — created inline for USDA fallback lookups.</li>
-</ul>
-<h2 id="lifetime-2">Lifetime</h2>
-<p>This is a plain <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a> (not auto-dispose) so the service lives for
-the entire app session. The service is stateless between lookups; it
+<p>This is a plain keep-alive provider so the service lives for the
+entire app session. The service is stateless between lookups; it
 holds no mutable state.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final firebaseCacheProvider = Provider&lt;FirebaseCacheService&gt;((ref) {
-  final db = ref.read(databaseProvider);
-  final api = ref.read(apiServiceProvider);
-
-  FirebaseCacheClient client;
-  if (AppConfig.firebaseEnabled) {
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final adapter = FirebaseFirestoreClientAdapter(firestore);
-      client = FirebaseCacheClient(firestore: adapter, enabled: true);
-    } on Exception catch (e) {
-      logWarning(&#39;FirebaseFirestore.instance failed, caching disabled: $e&#39;);
-      client = FirebaseCacheClient();
-    }
-  } else {
-    client = FirebaseCacheClient();
-  }
-
-  return FirebaseCacheService(
-    db: db,
-    firebaseClient: client,
-    usdaClient: ref.read(usdaApiClientProvider),
-    offAdapter: api,
-  );
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(firebaseCache)
+final firebaseCacheProvider = FirebaseCacheProvider._();</code></pre>
 </section>
 
 

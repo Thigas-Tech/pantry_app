@@ -54,23 +54,32 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_product_submission_provider/ProductSubmissionNotifier-class.html">ProductSubmissionNotifier</a></span>, <span class="type-parameter"><a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a>?</span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(ProductSubmissionNotifier)</li>
+    </ol>
+  </div>
+          <a href="../providers_product_submission_provider/ProductSubmissionNotifierProvider-class.html">ProductSubmissionNotifierProvider</a>
           <span class="name ">productSubmissionProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
         </section>
         
 <section class="desc markdown">
-  <p>The provider for <a href="../providers_product_submission_provider/ProductSubmissionNotifier-class.html">ProductSubmissionNotifier</a>.</p>
+  <p>Exposes observable, durable progress for an Open Food Facts submission.</p>
+<p>The notifier owns the submission lifecycle: submit starts a background
+submission, state holds the latest progress snapshot (null when idle),
+and isSubmitting reports whether a submission is running. Because
+<a href="../providers_product_submission_provider/productSubmissionProvider.html">productSubmissionProvider</a> is a plain keep-alive notifier provider (not
+autoDispose), progress outlives the screen that started the submission,
+so a user can navigate away while uploads continue.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final productSubmissionProvider =
-    NotifierProvider&lt;ProductSubmissionNotifier, SubmissionProgress?&gt;(
-      ProductSubmissionNotifier.new,
-    );</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(ProductSubmissionNotifier)
+final productSubmissionProvider = ProductSubmissionNotifierProvider._();</code></pre>
 </section>
 
 

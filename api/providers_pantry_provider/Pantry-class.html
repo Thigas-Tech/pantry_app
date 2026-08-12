@@ -56,8 +56,8 @@
 <section class="desc markdown">
   <p>Provides the joined list of inventory items for the currently active
 pantry.</p>
-<p>This <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncNotifierProvider-class.html">AsyncNotifierProvider</a> is watched by the home screen to display
-the pantry contents grouped by expiry status. It reads the active
+<p>This keep-alive async notifier provider is watched by the home screen to
+display the pantry contents grouped by expiry status. It reads the active
 inventory ID from <a href="../providers_active_inventory_provider/activeInventoryProvider.html">activeInventoryProvider</a> and calls
 <a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">DatabaseHelper.getInventoryWithProduct</a> with that ID.</p>
 <p>Mutations (add, delete, move) should be performed through the notifier
@@ -75,7 +75,6 @@ widget watching <a href="../providers_pantry_provider/pantryProvider.html">pantr
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
         <li><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier-class.html">AnyNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncValue-class.html">AsyncValue</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_with_product/InventoryWithProduct-class.html">InventoryWithProduct</a></span>&gt;</span></span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_with_product/InventoryWithProduct-class.html">InventoryWithProduct</a></span>&gt;</span></span>&gt;</span></li>
         <li><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$AsyncNotifier-class.html">$AsyncNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_with_product/InventoryWithProduct-class.html">InventoryWithProduct</a></span>&gt;</span></span>&gt;</span></li>
-        <li><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncNotifier-class.html">AsyncNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_inventory_with_product/InventoryWithProduct-class.html">InventoryWithProduct</a></span>&gt;</span></span>&gt;</span></li>
       <li>Pantry</li>
     </ul>
   </dd>
@@ -86,6 +85,12 @@ widget watching <a href="../providers_pantry_provider/pantryProvider.html">pantr
 
         
         
+  <dt>Annotations</dt>
+  <dd>
+    <ul class="annotation-list clazz-relationships">
+        <li>@<a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/Riverpod/Riverpod.html">Riverpod</a>(keepAlive: true)</li>
+    </ul>
+  </dd>
 
 
       </dl>
@@ -187,8 +192,8 @@ widget watching <a href="../providers_pantry_provider/pantryProvider.html">pantr
 
 </dt>
 <dd>
-  Initialize an <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncNotifier-class.html">AsyncNotifier</a>.
-  <div class="features"><span class="feature">override</span></div>
+  
+  
 
 </dd>
 
@@ -232,7 +237,7 @@ widget watching <a href="../providers_pantry_provider/pantryProvider.html">pantr
 </dd>
 
         <dt id="runBuild" class="callable inherited">
-  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncNotifier/runBuild.html">runBuild</a></span><span class="signature">(<wbr>)
+  <span class="name"><a href="../providers_pantry_provider/Pantry/runBuild.html">runBuild</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; WhenComplete?</span>
   </span>
   

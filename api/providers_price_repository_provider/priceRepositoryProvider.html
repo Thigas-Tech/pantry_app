@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_price_repository/PriceRepository-class.html">PriceRepository</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(priceRepository)</li>
+    </ol>
+  </div>
+          <a href="../providers_price_repository_provider/PriceRepositoryProvider-class.html">PriceRepositoryProvider</a>
           <span class="name ">priceRepositoryProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,16 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final priceRepositoryProvider = Provider&lt;PriceRepository&gt;(
-  (ref) =&gt; PriceRepository(
-    ref.watch(databaseProvider),
-    ref.watch(currencyServiceProvider),
-    OpenPricesService(
-      databaseHelper: ref.watch(databaseProvider),
-      apiClient: OpenPricesApiClient(),
-    ),
-  ),
-);</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(priceRepository)
+final priceRepositoryProvider = PriceRepositoryProvider._();</code></pre>
 </section>
 
 

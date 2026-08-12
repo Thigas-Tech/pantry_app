@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(allRecipeIngredients)</li>
+    </ol>
+  </div>
+          <a href="../providers_recipe_provider/AllRecipeIngredientsFamily-class.html">AllRecipeIngredientsFamily</a>
           <span class="name ">allRecipeIngredientsProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,14 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;List&lt;RecipeIngredient&gt;, int&gt;
-allRecipeIngredientsProvider = FutureProvider.autoDispose
-    .family&lt;List&lt;RecipeIngredient&gt;, int&gt;(
-      (ref, recipeId) {
-        final db = ref.watch(databaseProvider);
-        return db.getRecipeIngredients(recipeId);
-      },
-    );</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(allRecipeIngredients)
+final allRecipeIngredientsProvider = AllRecipeIngredientsFamily._();</code></pre>
 </section>
 
 

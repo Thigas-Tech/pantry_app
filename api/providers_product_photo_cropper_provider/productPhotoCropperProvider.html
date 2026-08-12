@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_product_photo_cropper/ProductPhotoCropper-class.html">ProductPhotoCropper</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(productPhotoCropper)</li>
+    </ol>
+  </div>
+          <a href="../providers_product_photo_cropper_provider/ProductPhotoCropperProvider-class.html">ProductPhotoCropperProvider</a>
           <span class="name ">productPhotoCropperProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -69,9 +74,8 @@ verify the crop screen wiring without encoding real images.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final productPhotoCropperProvider = Provider&lt;ProductPhotoCropper&gt;(
-  (ref) =&gt; ProductPhotoCropper(),
-);</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(productPhotoCropper)
+final productPhotoCropperProvider = ProductPhotoCropperProvider._();</code></pre>
 </section>
 
 

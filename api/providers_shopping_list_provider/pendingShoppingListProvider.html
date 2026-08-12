@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(pendingShoppingList)</li>
+    </ol>
+  </div>
+          <a href="../providers_shopping_list_provider/PendingShoppingListProvider-class.html">PendingShoppingListProvider</a>
           <span class="name ">pendingShoppingListProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -68,12 +73,8 @@ active inventory.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProvider&lt;List&lt;ShoppingItem&gt;&gt; pendingShoppingListProvider =
-    FutureProvider.autoDispose&lt;List&lt;ShoppingItem&gt;&gt;((ref) {
-      final db = ref.watch(databaseProvider);
-      final inventoryId = ref.watch(activeInventoryProvider);
-      return db.getPendingShoppingItems(inventoryId: inventoryId);
-    });</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(pendingShoppingList)
+final pendingShoppingListProvider = PendingShoppingListProvider._();</code></pre>
 </section>
 
 

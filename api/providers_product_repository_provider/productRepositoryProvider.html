@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(productRepository)</li>
+    </ol>
+  </div>
+          <a href="../providers_product_repository_provider/ProductRepositoryProvider-class.html">ProductRepositoryProvider</a>
           <span class="name ">productRepositoryProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -79,9 +84,9 @@ fetching product data from the internet.</li>
 fallback chain.</li>
 </ul>
 <h2 id="lifetime">Lifetime</h2>
-<p>Because this is a <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a> (not a <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a> or <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a>),
-the repository is created <strong>once</strong> and reused for the entire app session.
-The repository itself holds no mutable state; it delegates all storage to
+<p>Because this is a keep-alive provider (not autoDispose), the repository
+is created <strong>once</strong> and reused for the entire app session. The
+repository itself holds no mutable state; it delegates all storage to
 the database and all network requests to the SDK adapter.</p>
 <h2 id="usage">Usage</h2>
 <p>Typically accessed via ref.read(productRepositoryProvider) in async
@@ -92,18 +97,8 @@ in widgets that need to call repository methods inside <a href="https://api.flut
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final productRepositoryProvider = Provider&lt;ProductRepository&gt;((ref) {
-  final db = ref.read(databaseProvider);
-  final api = ref.read(apiServiceProvider);
-  final firebaseCache = ref.read(firebaseCacheProvider);
-  return ProductRepository(
-    db,
-    api,
-    usdaClient: ref.read(usdaApiClientProvider),
-    firebaseCache: firebaseCache,
-    metaDao: db.firebaseCacheMetaDao,
-  );
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(productRepository)
+final productRepositoryProvider = ProductRepositoryProvider._();</code></pre>
 </section>
 
 

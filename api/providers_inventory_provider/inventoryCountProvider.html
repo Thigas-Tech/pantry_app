@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(inventoryCount)</li>
+    </ol>
+  </div>
+          <a href="../providers_inventory_provider/InventoryCountProvider-class.html">InventoryCountProvider</a>
           <span class="name ">inventoryCountProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,10 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final inventoryCountProvider = FutureProvider&lt;int&gt;((ref) async {
-  final items = await ref.watch(pantryProvider.future);
-  return items.length;
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(inventoryCount)
+final inventoryCountProvider = InventoryCountProvider._();</code></pre>
 </section>
 
 

@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_github_issue_service/GithubIssueService-class.html">GithubIssueService</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(githubIssueService)</li>
+    </ol>
+  </div>
+          <a href="../providers_github_issue_service_provider/GithubIssueServiceProvider-class.html">GithubIssueServiceProvider</a>
           <span class="name ">githubIssueServiceProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,9 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final githubIssueServiceProvider = Provider&lt;GithubIssueService&gt;((ref) {
-  return GithubIssueService();
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(githubIssueService)
+final githubIssueServiceProvider = GithubIssueServiceProvider._();</code></pre>
 </section>
 
 

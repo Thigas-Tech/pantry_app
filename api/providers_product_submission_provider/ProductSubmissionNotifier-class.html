@@ -55,13 +55,12 @@
     
 <section class="desc markdown">
   <p>Exposes observable, durable progress for an Open Food Facts submission.</p>
-<p>The notifier owns the submission lifecycle: <a href="../providers_product_submission_provider/ProductSubmissionNotifier/submit.html">submit</a> starts a
-background submission, <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/state.html">state</a> holds the latest <a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a>
-snapshot (null when idle), and <a href="../providers_product_submission_provider/ProductSubmissionNotifier/isSubmitting.html">isSubmitting</a> reports whether a
-submission is running. Because <a href="../providers_product_submission_provider/productSubmissionProvider.html">productSubmissionProvider</a> is a plain
-<a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/NotifierProvider-class.html">NotifierProvider</a> (not autoDispose), progress outlives the screen that
-started the submission, so a user can navigate away while uploads
-continue.</p>
+<p>The notifier owns the submission lifecycle: submit starts a background
+submission, state holds the latest progress snapshot (null when idle),
+and isSubmitting reports whether a submission is running. Because
+<a href="../providers_product_submission_provider/productSubmissionProvider.html">productSubmissionProvider</a> is a plain keep-alive notifier provider (not
+autoDispose), progress outlives the screen that started the submission,
+so a user can navigate away while uploads continue.</p>
 </section>
 
 
@@ -74,7 +73,6 @@ continue.</p>
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
         <li><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier-class.html">AnyNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a>?</span>, <span class="type-parameter"><a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a>?</span>&gt;</span></li>
         <li><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$Notifier-class.html">$Notifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a>?</span>&gt;</span></li>
-        <li><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier-class.html">Notifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_submission_progress/SubmissionProgress-class.html">SubmissionProgress</a>?</span>&gt;</span></li>
       <li>ProductSubmissionNotifier</li>
     </ul>
   </dd>
@@ -85,6 +83,12 @@ continue.</p>
 
         
         
+  <dt>Annotations</dt>
+  <dd>
+    <ul class="annotation-list clazz-relationships">
+        <li>@<a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/Riverpod/Riverpod.html">Riverpod</a>(keepAlive: true)</li>
+    </ul>
+  </dd>
 
 
       </dl>
@@ -197,8 +201,8 @@ continue.</p>
 
 </dt>
 <dd>
-  Initialize a <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier-class.html">Notifier</a>.
-  <div class="features"><span class="feature">override</span></div>
+  
+  
 
 </dd>
 
@@ -242,7 +246,7 @@ continue.</p>
 </dd>
 
         <dt id="runBuild" class="callable inherited">
-  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier/runBuild.html">runBuild</a></span><span class="signature">(<wbr>)
+  <span class="name"><a href="../providers_product_submission_provider/ProductSubmissionNotifier/runBuild.html">runBuild</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; WhenComplete?</span>
   </span>
   

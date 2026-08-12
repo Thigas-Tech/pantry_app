@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(shoppingListDao)</li>
+    </ol>
+  </div>
+          <a href="../providers_shopping_list_provider/ShoppingListDaoProvider-class.html">ShoppingListDaoProvider</a>
           <span class="name ">shoppingListDaoProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,9 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final shoppingListDaoProvider = Provider&lt;ShoppingListDao&gt;((ref) {
-  return const ShoppingListDao();
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(shoppingListDao)
+final shoppingListDaoProvider = ShoppingListDaoProvider._();</code></pre>
 </section>
 
 

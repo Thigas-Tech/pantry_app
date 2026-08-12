@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Provider-class.html">Provider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_photo_service/PhotoService-class.html">PhotoService</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(photoService)</li>
+    </ol>
+  </div>
+          <a href="../providers_shopping_list_provider/PhotoServiceProvider-class.html">PhotoServiceProvider</a>
           <span class="name ">photoServiceProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -67,9 +72,8 @@
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final photoServiceProvider = Provider&lt;PhotoService&gt;((ref) {
-  return PhotoService();
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(photoService)
+final photoServiceProvider = PhotoServiceProvider._();</code></pre>
 </section>
 
 

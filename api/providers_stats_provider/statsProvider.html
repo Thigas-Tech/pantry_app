@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider-class.html">FutureProvider</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_pantry_stats/PantryStats-class.html">PantryStats</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(stats)</li>
+    </ol>
+  </div>
+          <a href="../providers_stats_provider/StatsProvider-class.html">StatsProvider</a>
           <span class="name ">statsProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -64,199 +69,15 @@
   <p>Aggregated statistics for the active pantry inventory.</p>
 <p>Computed from SQL aggregation queries in <a href="../database_product_dao/ProductDao-class.html">ProductDao</a> and
 <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>. Depends on <a href="../providers_active_inventory_provider/activeInventoryProvider.html">activeInventoryProvider</a> so it
-refreshes when the user switches pantries. Uses <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/FutureProvider/autoDispose-constant.html">FutureProvider.autoDispose</a>
-to release memory when leaving the Stats tab.</p>
+refreshes when the user switches pantries. Auto-disposes to
+release memory when leaving the Stats tab.</p>
 </section>
 
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProvider&lt;PantryStats&gt;
-statsProvider = FutureProvider.autoDispose&lt;PantryStats&gt;((ref) async {
-  final activeId = ref.watch(activeInventoryProvider);
-  final db = ref.watch(databaseProvider);
-  final expiringSoonDays = ref.watch(
-    settingsProvider.select((s) =&gt; s.expiringSoonDays),
-  );
-  final baseCurrency = ref.watch(
-    settingsProvider.select((s) =&gt; s.baseCurrency),
-  );
-  final priceRepo = ref.read(priceRepositoryProvider);
-  final database = await db.database;
-
-  final results = await Future.wait([
-    db.productDao.count(database),
-    db.inventoryDao.count(database, inventoryId: activeId),
-    db.productDao.nutriscoreDistribution(database),
-    db.productDao.categoryDistribution(database),
-    db.productDao.sourceDistribution(database),
-    db.productDao.photoCompleteness(database),
-    db.productDao.offPhotoCompleteness(database),
-    db.inventoryDao.locationDistribution(database, inventoryId: activeId),
-    db.inventoryDao.expiryDistribution(
-      database,
-      inventoryId: activeId,
-      expiringSoonDays: expiringSoonDays,
-    ),
-    db.inventoryDao.weeklyAdditions(database, inventoryId: activeId),
-    db.productDao.productsWithCategories(database),
-    database.rawQuery(
-      &#39;SELECT COUNT(*) AS cnt, COALESCE(SUM(cost_at_time), 0) AS total_cost&#39;
-      &#39; FROM recipe_history&#39;
-      &#39; WHERE made_at &gt;= ?&#39;,
-      [
-        DateTime.now()
-            .subtract(const Duration(days: 30))
-            .millisecondsSinceEpoch,
-      ],
-    ),
-    database.rawQuery(
-      &#39;SELECT recipe_id, COUNT(*) AS cnt FROM recipe_history&#39;
-      &#39; GROUP BY recipe_id ORDER BY cnt DESC LIMIT 1&#39;,
-    ),
-    db.priceDao.monthlyExpenditure(database, inventoryId: activeId),
-    db.priceDao.storeSpending(database, inventoryId: activeId),
-    db.priceDao.nutriscoreByStore(database, inventoryId: activeId),
-  ]);
-
-  final prodCount = results[0] as int;
-  final itemCount = results[1] as int;
-  final nutriDist = results[2] as Map&lt;String, int&gt;;
-  final srcDist = results[4] as Map&lt;String, int&gt;;
-  final localPhoto = results[5] as Map&lt;String, int&gt;;
-  final offPhoto = results[6] as Map&lt;String, int&gt;;
-  final locDist = results[7] as Map&lt;String, int&gt;;
-  final expiryDist = results[8] as Map&lt;String, int&gt;;
-  final weekly = results[9] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  final productCategories = results[10] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  final recipeHistoryRows = results[11] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  final mostCookedRows = results[12] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  final monthlyRows = results[13] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  final storeRows = results[14] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  final nutriscoreByStoreRows = results[15] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  &#47;&#47; Compute parent categories from hierarchy data.
-  final parentCounts = &lt;String, int&gt;{};
-  for (final row in productCategories) {
-    final parent = parentCategory(
-      row[&#39;category&#39;] as String?,
-      row[&#39;categories_hierarchy&#39;] as String?,
-    );
-    if (parent != null) {
-      parentCounts[parent] = (parentCounts[parent] ?? 0) + 1;
-    }
-  }
-  final sortedParents = parentCounts.entries.toList()
-    ..sort((a, b) =&gt; b.value.compareTo(a.value));
-
-  var nutriSum = 0;
-  var nutriCount = 0;
-  for (final entry in nutriDist.entries) {
-    final val = nutriscoreGradeToNumeric(entry.key);
-    if (val != null) {
-      nutriSum += val * entry.value;
-      nutriCount += entry.value;
-    }
-  }
-  final avgNutri = nutriCount &gt; 0 ? nutriSum &#47; nutriCount : 0.0;
-
-  var addedAll = 0;
-  for (final w in weekly) {
-    addedAll += w[&#39;cnt&#39;] as int;
-  }
-
-  final mealsCooked = (recipeHistoryRows.first[&#39;cnt&#39;] as num?)?.toInt() ?? 0;
-  final totalRecipeCost =
-      (recipeHistoryRows.first[&#39;total_cost&#39;] as num?)?.toDouble() ?? 0.0;
-  var mostCookedRecipe = &#39;&#39;;
-  if (mostCookedRows.isNotEmpty) {
-    final topRecipeId = (mostCookedRows.first[&#39;recipe_id&#39;] as num?)?.toInt();
-    if (topRecipeId != null) {
-      final topRecipe = await db.getRecipe(topRecipeId);
-      mostCookedRecipe = topRecipe?.name ?? &#39;&#39;;
-    }
-  }
-
-  return PantryStats(
-    totalProducts: prodCount,
-    totalItems: itemCount,
-    averageNutriscoreNumeric: avgNutri,
-    totalValue:
-        await priceRepo.totalInventoryValue(
-          activeId,
-          baseCurrency: baseCurrency,
-        ) ??
-        0,
-    averagePrice:
-        await priceRepo.averageItemPrice(
-          activeId,
-          baseCurrency: baseCurrency,
-        ) ??
-        0,
-    pricedItemCount: await priceRepo.pricedItemCount(activeId),
-    expiredCount: expiryDist[&#39;expired&#39;] ?? 0,
-    expiringSoonCount: expiryDist[&#39;expiring&#39;] ?? 0,
-    goodCount: expiryDist[&#39;good&#39;] ?? 0,
-    addedThisWeek: addedAll,
-    addedThisMonth: addedAll,
-    weeklyAdditions: weekly
-        .map(
-          (w) =&gt; WeeklyCount(
-            weekLabel: w[&#39;week&#39;] as String,
-            count: w[&#39;cnt&#39;] as int,
-          ),
-        )
-        .toList(),
-    itemsByLocation: locDist,
-    categoriesTop: sortedParents
-        .take(10)
-        .map(
-          (e) =&gt; CategoryCount(category: e.key, count: e.value),
-        )
-        .toList(),
-    nutriscoreDistribution: nutriDist,
-    itemsBySource: srcDist,
-    localPhotos: PhotoStats(
-      total: localPhoto[&#39;total&#39;] ?? 0,
-      withNutrition: localPhoto[&#39;nutrition&#39;] ?? 0,
-      withIngredients: localPhoto[&#39;ingredients&#39;] ?? 0,
-      withProduct: localPhoto[&#39;product&#39;] ?? 0,
-    ),
-    offPhotos: PhotoStats(
-      total: offPhoto[&#39;total&#39;] ?? 0,
-      withNutrition: offPhoto[&#39;nutrition&#39;] ?? 0,
-      withIngredients: offPhoto[&#39;ingredients&#39;] ?? 0,
-      withProduct: offPhoto[&#39;product&#39;] ?? 0,
-    ),
-    monthlySpending: monthlyRows
-        .map(
-          (r) =&gt; MonthlySpending(
-            month: r[&#39;month&#39;] as String,
-            total: (r[&#39;total&#39;] as num?)?.toDouble() ?? 0,
-          ),
-        )
-        .toList(),
-    storeSpending: storeRows
-        .map(
-          (r) =&gt; StoreSpending(
-            store: r[&#39;store&#39;] as String,
-            total: (r[&#39;total&#39;] as num?)?.toDouble() ?? 0,
-            itemCount: r[&#39;item_count&#39;] as int? ?? 0,
-          ),
-        )
-        .toList(),
-    nutriscoreByStore: nutriscoreByStoreRows
-        .map(
-          (r) =&gt; StoreNutriscore(
-            store: r[&#39;store&#39;] as String,
-            averageScore: (r[&#39;avg_score&#39;] as num?)?.toDouble() ?? 0,
-          ),
-        )
-        .toList(),
-    mealsCooked: mealsCooked,
-    totalRecipeCost: totalRecipeCost,
-    mostCookedRecipe: mostCookedRecipe,
-  );
-});</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(stats)
+final statsProvider = StatsProvider._();</code></pre>
 </section>
 
 

@@ -54,7 +54,12 @@
 
         <section class="multi-line-signature">
           
-          <a href="https://pub.dev/documentation/riverpod/3.3.2/misc/FutureProviderFamily-class.html">FutureProviderFamily</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span>
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(recipeNutriScore)</li>
+    </ol>
+  </div>
+          <a href="../providers_recipe_provider/RecipeNutriScoreFamily-class.html">RecipeNutriScoreFamily</a>
           <span class="name ">recipeNutriScoreProvider</span>
           <div class="features"><span class="feature">final</span></div>
 
@@ -69,33 +74,8 @@ known scores.</p>
         
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">final FutureProviderFamily&lt;String?, int&gt; recipeNutriScoreProvider =
-    FutureProvider.autoDispose.family&lt;String?, int&gt;(
-      (ref, recipeId) async {
-        ref.keepAlive();
-        final db = ref.watch(databaseProvider);
-        final ingredients = await db.getRecipeIngredients(recipeId);
-        if (ingredients.isEmpty) return null;
-
-        final barcodes = ingredients
-            .map((i) =&gt; i.barcode)
-            .where((b) =&gt; b != null &amp;&amp; b.isNotEmpty)
-            .cast&lt;String&gt;()
-            .toSet()
-            .toList();
-
-        final productsByBarcode = &lt;String, Product&gt;{};
-        for (final barcode in barcodes) {
-          final product = await db.getProduct(barcode);
-          if (product != null) {
-            productsByBarcode[barcode] = product;
-          }
-        }
-
-        final scoreService = RecipeNutriScoreService();
-        return scoreService.compute(ingredients, productsByBarcode);
-      },
-    );</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(recipeNutriScore)
+final recipeNutriScoreProvider = RecipeNutriScoreFamily._();</code></pre>
 </section>
 
 
