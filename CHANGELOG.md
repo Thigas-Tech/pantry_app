@@ -54,6 +54,17 @@
 
 ### Fixed
 
+- **Single dependency-injection path for singletons**: `DatabaseHelper` and
+  `ImageCacheService` were constructed directly in six startup/screen
+  sites (main.dart x5, settings_screen) in addition to their providers,
+  giving two DI paths for the same singletons. The shared `appContainer`
+  is now created before `_handleAppUpdate` and every site reads
+  `databaseProvider` / `imageCacheProvider`. A source-scan guard test
+  (`test/database/database_helper_di_guard_test.dart`) fails if a direct
+  construction is reintroduced outside the owning files.
+  (`lib/main.dart`, `lib/screens/settings_screen.dart`,
+  `test/database/database_helper_di_guard_test.dart`)
+
 - **SQLite version compatibility**: FEFO and price-statistics queries used
   `NULLS LAST` (SQLite 3.30+) and `ROW_NUMBER() OVER` (SQLite 3.25+),
   which crash on devices whose system SQLite predates those versions
