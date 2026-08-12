@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the saveRecipe method from the RecipeService class, for the Dart programming language.">
+  <title>saveRecipe method - RecipeService class - recipe_service library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_recipe_service/">services&#47;recipe_service.dart</a></li>
+    <li><a href="../../services_recipe_service/RecipeService-class.html">RecipeService</a></li>
+    <li class="self-crumb">saveRecipe method</li>
+  </ol>
+  <div class="self-name">saveRecipe</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_recipe_service&#47;RecipeService-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">saveRecipe</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">saveRecipe</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="saveRecipe-param-name"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span></li>
+<li><span class="parameter" id="saveRecipe-param-ingredients"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, </span></li>
+<li><span class="parameter" id="saveRecipe-param-activeInventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">activeInventoryId</span>, </span></li>
+<li><span class="parameter" id="saveRecipe-param-existingRecipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">existingRecipeId</span>, </span></li>
+<li><span class="parameter" id="saveRecipe-param-instructions"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">instructions</span> = <span class="default-value">&#39;&#39;</span>, </span></li>
+<li><span class="parameter" id="saveRecipe-param-servings"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">servings</span> = <span class="default-value">0</span>, </span></li>
+<li><span class="parameter" id="saveRecipe-param-imagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">imagePath</span> = <span class="default-value">&#39;&#39;</span>, </span></li>
+</ol>})
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Saves a recipe — creates a new one or updates an existing one.</p>
+<p>If <code>existingRecipeId</code> is null, a new recipe is created with the given
+<code>name</code>, <code>instructions</code>, and <code>ingredients</code>. If <code>existingRecipeId</code> is
+provided, the recipe and its ingredients are updated. The recipe's
+inventory defaults to <code>activeInventoryId</code>.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; saveRecipe({
+  required String name,
+  required List&lt;RecipeIngredient&gt; ingredients,
+  required int activeInventoryId,
+  int? existingRecipeId,
+  String instructions = &#39;&#39;,
+  int servings = 0,
+  String imagePath = &#39;&#39;,
+}) async {
+  if (name.trim().isEmpty) {
+    throw ArgumentError(&#39;Recipe name is required&#39;);
+  }
+
+  final now = DateTime.now().millisecondsSinceEpoch;
+
+  if (existingRecipeId != null) {
+    &#47;&#47; Preserve the recipe&#39;s original inventory when editing.
+    final existing = await _db.getRecipe(existingRecipeId);
+    final recipe = Recipe(
+      id: existingRecipeId,
+      name: name.trim(),
+      instructions: instructions.trim(),
+      servings: servings,
+      imagePath: imagePath,
+      inventoryId: existing?.inventoryId ?? activeInventoryId,
+      updatedAt: now,
+    );
+    await _db.updateRecipeWithIngredients(recipe, ingredients);
+    logInfo(&#39;Recipe $existingRecipeId updated: $name&#39;);
+    unawaited(_cache.cacheRecipe(recipe, ingredients));
+  } else {
+    final recipe = Recipe(
+      name: name.trim(),
+      instructions: instructions.trim(),
+      servings: servings,
+      imagePath: imagePath,
+      inventoryId: activeInventoryId,
+      createdAt: now,
+      updatedAt: now,
+    );
+    final newId = await _db.insertRecipeWithIngredients(
+      recipe,
+      ingredients,
+    );
+    logInfo(&#39;Recipe created: $name&#39;);
+    unawaited(
+      _cache.cacheRecipe(
+        recipe.copyWith(id: newId),
+        ingredients,
+      ),
+    );
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_recipe_service/">recipe_service</a></li>
+    <li><a href="../../services_recipe_service/RecipeService-class.html">RecipeService</a></li>
+    <li class="self-crumb">saveRecipe method</li>
+</ol>
+
+    <h5>RecipeService class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.9+5
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

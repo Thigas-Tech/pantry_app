@@ -73,14 +73,6 @@
 for the "From your pantry" suggestions in the add-to-shopping-list sheet.
 </dd>
 
-          <dt id="MoveToInventoryResult">
-  <span class="name "><a href="../providers_shopping_list_provider/MoveToInventoryResult-class.html">MoveToInventoryResult</a></span> 
-
-</dt>
-<dd>
-  Holds the result of a move-to-inventory operation.
-</dd>
-
           <dt id="PendingShoppingCountProvider">
   <span class="name "><a href="../providers_shopping_list_provider/PendingShoppingCountProvider-class.html">PendingShoppingCountProvider</a></span> 
 
@@ -113,14 +105,6 @@ active inventory.
 </dt>
 <dd>
   Provides only purchased shopping list items, scoped to the active inventory.
-</dd>
-
-          <dt id="ShoppingListDaoProvider">
-  <span class="name "><a href="../providers_shopping_list_provider/ShoppingListDaoProvider-class.html">ShoppingListDaoProvider</a></span> 
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a> instance.
 </dd>
 
           <dt id="ShoppingListProvider">
@@ -205,18 +189,6 @@ active inventory.
 
 </dd>
 
-          <dt id="shoppingListDaoProvider" class="property">
-  <span class="name"><a href="../providers_shopping_list_provider/shoppingListDaoProvider.html">shoppingListDaoProvider</a></span>
-  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/ShoppingListDaoProvider-class.html">ShoppingListDaoProvider</a></span>
-  
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a> instance.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
           <dt id="shoppingListProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/shoppingListProvider.html">shoppingListProvider</a></span>
   <span class="signature">&#8594; <a href="../providers_shopping_list_provider/ShoppingListProvider-class.html">ShoppingListProvider</a></span>
@@ -235,46 +207,6 @@ active inventory.
     <section class="summary offset-anchor" id="functions">
       <h2>Functions</h2>
       <dl class="callables">
-          <dt id="addShoppingItem" class="callable">
-  <span class="name"><a href="../providers_shopping_list_provider/addShoppingItem.html">addShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="addShoppingItem-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="addShoppingItem-param-item"><span class="type-annotation"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span> <span class="parameter-name">item</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Adds an item to the shopping list, merging by barcode if a pending
-item with the same barcode and unit already exists.
-  
-
-</dd>
-
-          <dt id="clearPurchasedShoppingItems" class="callable">
-  <span class="name"><a href="../providers_shopping_list_provider/clearPurchasedShoppingItems.html">clearPurchasedShoppingItems</a></span><span class="signature">(<wbr><span class="parameter" id="clearPurchasedShoppingItems-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Deletes all purchased shopping list items for the active inventory.
-  
-
-</dd>
-
-          <dt id="deleteShoppingItem" class="callable">
-  <span class="name"><a href="../providers_shopping_list_provider/deleteShoppingItem.html">deleteShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="deleteShoppingItem-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="deleteShoppingItem-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Deletes a shopping list item by <code>id</code>.
-  
-
-</dd>
-
           <dt id="invalidateShoppingList" class="callable">
   <span class="name"><a href="../providers_shopping_list_provider/invalidateShoppingList.html">invalidateShoppingList</a></span><span class="signature">(<wbr><span class="parameter" id="invalidateShoppingList-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span></span>)
     <span class="returntype parameter">&#8594; void</span>
@@ -298,19 +230,6 @@ item with the same barcode and unit already exists.
 <dd>
   Provides distinct product barcodes and names from the active inventory
 for the "From your pantry" suggestions in the add-to-shopping-list sheet.
-  
-
-</dd>
-
-          <dt id="movePurchasedToInventory" class="callable">
-  <span class="name"><a href="../providers_shopping_list_provider/movePurchasedToInventory.html">movePurchasedToInventory</a></span><span class="signature">(<wbr><span class="parameter" id="movePurchasedToInventory-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_shopping_list_provider/MoveToInventoryResult-class.html">MoveToInventoryResult</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Moves purchased items (with barcodes) to the active inventory.
   
 
 </dd>
@@ -378,45 +297,6 @@ active inventory.
 </dt>
 <dd>
   Provides all shopping list items, scoped to the active inventory.
-  
-
-</dd>
-
-          <dt id="shoppingListDao" class="callable">
-  <span class="name"><a href="../providers_shopping_list_provider/shoppingListDao.html">shoppingListDao</a></span><span class="signature">(<wbr><span class="parameter" id="shoppingListDao-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
-    <span class="returntype parameter">&#8594; <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a> instance.
-  
-
-</dd>
-
-          <dt id="toggleShoppingItem" class="callable">
-  <span class="name"><a href="../providers_shopping_list_provider/toggleShoppingItem.html">toggleShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="toggleShoppingItem-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="toggleShoppingItem-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Toggles the purchased state for the item with the given <code>id</code>.
-  
-
-</dd>
-
-          <dt id="updateShoppingItemPrice" class="callable">
-  <span class="name"><a href="../providers_shopping_list_provider/updateShoppingItemPrice.html">updateShoppingItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="updateShoppingItemPrice-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span>, {</span><span class="parameter" id="updateShoppingItemPrice-param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-pricePhotoPath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">pricePhotoPath</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Updates only the price fields for the shopping item with the given <code>id</code>.
   
 
 </dd>
@@ -558,11 +438,13 @@ active inventory.
       <li><a href="../providers_product_repository_provider/">providers/product_repository_provider</a></li>
       <li><a href="../providers_product_submission_provider/">providers/product_submission_provider</a></li>
       <li><a href="../providers_recipe_provider/">providers/recipe_provider</a></li>
+      <li><a href="../providers_recipe_service_provider/">providers/recipe_service_provider</a></li>
       <li><a href="../providers_scan_history_provider/">providers/scan_history_provider</a></li>
       <li><a href="../providers_scanner_providers/">providers/scanner_providers</a></li>
       <li><a href="../providers_search_panel_controller/">providers/search_panel_controller</a></li>
       <li><a href="../providers_settings_provider/">providers/settings_provider</a></li>
       <li><a href="../providers_shopping_list_provider/">providers/shopping_list_provider</a></li>
+      <li><a href="../providers_shopping_list_service_provider/">providers/shopping_list_service_provider</a></li>
       <li><a href="../providers_stats_provider/">providers/stats_provider</a></li>
       <li><a href="../providers_theme_provider/">providers/theme_provider</a></li>
       <li><a href="../providers_usda_provider/">providers/usda_provider</a></li>
@@ -620,6 +502,8 @@ active inventory.
       <li><a href="../services_product_submission_service/">services/product_submission_service</a></li>
       <li><a href="../services_recipe_nutri_score_service/">services/recipe_nutri_score_service</a></li>
       <li><a href="../services_recipe_nutrition_service/">services/recipe_nutrition_service</a></li>
+      <li><a href="../services_recipe_service/">services/recipe_service</a></li>
+      <li><a href="../services_shopping_list_service/">services/shopping_list_service</a></li>
       <li><a href="../services_usda_api_client/">services/usda_api_client</a></li>
       <li><a href="../utils_bottom_sheet_helper/">utils/bottom_sheet_helper</a></li>
       <li><a href="../utils_camera_permission_dialog/">utils/camera_permission_dialog</a></li>

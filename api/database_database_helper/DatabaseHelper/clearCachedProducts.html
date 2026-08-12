@@ -85,7 +85,7 @@ references are explicitly cleaned up.</p>
       UPDATE shopping_list SET barcode = NULL
       WHERE barcode IN (SELECT barcode FROM products WHERE source = &#39;api&#39;)
     &#39;&#39;&#39;);
-    return productDao.deleteBySource(db, &#39;api&#39;);
+    return await productDao.deleteBySource(db, &#39;api&#39;);
   } finally {
     await db.execute(&#39;PRAGMA foreign_keys = ON&#39;);
   }

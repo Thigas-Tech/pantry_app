@@ -115,7 +115,7 @@ On transient failure the barcode is queued for background retry.</p>
         logWarning(
           &#39;Product ${product.barcode}: barcode already exists on OFF&#39;,
         );
-        return _finishFailed(
+        return await _finishFailed(
           product,
           onProgress,
           SubmissionErrorCategory.duplicate,
@@ -134,7 +134,7 @@ On transient failure the barcode is queued for background retry.</p>
       logWarning(
         &#39;Product ${product.barcode}: OFF credentials rejected, aborting&#39;,
       );
-      return _finishFailed(
+      return await _finishFailed(
         product,
         onProgress,
         SubmissionErrorCategory.wrongCredentials,
@@ -154,7 +154,7 @@ On transient failure the barcode is queued for background retry.</p>
       logWarning(
         &#39;Product ${product.barcode}: metadata submission failed&#39;,
       );
-      return _finishFailed(
+      return await _finishFailed(
         product,
         onProgress,
         _categorize(metadataResult.error),
@@ -252,7 +252,7 @@ On transient failure the barcode is queued for background retry.</p>
       return updated;
     }
 
-    return _finishFailed(
+    return await _finishFailed(
       product,
       onProgress,
       _categorize(failures.first.error),

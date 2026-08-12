@@ -89,38 +89,6 @@
 descending.
 </dd>
 
-          <dt id="CookResult">
-  <span class="name "><a href="../providers_recipe_provider/CookResult-class.html">CookResult</a></span> 
-
-</dt>
-<dd>
-  Returned by <a href="../providers_recipe_provider/cookRecipe.html">cookRecipe</a> with data needed for undo.
-</dd>
-
-          <dt id="InventoryRowSnapshot">
-  <span class="name "><a href="../providers_recipe_provider/InventoryRowSnapshot-class.html">InventoryRowSnapshot</a></span> 
-
-</dt>
-<dd>
-  A snapshot of an inventory row before it was modified by cooking.
-</dd>
-
-          <dt id="RecipeDaoProvider">
-  <span class="name "><a href="../providers_recipe_provider/RecipeDaoProvider-class.html">RecipeDaoProvider</a></span> 
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a> instance.
-</dd>
-
-          <dt id="RecipeIngredientDaoProvider">
-  <span class="name "><a href="../providers_recipe_provider/RecipeIngredientDaoProvider-class.html">RecipeIngredientDaoProvider</a></span> 
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a> instance.
-</dd>
-
           <dt id="RecipeIngredientsWithProductsFamily">
   <span class="name "><a href="../providers_recipe_provider/RecipeIngredientsWithProductsFamily-class.html">RecipeIngredientsWithProductsFamily</a></span> 
 
@@ -205,30 +173,6 @@ descending.
 
 </dd>
 
-          <dt id="recipeDaoProvider" class="property">
-  <span class="name"><a href="../providers_recipe_provider/recipeDaoProvider.html">recipeDaoProvider</a></span>
-  <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeDaoProvider-class.html">RecipeDaoProvider</a></span>
-  
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a> instance.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-          <dt id="recipeIngredientDaoProvider" class="property">
-  <span class="name"><a href="../providers_recipe_provider/recipeIngredientDaoProvider.html">recipeIngredientDaoProvider</a></span>
-  <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeIngredientDaoProvider-class.html">RecipeIngredientDaoProvider</a></span>
-  
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a> instance.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
           <dt id="recipeIngredientsWithProductsProvider" class="property">
   <span class="name"><a href="../providers_recipe_provider/recipeIngredientsWithProductsProvider.html">recipeIngredientsWithProductsProvider</a></span>
   <span class="signature">&#8594; <a href="../providers_recipe_provider/RecipeIngredientsWithProductsFamily-class.html">RecipeIngredientsWithProductsFamily</a></span>
@@ -298,87 +242,6 @@ descending.
 
 </dd>
 
-          <dt id="calculateAverageRecipeCost" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/calculateAverageRecipeCost.html">calculateAverageRecipeCost</a></span><span class="signature">(<wbr><span class="parameter" id="calculateAverageRecipeCost-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Calculates the average cost across all recipes in the active inventory.
-  
-
-</dd>
-
-          <dt id="calculateIngredientCost" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/calculateIngredientCost.html">calculateIngredientCost</a></span><span class="signature">(<wbr><span class="parameter" id="calculateIngredientCost-param-database"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">database</span>, </span><span class="parameter" id="calculateIngredientCost-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, {</span><span class="parameter" id="calculateIngredientCost-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span><span class="parameter" id="calculateIngredientCost-param-baseCurrency"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseCurrency</span>, </span><span class="parameter" id="calculateIngredientCost-param-currencyService"><span>required</span> <span class="type-annotation"><a href="../services_currency_service/CurrencyService-class.html">CurrencyService</a></span> <span class="parameter-name">currencyService</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Sums the latest price of each <code>ingredients</code> row found in the prices table
-for the given <code>inventoryId</code>, converted to <code>baseCurrency</code>.
-  
-
-</dd>
-
-          <dt id="calculateRecipeCost" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/calculateRecipeCost.html">calculateRecipeCost</a></span><span class="signature">(<wbr><span class="parameter" id="calculateRecipeCost-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="calculateRecipeCost-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Calculates the total cost of a recipe by summing ingredient prices.
-  
-
-</dd>
-
-          <dt id="checkIngredientShortages" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/checkIngredientShortages.html">checkIngredientShortages</a></span><span class="signature">(<wbr><span class="parameter" id="checkIngredientShortages-param-db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="checkIngredientShortages-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="checkIngredientShortages-param-activeInventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">activeInventoryId</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span>&gt;</span></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Groups <code>ingredients</code> by barcode, sums quantities, normalizes units, and
-checks availability against inventory.
-  
-
-</dd>
-
-          <dt id="cookRecipe" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/cookRecipe.html">cookRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="cookRecipe-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="cookRecipe-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../providers_recipe_provider/CookResult-class.html">CookResult</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Cooks a recipe: deducts ingredients from the recipe's own inventory
-(FEFO) and logs history.
-  
-
-</dd>
-
-          <dt id="deleteRecipe" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/deleteRecipe.html">deleteRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="deleteRecipe-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="deleteRecipe-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Deletes a recipe by <code>id</code>. Invalidates providers on success.
-  
-
-</dd>
-
           <dt id="invalidateRecipes" class="callable">
   <span class="name"><a href="../providers_recipe_provider/invalidateRecipes.html">invalidateRecipes</a></span><span class="signature">(<wbr><span class="parameter" id="invalidateRecipes-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span></span>)
     <span class="returntype parameter">&#8594; void</span>
@@ -388,32 +251,6 @@ checks availability against inventory.
 </dt>
 <dd>
   Invalidates all recipe-related providers.
-  
-
-</dd>
-
-          <dt id="recipeDao" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/recipeDao.html">recipeDao</a></span><span class="signature">(<wbr><span class="parameter" id="recipeDao-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
-    <span class="returntype parameter">&#8594; <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a> instance.
-  
-
-</dd>
-
-          <dt id="recipeIngredientDao" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/recipeIngredientDao.html">recipeIngredientDao</a></span><span class="signature">(<wbr><span class="parameter" id="recipeIngredientDao-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span></span>)
-    <span class="returntype parameter">&#8594; <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Provides a singleton <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a> instance.
   
 
 </dd>
@@ -453,19 +290,6 @@ checks availability against inventory.
 </dt>
 <dd>
   Provides aggregated nutrition data for a recipe.
-  
-
-</dd>
-
-          <dt id="saveRecipe" class="callable">
-  <span class="name"><a href="../providers_recipe_provider/saveRecipe.html">saveRecipe</a></span><span class="signature">(<wbr><span class="parameter" id="saveRecipe-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, {</span><span class="parameter" id="saveRecipe-param-name"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span><span class="parameter" id="saveRecipe-param-ingredients"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, </span><span class="parameter" id="saveRecipe-param-existingRecipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">existingRecipeId</span>, </span><span class="parameter" id="saveRecipe-param-instructions"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">instructions</span> = <span class="default-value">&#39;&#39;</span>, </span><span class="parameter" id="saveRecipe-param-servings"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">servings</span> = <span class="default-value">0</span>, </span><span class="parameter" id="saveRecipe-param-imagePath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">imagePath</span> = <span class="default-value">&#39;&#39;</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Saves a recipe — creates a new one or updates an existing one.
   
 
 </dd>
@@ -627,11 +451,13 @@ checks availability against inventory.
       <li><a href="../providers_product_repository_provider/">providers/product_repository_provider</a></li>
       <li><a href="../providers_product_submission_provider/">providers/product_submission_provider</a></li>
       <li><a href="../providers_recipe_provider/">providers/recipe_provider</a></li>
+      <li><a href="../providers_recipe_service_provider/">providers/recipe_service_provider</a></li>
       <li><a href="../providers_scan_history_provider/">providers/scan_history_provider</a></li>
       <li><a href="../providers_scanner_providers/">providers/scanner_providers</a></li>
       <li><a href="../providers_search_panel_controller/">providers/search_panel_controller</a></li>
       <li><a href="../providers_settings_provider/">providers/settings_provider</a></li>
       <li><a href="../providers_shopping_list_provider/">providers/shopping_list_provider</a></li>
+      <li><a href="../providers_shopping_list_service_provider/">providers/shopping_list_service_provider</a></li>
       <li><a href="../providers_stats_provider/">providers/stats_provider</a></li>
       <li><a href="../providers_theme_provider/">providers/theme_provider</a></li>
       <li><a href="../providers_usda_provider/">providers/usda_provider</a></li>
@@ -689,6 +515,8 @@ checks availability against inventory.
       <li><a href="../services_product_submission_service/">services/product_submission_service</a></li>
       <li><a href="../services_recipe_nutri_score_service/">services/recipe_nutri_score_service</a></li>
       <li><a href="../services_recipe_nutrition_service/">services/recipe_nutrition_service</a></li>
+      <li><a href="../services_recipe_service/">services/recipe_service</a></li>
+      <li><a href="../services_shopping_list_service/">services/shopping_list_service</a></li>
       <li><a href="../services_usda_api_client/">services/usda_api_client</a></li>
       <li><a href="../utils_bottom_sheet_helper/">utils/bottom_sheet_helper</a></li>
       <li><a href="../utils_camera_permission_dialog/">utils/camera_permission_dialog</a></li>

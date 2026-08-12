@@ -95,14 +95,14 @@ Returns an empty map on failure.</p>
         &#39;ExchangeRate-API returned ${response.statusCode} for &#39;
         &#39;$normalized&#39;,
       );
-      return _tryFallbackCache(normalized);
+      return await _tryFallbackCache(normalized);
     }
     final body = jsonDecode(response.body) as Map&lt;String, dynamic&gt;;
     if (body[&#39;result&#39;] != &#39;success&#39;) {
       logWarning(
         &#39;ExchangeRate-API error for $normalized: ${body[&#39;result&#39;]}&#39;,
       );
-      return _tryFallbackCache(normalized);
+      return await _tryFallbackCache(normalized);
     }
     final rawRates = body[&#39;rates&#39;] as Map&lt;String, dynamic&gt;;
     final rates = rawRates.map(
