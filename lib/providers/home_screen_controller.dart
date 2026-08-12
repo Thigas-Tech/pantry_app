@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
@@ -75,9 +74,7 @@ class HomeScreenController extends _$HomeScreenController {
     for (final id in state.selectedIds) {
       await repo.deleteInventoryItem(id);
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(pantryProvider);
-    });
+    if (ref.mounted) ref.invalidate(pantryProvider);
     exitSelectionMode();
   }
 
@@ -91,9 +88,7 @@ class HomeScreenController extends _$HomeScreenController {
       state.selectedIds.toList(),
       targetInventoryId,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(pantryProvider);
-    });
+    if (ref.mounted) ref.invalidate(pantryProvider);
     exitSelectionMode();
   }
 
@@ -114,9 +109,7 @@ class HomeScreenController extends _$HomeScreenController {
       final activeId = ref.read(activeInventoryProvider);
       await repo.refreshInventoryProducts(activeId);
       await repo.setLastRefreshTime();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.invalidate(pantryProvider);
-      });
+      if (ref.mounted) ref.invalidate(pantryProvider);
     } on Exception catch (e) {
       logWarning('Overdue cache refresh failed: $e');
     }

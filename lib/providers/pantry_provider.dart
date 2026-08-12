@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -39,8 +38,6 @@ class Pantry extends _$Pantry {
     final repo = ref.read(productRepositoryProvider);
     await repo.refreshInventoryProducts(activeId);
     await repo.setLastRefreshTime();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidateSelf();
-    });
+    ref.invalidateSelf();
   }
 }

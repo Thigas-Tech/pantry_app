@@ -69,18 +69,13 @@ Future<List<RecipeIngredient>> allRecipeIngredients(Ref ref, int recipeId) {
 
 /// Invalidates all recipe-related providers.
 ///
-/// Call this after every mutation so the UI refreshes. Invalidation is
-/// deferred to the next frame via [WidgetsBinding.addPostFrameCallback] to
-/// prevent build-phase crashes when called from async gaps (e.g. database
-/// transactions). The [BuildContext.mounted] guard prevents crashes when the
-/// widget has been disposed before the callback fires, such as during widget
-/// tests.
+/// Call this after every mutation so the UI refreshes. The
+/// [BuildContext.mounted] guard prevents crashes when the widget has been
+/// disposed before the invalidation runs, such as during widget tests.
 void invalidateRecipes(WidgetRef ref) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (ref.context.mounted) {
-      ref.invalidate(allRecipesProvider);
-    }
-  });
+  if (ref.context.mounted) {
+    ref.invalidate(allRecipesProvider);
+  }
 }
 
 /// Saves a recipe — creates a new one or updates an existing one.
@@ -768,10 +763,10 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
       .then((result) {
         unawaited(
           Future.microtask(() {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              invalidateRecipes(ref);
+            invalidateRecipes(ref);
+            if (ref.context.mounted) {
               ref.invalidate(pantryProvider);
-            });
+            }
           }),
         );
         return result;

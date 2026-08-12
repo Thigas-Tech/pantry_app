@@ -83,9 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
     );
     if (mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.invalidate(pantryProvider);
-      });
+      ref.invalidate(pantryProvider);
     }
   }
 
@@ -253,9 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                     );
                     if (result == true && context.mounted) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ref.invalidate(pantryProvider);
-                      });
+                      ref.invalidate(pantryProvider);
                     }
                   },
                 ),
@@ -279,10 +275,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                       error: (err, _) => ErrorView(
                         message: l10n.inventoryLoadFailed,
-                        onRetry: () =>
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              ref.invalidate(pantryProvider);
-                            }),
+                        onRetry: () => ref.invalidate(pantryProvider),
                       ),
                       data: (items) {
                         if (items.isEmpty && !controller.selectionMode) {

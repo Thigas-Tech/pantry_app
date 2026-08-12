@@ -4,6 +4,19 @@
 
 ### Fixed
 
+- **Legacy post-frame invalidate dance (audit Q7)**: all 30
+  addPostFrameCallback((_) => ref.invalidate(...)) sites now call
+  ref.invalidate directly after their async gap, with a context.mounted /
+  ref.mounted guard where needed — Riverpod 3 allows invalidation from
+  async gaps, so the Riverpod-1.x frame deferral is gone. The
+  invalidateRecipes helper keeps its API but defers nothing. The 8
+  non-invalidate post-frame uses (changelog sheets, post-init tasks,
+  notification taps) are untouched.
+  (lib/providers/recipe_provider.dart,
+  lib/providers/shopping_list_provider.dart,
+  lib/providers/home_screen_controller.dart,
+  lib/providers/pantry_provider.dart, lib/screens/*, lib/widgets/*)
+
 - **Layering bypass (audit Q8)**: `HomeScreenController.deleteSelected`
   and `moveSelected` now delegate to `ProductRepository` (via
   `productRepositoryProvider`) instead of calling the database facade

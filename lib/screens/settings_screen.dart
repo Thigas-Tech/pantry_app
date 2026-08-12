@@ -1126,14 +1126,11 @@ class SettingsScreen extends ConsumerWidget {
         logInfo('Re-fetched $totalRefreshed products after cache flush');
         await repo.setLastRefreshTime();
         if (!context.mounted) return;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(pantryProvider);
-        });
+        ref.invalidate(pantryProvider);
       } else {
         logInfo('Offline — products will appear with barcode as name');
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.invalidate(pantryProvider);
-        });
+        if (!context.mounted) return;
+        ref.invalidate(pantryProvider);
       }
 
       if (context.mounted) {

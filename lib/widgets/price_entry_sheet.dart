@@ -315,9 +315,8 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     final storeId = await db.storeDao.insert(await db.database, result);
 
     if (storeId >= 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.invalidate(storesProvider);
-      });
+      if (!mounted) return;
+      ref.invalidate(storesProvider);
       _storeCtrl.text = result;
       _autocompleteCtrl?.text = result;
       if (mounted) {
@@ -381,9 +380,8 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     try {
       final db = ref.read(databaseProvider);
       await db.storeDao.insert(await db.database, name);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.invalidate(storesProvider);
-      });
+      if (!mounted) return;
+      ref.invalidate(storesProvider);
     } on Exception catch (e) {
       logWarning('Failed to auto-insert store "$name": $e');
     }
