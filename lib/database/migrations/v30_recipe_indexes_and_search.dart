@@ -4,8 +4,16 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// Adds indexes on recipes table (name, created_at, updated_at) and a
+/// Adds indexes on the recipes table (name, created_at, updated_at) and a
 /// search_text column for full-text search.
+///
+/// The search_text backfill intentionally stays Dart-based: it applies
+/// [normalizeForSearch] to every existing row instead of relying on raw
+/// SQL. SQLite's built-in string functions cannot strip diacritics
+/// (accents, eszett, Latin Extended-A) the way the Dart
+/// [normalizeForSearch] does, so a raw-SQL backfill would degrade search
+/// correctness. The performance gain of raw SQL is marginal for typical
+/// recipe counts, so correctness is prioritized over that optimization.
 class MigrationV30 extends Migration {
   @override
   int get version => 30;

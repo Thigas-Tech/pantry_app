@@ -87,5 +87,61 @@ void main() {
 
       await db.close();
     });
+
+    test('backfills to the fallback id when inventories is empty', () async {
+      final db = await databaseFactory.openDatabase(inMemoryDatabasePath);
+      final runner = MigrationRunner(allMigrations());
+      await runner.run(db, 0, 33);
+
+      // Seed a product and a price row, but no inventories rows at all.
+      await db.insert('products', {
+        'barcode': '123',
+        'name': 'Coffee',
+        'source': 'manual',
+      });
+      await db.insert('prices', {
+        'barcode': '123',
+        'price': 9.99,
+        'currency': 'USD',
+        'date_added': DateTime.now().millisecondsSinceEpoch,
+        'date_purchased': 1000,
+      });
+
+      await MigrationRunner(allMigrations()).run(db, 33, 34);
+
+      final rows = await db.rawQuery(
+        "SELECT inventory_id FROM prices WHERE barcode = '123'",
+      );
+      expect(rows, isNotEmpty);
+      expect(rows.first['inventory_id'], 1);
+
+      await db.close();
+    });
+
+    test(
+      'defaults inventory_id to 1 for rows inserted after migration',
+      () async {
+        final db = await buildPreV34Db();
+        await MigrationRunner(allMigrations()).run(db, 33, 34);
+
+        final id = await db.insert('prices', {
+          'barcode': '123',
+          'price': 4.99,
+          'currency': 'USD',
+          'date_added': DateTime.now().millisecondsSinceEpoch,
+          'date_purchased': 2000,
+        });
+        expect(id, isNonNegative);
+
+        final rows = await db.rawQuery(
+          'SELECT inventory_id FROM prices WHERE id = ?',
+          [id],
+        );
+        expect(rows, isNotEmpty);
+        expect(rows.first['inventory_id'], 1);
+
+        await db.close();
+      },
+    );
   });
 }

@@ -102,6 +102,14 @@ Version history:
 | v35 -> v36 | Replaced the unique index on `inventory(barcode, inventory_id)` with a non-unique index so distinct expiry batches can coexist |
 | v36 -> v37 | Added `package_quantity` / `package_unit` to `prices` and `quantity` / `product_quantity` to `products` for unit-aware price math |
 
+**Migration v30 search_text backfill**: the recipe `search_text` backfill
+intentionally runs in Dart via `normalizeForSearch()` instead of raw SQL.
+SQLite's built-in string functions cannot strip diacritics (accents,
+eszett, Latin Extended-A), and the performance gain of a raw-SQL backfill
+is marginal for typical recipe counts. Correctness is prioritized over
+that optimization; regression tests lock in diacritic removal, case and
+whitespace normalization, and idempotency.
+
 ### 2.4 Connectivity layer
 
 `InternetConnectionChecker` monitors device connectivity via a
