@@ -113,12 +113,15 @@ stock. Returns a <a href="../providers_recipe_provider/CookResult-class.html">Co
 
   final grouped = &lt;String, _GroupedIngredient&gt;{};
   for (final ing in ingredients) {
-    if (ing.barcode == null || ing.barcode!.isEmpty) continue;
-    grouped.putIfAbsent(
-      ing.barcode!,
-      () =&gt; _GroupedIngredient(name: ing.name, unit: ing.unit),
-    );
-    grouped[ing.barcode!]!.totalQuantity += ing.quantity;
+    final barcode = ing.barcode;
+    if (barcode == null || barcode.isEmpty) continue;
+    grouped
+            .putIfAbsent(
+              barcode,
+              () =&gt; _GroupedIngredient(name: ing.name, unit: ing.unit),
+            )
+            .totalQuantity +=
+        ing.quantity;
   }
 
   return database
@@ -143,8 +146,9 @@ stock. Returns a <a href="../providers_recipe_provider/CookResult-class.html">Co
           }
           for (final row in rows) {
             if (remaining &lt;= 0) break;
-            final rowId = row[&#39;id&#39;]! as int;
-            final rowQty = (row[&#39;quantity&#39;]! as num).toDouble();
+            final rowId = row[&#39;id&#39;] as int?;
+            if (rowId == null) continue;
+            final rowQty = (row[&#39;quantity&#39;] as num?)?.toDouble() ?? 0;
             final rowUnit = row[&#39;unit&#39;] as String? ?? &#39;pieces&#39;;
             double effectiveQty;
             double Function(double consumed) toRowUnits;

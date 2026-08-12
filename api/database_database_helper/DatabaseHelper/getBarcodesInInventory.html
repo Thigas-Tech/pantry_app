@@ -86,7 +86,12 @@ active pantry. Returns an empty set when <code>barcodes</code> is empty.</p>
     &#39;WHERE barcode IN ($placeholders) AND inventory_id = ?&#39;,
     [...barcodes, inventoryId],
   );
-  return rows.map((r) =&gt; r[&#39;barcode&#39;]! as String).toSet();
+  final result = &lt;String&gt;{};
+  for (final row in rows) {
+    final barcode = row[&#39;barcode&#39;] as String?;
+    if (barcode != null &amp;&amp; barcode.isNotEmpty) result.add(barcode);
+  }
+  return result;
 }</code></pre>
 </section>
 
