@@ -1,7 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'github_issue_service_provider.g.dart';
 
 /// Provides the [GithubIssueService] instance.
-final githubIssueServiceProvider = Provider<GithubIssueService>((ref) {
+@Riverpod(keepAlive: true)
+GithubIssueService githubIssueService(Ref ref) {
   return GithubIssueService();
-});
+}

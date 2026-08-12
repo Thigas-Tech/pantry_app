@@ -10,15 +10,18 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/utils/nutriscore.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'stats_provider.g.dart';
 
 /// Aggregated statistics for the active pantry inventory.
 ///
 /// Computed from SQL aggregation queries in [ProductDao] and
 /// [InventoryDao]. Depends on [activeInventoryProvider] so it
-/// refreshes when the user switches pantries. Uses [FutureProvider.autoDispose]
-/// to release memory when leaving the Stats tab.
-final FutureProvider<PantryStats>
-statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
+/// refreshes when the user switches pantries. Auto-disposes to
+/// release memory when leaving the Stats tab.
+@riverpod
+Future<PantryStats> stats(Ref ref) async {
   final activeId = ref.watch(activeInventoryProvider);
   final db = ref.watch(databaseProvider);
   final expiringSoonDays = ref.watch(
@@ -202,7 +205,7 @@ statsProvider = FutureProvider.autoDispose<PantryStats>((ref) async {
     totalRecipeCost: totalRecipeCost,
     mostCookedRecipe: mostCookedRecipe,
   );
-});
+}
 
 /// Returns a broad parent category from OFF hierarchy data.
 ///

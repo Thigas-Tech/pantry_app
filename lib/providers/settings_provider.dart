@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+part 'settings_provider.g.dart';
 
 /// The measurement system for displaying quantities.
 enum UnitSystem {
@@ -199,9 +201,10 @@ class Settings {
   static const _nullSentinel = Object();
 }
 
-/// A [Notifier] that holds the current [Settings] and persists every field
+/// A notifier that holds the current [Settings] and persists every field
 /// to [SharedPreferences].
-class SettingsNotifier extends Notifier<Settings> {
+@Riverpod(keepAlive: true)
+class SettingsNotifier extends _$SettingsNotifier {
   @override
   Settings build() {
     unawaited(_loadFromPrefs());
@@ -464,11 +467,6 @@ class SettingsNotifier extends Notifier<Settings> {
     }
   }
 }
-
-/// The provider for [SettingsNotifier].
-final settingsProvider = NotifierProvider<SettingsNotifier, Settings>(
-  SettingsNotifier.new,
-);
 
 /// Maps the device locale to an ISO 4217 currency code.
 ///

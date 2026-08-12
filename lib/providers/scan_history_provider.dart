@@ -1,15 +1,18 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/scan_history_dao.dart';
 import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'scan_history_provider.g.dart';
 
 /// Notifier that exposes the recent-scan history and its mutations.
 ///
 /// The history is a bounded list of the latest successful scans (capped by
 /// [ScanHistoryDao.defaultKeepCount]). Recording is delegated here so that
 /// the scanner and the UI share a single refresh path.
-class ScanHistory extends AsyncNotifier<List<ScanHistoryEntry>> {
+@Riverpod(keepAlive: true)
+class ScanHistory extends _$ScanHistory {
   @override
   Future<List<ScanHistoryEntry>> build() {
     final db = ref.watch(databaseProvider);
@@ -37,9 +40,3 @@ class ScanHistory extends AsyncNotifier<List<ScanHistoryEntry>> {
     return cleared;
   }
 }
-
-/// Provides the recent-scan history recorded by successful scans.
-final scanHistoryProvider =
-    AsyncNotifierProvider<ScanHistory, List<ScanHistoryEntry>>(
-      ScanHistory.new,
-    );

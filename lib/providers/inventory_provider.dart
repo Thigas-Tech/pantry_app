@@ -1,25 +1,30 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'inventory_provider.g.dart';
 
 /// Provides the list of all inventories (id, name).
-final inventoryListProvider = FutureProvider<List<Map<String, dynamic>>>((ref) {
+@Riverpod(keepAlive: true)
+Future<List<Map<String, dynamic>>> inventoryList(Ref ref) {
   final db = ref.watch(databaseProvider);
   return db.getInventories();
-});
+}
 
 /// Provides the count of inventory items in the active pantry.
-final inventoryCountProvider = FutureProvider<int>((ref) async {
+@Riverpod(keepAlive: true)
+Future<int> inventoryCount(Ref ref) async {
   final items = await ref.watch(pantryProvider.future);
   return items.length;
-});
+}
 
 /// Provides the total count of inventory items across ALL inventories.
 ///
 /// Used to detect the first item ever added to any pantry (0→1 transition)
 /// so the empty-pantry onboarding can auto-dismiss.
-final totalInventoryCountProvider = FutureProvider<int>((ref) async {
+@Riverpod(keepAlive: true)
+Future<int> totalInventoryCount(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final inventories = await db.getInventories();
   var total = 0;
@@ -30,13 +35,14 @@ final totalInventoryCountProvider = FutureProvider<int>((ref) async {
     total += rows.length;
   }
   return total;
-});
+}
 
 /// Provides the average Nutri-Score letter for the active inventory.
 ///
 /// Returns a grade ('a'–'e') or null if none of the products in the
 /// current pantry have [NutriScoreBadge] data.
-final averageNutriscoreProvider = FutureProvider<String?>((ref) async {
+@Riverpod(keepAlive: true)
+Future<String?> averageNutriscore(Ref ref) async {
   final items = await ref.watch(pantryProvider.future);
   final scores = <int>[];
   for (final item in items) {
@@ -56,4 +62,4 @@ final averageNutriscoreProvider = FutureProvider<String?>((ref) async {
     1 => 'e',
     _ => null,
   };
-});
+}

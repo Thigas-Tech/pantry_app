@@ -8,10 +8,10 @@ part of 'search_panel_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Notifier that owns all search state and execution for [SearchPanel].
+/// Notifier that owns all search state and execution for the search panel.
 ///
 /// This is an auto-dispose provider family keyed by the search debounce
-/// duration, so state lives exactly as long as the hosting [SearchPanel]
+/// duration, so state lives exactly as long as the hosting search panel
 /// widget and each panel instance is isolated.
 ///
 /// The notifier handles query changes (debounced and on-submit), source
@@ -22,10 +22,10 @@ part of 'search_panel_controller.dart';
 @ProviderFor(SearchPanelController)
 final searchPanelControllerProvider = SearchPanelControllerFamily._();
 
-/// Notifier that owns all search state and execution for [SearchPanel].
+/// Notifier that owns all search state and execution for the search panel.
 ///
 /// This is an auto-dispose provider family keyed by the search debounce
-/// duration, so state lives exactly as long as the hosting [SearchPanel]
+/// duration, so state lives exactly as long as the hosting search panel
 /// widget and each panel instance is isolated.
 ///
 /// The notifier handles query changes (debounced and on-submit), source
@@ -34,10 +34,10 @@ final searchPanelControllerProvider = SearchPanelControllerFamily._();
 /// navigation, snackbars, and the long-press menu live in the widget layer.
 final class SearchPanelControllerProvider
     extends $NotifierProvider<SearchPanelController, SearchPanelState> {
-  /// Notifier that owns all search state and execution for [SearchPanel].
+  /// Notifier that owns all search state and execution for the search panel.
   ///
   /// This is an auto-dispose provider family keyed by the search debounce
-  /// duration, so state lives exactly as long as the hosting [SearchPanel]
+  /// duration, so state lives exactly as long as the hosting search panel
   /// widget and each panel instance is isolated.
   ///
   /// The notifier handles query changes (debounced and on-submit), source
@@ -91,10 +91,10 @@ final class SearchPanelControllerProvider
 String _$searchPanelControllerHash() =>
     r'b0112e20297efa3b484c04804067b9515a09769f';
 
-/// Notifier that owns all search state and execution for [SearchPanel].
+/// Notifier that owns all search state and execution for the search panel.
 ///
 /// This is an auto-dispose provider family keyed by the search debounce
-/// duration, so state lives exactly as long as the hosting [SearchPanel]
+/// duration, so state lives exactly as long as the hosting search panel
 /// widget and each panel instance is isolated.
 ///
 /// The notifier handles query changes (debounced and on-submit), source
@@ -120,10 +120,10 @@ final class SearchPanelControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Notifier that owns all search state and execution for [SearchPanel].
+  /// Notifier that owns all search state and execution for the search panel.
   ///
   /// This is an auto-dispose provider family keyed by the search debounce
-  /// duration, so state lives exactly as long as the hosting [SearchPanel]
+  /// duration, so state lives exactly as long as the hosting search panel
   /// widget and each panel instance is isolated.
   ///
   /// The notifier handles query changes (debounced and on-submit), source
@@ -141,10 +141,10 @@ final class SearchPanelControllerFamily extends $Family
   String toString() => r'searchPanelControllerProvider';
 }
 
-/// Notifier that owns all search state and execution for [SearchPanel].
+/// Notifier that owns all search state and execution for the search panel.
 ///
 /// This is an auto-dispose provider family keyed by the search debounce
-/// duration, so state lives exactly as long as the hosting [SearchPanel]
+/// duration, so state lives exactly as long as the hosting search panel
 /// widget and each panel instance is isolated.
 ///
 /// The notifier handles query changes (debounced and on-submit), source

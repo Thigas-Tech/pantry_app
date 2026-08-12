@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -9,6 +8,9 @@ import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/firebase_firestore_client_adapter.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'firebase_cache_provider.g.dart';
 
 /// Provides the singleton [FirebaseCacheService] instance.
 ///
@@ -25,21 +27,15 @@ import 'package:pantry_app/utils/logger.dart';
 ///
 /// - The database provider for cache metadata.
 /// - The API service provider (OFF SDK wrapper).
-/// - [UsdaApiClient] — created inline for USDA fallback lookups.
+/// - [UsdaApiClient] for USDA fallback lookups.
 ///
 /// ## Lifetime
 ///
-/// This is a plain [Provider] (not auto-dispose) so the service lives for
-/// the entire app session. The service is stateless between lookups; it
+/// This is a plain keep-alive provider so the service lives for the
+/// entire app session. The service is stateless between lookups; it
 /// holds no mutable state.
-/// - [UsdaApiClient] — created inline for USDA fallback lookups.
-///
-/// ## Lifetime
-///
-/// This is a plain [Provider] (not auto-dispose) so the service lives for
-/// the entire app session. The service is stateless between lookups; it
-/// holds no mutable state.
-final firebaseCacheProvider = Provider<FirebaseCacheService>((ref) {
+@Riverpod(keepAlive: true)
+FirebaseCacheService firebaseCache(Ref ref) {
   final db = ref.read(databaseProvider);
   final api = ref.read(apiServiceProvider);
 
@@ -63,4 +59,4 @@ final firebaseCacheProvider = Provider<FirebaseCacheService>((ref) {
     usdaClient: ref.read(usdaApiClientProvider),
     offAdapter: api,
   );
-});
+}

@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/models/auth_user.dart';
 import 'package:pantry_app/services/auth_service.dart';
 import 'package:pantry_app/services/firebase_auth_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'auth_provider.g.dart';
 
 /// Provides the singleton [AuthService] instance.
 ///
@@ -14,10 +16,11 @@ import 'package:pantry_app/utils/logger.dart';
 ///
 /// ## Lifetime
 ///
-/// Plain [Provider] (not auto-dispose) — the service lives for the entire
+/// Plain keep-alive provider — the service lives for the entire
 /// app session. This matches the pattern used by the firebase cache
 /// provider.
-final authServiceProvider = Provider<AuthService>((ref) {
+@Riverpod(keepAlive: true)
+AuthService authService(Ref ref) {
   if (AppConfig.firebaseEnabled) {
     try {
       return FirebaseAuthService(FirebaseAuth.instance);
@@ -26,15 +29,16 @@ final authServiceProvider = Provider<AuthService>((ref) {
     }
   }
   return _NoopAuthService();
-});
+}
 
 /// Provides a reactive stream of the current [AuthUser] or null.
 ///
 /// Delegates to [AuthService.authStateChanges]. Starts as [AsyncLoading]
 /// until the first auth state event is emitted.
-final authStateProvider = StreamProvider<AuthUser?>((ref) {
+@Riverpod(keepAlive: true)
+Stream<AuthUser?> authState(Ref ref) {
   return ref.watch(authServiceProvider).authStateChanges;
-});
+}
 
 /// No-op implementation used when Firebase is disabled.
 class _NoopAuthService implements AuthService {
