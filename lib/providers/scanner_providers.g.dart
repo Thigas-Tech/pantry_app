@@ -10,7 +10,7 @@ part of 'scanner_providers.dart';
 // ignore_for_file: type=lint, type=warning
 /// Notifier that manages the scanner camera lifecycle and scan resolution.
 ///
-/// Owns the [MobileScannerController] (created with `autoStart` `false`),
+/// Owns the [MobileScannerController] (created with autoStart false),
 /// tracks camera streaming state, handles permission requests, and resolves
 /// barcodes/PLU codes via [productRepositoryProvider].
 
@@ -19,14 +19,14 @@ final scannerCameraProvider = ScannerCameraProvider._();
 
 /// Notifier that manages the scanner camera lifecycle and scan resolution.
 ///
-/// Owns the [MobileScannerController] (created with `autoStart` `false`),
+/// Owns the [MobileScannerController] (created with autoStart false),
 /// tracks camera streaming state, handles permission requests, and resolves
 /// barcodes/PLU codes via [productRepositoryProvider].
 final class ScannerCameraProvider
     extends $NotifierProvider<ScannerCamera, ScannerCameraState> {
   /// Notifier that manages the scanner camera lifecycle and scan resolution.
   ///
-  /// Owns the [MobileScannerController] (created with `autoStart` `false`),
+  /// Owns the [MobileScannerController] (created with autoStart false),
   /// tracks camera streaming state, handles permission requests, and resolves
   /// barcodes/PLU codes via [productRepositoryProvider].
   ScannerCameraProvider._()
@@ -60,7 +60,7 @@ String _$scannerCameraHash() => r'9647355292aec6f3c50d7b9cbdf1985e2234f29c';
 
 /// Notifier that manages the scanner camera lifecycle and scan resolution.
 ///
-/// Owns the [MobileScannerController] (created with `autoStart` `false`),
+/// Owns the [MobileScannerController] (created with autoStart false),
 /// tracks camera streaming state, handles permission requests, and resolves
 /// barcodes/PLU codes via [productRepositoryProvider].
 
