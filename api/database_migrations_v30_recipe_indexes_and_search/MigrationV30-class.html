@@ -54,8 +54,15 @@
 
     
 <section class="desc markdown">
-  <p>Adds indexes on recipes table (name, created_at, updated_at) and a
+  <p>Adds indexes on the recipes table (name, created_at, updated_at) and a
 search_text column for full-text search.</p>
+<p>The search_text backfill intentionally stays Dart-based: it applies
+<a href="../utils_search_utils/normalizeForSearch.html">normalizeForSearch</a> to every existing row instead of relying on raw
+SQL. SQLite's built-in string functions cannot strip diacritics
+(accents, eszett, Latin Extended-A) the way the Dart
+<a href="../utils_search_utils/normalizeForSearch.html">normalizeForSearch</a> does, so a raw-SQL backfill would degrade search
+correctness. The performance gain of raw SQL is marginal for typical
+recipe counts, so correctness is prioritized over that optimization.</p>
 </section>
 
 
