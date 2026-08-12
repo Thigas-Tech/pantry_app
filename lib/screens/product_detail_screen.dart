@@ -1,6 +1,6 @@
+
 import 'dart:async';
 import 'dart:io';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +22,7 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
@@ -429,7 +430,15 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   name: _product.name,
                   barcode: _product.barcode,
                 );
-                unawaited(addShoppingItem(ref, item));
+                unawaited(
+                  ref
+                      .read(shoppingListServiceProvider)
+                      .addShoppingItem(
+                        item,
+                        activeInventoryId: ref.read(activeInventoryProvider),
+                      )
+                      .then((_) => invalidateShoppingList(ref)),
+                );
                 SnackbarHelper.showInfo(
                   context,
                   l10n.addToShoppingList,

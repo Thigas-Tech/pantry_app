@@ -11,6 +11,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/recipe_detail_screen.dart';
@@ -193,7 +194,10 @@ class _AverageCostBanner extends ConsumerWidget {
     final symbol = currencySymbolFor(currencyCode);
 
     return FutureBuilder<double>(
-      future: calculateAverageRecipeCost(ref),
+      future: ref.read(recipeServiceProvider).calculateAverageRecipeCost(
+        activeInventoryId: ref.read(activeInventoryProvider),
+        baseCurrency: ref.read(settingsProvider).baseCurrency,
+      ),
       builder: (context, snapshot) {
         final cost = snapshot.data ?? 0.0;
 
@@ -273,7 +277,12 @@ class _RecipeCard extends ConsumerWidget {
         );
       },
       onDismissed: (_) {
-        unawaited(deleteRecipe(ref, recipe.id!));
+        unawaited(
+          ref
+              .read(recipeServiceProvider)
+              .deleteRecipe(recipe.id!)
+              .then((_) => invalidateRecipes(ref)),
+        );
         SnackbarHelper.showUndo(
           context,
           l10n.recipeDeleted,
@@ -371,7 +380,11 @@ class _RecipeCostLabel extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return FutureBuilder<double>(
-      future: calculateRecipeCost(ref, recipeId),
+      future: ref.read(recipeServiceProvider).calculateRecipeCost(
+        recipeId,
+        activeInventoryId: ref.read(activeInventoryProvider),
+        baseCurrency: ref.read(settingsProvider).baseCurrency,
+      ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
         final cost = snapshot.data!;

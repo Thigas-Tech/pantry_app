@@ -1,5 +1,5 @@
-import 'dart:async';
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +14,7 @@ import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/search_panel_controller.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/product_picker_screen.dart';
@@ -256,7 +257,15 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
                         .read(productRepositoryProvider)
                         .cacheProduct(product)
                         .then(
-                          (_) => addShoppingItem(ref, item),
+                          (_) => ref
+                              .read(shoppingListServiceProvider)
+                              .addShoppingItem(
+                                item,
+                                activeInventoryId: ref.read(
+                                  activeInventoryProvider,
+                                ),
+                              )
+                              .then((_) => invalidateShoppingList(ref)),
                         ),
                   );
                   SnackbarHelper.showInfo(context, l10n.addToShoppingList);

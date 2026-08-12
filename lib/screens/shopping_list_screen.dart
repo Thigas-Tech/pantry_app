@@ -9,6 +9,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -58,7 +59,11 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen>
   Future<void> _showAddSheet(BuildContext context) async {
     final item = await AddToShoppingListSheet.show(context);
     if (item != null && context.mounted) {
-      await addShoppingItem(ref, item);
+      await ref.read(shoppingListServiceProvider).addShoppingItem(
+        item,
+        activeInventoryId: ref.read(activeInventoryProvider),
+      );
+      invalidateShoppingList(ref);
     }
   }
 }
@@ -105,7 +110,12 @@ class _MoveToInventoryButton extends ConsumerWidget {
         if (confirm != true) return;
 
         try {
-          final result = await movePurchasedToInventory(ref);
+          final result = await ref
+              .read(shoppingListServiceProvider)
+              .movePurchasedToInventory(
+                inventoryId: ref.read(activeInventoryProvider),
+              );
+          invalidateShoppingList(ref);
           if (!context.mounted) return;
           SnackbarHelper.showUndo(
             context,
@@ -168,7 +178,12 @@ class _ClearPurchasedButton extends ConsumerWidget {
         final purchasedItems = await db.getPurchasedShoppingItems(
           inventoryId: inventoryId,
         );
-        final deleted = await clearPurchasedShoppingItems(ref);
+        final deleted = await ref
+            .read(shoppingListServiceProvider)
+            .clearPurchasedShoppingItems(
+              inventoryId: ref.read(activeInventoryProvider),
+            );
+        invalidateShoppingList(ref);
         if (!context.mounted) return;
         if (deleted > 0) {
           SnackbarHelper.showUndo(
@@ -176,11 +191,14 @@ class _ClearPurchasedButton extends ConsumerWidget {
             l10n.undoClearPurchased,
             () async {
               for (final item in purchasedItems) {
-                await addShoppingItem(
-                  ref,
-                  item.copyWith(isPurchased: false),
-                );
+                await ref
+                    .read(shoppingListServiceProvider)
+                    .addShoppingItem(
+                      item.copyWith(isPurchased: false),
+                      activeInventoryId: ref.read(activeInventoryProvider),
+                    );
               }
+              invalidateShoppingList(ref);
             },
           );
         }
@@ -408,23 +426,40 @@ class _ShoppingItemTile extends ConsumerWidget {
       ),
       onDismissed: (_) {
         unawaited(
-          deleteShoppingItem(ref, item.id!).then((_) {
-            if (!context.mounted) return;
-            SnackbarHelper.showUndo(
-              context,
-              l10n.undoDeleteShoppingItem,
-              () async {
-                await addShoppingItem(ref, item);
-              },
-            );
-          }),
+          ref
+              .read(shoppingListServiceProvider)
+              .deleteShoppingItem(item.id!)
+              .then((_) {
+                if (!context.mounted) return;
+                invalidateShoppingList(ref);
+                SnackbarHelper.showUndo(
+                  context,
+                  l10n.undoDeleteShoppingItem,
+                  () async {
+                    await ref
+                        .read(shoppingListServiceProvider)
+                        .addShoppingItem(
+                          item,
+                          activeInventoryId: ref.read(
+                            activeInventoryProvider,
+                          ),
+                        );
+                    invalidateShoppingList(ref);
+                  },
+                );
+              }),
         );
       },
       child: ListTile(
         leading: Checkbox(
           value: item.isPurchased,
           onChanged: (_) {
-            unawaited(toggleShoppingItem(ref, item.id!));
+            unawaited(
+              ref
+                  .read(shoppingListServiceProvider)
+                  .toggleShoppingItem(item.id!)
+                  .then((_) => invalidateShoppingList(ref)),
+            );
           },
         ),
         title: Text(
@@ -458,23 +493,38 @@ class _ShoppingItemTile extends ConsumerWidget {
                 icon: const Icon(Icons.add_shopping_cart, size: 18),
                 label: Text(l10n.addAgain),
                 onPressed: () async {
-                  await toggleShoppingItem(ref, item.id!);
+                  await ref
+                      .read(shoppingListServiceProvider)
+                      .toggleShoppingItem(item.id!);
+                  invalidateShoppingList(ref);
                 },
               ),
             IconButton(
               icon: const Icon(Icons.delete, size: 20),
               onPressed: () {
                 unawaited(
-                  deleteShoppingItem(ref, item.id!).then((_) {
-                    if (!context.mounted) return;
-                    SnackbarHelper.showUndo(
-                      context,
-                      l10n.undoDeleteShoppingItem,
-                      () async {
-                        await addShoppingItem(ref, item);
-                      },
-                    );
-                  }),
+                  ref
+                      .read(shoppingListServiceProvider)
+                      .deleteShoppingItem(item.id!)
+                      .then((_) {
+                        if (!context.mounted) return;
+                        invalidateShoppingList(ref);
+                        SnackbarHelper.showUndo(
+                          context,
+                          l10n.undoDeleteShoppingItem,
+                          () async {
+                            await ref
+                                .read(shoppingListServiceProvider)
+                                .addShoppingItem(
+                                  item,
+                                  activeInventoryId: ref.read(
+                                    activeInventoryProvider,
+                                  ),
+                                );
+                            invalidateShoppingList(ref);
+                          },
+                        );
+                      }),
                 );
               },
               tooltip: l10n.deleteItem,
@@ -560,7 +610,10 @@ class _ShoppingItemTile extends ConsumerWidget {
       );
 
       if (action == 'remove') {
-        await updateShoppingItemPrice(ref, item.id!);
+        await ref
+            .read(shoppingListServiceProvider)
+            .updateShoppingItemPrice(item.id!);
+        invalidateShoppingList(ref);
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.removePrice);
         }
@@ -581,13 +634,13 @@ class _ShoppingItemTile extends ConsumerWidget {
 
     if (price == null) return;
 
-    await updateShoppingItemPrice(
-      ref,
+    await ref.read(shoppingListServiceProvider).updateShoppingItemPrice(
       item.id!,
       priceAmount: price.price,
       priceCurrency: price.currency,
       priceStore: price.store,
     );
+    invalidateShoppingList(ref);
 
     if (context.mounted) {
       SnackbarHelper.showInfo(context, l10n.addPrice);

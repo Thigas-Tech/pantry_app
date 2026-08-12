@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -11,12 +12,24 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
+import 'package:pantry_app/services/firebase_cache_service.dart';
+import 'package:pantry_app/services/recipe_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+
+class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
+
+/// Builds a [RecipeService] backed by [db] with a disabled cache and the
+/// default currency service.
+RecipeService _service(MockDatabaseHelper db) {
+  return RecipeService(db, MockFirebaseCacheService(), CurrencyService());
+}
 
 class _MutableActiveInventory extends ActiveInventoryNotifier {
   _MutableActiveInventory(this.initial);
@@ -45,7 +58,13 @@ class _CookRecipeButton extends ConsumerWidget {
     return ElevatedButton(
       onPressed: () async {
         try {
-          await cookRecipe(ref, 1);
+          await ref
+              .read(recipeServiceProvider)
+              .cookRecipe(
+                1,
+                activeInventoryId: ref.read(activeInventoryProvider),
+                baseCurrency: ref.read(settingsProvider).baseCurrency,
+              );
         } on Exception {
           // cookRecipe is asserted via pre-flight mock interactions.
         }
@@ -55,13 +74,14 @@ class _CookRecipeButton extends ConsumerWidget {
   }
 }
 
-/// Captures the result of a [calculateRecipeCost] call inside a widget.
+/// Captures the result of a
+/// [RecipeService.calculateRecipeCost] call inside a widget.
 class _CapturedCost {
   double? value;
   bool done = false;
 }
 
-/// A button that computes [calculateRecipeCost] when tapped.
+/// A button that computes [RecipeService.calculateRecipeCost] when tapped.
 class _CostButton extends ConsumerWidget {
   const _CostButton({required this.recipeId, required this.capture});
 
@@ -72,7 +92,13 @@ class _CostButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ElevatedButton(
       onPressed: () async {
-        capture.value = await calculateRecipeCost(ref, recipeId);
+        capture.value = await ref
+            .read(recipeServiceProvider)
+            .calculateRecipeCost(
+              recipeId,
+              activeInventoryId: ref.read(activeInventoryProvider),
+              baseCurrency: ref.read(settingsProvider).baseCurrency,
+            );
         capture.done = true;
       },
       child: const Text('Cost'),
@@ -80,14 +106,14 @@ class _CostButton extends ConsumerWidget {
   }
 }
 
-/// Captures the outcome of a [cookRecipe] call inside a widget.
+/// Captures the outcome of a [RecipeService.cookRecipe] call inside a widget.
 class _CookResultCapture {
   Object? error;
   bool started = false;
   bool done = false;
 }
 
-/// A button that invokes [cookRecipe] when tapped.
+/// A button that invokes [RecipeService.cookRecipe] when tapped.
 class _CookButton extends ConsumerWidget {
   const _CookButton({required this.capture});
 
@@ -99,7 +125,13 @@ class _CookButton extends ConsumerWidget {
       onPressed: () async {
         capture.started = true;
         try {
-          await cookRecipe(ref, 1);
+          await ref
+              .read(recipeServiceProvider)
+              .cookRecipe(
+                1,
+                activeInventoryId: ref.read(activeInventoryProvider),
+                baseCurrency: ref.read(settingsProvider).baseCurrency,
+              );
         } on Exception catch (e) {
           capture.error = e;
         } finally {
@@ -115,8 +147,9 @@ class _CookButton extends ConsumerWidget {
 ///
 /// testWidgets runs under a fake-async zone where futures awaited from an
 /// event-handler callback chain (such as the price lookup in
-/// [calculateRecipeCost]) do not resolve on their own: sqflite_common_ffi
-/// completes its futures from the real event loop, which only turns during
+/// [RecipeService.calculateRecipeCost]) do not resolve on their own:
+/// sqflite_common_ffi completes its futures from the real event loop, which
+/// only turns during
 /// [WidgetTester.runAsync], while the continuation microtasks only flush
 /// during [WidgetTester.pump]. This helper alternates the two until [done] is
 /// true or [maxTurns] is reached, so real database work completes
@@ -137,7 +170,8 @@ Future<void> _pumpWithRealIo(
 /// Creates the full schema in [db] and inserts [prices].
 ///
 /// Running the migrations also creates the products and inventory tables so
-/// the package-size resolver in [calculateIngredientCost] can be exercised.
+/// the package-size resolver in
+/// [RecipeService.calculateIngredientCost] can be exercised.
 Future<void> _seedPrices(Database db, List<Price> prices) async {
   await MigrationRunner(allMigrations()).run(db, 0, 37);
   for (final price in prices) {
@@ -162,8 +196,12 @@ Future<void> _insertProduct(
 }
 
 /// Computes the ingredient cost for [ingredients] in inventory 1.
-Future<double> _cost(Database db, List<RecipeIngredient> ingredients) {
-  return calculateIngredientCost(
+Future<double> _cost(
+  Database db,
+  MockDatabaseHelper mockDb,
+  List<RecipeIngredient> ingredients,
+) {
+  return _service(mockDb).calculateIngredientCost(
     db,
     ingredients,
     inventoryId: 1,
@@ -174,6 +212,7 @@ Future<double> _cost(Database db, List<RecipeIngredient> ingredients) {
 
 void main() {
   setUpAll(() {
+    dotenv.loadFromString(isOptional: true, mergeWith: {});
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
     registerFallbackValue(const Recipe(name: ''));
@@ -317,7 +356,7 @@ void main() {
         ),
       ];
 
-      final inv2 = await calculateIngredientCost(
+      final inv2 = await _service(mockDb).calculateIngredientCost(
         db,
         ingredients,
         inventoryId: 2,
@@ -326,7 +365,7 @@ void main() {
       );
       expect(inv2, closeTo(3.0, 0.001));
 
-      final inv1 = await calculateIngredientCost(
+      final inv1 = await _service(mockDb).calculateIngredientCost(
         db,
         ingredients,
         inventoryId: 1,
@@ -344,7 +383,7 @@ void main() {
         RecipeIngredient(recipeId: 1, name: 'Eggs', barcode: '001'),
       ];
 
-      final cost = await calculateIngredientCost(
+      final cost = await _service(mockDb).calculateIngredientCost(
         db,
         ingredients,
         inventoryId: 2,
@@ -359,7 +398,7 @@ void main() {
         RecipeIngredient(recipeId: 1, name: 'Salt'),
       ];
 
-      final cost = await calculateIngredientCost(
+      final cost = await _service(mockDb).calculateIngredientCost(
         db,
         ingredients,
         inventoryId: 1,
@@ -390,7 +429,7 @@ void main() {
           ),
         ];
 
-        final cost = await _cost(db, ingredients);
+        final cost = await _cost(db, mockDb, ingredients);
         expect(cost, closeTo(1.665, 0.001));
       },
     );
@@ -412,7 +451,7 @@ void main() {
           ),
         ];
 
-        final cost = await _cost(db, ingredients);
+        final cost = await _cost(db, mockDb, ingredients);
         expect(cost, closeTo(1.25, 0.001));
       },
     );
@@ -437,7 +476,7 @@ void main() {
         ),
       ];
 
-      final cost = await _cost(db, ingredients);
+      final cost = await _cost(db, mockDb, ingredients);
       expect(cost, closeTo(20.0, 0.001));
     });
 
@@ -460,7 +499,7 @@ void main() {
         ),
       ];
 
-      final cost = await _cost(db, ingredients);
+      final cost = await _cost(db, mockDb, ingredients);
       expect(cost, closeTo(0.6, 0.001));
     });
 
@@ -478,7 +517,7 @@ void main() {
         ),
       ];
 
-      final cost = await _cost(db, ingredients);
+      final cost = await _cost(db, mockDb, ingredients);
       expect(cost, closeTo(9.99, 0.001));
     });
   });
@@ -521,6 +560,9 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
+              firebaseCacheProvider.overrideWithValue(
+                MockFirebaseCacheService(),
+              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(1),
               ),
@@ -566,6 +608,9 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
+              firebaseCacheProvider.overrideWithValue(
+                MockFirebaseCacheService(),
+              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(2),
               ),
@@ -648,6 +693,9 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
+              firebaseCacheProvider.overrideWithValue(
+                MockFirebaseCacheService(),
+              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(1),
               ),
@@ -713,7 +761,9 @@ void main() {
           quantity: 4,
         ),
       ];
-      final shortages = await checkIngredientShortages(mockDb, ingredients, 1);
+      final shortages = await _service(
+        mockDb,
+      ).checkIngredientShortages(ingredients, 1);
       // Total needed = 7, available = 5 -> deficit of 2
       expect(shortages, containsPair('Garlic', closeTo(2, 0.01)));
     });
@@ -739,7 +789,9 @@ void main() {
           unit: 'g',
         ),
       ];
-      final shortages = await checkIngredientShortages(mockDb, ingredients, 1);
+      final shortages = await _service(
+        mockDb,
+      ).checkIngredientShortages(ingredients, 1);
       // 1 kg = 1000 g, need 100 g -> no shortage
       expect(shortages, isEmpty);
     });
@@ -765,7 +817,9 @@ void main() {
           unit: 'g',
         ),
       ];
-      final shortages = await checkIngredientShortages(mockDb, ingredients, 1);
+      final shortages = await _service(
+        mockDb,
+      ).checkIngredientShortages(ingredients, 1);
       // g and L are incompatible -> available stays 0 -> shortage
       expect(shortages, isNotEmpty);
     });
@@ -774,7 +828,9 @@ void main() {
       final ingredients = [
         const RecipeIngredient(recipeId: 1, name: 'Salt'),
       ];
-      final shortages = await checkIngredientShortages(mockDb, ingredients, 1);
+      final shortages = await _service(
+        mockDb,
+      ).checkIngredientShortages(ingredients, 1);
       expect(shortages, isEmpty);
     });
 
@@ -798,7 +854,9 @@ void main() {
           quantity: 3,
         ),
       ];
-      final shortages = await checkIngredientShortages(mockDb, ingredients, 1);
+      final shortages = await _service(
+        mockDb,
+      ).checkIngredientShortages(ingredients, 1);
       expect(shortages, isEmpty);
     });
 
@@ -830,8 +888,7 @@ void main() {
             quantity: 2,
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -863,8 +920,7 @@ void main() {
             quantity: 2,
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -906,8 +962,7 @@ void main() {
             barcode: 'plu-12345',
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -937,8 +992,7 @@ void main() {
             barcode: 'produce-Onion',
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -974,8 +1028,7 @@ void main() {
             quantity: 2,
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -1006,8 +1059,7 @@ void main() {
             barcode: 'produce-Onion',
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -1038,8 +1090,7 @@ void main() {
             unit: 'g',
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -1070,8 +1121,7 @@ void main() {
             quantity: 3,
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -1105,8 +1155,7 @@ void main() {
             quantity: 2,
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -1139,8 +1188,7 @@ void main() {
             barcode: 'produce-Organic Banana',
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -1177,8 +1225,7 @@ void main() {
             quantity: 5,
           ),
         ];
-        final shortages = await checkIngredientShortages(
-          mockDb,
+        final shortages = await _service(mockDb).checkIngredientShortages(
           ingredients,
           1,
         );
@@ -1264,6 +1311,9 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
+              firebaseCacheProvider.overrideWithValue(
+                MockFirebaseCacheService(),
+              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(1),
               ),

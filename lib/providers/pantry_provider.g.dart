@@ -66,7 +66,7 @@ final class PantryProvider
   Pantry create() => Pantry();
 }
 
-String _$pantryHash() => r'186125bf8d269c434b10e3584ae07487f7ce9e7d';
+String _$pantryHash() => r'315ae977969455cbb1f0ba3dd7b2b21a174b2178';
 
 /// Provides the joined list of inventory items for the currently active
 /// pantry.

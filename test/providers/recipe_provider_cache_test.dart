@@ -11,7 +11,7 @@ import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
-import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/services/firebase_cache_service.dart';
 
 class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
@@ -55,12 +55,14 @@ class _SaveRecipeTestWidgetState extends ConsumerState<_SaveRecipeTestWidget> {
     unawaited(
       Future.microtask(() async {
         try {
-          await saveRecipe(
-            ref,
-            name: widget.name,
-            existingRecipeId: widget.existingRecipeId,
-            ingredients: widget.ingredients,
-          );
+          await ref
+              .read(recipeServiceProvider)
+              .saveRecipe(
+                name: widget.name,
+                existingRecipeId: widget.existingRecipeId,
+                ingredients: widget.ingredients,
+                activeInventoryId: ref.read(activeInventoryProvider),
+              );
         } on Exception {
           // Expected for negative tests.
         }
@@ -89,7 +91,7 @@ class _DeleteRecipeTestWidgetState
     super.initState();
     unawaited(
       Future.microtask(() async {
-        await deleteRecipe(ref, widget.id);
+        await ref.read(recipeServiceProvider).deleteRecipe(widget.id);
       }),
     );
   }
