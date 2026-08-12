@@ -308,7 +308,7 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: SearchSourceSelector(
-            label: '${l10n.searchSourceLabel}: ',
+            label: l10n.searchSourceLabel,
             value: state.activeSource,
             onChanged: (source) => _controller.setActiveSource(
               source,

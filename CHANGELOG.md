@@ -13,6 +13,25 @@
   (`lib/providers/home_screen_controller.dart`,
   `test/providers/home_screen_controller_test.dart`)
 
+- **l10n violations (audit Q2)**: 'Product not found' in main.dart is now
+  the localized productNotFound; raw e.toString() no longer reaches users
+  in product_detail_screen, stats_screen, recipe_list_screen and
+  price_history_screen (replaced by the new errorGeneric, with the real
+  exception still logged); the produce serving-size dropdown and the
+  Nutri-Score badge semantics labels use ARB strings; the colon in the
+  search source label moved into the ARB string. New ARB keys added to all
+  three locales. Android notification channel names stay English by
+  design - Android does not update channel names on locale change
+  (documented on the interface).
+  (lib/main.dart, lib/screens/product_detail_screen.dart,
+  lib/screens/stats_screen.dart, lib/screens/recipe_list_screen.dart,
+  lib/screens/price_history_screen.dart,
+  lib/screens/add_to_inventory_screen.dart,
+  lib/widgets/nutriscore_badge.dart, lib/widgets/search_panel.dart,
+  lib/l10n/app_en.arb, lib/l10n/app_pt.arb, lib/l10n/app_pt_BR.arb,
+  test/screens/add_to_inventory_screen_test.dart,
+  test/widgets/nutriscore_badge_test.dart)
+
 - **Silent exception swallowing (audit Q4)**: theme-mode load/persist
   failures in `theme_provider.dart` are now logged via `logWarning` instead
   of being swallowed; a price whose failure-marking also fails in

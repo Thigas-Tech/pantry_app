@@ -29,6 +29,30 @@ Future<void> _pumpScreen(WidgetTester tester, Widget child) async {
 }
 
 void main() {
+  testWidgets('serving size dropdown shows localized labels', (
+    tester,
+  ) async {
+    await _pumpScreen(
+      tester,
+      const AddToInventoryScreen(
+        barcode: 'produce-Apple',
+        inventoryId: 1,
+        productType: ProductType.produce,
+      ),
+    );
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(AddToInventoryScreen)),
+    )!;
+    // Open the serving-size dropdown so all options are built.
+    await tester.tap(find.text(l10n.servingMedium));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.servingSmall), findsOneWidget);
+    expect(find.text(l10n.servingMedium), findsWidgets);
+    expect(find.text(l10n.servingLarge), findsOneWidget);
+  });
+
   testWidgets('defaults to unit mode for produce type', (tester) async {
     await _pumpScreen(
       tester,

@@ -178,6 +178,8 @@
   "couldNotDeleteInventory": "Could not delete inventory.",
   "networkError": "Network error. Please check your connection.",
   "fetchProductFailed": "Failed to fetch product. Please check your connection.",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "productNotFound": "Product not found.",
   "productNotFoundHint": "This product isn't in the Open Food Facts database yet. You can add it manually or contribute it to the community.",
   "addManually": "Add manually",
   "contributeToOpenFoodFacts": "Contribute to Open Food Facts",
@@ -303,6 +305,13 @@
     }
   },
   "nutriscoreNotApplicableGeneric": "Nutri-Score is not applicable to this product category.",
+  "nutriscoreNotApplicableSemantics": "Nutri-Score, not applicable",
+  "nutriscoreGradeSemantics": "Nutri-Score {grade}",
+  "@nutriscoreGradeSemantics": {
+    "placeholders": {
+      "grade": {}
+    }
+  },
   "flushCache": "Flush cache",
   "flushCacheSub": "Delete cached product data and images",
   "flushCacheConfirm": "This will delete all cached product data and images fetched from Open Food Facts. Manually entered products and your inventory items will be preserved. Cached products will be re-fetched the next time you view them.",
@@ -933,7 +942,7 @@
   "onboardingPage5Cta": "Get Started",
   "onboardingSkip": "Skip",
   "onboardingBack": "Back",
-  "searchSourceLabel": "Search in",
+  "searchSourceLabel": "Search in:",
   "searchSourceOff": "Packaged Products",
   "searchSourceUsda": "Fresh Produce",
   "searchSourceInventory": "My Pantry",
