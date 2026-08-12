@@ -5,6 +5,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/services/open_prices_api_client.dart';
 import 'package:pantry_app/services/open_prices_service.dart';
+import 'package:pantry_app/utils/logger.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 
@@ -100,6 +101,65 @@ void main() {
 
       expect(result.synced, 0);
       expect(result.failed, 0);
+    });
+
+    test('marks a price as failed when the sync write fails', () async {
+      when(() => mockDb.getPricesBySyncStatus(priceSyncPending)).thenAnswer(
+        (_) async => [
+          const Price(
+            barcode: '123',
+            price: 4.99,
+            syncStatus: priceSyncPending,
+            id: 1,
+          ),
+        ],
+      );
+      var writeCalls = 0;
+      when(() => mockDb.updatePrice(any())).thenAnswer((_) async {
+        writeCalls++;
+        if (writeCalls == 1) throw Exception('db down');
+        return 1;
+      });
+
+      final result = await service.syncPendingPrices();
+
+      expect(result.synced, 0);
+      expect(result.failed, 1);
+      verify(
+        () => mockDb.updatePrice(
+          any(
+            that: isA<Price>().having(
+              (p) => p.syncStatus,
+              'syncStatus',
+              priceSyncFailed,
+            ),
+          ),
+        ),
+      ).called(1);
+      expect(recentLogs, isNot(contains('stuck in pending')));
+    });
+
+    test('logs a warning when a price cannot even be marked failed', () async {
+      when(() => mockDb.getPricesBySyncStatus(priceSyncPending)).thenAnswer(
+        (_) async => [
+          const Price(
+            barcode: '123',
+            price: 4.99,
+            syncStatus: priceSyncPending,
+            id: 1,
+          ),
+        ],
+      );
+      when(() => mockDb.updatePrice(any())).thenThrow(
+        Exception('db down'),
+      );
+
+      final result = await service.syncPendingPrices();
+
+      expect(result.synced, 0);
+      expect(result.failed, 1);
+      expect(recentLogs, contains('remain stuck in pending state'));
+      expect(recentLogs, contains('Failed to mark price 1 as failed'));
     });
   });
 

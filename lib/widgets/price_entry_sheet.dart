@@ -9,6 +9,7 @@ import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
+import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// A bottom sheet for entering or editing a price observation.
@@ -383,8 +384,8 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.invalidate(storesProvider);
       });
-    } on Exception {
-      // Silently ignore — store list will catch up on next open.
+    } on Exception catch (e) {
+      logWarning('Failed to auto-insert store "$name": $e');
     }
   }
 }

@@ -85,6 +85,7 @@ class OpenPricesService {
 
     var synced = 0;
     var failed = 0;
+    var stuckPending = 0;
 
     for (final price in pending) {
       try {
@@ -98,9 +99,21 @@ class OpenPricesService {
           await _db.updatePrice(
             price.copyWith(syncStatus: priceSyncFailed),
           );
-        } on Exception catch (_) {}
+        } on Exception catch (inner) {
+          logError(
+            'Failed to mark price ${price.id} as failed: $inner',
+          );
+          stuckPending++;
+        }
         failed++;
       }
+    }
+
+    if (stuckPending > 0) {
+      logWarning(
+        '$stuckPending prices remain stuck in pending state '
+        '(both sync and failure marking failed)',
+      );
     }
 
     logInfo(

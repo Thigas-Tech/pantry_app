@@ -167,7 +167,8 @@ class CurrencyService {
         'VN' => 'VND',
         _ => 'USD',
       };
-    } on Object catch (_) {
+    } on Object catch (e) {
+      logWarning('Locale currency detection failed, falling back to USD: $e');
       return 'USD';
     }
   }

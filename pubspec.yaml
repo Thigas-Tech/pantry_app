@@ -63,6 +63,7 @@ dev_dependencies:
     git: https://github.com/openfoodfacts/openfoodfacts_flutter_lints.git
   riverpod_generator: ^4.0.4
   riverpod_lint: ^3.1.4
+  shared_preferences_platform_interface: ^2.4.2
   very_good_analysis: ^10.3.0
   vm_service: ^15.2.0
 

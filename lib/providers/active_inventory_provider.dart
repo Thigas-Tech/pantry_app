@@ -71,7 +71,8 @@ class ActiveInventoryNotifier extends _$ActiveInventoryNotifier {
       final db = ref.read(databaseProvider);
       final result = await db.getInventories();
       return result;
-    } on Exception catch (_) {
+    } on Exception catch (e) {
+      logWarning('Failed to load inventories during validation: $e');
       return null;
     }
   }
