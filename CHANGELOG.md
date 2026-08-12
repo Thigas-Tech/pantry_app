@@ -54,6 +54,17 @@
 
 ### Fixed
 
+- **Single dependency-injection path for singletons**: `DatabaseHelper` and
+  `ImageCacheService` were constructed directly in six startup/screen
+  sites (main.dart x5, settings_screen) in addition to their providers,
+  giving two DI paths for the same singletons. The shared `appContainer`
+  is now created before `_handleAppUpdate` and every site reads
+  `databaseProvider` / `imageCacheProvider`. A source-scan guard test
+  (`test/database/database_helper_di_guard_test.dart`) fails if a direct
+  construction is reintroduced outside the owning files.
+  (`lib/main.dart`, `lib/screens/settings_screen.dart`,
+  `test/database/database_helper_di_guard_test.dart`)
+
 - **Connectivity-gated background cache refresh**: the scheduled refresh
   fired even while offline, contradicting the documented offline-first
   contract (ARCHITECTURE/PERFORMANCE.md §11.3). The decision moved into a
