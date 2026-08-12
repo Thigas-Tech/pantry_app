@@ -67,6 +67,7 @@
   <p>Inserts a recipe and returns its row ID.</p>
 <p>If <code>Recipe.createdAt</code> or <code>Recipe.updatedAt</code> is 0, the current epoch
 timestamp is used.</p>
+<p>Throws <a href="https://api.flutter.dev/flutter/dart-core/ArgumentError-class.html">ArgumentError</a> if <code>recipe.name</code> is empty.</p>
 </section>
 
 
@@ -74,6 +75,9 @@ timestamp is used.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; insert(Database db, Recipe recipe) async {
+  if (recipe.name.isEmpty) {
+    throw ArgumentError(&#39;recipe name must not be empty&#39;);
+  }
   final now = DateTime.now().millisecondsSinceEpoch;
   final stamped = recipe.createdAt == 0
       ? recipe.copyWith(createdAt: now)

@@ -66,6 +66,7 @@
 <section class="desc markdown">
   <p>Returns all recipes for the given <code>inventoryId</code>,
 ordered by updated_at descending.</p>
+<p>Throws <a href="https://api.flutter.dev/flutter/dart-core/ArgumentError-class.html">ArgumentError</a> if <code>inventoryId</code> is non-positive.</p>
 </section>
 
 
@@ -73,6 +74,9 @@ ordered by updated_at descending.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Recipe&gt;&gt; listAll(Database db, int inventoryId) async {
+  if (inventoryId &lt;= 0) {
+    throw ArgumentError(&#39;inventory id must be positive&#39;);
+  }
   try {
     final result = await db.query(
       &#39;recipes&#39;,

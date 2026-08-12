@@ -65,6 +65,7 @@
     
 <section class="desc markdown">
   <p>Deletes the recipe with the given <code>id</code>. Returns rows deleted.</p>
+<p>Throws <a href="https://api.flutter.dev/flutter/dart-core/ArgumentError-class.html">ArgumentError</a> if <code>id</code> is non-positive.</p>
 </section>
 
 
@@ -72,6 +73,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; delete(Database db, int id) async {
+  if (id &lt;= 0) {
+    throw ArgumentError(&#39;recipe id must be positive&#39;);
+  }
   logInfo(&#39;Deleting recipe $id&#39;);
   try {
     final affected = await db.delete(

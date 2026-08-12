@@ -70,6 +70,7 @@
 and the stored search_text column are normalized identically.</p>
 <p><strong>Filtering</strong>: uses LIKE '%escaped%' on the indexed search_text
 column to quickly narrow candidates.</p>
+<p>Throws <a href="https://api.flutter.dev/flutter/dart-core/ArgumentError-class.html">ArgumentError</a> if <code>query</code> is empty.</p>
 </section>
 
 
@@ -81,6 +82,9 @@ column to quickly narrow candidates.</p>
   String query, {
   int limit = 30,
 }) async {
+  if (query.isEmpty) {
+    throw ArgumentError(&#39;search query must not be empty&#39;);
+  }
   final normalizedQuery = normalizeForSearch(query);
   if (normalizedQuery.isEmpty) return &lt;Product&gt;[];
 
