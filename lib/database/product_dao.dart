@@ -134,7 +134,12 @@ class ProductDao {
   );
 
   /// Inserts a product into the local cache (upsert).
+  ///
+  /// Throws [ArgumentError] if [product.barcode] is empty.
   Future<void> insert(Database db, Product product) async {
+    if (product.barcode.isEmpty) {
+      throw ArgumentError('product barcode must not be empty');
+    }
     logInfo('Inserting product: ${product.barcode} — ${product.name}');
     try {
       final map = toMap(product);
@@ -194,11 +199,16 @@ class ProductDao {
   ///
   /// **Filtering**: uses LIKE '%escaped%' on the indexed search_text
   /// column to quickly narrow candidates.
+  ///
+  /// Throws [ArgumentError] if [query] is empty.
   Future<List<Product>> search(
     Database db,
     String query, {
     int limit = 30,
   }) async {
+    if (query.isEmpty) {
+      throw ArgumentError('search query must not be empty');
+    }
     final normalizedQuery = normalizeForSearch(query);
     if (normalizedQuery.isEmpty) return <Product>[];
 

@@ -145,7 +145,11 @@ class DatabaseHelper {
         dbPath,
         version: databaseVersion,
         onConfigure: (db) async {
-          await db.execute('PRAGMA foreign_keys = OFF');
+          await db.execute('PRAGMA foreign_keys = ON');
+          await db.execute('PRAGMA journal_mode = WAL');
+          await db.execute('PRAGMA synchronous = FULL');
+          await db.execute('PRAGMA cache_size = -2000');
+          await db.execute('PRAGMA mmap_size = 268435456');
         },
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,
@@ -153,6 +157,10 @@ class DatabaseHelper {
         onOpen: (db) async {
           await _checkIntegrity(db);
           await db.execute('PRAGMA foreign_keys = ON');
+          final mode = await db.rawQuery('PRAGMA journal_mode');
+          if (mode.first['journal_mode'] != 'wal') {
+            logWarning('WAL journal mode is not active on database open');
+          }
         },
       );
       logInfo('Database opened successfully');
