@@ -52,6 +52,60 @@
   `test/database/recipe_dao_test.dart`,
   `test/database/database_helper_test.dart`)
 
+### Fixed
+
+- **SQLite version compatibility**: FEFO and price-statistics queries used
+  `NULLS LAST` (SQLite 3.30+) and `ROW_NUMBER() OVER` (SQLite 3.25+),
+  which crash on devices whose system SQLite predates those versions
+  (Android 10 and below for NULLS LAST, Android 9 and below for window
+  functions). Both syntaxes are replaced with portable SQL: FEFO ordering
+  uses `ORDER BY (expiry_date IS NULL), expiry_date ASC`, and
+  latest-price-per-barcode uses a correlated subquery
+  (`ORDER BY date_purchased DESC, id DESC LIMIT 1`). The rewrite also
+  fixes a latent double-count when two purchases share the same
+  `date_purchased`. A new compatibility test scans `lib/` for the banned
+  syntax so it cannot be reintroduced.
+  (`lib/database/database_helper.dart`, `lib/providers/recipe_provider.dart`,
+  `lib/database/price_dao.dart`, `test/database/price_dao_test.dart`,
+  `test/database/database_helper_test.dart`,
+  `test/database/sqlite_compatibility_test.dart`)
+
+- **deleteInventory orphaned shopping list items**: with foreign-key
+  enforcement disabled during the delete, the `ON DELETE SET NULL` on
+  `shopping_list.inventory_id` never fired, leaving items dangling on a
+  deleted inventory. The delete now nulls those references explicitly and
+  runs all deletions inside a single transaction.
+  (`lib/database/inventories_dao.dart`,
+  `test/database/database_helper_test.dart`)
+
+- **Failed migrations are no longer silently skipped**: the migration
+  runner now rethrows the first failing migration so sqflite rolls back
+  the whole upgrade and retries on the next launch, instead of committing
+  version 38 with an incomplete schema.
+  (`lib/database/migrations/migration_runner.dart`,
+  `lib/database/database_helper.dart`,
+  `test/database/migrations/migration_runner_test.dart`,
+  `test/database/database_helper_test.dart`)
+
+- **Index optimizations (v38)**: dropped the redundant `idx_barcode`
+  (products PK is auto-indexed) and `idx_inventory_barcode` (covered by
+  the composite), and added `idx_prices_barcode_inventory_date`,
+  `idx_recipes_inventory_updated`, and `idx_products_source` to serve the
+  hot queries.
+  (`lib/database/migrations/v38_index_optimizations.dart`,
+  `lib/database/database_helper.dart`,
+  `test/database/migrations/v38_index_optimizations_test.dart`)
+
+- **Corrupt `categories_hierarchy` JSON no longer crashes product reads**:
+  the column is now decoded defensively like `additional_nutrients`.
+  (`lib/database/product_dao.dart`,
+  `test/database/product_dao_test.dart`)
+
+- **Database maintenance**: `PRAGMA quick_check` now runs only after
+  schema upgrades instead of on every open, and `PRAGMA optimize` runs on
+  open and after `cleanupOldEntries`.
+  (`lib/database/database_helper.dart`)
+
 ### Added
 
 - **Nutrition editor for all Open Food Facts nutrients**: the manual product

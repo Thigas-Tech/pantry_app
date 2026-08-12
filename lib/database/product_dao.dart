@@ -17,11 +17,8 @@ class ProductDao {
   /// Creates a [ProductDao].
   const ProductDao();
 
-  /// Decodes the additional_nutrients JSON column into a nutrient list.
-  ///
-  /// Returns an empty list when the column is null, empty, or holds corrupt
-  /// JSON so a malformed row never crashes a product read.
-  /// Decodes the additional_nutrients JSON column into nutrient objects.
+  /// Decodes the additional_nutrients JSON column into a list of
+  /// [ProductNutrient] entries.
   ///
   /// Returns an empty list for null, blank, non-list, or corrupt JSON and
   /// skips entries whose shape does not match [ProductNutrient] so a single
@@ -120,10 +117,9 @@ class ProductDao {
     offNutritionImageUrl: map['off_nutrition_image_url'] as String?,
     offIngredientsImageUrl: map['off_ingredients_image_url'] as String?,
     offProductImageUrl: map['off_product_image_url'] as String?,
-    categoriesHierarchy: map['categories_hierarchy'] != null
-        ? (jsonDecode(map['categories_hierarchy'] as String) as List<dynamic>)
-              .cast<String>()
-        : null,
+    categoriesHierarchy: decodeCategoriesHierarchy(
+      map['categories_hierarchy'] as String?,
+    ),
     languageCode: (map['language_code'] as String?) ?? 'en',
     pluCode: map['plu_code'] as String?,
     productType: map['product_type'] != null
@@ -133,6 +129,23 @@ class ProductDao {
           )
         : ProductType.barcoded,
   );
+
+  /// Decodes the categories_hierarchy JSON column into a list of category
+  /// names.
+  ///
+  /// Returns null for null, blank, non-list, or corrupt JSON so a malformed
+  /// row never crashes a product read. Mirrors the defensive handling of
+  /// [decodeAdditionalNutrients].
+  static List<String>? decodeCategoriesHierarchy(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return null;
+      return decoded.whereType<String>().toList();
+    } on FormatException {
+      return null;
+    }
+  }
 
   /// Inserts a product into the local cache (upsert).
   ///
@@ -198,8 +211,11 @@ class ProductDao {
   /// The search is accent- and case-insensitive because both the query
   /// and the stored search_text column are normalized identically.
   ///
-  /// **Filtering**: uses LIKE '%escaped%' on the indexed search_text
-  /// column to quickly narrow candidates.
+  /// **Filtering**: uses a leading- and trailing-wildcard LIKE on the
+  /// search_text column. SQLite cannot use a B-tree index for a
+  /// leading-wildcard LIKE, so this is a full scan of the products table;
+  /// acceptable for typical cache sizes (FTS5 would be the option if the
+  /// cache grows large).
   ///
   /// Throws [ArgumentError] if [query] is empty.
   Future<List<Product>> search(

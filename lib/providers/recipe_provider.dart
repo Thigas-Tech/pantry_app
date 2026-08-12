@@ -442,7 +442,7 @@ Future<({double packageQuantity, String packageUnit})?> _resolvePackageSize(
   final inventoryRows = await database.rawQuery(
     'SELECT quantity, unit FROM inventory'
     ' WHERE barcode = ? AND inventory_id = ?'
-    ' ORDER BY expiry_date ASC NULLS LAST',
+    ' ORDER BY (expiry_date IS NULL), expiry_date ASC',
     [barcode, inventoryId],
   );
   if (inventoryRows.isNotEmpty) {
@@ -652,7 +652,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
           var remaining = entry.value.totalQuantity;
           var rows = await txn.rawQuery(
             'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
-            ' ORDER BY expiry_date ASC NULLS LAST',
+            ' ORDER BY (expiry_date IS NULL), expiry_date ASC',
             [barcode, inventoryId],
           );
           if (rows.isEmpty && entry.value.name.isNotEmpty) {
@@ -661,7 +661,7 @@ Future<CookResult> cookRecipe(WidgetRef ref, int recipeId) async {
               'SELECT i.* FROM inventory i'
               ' INNER JOIN products p ON p.barcode = i.barcode'
               ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
-              ' ORDER BY i.expiry_date ASC NULLS LAST',
+              ' ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC',
               ['%$normalizedName%', inventoryId],
             );
           }

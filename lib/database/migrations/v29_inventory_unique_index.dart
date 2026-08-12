@@ -5,8 +5,9 @@ import 'package:sqflite/sqflite.dart';
 /// Adds a unique index on inventory(barcode, inventory_id) and deduplicates
 /// existing rows.
 ///
-/// The deduplication strategy keeps the row with the highest quantity for
-/// each (barcode, inventory_id) group, discarding extra copies.
+/// The deduplication strategy keeps the row with the maximum id (the
+/// latest insert) for each (barcode, inventory_id) group, discarding
+/// extra copies.
 class MigrationV29 extends Migration {
   @override
   int get version => 29;

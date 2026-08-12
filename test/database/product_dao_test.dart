@@ -327,6 +327,38 @@ void main() {
     });
   });
 
+  group('ProductDao categories hierarchy decode', () {
+    test('decodeCategoriesHierarchy returns null for null or blank', () {
+      expect(ProductDao.decodeCategoriesHierarchy(null), isNull);
+      expect(ProductDao.decodeCategoriesHierarchy(''), isNull);
+    });
+
+    test('decodeCategoriesHierarchy returns null for corrupt JSON', () {
+      expect(ProductDao.decodeCategoriesHierarchy('not json'), isNull);
+      expect(ProductDao.decodeCategoriesHierarchy('{"a":1}'), isNull);
+      expect(ProductDao.decodeCategoriesHierarchy('[1,2,3]'), isEmpty);
+    });
+
+    test('fromMap survives a corrupt categories_hierarchy column', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        const Product(barcode: 'cat123', name: 'Corrupt Cat'),
+      );
+
+      // Write corrupt JSON directly, bypassing the DAO encoder.
+      await db.rawUpdate(
+        "UPDATE products SET categories_hierarchy = 'not json'"
+        ' WHERE barcode = ?',
+        ['cat123'],
+      );
+
+      final fetched = await dao.get(db, 'cat123');
+      expect(fetched, isNotNull);
+      expect(fetched!.categoriesHierarchy, isNull);
+    });
+  });
+
   group('ProductDao pluCode and productType', () {
     const produceProduct = Product(
       barcode: 'produce-banana-4011',
