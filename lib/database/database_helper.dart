@@ -395,7 +395,7 @@ class DatabaseHelper {
         UPDATE shopping_list SET barcode = NULL
         WHERE barcode IN (SELECT barcode FROM products WHERE source = 'api')
       ''');
-      return productDao.deleteBySource(db, 'api');
+      return await productDao.deleteBySource(db, 'api');
     } finally {
       await db.execute('PRAGMA foreign_keys = ON');
     }

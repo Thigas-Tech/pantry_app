@@ -389,15 +389,17 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
         },
       ).toList();
 
-      await ref.read(recipeServiceProvider).saveRecipe(
-        existingRecipeId: widget.existingRecipeId,
-        name: _nameController.text.trim(),
-        instructions: _instructionsController.text.trim(),
-        servings: int.tryParse(_servingsController.text) ?? 0,
-        imagePath: _imagePath,
-        ingredients: ingredients,
-        activeInventoryId: ref.read(activeInventoryProvider),
-      );
+      await ref
+          .read(recipeServiceProvider)
+          .saveRecipe(
+            existingRecipeId: widget.existingRecipeId,
+            name: _nameController.text.trim(),
+            instructions: _instructionsController.text.trim(),
+            servings: int.tryParse(_servingsController.text) ?? 0,
+            imagePath: _imagePath,
+            ingredients: ingredients,
+            activeInventoryId: ref.read(activeInventoryProvider),
+          );
 
       if (!mounted) return;
       final l10n = AppLocalizations.of(context)!;

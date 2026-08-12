@@ -194,10 +194,12 @@ class _AverageCostBanner extends ConsumerWidget {
     final symbol = currencySymbolFor(currencyCode);
 
     return FutureBuilder<double>(
-      future: ref.read(recipeServiceProvider).calculateAverageRecipeCost(
-        activeInventoryId: ref.read(activeInventoryProvider),
-        baseCurrency: ref.read(settingsProvider).baseCurrency,
-      ),
+      future: ref
+          .read(recipeServiceProvider)
+          .calculateAverageRecipeCost(
+            activeInventoryId: ref.read(activeInventoryProvider),
+            baseCurrency: ref.read(settingsProvider).baseCurrency,
+          ),
       builder: (context, snapshot) {
         final cost = snapshot.data ?? 0.0;
 
@@ -380,11 +382,13 @@ class _RecipeCostLabel extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return FutureBuilder<double>(
-      future: ref.read(recipeServiceProvider).calculateRecipeCost(
-        recipeId,
-        activeInventoryId: ref.read(activeInventoryProvider),
-        baseCurrency: ref.read(settingsProvider).baseCurrency,
-      ),
+      future: ref
+          .read(recipeServiceProvider)
+          .calculateRecipeCost(
+            recipeId,
+            activeInventoryId: ref.read(activeInventoryProvider),
+            baseCurrency: ref.read(settingsProvider).baseCurrency,
+          ),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox.shrink();
         final cost = snapshot.data!;

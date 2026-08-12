@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -70,11 +69,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     setState(() => _isCooking = true);
     logInfo('Cooking recipe ${widget.recipeId}...');
     try {
-      final result = await ref.read(recipeServiceProvider).cookRecipe(
-        widget.recipeId,
-        activeInventoryId: ref.read(activeInventoryProvider),
-        baseCurrency: ref.read(settingsProvider).baseCurrency,
-      );
+      final result = await ref
+          .read(recipeServiceProvider)
+          .cookRecipe(
+            widget.recipeId,
+            activeInventoryId: ref.read(activeInventoryProvider),
+            baseCurrency: ref.read(settingsProvider).baseCurrency,
+          );
       logInfo('Recipe ${widget.recipeId} cooked successfully');
       if (!mounted) return;
       SnackbarHelper.showUndo(
@@ -272,11 +273,13 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   const SizedBox(height: 16),
                 ],
                 FutureBuilder<double>(
-                  future: ref.read(recipeServiceProvider).calculateRecipeCost(
-                    widget.recipeId,
-                    activeInventoryId: ref.read(activeInventoryProvider),
-                    baseCurrency: ref.read(settingsProvider).baseCurrency,
-                  ),
+                  future: ref
+                      .read(recipeServiceProvider)
+                      .calculateRecipeCost(
+                        widget.recipeId,
+                        activeInventoryId: ref.read(activeInventoryProvider),
+                        baseCurrency: ref.read(settingsProvider).baseCurrency,
+                      ),
                   builder: (context, snapshot) {
                     final cost = snapshot.data ?? 0.0;
                     final formatted = '$symbol${cost.toStringAsFixed(2)}';

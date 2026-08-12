@@ -59,10 +59,12 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen>
   Future<void> _showAddSheet(BuildContext context) async {
     final item = await AddToShoppingListSheet.show(context);
     if (item != null && context.mounted) {
-      await ref.read(shoppingListServiceProvider).addShoppingItem(
-        item,
-        activeInventoryId: ref.read(activeInventoryProvider),
-      );
+      await ref
+          .read(shoppingListServiceProvider)
+          .addShoppingItem(
+            item,
+            activeInventoryId: ref.read(activeInventoryProvider),
+          );
       invalidateShoppingList(ref);
     }
   }
@@ -634,12 +636,14 @@ class _ShoppingItemTile extends ConsumerWidget {
 
     if (price == null) return;
 
-    await ref.read(shoppingListServiceProvider).updateShoppingItemPrice(
-      item.id!,
-      priceAmount: price.price,
-      priceCurrency: price.currency,
-      priceStore: price.store,
-    );
+    await ref
+        .read(shoppingListServiceProvider)
+        .updateShoppingItemPrice(
+          item.id!,
+          priceAmount: price.price,
+          priceCurrency: price.currency,
+          priceStore: price.store,
+        );
     invalidateShoppingList(ref);
 
     if (context.mounted) {

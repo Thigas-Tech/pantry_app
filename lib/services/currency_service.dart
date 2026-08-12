@@ -61,7 +61,7 @@ class CurrencyService {
           'ExchangeRate-API returned ${response.statusCode} for '
           '$normalized',
         );
-        return _tryFallbackCache(normalized);
+        return await _tryFallbackCache(normalized);
       }
       final body = jsonDecode(response.body) as Map<String, dynamic>;
       if (body['result'] != 'success') {
