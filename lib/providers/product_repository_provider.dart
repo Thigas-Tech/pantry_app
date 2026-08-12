@@ -4,6 +4,7 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
+import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
@@ -47,7 +48,7 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
   return ProductRepository(
     db,
     api,
-    usdaClient: UsdaApiClient(),
+    usdaClient: ref.read(usdaApiClientProvider),
     firebaseCache: firebaseCache,
     metaDao: db.firebaseCacheMetaDao,
   );
