@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'connectivity_provider.g.dart';
 
 /// Debounces offline transitions on a connectivity status stream.
 ///
@@ -89,7 +92,8 @@ Stream<bool> debounceConnectivityStatus(
 /// Offline transitions are debounced for 3 seconds to suppress transient
 /// network blips (DNS hiccups, mobile network handovers, slow server
 /// responses).
-final connectivityProvider = StreamProvider<bool>((ref) async* {
+@Riverpod(keepAlive: true)
+Stream<bool> connectivity(Ref ref) async* {
   try {
     final initial = await InternetConnectionChecker.instance.hasConnection
         .timeout(const Duration(seconds: 3));
@@ -101,13 +105,14 @@ final connectivityProvider = StreamProvider<bool>((ref) async* {
   yield* debounceConnectivityStatus(
     InternetConnectionChecker.instance.onStatusChange,
   );
-});
+}
 
 /// Provides a one-shot connectivity check.
 ///
 /// Unlike [connectivityProvider] (a stream), this resolves once and
 /// is ideal for cache-flush flows and other places where you need a
 /// simple true/false answer at a single point in time.
-final hasConnectionProvider = FutureProvider<bool>((ref) {
+@Riverpod(keepAlive: true)
+Future<bool> hasConnection(Ref ref) {
   return InternetConnectionChecker.instance.hasConnection;
-});
+}

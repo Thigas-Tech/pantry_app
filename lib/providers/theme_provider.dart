@@ -1,8 +1,9 @@
 import 'dart:async';
 
-import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+part 'theme_provider.g.dart';
 
 /// The available theme modes for the app.
 enum ThemeModeOption {
@@ -16,12 +17,13 @@ enum ThemeModeOption {
   dark,
 }
 
-/// A [Notifier] that holds the current [ThemeModeOption] and persists it to
+/// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
 /// Used by [themeModeProvider] so that any widget can read or change the
 /// theme mode.
-class ThemeModeNotifier extends Notifier<ThemeModeOption> {
+@Riverpod(keepAlive: true)
+class ThemeModeNotifier extends _$ThemeModeNotifier {
   static const _key = 'theme_mode';
 
   @override
@@ -56,11 +58,3 @@ class ThemeModeNotifier extends Notifier<ThemeModeOption> {
     } on Exception catch (_) {}
   }
 }
-
-/// A [NotifierProvider] for [ThemeModeNotifier].
-///
-/// Changing the value triggers a rebuild of the [DynamicColorBuilder] and
-/// the widget tree, switching between light, dark, and system themes.
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeModeOption>(
-  ThemeModeNotifier.new,
-);

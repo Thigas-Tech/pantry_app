@@ -1,10 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'product_submission_provider.g.dart';
 
 /// Exposes observable, durable progress for an Open Food Facts submission.
 ///
@@ -12,10 +14,11 @@ import 'package:pantry_app/utils/logger.dart';
 /// background submission, [state] holds the latest [SubmissionProgress]
 /// snapshot (null when idle), and [isSubmitting] reports whether a
 /// submission is running. Because [productSubmissionProvider] is a plain
-/// [NotifierProvider] (not autoDispose), progress outlives the screen that
-/// started the submission, so a user can navigate away while uploads
-/// continue.
-class ProductSubmissionNotifier extends Notifier<SubmissionProgress?> {
+/// keep-alive notifier provider (not autoDispose), progress outlives the
+/// screen that started the submission, so a user can navigate away while
+/// uploads continue.
+@Riverpod(keepAlive: true)
+class ProductSubmissionNotifier extends _$ProductSubmissionNotifier {
   bool _inFlight = false;
 
   @override
@@ -66,17 +69,10 @@ class ProductSubmissionNotifier extends Notifier<SubmissionProgress?> {
   }
 }
 
-/// The provider for [ProductSubmissionNotifier].
-final productSubmissionProvider =
-    NotifierProvider<ProductSubmissionNotifier, SubmissionProgress?>(
-      ProductSubmissionNotifier.new,
-    );
-
 /// Provider for [ProductSubmissionService].
-final productSubmissionServiceProvider = Provider<ProductSubmissionService>(
-  (ref) {
-    final db = ref.watch(databaseProvider);
-    final api = ref.watch(apiServiceProvider);
-    return ProductSubmissionService(db: db, api: api);
-  },
-);
+@Riverpod(keepAlive: true)
+ProductSubmissionService productSubmissionService(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  final api = ref.watch(apiServiceProvider);
+  return ProductSubmissionService(db: db, api: api);
+}

@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -7,6 +6,9 @@ import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'product_repository_provider.g.dart';
 
 /// Provides the single [ProductRepository] instance used throughout the app.
 ///
@@ -30,9 +32,9 @@ import 'package:pantry_app/services/usda_api_client.dart';
 ///
 /// ## Lifetime
 ///
-/// Because this is a [Provider] (not a [FutureProvider] or [NotifierProvider]),
-/// the repository is created **once** and reused for the entire app session.
-/// The repository itself holds no mutable state; it delegates all storage to
+/// Because this is a keep-alive provider (not autoDispose), the repository
+/// is created **once** and reused for the entire app session. The
+/// repository itself holds no mutable state; it delegates all storage to
 /// the database and all network requests to the SDK adapter.
 ///
 /// ## Usage
@@ -40,7 +42,8 @@ import 'package:pantry_app/services/usda_api_client.dart';
 /// Typically accessed via ref.read(productRepositoryProvider) in async
 /// callbacks (like the scan flow) or via ref.watch(productRepositoryProvider)
 /// in widgets that need to call repository methods inside [FutureBuilder]s.
-final productRepositoryProvider = Provider<ProductRepository>((ref) {
+@Riverpod(keepAlive: true)
+ProductRepository productRepository(Ref ref) {
   final db = ref.read(databaseProvider);
   final api = ref.read(apiServiceProvider);
   final firebaseCache = ref.read(firebaseCacheProvider);
@@ -51,4 +54,4 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
     firebaseCache: firebaseCache,
     metaDao: db.firebaseCacheMetaDao,
   );
-});
+}

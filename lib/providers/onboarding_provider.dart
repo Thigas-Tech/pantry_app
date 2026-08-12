@@ -1,6 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+part 'onboarding_provider.g.dart';
 
 /// SharedPreferences key for the onboarding completion flag.
 const kOnboardingKey = 'onboarding_complete';
@@ -10,7 +12,8 @@ const kOnboardingKey = 'onboarding_complete';
 /// Returns true once the user has added their first item to any inventory.
 /// Once set to true the flag is never cleared, so the onboarding is never
 /// shown again — even if the user later empties their pantry.
-class OnboardingNotifier extends Notifier<bool> {
+@Riverpod(keepAlive: true)
+class OnboardingNotifier extends _$OnboardingNotifier {
   @override
   bool build() => false;
 
@@ -34,8 +37,3 @@ class OnboardingNotifier extends Notifier<bool> {
     }
   }
 }
-
-/// Provider for [OnboardingNotifier].
-final onboardingProvider = NotifierProvider<OnboardingNotifier, bool>(
-  OnboardingNotifier.new,
-);

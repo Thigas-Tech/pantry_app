@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
@@ -124,17 +123,15 @@ class ScannerCameraState {
 /// Created lazily and disposed when the provider is no longer watched
 /// (auto-dispose). The controller is created with autoStart false so
 /// that permission is checked before calling [MobileScannerController.start].
-final Provider<MobileScannerController> mobileScannerControllerProvider =
-    Provider.autoDispose<MobileScannerController>(
-      (ref) {
-        final controller = MobileScannerController(
-          autoStart: false,
-          autoZoom: true,
-        );
-        ref.onDispose(controller.dispose);
-        return controller;
-      },
-    );
+@riverpod
+MobileScannerController mobileScannerController(Ref ref) {
+  final controller = MobileScannerController(
+    autoStart: false,
+    autoZoom: true,
+  );
+  ref.onDispose(controller.dispose);
+  return controller;
+}
 
 // ---------------------------------------------------------------------------
 // Notifier

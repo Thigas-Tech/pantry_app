@@ -9,52 +9,57 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/photo_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'shopping_list_provider.g.dart';
 
 /// Provides a singleton [ShoppingListDao] instance.
-final shoppingListDaoProvider = Provider<ShoppingListDao>((ref) {
+@Riverpod(keepAlive: true)
+ShoppingListDao shoppingListDao(Ref ref) {
   return const ShoppingListDao();
-});
+}
 
 /// Provides a singleton [PhotoService] instance.
-final photoServiceProvider = Provider<PhotoService>((ref) {
+@Riverpod(keepAlive: true)
+PhotoService photoService(Ref ref) {
   return PhotoService();
-});
+}
 
 /// Provides all shopping list items, scoped to the active inventory.
-final FutureProvider<List<ShoppingItem>> shoppingListProvider =
-    FutureProvider.autoDispose<List<ShoppingItem>>((
-      ref,
-    ) {
-      final db = ref.watch(databaseProvider);
-      final inventoryId = ref.watch(activeInventoryProvider);
-      return db.getShoppingList(inventoryId: inventoryId);
-    });
+@riverpod
+Future<List<ShoppingItem>> shoppingList(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getShoppingList(inventoryId: inventoryId);
+}
 
 /// Provides only pending (not purchased) shopping list items, scoped to the
 /// active inventory.
-final FutureProvider<List<ShoppingItem>> pendingShoppingListProvider =
-    FutureProvider.autoDispose<List<ShoppingItem>>((ref) {
-      final db = ref.watch(databaseProvider);
-      final inventoryId = ref.watch(activeInventoryProvider);
-      return db.getPendingShoppingItems(inventoryId: inventoryId);
-    });
+@riverpod
+Future<List<ShoppingItem>> pendingShoppingList(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getPendingShoppingItems(inventoryId: inventoryId);
+}
 
 /// Provides only purchased shopping list items, scoped to the active inventory.
-final FutureProvider<List<ShoppingItem>> purchasedShoppingListProvider =
-    FutureProvider.autoDispose<List<ShoppingItem>>((ref) {
-      final db = ref.watch(databaseProvider);
-      final inventoryId = ref.watch(activeInventoryProvider);
-      return db.getPurchasedShoppingItems(inventoryId: inventoryId);
-    });
+@riverpod
+Future<List<ShoppingItem>> purchasedShoppingList(
+  Ref ref,
+) {
+  final db = ref.watch(databaseProvider);
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getPurchasedShoppingItems(inventoryId: inventoryId);
+}
 
 /// Provides the count of pending (not purchased) items, scoped to the active
 /// inventory.
-final FutureProvider<int> pendingShoppingCountProvider =
-    FutureProvider.autoDispose<int>((ref) {
-      final db = ref.watch(databaseProvider);
-      final inventoryId = ref.watch(activeInventoryProvider);
-      return db.getPendingShoppingCount(inventoryId: inventoryId);
-    });
+@riverpod
+Future<int> pendingShoppingCount(Ref ref) {
+  final db = ref.watch(databaseProvider);
+  final inventoryId = ref.watch(activeInventoryProvider);
+  return db.getPendingShoppingCount(inventoryId: inventoryId);
+}
 
 /// Invalidates all shopping list providers.
 ///
@@ -331,10 +336,12 @@ Future<MoveToInventoryResult> movePurchasedToInventory(
 
 /// Provides distinct product barcodes and names from the active inventory
 /// for the "From your pantry" suggestions in the add-to-shopping-list sheet.
-final FutureProvider<List<Map<String, dynamic>>> inventoryProductsProvider =
-    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
-      final db = ref.watch(databaseProvider);
-      final inventoryId = ref.watch(activeInventoryProvider);
-      logInfo('Fetching distinct products from inventory $inventoryId');
-      return db.getDistinctProductsFromInventory(inventoryId: inventoryId);
-    });
+@riverpod
+Future<List<Map<String, dynamic>>> inventoryProducts(
+  Ref ref,
+) {
+  final db = ref.watch(databaseProvider);
+  final inventoryId = ref.watch(activeInventoryProvider);
+  logInfo('Fetching distinct products from inventory $inventoryId');
+  return db.getDistinctProductsFromInventory(inventoryId: inventoryId);
+}

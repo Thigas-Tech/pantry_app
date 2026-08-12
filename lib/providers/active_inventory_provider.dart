@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+part 'active_inventory_provider.g.dart';
 
 /// Holds the ID of the currently selected inventory (pantry).
 ///
@@ -17,7 +19,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Defaults to 1 (the built‑in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
-class ActiveInventoryNotifier extends Notifier<int> {
+@Riverpod(keepAlive: true)
+class ActiveInventoryNotifier extends _$ActiveInventoryNotifier {
   @override
   int build() {
     unawaited(_validateAndLoad());
@@ -102,8 +105,3 @@ class ActiveInventoryNotifier extends Notifier<int> {
     }
   }
 }
-
-/// The provider for [ActiveInventoryNotifier].
-final activeInventoryProvider = NotifierProvider<ActiveInventoryNotifier, int>(
-  ActiveInventoryNotifier.new,
-);
