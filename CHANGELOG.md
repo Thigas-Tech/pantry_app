@@ -4,6 +4,18 @@
 
 ### Performance
 
+- **Image cache: downscale, size cap, in-flight dedup (audit P3)**:
+  [ImageCacheService] stored full-resolution WebP files with no eviction
+  or cap, and concurrent requests for the same barcode downloaded twice.
+  It now downscales the longest side to 400 px (matching the largest
+  display size at a 2x pixel ratio) before WebP encoding in the
+  background isolate, evicts the oldest files by last-modified time when
+  the cache exceeds 50 MB (injectable), and shares one in-flight
+  download per barcode. (lib/services/image_cache_service.dart,
+  test/services/image_cache_service_test.dart)
+
+### Performance
+
 - **Futures created in build() moved to cached providers (audit P2)**:
   product detail, settings, and recipe screens re-created futures inside
   build(), so any rebuild re-ran the DB query or image-cache call and the
