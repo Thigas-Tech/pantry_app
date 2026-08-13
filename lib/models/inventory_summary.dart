@@ -1,6 +1,6 @@
 /// Represents a pantry (inventory) summary row from the inventories table.
 ///
-/// This is the typed view of an `inventories` row (with its computed
+/// This is the typed view of an inventories row (with its computed
 /// item count) so that UI code never touches raw database maps. All fields
 /// are immutable.
 class InventorySummary {
@@ -12,7 +12,7 @@ class InventorySummary {
     required this.itemCount,
   });
 
-  /// Maps a raw `inventories` row into an [InventorySummary].
+  /// Maps a raw inventories row into an [InventorySummary].
   ///
   /// Missing or malformed values fall back to safe defaults (empty name,
   /// epoch timestamp, zero item count) instead of throwing.

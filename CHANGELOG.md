@@ -4,6 +4,16 @@
 
 ### Maintainability
 
+- **Zero backticks left in doc comments (audit MA3)**: 32 remaining
+  rule-11 violations across 16 hand-written files were converted to
+  [square-bracket] references or plain prose, and the 8 fenced code
+  examples in doc comments became indented code blocks. `dart doc .`
+  and `dart analyze` are clean. (lib/database/migrations/*,
+  lib/providers/scanner_providers.dart, lib/services/*, lib/utils/*,
+  lib/widgets/*, lib/models/*)
+
+### Maintainability
+
 - **Single [UsdaApiClient] and [CurrencyService] instances across the
   app (audit MA5)**: the USDA client was previously constructed in
   three places and the currency service was duplicated as a private

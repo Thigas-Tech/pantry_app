@@ -26,16 +26,15 @@ class SnackbarHelper {
   /// [Navigator.pop].
   ///
   /// Example:
-  /// ```dart
-  /// final rootMessengerKey = GlobalKey<ScaffoldMessengerState>();
   ///
-  /// MaterialApp(
-  ///   scaffoldMessengerKey: rootMessengerKey,
-  ///   // ...
-  /// );
+  ///     final rootMessengerKey = GlobalKey<ScaffoldMessengerState>();
   ///
-  /// SnackbarHelper.messengerKey = rootMessengerKey;
-  /// ```
+  ///     MaterialApp(
+  ///       scaffoldMessengerKey: rootMessengerKey,
+  ///       // ...
+  ///     );
+  ///
+  ///     SnackbarHelper.messengerKey = rootMessengerKey;
   static GlobalKey<ScaffoldMessengerState>? messengerKey;
 
   /// Shows an informational snackbar (blue) that auto-dismisses after 3 seconds

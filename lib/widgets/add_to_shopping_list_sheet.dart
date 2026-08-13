@@ -33,10 +33,10 @@ import 'package:pantry_app/utils/search_utils.dart';
 /// cancelled.
 ///
 /// Example:
-/// ```dart
-/// final item = await AddToShoppingListSheet.show(context);
-/// if (item != null) await addShoppingItem(ref, item);
-/// ```
+/// Example:
+///
+///     final item = await AddToShoppingListSheet.show(context);
+///     if (item != null) await addShoppingItem(ref, item);
 class AddToShoppingListSheet extends ConsumerStatefulWidget {
   const AddToShoppingListSheet._({
     this.searchDebounceDuration = const Duration(milliseconds: 2000),

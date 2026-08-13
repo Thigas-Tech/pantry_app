@@ -21,9 +21,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// The [http.Client] and [SharedPreferences] can be injected to mock
 /// network responses and cache in tests:
-/// ```dart
-/// final service = CurrencyService(httpClient: mockClient);
-/// ```
+/// Example:
+///
+///     final service = CurrencyService(httpClient: mockClient);
 class CurrencyService {
   /// Creates a [CurrencyService].
   CurrencyService({
