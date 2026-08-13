@@ -32,6 +32,12 @@ class CurrencyService {
 
   final http.Client _httpClient;
 
+  /// In-memory rate cache keyed by base currency, refreshed per calendar
+  /// day (mirroring the disk cache freshness rule). Avoids a
+  /// SharedPreferences read and jsonDecode on every conversion.
+  final Map<String, ({DateTime day, Map<String, double> rates})> _memoryRates =
+      {};
+
   Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
   /// Fetches the latest exchange rates for [baseCurrency] from the API
@@ -42,9 +48,21 @@ class CurrencyService {
   Future<Map<String, double>> getRates(String baseCurrency) async {
     final normalized = baseCurrency.toUpperCase();
 
-    // Try cache first.
+    // Try the in-memory cache first (one SharedPreferences read per day
+    // per currency instead of one per conversion).
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final memoryCached = _memoryRates[normalized];
+    if (memoryCached != null && memoryCached.day == todayStart) {
+      return memoryCached.rates;
+    }
+
+    // Try the on-disk cache next.
     final cached = await _readCachedRates(normalized);
-    if (cached != null) return cached;
+    if (cached != null) {
+      _memoryRates[normalized] = (day: todayStart, rates: cached);
+      return cached;
+    }
 
     // Fetch from API.
     try {
@@ -61,20 +79,21 @@ class CurrencyService {
           'ExchangeRate-API returned ${response.statusCode} for '
           '$normalized',
         );
-        return await _tryFallbackCache(normalized);
+        return _tryFallbackCache(normalized);
       }
       final body = jsonDecode(response.body) as Map<String, dynamic>;
       if (body['result'] != 'success') {
         logWarning(
           'ExchangeRate-API error for $normalized: ${body['result']}',
         );
-        return await _tryFallbackCache(normalized);
+        return _tryFallbackCache(normalized);
       }
       final rawRates = body['rates'] as Map<String, dynamic>;
       final rates = rawRates.map(
         (k, v) => MapEntry(k, (v as num).toDouble()),
       );
       await _cacheRates(normalized, rates);
+      _memoryRates[normalized] = (day: todayStart, rates: rates);
       return rates;
     } on Exception catch (e) {
       logWarning('Failed to fetch exchange rates: $e');

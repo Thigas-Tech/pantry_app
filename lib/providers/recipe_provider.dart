@@ -51,7 +51,6 @@ void invalidateRecipes(WidgetRef ref) {
 /// product nutrition data. Auto-disposes when no listener remains.
 @riverpod
 Future<RecipeNutrition?> recipeNutrition(Ref ref, int recipeId) async {
-  ref.keepAlive();
   final db = ref.watch(databaseProvider);
   final repo = ref.read(productRepositoryProvider);
   final ingredients = await db.getRecipeIngredients(recipeId);
@@ -60,24 +59,9 @@ Future<RecipeNutrition?> recipeNutrition(Ref ref, int recipeId) async {
   final recipe = await db.getRecipe(recipeId);
   final servings = recipe?.servings ?? 0;
 
-  final barcodes = ingredients
-      .map((i) => i.barcode)
-      .where((b) => b != null && b.isNotEmpty)
-      .cast<String>()
-      .toSet()
-      .toList();
+  final barcodes = _ingredientBarcodes(ingredients);
 
-  final productsByBarcode = <String, Product>{};
-  for (final barcode in barcodes) {
-    try {
-      final product = await repo.getProduct(barcode);
-      productsByBarcode[barcode] = product;
-    } on Exception catch (e) {
-      logWarning(
-        'Could not fetch product $barcode for recipe nutrition: $e',
-      );
-    }
-  }
+  final productsByBarcode = await _fetchProductsBatched(repo, barcodes);
 
   final nutritionService = RecipeNutritionService();
   return nutritionService.aggregate(
@@ -85,6 +69,31 @@ Future<RecipeNutrition?> recipeNutrition(Ref ref, int recipeId) async {
     productsByBarcode,
     servings: servings,
   );
+}
+
+/// Returns the unique, non-empty barcodes of [ingredients] in order.
+List<String> _ingredientBarcodes(List<RecipeIngredient> ingredients) {
+  return ingredients
+      .map((i) => i.barcode)
+      .where((b) => b != null && b.isNotEmpty)
+      .cast<String>()
+      .toSet()
+      .toList();
+}
+
+/// Resolves [barcodes] to products through [repo], tolerating per-barcode
+/// failures so a single unknown ingredient does not fail the whole batch.
+Future<Map<String, Product>> _fetchProductsBatched(
+  ProductRepository repo,
+  List<String> barcodes,
+) async {
+  if (barcodes.isEmpty) return {};
+  try {
+    return await repo.getProductsForBarcodes(barcodes);
+  } on Exception catch (e) {
+    logWarning('Could not fetch products for recipe ingredients: $e');
+    return {};
+  }
 }
 
 /// A record pairing a [RecipeIngredient] with its optional [Product].
@@ -106,29 +115,12 @@ Future<List<IngredientWithProduct>> recipeIngredientsWithProducts(
   Ref ref,
   int recipeId,
 ) async {
-  ref.keepAlive();
   final db = ref.watch(databaseProvider);
   final repo = ref.read(productRepositoryProvider);
   final ingredients = await db.getRecipeIngredients(recipeId);
 
-  final barcodes = ingredients
-      .map((i) => i.barcode)
-      .where((b) => b != null && b.isNotEmpty)
-      .cast<String>()
-      .toSet()
-      .toList();
-
-  final productsByBarcode = <String, Product>{};
-  for (final barcode in barcodes) {
-    try {
-      final product = await repo.getProduct(barcode);
-      productsByBarcode[barcode] = product;
-    } on Exception catch (e) {
-      logWarning(
-        'Could not fetch product $barcode for ingredient image: $e',
-      );
-    }
-  }
+  final barcodes = _ingredientBarcodes(ingredients);
+  final productsByBarcode = await _fetchProductsBatched(repo, barcodes);
 
   return ingredients
       .map(
@@ -143,28 +135,16 @@ Future<List<IngredientWithProduct>> recipeIngredientsWithProducts(
 /// Provides the Nutri-Score grade for a recipe.
 ///
 /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
-/// known scores.
+/// known scores. Uses only the local cache, never the network.
 @riverpod
 Future<String?> recipeNutriScore(Ref ref, int recipeId) async {
-  ref.keepAlive();
   final db = ref.watch(databaseProvider);
   final ingredients = await db.getRecipeIngredients(recipeId);
   if (ingredients.isEmpty) return null;
 
-  final barcodes = ingredients
-      .map((i) => i.barcode)
-      .where((b) => b != null && b.isNotEmpty)
-      .cast<String>()
-      .toSet()
-      .toList();
-
-  final productsByBarcode = <String, Product>{};
-  for (final barcode in barcodes) {
-    final product = await db.getProduct(barcode);
-    if (product != null) {
-      productsByBarcode[barcode] = product;
-    }
-  }
+  final barcodes = _ingredientBarcodes(ingredients);
+  final cached = await db.getProductsByBarcodes(barcodes);
+  final productsByBarcode = {for (final p in cached) p.barcode: p};
 
   final scoreService = RecipeNutriScoreService();
   return scoreService.compute(ingredients, productsByBarcode);

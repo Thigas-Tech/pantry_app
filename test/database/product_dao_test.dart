@@ -388,4 +388,33 @@ void main() {
       expect(fetched.pluCode, isNull);
     });
   });
+
+  group('ProductDao getByBarcodes', () {
+    test('returns only the products whose barcode is present', () async {
+      final db = await dbHelper.database;
+      await dao.insert(db, const Product(barcode: 'a1', name: 'Alpha'));
+      await dao.insert(db, const Product(barcode: 'b2', name: 'Bravo'));
+      await dao.insert(db, const Product(barcode: 'c3', name: 'Charlie'));
+
+      final result = await dao.getByBarcodes(db, ['a1', 'c3', 'missing']);
+      final barcodes = result.map((p) => p.barcode).toList()..sort();
+
+      expect(barcodes, ['a1', 'c3']);
+    });
+
+    test('returns empty for an empty barcode list', () async {
+      final db = await dbHelper.database;
+      final result = await dao.getByBarcodes(db, []);
+      expect(result, isEmpty);
+    });
+
+    test('handles duplicate barcodes without duplicate rows', () async {
+      final db = await dbHelper.database;
+      await dao.insert(db, const Product(barcode: 'a1', name: 'Alpha'));
+
+      final result = await dao.getByBarcodes(db, ['a1', 'a1']);
+
+      expect(result, hasLength(1));
+    });
+  });
 }

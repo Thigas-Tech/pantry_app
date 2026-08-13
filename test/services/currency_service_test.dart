@@ -137,8 +137,29 @@ void main() {
 
       final rates = await service.getRates('USD');
       expect(rates['BRL'], 5.0);
-
       verifyNever(() => mockClient.get(any()));
+    });
+
+    test('caches rates in memory across calls within the same day', () async {
+      final response = http.Response(
+        jsonEncode({
+          'result': 'success',
+          'rates': {'BRL': 5.0},
+        }),
+        200,
+      );
+      when(
+        () => mockClient.get(
+          Uri.parse('https://open.er-api.com/v6/latest/USD'),
+        ),
+      ).thenAnswer((_) async => response);
+
+      final first = await service.getRates('USD');
+      final second = await service.getRates('USD');
+
+      expect(first['BRL'], 5.0);
+      expect(second['BRL'], 5.0);
+      verify(() => mockClient.get(any())).called(1);
     });
   });
 

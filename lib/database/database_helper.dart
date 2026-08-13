@@ -347,6 +347,12 @@ class DatabaseHelper {
     return productDao.get(db, barcode);
   }
 
+  /// Returns all cached products whose barcode is in [barcodes].
+  Future<List<Product>> getProductsByBarcodes(List<String> barcodes) async {
+    final db = await database;
+    return productDao.getByBarcodes(db, barcodes);
+  }
+
   /// Returns the total number of cached product records.
   Future<int> getProductCount() async {
     final db = await database;

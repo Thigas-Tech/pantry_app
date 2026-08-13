@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Recipe screens now load product information and costs faster, especially
+  for recipes with many ingredients.
+
 - Product images are now stored smaller and the app keeps only a bounded
   amount of them on the device, so the app uses less storage over time.
 

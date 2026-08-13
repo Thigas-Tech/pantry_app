@@ -69,17 +69,19 @@ void main() {
       when(() => mockDb.getRecipe(1)).thenAnswer(
         (_) async => const Recipe(id: 1, name: 'Test', servings: 4),
       );
-      when(() => mockRepo.getProduct('001')).thenAnswer(
-        (_) async => const Product(
-          barcode: '001',
-          name: 'Milk',
-          energyKcal: 42,
-          proteinG: 3.4,
-          carbsG: 5,
-          fatG: 1,
-          fiberG: 0,
-          saltG: 0.1,
-        ),
+      when(() => mockRepo.getProductsForBarcodes(['001'])).thenAnswer(
+        (_) async => {
+          '001': const Product(
+            barcode: '001',
+            name: 'Milk',
+            energyKcal: 42,
+            proteinG: 3.4,
+            carbsG: 5,
+            fatG: 1,
+            fiberG: 0,
+            saltG: 0.1,
+          ),
+        },
       );
 
       final container = ProviderContainer(
@@ -96,6 +98,108 @@ void main() {
       expect(result.totalEnergyKcal, closeTo(84, 0.01));
       expect(result.servings, 4);
       expect(result.perServingEnergyKcal, closeTo(21, 0.01));
+    });
+
+    test('fetches all ingredient products in one batched call', () async {
+      when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
+        (_) async => [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Milk',
+            barcode: '001',
+            quantity: 200,
+            unit: 'g',
+          ),
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Honey',
+            barcode: '002',
+            quantity: 50,
+            unit: 'g',
+          ),
+        ],
+      );
+      when(() => mockDb.getRecipe(1)).thenAnswer(
+        (_) async => const Recipe(id: 1, name: 'Test', servings: 2),
+      );
+      when(() => mockRepo.getProductsForBarcodes(['001', '002'])).thenAnswer(
+        (_) async => const {},
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(recipeNutritionProvider(1).future);
+
+      verify(() => mockRepo.getProductsForBarcodes(['001', '002'])).called(1);
+      verifyNever(() => mockRepo.getProduct(any()));
+    });
+
+    test('re-runs the build when no listener remains (autoDispose)', () async {
+      when(() => mockDb.getRecipeIngredients(1)).thenAnswer((_) async => []);
+      when(() => mockDb.getRecipe(1)).thenAnswer((_) async => null);
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final sub = container.listen(recipeNutritionProvider(1), (_, _) {});
+      await container.read(recipeNutritionProvider(1).future);
+      sub.close();
+      await Future<void>.delayed(Duration.zero);
+
+      final second = await container.read(recipeNutritionProvider(1).future);
+
+      expect(second, isNull);
+      verify(() => mockDb.getRecipeIngredients(1)).called(2);
+    });
+  });
+
+  group('recipeIngredientsWithProductsProvider', () {
+    test('maps products by barcode in one batched call', () async {
+      when(() => mockDb.getRecipeIngredients(1)).thenAnswer(
+        (_) async => [
+          const RecipeIngredient(
+            recipeId: 1,
+            name: 'Milk',
+            barcode: '001',
+            quantity: 200,
+            unit: 'g',
+          ),
+          const RecipeIngredient(recipeId: 1, name: 'No barcode'),
+        ],
+      );
+      when(() => mockRepo.getProductsForBarcodes(['001'])).thenAnswer(
+        (_) async => {
+          '001': const Product(barcode: '001', name: 'Milk'),
+        },
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          productRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final result = await container.read(
+        recipeIngredientsWithProductsProvider(1).future,
+      );
+
+      expect(result, hasLength(2));
+      expect(result[0].product?.name, 'Milk');
+      expect(result[1].product, isNull);
+      verify(() => mockRepo.getProductsForBarcodes(['001'])).called(1);
     });
   });
 
@@ -127,12 +231,10 @@ void main() {
           ),
         ],
       );
-      when(() => mockDb.getProduct('001')).thenAnswer(
-        (_) async => const Product(
-          barcode: '001',
-          name: 'Healthy',
-          nutriscoreGrade: 'a',
-        ),
+      when(() => mockDb.getProductsByBarcodes(['001'])).thenAnswer(
+        (_) async => [
+          const Product(barcode: '001', name: 'Healthy', nutriscoreGrade: 'a'),
+        ],
       );
 
       final container = ProviderContainer(

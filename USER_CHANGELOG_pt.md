@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- As telas de receitas agora carregam as informacoes dos produtos e os
+  custos mais rapidamente, especialmente em receitas com muitos
+  ingredientes.
+
 - As imagens dos produtos agora sao armazenadas menores e o app mantem
   apenas uma quantidade limitada delas no dispositivo, entao o app usa
   menos armazenamento ao longo do tempo.
