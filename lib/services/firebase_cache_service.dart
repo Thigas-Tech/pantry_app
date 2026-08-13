@@ -61,6 +61,9 @@ class FirebaseCacheService {
   /// Whether the underlying Firebase client is available.
   bool get isAvailable => _firebaseClient.isAvailable;
 
+  /// The injected [UsdaApiClient] used for USDA fallback lookups.
+  UsdaApiClient get usdaClient => _usdaClient;
+
   // =================================================================
   //  Lookup methods
   // =================================================================

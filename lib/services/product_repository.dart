@@ -70,6 +70,10 @@ class ProductRepository {
   final FirebaseCacheService? _firebaseCache;
   final FirebaseCacheMetaDao _metaDao;
 
+  /// The injected [UsdaApiClient] used for produce nutrition lookups, or
+  /// null when none was provided.
+  UsdaApiClient? get usdaClient => _usdaClient;
+
   /// Returns the current application locale as a two-letter language code.
   ///
   /// Falls back to 'en' when the platform locale cannot be determined.

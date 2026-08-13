@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Maintainability
+
+- **Single [UsdaApiClient] and [CurrencyService] instances across the
+  app (audit MA5)**: the USDA client was previously constructed in
+  three places and the currency service was duplicated as a private
+  provider. All layers now consume [usdaApiClientProvider] and
+  [currencyServiceProvider]; [FirebaseCacheService] and
+  [ProductRepository] expose their injected client so the
+  provider-singleton guard test can assert instance identity at runtime.
+  (lib/services/firebase_cache_service.dart,
+  lib/services/product_repository.dart,
+  test/providers/provider_singleton_guard_test.dart)
+
 ### Performance
 
 - **Connectivity check no longer caches the first result forever
