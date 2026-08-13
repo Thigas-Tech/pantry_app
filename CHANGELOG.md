@@ -4,6 +4,14 @@
 
 ### Security
 
+- **Removed the Blaze feedback infrastructure (free-tier cleanup)**: the
+  Cloud Function (`functions/`) and its CI jobs were removed after in-app
+  feedback was dropped; `firebase.json` no longer configures functions and
+  the `FEEDBACK_PROXY_URL` build define is gone. The repo now depends only
+  on free Firebase services.
+  (functions/ removed, firebase.json, .github/workflows/firebase-rules.yml,
+  .github/workflows/build.yml, .github/workflows/deploy-to-playstore.yml,
+  .env.example, ARCHITECTURE/SERVICES.md)
 - **Removed in-app GitHub feedback (free-tier decision)**: the Cloud
   Function feedback proxy from the previous change required the paid
   Firebase Blaze plan. In-app feedback is removed instead; GitHub

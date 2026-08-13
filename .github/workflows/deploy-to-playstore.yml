@@ -78,13 +78,11 @@ jobs:
         run: >
           flutter build appbundle --release
           --dart-define=FIREBASE_ENABLED=${{ vars.FIREBASE_ENABLED || 'true' }}
-          --dart-define=FEEDBACK_PROXY_URL=${{ vars.FEEDBACK_PROXY_URL }}
 
       - name: Build release APK
         run: >
           flutter build apk --release
           --dart-define=FIREBASE_ENABLED=${{ vars.FIREBASE_ENABLED || 'true' }}
-          --dart-define=FEEDBACK_PROXY_URL=${{ vars.FEEDBACK_PROXY_URL }}
 
       - name: Upload AAB to Google Play Console
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5  # v1.1.5

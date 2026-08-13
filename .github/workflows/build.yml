@@ -112,7 +112,6 @@ jobs:
           --${{ matrix.build-type }}
           ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info' || '' }}
           --dart-define=FIREBASE_ENABLED=${{ vars.FIREBASE_ENABLED || 'true' }}
-          --dart-define=FEEDBACK_PROXY_URL=${{ vars.FEEDBACK_PROXY_URL }}
         working-directory: code
       - name: Upload APK
         if: >
