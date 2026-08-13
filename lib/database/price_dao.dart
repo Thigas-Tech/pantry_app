@@ -290,15 +290,21 @@ class PriceDao {
   /// most recent price per distinct product multiplied by the held
   /// quantity. Each row contains currency and subtotal columns.
   ///
-  /// When all prices use the same currency, this returns a single row.
-  /// When no items have prices, this returns an empty list.
+  /// Prices that carry a positive package size are scaled per row (price x
+  /// quantity / package size) so a dozen eggs priced for a 12-pack held as
+  /// 12 pieces contribute one package price, not twelve. When all prices use
+  /// the same currency, this returns a single row. When no items have
+  /// prices, this returns an empty list.
   Future<List<Map<String, dynamic>>> totalInventoryValueByCurrency(
     Database db,
     int inventoryId,
   ) async {
     final result = await db.rawQuery(
       '''
-      SELECT p.currency, SUM(p.price * i.total_quantity) as subtotal
+      SELECT p.currency,
+        SUM(p.price * i.total_quantity /
+          CASE WHEN p.package_quantity IS NOT NULL AND p.package_quantity > 0
+            THEN p.package_quantity ELSE 1 END) as subtotal
       FROM prices p
       INNER JOIN (
         SELECT barcode, SUM(quantity) as total_quantity
@@ -323,14 +329,18 @@ class PriceDao {
   /// Returns the most recent price per distinct product in the inventory,
   /// with the total held quantity, for currency-aware averaging by the caller.
   ///
-  /// Returns a list of maps with price, currency, total_quantity keys.
+  /// Returns a list of maps with price, currency, package_quantity,
+  /// package_unit, and total_quantity keys. The caller divides the price
+  /// value by package_quantity (when positive) to obtain the per-item price
+  /// before averaging.
   Future<List<Map<String, dynamic>>> latestPricesWithCurrency(
     Database db,
     int inventoryId,
   ) async {
     final result = await db.rawQuery(
       '''
-      SELECT p.price, p.currency, i.total_quantity
+      SELECT p.price, p.currency, p.package_quantity, p.package_unit,
+        i.total_quantity
       FROM prices p
       INNER JOIN (
         SELECT barcode, SUM(quantity) as total_quantity
@@ -469,7 +479,7 @@ class PriceDao {
           GROUP BY barcode
         ),
         latest_prices AS (
-          SELECT p.barcode, p.price, p.date_purchased,
+          SELECT p.barcode, p.price, p.date_purchased, p.package_quantity,
             ib.total_quantity
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
@@ -484,7 +494,9 @@ class PriceDao {
         )
         SELECT
           strftime('%Y-%m', date_purchased / 1000, 'unixepoch') AS month,
-          SUM(price * total_quantity) AS total
+          SUM(price * total_quantity /
+            CASE WHEN package_quantity IS NOT NULL AND package_quantity > 0
+              THEN package_quantity ELSE 1 END) AS total
         FROM latest_prices
         GROUP BY month
         ORDER BY month ASC
@@ -520,7 +532,7 @@ class PriceDao {
           GROUP BY barcode
         ),
         latest_prices AS (
-          SELECT p.barcode, p.price, p.store,
+          SELECT p.barcode, p.price, p.store, p.package_quantity,
             ib.total_quantity
           FROM prices p
           INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
@@ -536,7 +548,9 @@ class PriceDao {
         )
         SELECT
           store,
-          SUM(price * total_quantity) AS total,
+          SUM(price * total_quantity /
+            CASE WHEN package_quantity IS NOT NULL AND package_quantity > 0
+              THEN package_quantity ELSE 1 END) AS total,
           COUNT(*) AS item_count
         FROM latest_prices
         GROUP BY store

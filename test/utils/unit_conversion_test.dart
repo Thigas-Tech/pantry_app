@@ -124,6 +124,24 @@ void main() {
     });
   });
 
+  group('baseUnitFor', () {
+    test('classifies weight units as grams', () {
+      expect(UnitConverter.baseUnitFor('g'), 'g');
+      expect(UnitConverter.baseUnitFor('kg'), 'g');
+      expect(UnitConverter.baseUnitFor('oz'), 'g');
+    });
+
+    test('classifies volume units as milliliters', () {
+      expect(UnitConverter.baseUnitFor('ml'), 'ml');
+      expect(UnitConverter.baseUnitFor('L'), 'ml');
+      expect(UnitConverter.baseUnitFor('fl oz'), 'ml');
+    });
+
+    test('classifies everything else as pieces', () {
+      expect(UnitConverter.baseUnitFor('pieces'), 'pieces');
+    });
+  });
+
   group('convertBack', () {
     test('converts g back to kg', () {
       expect(UnitConverter.convertBack(1000, 'kg'), 1.0);

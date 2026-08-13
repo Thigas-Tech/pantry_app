@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Os precos agora registram o tamanho da embalagem comprada (por exemplo
+  12 ovos ou 1 L de leite), para que o preco unitario e a estimativa de
+  custo da receita sejam precisos mesmo quando o produto nao tem dados de
+  embalagem cadastrados.
+
+- A estimativa de custo das receitas agora e mais precisa para produtos
+  frescos e os valores sao arredondados de forma consistente, sem centavos
+  quebrados.
+
+- O valor total da despensa e o preco medio agora seguem o mesmo calculo
+  de custo das receitas para produtos embalados, para que os numeros
+  concordem em todos os lugares.
+
+- As listas de ingredientes das receitas agora mostram a quantidade com a
+  unidade (por exemplo "500 g x Farinha") e, quando a receita tem porcoes,
+  a quantidade por porcao.
+
 - Os relatorios de feedback no aplicativo foram removidos. O app agora
   usa apenas os servicos gratuitos do Firebase; voce pode entrar em
   contato diretamente pelo repositorio do projeto no GitHub.

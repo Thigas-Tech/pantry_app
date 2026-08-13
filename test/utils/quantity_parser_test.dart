@@ -64,11 +64,22 @@ void main() {
       expect(result.unit, 'L');
     });
 
-    test('parses fl oz unit', () {
+    test('parses fl oz unit as volume, not weight oz', () {
       final result = parseQuantity(quantity: '33.8 fl oz');
       expect(result, isNotNull);
       expect(result!.amount, closeTo(33.8, 0.001));
-      expect(result.unit, 'oz');
+      expect(result.unit, 'fl oz');
+    });
+
+    test('parses "floz" and "fluid ounce" as fl oz', () {
+      expect(normalizeUnit('floz'), 'fl oz');
+      expect(normalizeUnit('fluid ounce'), 'fl oz');
+      expect(normalizeUnit('fluid ounces'), 'fl oz');
+    });
+
+    test('returns null for a serving-based quantity string', () {
+      expect(parseQuantity(quantity: '12 serving'), isNull);
+      expect(parseQuantity(quantity: '1 serving'), isNull);
     });
 
     test('parses mg quantity', () {
@@ -409,6 +420,16 @@ void main() {
     test(
       'returns null for null',
       () => expect(normalizeUnit(null), isNull),
+    );
+
+    test(
+      'normalizes fl oz -> fl oz',
+      () => expect(normalizeUnit('fl oz'), 'fl oz'),
+    );
+
+    test(
+      'returns null for serving (no valid unit)',
+      () => expect(normalizeUnit('serving'), isNull),
     );
 
     test('returns null for unrecognised unit', () {

@@ -721,9 +721,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Future<void> _addPrice(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
+    final package = _productPackageSize();
     final price = await PriceEntrySheet.show(
       context,
       barcode: _product.barcode,
+      existingPackageQuantity: package?.quantity,
+      existingPackageUnit: package?.unit,
     );
     if (price != null) {
       try {
@@ -791,6 +794,21 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         }
       }
     }
+  }
+
+  /// Resolves the product's packaging size for pre-filling the price sheet.
+  ///
+  /// Parses the OFF packaging fields ([Product.quantity] /
+  /// [Product.productQuantity]) into a (amount, unit) pair, using the
+  /// per-unit value for multi-pack strings. Returns null when nothing is
+  /// parseable so the price is entered without a package size.
+  ({double quantity, String unit})? _productPackageSize() {
+    final parsed = parseQuantity(
+      productQuantity: _product.productQuantity,
+      quantity: _product.quantity,
+    );
+    if (parsed == null) return null;
+    return (quantity: parsed.amount, unit: parsed.unit);
   }
 
   Future<void> _editPrice(BuildContext context, Price price) async {

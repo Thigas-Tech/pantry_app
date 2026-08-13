@@ -2352,6 +2352,30 @@ abstract class AppLocalizations {
   /// **'Notes'**
   String get notes;
 
+  /// No description provided for @packageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Package size'**
+  String get packageSize;
+
+  /// No description provided for @packageSizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount in one package, e.g. 12'**
+  String get packageSizeHint;
+
+  /// No description provided for @packageUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Package unit'**
+  String get packageUnit;
+
+  /// No description provided for @packageSizeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid package size'**
+  String get packageSizeInvalid;
+
   /// No description provided for @navList.
   ///
   /// In en, this message translates to:
@@ -2807,12 +2831,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Package quantity'**
   String get packageQuantity;
-
-  /// No description provided for @packageUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'Package unit'**
-  String get packageUnit;
 
   /// No description provided for @generalNotificationChannelName.
   ///
@@ -3737,6 +3755,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown'**
   String get recipeCostUnknown;
+
+  /// No description provided for @recipePerServing.
+  ///
+  /// In en, this message translates to:
+  /// **'per serving'**
+  String get recipePerServing;
 
   /// No description provided for @recipeAverageCost.
   ///

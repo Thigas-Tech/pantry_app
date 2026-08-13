@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:pantry_app/utils/money.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 
 /// The per-unit price of a product, expressed in the base unit of its
@@ -50,8 +51,12 @@ class PriceCalculator {
   /// Returns:
   ///   - 0.0 when the ingredient quantity is zero (nothing is used);
   ///   - null when the package size is missing, zero, negative, or
-  ///     non-finite, when [packageUnit] is missing, when the units belong
-  ///     to different measurement groups, or when the inputs are non-finite.
+  ///     non-finite, when [packageUnit] is missing, when the price is not
+  ///     finite or positive, when the units belong to different measurement
+  ///     groups, or when the inputs are non-finite.
+  ///
+  /// The result is rounded to cents so recipe totals never carry fractional
+  /// cents.
   static double? scaledIngredientCost({
     required double price,
     required double ingredientQuantity,
@@ -64,7 +69,7 @@ class PriceCalculator {
       return null;
     }
     if (packageUnit == null) return null;
-    if (!price.isFinite) return null;
+    if (!price.isFinite || price <= 0) return null;
     if (!ingredientQuantity.isFinite) return null;
     if (ingredientQuantity <= 0) return 0;
     if (!UnitConverter.areUnitsCompatible(ingredientUnit, packageUnit)) {
@@ -77,7 +82,8 @@ class PriceCalculator {
       packageUnit,
     );
     final scaled = price * (qtyInPackageUnits / packageQty);
-    return scaled.isFinite ? scaled : null;
+    if (!scaled.isFinite) return null;
+    return Money.roundToCents(scaled);
   }
 
   /// Computes the price per base unit (piece, gram, or milliliter) of a

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Prices now record the size of the package you bought (for example 12 eggs
+  or 1 L of milk), so per-unit prices and recipe cost estimates are accurate
+  even when the product has no packaging data on file.
+
+- Recipe cost estimates are now more accurate for fresh produce and are
+  rounded consistently, so totals do not show stray fractional cents.
+
+- Inventory total value and average price now match the recipe cost
+  calculation for packaged products, so the numbers agree everywhere.
+
+- Recipe ingredient lists now show the amount with its unit (for example
+  "500 g x Flour") and, when a recipe has servings, the amount per serving.
+
 - In-app feedback reports have been removed. The app now runs entirely on
   free Firebase services; you can reach me directly through the project's
   GitHub repository instead.

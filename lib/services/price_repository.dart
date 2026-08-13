@@ -187,8 +187,10 @@ class PriceRepository {
   /// or null if no prices exist.
   ///
   /// Each price is converted individually before averaging so that
-  /// mixed-currency inventories produce a meaningful average. Products held
-  /// in larger quantities contribute proportionally more to the average.
+  /// mixed-currency inventories produce a meaningful average. Prices that
+  /// carry a positive package size are reduced to their per-item value first
+  /// (price / package size), matching recipe cost scaling. Products held in
+  /// larger quantities contribute proportionally more to the average.
   Future<double?> averageItemPrice(
     int inventoryId, {
     String baseCurrency = 'USD',
@@ -203,7 +205,7 @@ class PriceRepository {
     var sum = 0.0;
     var totalQty = 0.0;
     for (final row in rows) {
-      final price = (row['price'] as num).toDouble();
+      final price = _scaledLatestPrice(row);
       final currency = row['currency'] as String;
       final qty = (row['total_quantity'] as num?)?.toDouble() ?? 1;
       sum += await convertToBase(price, currency, baseCurrency) * qty;
@@ -247,7 +249,8 @@ class PriceRepository {
   ///
   /// The value sums per-currency subtotals converted to [baseCurrency];
   /// the average is the quantity-weighted mean of the latest price per
-  /// product. Returns nulls for total and average when no prices exist.
+  /// product, reduced to per-item values for prices that carry a package
+  /// size. Returns nulls for total and average when no prices exist.
   Future<({double? total, double? average, int count})> inventoryPriceSummary(
     int inventoryId, {
     String baseCurrency = 'USD',
@@ -263,7 +266,7 @@ class PriceRepository {
     var totalQty = 0.0;
     final subtotals = <String, double>{};
     for (final row in rows) {
-      final price = (row['price'] as num).toDouble();
+      final price = _scaledLatestPrice(row);
       final currency = row['currency'] as String;
       final qty = (row['total_quantity'] as num?)?.toDouble() ?? 1;
       weightedSum += await convertToBase(price, currency, baseCurrency) * qty;
@@ -283,5 +286,17 @@ class PriceRepository {
           : double.tryParse((weightedSum / totalQty).toStringAsFixed(2)),
       count: rows.length,
     );
+  }
+
+  /// Reduces a latest-price row to its per-item price when the price row
+  /// carries a positive package size.
+  ///
+  /// Returns the raw price value unchanged when no package size is present so
+  /// legacy prices keep their unscaled behavior.
+  double _scaledLatestPrice(Map<String, dynamic> row) {
+    final price = (row['price'] as num).toDouble();
+    final pkg = (row['package_quantity'] as num?)?.toDouble();
+    if (pkg == null || !pkg.isFinite || pkg <= 0) return price;
+    return price / pkg;
   }
 }

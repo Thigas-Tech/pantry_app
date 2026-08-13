@@ -17,8 +17,10 @@ import 'package:pantry_app/screens/recipe_history_screen.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/money.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
@@ -153,7 +155,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
             .value ??
         0.0;
     final costPerServing = _recipe != null && _recipe!.servings > 0
-        ? cost / _recipe!.servings
+        ? Money.roundToCents(cost / _recipe!.servings)
         : 0.0;
 
     return Scaffold(
@@ -245,8 +247,23 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                                   g.barcode,
                                 ),
                                 title: Text(
-                                  '${g.totalQuantity} x ${g.name}',
+                                  '${_formatIngredientAmount(
+                                    g.totalQuantity,
+                                    g.unit,
+                                  )} x ${g.name}',
                                 ),
+                                trailing: _recipe!.servings > 0
+                                    ? Text(
+                                        '${l10n.recipePerServing}: '
+                                        '${_formatIngredientAmount(
+                                          g.totalQuantity / _recipe!.servings,
+                                          g.unit,
+                                        )}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                      )
+                                    : null,
                               ),
                             ),
                           ],
@@ -361,6 +378,18 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
         ],
       ],
     );
+  }
+
+  /// Formats [quantity] in [unit] for ingredient list display.
+  ///
+  /// Auto-scales to the most readable representation (1500 g -> 1.5 kg) and
+  /// renders whole amounts without a trailing decimal.
+  String _formatIngredientAmount(double quantity, String unit) {
+    final scaled = UnitConverter.autoScale(quantity, unit);
+    final qtyText = scaled.quantity == scaled.quantity.roundToDouble()
+        ? scaled.quantity.toInt().toString()
+        : scaled.quantity.toString();
+    return '$qtyText ${scaled.unit}';
   }
 
   Widget _buildIngredientImage(String? imageUrl, String? barcode) {

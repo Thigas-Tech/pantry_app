@@ -11,8 +11,10 @@ import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/produce_barcode.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/money.dart';
 import 'package:pantry_app/utils/price_calculator.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
+import 'package:pantry_app/utils/serving_weight.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
@@ -200,13 +202,16 @@ class RecipeService {
   ///
   /// Each ingredient's cost is scaled by the fraction of the package
   /// actually used when a package size can be resolved. The package size is
-  /// looked up in this order: the price row itself, the product's packaging
-  /// quantity, then an inventory row for the same barcode. When no package
-  /// size can be resolved, or the units are incompatible, the full price is
-  /// charged (legacy behavior).
+  /// looked up in this order: the price row itself, then the product's
+  /// packaging quantity. When the ingredient and package units are
+  /// incompatible (e.g. pieces vs grams for produce), a per-piece serving
+  /// weight is used to convert before scaling. When no package size or
+  /// conversion can be resolved, the full price is charged (legacy
+  /// behavior).
   ///
   /// Ingredients without a barcode, or with no price recorded in
-  /// [inventoryId], contribute zero. Returns 0.0 when nothing can be priced.
+  /// [inventoryId], contribute zero. Each ingredient cost and the final
+  /// total are rounded to cents. Returns 0.0 when nothing can be priced.
   Future<double> calculateIngredientCost(
     Database database,
     List<RecipeIngredient> ingredients, {
@@ -216,8 +221,9 @@ class RecipeService {
   }) async {
     var total = 0.0;
     for (final ingredient in ingredients) {
-      final barcode = ingredient.barcode;
-      if (barcode == null || barcode.isEmpty) continue;
+      final rawBarcode = ingredient.barcode;
+      if (rawBarcode == null || rawBarcode.isEmpty) continue;
+      final barcode = normalizeProduceBarcode(rawBarcode);
 
       final rows = await database.rawQuery(
         'SELECT price, currency, package_quantity, package_unit FROM prices'
@@ -234,25 +240,118 @@ class RecipeService {
       final packageSize = await _resolvePackageSize(
         database,
         barcode,
-        inventoryId,
         priceRow: rows.first,
       );
       if (packageSize != null) {
         cost =
-            PriceCalculator.scaledIngredientCost(
+            await _scaleIngredientCost(
+              database,
+              barcode,
+              inventoryId,
               price: price,
-              ingredientQuantity: ingredient.quantity,
-              ingredientUnit: ingredient.unit,
-              packageQuantity: packageSize.packageQuantity,
-              packageUnit: packageSize.packageUnit,
+              ingredient: ingredient,
+              package: packageSize,
             ) ??
             price;
       }
 
-      total += await currencyService.convert(cost, currency, baseCurrency);
+      final converted = await currencyService.convert(
+        cost,
+        currency,
+        baseCurrency,
+      );
+      total += Money.roundToCents(converted);
     }
 
-    return total;
+    return Money.roundToCents(total);
+  }
+
+  /// Scales [ingredient]'s share of [price] against [package].
+  ///
+  /// First tries a plain same-group scale via [PriceCalculator]. When the
+  /// units are incompatible (pieces vs weight for produce), resolves a
+  /// per-piece serving weight from the inventory row or
+  /// [ProduceServingPresets] and converts before scaling. Returns null when
+  /// no conversion is possible.
+  Future<double?> _scaleIngredientCost(
+    Database database,
+    String barcode,
+    int inventoryId, {
+    required double price,
+    required RecipeIngredient ingredient,
+    required ({double packageQuantity, String packageUnit}) package,
+  }) async {
+    final scaled = PriceCalculator.scaledIngredientCost(
+      price: price,
+      ingredientQuantity: ingredient.quantity,
+      ingredientUnit: ingredient.unit,
+      packageQuantity: package.packageQuantity,
+      packageUnit: package.packageUnit,
+    );
+    if (scaled != null) return scaled;
+
+    final servingWeightG = await _servingWeightForIngredient(
+      database,
+      barcode,
+      inventoryId,
+      ingredient.name,
+    );
+    if (servingWeightG == null || servingWeightG <= 0) return null;
+
+    final ingredientIsWeight = UnitConverter.areUnitsCompatible(
+      ingredient.unit,
+      'g',
+    );
+    final packageIsWeight = UnitConverter.areUnitsCompatible(
+      package.packageUnit,
+      'g',
+    );
+
+    final double? convertedQuantity;
+    final String convertedUnit;
+    if (ingredientIsWeight && !packageIsWeight) {
+      // Grams needed -> pieces to take from a pieces package.
+      convertedQuantity = ingredient.quantity / servingWeightG;
+      convertedUnit = 'pieces';
+    } else if (!ingredientIsWeight && packageIsWeight) {
+      // Pieces needed -> grams to take from a weight package.
+      convertedQuantity = ingredient.quantity * servingWeightG;
+      convertedUnit = 'g';
+    } else {
+      return null;
+    }
+
+    return PriceCalculator.scaledIngredientCost(
+      price: price,
+      ingredientQuantity: convertedQuantity,
+      ingredientUnit: convertedUnit,
+      packageQuantity: package.packageQuantity,
+      packageUnit: package.packageUnit,
+    );
+  }
+
+  /// Resolves the grams-per-piece serving weight for [barcode] in
+  /// [inventoryId], falling back to [ProduceServingPresets] keyed by
+  /// [ingredientName].
+  Future<double?> _servingWeightForIngredient(
+    Database database,
+    String barcode,
+    int inventoryId,
+    String ingredientName,
+  ) async {
+    final rows = await database.rawQuery(
+      'SELECT serving_weight_g FROM inventory'
+      ' WHERE barcode = ? AND inventory_id = ?'
+      ' ORDER BY (expiry_date IS NULL), expiry_date ASC LIMIT 1',
+      [barcode, inventoryId],
+    );
+    final rowWeight = rows.isEmpty
+        ? null
+        : (rows.first['serving_weight_g'] as num?)?.toDouble();
+    return ServingWeightResolver.resolve(
+      rowServingWeightG: rowWeight,
+      produceName: ingredientName,
+    );
   }
 
   /// Resolves the package size for [barcode] to scale recipe ingredient
@@ -263,14 +362,15 @@ class RecipeService {
   ///   2. The product's packaging quantity ([Product.quantity] /
   ///      [Product.productQuantity]), parsing multi-pack strings like
   ///      "3 x 150 g" to their per-unit value.
-  ///   3. The first inventory row for [barcode] in [inventoryId], treating
-  ///      its stored quantity and unit as a best-effort package size.
+  ///
+  /// The inventory row is deliberately not consulted: its stored quantity
+  /// is the current stock, not the size of the package the price applies
+  /// to, so using it as a package size would distort the scaled cost.
   ///
   /// Returns null when no usable package size is found.
   Future<({double packageQuantity, String packageUnit})?> _resolvePackageSize(
     Database database,
-    String barcode,
-    int inventoryId, {
+    String barcode, {
     required Map<String, dynamic> priceRow,
   }) async {
     final priceQty = (priceRow['package_quantity'] as num?)?.toDouble();
@@ -294,20 +394,6 @@ class RecipeService {
       );
       if (parsed != null) {
         return (packageQuantity: parsed.amount, packageUnit: parsed.unit);
-      }
-    }
-
-    final inventoryRows = await database.rawQuery(
-      'SELECT quantity, unit FROM inventory'
-      ' WHERE barcode = ? AND inventory_id = ?'
-      ' ORDER BY (expiry_date IS NULL), expiry_date ASC',
-      [barcode, inventoryId],
-    );
-    if (inventoryRows.isNotEmpty) {
-      final rowQty = (inventoryRows.first['quantity'] as num?)?.toDouble();
-      final rowUnit = inventoryRows.first['unit'] as String? ?? 'pieces';
-      if (rowQty != null && rowQty > 0) {
-        return (packageQuantity: rowQty, packageUnit: rowUnit);
       }
     }
 
@@ -405,14 +491,13 @@ class RecipeService {
   /// Tries to resolve a per-piece serving weight in grams for an inventory
   /// row.
   ///
-  /// Checks the inventory row's serving_weight_g column first, then falls
-  /// back to [ProduceServingPresets] using the ingredient name. Returns null
-  /// when no serving weight can be determined.
+  /// Delegates to [ServingWeightResolver] so the shortage check, cook
+  /// transaction, and cost scaling share the same sources.
   double? _resolveServingWeightG(Map<String, dynamic> row, String name) {
-    final fromRow = (row['serving_weight_g'] as num?)?.toDouble();
-    if (fromRow != null && fromRow > 0) return fromRow;
-    final presets = ProduceServingPresets.forName(name);
-    return presets?['Medium'] ?? presets?.values.firstOrNull;
+    return ServingWeightResolver.resolve(
+      rowServingWeightG: (row['serving_weight_g'] as num?)?.toDouble(),
+      produceName: name,
+    );
   }
 
   /// Cooks a recipe: deducts ingredients from the recipe's own inventory

@@ -11,7 +11,7 @@ void main() {
         packageQuantity: 12,
         packageUnit: 'pieces',
       );
-      expect(cost, closeTo(1.665, 0.001));
+      expect(cost, closeTo(1.67, 0.001));
     });
 
     test('scales a volume from ml to L package (250 ml from 1 L)', () {
@@ -131,6 +131,28 @@ void main() {
         packageUnit: 'pieces',
       );
       expect(cost, isNull);
+    });
+
+    test('returns null when the price is negative', () {
+      final cost = PriceCalculator.scaledIngredientCost(
+        price: -9.99,
+        ingredientQuantity: 2,
+        ingredientUnit: 'pieces',
+        packageQuantity: 12,
+        packageUnit: 'pieces',
+      );
+      expect(cost, isNull);
+    });
+
+    test('rounds the scaled cost to cents', () {
+      final cost = PriceCalculator.scaledIngredientCost(
+        price: 9.99,
+        ingredientQuantity: 2,
+        ingredientUnit: 'pieces',
+        packageQuantity: 12,
+        packageUnit: 'pieces',
+      );
+      expect(cost, 1.67);
     });
   });
 

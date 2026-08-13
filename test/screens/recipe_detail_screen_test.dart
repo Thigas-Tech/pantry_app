@@ -98,7 +98,7 @@ void main() {
       await pumpDetailScreen(tester);
 
       expect(find.text('Omelette'), findsOneWidget);
-      expect(find.text('2.0 x Eggs'), findsOneWidget);
+      expect(find.text('2 pieces x Eggs'), findsOneWidget);
       expect(find.text('Beat eggs. Cook.'), findsOneWidget);
     });
 

@@ -67,7 +67,10 @@ const _unitMap = <String, String>{
   'oz': 'oz',
   'ounce': 'oz',
   'ounces': 'oz',
-  'fl oz': 'oz',
+  'fl oz': 'fl oz',
+  'floz': 'fl oz',
+  'fluid ounce': 'fl oz',
+  'fluid ounces': 'fl oz',
   'lb': 'lb',
   'lbs': 'lb',
   'pound': 'lb',
@@ -75,8 +78,6 @@ const _unitMap = <String, String>{
   'pieces': 'pieces',
   'piece': 'pieces',
   'count': 'pieces',
-  'serving': 'ounces',
-  'servings': 'ounces',
 };
 
 /// Parses a quantity from OFF API fields into a [ParsedQuantity].

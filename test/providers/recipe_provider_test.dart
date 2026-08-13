@@ -440,7 +440,7 @@ void main() {
         ];
 
         final cost = await _cost(db, mockDb, ingredients);
-        expect(cost, closeTo(1.665, 0.001));
+        expect(cost, closeTo(1.67, 0.001));
       },
     );
 
@@ -490,28 +490,32 @@ void main() {
       expect(cost, closeTo(20.0, 0.001));
     });
 
-    test('scales cost by an inventory row quantity as a last resort', () async {
-      await _seedPrices(db, const [
-        Price(barcode: '001', price: 3, datePurchased: 3000),
-      ]);
-      await db.insert('inventory', {
-        'barcode': '001',
-        'inventory_id': 1,
-        'quantity': 10,
-        'unit': 'pieces',
-      });
-      const ingredients = [
-        RecipeIngredient(
-          recipeId: 1,
-          name: 'Eggs',
-          barcode: '001',
-          quantity: 2,
-        ),
-      ];
+    test(
+      'charges full price when no package size resolves (inventory stock'
+      ' is not a package size)',
+      () async {
+        await _seedPrices(db, const [
+          Price(barcode: '001', price: 3, datePurchased: 3000),
+        ]);
+        await db.insert('inventory', {
+          'barcode': '001',
+          'inventory_id': 1,
+          'quantity': 10,
+          'unit': 'pieces',
+        });
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Eggs',
+            barcode: '001',
+            quantity: 2,
+          ),
+        ];
 
-      final cost = await _cost(db, mockDb, ingredients);
-      expect(cost, closeTo(0.6, 0.001));
-    });
+        final cost = await _cost(db, mockDb, ingredients);
+        expect(cost, closeTo(3.0, 0.001));
+      },
+    );
 
     test('charges full price when package units are incompatible', () async {
       await _seedPrices(db, const [
@@ -529,6 +533,160 @@ void main() {
 
       final cost = await _cost(db, mockDb, ingredients);
       expect(cost, closeTo(9.99, 0.001));
+    });
+
+    test(
+      'scales produce pieces against a weight package via the inventory'
+      ' serving_weight_g',
+      () async {
+        await _seedPrices(db, const [
+          Price(
+            barcode: 'produce-onion',
+            price: 2,
+            datePurchased: 3000,
+            packageQuantity: 500,
+            packageUnit: 'g',
+          ),
+        ]);
+        await db.insert('inventory', {
+          'barcode': 'produce-onion',
+          'inventory_id': 1,
+          'quantity': 3,
+          'unit': 'pieces',
+          'serving_weight_g': 150,
+        });
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+          ),
+        ];
+
+        // 1 onion = 150 g, package is 500 g at $2.00.
+        final cost = await _cost(db, mockDb, ingredients);
+        expect(cost, closeTo(0.6, 0.001));
+      },
+    );
+
+    test(
+      'scales produce pieces via ProduceServingPresets when no inventory'
+      ' serving weight exists',
+      () async {
+        await _seedPrices(db, const [
+          Price(
+            barcode: 'produce-onion',
+            price: 2,
+            datePurchased: 3000,
+            packageQuantity: 500,
+            packageUnit: 'g',
+          ),
+        ]);
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+          ),
+        ];
+
+        // Presets: medium onion = 150 g -> $0.60.
+        final cost = await _cost(db, mockDb, ingredients);
+        expect(cost, closeTo(0.6, 0.001));
+      },
+    );
+
+    test(
+      'scales a weight ingredient against a pieces package via serving'
+      ' weight',
+      () async {
+        await _seedPrices(db, const [
+          Price(
+            barcode: 'produce-onion',
+            price: 3,
+            datePurchased: 3000,
+            packageQuantity: 6,
+            packageUnit: 'pieces',
+          ),
+        ]);
+        await db.insert('inventory', {
+          'barcode': 'produce-onion',
+          'inventory_id': 1,
+          'quantity': 3,
+          'unit': 'pieces',
+          'serving_weight_g': 150,
+        });
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+            quantity: 300,
+            unit: 'g',
+          ),
+        ];
+
+        // 300 g = 2 pieces, package is 6 pieces at $3.00.
+        final cost = await _cost(db, mockDb, ingredients);
+        expect(cost, closeTo(1.0, 0.001));
+      },
+    );
+
+    test(
+      'normalizes produce barcodes before looking up the price',
+      () async {
+        await _seedPrices(db, const [
+          Price(
+            barcode: 'produce-onion',
+            price: 2,
+            datePurchased: 3000,
+            packageQuantity: 500,
+            packageUnit: 'g',
+          ),
+        ]);
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Onion',
+            barcode: 'produce-Onion',
+            quantity: 150,
+            unit: 'g',
+          ),
+        ];
+
+        final cost = await _cost(db, mockDb, ingredients);
+        expect(cost, closeTo(0.6, 0.001));
+      },
+    );
+
+    test('rounds the total to cents across ingredients', () async {
+      await _seedPrices(db, const [
+        Price(
+          barcode: '001',
+          price: 9.99,
+          datePurchased: 3000,
+          packageQuantity: 12,
+          packageUnit: 'pieces',
+        ),
+      ]);
+      const ingredients = [
+        RecipeIngredient(
+          recipeId: 1,
+          name: 'Eggs',
+          barcode: '001',
+          quantity: 2,
+        ),
+        RecipeIngredient(
+          recipeId: 1,
+          name: 'Eggs',
+          barcode: '001',
+          quantity: 2,
+        ),
+      ];
+
+      // Each ingredient costs $1.67; the rounded sum is $3.34.
+      final cost = await _cost(db, mockDb, ingredients);
+      expect(cost, closeTo(3.34, 0.001));
     });
   });
 
