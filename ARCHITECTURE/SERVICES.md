@@ -114,8 +114,13 @@ User scans barcode
   to the UI.
 - **Dependencies**: `firebase_core`, `cloud_firestore`, `firebase_auth`.
   All three are optional (`FIREBASE_ENABLED` flag in `.env`).
-- **Auth requirement**: Firestore security rules require `request.auth != null`
-  for writes. Anonymous Firebase Auth is enabled at app startup.
+- **Security rules**: `firestore.rules` (deployed via CI) allows public reads
+  of the cache collections; `product_cache`/`produce_cache` writes require a
+  signed-in user and a schema-valid document; `recipe_cache` writes/deletes
+  are scoped to the document's `ingestedBy` uid (the author). Rule behaviour
+  is covered by emulator-based tests in `firebase_tests/`.
+- **Auth requirement**: anonymous Firebase Auth is enabled and the app signs
+  in at startup; writes without a signed-in user are rejected by the rules.
 
 ### 3.7 Feedback service (GitHub Issues)
 

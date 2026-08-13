@@ -23,7 +23,11 @@ mixin _$RecipeCacheEntry {
 @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) List<RecipeIngredientCache> get ingredients;/// Epoch ms of first creation (copied from original recipe).
  int get createdAt;/// Epoch ms of last refresh.
  int get lastRefreshedAt;/// Epoch ms of next scheduled refresh.
- int get nextRefreshAt;/// Optional Firebase Storage URL for the recipe photo.
+ int get nextRefreshAt;/// Anonymous-auth uid of the user who shared the recipe.
+///
+/// Used by Firestore rules to scope create/update/delete of
+/// recipe_cache documents to their author. Empty when not signed in.
+ String get ingestedBy;/// Optional Firebase Storage URL for the recipe photo.
 ///
 /// Null when no photo has been uploaded. Never a local file path.
 @JsonKey(includeIfNull: false) String? get imageUrl;/// Schema version for forward compatibility.
@@ -40,16 +44,16 @@ $RecipeCacheEntryCopyWith<RecipeCacheEntry> get copyWith => _$RecipeCacheEntryCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecipeCacheEntry&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&const DeepCollectionEquality().equals(other.ingredients, ingredients)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastRefreshedAt, lastRefreshedAt) || other.lastRefreshedAt == lastRefreshedAt)&&(identical(other.nextRefreshAt, nextRefreshAt) || other.nextRefreshAt == nextRefreshAt)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.schemaVersion, schemaVersion) || other.schemaVersion == schemaVersion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RecipeCacheEntry&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&const DeepCollectionEquality().equals(other.ingredients, ingredients)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastRefreshedAt, lastRefreshedAt) || other.lastRefreshedAt == lastRefreshedAt)&&(identical(other.nextRefreshAt, nextRefreshAt) || other.nextRefreshAt == nextRefreshAt)&&(identical(other.ingestedBy, ingestedBy) || other.ingestedBy == ingestedBy)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.schemaVersion, schemaVersion) || other.schemaVersion == schemaVersion));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,recipeId,name,instructions,servings,const DeepCollectionEquality().hash(ingredients),createdAt,lastRefreshedAt,nextRefreshAt,imageUrl,schemaVersion);
+int get hashCode => Object.hash(runtimeType,recipeId,name,instructions,servings,const DeepCollectionEquality().hash(ingredients),createdAt,lastRefreshedAt,nextRefreshAt,ingestedBy,imageUrl,schemaVersion);
 
 @override
 String toString() {
-  return 'RecipeCacheEntry(recipeId: $recipeId, name: $name, instructions: $instructions, servings: $servings, ingredients: $ingredients, createdAt: $createdAt, lastRefreshedAt: $lastRefreshedAt, nextRefreshAt: $nextRefreshAt, imageUrl: $imageUrl, schemaVersion: $schemaVersion)';
+  return 'RecipeCacheEntry(recipeId: $recipeId, name: $name, instructions: $instructions, servings: $servings, ingredients: $ingredients, createdAt: $createdAt, lastRefreshedAt: $lastRefreshedAt, nextRefreshAt: $nextRefreshAt, ingestedBy: $ingestedBy, imageUrl: $imageUrl, schemaVersion: $schemaVersion)';
 }
 
 
@@ -60,7 +64,7 @@ abstract mixin class $RecipeCacheEntryCopyWith<$Res>  {
   factory $RecipeCacheEntryCopyWith(RecipeCacheEntry value, $Res Function(RecipeCacheEntry) _then) = _$RecipeCacheEntryCopyWithImpl;
 @useResult
 $Res call({
- String recipeId, String name, String instructions, int servings,@JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) List<RecipeIngredientCache> ingredients, int createdAt, int lastRefreshedAt, int nextRefreshAt,@JsonKey(includeIfNull: false) String? imageUrl, int schemaVersion
+ String recipeId, String name, String instructions, int servings,@JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) List<RecipeIngredientCache> ingredients, int createdAt, int lastRefreshedAt, int nextRefreshAt, String ingestedBy,@JsonKey(includeIfNull: false) String? imageUrl, int schemaVersion
 });
 
 
@@ -77,7 +81,7 @@ class _$RecipeCacheEntryCopyWithImpl<$Res>
 
 /// Create a copy of RecipeCacheEntry
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? recipeId = null,Object? name = null,Object? instructions = null,Object? servings = null,Object? ingredients = null,Object? createdAt = null,Object? lastRefreshedAt = null,Object? nextRefreshAt = null,Object? imageUrl = freezed,Object? schemaVersion = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? recipeId = null,Object? name = null,Object? instructions = null,Object? servings = null,Object? ingredients = null,Object? createdAt = null,Object? lastRefreshedAt = null,Object? nextRefreshAt = null,Object? ingestedBy = null,Object? imageUrl = freezed,Object? schemaVersion = null,}) {
   return _then(_self.copyWith(
 recipeId: null == recipeId ? _self.recipeId : recipeId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -87,7 +91,8 @@ as int,ingredients: null == ingredients ? _self.ingredients : ingredients // ign
 as List<RecipeIngredientCache>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,lastRefreshedAt: null == lastRefreshedAt ? _self.lastRefreshedAt : lastRefreshedAt // ignore: cast_nullable_to_non_nullable
 as int,nextRefreshAt: null == nextRefreshAt ? _self.nextRefreshAt : nextRefreshAt // ignore: cast_nullable_to_non_nullable
-as int,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as int,ingestedBy: null == ingestedBy ? _self.ingestedBy : ingestedBy // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,schemaVersion: null == schemaVersion ? _self.schemaVersion : schemaVersion // ignore: cast_nullable_to_non_nullable
 as int,
   ));
@@ -174,10 +179,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String recipeId,  String name,  String instructions,  int servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson)  List<RecipeIngredientCache> ingredients,  int createdAt,  int lastRefreshedAt,  int nextRefreshAt, @JsonKey(includeIfNull: false)  String? imageUrl,  int schemaVersion)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String recipeId,  String name,  String instructions,  int servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson)  List<RecipeIngredientCache> ingredients,  int createdAt,  int lastRefreshedAt,  int nextRefreshAt,  String ingestedBy, @JsonKey(includeIfNull: false)  String? imageUrl,  int schemaVersion)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RecipeCacheEntry() when $default != null:
-return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_that.ingredients,_that.createdAt,_that.lastRefreshedAt,_that.nextRefreshAt,_that.imageUrl,_that.schemaVersion);case _:
+return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_that.ingredients,_that.createdAt,_that.lastRefreshedAt,_that.nextRefreshAt,_that.ingestedBy,_that.imageUrl,_that.schemaVersion);case _:
   return orElse();
 
 }
@@ -195,10 +200,10 @@ return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String recipeId,  String name,  String instructions,  int servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson)  List<RecipeIngredientCache> ingredients,  int createdAt,  int lastRefreshedAt,  int nextRefreshAt, @JsonKey(includeIfNull: false)  String? imageUrl,  int schemaVersion)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String recipeId,  String name,  String instructions,  int servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson)  List<RecipeIngredientCache> ingredients,  int createdAt,  int lastRefreshedAt,  int nextRefreshAt,  String ingestedBy, @JsonKey(includeIfNull: false)  String? imageUrl,  int schemaVersion)  $default,) {final _that = this;
 switch (_that) {
 case _RecipeCacheEntry():
-return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_that.ingredients,_that.createdAt,_that.lastRefreshedAt,_that.nextRefreshAt,_that.imageUrl,_that.schemaVersion);case _:
+return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_that.ingredients,_that.createdAt,_that.lastRefreshedAt,_that.nextRefreshAt,_that.ingestedBy,_that.imageUrl,_that.schemaVersion);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -215,10 +220,10 @@ return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String recipeId,  String name,  String instructions,  int servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson)  List<RecipeIngredientCache> ingredients,  int createdAt,  int lastRefreshedAt,  int nextRefreshAt, @JsonKey(includeIfNull: false)  String? imageUrl,  int schemaVersion)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String recipeId,  String name,  String instructions,  int servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson)  List<RecipeIngredientCache> ingredients,  int createdAt,  int lastRefreshedAt,  int nextRefreshAt,  String ingestedBy, @JsonKey(includeIfNull: false)  String? imageUrl,  int schemaVersion)?  $default,) {final _that = this;
 switch (_that) {
 case _RecipeCacheEntry() when $default != null:
-return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_that.ingredients,_that.createdAt,_that.lastRefreshedAt,_that.nextRefreshAt,_that.imageUrl,_that.schemaVersion);case _:
+return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_that.ingredients,_that.createdAt,_that.lastRefreshedAt,_that.nextRefreshAt,_that.ingestedBy,_that.imageUrl,_that.schemaVersion);case _:
   return null;
 
 }
@@ -230,7 +235,7 @@ return $default(_that.recipeId,_that.name,_that.instructions,_that.servings,_tha
 @JsonSerializable()
 
 class _RecipeCacheEntry extends RecipeCacheEntry {
-  const _RecipeCacheEntry({required this.recipeId, required this.name, required this.instructions, required this.servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) required final  List<RecipeIngredientCache> ingredients, required this.createdAt, required this.lastRefreshedAt, required this.nextRefreshAt, @JsonKey(includeIfNull: false) this.imageUrl, this.schemaVersion = 1}): _ingredients = ingredients,super._();
+  const _RecipeCacheEntry({required this.recipeId, required this.name, required this.instructions, required this.servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) required final  List<RecipeIngredientCache> ingredients, required this.createdAt, required this.lastRefreshedAt, required this.nextRefreshAt, this.ingestedBy = '', @JsonKey(includeIfNull: false) this.imageUrl, this.schemaVersion = 1}): _ingredients = ingredients,super._();
   factory _RecipeCacheEntry.fromJson(Map<String, dynamic> json) => _$RecipeCacheEntryFromJson(json);
 
 /// Random UUID4 used as the Firestore doc ID.
@@ -256,6 +261,11 @@ class _RecipeCacheEntry extends RecipeCacheEntry {
 @override final  int lastRefreshedAt;
 /// Epoch ms of next scheduled refresh.
 @override final  int nextRefreshAt;
+/// Anonymous-auth uid of the user who shared the recipe.
+///
+/// Used by Firestore rules to scope create/update/delete of
+/// recipe_cache documents to their author. Empty when not signed in.
+@override@JsonKey() final  String ingestedBy;
 /// Optional Firebase Storage URL for the recipe photo.
 ///
 /// Null when no photo has been uploaded. Never a local file path.
@@ -276,16 +286,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecipeCacheEntry&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&const DeepCollectionEquality().equals(other._ingredients, _ingredients)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastRefreshedAt, lastRefreshedAt) || other.lastRefreshedAt == lastRefreshedAt)&&(identical(other.nextRefreshAt, nextRefreshAt) || other.nextRefreshAt == nextRefreshAt)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.schemaVersion, schemaVersion) || other.schemaVersion == schemaVersion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RecipeCacheEntry&&(identical(other.recipeId, recipeId) || other.recipeId == recipeId)&&(identical(other.name, name) || other.name == name)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.servings, servings) || other.servings == servings)&&const DeepCollectionEquality().equals(other._ingredients, _ingredients)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.lastRefreshedAt, lastRefreshedAt) || other.lastRefreshedAt == lastRefreshedAt)&&(identical(other.nextRefreshAt, nextRefreshAt) || other.nextRefreshAt == nextRefreshAt)&&(identical(other.ingestedBy, ingestedBy) || other.ingestedBy == ingestedBy)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.schemaVersion, schemaVersion) || other.schemaVersion == schemaVersion));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,recipeId,name,instructions,servings,const DeepCollectionEquality().hash(_ingredients),createdAt,lastRefreshedAt,nextRefreshAt,imageUrl,schemaVersion);
+int get hashCode => Object.hash(runtimeType,recipeId,name,instructions,servings,const DeepCollectionEquality().hash(_ingredients),createdAt,lastRefreshedAt,nextRefreshAt,ingestedBy,imageUrl,schemaVersion);
 
 @override
 String toString() {
-  return 'RecipeCacheEntry(recipeId: $recipeId, name: $name, instructions: $instructions, servings: $servings, ingredients: $ingredients, createdAt: $createdAt, lastRefreshedAt: $lastRefreshedAt, nextRefreshAt: $nextRefreshAt, imageUrl: $imageUrl, schemaVersion: $schemaVersion)';
+  return 'RecipeCacheEntry(recipeId: $recipeId, name: $name, instructions: $instructions, servings: $servings, ingredients: $ingredients, createdAt: $createdAt, lastRefreshedAt: $lastRefreshedAt, nextRefreshAt: $nextRefreshAt, ingestedBy: $ingestedBy, imageUrl: $imageUrl, schemaVersion: $schemaVersion)';
 }
 
 
@@ -296,7 +306,7 @@ abstract mixin class _$RecipeCacheEntryCopyWith<$Res> implements $RecipeCacheEnt
   factory _$RecipeCacheEntryCopyWith(_RecipeCacheEntry value, $Res Function(_RecipeCacheEntry) _then) = __$RecipeCacheEntryCopyWithImpl;
 @override @useResult
 $Res call({
- String recipeId, String name, String instructions, int servings,@JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) List<RecipeIngredientCache> ingredients, int createdAt, int lastRefreshedAt, int nextRefreshAt,@JsonKey(includeIfNull: false) String? imageUrl, int schemaVersion
+ String recipeId, String name, String instructions, int servings,@JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) List<RecipeIngredientCache> ingredients, int createdAt, int lastRefreshedAt, int nextRefreshAt, String ingestedBy,@JsonKey(includeIfNull: false) String? imageUrl, int schemaVersion
 });
 
 
@@ -313,7 +323,7 @@ class __$RecipeCacheEntryCopyWithImpl<$Res>
 
 /// Create a copy of RecipeCacheEntry
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? recipeId = null,Object? name = null,Object? instructions = null,Object? servings = null,Object? ingredients = null,Object? createdAt = null,Object? lastRefreshedAt = null,Object? nextRefreshAt = null,Object? imageUrl = freezed,Object? schemaVersion = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? recipeId = null,Object? name = null,Object? instructions = null,Object? servings = null,Object? ingredients = null,Object? createdAt = null,Object? lastRefreshedAt = null,Object? nextRefreshAt = null,Object? ingestedBy = null,Object? imageUrl = freezed,Object? schemaVersion = null,}) {
   return _then(_RecipeCacheEntry(
 recipeId: null == recipeId ? _self.recipeId : recipeId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -323,7 +333,8 @@ as int,ingredients: null == ingredients ? _self._ingredients : ingredients // ig
 as List<RecipeIngredientCache>,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as int,lastRefreshedAt: null == lastRefreshedAt ? _self.lastRefreshedAt : lastRefreshedAt // ignore: cast_nullable_to_non_nullable
 as int,nextRefreshAt: null == nextRefreshAt ? _self.nextRefreshAt : nextRefreshAt // ignore: cast_nullable_to_non_nullable
-as int,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as int,ingestedBy: null == ingestedBy ? _self.ingestedBy : ingestedBy // ignore: cast_nullable_to_non_nullable
+as String,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String?,schemaVersion: null == schemaVersion ? _self.schemaVersion : schemaVersion // ignore: cast_nullable_to_non_nullable
 as int,
   ));

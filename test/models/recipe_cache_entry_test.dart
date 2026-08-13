@@ -235,6 +235,26 @@ void main() {
       expect(entry.recipeId, 'fixed-id');
     });
 
+    test('fromRecipe records the ingestedBy uid when provided', () {
+      const recipe = Recipe(name: 'Toast', createdAt: 7000);
+
+      final entry = RecipeCacheEntryConversions.fromRecipe(
+        recipe,
+        [],
+        ingestedBy: 'user-123',
+      );
+
+      expect(entry.ingestedBy, 'user-123');
+    });
+
+    test('fromRecipe defaults ingestedBy to empty', () {
+      const recipe = Recipe(name: 'Toast', createdAt: 7000);
+
+      final entry = RecipeCacheEntryConversions.fromRecipe(recipe, []);
+
+      expect(entry.ingestedBy, '');
+    });
+
     test('fromRecipe generates different IDs for different names', () {
       const recipe1 = Recipe(name: 'Toast', createdAt: 7000);
       const recipe2 = Recipe(name: 'Toast2', createdAt: 7000);

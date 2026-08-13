@@ -687,10 +687,20 @@ void main() {
       ),
     ];
 
+    FirebaseCacheService signedInService() => FirebaseCacheService(
+      db: mockDb,
+      firebaseClient: mockClient,
+      usdaClient: mockUsda,
+      offAdapter: mockOff,
+      metaDao: mockMetaDao,
+      currentUid: () => 'test-user-id',
+    );
+
     test('writes to firestore and upserts metadata', () async {
       when(() => mockClient.setRecipe(any())).thenAnswer((_) async => true);
+      final svc = signedInService();
 
-      await service.cacheRecipe(recipe, ingredients);
+      await svc.cacheRecipe(recipe, ingredients);
 
       verify(() => mockClient.setRecipe(any())).called(1);
       verify(
@@ -708,7 +718,7 @@ void main() {
     test('no-op when firebase client is unavailable', () async {
       when(() => mockClient.isAvailable).thenReturn(false);
 
-      await service.cacheRecipe(recipe, ingredients);
+      await signedInService().cacheRecipe(recipe, ingredients);
 
       verifyNever(() => mockClient.setRecipe(any()));
       verifyNever(
@@ -735,7 +745,7 @@ void main() {
         ),
       ).thenThrow(Exception('DB error'));
 
-      await service.cacheRecipe(recipe, ingredients);
+      await signedInService().cacheRecipe(recipe, ingredients);
 
       verify(() => mockClient.setRecipe(any())).called(1);
     });
@@ -743,7 +753,7 @@ void main() {
     test('cacheRecipe uses imageUrl when provided', () async {
       when(() => mockClient.setRecipe(any())).thenAnswer((_) async => true);
 
-      await service.cacheRecipe(
+      await signedInService().cacheRecipe(
         recipe,
         ingredients,
         imageUrl: 'https://example.com/photo.jpg',
@@ -753,6 +763,31 @@ void main() {
           verify(() => mockClient.setRecipe(captureAny())).captured.first
               as RecipeCacheEntry;
       expect(captured.imageUrl, 'https://example.com/photo.jpg');
+    });
+
+    test('cacheRecipe attributes the entry to the signed-in user', () async {
+      when(() => mockClient.setRecipe(any())).thenAnswer((_) async => true);
+
+      await signedInService().cacheRecipe(recipe, ingredients);
+
+      final captured =
+          verify(() => mockClient.setRecipe(captureAny())).captured.first
+              as RecipeCacheEntry;
+      expect(captured.ingestedBy, 'test-user-id');
+    });
+
+    test('skips the write when no user is signed in', () async {
+      final svc = FirebaseCacheService(
+        db: mockDb,
+        firebaseClient: mockClient,
+        usdaClient: mockUsda,
+        offAdapter: mockOff,
+        metaDao: mockMetaDao,
+      );
+
+      await svc.cacheRecipe(recipe, ingredients);
+
+      verifyNever(() => mockClient.setRecipe(any()));
     });
   });
 

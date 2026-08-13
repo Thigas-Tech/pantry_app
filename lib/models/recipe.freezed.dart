@@ -31,9 +31,9 @@ mixin _$Recipe {
 /// the per-inventory feature remain in the first pantry.
  int get inventoryId;/// The recipe_cache Firestore document id for the shared snapshot.
 ///
-/// A random UUID4 assigned when the recipe is cached (see
-/// [RecipeCacheEntryConversions.fromRecipe]). Empty until then, and
-/// used to delete the shared document when the recipe is removed.
+/// A random UUID4 assigned when the recipe is cached. Empty until
+/// then, and used to delete the shared document when the recipe is
+/// removed.
  String get sharedRecipeId;
 /// Create a copy of Recipe
 /// with the given fields replaced by the non-null parameter values.
@@ -262,9 +262,9 @@ class _Recipe implements Recipe {
 @override@JsonKey() final  int inventoryId;
 /// The recipe_cache Firestore document id for the shared snapshot.
 ///
-/// A random UUID4 assigned when the recipe is cached (see
-/// [RecipeCacheEntryConversions.fromRecipe]). Empty until then, and
-/// used to delete the shared document when the recipe is removed.
+/// A random UUID4 assigned when the recipe is cached. Empty until
+/// then, and used to delete the shared document when the recipe is
+/// removed.
 @override@JsonKey() final  String sharedRecipeId;
 
 /// Create a copy of Recipe
