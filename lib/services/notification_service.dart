@@ -183,6 +183,7 @@ class FlutterNotificationService implements NotificationService {
     String channelName = 'Expiry reminders',
     String channelDescription = 'Warns about expiring food',
     bool notificationsEnabled = true,
+    bool? systemNotificationsEnabled,
   }) async {
     if (!notificationsEnabled) {
       logInfo('Notifications disabled in settings, skipping');
@@ -205,7 +206,11 @@ class FlutterNotificationService implements NotificationService {
       return;
     }
 
-    final systemEnabled = await areNotificationsEnabled();
+    // The caller (e.g. rescheduleAllItems) may hoist the platform
+    // permission check out of a loop and pass the result down; when null,
+    // the check runs here.
+    final systemEnabled =
+        systemNotificationsEnabled ?? await areNotificationsEnabled();
     if (systemEnabled == false) {
       logWarning('System notifications disabled, skipping reminders');
       return;
@@ -495,6 +500,14 @@ class FlutterNotificationService implements NotificationService {
     try {
       await _plugin.cancelAll();
 
+      // Check the platform permission once instead of once per item
+      // (each check is a platform-channel round trip).
+      final systemEnabled = await areNotificationsEnabled();
+      if (systemEnabled == false) {
+        logWarning('System notifications disabled, skipping all reminders');
+        return;
+      }
+
       for (final item in items) {
         await scheduleExpiryReminders(
           item,
@@ -504,6 +517,7 @@ class FlutterNotificationService implements NotificationService {
           buildExpiringSoonBody: buildExpiringSoonBody,
           buildExpiringTodayBody: buildExpiringTodayBody,
           notificationsEnabled: notificationsEnabled,
+          systemNotificationsEnabled: systemEnabled,
         );
       }
 
