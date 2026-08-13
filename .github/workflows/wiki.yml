@@ -33,28 +33,25 @@ jobs:
       - name: Generate API documentation
         run: dart doc .
 
-      - name: Checkout gh-pages branch
+      - name: Deploy API docs to gh-pages via worktree
         run: |
+          set -e
           git fetch origin gh-pages --depth=1 || {
             echo "gh-pages branch does not exist yet; run initial setup first"
             exit 1
           }
-          git checkout gh-pages
-
-      - name: Sync documentation
-        run: |
+          git worktree add --detach "$RUNNER_TEMP/gh-pages" FETCH_HEAD
+          trap 'git worktree remove --force "$RUNNER_TEMP/gh-pages" 2>/dev/null || true' EXIT
+          cd "$RUNNER_TEMP/gh-pages"
           rm -rf api
-          mv doc/api api
+          mv "$GITHUB_WORKSPACE/doc/api" api
           git add -A
-
-      - name: Commit and push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           if git diff --staged --quiet; then
             echo "No changes to API docs"
           else
-            git commit -m "Update API docs [skip ci]"
-            git push origin gh-pages
+            git -c user.name="github-actions[bot]" \
+                -c user.email="github-actions[bot]@users.noreply.github.com" \
+                commit -m "Update API docs [skip ci]"
+            git push origin HEAD:gh-pages
             echo "API docs deployed to gh-pages"
           fi
