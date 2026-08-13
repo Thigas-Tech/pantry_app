@@ -56,7 +56,9 @@
 <section class="desc markdown">
   <p>Submits feedback as GitHub Issues and manages an offline queue.</p>
 <p>On platforms that support HTTP (Android, iOS, desktop), issues are
-posted to the GitHub Issues API with the developer's PAT. When the
+posted either through the serverless feedback proxy (release builds,
+configured by <a href="../config/AppConfig/feedbackProxyUrl.html">AppConfig.feedbackProxyUrl</a>) or directly to the GitHub
+Issues API with the developer's PAT (development only). When the
 device is offline the issue is stored in the feedback_queue SQLite
 table and flushed automatically when connectivity is restored.</p>
 <p>On web, issue submissions are not supported;
@@ -202,7 +204,8 @@ table and flushed automatically when connectivity is restored.</p>
 
 </dt>
 <dd>
-  Posts an issue to the GitHub API and returns the issue URL.
+  Posts an issue to the feedback proxy or GitHub API and returns the
+issue URL.
   
 
 </dd>

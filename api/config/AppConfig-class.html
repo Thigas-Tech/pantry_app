@@ -54,15 +54,20 @@
 
     
 <section class="desc markdown">
-  <p>Application configuration loaded from a .env file at startup.</p>
-<p>All sensitive values (API credentials, contact email, etc.) are read from
-environment variables loaded by the <a href="https://pub.dev/documentation/flutter_dotenv/6.0.1/flutterdotenv/DotEnv-class.html">DotEnv</a> class. A .env.example file is
-provided as a template; copy it to .env and fill in real values.</p>
+  <p>Application configuration.</p>
+<p>Credentials are read from a .env file loaded by <a href="https://pub.dev/documentation/flutter_dotenv/6.0.1/flutterdotenv/DotEnv-class.html">DotEnv</a> for local
+development only; the .env file is <strong>not</strong> a Flutter asset, so nothing
+sensitive is bundled into release builds. Non-secret feature toggles
+fall back to <code>--dart-define</code> build flags set by CI.</p>
 <h2 id="security-note">Security note</h2>
 <ul>
-<li>The .env file is <strong>never</strong> committed to version control.</li>
-<li>.env.example contains placeholder values and IS committed.</li>
-<li>These values are embedded in the app bundle at build time.</li>
+<li>The .env file is <strong>never</strong> committed to version control and <strong>never</strong>
+shipped in an app artifact.</li>
+<li>Credential-backed features (OFF product submission, Open Prices,
+USDA, GitHub feedback) are disabled when their credential is absent.</li>
+<li>GitHub feedback in release builds goes through a serverless proxy
+configured via the <a href="../config/AppConfig/feedbackProxyUrl.html">feedbackProxyUrl</a> build flag; the PAT lives only
+on the server.</li>
 </ul>
 <p>This class cannot be instantiated — all members are static.</p>
 </section>
@@ -183,6 +188,18 @@ Open Food Facts (required by their API terms).
 </dt>
 <dd>
   Whether in-app feedback submission is enabled.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
+        <dt id="feedbackProxyUrl" class="property">
+  <span class="name"><a href="../config/AppConfig/feedbackProxyUrl.html">feedbackProxyUrl</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+  
+
+</dt>
+<dd>
+  The URL of the serverless feedback proxy used in release builds.
   <div class="features"><span class="feature">no setter</span></div>
 
 </dd>

@@ -74,8 +74,11 @@ production server (false).</p>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static bool get useOffStaging =&gt;
-    dotenv.env[&#39;USE_OFF_STAGING&#39;]?.toLowerCase() == &#39;true&#39;;</code></pre>
+  <pre class="language-dart"><code class="language-dart">static bool get useOffStaging {
+  final env = dotenv.env[&#39;USE_OFF_STAGING&#39;];
+  if (env != null) return env.toLowerCase() == &#39;true&#39;;
+  return const String.fromEnvironment(&#39;USE_OFF_STAGING&#39;) == &#39;true&#39;;
+}</code></pre>
 </section>
 
   </section>

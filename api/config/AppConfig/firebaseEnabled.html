@@ -68,17 +68,20 @@
     
 <section class="desc markdown">
   <p>Whether Firebase integration is enabled.</p>
-<p>Set to true in .env after running flutterfire configure and
-placing the generated google-services.json / GoogleService-Info.plist
-in the platform project. When false, all Firebase operations are
-no-ops and the app works exactly as before.</p>
+<p>Controlled by the <code>FIREBASE_ENABLED</code> <code>--dart-define</code> build flag
+(CI sets it true for release builds) with a .env override for local
+development. When false, all Firebase operations are no-ops and the
+app works exactly as before.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static bool get firebaseEnabled =&gt;
-    dotenv.env[&#39;FIREBASE_ENABLED&#39;]?.toLowerCase() == &#39;true&#39;;</code></pre>
+  <pre class="language-dart"><code class="language-dart">static bool get firebaseEnabled {
+  final env = dotenv.env[&#39;FIREBASE_ENABLED&#39;];
+  if (env != null) return env.toLowerCase() == &#39;true&#39;;
+  return const String.fromEnvironment(&#39;FIREBASE_ENABLED&#39;) == &#39;true&#39;;
+}</code></pre>
 </section>
 
   </section>

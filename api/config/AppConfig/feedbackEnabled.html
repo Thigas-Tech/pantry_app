@@ -68,13 +68,15 @@
     
 <section class="desc markdown">
   <p>Whether in-app feedback submission is enabled.</p>
+<p>True only when a working submission path exists: a serverless
+<a href="../../config/AppConfig/feedbackProxyUrl.html">feedbackProxyUrl</a> or a development <a href="../../config/AppConfig/feedbackToken.html">feedbackToken</a>.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">static bool get feedbackEnabled =&gt;
-    (dotenv.env[&#39;FEEDBACK_ENABLED&#39;] ?? &#39;true&#39;).toLowerCase() == &#39;true&#39;;</code></pre>
+    feedbackProxyUrl.isNotEmpty || feedbackToken.isNotEmpty;</code></pre>
 </section>
 
   </section>

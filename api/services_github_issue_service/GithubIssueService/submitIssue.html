@@ -66,9 +66,15 @@
     </section>
     
 <section class="desc markdown">
-  <p>Posts an issue to the GitHub API and returns the issue URL.</p>
-<p>Throws <a href="../../services_github_issue_service/IssueSubmissionException-class.html">IssueSubmissionException</a> on failure. On web this throws
-<a href="https://api.flutter.dev/flutter/dart-core/UnsupportedError-class.html">UnsupportedError</a> because direct GitHub API calls are not supported.</p>
+  <p>Posts an issue to the feedback proxy or GitHub API and returns the
+issue URL.</p>
+<p>When <a href="../../config/AppConfig/feedbackProxyUrl.html">AppConfig.feedbackProxyUrl</a> is set, the issue is POSTed to the
+proxy (which holds the GitHub PAT and enforces server-side rate
+limits). Otherwise it is posted directly to the GitHub API with the
+development <a href="../../config/AppConfig/feedbackToken.html">AppConfig.feedbackToken</a>. Throws
+<a href="../../services_github_issue_service/IssueSubmissionException-class.html">IssueSubmissionException</a> on failure; throws <a href="../../services_github_issue_service/IssueRateLimitException-class.html">IssueRateLimitException</a>
+when the proxy rejects the request for rate limiting. On web this
+throws <a href="https://api.flutter.dev/flutter/dart-core/UnsupportedError-class.html">UnsupportedError</a> because submissions are not supported.</p>
 </section>
 
 
@@ -85,16 +91,25 @@
     throw UnsupportedError(&#39;GitHub API submissions are not supported on web&#39;);
   }
 
-  if (AppConfig.feedbackToken.isEmpty) {
-    logError(&#39;FEEDBACK_TOKEN is empty — in-app feedback will fail&#39;);
+  if (AppConfig.feedbackProxyUrl.isEmpty &amp;&amp; AppConfig.feedbackToken.isEmpty) {
+    logError(&#39;Feedback is not configured (no proxy URL or token)&#39;);
     throw const IssueSubmissionException(
-      &#39;Feedback token is not configured.&#39;,
+      &#39;Feedback is not configured.&#39;,
     );
   }
 
   if (!fromFlush &amp;&amp; !_canSubmit()) {
     throw const IssueSubmissionException(
       &#39;Rate limit reached. Try again later.&#39;,
+    );
+  }
+
+  if (AppConfig.feedbackProxyUrl.isNotEmpty) {
+    return _submitViaProxy(
+      title: title,
+      body: body,
+      label: label,
+      fromFlush: fromFlush,
     );
   }
 
