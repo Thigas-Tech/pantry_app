@@ -225,5 +225,32 @@ void main() {
       expect(await statsRepo.totalInventoryValue(1), isNull);
       expect(await statsRepo.averageItemPrice(1), isNull);
     });
+
+    test('inventoryPriceSummary derives all aggregates from one pass',
+        () async {
+      final db = await statsDb.database;
+      const inventoryDao = InventoryDao();
+      final p1Rows = await inventoryDao.listByBarcode(db, 'p1', inventoryId: 1);
+      await inventoryDao.update(db, p1Rows.first.copyWith(quantity: 3));
+
+      // Latest prices p1=10 (x3), p2=20 (x1).
+      final summary = await statsRepo.inventoryPriceSummary(1);
+
+      expect(summary.total, 50.0);
+      expect(summary.average, 12.5);
+      expect(summary.count, 2);
+    });
+
+    test('inventoryPriceSummary returns nulls when no prices exist',
+        () async {
+      final db = await statsDb.database;
+      await db.delete('prices');
+
+      final summary = await statsRepo.inventoryPriceSummary(1);
+
+      expect(summary.total, isNull);
+      expect(summary.average, isNull);
+      expect(summary.count, 0);
+    });
   });
 }

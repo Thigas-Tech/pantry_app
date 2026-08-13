@@ -4,6 +4,19 @@
 
 ### Performance
 
+- **Stats screen single-pass price aggregates (audit P9)**: the stats
+  visit re-executed the correlated latest-price subquery 4-6 times
+  (value, average, priced count, plus the dashboard queries). New
+  [PriceRepository.inventoryPriceSummary] derives all three aggregates
+  from one latest-prices pass with a single currency-conversion sweep,
+  and the per-row categories_hierarchy JSON decoding now runs in a
+  background isolate via compute instead of on the UI path.
+  (lib/services/price_repository.dart, lib/providers/stats_provider.dart,
+  test/services/price_repository_test.dart,
+  test/providers/stats_provider_test.dart)
+
+### Performance
+
 - **Database indexes and count queries (audit P8)**: new migration v39
   adds composite indexes for the hot queries —
   inventory(inventory_id, expiry_date) serves the per-pantry list

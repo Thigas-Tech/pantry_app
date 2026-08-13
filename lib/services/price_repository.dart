@@ -232,4 +232,52 @@ class PriceRepository {
   /// Returns a [SyncResult] with counts of synced/failed prices.
   Future<SyncResult> syncToOpenPrices() =>
       _openPricesService.syncPendingPrices();
+
+  /// Computes the value, quantity-weighted average price, and count of
+  /// priced items in [inventoryId] from a single latest-price pass.
+  ///
+  /// Runs one query (the latest-prices-with-currency pass) and one
+  /// currency-conversion pass instead of re-executing the correlated
+  /// latest-price subquery per aggregate, which the stats screen
+  /// previously did on every visit.
+  ///
+  /// The value sums per-currency subtotals converted to [baseCurrency];
+  /// the average is the quantity-weighted mean of the latest price per
+  /// product. Returns nulls for total and average when no prices exist.
+  Future<({double? total, double? average, int count})> inventoryPriceSummary(
+    int inventoryId, {
+    String baseCurrency = 'USD',
+  }) async {
+    final db = await _db.database;
+    final rows = await _db.priceDao.latestPricesWithCurrency(
+      db,
+      inventoryId,
+    );
+    if (rows.isEmpty) return (total: null, average: null, count: 0);
+
+    var weightedSum = 0.0;
+    var totalQty = 0.0;
+    final subtotals = <String, double>{};
+    for (final row in rows) {
+      final price = (row['price'] as num).toDouble();
+      final currency = row['currency'] as String;
+      final qty = (row['total_quantity'] as num?)?.toDouble() ?? 1;
+      weightedSum += await convertToBase(price, currency, baseCurrency) * qty;
+      subtotals[currency] = (subtotals[currency] ?? 0) + price * qty;
+      totalQty += qty;
+    }
+
+    var total = 0.0;
+    for (final entry in subtotals.entries) {
+      total += await convertToBase(entry.value, entry.key, baseCurrency);
+    }
+
+    return (
+      total: double.tryParse(total.toStringAsFixed(2)),
+      average: totalQty == 0
+          ? null
+          : double.tryParse((weightedSum / totalQty).toStringAsFixed(2)),
+      count: rows.length,
+    );
+  }
 }
