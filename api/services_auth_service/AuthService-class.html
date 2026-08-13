@@ -60,8 +60,9 @@
 This makes testing trivial and enables future migration to non-anonymous
 auth (Google, email) by swapping the implementation.</p>
 <h2 id="future-migration">Future migration</h2>
-<p>To add Google sign-in, extend this interface with methods like:</p>
-<pre class="language-dart"><code class="language-dart">Future&lt;AuthUser?&gt; signInWithGoogle();
+<p>To add Google sign-in, extend this interface with methods like:
+Example:</p>
+<pre class="language-dart"><code>Future&lt;AuthUser?&gt; signInWithGoogle();
 </code></pre>
 <p>and create a GoogleAuthService that implements them. The rest of the
 app is unaffected because it already depends on <a href="../services_auth_service/AuthService-class.html">AuthService</a>.</p>

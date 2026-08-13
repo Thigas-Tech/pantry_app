@@ -59,7 +59,7 @@
         <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
     </ol>
   </div>
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
 <span class="name ">build</span>(<wbr>)
 
       
@@ -72,9 +72,22 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-int build() {
-  unawaited(_validateAndLoad());
-  return 1;
+Future&lt;int&gt; build() async {
+  final prefs = await SharedPreferences.getInstance();
+  final stored = prefs.getInt(&#39;active_inventory_id&#39;);
+  final targetId = stored ?? 1;
+
+  final inventories = await _fetchInventories();
+  if (inventories == null) return targetId;
+
+  final exists = inventories.any((i) =&gt; i[&#39;id&#39;] == targetId);
+  if (exists) return targetId;
+
+  final resolvedId = _fallbackId(inventories);
+  if (resolvedId != targetId) {
+    unawaited(prefs.setInt(&#39;active_inventory_id&#39;, resolvedId));
+  }
+  return resolvedId;
 }</code></pre>
 </section>
 

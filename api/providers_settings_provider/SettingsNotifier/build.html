@@ -59,7 +59,7 @@
         <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
     </ol>
   </div>
-<span class="returntype"><a href="../../providers_settings_provider/Settings-class.html">Settings</a></span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../providers_settings_provider/Settings-class.html">Settings</a></span>&gt;</span></span>
 <span class="name ">build</span>(<wbr>)
 
       
@@ -72,11 +72,68 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-Settings build() {
-  unawaited(_loadFromPrefs());
-  return Settings(
-    baseCurrency: _detectLocaleCurrency(),
-  );
+Future&lt;Settings&gt; build() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    return Settings(
+      notificationsEnabled: prefs.getBool(&#39;notificationsEnabled&#39;) ?? true,
+      retentionDays: prefs.getInt(&#39;retentionDays&#39;) ?? 60,
+      expiringSoonDays: prefs.getInt(&#39;expiringSoonDays&#39;) ?? 3,
+      inactivityReminderEnabled:
+          prefs.getBool(&#39;inactivityReminderEnabled&#39;) ?? true,
+      inactivityThresholdDays: prefs.getInt(&#39;inactivityThresholdDays&#39;) ?? 10,
+      amoledDarkMode: prefs.getBool(&#39;amoledDarkMode&#39;) ?? false,
+      priceTrackingEnabled: prefs.getBool(&#39;priceTrackingEnabled&#39;) ?? false,
+      priceRetentionDays: prefs.getInt(&#39;priceRetentionDays&#39;) ?? 0,
+      pricesHidden: prefs.getBool(&#39;pricesHidden&#39;) ?? false,
+      baseCurrency:
+          prefs.getString(&#39;baseCurrency&#39;) ?? _detectLocaleCurrency(),
+      openPricesSyncEnabled: prefs.getBool(&#39;openPricesSyncEnabled&#39;) ?? false,
+      openPricesToken:
+          prefs.getString(&#39;openPricesToken&#39;) ?? AppConfig.openPricesToken,
+      unitSystem: UnitSystem.values.firstWhere(
+        (e) =&gt; e.name == prefs.getString(&#39;unitSystem&#39;),
+        orElse: () =&gt; UnitSystem.metric,
+      ),
+      unitSystemServingSize: () {
+        final v = prefs.getString(&#39;unitSystemServingSize&#39;);
+        if (v == null) return null;
+        return UnitSystem.values.firstWhere(
+          (e) =&gt; e.name == v,
+          orElse: () =&gt; UnitSystem.metric,
+        );
+      }(),
+      unitSystemRecipeIngredients: () {
+        final v = prefs.getString(&#39;unitSystemRecipeIngredients&#39;);
+        if (v == null) return null;
+        return UnitSystem.values.firstWhere(
+          (e) =&gt; e.name == v,
+          orElse: () =&gt; UnitSystem.metric,
+        );
+      }(),
+      unitSystemInventory: () {
+        final v = prefs.getString(&#39;unitSystemInventory&#39;);
+        if (v == null) return null;
+        return UnitSystem.values.firstWhere(
+          (e) =&gt; e.name == v,
+          orElse: () =&gt; UnitSystem.metric,
+        );
+      }(),
+      preferredWeightUnit: WeightUnitPreference.values.firstWhere(
+        (e) =&gt; e.name == prefs.getString(&#39;preferredWeightUnit&#39;),
+        orElse: () =&gt; WeightUnitPreference.ounces,
+      ),
+      preferredVolumeUnit: VolumeUnitPreference.values.firstWhere(
+        (e) =&gt; e.name == prefs.getString(&#39;preferredVolumeUnit&#39;),
+        orElse: () =&gt; VolumeUnitPreference.fluidOunces,
+      ),
+    );
+  } on Exception catch (e) {
+    logWarning(&#39;Failed to load settings from SharedPreferences: $e&#39;);
+    return Settings(
+      baseCurrency: _detectLocaleCurrency(),
+    );
+  }
 }</code></pre>
 </section>
 

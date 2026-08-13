@@ -59,7 +59,7 @@
         <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
     </ol>
   </div>
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
 <span class="name ">build</span>(<wbr>)
 
       
@@ -72,7 +72,15 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-bool build() =&gt; false;</code></pre>
+Future&lt;bool&gt; build() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(kOnboardingKey) ?? false;
+  } on Exception catch (e) {
+    logWarning(&#39;Failed to load onboarding flag: $e&#39;);
+    return false;
+  }
+}</code></pre>
 </section>
 
 

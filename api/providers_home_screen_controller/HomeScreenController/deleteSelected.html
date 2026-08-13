@@ -73,9 +73,7 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteSelected() async {
   if (state.selectedIds.isEmpty) return;
   final repo = ref.read(productRepositoryProvider);
-  for (final id in state.selectedIds) {
-    await repo.deleteInventoryItem(id);
-  }
+  await repo.deleteInventoryItems(state.selectedIds.toList());
   if (ref.mounted) ref.invalidate(pantryProvider);
   exitSelectionMode();
 }</code></pre>

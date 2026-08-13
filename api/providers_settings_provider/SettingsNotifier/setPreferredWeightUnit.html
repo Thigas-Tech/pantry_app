@@ -71,8 +71,11 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void setPreferredWeightUnit(WeightUnitPreference value) {
-  state = state.copyWith(preferredWeightUnit: value);
-  unawaited(_persist(state));
+  final updated = (state.value ?? const Settings()).copyWith(
+    preferredWeightUnit: value,
+  );
+  state = AsyncValue.data(updated);
+  unawaited(_persist(updated));
 }</code></pre>
 </section>
 

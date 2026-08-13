@@ -78,7 +78,7 @@
   <pre class="language-dart"><code class="language-dart">@riverpod
 Future&lt;int&gt; pricedItemCount(Ref ref) {
   final repo = ref.watch(priceRepositoryProvider);
-  final activeId = ref.watch(activeInventoryProvider);
+  final activeId = ref.watch(activeInventoryProvider).value ?? 1;
   return repo.pricedItemCount(activeId);
 }</code></pre>
 </section>

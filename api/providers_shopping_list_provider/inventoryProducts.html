@@ -81,7 +81,7 @@ Future&lt;List&lt;InventoryProductOption&gt;&gt; inventoryProducts(
   Ref ref,
 ) async {
   final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
+  final inventoryId = await ref.watch(activeInventoryProvider.future);
   logInfo(&#39;Fetching distinct products from inventory $inventoryId&#39;);
   final rows = await db.getDistinctProductsFromInventory(
     inventoryId: inventoryId,

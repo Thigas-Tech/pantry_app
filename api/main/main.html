@@ -67,10 +67,15 @@
 <ol>
 <li>Flutter binding.</li>
 <li>Environment variables loaded via flutter_dotenv.</li>
-<li>App version check — clears stale caches when the app was updated.</li>
+<li>App version comparison (one fast platform call) via
+<a href="../services_app_startup_service/AppStartupService/checkAppUpdateBeforeFrame.html">AppStartupService.checkAppUpdateBeforeFrame</a>; the changelog flag and
+post-update cache flush run after the first frame.</li>
+<li>Firebase initialized; the anonymous sign-in (a network call) is
+deferred until after the first frame.</li>
 <li>Notification service initialized (timezone, channel, plugin).</li>
 <li>Notification permission requested (system dialog, after first frame).</li>
-<li>Database cleanup, feedback flush, cache refresh (after first frame).</li>
+<li>Database cleanup, feedback flush, cache refresh (after first frame),
+all owned by <a href="../services_app_startup_service/AppStartupService/schedulePostInitTasks.html">AppStartupService.schedulePostInitTasks</a>.</li>
 <li>App launched inside <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/UncontrolledProviderScope-class.html">UncontrolledProviderScope</a> so all providers
 share the same <a href="../main/appContainer.html">appContainer</a>.</li>
 </ol>
@@ -92,18 +97,17 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   logInfo(&#39;Environment loaded&#39;);
 
   &#47;&#47; Create the shared container before any startup task that needs
-  &#47;&#47; services, so everything (including _handleAppUpdate) consumes the
+  &#47;&#47; services, so everything (including the app-update check) consumes the
   &#47;&#47; same singleton instances as the widget tree.
   appContainer = ProviderContainer();
+  final appStartup = AppStartupService(container: appContainer);
 
   if (AppConfig.firebaseEnabled) {
     try {
       await Firebase.initializeApp();
       logInfo(&#39;Firebase initialized successfully&#39;);
-      await FirebaseAuth.instance.signInAnonymously();
-      logInfo(&#39;Anonymous auth initialized&#39;);
     } on Exception catch (e) {
-      logWarning(&#39;Firebase init&#47;auth failed (graceful degradation): $e&#39;);
+      logWarning(&#39;Firebase init failed (graceful degradation): $e&#39;);
     }
   }
 
@@ -132,23 +136,12 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   );
   logInfo(&#39;InternetConnectionChecker configured with OFF endpoints&#39;);
 
-  await _handleAppUpdate();
-
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingCompleted = prefs.getBool(kOnboardingKey) ?? false;
-    appContainer
-        .read(onboardingProvider.notifier)
-        .initial(value: onboardingCompleted);
-    logInfo(&#39;Onboarding flag loaded: $onboardingCompleted&#39;);
-  } on Exception catch (e) {
-    logWarning(&#39;Failed to load onboarding flag before runApp: $e&#39;);
-  }
+  await appStartup.checkAppUpdateBeforeFrame();
 
   try {
     final notifService = appContainer.read(notificationServiceProvider);
     await notifService.initialize(
-      onDidReceiveResponse: _handleNotificationTap,
+      onDidReceiveResponse: appStartup.handleNotificationTap,
       onDidReceiveBackgroundResponse: notificationTapBackground,
     );
     logInfo(&#39;Notification service initialized before runApp&#39;);
@@ -168,8 +161,13 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
 
   &#47;&#47; Post-first-frame tasks (do not block startup).
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    _runPostInitTasks();
+    unawaited(appStartup.schedulePostInitTasks());
   });
+
+  &#47;&#47; Anonymous sign-in is a network call; defer it past the first frame so
+  &#47;&#47; a slow or blocked network cannot delay startup. The Firebase cache
+  &#47;&#47; path already degrades gracefully when auth is unavailable.
+  unawaited(appStartup.signInAnonymously());
 
   &#47;&#47; Notification permission request — needs the Activity to be visible.
   &#47;&#47; This runs ~100ms after the first frame so the system dialog does not
@@ -177,7 +175,7 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   unawaited(
     Future&lt;void&gt;.delayed(
       const Duration(milliseconds: 100),
-      _requestNotificationPermission,
+      appStartup.requestNotificationPermission,
     ),
   );
 }</code></pre>

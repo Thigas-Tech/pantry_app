@@ -73,7 +73,7 @@ TickerMode.didChangeDependencies resuming paused subscriptions).</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; refresh() async {
-  final activeId = ref.read(activeInventoryProvider);
+  final activeId = await ref.read(activeInventoryProvider.future);
   final repo = ref.read(productRepositoryProvider);
   await repo.refreshInventoryProducts(activeId);
   await repo.setLastRefreshTime();

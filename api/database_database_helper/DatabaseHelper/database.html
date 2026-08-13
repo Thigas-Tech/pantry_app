@@ -67,16 +67,15 @@
     </section>
     
 <section class="desc markdown">
-  <p>The lazily‑opened database instance.</p>
+  <p>The lazily‑opened database instance, with in-flight dedup so several
+concurrent first accesses share a single open.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Database&gt; get database async {
-  if (_database != null) return _database!;
-  _database = await _initDatabase();
-  return _database!;
+  <pre class="language-dart"><code class="language-dart">Future&lt;Database&gt; get database {
+  return _databaseFuture ??= _initDatabase();
 }</code></pre>
 </section>
 

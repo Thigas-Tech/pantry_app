@@ -77,7 +77,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@Riverpod(keepAlive: true)
 bool pricesHidden(Ref ref) {
-  return ref.watch(settingsProvider).pricesHidden;
+  return ref.watch(settingsProvider).value?.pricesHidden ?? false;
 }</code></pre>
 </section>
 

@@ -70,7 +70,7 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; markComplete() async {
-  state = true;
+  state = const AsyncValue.data(true);
   try {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(kOnboardingKey, true);

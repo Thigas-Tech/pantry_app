@@ -80,7 +80,6 @@ product nutrition data. Auto-disposes when no listener remains.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@riverpod
 Future&lt;RecipeNutrition?&gt; recipeNutrition(Ref ref, int recipeId) async {
-  ref.keepAlive();
   final db = ref.watch(databaseProvider);
   final repo = ref.read(productRepositoryProvider);
   final ingredients = await db.getRecipeIngredients(recipeId);
@@ -89,24 +88,9 @@ Future&lt;RecipeNutrition?&gt; recipeNutrition(Ref ref, int recipeId) async {
   final recipe = await db.getRecipe(recipeId);
   final servings = recipe?.servings ?? 0;
 
-  final barcodes = ingredients
-      .map((i) =&gt; i.barcode)
-      .where((b) =&gt; b != null &amp;&amp; b.isNotEmpty)
-      .cast&lt;String&gt;()
-      .toSet()
-      .toList();
+  final barcodes = _ingredientBarcodes(ingredients);
 
-  final productsByBarcode = &lt;String, Product&gt;{};
-  for (final barcode in barcodes) {
-    try {
-      final product = await repo.getProduct(barcode);
-      productsByBarcode[barcode] = product;
-    } on Exception catch (e) {
-      logWarning(
-        &#39;Could not fetch product $barcode for recipe nutrition: $e&#39;,
-      );
-    }
-  }
+  final productsByBarcode = await _fetchProductsBatched(repo, barcodes);
 
   final nutritionService = RecipeNutritionService();
   return nutritionService.aggregate(

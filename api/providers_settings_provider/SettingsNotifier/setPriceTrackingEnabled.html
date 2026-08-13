@@ -71,8 +71,11 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void setPriceTrackingEnabled({required bool value}) {
-  state = state.copyWith(priceTrackingEnabled: value);
-  unawaited(_persist(state));
+  final updated = (state.value ?? const Settings()).copyWith(
+    priceTrackingEnabled: value,
+  );
+  state = AsyncValue.data(updated);
+  unawaited(_persist(updated));
 }</code></pre>
 </section>
 

@@ -66,7 +66,8 @@
 <section class="desc markdown">
   <p>Downloads the image at <code>imageUrl</code> for the product with <code>barcode</code>,
 converts it to WebP, and saves it to the local file system.</p>
-<p>Returns the path to the cached file, or null if caching failed.</p>
+<p>Returns the path to the cached file, or null if caching failed.
+Concurrent calls for the same <code>barcode</code> share one download.</p>
 </section>
 
 
@@ -76,28 +77,15 @@ converts it to WebP, and saves it to the local file system.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;String?&gt; cacheImage(String? imageUrl, String barcode) async {
   if (imageUrl == null || imageUrl.isEmpty) return null;
 
-  final cacheDir = await _imageCacheDirectory();
-  final cachedFile = File(&#39;${cacheDir.path}&#47;$barcode.webp&#39;);
+  final inFlight = _inFlight[barcode];
+  if (inFlight != null) return inFlight;
 
-  if (await cachedFile.exists()) {
-    return cachedFile.path;
-  }
-
+  final future = _cacheImageImpl(imageUrl, barcode);
+  _inFlight[barcode] = future;
   try {
-    final response = await _httpClient.get(Uri.parse(imageUrl));
-    if (response.statusCode != 200) return null;
-
-    final webpBytes = await compute(
-      _decodeAndEncodeWebp,
-      Uint8List.fromList(response.bodyBytes),
-    );
-    if (webpBytes == null) return null;
-    await cachedFile.writeAsBytes(webpBytes);
-    logInfo(&#39;Image cached for $barcode&#39;);
-    return cachedFile.path;
-  } on Object catch (e) {
-    logError(&#39;Failed to cache image for $barcode: $e&#39;);
-    return null;
+    return await future;
+  } finally {
+    final _ = _inFlight.remove(barcode);
   }
 }</code></pre>
 </section>

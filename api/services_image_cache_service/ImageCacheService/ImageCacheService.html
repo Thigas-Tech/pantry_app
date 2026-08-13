@@ -56,6 +56,7 @@
       
       <span class="name ">ImageCacheService</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-httpClient"><span class="type-annotation"><a href="https://pub.dev/documentation/http/1.6.0/http/Client-class.html">Client</a>?</span> <span class="parameter-name">httpClient</span>, </span></li>
 <li><span class="parameter" id="param-cacheDirectory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span> <span class="parameter-name">cacheDirectory</span>, </span></li>
+<li><span class="parameter" id="param-maxCacheBytes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maxCacheBytes</span> = <span class="default-value">50 * 1024 * 1024</span>, </span></li>
 </ol>})
     </section>
     
@@ -63,15 +64,20 @@
   <p>Creates an <a href="../../services_image_cache_service/ImageCacheService-class.html">ImageCacheService</a>.</p>
 <p>If <a href="https://pub.dev/documentation/http/1.6.0/http/Client-class.html">http.Client</a> is not provided, a new instance is created.
 If <a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a> is not provided, the default application documents
-directory is used. Both parameters allow unit tests to inject mocks.</p>
+directory is used. <code>maxCacheBytes</code> bounds the total on-disk cache
+size (oldest files are evicted when exceeded). All parameters allow
+unit tests to inject mocks and small limits.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">ImageCacheService({http.Client? httpClient, this._cacheDirectory})
-  : _httpClient = httpClient ?? http.Client();</code></pre>
+  <pre class="language-dart"><code class="language-dart">ImageCacheService({
+  http.Client? httpClient,
+  this.cacheDirectory,
+  this.maxCacheBytes = 50 * 1024 * 1024,
+}) : _httpClient = httpClient ?? http.Client();</code></pre>
 </section>
 
 

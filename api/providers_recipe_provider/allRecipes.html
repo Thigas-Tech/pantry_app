@@ -79,9 +79,9 @@ the user switches pantries.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@riverpod
-Future&lt;List&lt;Recipe&gt;&gt; allRecipes(Ref ref) {
+Future&lt;List&lt;Recipe&gt;&gt; allRecipes(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  final activeId = ref.watch(activeInventoryProvider);
+  final activeId = await ref.watch(activeInventoryProvider.future);
   return db.getAllRecipes(activeId);
 }</code></pre>
 </section>

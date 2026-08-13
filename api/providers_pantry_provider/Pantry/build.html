@@ -73,7 +73,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 Future&lt;List&lt;InventoryWithProduct&gt;&gt; build() async {
-  final activeId = ref.watch(activeInventoryProvider);
+  final activeId = await ref.watch(activeInventoryProvider.future);
   final db = ref.watch(databaseProvider);
   final rows = await db.getInventoryWithProduct(inventoryId: activeId);
   return rows.map(InventoryWithProduct.fromMap).toList();

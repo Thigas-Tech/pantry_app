@@ -55,9 +55,12 @@
     
 <section class="desc markdown">
   <p>Tracks whether the user has completed the empty-pantry onboarding.</p>
-<p>Returns true once the user has added their first item to any inventory.
-Once set to true the flag is never cleared, so the onboarding is never
-shown again — even if the user later empties their pantry.</p>
+<p>Loads the persisted flag from <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a> in <a href="../providers_onboarding_provider/OnboardingNotifier/build.html">build</a> so the
+correct value is available on the first frame — no pre-runApp seeding
+needed and no flash of the onboarding flow for returning users. Returns
+true once the user has added their first item to any inventory. Once
+set to true the flag is never cleared, so the onboarding is never shown
+again — even if the user later empties their pantry.</p>
 </section>
 
 
@@ -68,8 +71,8 @@ shown again — even if the user later empties their pantry.</p>
   <dd>
     <ul class="gt-separated dark clazz-relationships">
       <li><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></li>
-        <li><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier-class.html">AnyNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></li>
-        <li><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$Notifier-class.html">$Notifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></li>
+        <li><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier-class.html">AnyNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncValue-class.html">AsyncValue</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>, <span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></li>
+        <li><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$AsyncNotifier-class.html">$AsyncNotifier</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></li>
       <li>OnboardingNotifier</li>
     </ul>
   </dd>
@@ -109,6 +112,19 @@ shown again — even if the user later empties their pantry.</p>
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
+        <dt id="future" class="property inherited">
+  <span class="name"><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$AsyncNotifier/future.html">future</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  
+
+</dt>
+<dd class="inherited">
+  Obtains a <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a> that resolves with the first <code>state</code> value that is not
+<a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncLoading-class.html">AsyncLoading</a>.
+  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
         <dt id="hashCode" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
@@ -146,26 +162,14 @@ shown again — even if the user later empties their pantry.</p>
 </dd>
 
         <dt id="state" class="property inherited">
-  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/state.html">state</a></span>
-  <span class="signature">&#8596; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  <span class="name"><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$AsyncNotifier/state.html">state</a></span>
+  <span class="signature">&#8596; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncValue-class.html">AsyncValue</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
   
 
 </dt>
 <dd class="inherited">
   The value currently exposed by this notifier.
   <div class="features"><span class="feature">getter/setter pair</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="stateOrNull" class="property inherited">
-  <span class="name"><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$Notifier/stateOrNull.html">stateOrNull</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span>
-  
-
-</dt>
-<dd class="inherited">
-  The value currently exposed by this <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Notifier-class.html">Notifier</a>.
-  <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
 
 </dd>
 
@@ -180,32 +184,19 @@ shown again — even if the user later empties their pantry.</p>
     <dl class="callables">
         <dt id="build" class="callable">
   <span class="name"><a href="../providers_onboarding_provider/OnboardingNotifier/build.html">build</a></span><span class="signature">(<wbr>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
   </span>
   
 
 </dt>
 <dd>
   
-  
-
-</dd>
-
-        <dt id="initial" class="callable">
-  <span class="name"><a href="../providers_onboarding_provider/OnboardingNotifier/initial.html">initial</a></span><span class="signature">(<wbr>{<span class="parameter" id="initial-param-value"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">value</span></span>})
-    <span class="returntype parameter">&#8594; void</span>
-  </span>
-  
-
-</dt>
-<dd>
-  Sets the persisted state from <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a> before the first frame.
   
 
 </dd>
 
         <dt id="listenSelf" class="callable inherited">
-  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/listenSelf.html">listenSelf</a></span><span class="signature">(<wbr><span class="parameter" id="listenSelf-param-listener"><span class="type-annotation">void</span> <span class="parameter-name">listener</span>(<span class="parameter" id="param-previous"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">previous</span>, </span><span class="parameter" id="param-next"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">next</span></span>), {</span><span class="parameter" id="listenSelf-param-onError"><span class="type-annotation">void</span> <span class="parameter-name">onError</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-stackTrace"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/StackTrace-class.html">StackTrace</a></span> <span class="parameter-name">stackTrace</span></span>)?</span>})
+  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/listenSelf.html">listenSelf</a></span><span class="signature">(<wbr><span class="parameter" id="listenSelf-param-listener"><span class="type-annotation">void</span> <span class="parameter-name">listener</span>(<span class="parameter" id="param-previous"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncValue-class.html">AsyncValue</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span>?</span> <span class="parameter-name">previous</span>, </span><span class="parameter" id="param-next"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncValue-class.html">AsyncValue</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">next</span></span>), {</span><span class="parameter" id="listenSelf-param-onError"><span class="type-annotation">void</span> <span class="parameter-name">onError</span>(<span class="parameter" id="param-error"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">error</span>, </span><span class="parameter" id="param-stackTrace"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/StackTrace-class.html">StackTrace</a></span> <span class="parameter-name">stackTrace</span></span>)?</span>})
     <span class="returntype parameter">&#8594; <a href="https://pub.dev/documentation/state_notifier/1.0.0/state_notifier/RemoveListener.html">RemoveListener</a></span>
   </span>
   
@@ -269,8 +260,22 @@ shown again — even if the user later empties their pantry.</p>
 
 </dd>
 
+        <dt id="update" class="callable inherited">
+  <span class="name"><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/$AsyncNotifier/update.html">update</a></span><span class="signature">(<wbr><span class="parameter" id="update-param-cb"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">cb</span>(<span class="parameter" id="param-previousState"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">previousState</span></span>), {</span><span class="parameter" id="update-param-onError"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">onError</span>(<span class="parameter" id="param-err"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a></span> <span class="parameter-name">err</span>, </span><span class="parameter" id="param-stackTrace"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/StackTrace-class.html">StackTrace</a></span> <span class="parameter-name">stackTrace</span></span>)?</span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd class="inherited">
+  A function to update <code>state</code> from its previous value, while
+abstracting loading/error cases for <code>state</code>.
+  <div class="features"><span class="feature">inherited</span></div>
+
+</dd>
+
         <dt id="updateShouldNotify" class="callable inherited">
-  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/updateShouldNotify.html">updateShouldNotify</a></span><span class="signature">(<wbr><span class="parameter" id="updateShouldNotify-param-previous"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">previous</span>, </span><span class="parameter" id="updateShouldNotify-param-next"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">next</span></span>)
+  <span class="name"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AnyNotifier/updateShouldNotify.html">updateShouldNotify</a></span><span class="signature">(<wbr><span class="parameter" id="updateShouldNotify-param-previous"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncValue-class.html">AsyncValue</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">previous</span>, </span><span class="parameter" id="updateShouldNotify-param-next"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/AsyncValue-class.html">AsyncValue</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>&gt;</span></span> <span class="parameter-name">next</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
   </span>
   

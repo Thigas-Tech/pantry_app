@@ -76,11 +76,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@riverpod
-Future&lt;List&lt;ShoppingItem&gt;&gt; purchasedShoppingList(
-  Ref ref,
-) {
+Future&lt;List&lt;ShoppingItem&gt;&gt; purchasedShoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
-  final inventoryId = ref.watch(activeInventoryProvider);
+  final inventoryId = await ref.watch(activeInventoryProvider.future);
   return db.getPurchasedShoppingItems(inventoryId: inventoryId);
 }</code></pre>
 </section>

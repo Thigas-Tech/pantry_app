@@ -109,6 +109,14 @@ Future&lt;void&gt; rescheduleAllItems(
   try {
     await _plugin.cancelAll();
 
+    &#47;&#47; Check the platform permission once instead of once per item
+    &#47;&#47; (each check is a platform-channel round trip).
+    final systemEnabled = await areNotificationsEnabled();
+    if (systemEnabled == false) {
+      logWarning(&#39;System notifications disabled, skipping all reminders&#39;);
+      return;
+    }
+
     for (final item in items) {
       await scheduleExpiryReminders(
         item,
@@ -118,6 +126,7 @@ Future&lt;void&gt; rescheduleAllItems(
         buildExpiringSoonBody: buildExpiringSoonBody,
         buildExpiringTodayBody: buildExpiringTodayBody,
         notificationsEnabled: notificationsEnabled,
+        systemNotificationsEnabled: systemEnabled,
       );
     }
 

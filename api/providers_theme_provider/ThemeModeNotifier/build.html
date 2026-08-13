@@ -59,7 +59,7 @@
         <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
     </ol>
   </div>
-<span class="returntype"><a href="../../providers_theme_provider/ThemeModeOption.html">ThemeModeOption</a></span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../providers_theme_provider/ThemeModeOption.html">ThemeModeOption</a></span>&gt;</span></span>
 <span class="name ">build</span>(<wbr>)
 
       
@@ -72,8 +72,19 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-ThemeModeOption build() {
-  unawaited(_loadFromPrefs());
+Future&lt;ThemeModeOption&gt; build() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_key);
+    if (stored != null) {
+      return ThemeModeOption.values.firstWhere(
+        (e) =&gt; e.name == stored,
+        orElse: () =&gt; ThemeModeOption.system,
+      );
+    }
+  } on Exception catch (e) {
+    logWarning(&#39;Failed to load theme mode from preferences: $e&#39;);
+  }
   return ThemeModeOption.system;
 }</code></pre>
 </section>

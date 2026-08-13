@@ -59,11 +59,16 @@
 keyboard-avoidance and system-ui respect. Use <a href="../utils_bottom_sheet_helper/BottomSheetHelper/bottomInset.html">bottomInset</a> for the
 standard bottom padding that accounts for the navigation bar and keyboard.</p>
 <p>Example:</p>
-<pre class="language-dart"><code class="language-dart">final result = await BottomSheetHelper.show&lt;int&gt;(
+<pre class="language-dart"><code>final result = await BottomSheetHelper.show&lt;int&gt;(
   context: context,
   builder: (ctx) =&gt; Padding(
-    padding: EdgeInsets.only(bottom: BottomSheetHelper.bottomInset(ctx)),
-    child: Column(mainAxisSize: MainAxisSize.min, children: [...]),
+    padding: EdgeInsets.only(
+      bottom: BottomSheetHelper.bottomInset(ctx),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [...],
+    ),
   ),
 );
 </code></pre>

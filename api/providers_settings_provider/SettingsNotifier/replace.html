@@ -79,7 +79,7 @@ Deprecated: use individual setter methods instead.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@Deprecated(&#39;Use individual setter methods instead&#39;)
 void replace(Settings settings) {
-  state = settings;
+  state = AsyncValue.data(settings);
   unawaited(_persist(settings));
 }</code></pre>
 </section>

@@ -197,6 +197,19 @@ or null if no prices exist.
 
 </dd>
 
+        <dt id="getPendingSyncCount" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/getPendingSyncCount.html">getPendingSyncCount</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Counts prices pending sync to Open Prices without loading the rows.
+  
+
+</dd>
+
         <dt id="getPendingSyncPrices" class="callable">
   <span class="name"><a href="../services_price_repository/PriceRepository/getPendingSyncPrices.html">getPendingSyncPrices</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a></span>&gt;</span></span>&gt;</span></span>
@@ -246,6 +259,20 @@ or null if no prices exist.
 <dd>
   Returns all price entries for the given <code>barcode</code> and <code>inventoryId</code>,
 ordered by datePurchased descending.
+  
+
+</dd>
+
+        <dt id="inventoryPriceSummary" class="callable">
+  <span class="name"><a href="../services_price_repository/PriceRepository/inventoryPriceSummary.html">inventoryPriceSummary</a></span><span class="signature">(<wbr><span class="parameter" id="inventoryPriceSummary-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, {</span><span class="parameter" id="inventoryPriceSummary-param-baseCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseCurrency</span> = <span class="default-value">&#39;USD&#39;</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">(<span class="field">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="field-name">average</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="field-name">count</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="field-name">total</span>}</span>)</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Computes the value, quantity-weighted average price, and count of
+priced items in <code>inventoryId</code> from a single latest-price pass.
   
 
 </dd>

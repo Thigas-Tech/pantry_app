@@ -79,11 +79,11 @@ converted to the user's base currency.</p>
   <pre class="language-dart"><code class="language-dart">@riverpod
 Future&lt;double?&gt; averagePrice(Ref ref) async {
   final repo = ref.watch(priceRepositoryProvider);
-  final activeId = ref.watch(activeInventoryProvider);
-  final settings = ref.watch(settingsProvider);
+  final activeId = ref.watch(activeInventoryProvider.future);
+  final settings = ref.watch(settingsProvider.future);
   final avg = await repo.averageItemPrice(
-    activeId,
-    baseCurrency: settings.baseCurrency,
+    await activeId,
+    baseCurrency: (await settings).baseCurrency,
   );
   if (avg == null) return null;
   return double.tryParse(avg.toStringAsFixed(2));

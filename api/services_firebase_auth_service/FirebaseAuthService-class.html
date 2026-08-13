@@ -59,8 +59,9 @@
 All failures are caught and logged — the service returns null instead of
 throwing, following the app's graceful degradation pattern.</p>
 <h2 id="future-migration">Future migration</h2>
-<p>To add Google sign-in, add a method:</p>
-<pre class="language-dart"><code class="language-dart">Future&lt;AuthUser?&gt; signInWithGoogle() async { ... }
+<p>To add Google sign-in, add a method:
+Example:</p>
+<pre class="language-dart"><code>Future&lt;AuthUser?&gt; signInWithGoogle() async { ... }
 </code></pre>
 <p>and use FirebaseAuth.instance.currentUser!.linkWithCredential to preserve
 anonymous data under the permanent account.</p>

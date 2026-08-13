@@ -57,6 +57,7 @@
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
 <span class="name ">getInventoryRowsByProductName</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="getInventoryRowsByProductName-param-name"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">name</span>, </span></li>
 <li><span class="parameter" id="getInventoryRowsByProductName-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span>, </span></li>
+<li><span class="parameter" id="getInventoryRowsByProductName-param-limit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">limit</span> = <span class="default-value">20</span>, </span></li>
 </ol>})
 
       
@@ -68,7 +69,8 @@
 ordered by expiry_date ASC (nulls last) for FEFO deduction.</p>
 <p>The search is case-insensitive and trims the input to reduce false
 negatives from whitespace mismatch. This is a fallback when exact
-barcode lookup returns no results.</p>
+barcode lookup returns no results. The leading-wildcard LIKE forces
+a scan, so results are capped at <code>limit</code> rows (default 20).</p>
 </section>
 
 
@@ -78,6 +80,7 @@ barcode lookup returns no results.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Map&lt;String, dynamic&gt;&gt;&gt; getInventoryRowsByProductName({
   required String name,
   required int inventoryId,
+  int limit = 20,
 }) async {
   final db = await database;
   final normalized = name.trim().toLowerCase();
@@ -85,8 +88,9 @@ barcode lookup returns no results.</p>
     &#39;SELECT i.* FROM inventory i&#39;
     &#39; INNER JOIN products p ON p.barcode = i.barcode&#39;
     &#39; WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?&#39;
-    &#39; ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC&#39;,
-    [&#39;%$normalized%&#39;, inventoryId],
+    &#39; ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC&#39;
+    &#39; LIMIT ?&#39;,
+    [&#39;%$normalized%&#39;, inventoryId, limit],
   );
 }</code></pre>
 </section>

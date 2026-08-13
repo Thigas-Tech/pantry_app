@@ -55,9 +55,15 @@
     
 <section class="desc markdown">
   <p>Caches product images locally in the WebP format.</p>
-<p>Images are downloaded from the network, decoded, re-encoded as WebP for
-storage efficiency, and saved to app-documents/image_cache/barcode.webp.
-On subsequent requests the cached file is returned without a network call.</p>
+<p>Images are downloaded from the network, decoded, downscaled to at most
+<a href="../services_image_cache_service/kMaxCachedImageDimension-constant.html">kMaxCachedImageDimension</a> pixels on the longest side, re-encoded as
+WebP for storage efficiency, and saved to
+app-documents/image_cache/barcode.webp. On subsequent requests the
+cached file is returned without a network call.</p>
+<p>The cache is bounded: when the total size of the cache directory
+exceeds <a href="../services_image_cache_service/ImageCacheService/maxCacheBytes.html">maxCacheBytes</a> (default 50 MB), the oldest files are evicted
+by last-modified time. Concurrent requests for the same barcode share
+one in-flight download instead of fetching twice.</p>
 <p>All I/O is asynchronous — no synchronous file operations are used.</p>
 </section>
 
@@ -68,7 +74,7 @@ On subsequent requests the cached file is returned without a network call.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ImageCacheService.new" class="callable">
-          <span class="name"><a href="../services_image_cache_service/ImageCacheService/ImageCacheService.html">ImageCacheService</a></span><span class="signature">({<span class="parameter" id="param-httpClient"><span class="type-annotation"><a href="https://pub.dev/documentation/http/1.6.0/http/Client-class.html">Client</a>?</span> <span class="parameter-name">httpClient</span>, </span><span class="parameter" id="param-cacheDirectory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span> <span class="parameter-name">cacheDirectory</span></span>})</span>
+          <span class="name"><a href="../services_image_cache_service/ImageCacheService/ImageCacheService.html">ImageCacheService</a></span><span class="signature">({<span class="parameter" id="param-httpClient"><span class="type-annotation"><a href="https://pub.dev/documentation/http/1.6.0/http/Client-class.html">Client</a>?</span> <span class="parameter-name">httpClient</span>, </span><span class="parameter" id="param-cacheDirectory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span> <span class="parameter-name">cacheDirectory</span>, </span><span class="parameter" id="param-maxCacheBytes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">maxCacheBytes</span> = <span class="default-value">50 * 1024 * 1024</span></span>})</span>
         </dt>
         <dd>
           Creates an <a href="../services_image_cache_service/ImageCacheService-class.html">ImageCacheService</a>.
@@ -77,10 +83,23 @@ On subsequent requests the cached file is returned without a network call.</p>
   </section>
     
   <section
-      class="summary offset-anchor inherited"
+      class="summary offset-anchor"
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
+        <dt id="cacheDirectory" class="property">
+  <span class="name"><a href="../services_image_cache_service/ImageCacheService/cacheDirectory.html">cacheDirectory</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-io/Directory-class.html">Directory</a>?</span>
+  
+
+</dt>
+<dd>
+  The directory used to store cached images, or null to use the
+application documents directory.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="hashCode" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
@@ -90,6 +109,18 @@ On subsequent requests the cached file is returned without a network call.</p>
 <dd class="inherited">
   The hash code for this object.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="maxCacheBytes" class="property">
+  <span class="name"><a href="../services_image_cache_service/ImageCacheService/maxCacheBytes.html">maxCacheBytes</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
+  
+
+</dt>
+<dd>
+  The maximum total size of the on-disk image cache in bytes.
+  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 

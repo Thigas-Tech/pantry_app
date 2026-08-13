@@ -76,10 +76,9 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@riverpod
-Future&lt;int&gt; pendingSyncCount(Ref ref) async {
+Future&lt;int&gt; pendingSyncCount(Ref ref) {
   final repo = ref.watch(priceRepositoryProvider);
-  final pending = await repo.getPendingSyncPrices();
-  return pending.length;
+  return repo.getPendingSyncCount();
 }</code></pre>
 </section>
 

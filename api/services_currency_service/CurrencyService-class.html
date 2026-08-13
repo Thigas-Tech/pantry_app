@@ -64,8 +64,9 @@ well within the 1,500 requests/month free tier.</p>
 cached rates are used. Callers see stale rates but no crash.</p>
 <h2 id="testing">Testing</h2>
 <p>The <a href="https://pub.dev/documentation/http/1.6.0/http/Client-class.html">http.Client</a> and <a href="https://pub.dev/documentation/shared_preferences/2.5.5/shared_preferences/SharedPreferences-class.html">SharedPreferences</a> can be injected to mock
-network responses and cache in tests:</p>
-<pre class="language-dart"><code class="language-dart">final service = CurrencyService(httpClient: mockClient);
+network responses and cache in tests:
+Example:</p>
+<pre class="language-dart"><code>final service = CurrencyService(httpClient: mockClient);
 </code></pre>
 </section>
 

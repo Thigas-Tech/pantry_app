@@ -97,12 +97,16 @@
 
     await db.rawDelete(&#39;&#39;&#39;
       DELETE FROM prices
-      WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
+      WHERE NOT EXISTS (
+        SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
+      )
     &#39;&#39;&#39;);
 
     final deletedProducts = await db.rawDelete(&#39;&#39;&#39;
       DELETE FROM products
-      WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
+      WHERE NOT EXISTS (
+        SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
+      )
     &#39;&#39;&#39;);
     logInfo(&#39;Removed $deletedProducts orphaned products&#39;);
 

@@ -93,12 +93,12 @@ regardless of whether they use arguments or not.</p>
   <pre class="language-dart"><code class="language-dart">@$mustCallSuper
 @override
 WhenComplete runBuild() {
-  final ref = this.ref as $Ref&lt;ThemeModeOption, ThemeModeOption&gt;;
+  final ref = this.ref as $Ref&lt;AsyncValue&lt;ThemeModeOption&gt;, ThemeModeOption&gt;;
   final element =
       ref.element
           as $ClassProviderElement&lt;
-            AnyNotifier&lt;ThemeModeOption, ThemeModeOption&gt;,
-            ThemeModeOption,
+            AnyNotifier&lt;AsyncValue&lt;ThemeModeOption&gt;, ThemeModeOption&gt;,
+            AsyncValue&lt;ThemeModeOption&gt;,
             Object?,
             Object?
           &gt;;

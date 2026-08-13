@@ -76,9 +76,21 @@ Returns an empty map on failure.</p>
   <pre class="language-dart"><code class="language-dart">Future&lt;Map&lt;String, double&gt;&gt; getRates(String baseCurrency) async {
   final normalized = baseCurrency.toUpperCase();
 
-  &#47;&#47; Try cache first.
+  &#47;&#47; Try the in-memory cache first (one SharedPreferences read per day
+  &#47;&#47; per currency instead of one per conversion).
+  final today = DateTime.now();
+  final todayStart = DateTime(today.year, today.month, today.day);
+  final memoryCached = _memoryRates[normalized];
+  if (memoryCached != null &amp;&amp; memoryCached.day == todayStart) {
+    return memoryCached.rates;
+  }
+
+  &#47;&#47; Try the on-disk cache next.
   final cached = await _readCachedRates(normalized);
-  if (cached != null) return cached;
+  if (cached != null) {
+    _memoryRates[normalized] = (day: todayStart, rates: cached);
+    return cached;
+  }
 
   &#47;&#47; Fetch from API.
   try {
@@ -109,6 +121,7 @@ Returns an empty map on failure.</p>
       (k, v) =&gt; MapEntry(k, (v as num).toDouble()),
     );
     await _cacheRates(normalized, rates);
+    _memoryRates[normalized] = (day: todayStart, rates: rates);
     return rates;
   } on Exception catch (e) {
     logWarning(&#39;Failed to fetch exchange rates: $e&#39;);

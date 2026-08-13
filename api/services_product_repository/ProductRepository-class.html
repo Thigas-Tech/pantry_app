@@ -136,6 +136,19 @@ stale and a background refresh should be scheduled.
 
 </dd>
 
+        <dt id="usdaClient" class="property">
+  <span class="name"><a href="../services_product_repository/ProductRepository/usdaClient.html">usdaClient</a></span>
+  <span class="signature">&#8594; <a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a>?</span>
+  
+
+</dt>
+<dd>
+  The injected <a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> used for produce nutrition lookups, or
+null when none was provided.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
     </dl>
   </section>
 
@@ -240,6 +253,19 @@ existing cached product for the same barcode.
 
 </dd>
 
+        <dt id="deleteInventoryItems" class="callable">
+  <span class="name"><a href="../services_product_repository/ProductRepository/deleteInventoryItems.html">deleteInventoryItems</a></span><span class="signature">(<wbr><span class="parameter" id="deleteInventoryItems-param-ids"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">ids</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Deletes multiple inventory items in one batch by their <code>ids</code>.
+  
+
+</dd>
+
         <dt id="getInventories" class="callable">
   <span class="name"><a href="../services_product_repository/ProductRepository/getInventories.html">getInventories</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
@@ -331,6 +357,20 @@ the remote API.
 </dt>
 <dd>
   Checks the local cache for a product with the given <code>barcode</code>.
+  
+
+</dd>
+
+        <dt id="getProductsForBarcodes" class="callable">
+  <span class="name"><a href="../services_product_repository/ProductRepository/getProductsForBarcodes.html">getProductsForBarcodes</a></span><span class="signature">(<wbr><span class="parameter" id="getProductsForBarcodes-param-barcodes"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>&gt;</span></span> <span class="parameter-name">barcodes</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../models_product/Product-class.html">Product</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Resolves products for multiple <code>barcodes</code> with a single cached
+lookup, fetching only the misses from the remote API.
   
 
 </dd>

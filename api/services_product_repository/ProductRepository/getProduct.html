@@ -66,6 +66,8 @@
 <section class="desc markdown">
   <p>Returns a <a href="../../models_product/Product-class.html">Product</a> for the given <code>barcode</code>, either from cache or from
 the remote API.</p>
+<p>Concurrent calls for the same <code>barcode</code> share one in-flight lookup
+instead of issuing duplicate network requests.</p>
 <p>Throws <a href="../../services_exceptions/ProductNotFoundException-class.html">ProductNotFoundException</a> if the barcode is unknown to all
 sources. Throws <a href="../../services_exceptions/FetchFailedException-class.html">FetchFailedException</a> on network errors when no
 cache exists.</p>
@@ -75,58 +77,14 @@ cache exists.</p>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; getProduct(String barcode, {String? languageCode}) async {
-  logInfo(&#39;Looking up $barcode&#39;);
-  final lang = languageCode ?? _currentLanguageCode();
-
-  &#47;&#47; 1. Local cache
-  final cached = await _db.getProduct(barcode);
-  if (cached != null) {
-    logInfo(&#39;Cache hit for $barcode&#39;);
-    return cached;
-  }
-
-  &#47;&#47; 1.5 Firebase cache
-  if (_firebaseCache != null &amp;&amp; _firebaseCache.isAvailable) {
-    try {
-      final fbProduct = await _firebaseCache.resolveBarcodedProduct(
-        barcode,
-        languageCode: lang,
-      );
-      if (fbProduct != null) {
-        logInfo(&#39;Firebase cache hit for $barcode&#39;);
-        return fbProduct;
-      }
-      logInfo(
-        &#39;Firebase miss for $barcode &#39;
-        &#39;- resolveBarcodedProduct already tried OFF; skipping retry&#39;,
-      );
-      &#47;&#47; The service already tried OFF internally.  Skip the direct OFF
-      &#47;&#47; call (step 2) and proceed to the fallback chain.
-      return await _fallbackOrThrow(barcode, lang);
-    } on ProductNotFoundException {
-      rethrow;
-    } on Exception catch (e) {
-      logWarning(&#39;Firebase cache lookup failed for $barcode: $e&#39;);
-    }
-  }
-
-  &#47;&#47; 2. Try primary API
-  try {
-    logInfo(&#39;Fetching $barcode from primary API&#39;);
-    final remote = await _api.getByBarcode(barcode, languageCode: lang);
-    await _db.insertProduct(remote);
-    logInfo(&#39;Fetched and cached $barcode&#39;);
-    return remote;
-  } on ProductNotFoundException {
-    logWarning(&#39;Product $barcode not found in primary API&#39;);
-    return _fallbackOrThrow(barcode, lang);
-  } on Exception catch (e) {
-    logError(&#39;Network error for $barcode: $e&#39;);
-    throw FetchFailedException(
-      &#39;Failed to fetch product. Please check your connection.&#39;,
-    );
-  }
+  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; getProduct(String barcode, {String? languageCode}) {
+  final inFlight = _getProductInFlight[barcode];
+  if (inFlight != null) return inFlight;
+  final future = _getProductImpl(barcode, languageCode);
+  _getProductInFlight[barcode] = future;
+  return future.whenComplete(() {
+    final _ = _getProductInFlight.remove(barcode);
+  });
 }</code></pre>
 </section>
 

@@ -64,8 +64,9 @@ OFF API results are appended as they arrive.</p>
 (name + quantity + unit) for items that are not in any product database.</p>
 <p>Opens via <a href="https://api.flutter.dev/flutter/material/showModalBottomSheet.html">showModalBottomSheet</a>. Returns a <a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a> or null if
 cancelled.</p>
-<p>Example:</p>
-<pre class="language-dart"><code class="language-dart">final item = await AddToShoppingListSheet.show(context);
+<p>Example:
+Example:</p>
+<pre class="language-dart"><code>final item = await AddToShoppingListSheet.show(context);
 if (item != null) await addShoppingItem(ref, item);
 </code></pre>
 </section>

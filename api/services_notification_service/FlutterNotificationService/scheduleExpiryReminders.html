@@ -71,6 +71,7 @@
 <li><span class="parameter" id="scheduleExpiryReminders-param-channelName"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span> = <span class="default-value">&#39;Expiry reminders&#39;</span>, </span></li>
 <li><span class="parameter" id="scheduleExpiryReminders-param-channelDescription"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span> = <span class="default-value">&#39;Warns about expiring food&#39;</span>, </span></li>
 <li><span class="parameter" id="scheduleExpiryReminders-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span>, </span></li>
+<li><span class="parameter" id="scheduleExpiryReminders-param-systemNotificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">systemNotificationsEnabled</span>, </span></li>
 </ol>})
 
       <div class="features"><span class="feature">override</span></div>
@@ -96,6 +97,7 @@ Future&lt;void&gt; scheduleExpiryReminders(
   String channelName = &#39;Expiry reminders&#39;,
   String channelDescription = &#39;Warns about expiring food&#39;,
   bool notificationsEnabled = true,
+  bool? systemNotificationsEnabled,
 }) async {
   if (!notificationsEnabled) {
     logInfo(&#39;Notifications disabled in settings, skipping&#39;);
@@ -118,7 +120,11 @@ Future&lt;void&gt; scheduleExpiryReminders(
     return;
   }
 
-  final systemEnabled = await areNotificationsEnabled();
+  &#47;&#47; The caller (e.g. rescheduleAllItems) may hoist the platform
+  &#47;&#47; permission check out of a loop and pass the result down; when null,
+  &#47;&#47; the check runs here.
+  final systemEnabled =
+      systemNotificationsEnabled ?? await areNotificationsEnabled();
   if (systemEnabled == false) {
     logWarning(&#39;System notifications disabled, skipping reminders&#39;);
     return;

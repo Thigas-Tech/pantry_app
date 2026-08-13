@@ -71,7 +71,7 @@
 <section class="desc markdown">
   <p>Provides the Nutri-Score grade for a recipe.</p>
 <p>Returns a grade letter ('A'–'E') or null if not enough ingredients have
-known scores.</p>
+known scores. Uses only the local cache, never the network.</p>
 </section>
 
 
@@ -80,25 +80,13 @@ known scores.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@riverpod
 Future&lt;String?&gt; recipeNutriScore(Ref ref, int recipeId) async {
-  ref.keepAlive();
   final db = ref.watch(databaseProvider);
   final ingredients = await db.getRecipeIngredients(recipeId);
   if (ingredients.isEmpty) return null;
 
-  final barcodes = ingredients
-      .map((i) =&gt; i.barcode)
-      .where((b) =&gt; b != null &amp;&amp; b.isNotEmpty)
-      .cast&lt;String&gt;()
-      .toSet()
-      .toList();
-
-  final productsByBarcode = &lt;String, Product&gt;{};
-  for (final barcode in barcodes) {
-    final product = await db.getProduct(barcode);
-    if (product != null) {
-      productsByBarcode[barcode] = product;
-    }
-  }
+  final barcodes = _ingredientBarcodes(ingredients);
+  final cached = await db.getProductsByBarcodes(barcodes);
+  final productsByBarcode = {for (final p in cached) p.barcode: p};
 
   final scoreService = RecipeNutriScoreService();
   return scoreService.compute(ingredients, productsByBarcode);

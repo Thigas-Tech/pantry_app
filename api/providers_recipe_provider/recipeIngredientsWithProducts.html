@@ -84,29 +84,12 @@ Future&lt;List&lt;IngredientWithProduct&gt;&gt; recipeIngredientsWithProducts(
   Ref ref,
   int recipeId,
 ) async {
-  ref.keepAlive();
   final db = ref.watch(databaseProvider);
   final repo = ref.read(productRepositoryProvider);
   final ingredients = await db.getRecipeIngredients(recipeId);
 
-  final barcodes = ingredients
-      .map((i) =&gt; i.barcode)
-      .where((b) =&gt; b != null &amp;&amp; b.isNotEmpty)
-      .cast&lt;String&gt;()
-      .toSet()
-      .toList();
-
-  final productsByBarcode = &lt;String, Product&gt;{};
-  for (final barcode in barcodes) {
-    try {
-      final product = await repo.getProduct(barcode);
-      productsByBarcode[barcode] = product;
-    } on Exception catch (e) {
-      logWarning(
-        &#39;Could not fetch product $barcode for ingredient image: $e&#39;,
-      );
-    }
-  }
+  final barcodes = _ingredientBarcodes(ingredients);
+  final productsByBarcode = await _fetchProductsBatched(repo, barcodes);
 
   return ingredients
       .map(

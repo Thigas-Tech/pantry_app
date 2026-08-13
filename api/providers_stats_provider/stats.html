@@ -81,14 +81,11 @@ release memory when leaving the Stats tab.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@riverpod
 Future&lt;PantryStats&gt; stats(Ref ref) async {
-  final activeId = ref.watch(activeInventoryProvider);
+  final activeId = await ref.watch(activeInventoryProvider.future);
   final db = ref.watch(databaseProvider);
-  final expiringSoonDays = ref.watch(
-    settingsProvider.select((s) =&gt; s.expiringSoonDays),
-  );
-  final baseCurrency = ref.watch(
-    settingsProvider.select((s) =&gt; s.baseCurrency),
-  );
+  final settings = await ref.watch(settingsProvider.future);
+  final expiringSoonDays = settings.expiringSoonDays;
+  final baseCurrency = settings.baseCurrency;
   final priceRepo = ref.read(priceRepositoryProvider);
   final database = await db.database;
 
@@ -142,13 +139,21 @@ Future&lt;PantryStats&gt; stats(Ref ref) async {
   final monthlyRows = results[13] as List&lt;Map&lt;String, dynamic&gt;&gt;;
   final storeRows = results[14] as List&lt;Map&lt;String, dynamic&gt;&gt;;
   final nutriscoreByStoreRows = results[15] as List&lt;Map&lt;String, dynamic&gt;&gt;;
-  &#47;&#47; Compute parent categories from hierarchy data.
+  &#47;&#47; Compute parent categories from hierarchy data in a background
+  &#47;&#47; isolate (per-row JSON decoding was previously on the UI path).
+  final parentNames = await compute(
+    _parentCategoriesForRows,
+    [
+      for (final row in productCategories)
+        (
+          row[&#39;category&#39;] as String?,
+          row[&#39;categories_hierarchy&#39;] as String?,
+        ),
+    ],
+  );
   final parentCounts = &lt;String, int&gt;{};
-  for (final row in productCategories) {
-    final parent = parentCategory(
-      row[&#39;category&#39;] as String?,
-      row[&#39;categories_hierarchy&#39;] as String?,
-    );
+  for (var i = 0; i &lt; parentNames.length; i++) {
+    final parent = parentNames[i];
     if (parent != null) {
       parentCounts[parent] = (parentCounts[parent] ?? 0) + 1;
     }
@@ -184,23 +189,18 @@ Future&lt;PantryStats&gt; stats(Ref ref) async {
     }
   }
 
+  final priceSummary = await priceRepo.inventoryPriceSummary(
+    activeId,
+    baseCurrency: baseCurrency,
+  );
+
   return PantryStats(
     totalProducts: prodCount,
     totalItems: itemCount,
     averageNutriscoreNumeric: avgNutri,
-    totalValue:
-        await priceRepo.totalInventoryValue(
-          activeId,
-          baseCurrency: baseCurrency,
-        ) ??
-        0,
-    averagePrice:
-        await priceRepo.averageItemPrice(
-          activeId,
-          baseCurrency: baseCurrency,
-        ) ??
-        0,
-    pricedItemCount: await priceRepo.pricedItemCount(activeId),
+    totalValue: priceSummary.total ?? 0,
+    averagePrice: priceSummary.average ?? 0,
+    pricedItemCount: priceSummary.count,
     expiredCount: expiryDist[&#39;expired&#39;] ?? 0,
     expiringSoonCount: expiryDist[&#39;expiring&#39;] ?? 0,
     goodCount: expiryDist[&#39;good&#39;] ?? 0,

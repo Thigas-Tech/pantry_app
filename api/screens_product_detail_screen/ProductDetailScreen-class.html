@@ -70,11 +70,11 @@ and creates the item inside the active pantry.</li>
 <li>A button in the app bar that opens the product’s page on Open Food Facts.</li>
 </ul>
 <h2 id="state">State</h2>
-<p>The screen is a <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/ConsumerStatefulWidget-class.html">ConsumerStatefulWidget</a> because it needs to rebuild the
-inventory list after adding, editing, or deleting an item. A simple
-counter _inventoryVersion is incremented after every mutation; it is
-used as the <a href="https://api.flutter.dev/flutter/foundation/ValueKey-class.html">ValueKey</a> of the <a href="https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html">FutureBuilder</a> so that the future is
-re‑evaluated and the list refreshes.</p>
+<p>The screen is a <a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/ConsumerStatefulWidget-class.html">ConsumerStatefulWidget</a> because it manages inventory
+operations and the image service lifecycle. The inventory list is
+provided by <a href="../providers_inventory_for_barcode_provider/inventoryForBarcodeProvider.html">inventoryForBarcodeProvider</a>; after adding, editing, or
+deleting an item the provider family is invalidated so the list
+refreshes.</p>
 <h2 id="expiry-suggestions">Expiry suggestions</h2>
 <p>When adding a new item, the screen looks at the product’s <code>Product.category</code>
 and suggests a default expiry date:</p>

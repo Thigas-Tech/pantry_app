@@ -110,7 +110,8 @@ and</li>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 Widget build(BuildContext context, WidgetRef ref) {
-  final themeModeOption = ref.watch(themeModeProvider);
+  final themeModeOption =
+      ref.watch(themeModeProvider).value ?? ThemeModeOption.system;
   final themeMode = switch (themeModeOption) {
     ThemeModeOption.light =&gt; ThemeMode.light,
     ThemeModeOption.dark =&gt; ThemeMode.dark,
@@ -128,7 +129,7 @@ Widget build(BuildContext context, WidgetRef ref) {
             brightness: Brightness.dark,
           );
 
-      final settings = ref.watch(settingsProvider);
+      final settings = ref.watch(settingsProvider).value ?? const Settings();
       final darkScheme = settings.amoledDarkMode
           ? rawDarkScheme.copyWith(
               surface: Colors.black,
