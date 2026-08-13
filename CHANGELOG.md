@@ -4,6 +4,18 @@
 
 ### Maintainability
 
+- **main.dart slimmed from 622 to ~200 lines (audit MA1)**: the fourteen
+  top-level async orchestrators plus notification-tap navigation and
+  app-update bookkeeping were extracted into [AppStartupService], which
+  owns the post-init task schedule (with an injectable delay seam), the
+  pre-frame version check, the post-frame cache flush, anonymous
+  sign-in, permission request, and notification-tap navigation.
+  main.dart now keeps only main(), [PantryApp], and the raw wiring.
+  (lib/services/app_startup_service.dart new,
+  test/services/app_startup_service_test.dart new, lib/main.dart)
+
+### Maintainability
+
 - **Single [NotificationCoordinator] for all notification scheduling
   (audit MA2)**: expiry and inactivity reminders were re-implemented
   three times (startup in main.dart, the settings notifications toggle,
