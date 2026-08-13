@@ -361,6 +361,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             _resetForm();
             if (mounted) Navigator.of(context).pop();
           }
+        } on IssueRateLimitException {
+          logWarning('Submission rate-limited by the feedback service');
+          if (mounted) {
+            SnackbarHelper.showWarning(context, l10n.feedbackRateLimit);
+          }
         } on IssueSubmissionException {
           logError(
             'Online submission failed, falling back to offline queue',

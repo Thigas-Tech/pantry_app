@@ -520,5 +520,110 @@ void main() {
         expect(count, 1);
       });
     });
+
+    group('submitIssue via proxy', () {
+      setUp(() {
+        dotenv.loadFromString(
+          isOptional: true,
+          mergeWith: {'FEEDBACK_PROXY_URL': 'https://proxy.example.com/submit'},
+        );
+      });
+
+      /// Verifies the proxy path posts to the proxy URL with the device id
+      /// header and no GitHub Authorization header.
+      test('posts to the proxy with device id and no auth header', () async {
+        Uri? postedUrl;
+        Map<String, String>? postedHeaders;
+        String? postedBody;
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (invocation) async {
+            postedUrl = invocation.positionalArguments[0] as Uri;
+            postedHeaders =
+                invocation.namedArguments[#headers] as Map<String, String>?;
+            postedBody = invocation.namedArguments[#body] as String?;
+            return http.Response(
+              jsonEncode({'url': 'https://github.com/owner/repo/issues/7'}),
+              201,
+            );
+          },
+        );
+
+        final url = await service.submitIssue(title: 'Test', body: 'Body');
+
+        expect(url, 'https://github.com/owner/repo/issues/7');
+        expect(postedUrl.toString(), 'https://proxy.example.com/submit');
+        expect(postedHeaders, isNotNull);
+        expect(postedHeaders!['Authorization'], isNull);
+        expect(postedHeaders!['X-Device-Id'], isNotNull);
+        expect(postedHeaders!['X-Device-Id'], isNotEmpty);
+        final decoded = jsonDecode(postedBody!) as Map<String, dynamic>;
+        expect(decoded['title'], 'Test');
+        expect(decoded['body'], 'Body');
+      });
+
+      /// Verifies a 429 response surfaces as a rate-limit exception.
+      test('throws IssueRateLimitException on 429', () {
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) => Future.value(http.Response('{"error":"rate_limited"}', 429)),
+        );
+
+        expect(
+          () => service.submitIssue(title: 'Test', body: 'Body'),
+          throwsA(isA<IssueRateLimitException>()),
+        );
+      });
+
+      /// Verifies a 5xx proxy response surfaces as a generic submission
+      /// exception (so the caller can queue offline).
+      test('throws IssueSubmissionException on proxy 5xx', () {
+        when(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
+          (_) => Future.value(http.Response('{"error":"upstream"}', 503)),
+        );
+
+        expect(
+          () => service.submitIssue(title: 'Test', body: 'Body'),
+          throwsA(isA<IssueSubmissionException>()),
+        );
+      });
+
+      /// Verifies the proxy path still enforces the client-side rate limit
+      /// as a UX guardrail.
+      test('still enforces the client-side 60s guardrail', () async {
+        SharedPreferences.setMockInitialValues({
+          'feedback_last_submit': DateTime.now().millisecondsSinceEpoch,
+        });
+        await GithubIssueService.initPreferences();
+
+        expect(
+          () => service.submitIssue(title: 'Test', body: 'Body'),
+          throwsA(isA<IssueSubmissionException>()),
+        );
+        verifyNever(
+          () => mockHttp.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        );
+      });
+    });
   });
 }

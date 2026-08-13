@@ -4,6 +4,24 @@
 
 ### Security
 
+- **Stop shipping credentials in the APK (audit S1)**: the .env file was a
+  Flutter asset, so every release bundled the GitHub feedback PAT, OFF
+  credentials, Open Prices token and USDA key. The asset is removed and
+  `dotenv.load` is optional; credential-backed features (OFF product
+  submission, Open Prices, USDA) are now disabled in release builds unless
+  the user supplies their own credentials. GitHub feedback in release goes
+  through a new serverless Cloud Function (`functions/`) that holds the
+  PAT server-side, validates the payload and enforces server-side per-
+  device rate limits (audit S6). Non-secret toggles (FIREBASE_ENABLED,
+  FEEDBACK_PROXY_URL) moved to `--dart-define` CI build flags; the CI
+  `.env` secret injection steps were removed.
+  (pubspec.yaml, lib/config.dart, lib/main.dart,
+  lib/services/github_issue_service.dart, lib/services/device_id.dart,
+  lib/screens/feedback_screen.dart, functions/ new,
+  .github/workflows/build.yml, .github/workflows/deploy-to-playstore.yml,
+  .github/workflows/firebase-rules.yml, .env.example)
+  **Owner action required: rotate/revoke the four exposed credentials and
+  delete old CI artifacts.**
 - **Firestore security rules added and deployed via CI (audit S2)**: the
   repo shipped no rules file, so anonymous users could overwrite or poison
   the shared product/produce cache. New `firestore.rules`: cache reads stay

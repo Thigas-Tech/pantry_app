@@ -62,7 +62,7 @@ Future<void> main() async {
     SemanticsBinding.instance.ensureSemantics();
   }
 
-  await dotenv.load();
+  await dotenv.load(isOptional: true);
   logInfo('Environment loaded');
 
   // Create the shared container before any startup task that needs

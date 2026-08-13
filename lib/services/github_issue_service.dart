@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/feedback_queue_dao.dart';
+import 'package:pantry_app/services/device_id.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -14,7 +15,9 @@ import 'package:sqflite/sqflite.dart';
 /// Submits feedback as GitHub Issues and manages an offline queue.
 ///
 /// On platforms that support HTTP (Android, iOS, desktop), issues are
-/// posted to the GitHub Issues API with the developer's PAT. When the
+/// posted either through the serverless feedback proxy (release builds,
+/// configured by [AppConfig.feedbackProxyUrl]) or directly to the GitHub
+/// Issues API with the developer's PAT (development only). When the
 /// device is offline the issue is stored in the feedback_queue SQLite
 /// table and flushed automatically when connectivity is restored.
 ///
@@ -39,10 +42,16 @@ class GithubIssueService {
   bool _isFlushing = false;
   DateTime? _lastFlushTime;
 
-  /// Posts an issue to the GitHub API and returns the issue URL.
+  /// Posts an issue to the feedback proxy or GitHub API and returns the
+  /// issue URL.
   ///
-  /// Throws [IssueSubmissionException] on failure. On web this throws
-  /// [UnsupportedError] because direct GitHub API calls are not supported.
+  /// When [AppConfig.feedbackProxyUrl] is set, the issue is POSTed to the
+  /// proxy (which holds the GitHub PAT and enforces server-side rate
+  /// limits). Otherwise it is posted directly to the GitHub API with the
+  /// development [AppConfig.feedbackToken]. Throws
+  /// [IssueSubmissionException] on failure; throws [IssueRateLimitException]
+  /// when the proxy rejects the request for rate limiting. On web this
+  /// throws [UnsupportedError] because submissions are not supported.
   Future<String> submitIssue({
     required String title,
     required String body,
@@ -53,16 +62,25 @@ class GithubIssueService {
       throw UnsupportedError('GitHub API submissions are not supported on web');
     }
 
-    if (AppConfig.feedbackToken.isEmpty) {
-      logError('FEEDBACK_TOKEN is empty — in-app feedback will fail');
+    if (AppConfig.feedbackProxyUrl.isEmpty && AppConfig.feedbackToken.isEmpty) {
+      logError('Feedback is not configured (no proxy URL or token)');
       throw const IssueSubmissionException(
-        'Feedback token is not configured.',
+        'Feedback is not configured.',
       );
     }
 
     if (!fromFlush && !_canSubmit()) {
       throw const IssueSubmissionException(
         'Rate limit reached. Try again later.',
+      );
+    }
+
+    if (AppConfig.feedbackProxyUrl.isNotEmpty) {
+      return _submitViaProxy(
+        title: title,
+        body: body,
+        label: label,
+        fromFlush: fromFlush,
       );
     }
 
@@ -113,6 +131,85 @@ class GithubIssueService {
       '(tokenLength=${AppConfig.feedbackToken.length})',
     );
     throw IssueSubmissionException(message);
+  }
+
+  /// Submits an issue through the serverless feedback proxy.
+  ///
+  /// The proxy owns the GitHub PAT (never shipped in the app) and enforces
+  /// per-device rate limits. The device id is sent as the X-Device-Id
+  /// header so the server can key its counters; no credentials are sent.
+  Future<String> _submitViaProxy({
+    required String title,
+    required String body,
+    required bool fromFlush,
+    String? label,
+  }) async {
+    final deviceId = await DeviceId.get();
+    late final http.Response response;
+    try {
+      response = await _httpClient
+          .post(
+            Uri.parse(AppConfig.feedbackProxyUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Device-Id': deviceId,
+              'User-Agent': 'PantryApp/1.0',
+            },
+            body: jsonEncode({
+              'title': title,
+              'body': body,
+              if (label != null && label.isNotEmpty) 'label': label,
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
+    } on TimeoutException {
+      throw const IssueSubmissionException('Request timed out');
+    } on http.ClientException catch (e) {
+      throw IssueSubmissionException('Network error: ${e.message}');
+    }
+
+    if (response.statusCode == 201) {
+      if (!fromFlush) {
+        await _recordSubmission(title, body);
+      }
+      final url = _jsonField(response, 'url');
+      logInfo('Issue created via proxy: $url');
+      return url;
+    }
+
+    if (response.statusCode == 429) {
+      throw const IssueRateLimitException(
+        'Rate limit reached. Try again later.',
+      );
+    }
+
+    final message = _parseProxyError(response);
+    logError('Feedback proxy error ${response.statusCode}: $message');
+    throw IssueSubmissionException(message);
+  }
+
+  /// Extracts a JSON string field from [response], or the empty string.
+  String _jsonField(http.Response response, String field) {
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      return data[field] as String? ?? '';
+    } on Exception {
+      return '';
+    }
+  }
+
+  /// Maps a proxy error status to a human-readable message.
+  String _parseProxyError(http.Response response) {
+    switch (response.statusCode) {
+      case 400:
+        return 'Feedback could not be submitted (invalid request)';
+      case 502:
+      case 503:
+      case 504:
+        return 'Feedback service is temporarily unavailable. Try again later';
+      default:
+        return 'Feedback could not be submitted (HTTP ${response.statusCode})';
+    }
   }
 
   /// Queues an issue for offline submission.
@@ -386,4 +483,16 @@ class IssueSubmissionException implements Exception {
 
   @override
   String toString() => 'IssueSubmissionException: $message';
+}
+
+/// Thrown when the feedback proxy rejects a submission for rate limiting.
+///
+/// The UI shows the rate-limit message and does **not** fall back to the
+/// offline queue (a server-side limit will not clear by retrying later).
+class IssueRateLimitException extends IssueSubmissionException {
+  /// Creates an [IssueRateLimitException] with a human-readable [message].
+  const IssueRateLimitException(super.message);
+
+  @override
+  String toString() => 'IssueRateLimitException: $message';
 }

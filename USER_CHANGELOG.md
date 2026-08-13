@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- In-app feedback reports are now sent through a secure server relay, so
+  no account credentials are stored on your device.
+
 - The app now opens faster on slow networks: signing in and refreshing
   cached data happen after the first screen appears instead of delaying
   the start.
