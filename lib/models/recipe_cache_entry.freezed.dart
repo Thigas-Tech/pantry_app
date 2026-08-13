@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecipeCacheEntry {
 
-/// SHA-256 hex hash (name + createdAt), used as Firestore doc ID.
+/// Random UUID4 used as the Firestore doc ID.
  String get recipeId;/// Recipe display name.
  String get name;/// Free-text preparation instructions.
  String get instructions;/// Number of servings this recipe yields.
@@ -233,7 +233,7 @@ class _RecipeCacheEntry extends RecipeCacheEntry {
   const _RecipeCacheEntry({required this.recipeId, required this.name, required this.instructions, required this.servings, @JsonKey(fromJson: _ingredientsFromJson, toJson: _ingredientsToJson) required final  List<RecipeIngredientCache> ingredients, required this.createdAt, required this.lastRefreshedAt, required this.nextRefreshAt, @JsonKey(includeIfNull: false) this.imageUrl, this.schemaVersion = 1}): _ingredients = ingredients,super._();
   factory _RecipeCacheEntry.fromJson(Map<String, dynamic> json) => _$RecipeCacheEntryFromJson(json);
 
-/// SHA-256 hex hash (name + createdAt), used as Firestore doc ID.
+/// Random UUID4 used as the Firestore doc ID.
 @override final  String recipeId;
 /// Recipe display name.
 @override final  String name;

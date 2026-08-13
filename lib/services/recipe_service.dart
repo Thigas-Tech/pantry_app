@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
-import 'package:pantry_app/models/recipe_cache_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
@@ -17,6 +15,7 @@ import 'package:pantry_app/utils/price_calculator.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 
 /// Groups ingredients by barcode with a summed quantity.
 class _GroupedIngredient {
@@ -119,11 +118,19 @@ class RecipeService {
         imagePath: imagePath,
         inventoryId: existing?.inventoryId ?? activeInventoryId,
         updatedAt: now,
+        sharedRecipeId: existing?.sharedRecipeId ?? _newSharedId(),
       );
       await _db.updateRecipeWithIngredients(recipe, ingredients);
       logInfo('Recipe $existingRecipeId updated: $name');
-      unawaited(_cache.cacheRecipe(recipe, ingredients));
+      unawaited(
+        _cache.cacheRecipe(
+          recipe,
+          ingredients,
+          recipeId: recipe.sharedRecipeId,
+        ),
+      );
     } else {
+      final sharedId = _newSharedId();
       final recipe = Recipe(
         name: name.trim(),
         instructions: instructions.trim(),
@@ -132,6 +139,7 @@ class RecipeService {
         inventoryId: activeInventoryId,
         createdAt: now,
         updatedAt: now,
+        sharedRecipeId: sharedId,
       );
       final newId = await _db.insertRecipeWithIngredients(
         recipe,
@@ -142,6 +150,7 @@ class RecipeService {
         _cache.cacheRecipe(
           recipe.copyWith(id: newId),
           ingredients,
+          recipeId: sharedId,
         ),
       );
     }
@@ -152,30 +161,15 @@ class RecipeService {
     final recipe = await _db.getRecipe(id);
     await _db.deleteRecipe(id);
     logInfo('Recipe $id deleted');
-    if (recipe != null) {
+    if (recipe != null && recipe.sharedRecipeId.isNotEmpty) {
       unawaited(
-        _cache.deleteSharedRecipe(
-          _computeSharedRecipeId(
-            recipe.name,
-            recipe.createdAt,
-            recipe.inventoryId,
-          ),
-        ),
+        _cache.deleteSharedRecipe(recipe.sharedRecipeId),
       );
     }
   }
 
-  /// Computes the shared recipe cache key for a local recipe, matching
-  /// the hash produced by [RecipeCacheEntryConversions.fromRecipe].
-  String _computeSharedRecipeId(
-    String name,
-    int createdAt,
-    int inventoryId,
-  ) {
-    final bytes = utf8.encode('$name:$createdAt:$inventoryId');
-    final digest = sha256.convert(bytes);
-    return digest.toString();
-  }
+  /// Returns a fresh random id for a recipe's shared-cache snapshot.
+  String _newSharedId() => const Uuid().v4();
 
   /// Calculates the total cost of [recipeId] from its ingredients' latest
   /// prices, scoped to the recipe's own inventory (falling back to

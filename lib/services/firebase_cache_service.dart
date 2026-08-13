@@ -355,13 +355,16 @@ class FirebaseCacheService {
   /// Writes a [Recipe] and its [RecipeIngredient] list to the Firebase
   /// cache (fire-and-forget).
   ///
-  /// The recipe is anonymized via [RecipeCacheEntryConversions.fromRecipe]
-  /// — no local DB IDs, user IDs, or file paths are stored. Errors are
+  /// The recipe is obfuscated via [RecipeCacheEntryConversions.fromRecipe]
+  /// — no local DB IDs, user IDs, or file paths are stored, and the doc id
+  /// is a random UUID4. [recipeId] pins that id so the caller can persist
+  /// it for later cleanup; when omitted a new one is generated. Errors are
   /// caught and logged.
   Future<void> cacheRecipe(
     Recipe recipe,
     List<RecipeIngredient> ingredients, {
     String? imageUrl,
+    String? recipeId,
   }) async {
     if (!isAvailable) return;
     try {
@@ -369,6 +372,7 @@ class FirebaseCacheService {
         recipe,
         ingredients,
         imageUrl: imageUrl,
+        recipeId: recipeId,
       );
       await _firebaseClient.setRecipe(entry);
       await _upsertMeta(entry.recipeId, 'recipe');

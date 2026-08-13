@@ -1,23 +1,12 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pantry_app/firebase_cache_config.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/recipe_ingredient_cache.dart';
+import 'package:uuid/uuid.dart';
 
 part 'recipe_cache_entry.freezed.dart';
 part 'recipe_cache_entry.g.dart';
-
-/// Computes a deterministic SHA-256 hex hash from a recipe's name,
-/// createdAt timestamp, and inventory id, avoiding any local DB IDs. The
-/// result is used as the Firestore document ID.
-String _computeRecipeId(String name, int createdAt, int inventoryId) {
-  final bytes = utf8.encode('$name:$createdAt:$inventoryId');
-  final digest = sha256.convert(bytes);
-  return digest.toString();
-}
 
 List<RecipeIngredientCache> _ingredientsFromJson(List<dynamic> json) => json
     .map((e) => RecipeIngredientCache.fromJson(e as Map<String, dynamic>))
@@ -29,18 +18,18 @@ List<Map<String, dynamic>> _ingredientsToJson(
 
 /// Firestore document for the recipe_cache/{recipeId} collection.
 ///
-/// Stores an anonymized, cross-device shareable snapshot of a user's
+/// Stores an obfuscated, cross-device shareable snapshot of a user's
 /// recipe. No PII (user ID, device ID, local file paths) is stored.
 ///
-/// [recipeId] is a SHA-256 hex hash derived from the original recipe's
-/// name, createdAt, and inventory id, ensuring deterministic,
-/// collision-resistant IDs that cannot be traced back to the local SQLite
-/// database.
+/// [recipeId] is a random UUID4, so it cannot be derived from the recipe
+/// contents and cannot be traced back to the local SQLite database. The
+/// document is not anonymous — the recipe name and instructions are stored
+/// in plaintext by design — but nothing links it to a specific user.
 @freezed
 abstract class RecipeCacheEntry with _$RecipeCacheEntry {
   /// Creates a [RecipeCacheEntry] with all required fields.
   const factory RecipeCacheEntry({
-    /// SHA-256 hex hash (name + createdAt), used as Firestore doc ID.
+    /// Random UUID4 used as the Firestore doc ID.
     required String recipeId,
 
     /// Recipe display name.
@@ -86,28 +75,26 @@ abstract class RecipeCacheEntry with _$RecipeCacheEntry {
 
 /// Extension providing conversions to/from local [Recipe].
 extension RecipeCacheEntryConversions on RecipeCacheEntry {
-  /// Creates an anonymized cache entry from a local [Recipe] and its
+  /// Creates an obfuscated cache entry from a local [Recipe] and its
   /// [ingredients].
   ///
   /// [imageUrl] is the optional Firebase Storage URL for the recipe photo
   /// (never a local file path). If [createdAt] is omitted, it defaults to
-  /// the current time.
+  /// the current time. When [recipeId] is omitted, a random UUID4 is
+  /// generated so the document id cannot be derived from the recipe.
   static RecipeCacheEntry fromRecipe(
     Recipe recipe,
     List<RecipeIngredient> ingredients, {
     String? imageUrl,
     int? createdAt,
+    String? recipeId,
   }) {
     final now = DateTime.now().millisecondsSinceEpoch;
     final effectiveCreatedAt = createdAt ?? recipe.createdAt;
-    final recipeId = _computeRecipeId(
-      recipe.name,
-      effectiveCreatedAt,
-      recipe.inventoryId,
-    );
+    final effectiveRecipeId = recipeId ?? const Uuid().v4();
 
     return RecipeCacheEntry(
-      recipeId: recipeId,
+      recipeId: effectiveRecipeId,
       name: recipe.name,
       instructions: recipe.instructions,
       servings: recipe.servings,
