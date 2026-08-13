@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the toString method from the RecipeCacheEntry class, for the Dart programming language.">
-  <title>toString method - RecipeCacheEntry class - recipe_cache_entry library - Dart API</title>
+  <meta name="description" content="API docs for the ingestedBy property from the RecipeCacheEntry class, for the Dart programming language.">
+  <title>ingestedBy property - RecipeCacheEntry class - recipe_cache_entry library - Dart API</title>
 
 
   
@@ -27,9 +27,9 @@
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../models_recipe_cache_entry/">models&#47;recipe_cache_entry.dart</a></li>
     <li><a href="../../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a></li>
-    <li class="self-crumb">toString method</li>
+    <li class="self-crumb">ingestedBy property</li>
   </ol>
-  <div class="self-name">toString</div>
+  <div class="self-name">ingestedBy</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -49,50 +49,45 @@
     data-above-sidebar="models_recipe_cache_entry&#47;RecipeCacheEntry-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">toString</span> method 
+<h1><span class="kind-property">ingestedBy</span> property 
 </h1></div>
 
+    
+
+    
+        
+  <section id="getter">
     <section class="multi-line-signature">
       
-  <div>
-    <ol class="annotation-list">
-        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
-    </ol>
-  </div>
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-<span class="name ">toString</span>(<wbr>)
-
+      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+      get
+      <span class="name ">ingestedBy</span>
       <div class="features"><span class="feature">inherited</span></div>
 
     </section>
     
 <section class="desc markdown">
-  <p>A string representation of this object.</p>
-<p>Some classes have a default textual representation,
-often paired with a static <code>parse</code> function (like <a href="https://api.flutter.dev/flutter/dart-core/int/parse.html">int.parse</a>).
-These classes will provide the textual representation as
-their string representation.</p>
-<p>Other classes have no meaningful textual representation
-that a program will care about.
-Such classes will typically override <code>toString</code> to provide
-useful information when inspecting the object,
-mainly for debugging or logging.</p>
+  <p>Anonymous-auth uid of the user who shared the recipe.</p>
+<p>Used by Firestore rules to scope create/update/delete of
+recipe_cache documents to their author. Empty when not signed in.</p>
 </section>
-
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@override
-String toString() {
-  return &#39;RecipeCacheEntry(recipeId: $recipeId, name: $name, instructions: $instructions, servings: $servings, ingredients: $ingredients, createdAt: $createdAt, lastRefreshedAt: $lastRefreshedAt, nextRefreshAt: $nextRefreshAt, ingestedBy: $ingestedBy, imageUrl: $imageUrl, schemaVersion: $schemaVersion)&#39;;
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">int get nextRefreshAt;&#47;&#47;&#47; Anonymous-auth uid of the user who shared the recipe.
+&#47;&#47;&#47;
+&#47;&#47;&#47; Used by Firestore rules to scope create&#47;update&#47;delete of
+&#47;&#47;&#47; recipe_cache documents to their author. Empty when not signed in.
+String get ingestedBy;</code></pre>
 </section>
 
+  </section>
 
-  </div> <!-- /.main-content -->
-  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
-    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+
+</div> <!-- /.main-content -->
+<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+  <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
 <header id="header-search-sidebar" class="hidden-l">
   <form class="search-sidebar" role="search">
     <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
@@ -102,13 +97,13 @@ String toString() {
     <li><a href="../../index.html">pantry_app</a></li>
     <li><a href="../../models_recipe_cache_entry/">recipe_cache_entry</a></li>
     <li><a href="../../models_recipe_cache_entry/RecipeCacheEntry-class.html">RecipeCacheEntry</a></li>
-    <li class="self-crumb">toString method</li>
+    <li class="self-crumb">ingestedBy property</li>
 </ol>
 
-    <h5>RecipeCacheEntry class</h5>
-    <div id="dartdoc-sidebar-left-content"></div>
-  </div><!--/.sidebar-offcanvas-->
-  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  <h5>RecipeCacheEntry class</h5>
+  <div id="dartdoc-sidebar-left-content"></div>
+</div><!--/.sidebar-offcanvas-->
+<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
 </div><!--/.sidebar-offcanvas-->
 </main>
 <footer>

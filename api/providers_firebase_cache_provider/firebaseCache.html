@@ -116,6 +116,9 @@ FirebaseCacheService firebaseCache(Ref ref) {
     firebaseClient: client,
     usdaClient: ref.read(usdaApiClientProvider),
     offAdapter: api,
+    currentUid: () =&gt; AppConfig.firebaseEnabled
+        ? FirebaseAuth.instance.currentUser?.uid
+        : null,
   );
 }</code></pre>
 </section>

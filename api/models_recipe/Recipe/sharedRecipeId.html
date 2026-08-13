@@ -68,9 +68,9 @@
     
 <section class="desc markdown">
   <p>The recipe_cache Firestore document id for the shared snapshot.</p>
-<p>A random UUID4 assigned when the recipe is cached (see
-<a href="../../models_recipe_cache_entry/RecipeCacheEntryConversions/fromRecipe.html">RecipeCacheEntryConversions.fromRecipe</a>). Empty until then, and
-used to delete the shared document when the recipe is removed.</p>
+<p>A random UUID4 assigned when the recipe is cached. Empty until
+then, and used to delete the shared document when the recipe is
+removed.</p>
 </section>
 
     
@@ -78,9 +78,9 @@ used to delete the shared document when the recipe is removed.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">int get inventoryId;&#47;&#47;&#47; The recipe_cache Firestore document id for the shared snapshot.
 &#47;&#47;&#47;
-&#47;&#47;&#47; A random UUID4 assigned when the recipe is cached (see
-&#47;&#47;&#47; [RecipeCacheEntryConversions.fromRecipe]). Empty until then, and
-&#47;&#47;&#47; used to delete the shared document when the recipe is removed.
+&#47;&#47;&#47; A random UUID4 assigned when the recipe is cached. Empty until
+&#47;&#47;&#47; then, and used to delete the shared document when the recipe is
+&#47;&#47;&#47; removed.
 String get sharedRecipeId;</code></pre>
 </section>
 

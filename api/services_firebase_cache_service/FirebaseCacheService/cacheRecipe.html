@@ -71,8 +71,10 @@ cache (fire-and-forget).</p>
 <p>The recipe is obfuscated via <a href="../../models_recipe_cache_entry/RecipeCacheEntryConversions/fromRecipe.html">RecipeCacheEntryConversions.fromRecipe</a>
 — no local DB IDs, user IDs, or file paths are stored, and the doc id
 is a random UUID4. <code>recipeId</code> pins that id so the caller can persist
-it for later cleanup; when omitted a new one is generated. Errors are
-caught and logged.</p>
+it for later cleanup; when omitted a new one is generated. The write
+is attributed to the signed-in user via <a href="../../services_firebase_cache_service/FirebaseCacheService/currentUid.html">currentUid</a> so Firestore
+rules can scope it to its author; when no user is signed in the
+write is skipped. Errors are caught and logged.</p>
 </section>
 
 
@@ -87,11 +89,17 @@ caught and logged.</p>
 }) async {
   if (!isAvailable) return;
   try {
+    final uid = await currentUid?.call();
+    if (uid == null || uid.isEmpty) {
+      logWarning(&#39;cacheRecipe skipped: no signed-in user&#39;);
+      return;
+    }
     final entry = RecipeCacheEntryConversions.fromRecipe(
       recipe,
       ingredients,
       imageUrl: imageUrl,
       recipeId: recipeId,
+      ingestedBy: uid,
     );
     await _firebaseClient.setRecipe(entry);
     await _upsertMeta(entry.recipeId, &#39;recipe&#39;);

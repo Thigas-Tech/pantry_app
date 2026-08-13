@@ -81,7 +81,7 @@ lookup methods bypass Firestore entirely and call the source API directly.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="FirebaseCacheService.new" class="callable">
-          <span class="name"><a href="../services_firebase_cache_service/FirebaseCacheService/FirebaseCacheService.html">FirebaseCacheService</a></span><span class="signature">({<span class="parameter" id="param-db"><span>required</span> <span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="param-firebaseClient"><span>required</span> <span class="type-annotation"><a href="../services_firebase_cache_client/FirebaseCacheClient-class.html">FirebaseCacheClient</a></span> <span class="parameter-name">firebaseClient</span>, </span><span class="parameter" id="param-usdaClient"><span>required</span> <span class="type-annotation"><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a></span> <span class="parameter-name">usdaClient</span>, </span><span class="parameter" id="param-offAdapter"><span>required</span> <span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">offAdapter</span>, </span><span class="parameter" id="param-metaDao"><span class="type-annotation"><a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>?</span> <span class="parameter-name">metaDao</span></span>})</span>
+          <span class="name"><a href="../services_firebase_cache_service/FirebaseCacheService/FirebaseCacheService.html">FirebaseCacheService</a></span><span class="signature">({<span class="parameter" id="param-db"><span>required</span> <span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="param-firebaseClient"><span>required</span> <span class="type-annotation"><a href="../services_firebase_cache_client/FirebaseCacheClient-class.html">FirebaseCacheClient</a></span> <span class="parameter-name">firebaseClient</span>, </span><span class="parameter" id="param-usdaClient"><span>required</span> <span class="type-annotation"><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a></span> <span class="parameter-name">usdaClient</span>, </span><span class="parameter" id="param-offAdapter"><span>required</span> <span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">offAdapter</span>, </span><span class="parameter" id="param-metaDao"><span class="type-annotation"><a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>?</span> <span class="parameter-name">metaDao</span>, </span><span class="parameter" id="param-currentUid"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>&gt;</span></span> <span class="parameter-name">currentUid</span>()?</span>})</span>
         </dt>
         <dd>
           Creates a <a href="../services_firebase_cache_service/FirebaseCacheService-class.html">FirebaseCacheService</a>.
@@ -94,6 +94,19 @@ lookup methods bypass Firestore entirely and call the source API directly.</p>
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
+        <dt id="currentUid" class="property">
+  <span class="name"><a href="../services_firebase_cache_service/FirebaseCacheService/currentUid.html">currentUid</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>&gt;</span> Function<span class="signature">()</span>?</span>
+  
+
+</dt>
+<dd>
+  Resolves the anonymous-auth uid of the current user, or null when no
+user is signed in (or Firebase is disabled).
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="hashCode" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>

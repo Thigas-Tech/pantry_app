@@ -59,13 +59,15 @@
 <li><span class="parameter" id="param-usdaClient"><span>required</span> <span class="type-annotation"><a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a></span> <span class="parameter-name">usdaClient</span>, </span></li>
 <li><span class="parameter" id="param-offAdapter"><span>required</span> <span class="type-annotation"><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">offAdapter</span>, </span></li>
 <li><span class="parameter" id="param-metaDao"><span class="type-annotation"><a href="../../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>?</span> <span class="parameter-name">metaDao</span>, </span></li>
+<li><span class="parameter" id="param-currentUid"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/FutureOr-class.html">FutureOr</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>&gt;</span></span> <span class="parameter-name">currentUid</span>()?, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../services_firebase_cache_service/FirebaseCacheService-class.html">FirebaseCacheService</a>.</p>
 <p>All dependencies are required except <code>metaDao</code>; when omitted the
-instance from <code>db</code> is used.</p>
+instance from <code>db</code> is used. <code>currentUid</code>, when provided, resolves the
+signed-in user id used to attribute shared recipe writes.</p>
 </section>
 
 
@@ -78,6 +80,7 @@ instance from <code>db</code> is used.</p>
   required this._usdaClient,
   required this._offAdapter,
   FirebaseCacheMetaDao? metaDao,
+  this.currentUid,
 }) : _db = db,
      _metaDao = metaDao ?? db.firebaseCacheMetaDao;</code></pre>
 </section>
