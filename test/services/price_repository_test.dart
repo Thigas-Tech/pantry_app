@@ -226,23 +226,28 @@ void main() {
       expect(await statsRepo.averageItemPrice(1), isNull);
     });
 
-    test('inventoryPriceSummary derives all aggregates from one pass',
-        () async {
-      final db = await statsDb.database;
-      const inventoryDao = InventoryDao();
-      final p1Rows = await inventoryDao.listByBarcode(db, 'p1', inventoryId: 1);
-      await inventoryDao.update(db, p1Rows.first.copyWith(quantity: 3));
+    test(
+      'inventoryPriceSummary derives all aggregates from one pass',
+      () async {
+        final db = await statsDb.database;
+        const inventoryDao = InventoryDao();
+        final p1Rows = await inventoryDao.listByBarcode(
+          db,
+          'p1',
+          inventoryId: 1,
+        );
+        await inventoryDao.update(db, p1Rows.first.copyWith(quantity: 3));
 
-      // Latest prices p1=10 (x3), p2=20 (x1).
-      final summary = await statsRepo.inventoryPriceSummary(1);
+        // Latest prices p1=10 (x3), p2=20 (x1).
+        final summary = await statsRepo.inventoryPriceSummary(1);
 
-      expect(summary.total, 50.0);
-      expect(summary.average, 12.5);
-      expect(summary.count, 2);
-    });
+        expect(summary.total, 50.0);
+        expect(summary.average, 12.5);
+        expect(summary.count, 2);
+      },
+    );
 
-    test('inventoryPriceSummary returns nulls when no prices exist',
-        () async {
+    test('inventoryPriceSummary returns nulls when no prices exist', () async {
       final db = await statsDb.database;
       await db.delete('prices');
 
@@ -251,6 +256,95 @@ void main() {
       expect(summary.total, isNull);
       expect(summary.average, isNull);
       expect(summary.count, 0);
+    });
+  });
+
+  group('package-aware aggregations', () {
+    setUpAll(() {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    });
+
+    late DatabaseHelper packageDb;
+    late PriceRepository packageRepo;
+
+    setUp(() async {
+      packageDb = DatabaseHelper.withPath(inMemoryDatabasePath);
+      final db = await packageDb.database;
+
+      const productDao = ProductDao();
+      await productDao.insert(
+        db,
+        const Product(barcode: 'pk1', name: 'Dozen eggs'),
+      );
+      await productDao.insert(
+        db,
+        const Product(barcode: 'pk2', name: 'Milk'),
+      );
+
+      const inventoryDao = InventoryDao();
+      // pk1: a dozen eggs held as 12 pieces at $4 for the 12-pack.
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'pk1', quantity: 12),
+      );
+      // pk2: no package size, held 6 units at $2 each.
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'pk2', quantity: 6),
+      );
+
+      const priceDao = PriceDao();
+      await priceDao.insert(
+        db,
+        const Price(
+          barcode: 'pk1',
+          price: 4,
+          datePurchased: 100,
+          packageQuantity: 12,
+          packageUnit: 'pieces',
+        ),
+      );
+      await priceDao.insert(
+        db,
+        const Price(barcode: 'pk2', price: 2, datePurchased: 100),
+      );
+
+      packageRepo = PriceRepository(
+        packageDb,
+        CurrencyService(),
+        OpenPricesService(
+          databaseHelper: packageDb,
+          apiClient: OpenPricesApiClient(
+            client: http.Client(),
+            baseUrl: 'https://test.prices.api/v1',
+            token: 'test-token',
+            contactEmail: 'test@example.com',
+          ),
+        ),
+      );
+    });
+
+    tearDown(() async {
+      final db = await packageDb.database;
+      await db.close();
+    });
+
+    test('totalInventoryValue scales latest price by package size', () async {
+      // pk1: 4 * 12 / 12 = 4; pk2: 2 * 6 = 12. Total 16.
+      expect(await packageRepo.totalInventoryValue(1), 16.0);
+    });
+
+    test('averageItemPrice is weighted and package-aware', () async {
+      // (4*12/12 + 2*6) / (12 + 6) = 16/18, rounded to cents.
+      expect(await packageRepo.averageItemPrice(1), 0.89);
+    });
+
+    test('inventoryPriceSummary is package-aware', () async {
+      final summary = await packageRepo.inventoryPriceSummary(1);
+      expect(summary.total, 16.0);
+      expect(summary.average, 0.89);
+      expect(summary.count, 2);
     });
   });
 }

@@ -10,6 +10,7 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/off_units.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 
 /// A bottom sheet for entering or editing a price observation.
@@ -31,6 +32,8 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
     this.existingAmount,
     this.existingCurrency,
     this.existingStore,
+    this.existingPackageQuantity,
+    this.existingPackageUnit,
   });
 
   /// The product barcode this price is for.
@@ -48,6 +51,12 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
   /// Pre-fills the store field when not using an existingPrice.
   final String? existingStore;
 
+  /// Pre-fills the package size when not using an existingPrice.
+  final double? existingPackageQuantity;
+
+  /// Pre-fills the package unit when not using an existingPrice.
+  final String? existingPackageUnit;
+
   /// Shows the price entry bottom sheet and returns the entered [Price],
   /// or null if cancelled.
   static Future<Price?> show(
@@ -57,6 +66,8 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
     double? existingAmount,
     String? existingCurrency,
     String? existingStore,
+    double? existingPackageQuantity,
+    String? existingPackageUnit,
   }) {
     return BottomSheetHelper.show<Price>(
       context: context,
@@ -66,6 +77,8 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
         existingAmount: existingAmount,
         existingCurrency: existingCurrency,
         existingStore: existingStore,
+        existingPackageQuantity: existingPackageQuantity,
+        existingPackageUnit: existingPackageUnit,
       ),
     );
   }
@@ -79,7 +92,9 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
   late final TextEditingController _amountCtrl;
   late final TextEditingController _storeCtrl;
   late final TextEditingController _notesCtrl;
+  late final TextEditingController _packageQtyCtrl;
   String _currency = 'USD';
+  String _packageUnit = 'pieces';
   DateTime _date = DateTime.now();
   bool _isDiscounted = false;
   late String _decimalSep;
@@ -109,6 +124,13 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
       text: existing?.store ?? widget.existingStore ?? '',
     );
     _notesCtrl = TextEditingController(text: existing?.notes ?? '');
+    final packageQty =
+        existing?.packageQuantity ?? widget.existingPackageQuantity;
+    _packageUnit =
+        existing?.packageUnit ?? widget.existingPackageUnit ?? 'pieces';
+    _packageQtyCtrl = TextEditingController(
+      text: packageQty != null ? _formatNumber(packageQty) : '',
+    );
   }
 
   /// Formats [value] with exactly 2 decimal places using the locale separator.
@@ -118,11 +140,18 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
     return fixed;
   }
 
+  /// Formats a package size number without a locale-specific separator.
+  String _formatNumber(double value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toString();
+  }
+
   @override
   void dispose() {
     _amountCtrl.dispose();
     _storeCtrl.dispose();
     _notesCtrl.dispose();
+    _packageQtyCtrl.dispose();
     super.dispose();
   }
 
@@ -195,6 +224,8 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
                 ],
               ),
               const SizedBox(height: 12),
+              _buildPackageFields(l10n),
+              const SizedBox(height: 12),
               SwitchListTile(
                 title: Text(l10n.discounted),
                 value: _isDiscounted,
@@ -216,6 +247,76 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
         ),
       ),
     );
+  }
+
+  /// Builds the package-size and package-unit inputs.
+  ///
+  /// The package size is optional; when left empty the price is stored as a
+  /// legacy unscaled observation (no per-unit label, no recipe scaling).
+  Widget _buildPackageFields(AppLocalizations l10n) {
+    final units = _packageUnits;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 3,
+          child: TextFormField(
+            controller: _packageQtyCtrl,
+            decoration: InputDecoration(
+              labelText: l10n.packageSize,
+              hintText: l10n.packageSizeHint,
+              isDense: true,
+            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return null;
+              final qty = double.tryParse(v.trim());
+              if (qty == null || !qty.isFinite || qty <= 0) {
+                return l10n.packageSizeInvalid;
+              }
+              return null;
+            },
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 2,
+          child: DropdownButtonFormField<String>(
+            initialValue: _packageUnit,
+            decoration: InputDecoration(
+              labelText: l10n.packageUnit,
+              isDense: true,
+            ),
+            items: [
+              if (!units.contains(_packageUnit))
+                DropdownMenuItem(
+                  value: _packageUnit,
+                  child: Text(_packageUnit),
+                ),
+              ...units.map(
+                (u) => DropdownMenuItem(value: u, child: Text(u)),
+              ),
+            ],
+            onChanged: (v) {
+              if (v != null) setState(() => _packageUnit = v);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The unit options offered for package sizes, combining the metric and
+  /// imperial catalogs (pieces first) so any measured package can be
+  /// described regardless of the user's display system.
+  static final List<String> _packageUnits = _dedupe([
+    ...OffUnitCatalog.quantityUnits,
+    ...OffUnitCatalog.imperialUnits,
+  ]);
+
+  static List<String> _dedupe(List<String> values) {
+    final seen = <String>{};
+    return values.where(seen.add).toList();
   }
 
   Widget _buildStoreField(AppLocalizations l10n) {
@@ -354,6 +455,13 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
       unawaited(_autoInsertStore(storeName));
     }
 
+    final packageQtyText = _packageQtyCtrl.text.trim();
+    final packageQty = packageQtyText.isEmpty
+        ? null
+        : double.tryParse(packageQtyText);
+    final hasPackage =
+        packageQty != null && packageQty.isFinite && packageQty > 0;
+
     final price = Price(
       barcode: widget.barcode,
       price: amount,
@@ -364,6 +472,8 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
       regularPrice: widget.existingPrice?.regularPrice,
       datePurchased: _date.millisecondsSinceEpoch,
       notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+      packageQuantity: hasPackage ? packageQty : null,
+      packageUnit: hasPackage ? _packageUnit : null,
       dateAdded:
           widget.existingPrice?.dateAdded ??
           DateTime.now().millisecondsSinceEpoch,

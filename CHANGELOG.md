@@ -84,6 +84,20 @@
   (android/app/src/main/AndroidManifest.xml,
   test/manifests/android_manifest_test.dart new)
 
+### Features
+
+- **Package size captured when entering a price**: the price bottom sheet
+  now has package-size and package-unit fields (prefilled from the product's
+  OFF packaging when available), so per-unit price labels and recipe cost
+  scaling no longer rely on a product packaging string being present.
+  (lib/widgets/price_entry_sheet.dart, lib/screens/product_detail_screen.dart,
+  lib/l10n/*.arb)
+
+- **Recipe ingredient amounts show units and per-serving values**: ingredient
+  rows in the recipe detail screen auto-scale (1500 g -> 1.5 kg), show their
+  unit, and display the per-serving amount when the recipe has servings.
+  (lib/screens/recipe_detail_screen.dart, lib/l10n/*.arb)
+
 ### Maintainability
 
 - **One-shot UI flags routed through a [UiFlagsNotifier] (audit MA7)**:
@@ -305,6 +319,23 @@
   test/providers/*, test/screens/*)
 
 ### Fixed
+
+- **Price and recipe cost correctness (price/recipe audit)**: fixed a batch
+  of unit and money-math defects — [fl oz] is now treated as a volume unit
+  (it was normalized to the weight [oz]); the invalid [serving] -> [ounces]
+  unit mapping was removed; [PriceCalculator] rejects negative prices and
+  rounds scaled costs to cents; recipe cost no longer treats inventory stock
+  as a package size; produce pieces vs weight packages are now converted via
+  serving weights; produce barcodes are normalized before price lookup; and
+  inventory value/average/monthly/store-spending aggregates scale by the
+  price package size so the stats match recipe costing. Recipe nutrition now
+  uses ingredient densities and produce gram weights for volume and piece
+  ingredients instead of assuming water density or skipping them.
+  (lib/utils/quantity_parser.dart, lib/utils/price_calculator.dart,
+  lib/utils/money.dart new, lib/utils/serving_weight.dart new,
+  lib/utils/density_table.dart new, lib/services/recipe_service.dart,
+  lib/services/recipe_nutrition_service.dart, lib/services/price_repository.dart,
+  lib/database/price_dao.dart, test/*)
 
 - **Items expiring exactly N days from now disappear from the home list
   (audit P1)**: the "good" bucket used a time-of-day-aware threshold

@@ -488,6 +488,77 @@ void main() {
     });
   });
 
+  group('PriceDao aggregates scale by package size', () {
+    setUp(() async {
+      final db = await dbHelper.database;
+      const productDao = ProductDao();
+
+      await productDao.insert(
+        db,
+        const Product(barcode: 'p1', name: 'Dozen eggs'),
+      );
+      await productDao.insert(
+        db,
+        const Product(barcode: 'p2', name: 'Milk'),
+      );
+
+      // p1: a dozen eggs held as 12 pieces, priced 3.50 for the 12-pack.
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'p1', quantity: 12),
+      );
+      await dao.insert(
+        db,
+        const Price(
+          barcode: 'p1',
+          price: 3.50,
+          packageQuantity: 12,
+          packageUnit: 'pieces',
+          datePurchased: 100,
+        ),
+      );
+
+      // p2: no package size, held 3 units at 5 each.
+      await inventoryDao.insert(
+        db,
+        const InventoryItem(barcode: 'p2', quantity: 3),
+      );
+      await dao.insert(
+        db,
+        const Price(barcode: 'p2', price: 5, datePurchased: 200),
+      );
+    });
+
+    test(
+      'monthlyExpenditure scales by the price package size',
+      () async {
+        final db = await dbHelper.database;
+        final rows = await dao.monthlyExpenditure(db, inventoryId: 1);
+
+        expect(rows, hasLength(1));
+        // p1: 3.50 * 12 / 12 = 3.50; p2: 5 * 3 = 15. Total 18.50.
+        expect((rows.first['total'] as num).toDouble(), 18.50);
+      },
+    );
+
+    test('storeSpending scales by the price package size', () async {
+      final db = await dbHelper.database;
+      await db.update(
+        'prices',
+        {'store': 'Big Box'},
+        where: 'barcode = ?',
+        whereArgs: ['p1'],
+      );
+
+      final rows = await dao.storeSpending(db, inventoryId: 1);
+
+      expect(rows, hasLength(1));
+      expect(rows.first['store'], 'Big Box');
+      // 3.50 * 12 / 12 = 3.50.
+      expect((rows.first['total'] as num).toDouble(), 3.50);
+    });
+  });
+
   group('PriceDao sync and retention', () {
     test('getBySyncStatus filters correctly', () async {
       final db = await dbHelper.database;

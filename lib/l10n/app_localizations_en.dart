@@ -1203,6 +1203,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notes => 'Notes';
 
   @override
+  String get packageSize => 'Package size';
+
+  @override
+  String get packageSizeHint => 'Amount in one package, e.g. 12';
+
+  @override
+  String get packageUnit => 'Package unit';
+
+  @override
+  String get packageSizeInvalid => 'Enter a valid package size';
+
+  @override
   String get navList => 'List';
 
   @override
@@ -1467,9 +1479,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get packageQuantity => 'Package quantity';
-
-  @override
-  String get packageUnit => 'Package unit';
 
   @override
   String get generalNotificationChannelName => 'General Notifications';
@@ -1940,6 +1949,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipeCostUnknown => 'Unknown';
+
+  @override
+  String get recipePerServing => 'per serving';
 
   @override
   String get recipeAverageCost => 'Average recipe cost';

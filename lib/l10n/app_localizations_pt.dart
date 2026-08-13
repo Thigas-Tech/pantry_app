@@ -1203,6 +1203,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notes => 'Observações';
 
   @override
+  String get packageSize => 'Tamanho da embalagem';
+
+  @override
+  String get packageSizeHint => 'Quantidade em uma embalagem, ex. 12';
+
+  @override
+  String get packageUnit => 'Unidade da embalagem';
+
+  @override
+  String get packageSizeInvalid => 'Informe um tamanho de embalagem válido';
+
+  @override
   String get navList => 'Lista';
 
   @override
@@ -1467,9 +1479,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get packageQuantity => 'Quantidade da embalagem';
-
-  @override
-  String get packageUnit => 'Unidade da embalagem';
 
   @override
   String get generalNotificationChannelName => 'Notificacoes Gerais';
@@ -1940,6 +1949,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get recipeCostUnknown => 'Desconhecido';
+
+  @override
+  String get recipePerServing => 'por porção';
 
   @override
   String get recipeAverageCost => 'Custo médio das receitas';
@@ -3319,6 +3331,18 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get notes => 'Observações';
 
   @override
+  String get packageSize => 'Tamanho da embalagem';
+
+  @override
+  String get packageSizeHint => 'Quantidade em uma embalagem, ex. 12';
+
+  @override
+  String get packageUnit => 'Unidade da embalagem';
+
+  @override
+  String get packageSizeInvalid => 'Informe um tamanho de embalagem válido';
+
+  @override
   String get navList => 'Lista';
 
   @override
@@ -3583,9 +3607,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get packageQuantity => 'Quantidade da embalagem';
-
-  @override
-  String get packageUnit => 'Unidade da embalagem';
 
   @override
   String get generalNotificationChannelName => 'Notificações Gerais';
@@ -4056,6 +4077,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get recipeCostUnknown => 'Desconhecido';
+
+  @override
+  String get recipePerServing => 'por porção';
 
   @override
   String get recipeAverageCost => 'Custo médio das receitas';

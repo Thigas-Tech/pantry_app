@@ -79,11 +79,13 @@ retention pruning.
 
 1. A price is added or edited through `PriceEntrySheet`
    (`lib/widgets/price_entry_sheet.dart`), a modal bottom sheet opened from
-   `ProductDetailScreen` and `ShoppingListScreen`. Current fields: amount
+   `ProductDetailScreen` and `ShoppingListScreen`. Fields: amount
    (locale-aware decimal separator via `PriceCalculatorFormatter`), store
    (autocomplete over the `stores` table with an add-new action), purchase
-   date, discounted toggle, and notes. Package-size fields are not captured
-   yet.
+   date, discounted toggle, notes, and package size + package unit. The
+   package size is prefilled from the product's OFF packaging string when
+   available, and is optional — prices left without one are stored as legacy
+   unscaled observations.
 2. The sheet returns a `Price`; the caller scopes it with the active
    `inventoryId` and saves it through `PriceRepository.addPrice` ->
    `PriceDao.insert`. New prices default to `sync_status = 'local_only'`.
@@ -113,24 +115,33 @@ fl oz), and count (pieces).
   between incompatible groups (e.g. grams vs pieces).
 - `scaledIngredientCost` scales a package price to the cost of the ingredient
   quantity actually used, converting within the same measurement group. It
-  returns `0.0` for zero quantity and null when the package is unusable or the
-  units are incompatible.
+  returns `0.0` for zero quantity and null when the package is unusable, the
+  price is not positive, or the units are incompatible. Both the scaled
+  ingredient cost and the recipe total are rounded to cents via `Money`
+  (`lib/utils/money.dart`) so recipe totals never carry fractional cents.
 
 ### 3.1 Package-size resolution for recipes
 
-`calculateIngredientCost` (`lib/providers/recipe_provider.dart:354`) charges
-each ingredient `price * (ingredient qty / package qty)` and resolves the
-package size in this order (`_resolvePackageSize`, recipe_provider.dart:412):
+`calculateIngredientCost` (`lib/services/recipe_service.dart`) charges each
+ingredient `price * (ingredient qty / package qty)` and resolves the package
+size in this order (`_resolvePackageSize`):
 
 1. The price row's own `package_quantity` / `package_unit`.
 2. The product's packaging (`products.quantity` / `products.product_quantity`),
    parsing multi-pack strings like `"3 x 150 g"` to their per-unit value via
    `parseQuantity` (`lib/utils/quantity_parser.dart`).
-3. The first inventory row for the barcode, using its stored quantity/unit as
-   a best-effort package size.
 
-When no package size resolves, or units are incompatible, the full package
-price is charged (legacy behavior). Cook-history scoring uses the same path.
+The inventory row is deliberately **not** a package-size source: its stored
+quantity is the current stock, not the size of the package the price applies
+to, so using it would distort the scaled cost.
+
+When the ingredient and package units are incompatible (e.g. a piece-counted
+produce item against a gram package), a per-piece serving weight is resolved
+via `ServingWeightResolver` (`lib/utils/serving_weight.dart`): the inventory
+row's `serving_weight_g`, then `ProduceServingPresets`. The resolved weight
+converts the ingredient into the package's measurement group before scaling.
+When no package size or conversion resolves, the full package price is
+charged (legacy behavior). Cook-history scoring uses the same path.
 
 Example (issue #308): a dozen eggs priced at R$ 15.90 used as "2 pieces"
 costs 15.90 x (2/12) = R$ 2.65; 250 ml of a 1 L carton priced at R$ 5.00
@@ -154,9 +165,12 @@ When no usable package size is present, the label is null and `UnitPriceLabel`
 
 `PriceDao` aggregates scale by the total held quantity of each barcode in the
 inventory: total inventory value, average item price, monthly expenditure,
-and store spending all multiply the latest price per barcode by the summed
-`inventory.quantity`. Because that quantity counts packages held (e.g.
-3 cartons of milk), it does not further split by package fraction.
+and store spending. When the latest price carries a positive package size,
+the value is reduced to the per-item price first (`price / package size`),
+matching recipe cost scaling. A dozen eggs priced for a 12-pack and held as
+12 pieces therefore contribute one package price, not twelve; legacy prices
+without a package size keep their unscaled behavior. Currency conversion is
+applied by `PriceRepository` in the same pass.
 
 ## 4. Open Prices integration
 
@@ -234,18 +248,19 @@ Planned path, in order:
 
 ## 6. Pitfalls and edge cases
 
-- **Legacy prices (pre-v37 / no package fields)**: served unscaled at full
-  price; unit labels hidden. They are not explicitly flagged today.
-- **Incompatible units**: grams vs pieces returns null rather than guessing a
-  density; callers fall back to the full package price.
+- **Legacy prices (no package fields)**: served unscaled at full price; unit
+  labels hidden. They are not explicitly flagged today.
+- **Incompatible units**: grams vs pieces is converted using a per-piece
+  serving weight for produce when available; otherwise the full package price
+  is charged (no density is guessed).
 - **Invalid package sizes**: zero, negative, or non-finite quantities (and
-  non-finite prices) produce null from `PriceCalculator`.
+  non-finite or non-positive prices) produce null from `PriceCalculator`.
 - **Multi-pack strings**: `"3 x 150 g"` resolves to the per-unit 150 g, not
   the 450 g total.
 - **Unit-label vs recipe asymmetry**: the per-unit label uses only the price
-  row's package columns, while recipe cost falls back to product/inventory
-  rows. A price recorded without package data can show in recipe math scaled
-  but without a unit label.
+  row's package columns, while recipe cost falls back to product packaging.
+  A price recorded without package data can show in recipe math scaled but
+  without a unit label.
 - **Rate limits**: Open Prices documents no limits; the app assumes ~15
   req/min and always sends a `User-Agent` header.
 - **Licensing**: Open Prices data is OdBL-licensed; contributions must be

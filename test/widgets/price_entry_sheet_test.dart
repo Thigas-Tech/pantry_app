@@ -304,6 +304,109 @@ void main() {
     });
   });
 
+  group('package size fields', () {
+    TextField textFieldWithLabel(WidgetTester tester, String label) {
+      final matches = tester
+          .widgetList<TextField>(find.byType(TextField))
+          .where((f) => f.decoration?.labelText == label)
+          .toList();
+      expect(
+        matches,
+        hasLength(1),
+        reason: 'expected one field labelled $label',
+      );
+      return matches.single;
+    }
+
+    testWidgets('shows package size and package unit fields', (tester) async {
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => PriceEntrySheet.show(context, barcode: '123'),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: priceSheetOverrides(),
+      );
+
+      await openSheet(tester);
+
+      expect(find.text('Package size'), findsOneWidget);
+      expect(find.text('Package unit'), findsOneWidget);
+    });
+
+    testWidgets('pre-fills package fields from existingPrice', (tester) async {
+      final price = Price(
+        barcode: '123',
+        price: 5.99,
+        packageQuantity: 12,
+        packageUnit: 'pieces',
+        dateAdded: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => PriceEntrySheet.show(
+              context,
+              barcode: '123',
+              existingPrice: price,
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: priceSheetOverrides(),
+      );
+
+      await openSheet(tester);
+
+      expect(textFieldWithLabel(tester, 'Package size').controller?.text, '12');
+    });
+
+    testWidgets('returns a Price carrying the entered package size', (
+      tester,
+    ) async {
+      Price? captured;
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () async {
+              captured = await PriceEntrySheet.show(context, barcode: '123');
+            },
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: priceSheetOverrides(),
+      );
+
+      await openSheet(tester);
+
+      await tester.enterText(find.byType(TextField).first, '3.50');
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Package size'),
+        '500',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('g').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FilledButton));
+      await tester.pumpAndSettle();
+
+      expect(captured, isNotNull);
+      expect(captured!.packageQuantity, 500);
+      expect(captured!.packageUnit, 'g');
+    });
+  });
+
   group('submit flow', () {
     testWidgets('submit button is present in add mode', (tester) async {
       await pumpApp(
