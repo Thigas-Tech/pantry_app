@@ -157,7 +157,7 @@ ParsedQuantity? _parseQuantityString(String quantity) {
 /// Parses USDA foodPortion data into a [ParsedQuantity].
 ///
 /// Always uses [usdaGramWeight] when present and > 0, returning it with
-/// unit `"g"`. This matches the design decision to pre-fill produce
+/// unit "g". This matches the design decision to pre-fill produce
 /// items in weight mode with gram weights from the USDA API.
 ///
 /// Returns null when no usable gram weight is available.

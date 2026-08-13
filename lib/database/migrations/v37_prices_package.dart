@@ -6,10 +6,10 @@ import 'package:sqflite/sqflite.dart';
 /// Adds package-size columns to the prices table and packaging-quantity
 /// columns to the products table.
 ///
-/// The prices table gains `package_quantity` and `package_unit` so a price
+/// The prices table gains package_quantity and package_unit so a price
 /// observation can carry the size of the package it applies to (e.g. a
-/// dozen eggs, a 1 L bottle). The products table gains `quantity` and
-/// `product_quantity` so the packaging data fetched from Open Food Facts
+/// dozen eggs, a 1 L bottle). The products table gains quantity and
+/// product_quantity so the packaging data fetched from Open Food Facts
 /// is persisted locally and can be used as a package-size fallback.
 class MigrationV37 extends Migration {
   @override

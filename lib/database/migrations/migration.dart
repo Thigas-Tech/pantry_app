@@ -12,7 +12,7 @@ abstract class Migration {
 
   /// Applies the schema changes for this migration.
   ///
-  /// Called inside the `onUpgrade` callback. Should be resilient to
+  /// Called inside the onUpgrade callback. Should be resilient to
   /// re-execution (idempotent) whenever possible.
   Future<void> up(Database db);
 }

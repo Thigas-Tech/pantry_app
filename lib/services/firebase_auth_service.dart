@@ -14,9 +14,10 @@ import 'package:pantry_app/utils/logger.dart';
 /// ## Future migration
 ///
 /// To add Google sign-in, add a method:
-/// ```dart
-/// Future<AuthUser?> signInWithGoogle() async { ... }
-/// ```
+/// Example:
+///
+///     Future<AuthUser?> signInWithGoogle() async { ... }
+///
 /// and use FirebaseAuth.instance.currentUser!.linkWithCredential to preserve
 /// anonymous data under the permanent account.
 class FirebaseAuthService implements AuthService {

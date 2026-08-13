@@ -11,9 +11,10 @@ import 'package:pantry_app/models/auth_user.dart';
 /// ## Future migration
 ///
 /// To add Google sign-in, extend this interface with methods like:
-/// ```dart
-/// Future<AuthUser?> signInWithGoogle();
-/// ```
+/// Example:
+///
+///     Future<AuthUser?> signInWithGoogle();
+///
 /// and create a GoogleAuthService that implements them. The rest of the
 /// app is unaffected because it already depends on [AuthService].
 abstract class AuthService {

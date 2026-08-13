@@ -17,21 +17,19 @@ enum ProgressIndicatorType {
 ///
 /// ## Examples
 ///
-/// ```dart
-/// // Small circular spinner (carousel chips):
-/// ProgressIndicatorHelper.build(size: 16, strokeWidth: 2);
+///     // Small circular spinner (carousel chips):
+///     ProgressIndicatorHelper.build(size: 16, strokeWidth: 2);
 ///
-/// // Full-width linear bar (detail screen loading):
-/// ProgressIndicatorHelper.build(type: ProgressIndicatorType.linear);
+///     // Full-width linear bar (detail screen loading):
+///     ProgressIndicatorHelper.build(type: ProgressIndicatorType.linear);
 ///
-/// // Determinate linear with custom colour:
-/// ProgressIndicatorHelper.build(
-///   type: ProgressIndicatorType.linear,
-///   value: 0.45,
-///   color: Colors.green,
-///   minHeight: 6,
-/// );
-/// ```
+///     // Determinate linear with custom colour:
+///     ProgressIndicatorHelper.build(
+///       type: ProgressIndicatorType.linear,
+///       value: 0.45,
+///       color: Colors.green,
+///       minHeight: 6,
+///     );
 class ProgressIndicatorHelper {
   const ProgressIndicatorHelper._();
 

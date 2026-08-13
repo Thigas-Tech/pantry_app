@@ -21,9 +21,9 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 /// ([decimalSeparatorFor]).
 ///
 /// Example:
-/// ```dart
-/// final price = await PriceEntrySheet.show(context, barcode: '123');
-/// ```
+/// Example:
+///
+///     final price = await PriceEntrySheet.show(context, barcode: '123');
 class PriceEntrySheet extends ConsumerStatefulWidget {
   const PriceEntrySheet._({
     required this.barcode,

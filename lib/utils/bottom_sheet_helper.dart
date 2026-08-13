@@ -7,15 +7,19 @@ import 'package:flutter/material.dart';
 /// standard bottom padding that accounts for the navigation bar and keyboard.
 ///
 /// Example:
-/// ```dart
-/// final result = await BottomSheetHelper.show<int>(
-///   context: context,
-///   builder: (ctx) => Padding(
-///     padding: EdgeInsets.only(bottom: BottomSheetHelper.bottomInset(ctx)),
-///     child: Column(mainAxisSize: MainAxisSize.min, children: [...]),
-///   ),
-/// );
-/// ```
+///
+///     final result = await BottomSheetHelper.show<int>(
+///       context: context,
+///       builder: (ctx) => Padding(
+///         padding: EdgeInsets.only(
+///           bottom: BottomSheetHelper.bottomInset(ctx),
+///         ),
+///         child: Column(
+///           mainAxisSize: MainAxisSize.min,
+///           children: [...],
+///         ),
+///       ),
+///     );
 class BottomSheetHelper {
   BottomSheetHelper._();
 

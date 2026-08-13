@@ -275,7 +275,7 @@ class ScannerCamera extends _$ScannerCamera {
   /// a resolution is already in progress are silently ignored.
   ///
   /// If resolution takes longer than [timeout], a [TimeoutException] is
-  /// caught and [ScanFailed] with message `'TIMEOUT'` is emitted.
+  /// caught and [ScanFailed] with message 'TIMEOUT' is emitted.
   Future<void> resolveBarcode(
     String barcode, {
     Duration timeout = const Duration(seconds: 15),
@@ -306,11 +306,11 @@ class ScannerCamera extends _$ScannerCamera {
   /// Resolves a PLU code by searching the OFF API.
   ///
   /// Sets [ScanResolved] with an enriched produce product on success, or
-  /// [ScanFailed] with `'PLU_NOT_FOUND'` when the OFF search returns no
+  /// [ScanFailed] with 'PLU_NOT_FOUND' when the OFF search returns no
   /// results.
   ///
   /// If resolution takes longer than [timeout], a [TimeoutException] is
-  /// caught and [ScanFailed] with message `'TIMEOUT'` is emitted.
+  /// caught and [ScanFailed] with message 'TIMEOUT' is emitted.
   Future<void> resolvePlu({
     required String pluCode,
     required String produceName,
