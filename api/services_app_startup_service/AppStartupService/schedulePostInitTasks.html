@@ -77,7 +77,6 @@ janking the first few frames.</p>
   await _delay(const Duration(milliseconds: 200));
   await _runDatabaseCleanup();
   await _delay(const Duration(milliseconds: 400));
-  await _flushFeedbackQueue();
   await _delay(const Duration(milliseconds: 600));
   await _schedulePostInitNotifications();
   await _delay(const Duration(milliseconds: 800));

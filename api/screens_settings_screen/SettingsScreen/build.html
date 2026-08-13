@@ -581,41 +581,6 @@ Widget build(BuildContext context, WidgetRef ref) {
               subtitle: Text(l10n.whatsNewDismiss),
               onTap: () =&gt; _showWhatsNew(context),
             ),
-            if (AppConfig.feedbackEnabled)
-              ListTile(
-                leading: const Icon(Icons.bug_report_outlined),
-                title: Text(l10n.sendFeedback),
-                onTap: () =&gt; _sendFeedback(context),
-              ),
-            if (AppConfig.feedbackEnabled)
-              Consumer(
-                builder: (context, ref, _) {
-                  final service = ref.watch(githubIssueServiceProvider);
-                  final count =
-                      ref.watch(pendingFeedbackCountProvider).value ?? 0;
-                  if (count == 0) return const SizedBox.shrink();
-                  return ListTile(
-                    leading: const Icon(Icons.cloud_upload_outlined),
-                    title: Text(l10n.pendingFeedback(count)),
-                    trailing: TextButton(
-                      onPressed: () async {
-                        final result = await service.flushQueue();
-                        ref.invalidate(pendingFeedbackCountProvider);
-                        if (context.mounted) {
-                          SnackbarHelper.showInfo(
-                            context,
-                            l10n.submissionResult(
-                              result.failed,
-                              result.submitted,
-                            ),
-                          );
-                        }
-                      },
-                      child: Text(l10n.retryNow),
-                    ),
-                  );
-                },
-              ),
           ],
         ),
       ],

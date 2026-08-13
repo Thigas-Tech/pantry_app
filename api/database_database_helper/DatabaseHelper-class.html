@@ -67,7 +67,6 @@ or a temporary file.</p>
 <li>products – product data fetched from Open Food Facts.</li>
 <li>inventories – named pantries (e.g. "Home", "Work").</li>
 <li>inventory – instances of products the user has added to a pantry.</li>
-<li>feedback_queue – offline queue for GitHub issue reports.</li>
 <li>product_submission_queue – offline queue for OFF product submissions.</li>
 <li>prices – purchase price observations per barcode.</li>
 <li>shopping_list – items the user intends to buy.</li>
@@ -81,7 +80,7 @@ or a temporary file.</p>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
 <a href="../database_product_dao/ProductDao-class.html">ProductDao</a>, <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>, <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a>, <a href="../database_price_dao/PriceDao-class.html">PriceDao</a>,
-<a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a>, <a href="../database_store_dao/StoreDao-class.html">StoreDao</a>, <a href="../database_feedback_queue_dao/FeedbackQueueDao-class.html">FeedbackQueueDao</a>,
+<a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a>, <a href="../database_store_dao/StoreDao-class.html">StoreDao</a>,
 <a href="../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>, <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>,
 <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a>, <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a>, <a href="../database_scan_history_dao/ScanHistoryDao-class.html">ScanHistoryDao</a>.</p>
 <p>See also:</p>
@@ -130,18 +129,6 @@ used for local storage.</li>
   The lazily‑opened database instance, with in-flight dedup so several
 concurrent first accesses share a single open.
   <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
-        <dt id="feedbackQueueDao" class="property">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/feedbackQueueDao.html">feedbackQueueDao</a></span>
-  <span class="signature">&#8594; <a href="../database_feedback_queue_dao/FeedbackQueueDao-class.html">FeedbackQueueDao</a></span>
-  
-
-</dt>
-<dd>
-  DAO for the feedback_queue table.
-  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
@@ -414,19 +401,6 @@ inventory.
 
 </dd>
 
-        <dt id="deleteFeedbackIssue" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteFeedbackIssue.html">deleteFeedbackIssue</a></span><span class="signature">(<wbr><span class="parameter" id="deleteFeedbackIssue-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Deletes a feedback queue row.
-  
-
-</dd>
-
         <dt id="deleteInventory" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteInventory.html">deleteInventory</a></span><span class="signature">(<wbr><span class="parameter" id="deleteInventory-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -527,19 +501,6 @@ inventory.
 </dt>
 <dd>
   Deletes a shopping list item by <code>id</code>.
-  
-
-</dd>
-
-        <dt id="deleteStaleFeedbackFailures" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/deleteStaleFeedbackFailures.html">deleteStaleFeedbackFailures</a></span><span class="signature">(<wbr>{<span class="parameter" id="deleteStaleFeedbackFailures-param-olderThanDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">olderThanDays</span> = <span class="default-value">30</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Deletes stale failed feedback queue rows.
   
 
 </dd>
@@ -757,19 +718,6 @@ ordered by expiry_date ASC (nulls last) for FEFO deduction.
 <dd>
   Returns the most recent price for the given <code>barcode</code> and
 <code>inventoryId</code>, or null.
-  
-
-</dd>
-
-        <dt id="getPendingFeedbackIssues" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/getPendingFeedbackIssues.html">getPendingFeedbackIssues</a></span><span class="signature">(<wbr>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>, <span class="type-parameter">dynamic</span>&gt;</span></span>&gt;</span></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Returns all pending (non-failed) feedback queue rows.
   
 
 </dd>
@@ -1037,19 +985,6 @@ given inventory.
 
 </dd>
 
-        <dt id="incrementFeedbackRetry" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/incrementFeedbackRetry.html">incrementFeedbackRetry</a></span><span class="signature">(<wbr><span class="parameter" id="incrementFeedbackRetry-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Increments the retry count for a feedback queue row.
-  
-
-</dd>
-
         <dt id="insertInventoryItem" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/insertInventoryItem.html">insertInventoryItem</a></span><span class="signature">(<wbr><span class="parameter" id="insertInventoryItem-param-item"><span class="type-annotation"><a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a></span> <span class="parameter-name">item</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -1168,19 +1103,6 @@ that has the same barcode and inventoryId.
 
 </dd>
 
-        <dt id="markFeedbackFailed" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/markFeedbackFailed.html">markFeedbackFailed</a></span><span class="signature">(<wbr><span class="parameter" id="markFeedbackFailed-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Marks a feedback queue row as permanently failed.
-  
-
-</dd>
-
         <dt id="markShoppingItemsByBarcode" class="callable">
   <span class="name"><a href="../database_database_helper/DatabaseHelper/markShoppingItemsByBarcode.html">markShoppingItemsByBarcode</a></span><span class="signature">(<wbr><span class="parameter" id="markShoppingItemsByBarcode-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span><span class="parameter" id="markShoppingItemsByBarcode-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inventoryId</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -1218,19 +1140,6 @@ scoped to an inventory.
 <dd class="inherited">
   Invoked when a nonexistent method or property is accessed.
   <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="queueFeedbackIssue" class="callable">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/queueFeedbackIssue.html">queueFeedbackIssue</a></span><span class="signature">(<wbr>{<span class="parameter" id="queueFeedbackIssue-param-title"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span>, </span><span class="parameter" id="queueFeedbackIssue-param-body"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span>, </span><span class="parameter" id="queueFeedbackIssue-param-label"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">label</span>, </span><span class="parameter" id="queueFeedbackIssue-param-screenshotPath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">screenshotPath</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Queues a feedback issue for offline submission.
-  
 
 </dd>
 

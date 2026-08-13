@@ -64,10 +64,7 @@ fall back to <code>--dart-define</code> build flags set by CI.</p>
 <li>The .env file is <strong>never</strong> committed to version control and <strong>never</strong>
 shipped in an app artifact.</li>
 <li>Credential-backed features (OFF product submission, Open Prices,
-USDA, GitHub feedback) are disabled when their credential is absent.</li>
-<li>GitHub feedback in release builds goes through a serverless proxy
-configured via the <a href="../config/AppConfig/feedbackProxyUrl.html">feedbackProxyUrl</a> build flag; the PAT lives only
-on the server.</li>
+USDA) are disabled when their credential is absent.</li>
 </ul>
 <p>This class cannot be instantiated — all members are static.</p>
 </section>
@@ -180,42 +177,6 @@ Open Food Facts (required by their API terms).
 
 </dd>
 
-        <dt id="feedbackEnabled" class="property">
-  <span class="name"><a href="../config/AppConfig/feedbackEnabled.html">feedbackEnabled</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
-  
-
-</dt>
-<dd>
-  Whether in-app feedback submission is enabled.
-  <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
-        <dt id="feedbackProxyUrl" class="property">
-  <span class="name"><a href="../config/AppConfig/feedbackProxyUrl.html">feedbackProxyUrl</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-  
-
-</dt>
-<dd>
-  The URL of the serverless feedback proxy used in release builds.
-  <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
-        <dt id="feedbackToken" class="property">
-  <span class="name"><a href="../config/AppConfig/feedbackToken.html">feedbackToken</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-  
-
-</dt>
-<dd>
-  The GitHub personal access token used for in-app feedback submissions.
-  <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
         <dt id="firebaseEnabled" class="property">
   <span class="name"><a href="../config/AppConfig/firebaseEnabled.html">firebaseEnabled</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
@@ -224,30 +185,6 @@ Open Food Facts (required by their API terms).
 </dt>
 <dd>
   Whether Firebase integration is enabled.
-  <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
-        <dt id="githubOwner" class="property">
-  <span class="name"><a href="../config/AppConfig/githubOwner.html">githubOwner</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-  
-
-</dt>
-<dd>
-  The GitHub repository owner for in-app feedback submissions.
-  <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
-        <dt id="githubRepo" class="property">
-  <span class="name"><a href="../config/AppConfig/githubRepo.html">githubRepo</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-  
-
-</dt>
-<dd>
-  The GitHub repository name for in-app feedback submissions.
   <div class="features"><span class="feature">no setter</span></div>
 
 </dd>
