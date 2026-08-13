@@ -17,6 +17,7 @@ import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/providers/ui_flags_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/app_update_handler.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
@@ -96,7 +97,15 @@ class AppStartupService {
     try {
       final handler = _appUpdateHandler;
       if (handler == null) return;
-      await handler.updateChangelogFlag();
+      final showChangelog = await handler.updateChangelogFlag();
+      if (showChangelog) {
+        await container.read(uiFlagsProvider.future);
+        container
+            .read(uiFlagsProvider.notifier)
+            .setChangelogShowPending(
+              value: true,
+            );
+      }
       if (_appUpdateVersionChanged) {
         await handler.flushCaches();
       }
@@ -146,10 +155,8 @@ class AppStartupService {
   /// PantryShell warning; a grant reschedules expiry reminders.
   Future<void> requestNotificationPermission() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final rationaleShown =
-          prefs.getBool('notification_rationale_shown') == true;
-      if (!rationaleShown) {
+      final flags = await container.read(uiFlagsProvider.future);
+      if (!flags.notificationRationaleShown) {
         logInfo(
           'Rationale not yet shown — deferring permission request to Settings',
         );
@@ -166,8 +173,11 @@ class AppStartupService {
       if (granted != false) {
         unawaited(_rescheduleNotifications());
       } else {
-        final deniedPrefs = await SharedPreferences.getInstance();
-        await deniedPrefs.setBool('notification_denied_warning', true);
+        container
+            .read(uiFlagsProvider.notifier)
+            .setNotificationDeniedWarning(
+              value: true,
+            );
         logInfo(
           'Notification permission denied — flagged warning for PantryShell',
         );

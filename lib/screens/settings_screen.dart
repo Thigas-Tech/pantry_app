@@ -16,6 +16,7 @@ import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
+import 'package:pantry_app/providers/ui_flags_provider.dart';
 import 'package:pantry_app/screens/feedback_screen.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/utils/changelog_loader.dart';
@@ -23,7 +24,6 @@ import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// A screen where the user can adjust application preferences.
 ///
@@ -189,6 +189,7 @@ class SettingsScreen extends ConsumerWidget {
                   if (!context.mounted) return;
                   final proceed = await _showPermissionRationaleIfNeeded(
                     context,
+                    ref,
                     l10n,
                   );
                   if (!proceed) return;
@@ -227,6 +228,7 @@ class SettingsScreen extends ConsumerWidget {
                   if (!context.mounted) return;
                   final proceed = await _showPermissionRationaleIfNeeded(
                     context,
+                    ref,
                     l10n,
                   );
                   if (!proceed) return;
@@ -258,6 +260,7 @@ class SettingsScreen extends ConsumerWidget {
                     if (!context.mounted) return;
                     final proceed = await _showPermissionRationaleIfNeeded(
                       context,
+                      ref,
                       l10n,
                     );
                     if (!proceed) return;
@@ -308,6 +311,7 @@ class SettingsScreen extends ConsumerWidget {
                     if (!context.mounted) return;
                     final proceed = await _showPermissionRationaleIfNeeded(
                       context,
+                      ref,
                       l10n,
                     );
                     if (!proceed) return;
@@ -1165,11 +1169,11 @@ class SettingsScreen extends ConsumerWidget {
   /// shown), false if the user tapped "Not now".
   Future<bool> _showPermissionRationaleIfNeeded(
     BuildContext context,
+    WidgetRef ref,
     AppLocalizations l10n,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    final alreadyShown = prefs.getBool('notification_rationale_shown') == true;
-    if (alreadyShown) return true;
+    final flags = await ref.read(uiFlagsProvider.future);
+    if (flags.notificationRationaleShown) return true;
     if (!context.mounted) return false;
 
     final result = await showDialog<bool>(
@@ -1190,7 +1194,11 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
 
-    await prefs.setBool('notification_rationale_shown', true);
+    ref
+        .read(uiFlagsProvider.notifier)
+        .setNotificationRationaleShown(
+          value: true,
+        );
     return result ?? false;
   }
 

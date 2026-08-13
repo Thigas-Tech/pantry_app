@@ -4,6 +4,20 @@
 
 ### Maintainability
 
+- **One-shot UI flags routed through a [UiFlagsNotifier] (audit MA7)**:
+  the notification-denied warning, AMOLED nudge, What's-New sheet, and
+  notification-rationale flags were read/written ad-hoc via raw
+  SharedPreferences from the shell, settings, and startup paths. A new
+  keepAlive [UiFlagsNotifier] now owns all four with typed getters and
+  setters; [AppUpdateHandler.updateChangelogFlag] returns whether to show
+  the What's-New sheet instead of writing the flag itself.
+  (lib/providers/ui_flags_provider.dart new,
+  test/providers/ui_flags_provider_test.dart new, lib/screens/
+  pantry_shell.dart, lib/screens/settings_screen.dart, lib/services/
+  app_update_handler.dart, lib/services/app_startup_service.dart)
+
+### Maintainability
+
 - **main.dart slimmed from 622 to ~200 lines (audit MA1)**: the fourteen
   top-level async orchestrators plus notification-tap navigation and
   app-update bookkeeping were extracted into [AppStartupService], which
