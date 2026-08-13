@@ -130,6 +130,26 @@ void main() {
       expect(decoded.height, 1);
     });
 
+    test('sanitizes traversal characters in the barcode file name', () async {
+      /// A malicious barcode such as ../../evil must not escape the cache
+      /// directory; the file name is sanitized and written inside it.
+      when(
+        () => mockClient.get(any()),
+      ).thenAnswer((_) async => http.Response.bytes(createTestImage(), 200));
+
+      final path = await service.cacheImage(
+        'http://example.com/img.png',
+        '../../evil',
+      );
+
+      expect(path, '${cacheDir.path}/______evil.webp');
+      expect(File(path!).existsSync(), isTrue);
+      expect(
+        File('${cacheDir.parent.path}/evil.webp').existsSync(),
+        isFalse,
+      );
+    });
+
     test('deduplicates concurrent downloads for the same barcode', () async {
       /// Two concurrent cacheImage calls for the same barcode must result
       /// in a single network request.

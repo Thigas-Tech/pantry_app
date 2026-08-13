@@ -4,6 +4,13 @@
 
 ### Security
 
+- **Sanitized image cache file names (audit S3)**: [ImageCacheService]
+  now scrubs unsafe characters from the barcode before building the cache
+  file path, so a barcode like `../../evil` cannot escape the cache
+  directory (matches the existing [ProductImageService] sanitization).
+  Regression test covers the traversal case.
+  (lib/services/image_cache_service.dart,
+  test/services/image_cache_service_test.dart)
 - **Disabled Android app-data backups (audit S5)**: [android:allowBackup]
   is now [false], so the SQLite DB (including the unsubmitted feedback
   queue) and SharedPreferences are no longer extractable via adb or cloud
