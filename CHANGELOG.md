@@ -4,6 +4,17 @@
 
 ### Maintainability
 
+- **Verbose logging now debug-only and doc comments corrected
+  (audit MA6 + S4)**: [_verbose] was hardcoded to true, so release
+  builds logged barcodes, search queries, notification payloads, and DB
+  paths into the ring buffer attached to opt-in feedback issues. It now
+  mirrors [kDebugMode], matching the class doc: logDebug/logInfo are
+  eliminated from release binaries, warnings and errors remain. This
+  also resolves security finding S4. (lib/utils/logger.dart,
+  test/utils/logger_test.dart)
+
+### Maintainability
+
 - **Zero backticks left in doc comments (audit MA3)**: 32 remaining
   rule-11 violations across 16 hand-written files were converted to
   [square-bracket] references or plain prose, and the 8 fenced code
