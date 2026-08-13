@@ -211,6 +211,31 @@ class InventoryDao {
     }
   }
 
+  /// Deletes multiple inventory items in one batch.
+  ///
+  /// Uses a single transaction-backed batch DELETE instead of one
+  /// statement per id. Returns the number of deleted rows.
+  Future<int> deleteMany(Database db, List<int> ids) async {
+    if (ids.isEmpty) return 0;
+    logInfo('Deleting ${ids.length} inventory item(s)');
+    try {
+      final batch = db.batch();
+      for (final id in ids) {
+        batch.delete('inventory', where: 'id = ?', whereArgs: [id]);
+      }
+      final results = await batch.commit();
+      final deleted = results.fold<int>(
+        0,
+        (sum, r) => sum + ((r as int?) ?? 0),
+      );
+      logInfo('Deleted $deleted item(s) successfully');
+      return deleted;
+    } on Exception catch (e) {
+      logError('Failed to delete inventory items: $e');
+      rethrow;
+    }
+  }
+
   /// Moves multiple inventory items to a different inventory (pantry).
   ///
   /// Uses a batch UPDATE to atomically reassign all [itemIds] to the

@@ -557,6 +557,27 @@ void main() {
     });
   });
 
+  group('database getter dedup', () {
+    test('returns the same future for concurrent first accesses', () async {
+      final helper = DatabaseHelper.withPath(inMemoryDatabasePath);
+      addTearDown(() async {
+        final db = await helper.database;
+        await db.close();
+      });
+
+      final first = helper.database;
+      final second = helper.database;
+      final third = helper.database;
+
+      expect(identical(first, second), isTrue);
+      expect(identical(first, third), isTrue);
+
+      final db = await first;
+      expect(await second, same(db));
+      expect(await third, same(db));
+    });
+  });
+
   group('getInventoryRowsByProductName', () {
     test('caps the name-based FEFO fallback at the limit', () async {
       for (var i = 0; i < 25; i++) {
@@ -1200,6 +1221,27 @@ void main() {
         tempDir.deleteSync(recursive: true);
       },
     );
+  });
+
+  group('database getter dedup', () {
+    test('returns the same future for concurrent first accesses', () async {
+      final helper = DatabaseHelper.withPath(inMemoryDatabasePath);
+      addTearDown(() async {
+        final db = await helper.database;
+        await db.close();
+      });
+
+      final first = helper.database;
+      final second = helper.database;
+      final third = helper.database;
+
+      expect(identical(first, second), isTrue);
+      expect(identical(first, third), isTrue);
+
+      final db = await first;
+      expect(await second, same(db));
+      expect(await third, same(db));
+    });
   });
 
   group('getInventoryRowsByProductName', () {

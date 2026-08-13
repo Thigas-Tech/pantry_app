@@ -4,6 +4,23 @@
 
 ### Performance
 
+- **Batch deletes and leaner list-row watchers (audit P10)**:
+  [HomeScreenController.deleteSelected] now deletes all selected items in
+  one batch (new [InventoryDao.deleteMany] + repository passthrough)
+  instead of one statement per item; the inventory card and recipe list
+  no longer watch the whole settings object per row — they select only
+  the fields they use, so unrelated setting changes no longer rebuild
+  every card; the [DatabaseHelper.database] getter deduplicates
+  concurrent first opens (cached future); and [pendingSyncCountProvider]
+  counts via COUNT(*) instead of loading all pending price rows.
+  (lib/database/inventory_dao.dart, lib/database/database_helper.dart,
+  lib/database/price_dao.dart, lib/services/product_repository.dart,
+  lib/services/price_repository.dart, lib/providers/price_provider.dart,
+  lib/providers/home_screen_controller.dart, lib/widgets/inventory_card.dart,
+  test/database/*, test/providers/*, test/widgets/inventory_card_test.dart)
+
+### Performance
+
 - **Stats screen single-pass price aggregates (audit P9)**: the stats
   visit re-executed the correlated latest-price subquery 4-6 times
   (value, average, priced count, plus the dashboard queries). New

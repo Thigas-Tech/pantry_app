@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/inventory_item.dart';
@@ -47,6 +48,22 @@ InventoryWithProduct createItem({
     nutriscoreGrade: nutriscoreGrade,
     productType: productType,
   );
+}
+
+/// A settings notifier whose value can be pushed from the test.
+class _MutableSettingsNotifier extends SettingsNotifier {
+  _MutableSettingsNotifier([Settings initial = const Settings()])
+    : _settings = initial;
+
+  Settings _settings;
+
+  @override
+  Future<Settings> build() async => _settings;
+
+  void push(Settings settings) {
+    _settings = settings;
+    state = AsyncValue.data(settings);
+  }
 }
 
 void main() {
@@ -488,6 +505,43 @@ void main() {
       );
 
       expect(find.text(r'$4.99'), findsNothing);
+    });
+  });
+  group('settings select reactivity', () {
+    testWidgets('reflects unit-system changes and survives unrelated setting '
+        'changes', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final notifier = _MutableSettingsNotifier();
+      final item = createItem(name: 'Milk', quantity: 1, unit: 'L');
+
+      await pumpApp(
+        tester,
+        InventoryCard(item: item),
+        imageCacheMock: mockImageCache,
+        overrides: [
+          productRepositoryProvider.overrideWithValue(
+            MockProductRepository(),
+          ),
+          settingsProvider.overrideWith(() => notifier),
+          latestPriceProvider(('123', 1)).overrideWith((ref) => null),
+        ],
+      );
+
+      expect(find.textContaining('L · Pantry'), findsOneWidget);
+
+      notifier.push(
+        const Settings(amoledDarkMode: true),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('L · Pantry'), findsOneWidget);
+
+      notifier.push(
+        const Settings(unitSystem: UnitSystem.imperial),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('L · Pantry'), findsNothing);
     });
   });
 }

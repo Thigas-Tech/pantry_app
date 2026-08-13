@@ -380,4 +380,33 @@ void main() {
       expect(workItems.first.quantity, 5);
     });
   });
+
+  group('InventoryDao deleteMany', () {
+    test('deletes all given ids in one batch', () async {
+      final db = await dbHelper.database;
+      for (final barcode in ['a1', 'b2', 'c3']) {
+        await productDao.insert(db, Product(barcode: barcode, name: barcode));
+        await dao.insert(db, InventoryItem(barcode: barcode));
+      }
+      final ids = (await dao.list(db, inventoryId: 1))
+          .map((i) => i.id!)
+          .toList();
+
+      final deleted = await dao.deleteMany(db, ids);
+
+      expect(deleted, ids.length);
+      expect(await dao.list(db, inventoryId: 1), isEmpty);
+    });
+
+    test('is a no-op for an empty id list', () async {
+      final db = await dbHelper.database;
+      await productDao.insert(db, const Product(barcode: 'a1', name: 'a1'));
+      await dao.insert(db, const InventoryItem(barcode: 'a1'));
+
+      final deleted = await dao.deleteMany(db, []);
+
+      expect(deleted, 0);
+      expect(await dao.list(db, inventoryId: 1), hasLength(1));
+    });
+  });
 }

@@ -416,6 +416,20 @@ class PriceDao {
     }
   }
 
+  /// Counts prices with the given [syncStatus].
+  ///
+  /// Uses COUNT(*) instead of materializing the rows, for badge and
+  /// pending-count consumers that only need the number.
+  Future<int> countBySyncStatus(Database db, String syncStatus) async {
+    return Sqflite.firstIntValue(
+          await db.rawQuery(
+            'SELECT COUNT(*) FROM prices WHERE sync_status = ?',
+            [syncStatus],
+          ),
+        ) ??
+        0;
+  }
+
   /// Deletes price rows older than the given [retentionDays].
   ///
   /// Only deletes when [retentionDays] is positive. A value of 0 means

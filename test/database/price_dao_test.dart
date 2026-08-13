@@ -538,4 +538,36 @@ void main() {
       expect(await dao.getLatest(db, '1', inventoryId: 1), isNull);
     });
   });
+
+  group('PriceDao countBySyncStatus', () {
+    test('counts only rows with the given sync status', () async {
+      final db = await dbHelper.database;
+      const productDao = ProductDao();
+      await productDao.insert(db, const Product(barcode: 'a', name: 'A'));
+      await productDao.insert(db, const Product(barcode: 'b', name: 'B'));
+      await productDao.insert(db, const Product(barcode: 'c', name: 'C'));
+      await dao.insert(
+        db,
+        const Price(barcode: 'a', price: 1, syncStatus: 'pending'),
+      );
+      await dao.insert(
+        db,
+        const Price(barcode: 'b', price: 2, syncStatus: 'pending'),
+      );
+      await dao.insert(
+        db,
+        const Price(barcode: 'c', price: 3, syncStatus: 'synced'),
+      );
+
+      final count = await dao.countBySyncStatus(db, 'pending');
+
+      expect(count, 2);
+    });
+
+    test('returns zero when no rows match', () async {
+      final db = await dbHelper.database;
+      final count = await dao.countBySyncStatus(db, 'pending');
+      expect(count, 0);
+    });
+  });
 }
