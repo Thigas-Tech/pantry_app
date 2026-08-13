@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Product images are now stored smaller and the app keeps only a bounded
+  amount of them on the device, so the app uses less storage over time.
+
 - The product detail and recipe screens no longer briefly show a loading
   spinner when the screen refreshes for other reasons (for example after
   changing settings): the data stays visible while it is up to date.

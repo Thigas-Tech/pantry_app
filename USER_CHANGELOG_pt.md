@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- As imagens dos produtos agora sao armazenadas menores e o app mantem
+  apenas uma quantidade limitada delas no dispositivo, entao o app usa
+  menos armazenamento ao longo do tempo.
+
 - As telas de detalhes do produto e de receitas nao mostram mais
   brevemente um indicador de carregamento quando a tela atualiza por
   outros motivos (por exemplo, apos mudar as configuracoes): os dados

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -46,6 +47,13 @@ void main() {
     return Uint8List.fromList(img.encodePng(image));
   }
 
+  /// Creates a PNG of [width] x [height] filled with red.
+  Uint8List createLargeImage(int width, int height) {
+    final image = img.Image(width: width, height: height);
+    img.fill(image, color: img.ColorRgba8(255, 0, 0, 255));
+    return Uint8List.fromList(img.encodePng(image));
+  }
+
   group('cacheImage', () {
     test('returns null for null or empty URL', () async {
       /// Null and empty URLs return null immediately without any network call.
@@ -82,6 +90,80 @@ void main() {
       expect(decoded, isNotNull);
     });
 
+    test('downscales large images to the maximum cached dimension', () async {
+      /// A 1200x600 source image must be stored at most 400px on its
+      /// longest side, keeping the aspect ratio.
+      when(
+        () => mockClient.get(any()),
+      ).thenAnswer(
+        (_) async => http.Response.bytes(createLargeImage(1200, 600), 200),
+      );
+
+      final path = await service.cacheImage(
+        'http://example.com/big.png',
+        'big',
+      );
+      expect(path, isNotNull);
+
+      final decoded = img.decodeImage(File(path!).readAsBytesSync());
+      expect(decoded, isNotNull);
+      expect(decoded!.width, lessThanOrEqualTo(400));
+      expect(decoded.height, lessThanOrEqualTo(400));
+      expect(decoded.width / decoded.height, closeTo(2.0, 0.01));
+    });
+
+    test('keeps images smaller than the maximum dimension unchanged', () async {
+      /// A small source image must not be upscaled.
+      when(
+        () => mockClient.get(any()),
+      ).thenAnswer((_) async => http.Response.bytes(createTestImage(), 200));
+
+      final path = await service.cacheImage(
+        'http://example.com/small.png',
+        's1',
+      );
+      expect(path, isNotNull);
+
+      final decoded = img.decodeImage(File(path!).readAsBytesSync());
+      expect(decoded, isNotNull);
+      expect(decoded!.width, 1);
+      expect(decoded.height, 1);
+    });
+
+    test('deduplicates concurrent downloads for the same barcode', () async {
+      /// Two concurrent cacheImage calls for the same barcode must result
+      /// in a single network request.
+      final completer = Completer<http.Response>();
+      when(() => mockClient.get(any())).thenAnswer((_) => completer.future);
+
+      final first = service.cacheImage('http://example.com/img.png', 'dedup');
+      final second = service.cacheImage('http://example.com/img.png', 'dedup');
+
+      completer.complete(http.Response.bytes(createTestImage(), 200));
+      final path1 = await first;
+      final path2 = await second;
+
+      expect(path1, isNotNull);
+      expect(path2, path1);
+      verify(() => mockClient.get(any())).called(1);
+    });
+
+    test('deduplicates a slow download that is already in flight', () async {
+      /// A third call while the first is still downloading shares the
+      /// in-flight future without starting a new request.
+      final completer = Completer<http.Response>();
+      when(() => mockClient.get(any())).thenAnswer((_) => completer.future);
+
+      final first = service.cacheImage('http://example.com/img.png', 'b3');
+      final second = service.cacheImage('http://example.com/img.png', 'b3');
+      final third = service.cacheImage('http://example.com/img.png', 'b3');
+
+      completer.complete(http.Response.bytes(createTestImage(), 200));
+      await Future.wait([first, second, third]);
+
+      verify(() => mockClient.get(any())).called(1);
+    });
+
     test('returns null for non-200 response', () async {
       /// If the server returns a non-200 status, null is returned.
       when(
@@ -114,6 +196,46 @@ void main() {
 
       final path = await service.cacheImage('http://example.com/img.png', 'b1');
       expect(path, isNull);
+    });
+
+    test('evicts the oldest files when the cache exceeds its cap', () async {
+      /// A service with a tiny cap keeps only the newest files and evicts
+      /// the oldest ones until the total size fits under the cap.
+      final tinyService = ImageCacheService(
+        httpClient: mockClient,
+        cacheDirectory: cacheDir,
+        maxCacheBytes: 100,
+      );
+      when(
+        () => mockClient.get(any()),
+      ).thenAnswer((_) async => http.Response.bytes(createTestImage(), 200));
+
+      await tinyService.cacheImage('http://example.com/a.png', 'a1');
+      await tinyService.cacheImage('http://example.com/b.png', 'b2');
+      await tinyService.cacheImage('http://example.com/c.png', 'c3');
+      await tinyService.cacheImage('http://example.com/d.png', 'd4');
+
+      final remaining = cacheDir
+          .listSync()
+          .whereType<File>()
+          .map((f) => f.path)
+          .toList();
+      expect(remaining, hasLength(lessThan(4)));
+      expect(File('${cacheDir.path}/a1.webp').existsSync(), isFalse);
+      expect(File('${cacheDir.path}/d4.webp').existsSync(), isTrue);
+    });
+
+    test('does not evict when the cache stays under the cap', () async {
+      /// With a generous cap all files are kept.
+      when(
+        () => mockClient.get(any()),
+      ).thenAnswer((_) async => http.Response.bytes(createTestImage(), 200));
+
+      await service.cacheImage('http://example.com/a.png', 'k1');
+      await service.cacheImage('http://example.com/b.png', 'k2');
+
+      expect(File('${cacheDir.path}/k1.webp').existsSync(), isTrue);
+      expect(File('${cacheDir.path}/k2.webp').existsSync(), isTrue);
     });
   });
 
