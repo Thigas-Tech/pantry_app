@@ -4,6 +4,19 @@
 
 ### Performance
 
+- **Notification reschedule permission check hoisted (audit P5)**:
+  [FlutterNotificationService.rescheduleAllItems] called
+  areNotificationsEnabled — a platform-channel round trip — once per
+  item (plus up to two zonedSchedule calls), so rescheduling 200 items
+  meant ~600 sequential channel round trips at startup. The check now
+  runs once before the loop and the result is passed down;
+  [scheduleExpiryReminders] accepts an optional
+  systemNotificationsEnabled override for that case. (lib/services/
+  notification_service.dart, notification_service_interface.dart,
+  test/services/notification_service_test.dart)
+
+### Performance
+
 - **Batch deletes and leaner list-row watchers (audit P10)**:
   [HomeScreenController.deleteSelected] now deletes all selected items in
   one batch (new [InventoryDao.deleteMany] + repository passthrough)

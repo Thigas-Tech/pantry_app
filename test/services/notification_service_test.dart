@@ -941,10 +941,93 @@ void main() {
       verify(() => mockPlugin.cancelAll()).called(1);
     });
 
+    test('checks the system permission once for many items', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).thenAnswer((_) => Future.value());
+
+      final items = [
+        for (var i = 1; i <= 3; i++)
+          InventoryItem(
+            barcode: '$i',
+            id: i,
+            expiryDate: '2099-12-31',
+          ),
+      ];
+      await service.rescheduleAllItems(
+        items,
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(() => mockAndroidPlugin.areNotificationsEnabled()).called(1);
+      verify(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      ).called(6);
+    });
+
+    test('skips all scheduling when the system permission is denied', () async {
+      when(() => mockPlugin.cancelAll()).thenAnswer((_) => Future.value());
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(false));
+
+      const item = InventoryItem(
+        barcode: '123',
+        id: 1,
+        expiryDate: '2099-12-31',
+      );
+      await service.rescheduleAllItems(
+        [item],
+        expiringSoonTitle: expiringSoonTitle,
+        buildExpiringSoonBody: buildExpiringSoonBody,
+        expiringTodayTitle: expiringTodayTitle,
+        buildExpiringTodayBody: buildExpiringTodayBody,
+      );
+
+      verify(() => mockAndroidPlugin.areNotificationsEnabled()).called(1);
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+        ),
+      );
+    });
+
     test('prevents concurrent reschedule', () async {
       when(() => mockPlugin.cancelAll()).thenAnswer(
         (_) => Future<void>.delayed(const Duration(milliseconds: 50)),
       );
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
 
       final first = service.rescheduleAllItems(
         [],

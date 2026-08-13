@@ -58,6 +58,7 @@ abstract class NotificationService {
     String channelName = 'Expiry reminders',
     String channelDescription = 'Warns about expiring food',
     bool notificationsEnabled = true,
+    bool? systemNotificationsEnabled,
   });
 
   /// Cancels both notifications associated with the given [itemId].
