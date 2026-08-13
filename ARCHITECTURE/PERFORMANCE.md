@@ -58,12 +58,12 @@ Each `InventoryCard` in the main inventory list is wrapped in
 events from triggering card repaints. Cards that load network images or
 toggle selection do not force their siblings to repaint.
 
-> **Note**: the main inventory list is currently an eager `ListView(
-> children:)` (home_screen.dart). Converting it to a lazy
-> `ListView.builder` with a flattened section index is tracked in the
-> performance backlog; the `RepaintBoundary` + `ValueKey` pattern above
-> is already in place and is a prerequisite for efficient widget
-> recycling once the list becomes lazy.
+The main inventory list is a lazy `ListView.builder` over a flattened
+section index (`InventoryGrouping.entries` in
+`lib/utils/inventory_grouping.dart`): items are grouped once per change
+of the underlying list, the expiring-soon window, or the calendar day,
+so offscreen cards (and their image/price futures) are never built.
+Section headers are rendered by the shared `SectionHeader` widget.
 
 ### 11.6 Thread strategy
 

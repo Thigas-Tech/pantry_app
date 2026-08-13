@@ -18,7 +18,7 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
-import 'package:pantry_app/utils/date_helpers.dart';
+import 'package:pantry_app/utils/inventory_grouping.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/empty_pantry.dart';
@@ -28,6 +28,7 @@ import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/search_panel.dart';
+import 'package:pantry_app/widgets/section_header.dart';
 
 /// The main pantry screen showing inventory items grouped by expiry.
 ///
@@ -410,90 +411,103 @@ class _InventoryList extends ConsumerStatefulWidget {
 }
 
 class _InventoryListState extends ConsumerState<_InventoryList> {
-  List<InventoryWithProduct> get _filtered => widget.items;
+  InventoryGrouping? _grouping;
+  Object? _groupingKey;
 
-  List<InventoryWithProduct> get _expired =>
-      _filtered.where((i) => isExpired(i.expiryDate)).toList();
+  /// Returns the memoized [InventoryGrouping], recomputed only when the
+  /// items, the expiring-soon window, or the calendar day change.
+  InventoryGrouping _groupingFor() {
+    final today = DateTime.now();
+    final dayKey = DateTime(today.year, today.month, today.day);
+    final key = (widget.items, widget.expiringSoonDays, dayKey);
+    if (_grouping == null || _groupingKey != key) {
+      _grouping = InventoryGrouping.partition(
+        widget.items,
+        widget.expiringSoonDays,
+        now: today,
+      );
+      _groupingKey = key;
+    }
+    return _grouping!;
+  }
 
-  List<InventoryWithProduct> get _expiringSoon => _filtered
-      .where(
-        (i) => isExpiringSoon(i.expiryDate, widget.expiringSoonDays),
-      )
-      .toList();
+  String _sectionTitle(AppLocalizations l10n, InventorySection section) {
+    return switch (section) {
+      InventorySection.expired => l10n.expired,
+      InventorySection.expiringSoon => l10n.expiringSoon,
+      InventorySection.good => l10n.good,
+    };
+  }
 
-  List<InventoryWithProduct> get _good {
-    final threshold = DateTime.now().add(
-      Duration(days: widget.expiringSoonDays),
-    );
-    return _filtered.where((i) {
-      if (i.expiryDate == null) return true;
-      final date = parseExpiryDate(i.expiryDate);
-      if (date == null) return true;
-      return !date.isBefore(threshold);
-    }).toList();
+  IconData _sectionIcon(InventorySection section) {
+    return switch (section) {
+      InventorySection.expired => Icons.error_outline,
+      InventorySection.expiringSoon => Icons.warning_amber,
+      InventorySection.good => Icons.check_circle_outline,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final now = DateTime.now();
-    final weekAgo = now
-        .subtract(const Duration(days: 7))
-        .millisecondsSinceEpoch;
-    final addedThisWeek = widget.items.where((i) {
-      if (i.dateAdded == null) return false;
-      return i.dateAdded! >= weekAgo;
-    }).length;
+    final grouping = _groupingFor();
+    final entries = grouping.entries;
 
     return RefreshIndicator(
       onRefresh: () => ref.read(pantryProvider.notifier).refresh(),
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        children: [
-          SizedBox(
-            height: 32,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _countChip(
-                    l10n.totalItemsCount(widget.items.length),
-                    Icons.inventory_2_outlined,
+      child: entries.isEmpty
+          ? ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(child: Text(l10n.noItemsMatch)),
+                ),
+              ],
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: entries.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return SizedBox(
+                    height: 32,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          _countChip(
+                            l10n.totalItemsCount(widget.items.length),
+                            Icons.inventory_2_outlined,
+                          ),
+                          const SizedBox(width: 8),
+                          _countChip(
+                            l10n.expiringSoonCount(
+                              grouping.expiringSoon.length,
+                            ),
+                            Icons.warning_amber_outlined,
+                          ),
+                          const SizedBox(width: 8),
+                          _countChip(
+                            l10n.addedThisWeek(grouping.addedThisWeek),
+                            Icons.add_circle_outline,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return switch (entries[index - 1]) {
+                  InventorySectionEntry(:final section) => SectionHeader(
+                    key: ValueKey('section-${section.name}'),
+                    title: _sectionTitle(l10n, section),
+                    icon: _sectionIcon(section),
                   ),
-                  const SizedBox(width: 8),
-                  _countChip(
-                    l10n.expiringSoonCount(_expiringSoon.length),
-                    Icons.warning_amber_outlined,
-                  ),
-                  const SizedBox(width: 8),
-                  _countChip(
-                    l10n.addedThisWeek(addedThisWeek),
-                    Icons.add_circle_outline,
-                  ),
-                ],
-              ),
+                  InventoryItemEntry(:final item) => _buildCard(item),
+                };
+              },
             ),
-          ),
-          if (_expired.isNotEmpty) ...[
-            _sectionHeader(l10n.expired, Icons.error_outline),
-            ..._expired.map(_buildCard),
-          ],
-          if (_expiringSoon.isNotEmpty) ...[
-            _sectionHeader(l10n.expiringSoon, Icons.warning_amber),
-            ..._expiringSoon.map(_buildCard),
-          ],
-          if (_good.isNotEmpty) ...[
-            _sectionHeader(l10n.good, Icons.check_circle_outline),
-            ..._good.map(_buildCard),
-          ],
-          if (_filtered.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(child: Text(l10n.noItemsMatch)),
-            ),
-        ],
-      ),
     );
   }
 
@@ -513,22 +527,6 @@ class _InventoryListState extends ConsumerState<_InventoryList> {
           Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 4),
           Text(label, style: const TextStyle(fontSize: 12)),
-        ],
-      ),
-    );
-  }
-
-  Widget _sectionHeader(String title, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
         ],
       ),
     );

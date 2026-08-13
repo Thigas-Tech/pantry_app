@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- The home list now loads only the items you can see, so scrolling through
+  large pantries is smoother and uses less memory.
+
+- Items that expire exactly a few days from now (the "expiring soon"
+  window) no longer disappear from the list for a day: they show under
+  "Good" until they enter the expiring-soon window.
+
 - The app no longer briefly shows the wrong pantry, theme, or settings
   right after launch: persisted values now load before the first frame
   renders.

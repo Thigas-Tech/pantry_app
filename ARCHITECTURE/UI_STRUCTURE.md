@@ -7,11 +7,9 @@ HomeScreen
 ├── ErrorView (loading/error states)
 ├── EmptyPantry (empty state with scan prompt)
 └── _InventoryList
-    ├── SearchBar (Autocomplete with image thumbnails, leaf icon for produce)
-    ├── StockCountBadges (horizontal ListView.builder)
-    ├── CategoryFilterChips (horizontal ListView.builder)
+    ├── SearchBar (inline search panel)
     ├── RefreshIndicator (pull-to-refresh)
-    └── ListView.builder (RepaintBoundary on each card)
+    └── ListView.builder (lazy, flattened InventoryGrouping entries, RepaintBoundary on each card)
         ├── SectionHeader (expired / expiring soon / good)
         └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot, flat + per-unit price)
 
