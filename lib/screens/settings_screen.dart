@@ -5,12 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
-import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
+import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -1148,26 +1148,11 @@ class SettingsScreen extends ConsumerWidget {
     AppLocalizations l10n,
   ) async {
     try {
-      final notifService = ref.read(notificationServiceProvider);
-      final db = ref.read(databaseProvider);
-      final database = await db.database;
-      final inventories = await db.getInventories();
-      final items = <InventoryItem>[];
-      for (final inv in inventories) {
-        final invItems = await db.inventoryDao.list(
-          database,
-          inventoryId: inv['id'] as int,
-        );
-        items.addAll(invItems);
-      }
+      final coordinator = ref.read(notificationCoordinatorProvider);
       final settings = await ref.read(settingsProvider.future);
-      await notifService.rescheduleAllItems(
-        items,
-        expiringSoonTitle: l10n.expiringSoon,
-        expiringTodayTitle: l10n.expiringToday,
-        buildExpiringSoonBody: l10n.expiresTomorrow,
-        buildExpiringTodayBody: l10n.expiresToday,
-        notificationsEnabled: settings.notificationsEnabled,
+      await coordinator.rescheduleExpiryReminders(
+        l10n: l10n,
+        settings: settings,
       );
     } on Exception catch (e) {
       logError('Failed to reschedule notifications on toggle: $e');

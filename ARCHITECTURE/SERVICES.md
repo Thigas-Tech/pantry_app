@@ -62,8 +62,12 @@ User scans barcode
   `initialize()`. The payload is the item's barcode for deep‑linking to
   [ProductDetailScreen].
 - **Boot recovery**: `rescheduleAllItems()` cancels all pending alarms and
-  re‑schedules them from the current DB contents. Called in `main.dart`
-  after initialization.
+  re‑schedules them from the current DB contents. Scheduling is owned by a
+  single `NotificationCoordinator` (lib/services/notification_coordinator.dart),
+  used by startup (`main.dart`), the settings notifications toggle, and the
+  product detail screen; it resolves display names only for items with an
+  expiry date via one batched query instead of loading the whole products
+  table.
 - **Permission**: `requestPermission()` requests `POST_NOTIFICATIONS` on
   Android 13+. Returns `bool` — the settings screen reacts accordingly.
 - **Background handler**: Separated into

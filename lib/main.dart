@@ -15,12 +15,12 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
-import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/providers/cache_refresh_coordinator_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
+import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
@@ -32,6 +32,7 @@ import 'package:pantry_app/services/app_update_handler.dart';
 import 'package:pantry_app/services/cache_refresh_coordinator.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/notification_background_handler.dart';
+import 'package:pantry_app/services/notification_coordinator.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/navigator_key.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -372,10 +373,25 @@ Future<void> _flushFeedbackQueueAsync() async {
   }
 }
 
-/// Reschedules expiry and inactivity reminders after startup.
+/// Reschedules expiry and inactivity reminders after startup via the
+/// [NotificationCoordinator].
 void _schedulePostInitNotifications() {
-  unawaited(_rescheduleNotifications());
-  unawaited(_scheduleInactivityReminder());
+  unawaited(_rescheduleAllNotifications());
+}
+
+/// Runs the full startup notification reschedule through the shared
+/// [NotificationCoordinator].
+Future<void> _rescheduleAllNotifications() async {
+  try {
+    final coordinator = appContainer.read(notificationCoordinatorProvider);
+    final settings = await appContainer.read(settingsProvider.future);
+    await coordinator.rescheduleAll(
+      l10n: _currentL10n(),
+      settings: settings,
+    );
+  } on Exception catch (e) {
+    logError('Notification reschedule failed: $e');
+  }
 }
 
 /// Flushes queued product submissions to Open Food Facts.
@@ -465,102 +481,30 @@ Future<void> _navigateToProduct(String barcode) async {
   }
 }
 
-/// Reschedules all expiry reminders for items with future expiry dates.
+/// Reschedules all expiry reminders through the shared
+/// [NotificationCoordinator] after notification permission is granted.
 Future<void> _rescheduleNotifications() async {
-  logInfo('Rescheduling expiry notifications');
   try {
-    final notifService = appContainer.read(notificationServiceProvider);
-    if (!notifService.initialized) {
-      logWarning('Notification service not initialized, skipping reschedule');
-      return;
-    }
-    final db = appContainer.read(databaseProvider);
-    final database = await db.database;
-    final inventories = await db.getInventories();
-    final items = <InventoryItem>[];
-    for (final inv in inventories) {
-      final invItems = await db.inventoryDao.list(
-        database,
-        inventoryId: inv['id'] as int,
-      );
-      items.addAll(invItems);
-    }
+    final coordinator = appContainer.read(notificationCoordinatorProvider);
     final settings = await appContainer.read(settingsProvider.future);
-    if (!settings.notificationsEnabled) {
-      logInfo('Notifications disabled in settings, skipping reschedule');
-      return;
-    }
-
-    final barcodeToName = <String, String>{};
-    final products = await db.getAllProducts();
-    for (final p in products) {
-      if (p.name.isNotEmpty && p.name != 'Unknown') {
-        barcodeToName[p.barcode] = p.name;
-      }
-    }
-
-    final locale = PlatformDispatcher.instance.locale;
-    final l10n = lookupAppLocalizations(
-      <String>{'en', 'pt'}.contains(locale.languageCode)
-          ? locale
-          : const Locale('en'),
+    await coordinator.rescheduleExpiryReminders(
+      l10n: _currentL10n(),
+      settings: settings,
     );
-    await notifService.rescheduleAllItems(
-      items,
-      barcodeToName: barcodeToName,
-      expiringSoonTitle: l10n.expiringSoon,
-      expiringTodayTitle: l10n.expiringToday,
-      buildExpiringSoonBody: l10n.expiresTomorrow,
-      buildExpiringTodayBody: l10n.expiresToday,
-      notificationsEnabled: settings.notificationsEnabled,
-    );
-    logInfo('Notification reschedule completed');
   } on Exception catch (e) {
     logError('Notification reschedule failed: $e');
   }
 }
 
-/// Checks the inactivity threshold and schedules a daily reminder if the user
-/// has not added any product for more than [Settings.inactivityThresholdDays]
-/// days.
-Future<void> _scheduleInactivityReminder() async {
-  logInfo('Scheduling inactivity reminder check');
-  try {
-    final notifService = appContainer.read(notificationServiceProvider);
-    if (!notifService.initialized) {
-      logWarning(
-        'Notification service not initialized, skipping inactivity reminder',
-      );
-      return;
-    }
-    final db = appContainer.read(databaseProvider);
-    final lastAddDateEpoch = await db.getLastAddDate();
-    final settings = await appContainer.read(settingsProvider.future);
-
-    if (!settings.inactivityReminderEnabled) {
-      logInfo('Inactivity reminder disabled in settings, skipping');
-      return;
-    }
-
-    final locale = PlatformDispatcher.instance.locale;
-    final l10n = lookupAppLocalizations(
-      <String>{'en', 'pt'}.contains(locale.languageCode)
-          ? locale
-          : const Locale('en'),
-    );
-    await notifService.scheduleInactivityReminder(
-      lastAddDateEpoch: lastAddDateEpoch,
-      thresholdDays: settings.inactivityThresholdDays,
-      title: l10n.inactivityReminderTitle,
-      buildBody: l10n.inactivityReminderBody,
-      channelName: l10n.inactivityReminderChannelName,
-      channelDescription: l10n.inactivityReminderChannelDescription,
-      notificationsEnabled: settings.notificationsEnabled,
-    );
-    logInfo('Inactivity reminder scheduling completed');
-  } on Exception catch (e) {
-    logError('Inactivity reminder scheduling failed: $e');
-  }
+/// Resolves the [AppLocalizations] for the current device locale, falling
+/// back to English when the language is not supported.
+AppLocalizations _currentL10n() {
+  final locale = PlatformDispatcher.instance.locale;
+  return lookupAppLocalizations(
+    <String>{'en', 'pt'}.contains(locale.languageCode)
+        ? locale
+        : const Locale('en'),
+  );
 }
 
 /// The root widget of the Pantry application.

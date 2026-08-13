@@ -220,7 +220,7 @@ final class RecipeNutritionProvider
   }
 }
 
-String _$recipeNutritionHash() => r'1274a79f40f9fbf1f6123733958a7d22ee0e79ad';
+String _$recipeNutritionHash() => r'5707947178845512a94e9dd1ce95553eefbaafc6';
 
 /// Provides aggregated nutrition data for a recipe.
 ///
@@ -327,7 +327,7 @@ final class RecipeIngredientsWithProductsProvider
 }
 
 String _$recipeIngredientsWithProductsHash() =>
-    r'298f5257153649329f460b78531cc21061665c8f';
+    r'7c1b3e8fc90a8dff8f79677d96785925e45807a4';
 
 /// Provides ingredients with their product data (including image URL).
 ///
@@ -362,7 +362,7 @@ final class RecipeIngredientsWithProductsFamily extends $Family
 /// Provides the Nutri-Score grade for a recipe.
 ///
 /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
-/// known scores.
+/// known scores. Uses only the local cache, never the network.
 
 @ProviderFor(recipeNutriScore)
 final recipeNutriScoreProvider = RecipeNutriScoreFamily._();
@@ -370,7 +370,7 @@ final recipeNutriScoreProvider = RecipeNutriScoreFamily._();
 /// Provides the Nutri-Score grade for a recipe.
 ///
 /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
-/// known scores.
+/// known scores. Uses only the local cache, never the network.
 
 final class RecipeNutriScoreProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
@@ -378,7 +378,7 @@ final class RecipeNutriScoreProvider
   /// Provides the Nutri-Score grade for a recipe.
   ///
   /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
-  /// known scores.
+  /// known scores. Uses only the local cache, never the network.
   RecipeNutriScoreProvider._({
     required RecipeNutriScoreFamily super.from,
     required int super.argument,
@@ -422,12 +422,12 @@ final class RecipeNutriScoreProvider
   }
 }
 
-String _$recipeNutriScoreHash() => r'4388929de4af2fe0c84d09107681b4a7f2a58d4a';
+String _$recipeNutriScoreHash() => r'e5800af47bbf92f27fc72433487801d57700b3f0';
 
 /// Provides the Nutri-Score grade for a recipe.
 ///
 /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
-/// known scores.
+/// known scores. Uses only the local cache, never the network.
 
 final class RecipeNutriScoreFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<String?>, int> {
@@ -443,7 +443,7 @@ final class RecipeNutriScoreFamily extends $Family
   /// Provides the Nutri-Score grade for a recipe.
   ///
   /// Returns a grade letter ('A'–'E') or null if not enough ingredients have
-  /// known scores.
+  /// known scores. Uses only the local cache, never the network.
 
   RecipeNutriScoreProvider call(int recipeId) =>
       RecipeNutriScoreProvider._(argument: recipeId, from: this);

@@ -16,7 +16,7 @@ mixin _$RecipeHistoryEntry {
 
 /// Foreign key referencing the cooked recipe.
  int get recipeId;/// Epoch millis timestamp of when the recipe was made.
- int get madeAt;/// JSON-encoded snapshot of `[{barcode, name, quantity, unit}]` at cook
+ int get madeAt;/// JSON-encoded snapshot of [{barcode, name, quantity, unit}] at cook
 /// time, so the entry is accurate even if the recipe changes later.
  String get ingredientSnapshot;/// Auto-increment primary key from the recipe_history table.
  int? get id;/// Total recipe cost computed at cook time.
@@ -223,7 +223,7 @@ class _RecipeHistoryEntry implements RecipeHistoryEntry {
 @override final  int recipeId;
 /// Epoch millis timestamp of when the recipe was made.
 @override final  int madeAt;
-/// JSON-encoded snapshot of `[{barcode, name, quantity, unit}]` at cook
+/// JSON-encoded snapshot of [{barcode, name, quantity, unit}] at cook
 /// time, so the entry is accurate even if the recipe changes later.
 @override final  String ingredientSnapshot;
 /// Auto-increment primary key from the recipe_history table.

@@ -11,9 +11,9 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
-import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_for_barcode_provider.dart';
+import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
@@ -976,24 +976,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   /// Cancels any pending inactivity reminder and re-schedules based on the
-  /// latest product-add date from the database.
+  /// latest product-add date.
   Future<void> _rescheduleInactivityReminder() async {
     try {
       final l10n = AppLocalizations.of(context)!;
-      final notificationService = ref.read(notificationServiceProvider);
-      await notificationService.cancelInactivityReminder();
-      final db = ref.read(databaseProvider);
-      final lastAddDateEpoch = await db.getLastAddDate();
       final settings = await ref.read(settingsProvider.future);
-      await notificationService.scheduleInactivityReminder(
-        lastAddDateEpoch: lastAddDateEpoch,
-        thresholdDays: settings.inactivityThresholdDays,
-        title: l10n.inactivityReminderTitle,
-        buildBody: l10n.inactivityReminderBody,
-        channelName: l10n.inactivityReminderChannelName,
-        channelDescription: l10n.inactivityReminderChannelDescription,
-        notificationsEnabled: settings.notificationsEnabled,
-      );
+      await ref
+          .read(notificationCoordinatorProvider)
+          .rescheduleInactivityReminder(l10n: l10n, settings: settings);
     } on Exception catch (e) {
       logError('Failed to reschedule inactivity reminder: $e');
     }
