@@ -95,7 +95,8 @@ String _$inventoryCountHash() => r'030583b548a5797092b2642c6cc4ac96dda021a8';
 /// Provides the total count of inventory items across ALL inventories.
 ///
 /// Used to detect the first item ever added to any pantry (0→1 transition)
-/// so the empty-pantry onboarding can auto-dismiss.
+/// so the empty-pantry onboarding can auto-dismiss. Uses COUNT queries
+/// instead of materializing the full joined rows just to take their length.
 
 @ProviderFor(totalInventoryCount)
 final totalInventoryCountProvider = TotalInventoryCountProvider._();
@@ -103,7 +104,8 @@ final totalInventoryCountProvider = TotalInventoryCountProvider._();
 /// Provides the total count of inventory items across ALL inventories.
 ///
 /// Used to detect the first item ever added to any pantry (0→1 transition)
-/// so the empty-pantry onboarding can auto-dismiss.
+/// so the empty-pantry onboarding can auto-dismiss. Uses COUNT queries
+/// instead of materializing the full joined rows just to take their length.
 
 final class TotalInventoryCountProvider
     extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
@@ -111,7 +113,8 @@ final class TotalInventoryCountProvider
   /// Provides the total count of inventory items across ALL inventories.
   ///
   /// Used to detect the first item ever added to any pantry (0→1 transition)
-  /// so the empty-pantry onboarding can auto-dismiss.
+  /// so the empty-pantry onboarding can auto-dismiss. Uses COUNT queries
+  /// instead of materializing the full joined rows just to take their length.
   TotalInventoryCountProvider._()
     : super(
         from: null,
@@ -138,7 +141,7 @@ final class TotalInventoryCountProvider
 }
 
 String _$totalInventoryCountHash() =>
-    r'a6e8f3750601590fed1be6d76e79ce993e9f5f94';
+    r'71c5d0f1a704a828e251704d8ef572e34e09bb5a';
 
 /// Provides the average Nutri-Score letter for the active inventory.
 ///

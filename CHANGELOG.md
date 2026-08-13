@@ -4,6 +4,24 @@
 
 ### Maintainability
 
+- **Single [NotificationCoordinator] for all notification scheduling
+  (audit MA2)**: expiry and inactivity reminders were re-implemented
+  three times (startup in main.dart, the settings notifications toggle,
+  and the product detail screen) with the logic drifting apart — the
+  settings path had stopped resolving product names. A new
+  [NotificationCoordinator] now owns rescheduling; it also loads
+  barcode-to-name data only for items with an expiry date via one
+  batched query instead of scanning the whole products table. The
+  product detail path now also respects the inactivity-reminder toggle.
+  (lib/services/notification_coordinator.dart new,
+  lib/providers/notification_coordinator_provider.dart new,
+  lib/main.dart, lib/screens/settings_screen.dart,
+  lib/screens/product_detail_screen.dart,
+  test/services/notification_coordinator_test.dart new,
+  ARCHITECTURE/SERVICES.md)
+
+### Maintainability
+
 - **CHANGELOG.md pruned (audit MA4)**: shipped releases older than
   [0.0.8] were collapsed into one-line summaries (0.0.5 was ~515 lines
   of itemized history), keeping the current Unreleased section plus the

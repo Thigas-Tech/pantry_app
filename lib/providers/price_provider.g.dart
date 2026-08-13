@@ -401,4 +401,4 @@ final class PendingSyncCountProvider
   }
 }
 
-String _$pendingSyncCountHash() => r'60e373dafaa001c83196704eef785aea37478af8';
+String _$pendingSyncCountHash() => r'624bc35a11939f12b958195fbcfde0f08a38e966';
