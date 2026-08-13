@@ -557,6 +557,43 @@ void main() {
     });
   });
 
+  group('getInventoryRowsByProductName', () {
+    test('caps the name-based FEFO fallback at the limit', () async {
+      for (var i = 0; i < 25; i++) {
+        await db.insertProduct(
+          Product(barcode: 'n$i', name: 'Milk Brand $i'),
+        );
+        await db.insertInventoryItem(
+          InventoryItem(
+            barcode: 'n$i',
+            expiryDate: '2027-01-${(i % 9) + 1}0',
+          ),
+        );
+      }
+
+      final rows = await db.getInventoryRowsByProductName(
+        name: 'milk',
+        inventoryId: 1,
+      );
+
+      expect(rows.length, lessThanOrEqualTo(20));
+    });
+
+    test('returns all matches when under the limit', () async {
+      await db.insertProduct(const Product(barcode: 'a', name: 'Milk'));
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'a', expiryDate: '2027-01-01'),
+      );
+
+      final rows = await db.getInventoryRowsByProductName(
+        name: 'milk',
+        inventoryId: 1,
+      );
+
+      expect(rows, hasLength(1));
+    });
+  });
+
   group('counts', () {
     test('getProductCount and getInventoryCount', () async {
       await db.insertProduct(const Product(barcode: 'a', name: 'A'));
@@ -564,7 +601,6 @@ void main() {
       await db.insertInventoryItem(
         const InventoryItem(barcode: 'a'),
       );
-
       expect(await db.getProductCount(), 2);
       expect(await db.getInventoryCount(), 1);
       expect(await db.getInventoryCount(inventoryId: 1), 1);

@@ -4,6 +4,23 @@
 
 ### Performance
 
+- **Database indexes and count queries (audit P8)**: new migration v39
+  adds composite indexes for the hot queries —
+  inventory(inventory_id, expiry_date) serves the per-pantry list
+  ordering without a temporary sort, and
+  shopping_list(inventory_id, is_purchased, date_added) serves the
+  pending/purchased lists. The name-based FEFO fallback
+  (LOWER(p.name) LIKE, a leading-wildcard scan) is now capped at 20
+  rows, the orphan cleanup rewrites NOT IN (SELECT DISTINCT ...) as
+  NOT EXISTS, and [totalInventoryCountProvider] counts via COUNT(*)
+  per inventory instead of materializing the full joined rows.
+  (lib/database/migrations/v39_inventory_shopping_indexes.dart,
+  lib/database/database_helper.dart, lib/providers/inventory_provider.dart,
+  test/database/migrations/v39_inventory_shopping_indexes_test.dart,
+  test/database/database_helper_test.dart, test/providers/providers_test.dart)
+
+### Performance
+
 - **Recipe N+1 cascade removed (audit P4)**: the recipe nutrition,
   ingredient, and Nutri-Score providers fetched products one sequential
   [getProduct] call per barcode (each a DB query and possibly a network
