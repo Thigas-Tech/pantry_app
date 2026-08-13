@@ -69,16 +69,19 @@ class AppUpdateHandler {
   /// Flags the "What's New" badge when the changelog content hash changes.
   ///
   /// Content-hash-driven so new Unreleased entries surface even when the
-  /// version string has not changed between development builds.
-  Future<void> updateChangelogFlag() async {
+  /// version string has not changed between development builds. Returns
+  /// true when the caller should show the changelog (the caller owns the
+  /// one-shot "show pending" UI flag).
+  Future<bool> updateChangelogFlag() async {
     final raw = await rootBundle.loadString('USER_CHANGELOG.md');
     final contentHash = raw.hashCode.toString();
     final lastSeenHash = prefs.getString('changelog_content_hash');
-    if (lastSeenHash != null && lastSeenHash != contentHash) {
-      await prefs.setString('changelog_show_pending', 'true');
+    final changed = lastSeenHash != null && lastSeenHash != contentHash;
+    await prefs.setString('changelog_content_hash', contentHash);
+    if (changed) {
       logInfo('Changelog content changed — flagged for display');
     }
-    await prefs.setString('changelog_content_hash', contentHash);
+    return changed;
   }
 
   /// Clears the image cache and API-fetched product records after an

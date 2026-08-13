@@ -7,6 +7,7 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
+import 'package:pantry_app/providers/ui_flags_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
@@ -16,7 +17,6 @@ import 'package:pantry_app/utils/changelog_loader.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// The root shell that holds the [NavigationBar] and switches between
 /// the main app screens.
@@ -55,11 +55,14 @@ class _PantryShellState extends ConsumerState<PantryShell> {
 
   Future<void> _showNotificationDeniedWarning() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final showWarning = prefs.getBool('notification_denied_warning') == true;
-      if (!showWarning) return;
+      final flags = await ref.read(uiFlagsProvider.future);
+      if (!flags.notificationDeniedWarning) return;
 
-      await prefs.setBool('notification_denied_warning', false);
+      ref
+          .read(uiFlagsProvider.notifier)
+          .setNotificationDeniedWarning(
+            value: false,
+          );
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
@@ -73,15 +76,14 @@ class _PantryShellState extends ConsumerState<PantryShell> {
 
   Future<void> _showAmoledNudge() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final alreadyShown = prefs.getBool('amoled_nudge_shown') == true;
-      if (alreadyShown) return;
+      final flags = await ref.read(uiFlagsProvider.future);
+      if (flags.amoledNudgeShown) return;
       if (!mounted) return;
 
       final brightness = MediaQuery.of(context).platformBrightness;
       if (brightness == Brightness.dark) return;
 
-      await prefs.setBool('amoled_nudge_shown', true);
+      ref.read(uiFlagsProvider.notifier).setAmoledNudgeShown(value: true);
 
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -150,9 +152,8 @@ class _PantryShellState extends ConsumerState<PantryShell> {
   Future<void> _showChangelogIfPending() async {
     try {
       final locale = Localizations.localeOf(context);
-      final prefs = await SharedPreferences.getInstance();
-      final showPending = prefs.getString('changelog_show_pending') == 'true';
-      if (!showPending) {
+      final flags = await ref.read(uiFlagsProvider.future);
+      if (!flags.changelogShowPending) {
         logInfo('No changelog show pending — skipping');
         return;
       }
@@ -163,16 +164,15 @@ class _PantryShellState extends ConsumerState<PantryShell> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
         await showWhatsNewSheet(context, rawChangelog: raw);
-        await prefs.setString('changelog_show_pending', 'false');
+        ref
+            .read(uiFlagsProvider.notifier)
+            .setChangelogShowPending(
+              value: false,
+            );
       });
     } on Exception catch (e) {
       logError('Failed to show changelog: $e');
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('changelog_show_pending', 'false');
-      } on Exception catch (e) {
-        logWarning('Failed to reset changelog flag during cleanup: $e');
-      }
+      ref.read(uiFlagsProvider.notifier).setChangelogShowPending(value: false);
     }
   }
 

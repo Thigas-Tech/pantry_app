@@ -77,13 +77,14 @@ void main() {
   });
 
   test(
-    'updateChangelogFlag flags the badge when the content hash changes',
+    'updateChangelogFlag returns true when the content hash changes',
     () async {
       await prefs.setString('changelog_content_hash', 'old-hash');
 
-      await handler().updateChangelogFlag();
+      final changed = await handler().updateChangelogFlag();
 
-      expect(prefs.getString('changelog_show_pending'), 'true');
+      expect(changed, isTrue);
+      expect(prefs.getString('changelog_show_pending'), isNull);
       expect(prefs.getString('changelog_content_hash'), isNot('old-hash'));
     },
   );
@@ -91,8 +92,9 @@ void main() {
   test(
     'updateChangelogFlag stores the hash on first run without flagging',
     () async {
-      await handler().updateChangelogFlag();
+      final changed = await handler().updateChangelogFlag();
 
+      expect(changed, isFalse);
       expect(prefs.getString('changelog_show_pending'), isNull);
       expect(prefs.getString('changelog_content_hash'), isNotNull);
     },

@@ -118,6 +118,7 @@ void main() {
       );
       await service.checkAppUpdateBeforeFrame();
       await service.runAppUpdatePostFrame();
+      await Future<void>.delayed(Duration.zero);
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('changelog_show_pending'), 'true');
