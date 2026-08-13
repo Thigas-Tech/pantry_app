@@ -62,8 +62,7 @@ import 'app_localizations_pt.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,19 +82,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('pt'),
-    Locale('pt', 'BR'),
+    Locale('pt', 'BR')
   ];
 
   /// No description provided for @myPantry.
@@ -1617,12 +1614,6 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsAbout;
 
-  /// No description provided for @comingSoonDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'This feature will be available soon.'**
-  String get comingSoonDescription;
-
   /// No description provided for @priceTracking.
   ///
   /// In en, this message translates to:
@@ -1725,143 +1716,11 @@ abstract class AppLocalizations {
   /// **'Product'**
   String get productPhoto;
 
-  /// No description provided for @sendFeedback.
-  ///
-  /// In en, this message translates to:
-  /// **'Send Feedback'**
-  String get sendFeedback;
-
-  /// No description provided for @issueType.
-  ///
-  /// In en, this message translates to:
-  /// **'Issue type'**
-  String get issueType;
-
-  /// No description provided for @bugReport.
-  ///
-  /// In en, this message translates to:
-  /// **'Bug Report'**
-  String get bugReport;
-
-  /// No description provided for @featureRequest.
-  ///
-  /// In en, this message translates to:
-  /// **'Feature Request'**
-  String get featureRequest;
-
-  /// No description provided for @generalFeedback.
-  ///
-  /// In en, this message translates to:
-  /// **'General Feedback'**
-  String get generalFeedback;
-
-  /// No description provided for @regressionReport.
-  ///
-  /// In en, this message translates to:
-  /// **'Regression'**
-  String get regressionReport;
-
-  /// No description provided for @bugReportExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'Something is broken or not working as expected.'**
-  String get bugReportExplanation;
-
-  /// No description provided for @featureRequestExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'Suggest a new feature or improvement.'**
-  String get featureRequestExplanation;
-
-  /// No description provided for @generalFeedbackExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'Other comments, questions, or suggestions.'**
-  String get generalFeedbackExplanation;
-
-  /// No description provided for @regressionReportExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'A feature that used to work but no longer does.'**
-  String get regressionReportExplanation;
-
-  /// No description provided for @issueTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Title'**
-  String get issueTitle;
-
-  /// No description provided for @issueTitleRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Title is required (min 5 characters)'**
-  String get issueTitleRequired;
-
-  /// No description provided for @issueDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Description'**
-  String get issueDescription;
-
-  /// No description provided for @issueDescriptionRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Description is required (min 10 characters)'**
-  String get issueDescriptionRequired;
-
   /// No description provided for @attachScreenshot.
   ///
   /// In en, this message translates to:
   /// **'Attach screenshot'**
   String get attachScreenshot;
-
-  /// No description provided for @includeDeviceInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Include device info'**
-  String get includeDeviceInfo;
-
-  /// No description provided for @sending.
-  ///
-  /// In en, this message translates to:
-  /// **'Sending...'**
-  String get sending;
-
-  /// No description provided for @issueCreate.
-  ///
-  /// In en, this message translates to:
-  /// **'Create issue'**
-  String get issueCreate;
-
-  /// No description provided for @issueSubmitted.
-  ///
-  /// In en, this message translates to:
-  /// **'Thanks! Your report has been submitted.'**
-  String get issueSubmitted;
-
-  /// No description provided for @issueQueuedOffline.
-  ///
-  /// In en, this message translates to:
-  /// **'You are offline. Your report will be submitted when you are back online.'**
-  String get issueQueuedOffline;
-
-  /// No description provided for @issueSubmissionFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to submit. Please try again.'**
-  String get issueSubmissionFailed;
-
-  /// No description provided for @viewOnGitHub.
-  ///
-  /// In en, this message translates to:
-  /// **'View on GitHub'**
-  String get viewOnGitHub;
-
-  /// No description provided for @issueDuplicate.
-  ///
-  /// In en, this message translates to:
-  /// **'You recently submitted a similar report.'**
-  String get issueDuplicate;
 
   /// No description provided for @removeScreenshot.
   ///
@@ -1892,18 +1751,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not attach image'**
   String get couldNotAttachImage;
-
-  /// No description provided for @appVersionLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'App version'**
-  String get appVersionLabel;
-
-  /// No description provided for @osLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'OS'**
-  String get osLabel;
 
   /// No description provided for @cameraPermissionDenied.
   ///
@@ -2180,48 +2027,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get amoledNudgeDismiss;
-
-  /// No description provided for @translationReport.
-  ///
-  /// In en, this message translates to:
-  /// **'Translation Report'**
-  String get translationReport;
-
-  /// No description provided for @translationReportExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'Report an issue with a product translation or suggest a new translation.'**
-  String get translationReportExplanation;
-
-  /// No description provided for @feedbackRateLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'You can only submit one report per minute and up to 5 per day. Please try again later.'**
-  String get feedbackRateLimit;
-
-  /// No description provided for @couldNotOpenLinkFallback.
-  ///
-  /// In en, this message translates to:
-  /// **'URL copied to clipboard.'**
-  String get couldNotOpenLinkFallback;
-
-  /// No description provided for @includeLogs.
-  ///
-  /// In en, this message translates to:
-  /// **'Include app logs'**
-  String get includeLogs;
-
-  /// No description provided for @includeLogsExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent warnings and errors from this session'**
-  String get includeLogsExplanation;
-
-  /// No description provided for @logsPrivacyNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Logs may contain product names and timestamps.'**
-  String get logsPrivacyNote;
 
   /// No description provided for @price.
   ///
@@ -3056,18 +2861,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bearer token'**
   String get bearerTokenLabel;
-
-  /// No description provided for @pendingFeedback.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending feedback: {count}'**
-  String pendingFeedback(Object count);
-
-  /// No description provided for @submissionResult.
-  ///
-  /// In en, this message translates to:
-  /// **'Submitted {submitted}, {failed} failed'**
-  String submissionResult(Object failed, Object submitted);
 
   /// No description provided for @bytesUnit.
   ///
@@ -4282,8 +4075,7 @@ abstract class AppLocalizations {
   String unitSystemChanged(String system);
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -4292,38 +4084,34 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'pt'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'pt'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'pt':
-      {
-        switch (locale.countryCode) {
-          case 'BR':
-            return AppLocalizationsPtBr();
-        }
-        break;
-      }
+    case 'pt': {
+  switch (locale.countryCode) {
+    case 'BR': return AppLocalizationsPtBr();
+   }
+  break;
+   }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'pt':
-      return AppLocalizationsPt();
+    case 'en': return AppLocalizationsEn();
+    case 'pt': return AppLocalizationsPt();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

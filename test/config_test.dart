@@ -42,49 +42,5 @@ void main() {
       expect(AppConfig.contactEmail, 'dev@test.com');
       expect(AppConfig.useOffStaging, true);
     });
-
-    /// Verifies FEEDBACK_TOKEN returns empty string when not set.
-    test('returns empty string for missing FEEDBACK_TOKEN', () {
-      expect(AppConfig.feedbackToken, '');
-    });
-
-    /// Verifies GITHUB_OWNER returns default when not set.
-    test('returns default for missing GITHUB_OWNER', () {
-      expect(AppConfig.githubOwner, 'Thigas-Tech');
-    });
-
-    /// Verifies GITHUB_REPO returns default when not set.
-    test('returns default for missing GITHUB_REPO', () {
-      expect(AppConfig.githubRepo, 'pantry_app');
-    });
-
-    /// Feedback is disabled when neither a proxy URL nor a token is set.
-    test('returns false for missing feedback configuration', () {
-      expect(AppConfig.feedbackEnabled, false);
-    });
-
-    /// Verifies a proxy URL enables feedback without a token.
-    test('feedback enabled by a configured proxy URL', () {
-      dotenv.loadFromString(
-        isOptional: true,
-        mergeWith: {'FEEDBACK_PROXY_URL': 'https://proxy.example.com/feedback'},
-      );
-
-      expect(AppConfig.feedbackProxyUrl, 'https://proxy.example.com/feedback');
-      expect(AppConfig.feedbackEnabled, isTrue);
-      expect(AppConfig.feedbackToken, '');
-    });
-
-    /// Verifies a development token alone enables feedback.
-    test('feedback enabled by a configured development token', () {
-      dotenv.loadFromString(
-        isOptional: true,
-        mergeWith: {'FEEDBACK_TOKEN': 'dev-token'},
-      );
-
-      expect(AppConfig.feedbackProxyUrl, '');
-      expect(AppConfig.feedbackToken, 'dev-token');
-      expect(AppConfig.feedbackEnabled, isTrue);
-    });
   });
 }

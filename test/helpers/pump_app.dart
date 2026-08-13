@@ -122,12 +122,8 @@ Future<void> pumpApp(
     () => effectiveImageCache.cacheImage(any(), any()),
   ).thenAnswer((_) async => null);
 
-  // Seed a dev env so providers that read AppConfig don't crash and the
-  // feedback screen renders its form (a token enables it, as in development).
-  dotenv.loadFromString(
-    isOptional: true,
-    mergeWith: {'FEEDBACK_TOKEN': 'test-token-for-ci'},
-  );
+  // Seed an empty env so providers that read AppConfig don't crash.
+  dotenv.loadFromString(isOptional: true, mergeWith: {});
 
   await tester.pumpWidget(
     ProviderScope(

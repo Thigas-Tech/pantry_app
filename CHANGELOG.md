@@ -4,6 +4,18 @@
 
 ### Security
 
+- **Removed in-app GitHub feedback (free-tier decision)**: the Cloud
+  Function feedback proxy from the previous change required the paid
+  Firebase Blaze plan. In-app feedback is removed instead; GitHub
+  feedback, the serverless proxy, the PAT, and the offline feedback queue
+  are gone. Feedback-only l10n keys were pruned. This keeps the app on
+  free Firebase (Firestore rules, anonymous auth) only.
+  (lib/screens/feedback_screen.dart, lib/services/github_issue_service.dart,
+  lib/services/device_id.dart, lib/database/feedback_queue_dao.dart,
+  lib/database/migrations/v11_feedback_queue.dart removed;
+  lib/config.dart, lib/screens/settings_screen.dart,
+  lib/screens/pantry_shell.dart, lib/services/app_startup_service.dart,
+  lib/database/database_helper.dart, lib/l10n/*.arb)
 - **Stop shipping credentials in the APK (audit S1)**: the .env file was a
   Flutter asset, so every release bundled the GitHub feedback PAT, OFF
   credentials, Open Prices token and USDA key. The asset is removed and

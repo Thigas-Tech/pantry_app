@@ -2,13 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -17,7 +15,6 @@ import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/providers/ui_flags_provider.dart';
-import 'package:pantry_app/screens/feedback_screen.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/utils/changelog_loader.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -506,41 +503,6 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(l10n.whatsNewDismiss),
                 onTap: () => _showWhatsNew(context),
               ),
-              if (AppConfig.feedbackEnabled)
-                ListTile(
-                  leading: const Icon(Icons.bug_report_outlined),
-                  title: Text(l10n.sendFeedback),
-                  onTap: () => _sendFeedback(context),
-                ),
-              if (AppConfig.feedbackEnabled)
-                Consumer(
-                  builder: (context, ref, _) {
-                    final service = ref.watch(githubIssueServiceProvider);
-                    final count =
-                        ref.watch(pendingFeedbackCountProvider).value ?? 0;
-                    if (count == 0) return const SizedBox.shrink();
-                    return ListTile(
-                      leading: const Icon(Icons.cloud_upload_outlined),
-                      title: Text(l10n.pendingFeedback(count)),
-                      trailing: TextButton(
-                        onPressed: () async {
-                          final result = await service.flushQueue();
-                          ref.invalidate(pendingFeedbackCountProvider);
-                          if (context.mounted) {
-                            SnackbarHelper.showInfo(
-                              context,
-                              l10n.submissionResult(
-                                result.failed,
-                                result.submitted,
-                              ),
-                            );
-                          }
-                        },
-                        child: Text(l10n.retryNow),
-                      ),
-                    );
-                  },
-                ),
             ],
           ),
         ],
@@ -771,16 +733,6 @@ class SettingsScreen extends ConsumerWidget {
         SnackbarHelper.showError(context, l10n.changelogLoadFailed);
       }
     }
-  }
-
-  void _sendFeedback(BuildContext context) {
-    unawaited(
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => const FeedbackScreen(),
-        ),
-      ),
-    );
   }
 
   Future<void> _showThemeDialog(BuildContext context, WidgetRef ref) async {
