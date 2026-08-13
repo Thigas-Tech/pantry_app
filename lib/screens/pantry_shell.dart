@@ -126,6 +126,12 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     AsyncValue<bool>? prev,
     AsyncValue<bool> next,
   ) {
+    // The one-shot check caches its first result for the whole session;
+    // invalidate it on every connectivity change so the 8 call sites get
+    // fresh answers (e.g. an app started offline sees the device come
+    // online without a restart).
+    ref.invalidate(hasConnectionProvider);
+
     final online = next.asData?.value;
     if (online == true) {
       final feedbackService = ref.read(githubIssueServiceProvider);

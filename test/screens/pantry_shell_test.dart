@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
@@ -109,4 +112,61 @@ void main() {
 
     expect(find.byType(RecipeListScreen), findsOneWidget);
   });
+
+  testWidgets(
+    'invalidates the one-shot connectivity check when the stream changes',
+    (tester) async {
+      var reads = 0;
+      final controller = StreamController<bool>();
+      final mockDb = _MockDatabaseHelper();
+      when(mockDb.getInventories).thenAnswer((_) async => []);
+      when(
+        () => mockDb.getInventoryWithProduct(
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => []);
+
+      await pumpApp(
+        tester,
+        const PantryShell(),
+        settle: false,
+        overrides: [
+          databaseProvider.overrideWithValue(mockDb),
+          inventoryListProvider.overrideWith(
+            (ref) => <InventorySummary>[],
+          ),
+          inventoryCountProvider.overrideWith((ref) => 0),
+          activeInventoryProvider.overrideWith(
+            FakeActiveInventoryNotifier.new,
+          ),
+          settingsProvider.overrideWith(FakeSettingsNotifier.new),
+          themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+          onboardingProvider.overrideWith(FakeOnboardingNotifier.new),
+          hasConnectionProvider.overrideWith((ref) {
+            reads++;
+            return Future.value(true);
+          }),
+          connectivityProvider.overrideWith((ref) => controller.stream),
+          productRepositoryProvider.overrideWithValue(
+            createMockProductRepository(),
+          ),
+          allRecipesProvider.overrideWith((ref) => []),
+        ],
+      );
+      await tester.pump();
+      addTearDown(controller.close);
+
+      expect(reads, 1);
+
+      controller.add(false);
+      await tester.pump();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(PantryShell)),
+      );
+      await container.read(hasConnectionProvider.future);
+
+      expect(reads, 2);
+    },
+  );
 }
