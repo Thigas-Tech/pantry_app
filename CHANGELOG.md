@@ -4,6 +4,19 @@
 
 ### Performance
 
+- **Startup no longer blocks on network and asset loads (audit P6)**:
+  the anonymous Firebase sign-in (a network call) ran before runApp and
+  the app-update handler loaded PackageInfo, the changelog asset, and
+  flushed caches pre-frame. Sign-in is now deferred past the first
+  frame, and the update handling is split: only the one-fast-call
+  version comparison stays pre-frame, while the changelog content-hash
+  check and the post-update cache flush run post-frame, extracted into a
+  testable [AppUpdateHandler]. (lib/main.dart,
+  lib/services/app_update_handler.dart, test/services/
+  app_update_handler_test.dart)
+
+### Performance
+
 - **Notification reschedule permission check hoisted (audit P5)**:
   [FlutterNotificationService.rescheduleAllItems] called
   areNotificationsEnabled — a platform-channel round trip — once per
