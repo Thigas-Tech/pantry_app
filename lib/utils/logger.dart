@@ -10,10 +10,12 @@ import 'package:flutter/foundation.dart';
 /// Colours use ANSI escape codes which work in most terminals. On platforms
 /// that do not support ANSI colours the messages still print normally.
 ///
-/// The verbose flag mirrors [kDebugMode] — true in debug builds, false
-/// in release and profile builds. This means [logInfo] and [logDebug] calls
-/// are tree-shaken from release binaries entirely.
-const bool _verbose = true; //kDebugMode;
+/// The verbose flag mirrors [kDebugMode] — true in debug builds, false in
+/// release and profile builds. Because it is a const, the [logDebug] and
+/// [logInfo] call sites are eliminated at compile time in non-debug builds,
+/// so verbose logging is tree-shaken from release binaries entirely.
+/// Warnings and errors are always compiled in.
+const bool _verbose = kDebugMode;
 
 // ANSI colour codes.
 const _reset = '\x1B[0m';
