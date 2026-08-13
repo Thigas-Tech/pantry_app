@@ -381,5 +381,71 @@ void main() {
         ),
       ).called(1);
     });
+
+    /// Verifies that when [GithubIssueService.submitIssue] throws
+    /// [IssueRateLimitException], the form shows the rate-limit message and
+    /// does NOT fall back to the offline queue.
+    testWidgets('rate limit shows the message and does not queue', (
+      tester,
+    ) async {
+      final mockService = MockGithubIssueService();
+
+      when(
+        () => mockService.submitIssue(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          label: any(named: 'label'),
+        ),
+      ).thenThrow(const IssueRateLimitException('Rate limit reached.'));
+      when(() => mockService.isDuplicate(any(), any())).thenReturn(false);
+
+      await pumpApp(
+        tester,
+        const _SubmitShell(screen: FeedbackScreen()),
+        settle: false,
+        overrides: [
+          connectivityProvider.overrideWith(
+            (ref) => Stream<bool>.value(true),
+          ),
+          githubIssueServiceProvider.overrideWithValue(mockService),
+        ],
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Open feedback'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Title'),
+        'Rate limit test title',
+      );
+      await tester.pump();
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Description'),
+        'Test description with enough characters.',
+      );
+      await tester.pump();
+      await tester.ensureVisible(find.text('Create issue'));
+      await tester.tap(find.text('Create issue'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // The screen stays open and the rate-limit message is shown.
+      expect(find.byType(FeedbackScreen), findsOneWidget);
+      expect(
+        find.text(
+          'You can only submit one report per minute and up to 5 per day.'
+          ' Please try again later.',
+        ),
+        findsOneWidget,
+      );
+      verifyNever(
+        () => mockService.queueOffline(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          label: any(named: 'label'),
+        ),
+      );
+    });
   });
 }

@@ -51,24 +51,6 @@ jobs:
       - name: Get Flutter packages
         run: flutter pub get
         working-directory: code
-      - name: Inject environment
-        working-directory: code
-        env:
-          OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
-          OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
-          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
-          FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
-          USE_OFF_STAGING: ${{ vars.USE_OFF_STAGING || 'false' }}
-          GITHUB_OWNER: ${{ vars.GITHUB_OWNER || 'Thigas-Tech' }}
-          GITHUB_REPO: ${{ vars.GITHUB_REPO || 'pantry_app' }}
-          FEEDBACK_ENABLED: ${{ vars.FEEDBACK_ENABLED || 'true' }}
-          OPEN_PRICES_TOKEN: ${{ secrets.OPEN_PRICES_TOKEN }}
-          USDA_API_KEY: ${{ secrets.USDA_API_KEY }}
-          FIREBASE_ENABLED: ${{ vars.FIREBASE_ENABLED || 'true' }}
-        run: |
-          env \
-            | grep -E '^(OFF_USER_ID|OFF_PASSWORD|CONTACT_EMAIL|FEEDBACK_TOKEN|USE_OFF_STAGING|GITHUB_OWNER|GITHUB_REPO|FEEDBACK_ENABLED|OPEN_PRICES_TOKEN|USDA_API_KEY|FIREBASE_ENABLED)=' \
-            > .env
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: dart analyze lib/ test/
@@ -111,24 +93,6 @@ jobs:
       - name: Get Flutter packages
         run: flutter pub get
         working-directory: code
-      - name: Inject environment
-        working-directory: code
-        env:
-          OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
-          OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
-          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
-          FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
-          USE_OFF_STAGING: ${{ vars.USE_OFF_STAGING || 'false' }}
-          GITHUB_OWNER: ${{ vars.GITHUB_OWNER || 'Thigas-Tech' }}
-          GITHUB_REPO: ${{ vars.GITHUB_REPO || 'pantry_app' }}
-          FEEDBACK_ENABLED: ${{ vars.FEEDBACK_ENABLED || 'true' }}
-          OPEN_PRICES_TOKEN: ${{ secrets.OPEN_PRICES_TOKEN }}
-          USDA_API_KEY: ${{ secrets.USDA_API_KEY }}
-          FIREBASE_ENABLED: ${{ vars.FIREBASE_ENABLED || 'true' }}
-        run: |
-          env \
-            | grep -E '^(OFF_USER_ID|OFF_PASSWORD|CONTACT_EMAIL|FEEDBACK_TOKEN|USE_OFF_STAGING|GITHUB_OWNER|GITHUB_REPO|FEEDBACK_ENABLED|OPEN_PRICES_TOKEN|USDA_API_KEY|FIREBASE_ENABLED)=' \
-            > .env
       - name: Create google-services.json
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
@@ -147,6 +111,8 @@ jobs:
           flutter build ${{ matrix.package-type }}
           --${{ matrix.build-type }}
           ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info' || '' }}
+          --dart-define=FIREBASE_ENABLED=${{ vars.FIREBASE_ENABLED || 'true' }}
+          --dart-define=FEEDBACK_PROXY_URL=${{ vars.FEEDBACK_PROXY_URL }}
         working-directory: code
       - name: Upload APK
         if: >

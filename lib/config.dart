@@ -1,16 +1,21 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Application configuration loaded from a .env file at startup.
+/// Application configuration.
 ///
-/// All sensitive values (API credentials, contact email, etc.) are read from
-/// environment variables loaded by the [DotEnv] class. A .env.example file is
-/// provided as a template; copy it to .env and fill in real values.
+/// Credentials are read from a .env file loaded by [DotEnv] for local
+/// development only; the .env file is **not** a Flutter asset, so nothing
+/// sensitive is bundled into release builds. Non-secret feature toggles
+/// fall back to `--dart-define` build flags set by CI.
 ///
 /// ## Security note
 ///
-/// - The .env file is **never** committed to version control.
-/// - .env.example contains placeholder values and IS committed.
-/// - These values are embedded in the app bundle at build time.
+/// - The .env file is **never** committed to version control and **never**
+///   shipped in an app artifact.
+/// - Credential-backed features (OFF product submission, Open Prices,
+///   USDA, GitHub feedback) are disabled when their credential is absent.
+/// - GitHub feedback in release builds goes through a serverless proxy
+///   configured via the [feedbackProxyUrl] build flag; the PAT lives only
+///   on the server.
 ///
 /// This class cannot be instantiated — all members are static.
 class AppConfig {
@@ -34,14 +39,29 @@ class AppConfig {
 
   /// Whether to use the Open Food Facts staging server (true) or the
   /// production server (false).
-  static bool get useOffStaging =>
-      dotenv.env['USE_OFF_STAGING']?.toLowerCase() == 'true';
+  static bool get useOffStaging {
+    final env = dotenv.env['USE_OFF_STAGING'];
+    if (env != null) return env.toLowerCase() == 'true';
+    return const String.fromEnvironment('USE_OFF_STAGING') == 'true';
+  }
 
   /// The GitHub personal access token used for in-app feedback submissions.
   ///
-  /// Must have Issues: Read and write permission on the repository
-  /// specified by [githubOwner] and [githubRepo].
+  /// Development-only: release builds submit feedback through the
+  /// serverless [feedbackProxyUrl] instead, so this token never ships.
   static String get feedbackToken => dotenv.env['FEEDBACK_TOKEN'] ?? '';
+
+  /// The URL of the serverless feedback proxy used in release builds.
+  ///
+  /// Configured via the `FEEDBACK_PROXY_URL` `--dart-define` build flag
+  /// (set from CI variables). When set, feedback is POSTed to this URL and
+  /// the server holds the GitHub PAT. Not a secret — it is a public HTTPS
+  /// endpoint. May also be set in .env for local testing.
+  static String get feedbackProxyUrl {
+    final env = dotenv.env['FEEDBACK_PROXY_URL'];
+    if (env != null && env.isNotEmpty) return env;
+    return const String.fromEnvironment('FEEDBACK_PROXY_URL');
+  }
 
   /// The GitHub repository owner for in-app feedback submissions.
   static String get githubOwner => dotenv.env['GITHUB_OWNER'] ?? 'Thigas-Tech';
@@ -50,8 +70,11 @@ class AppConfig {
   static String get githubRepo => dotenv.env['GITHUB_REPO'] ?? 'pantry_app';
 
   /// Whether in-app feedback submission is enabled.
+  ///
+  /// True only when a working submission path exists: a serverless
+  /// [feedbackProxyUrl] or a development [feedbackToken].
   static bool get feedbackEnabled =>
-      (dotenv.env['FEEDBACK_ENABLED'] ?? 'true').toLowerCase() == 'true';
+      feedbackProxyUrl.isNotEmpty || feedbackToken.isNotEmpty;
 
   /// The Bearer token for the Open Prices API.
   ///
@@ -74,10 +97,13 @@ class AppConfig {
 
   /// Whether Firebase integration is enabled.
   ///
-  /// Set to true in .env after running flutterfire configure and
-  /// placing the generated google-services.json / GoogleService-Info.plist
-  /// in the platform project. When false, all Firebase operations are
-  /// no-ops and the app works exactly as before.
-  static bool get firebaseEnabled =>
-      dotenv.env['FIREBASE_ENABLED']?.toLowerCase() == 'true';
+  /// Controlled by the `FIREBASE_ENABLED` `--dart-define` build flag
+  /// (CI sets it true for release builds) with a .env override for local
+  /// development. When false, all Firebase operations are no-ops and the
+  /// app works exactly as before.
+  static bool get firebaseEnabled {
+    final env = dotenv.env['FIREBASE_ENABLED'];
+    if (env != null) return env.toLowerCase() == 'true';
+    return const String.fromEnvironment('FIREBASE_ENABLED') == 'true';
+  }
 }

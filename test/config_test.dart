@@ -58,9 +58,33 @@ void main() {
       expect(AppConfig.githubRepo, 'pantry_app');
     });
 
-    /// Verifies FEEDBACK_ENABLED returns true as default.
-    test('returns true for missing FEEDBACK_ENABLED', () {
-      expect(AppConfig.feedbackEnabled, true);
+    /// Feedback is disabled when neither a proxy URL nor a token is set.
+    test('returns false for missing feedback configuration', () {
+      expect(AppConfig.feedbackEnabled, false);
+    });
+
+    /// Verifies a proxy URL enables feedback without a token.
+    test('feedback enabled by a configured proxy URL', () {
+      dotenv.loadFromString(
+        isOptional: true,
+        mergeWith: {'FEEDBACK_PROXY_URL': 'https://proxy.example.com/feedback'},
+      );
+
+      expect(AppConfig.feedbackProxyUrl, 'https://proxy.example.com/feedback');
+      expect(AppConfig.feedbackEnabled, isTrue);
+      expect(AppConfig.feedbackToken, '');
+    });
+
+    /// Verifies a development token alone enables feedback.
+    test('feedback enabled by a configured development token', () {
+      dotenv.loadFromString(
+        isOptional: true,
+        mergeWith: {'FEEDBACK_TOKEN': 'dev-token'},
+      );
+
+      expect(AppConfig.feedbackProxyUrl, '');
+      expect(AppConfig.feedbackToken, 'dev-token');
+      expect(AppConfig.feedbackEnabled, isTrue);
     });
   });
 }

@@ -124,8 +124,12 @@ User scans barcode
 
 ### 3.7 Feedback service (GitHub Issues)
 
-- `GithubIssueService` -- HTTP POST to GitHub Issues API with PAT from
-  `.env` (`FEEDBACK_TOKEN`), never committed.
+- `GithubIssueService` submits issues either through the **serverless
+  feedback proxy** (release builds; a Cloud Function that holds the GitHub
+  PAT server-side and enforces per-device rate limits) or directly to the
+  GitHub Issues API with a development PAT (`.env`, never shipped).
+- No credentials are bundled in release builds — `.env` is not a Flutter
+  asset and CI no longer injects secrets.
 - Offline queue: unresolved issues stored in `feedback_queue` SQLite table
   (version 11 migration). Flushed when `connectivityProvider` emits `true`
   via listener in `PantryShell` and at app startup.

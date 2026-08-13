@@ -66,3 +66,57 @@ jobs:
         run: |
           ./firebase_tests/node_modules/.bin/firebase deploy \
             --only firestore:rules --project pantry-app-c5c36
+
+  functions-test:
+    name: Feedback function tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: functions
+
+      - name: Run function unit tests
+        run: npm test
+        working-directory: functions
+
+  deploy-functions:
+    name: Deploy feedback function
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      FEEDBACK_TOKEN: ${{ secrets.FEEDBACK_TOKEN }}
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install function dependencies
+        run: npm ci
+        working-directory: functions
+
+      - name: Install firebase-tools
+        run: npm ci
+        working-directory: firebase_tests
+
+      - name: Deploy the feedback function
+        if: github.ref == 'refs/heads/main' && env.FIREBASE_TOKEN != '' && env.FEEDBACK_TOKEN != ''
+        run: |
+          ./firebase_tests/node_modules/.bin/firebase deploy \
+            --only functions --project pantry-app-c5c36 \
+            --set-env-vars FEEDBACK_TOKEN="$FEEDBACK_TOKEN"
