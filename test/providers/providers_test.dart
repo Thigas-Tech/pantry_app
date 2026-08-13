@@ -324,7 +324,7 @@ void main() {
       expect(count, 0);
     });
 
-    test('sums items across multiple inventories', () async {
+    test('sums items across multiple inventories via COUNT queries', () async {
       final mockDb = MockDatabaseHelper();
       when(mockDb.getInventories).thenAnswer(
         (_) async => [
@@ -333,20 +333,11 @@ void main() {
         ],
       );
       when(
-        () => mockDb.getInventoryWithProduct(inventoryId: 1),
-      ).thenAnswer(
-        (_) async => [
-          {'id': 1, 'barcode': '001', 'inventory_id': 1, 'product_name': 'A'},
-          {'id': 2, 'barcode': '002', 'inventory_id': 1, 'product_name': 'B'},
-        ],
-      );
+        () => mockDb.getInventoryCount(inventoryId: 1),
+      ).thenAnswer((_) async => 2);
       when(
-        () => mockDb.getInventoryWithProduct(inventoryId: 2),
-      ).thenAnswer(
-        (_) async => [
-          {'id': 3, 'barcode': '003', 'inventory_id': 2, 'product_name': 'C'},
-        ],
-      );
+        () => mockDb.getInventoryCount(inventoryId: 2),
+      ).thenAnswer((_) async => 1);
 
       container = ProviderContainer(
         overrides: [
@@ -357,6 +348,13 @@ void main() {
 
       final count = await container.read(totalInventoryCountProvider.future);
       expect(count, 3);
+      verify(() => mockDb.getInventoryCount(inventoryId: 1)).called(1);
+      verify(() => mockDb.getInventoryCount(inventoryId: 2)).called(1);
+      verifyNever(
+        () => mockDb.getInventoryWithProduct(
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      );
     });
   });
 

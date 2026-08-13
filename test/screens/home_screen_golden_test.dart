@@ -86,6 +86,9 @@ void main() {
       ],
     );
     when(
+      () => mockDb.getInventoryCount(inventoryId: any(named: 'inventoryId')),
+    ).thenAnswer((_) async => items.length);
+    when(
       () => mockDb.getInventoryWithProduct(
         inventoryId: any(named: 'inventoryId'),
       ),

@@ -24,7 +24,8 @@ Future<int> inventoryCount(Ref ref) async {
 /// Provides the total count of inventory items across ALL inventories.
 ///
 /// Used to detect the first item ever added to any pantry (0→1 transition)
-/// so the empty-pantry onboarding can auto-dismiss.
+/// so the empty-pantry onboarding can auto-dismiss. Uses COUNT queries
+/// instead of materializing the full joined rows just to take their length.
 @Riverpod(keepAlive: true)
 Future<int> totalInventoryCount(Ref ref) async {
   final db = ref.watch(databaseProvider);
@@ -32,10 +33,7 @@ Future<int> totalInventoryCount(Ref ref) async {
   var total = 0;
   for (final inv in inventories) {
     final summary = InventorySummary.fromMap(inv);
-    final rows = await db.getInventoryWithProduct(
-      inventoryId: summary.id,
-    );
-    total += rows.length;
+    total += await db.getInventoryCount(inventoryId: summary.id);
   }
   return total;
 }

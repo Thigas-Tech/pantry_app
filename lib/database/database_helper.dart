@@ -128,7 +128,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 38;
+  static const int databaseVersion = 39;
 
   /// The lazily‑opened database instance.
   Future<Database> get database async {
@@ -267,6 +267,10 @@ class DatabaseHelper {
       'ON inventory(barcode, inventory_id)',
     );
     await db.execute(
+      'CREATE INDEX idx_inventory_inventory_expiry'
+      ' ON inventory(inventory_id, expiry_date)',
+    );
+    await db.execute(
       'CREATE INDEX idx_products_source ON products(source)',
     );
 
@@ -282,6 +286,11 @@ class DatabaseHelper {
     );
 
     await _createShoppingListTable(db);
+
+    await db.execute(
+      'CREATE INDEX idx_shopping_list_inventory_purchased_date'
+      ' ON shopping_list(inventory_id, is_purchased, date_added)',
+    );
 
     await _createStoresTable(db);
 
@@ -444,12 +453,16 @@ class DatabaseHelper {
 
       await db.rawDelete('''
         DELETE FROM prices
-        WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
+        WHERE NOT EXISTS (
+          SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
+        )
       ''');
 
       final deletedProducts = await db.rawDelete('''
         DELETE FROM products
-        WHERE barcode NOT IN (SELECT DISTINCT barcode FROM inventory)
+        WHERE NOT EXISTS (
+          SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
+        )
       ''');
       logInfo('Removed $deletedProducts orphaned products');
 
@@ -1073,10 +1086,12 @@ class DatabaseHelper {
   ///
   /// The search is case-insensitive and trims the input to reduce false
   /// negatives from whitespace mismatch. This is a fallback when exact
-  /// barcode lookup returns no results.
+  /// barcode lookup returns no results. The leading-wildcard LIKE forces
+  /// a scan, so results are capped at [limit] rows (default 20).
   Future<List<Map<String, dynamic>>> getInventoryRowsByProductName({
     required String name,
     required int inventoryId,
+    int limit = 20,
   }) async {
     final db = await database;
     final normalized = name.trim().toLowerCase();
@@ -1084,8 +1099,9 @@ class DatabaseHelper {
       'SELECT i.* FROM inventory i'
       ' INNER JOIN products p ON p.barcode = i.barcode'
       ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
-      ' ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC',
-      ['%$normalized%', inventoryId],
+      ' ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC'
+      ' LIMIT ?',
+      ['%$normalized%', inventoryId, limit],
     );
   }
 }
