@@ -959,4 +959,87 @@ void main() {
     expect(find.text('Milk'), findsNothing);
     expect(find.byIcon(Icons.add_circle_outline), findsNothing);
   });
+
+  testWidgets('builds cards lazily and reveals offscreen items on scroll', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final items = [
+      for (var i = 1; i <= 40; i++)
+        testItem(
+          'Item $i',
+          barcode: '$i',
+          expiryDate: now.add(const Duration(days: 30)),
+          id: i,
+        ),
+    ];
+
+    final mockDb = _createMockDb(
+      items: items,
+      inventories: [
+        {'id': 1, 'name': 'Home'},
+      ],
+    );
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: _homeScreenOverrides(
+        mockDb: mockDb,
+        inventories: [
+          {'id': 1, 'name': 'Home'},
+        ],
+      ),
+    );
+
+    final builtCards = find.byType(InventoryCard).evaluate().length;
+    expect(builtCards, lessThan(items.length));
+
+    final verticalList = find.byWidgetPredicate(
+      (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+    );
+    await tester.scrollUntilVisible(
+      find.text('Item 40'),
+      300,
+      maxScrolls: 150,
+      scrollable: verticalList,
+    );
+
+    expect(find.text('Item 40'), findsOneWidget);
+  });
+
+  testWidgets('shows an item expiring exactly expiringSoonDays from now', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final items = [
+      testItem(
+        'Milk',
+        barcode: '1',
+        expiryDate: now.add(const Duration(days: 3)),
+      ),
+    ];
+
+    final mockDb = _createMockDb(
+      items: items,
+      inventories: [
+        {'id': 1, 'name': 'Home'},
+      ],
+    );
+    await pumpApp(
+      tester,
+      const HomeScreen(),
+      imageCacheMock: mockImageCache,
+      overrides: _homeScreenOverrides(
+        mockDb: mockDb,
+        inventories: [
+          {'id': 1, 'name': 'Home'},
+        ],
+      ),
+    );
+
+    expect(find.text('Milk'), findsOneWidget);
+    expect(find.text('Good'), findsAtLeast(1));
+    expect(find.text('Expiring soon'), findsNothing);
+  });
 }

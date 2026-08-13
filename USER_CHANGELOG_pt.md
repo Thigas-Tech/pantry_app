@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A lista inicial agora carrega apenas os itens que estao visiveis, entao
+  percorrer despensas grandes e mais suave e usa menos memoria.
+
+- Itens que expiram exatamente daqui a alguns dias (a janela de
+  "expira em breve") nao desaparecem mais da lista por um dia: eles
+  aparecem em "Bom" ate entrarem na janela de expiracao proxima.
+
 - O app nao mostra mais brevemente a despensa, o tema ou as configuracoes
   erradas logo apos a abertura: os valores salvos agora sao carregados
   antes do primeiro quadro ser renderizado.

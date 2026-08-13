@@ -4,6 +4,28 @@
 
 ### Fixed
 
+- **Items expiring exactly N days from now disappear from the home list
+  (audit P1)**: the "good" bucket used a time-of-day-aware threshold
+  while the expiring-soon bucket used a date-only one, so an item whose
+  expiry date was exactly expiringSoonDays away fell into neither bucket
+  for a day. Grouping now uses one date-only threshold; the item shows
+  under Good.
+
+### Performance
+
+- **Lazy home inventory list (audit P1)**: the home list was an eager
+  [ListView] with children: every card, its price provider, and its image
+  future were created for all items regardless of visibility. It is now a
+  lazy [ListView.builder] over a flattened section index
+  ([InventoryGrouping] in lib/utils/inventory_grouping.dart), and the
+  expiry groups are computed once per change of the items, the
+  expiring-soon window, or the calendar day instead of re-filtering and
+  re-parsing dates on every build. Section headers are a shared
+  [SectionHeader] widget. (lib/screens/home_screen.dart,
+  lib/utils/inventory_grouping.dart, lib/widgets/section_header.dart,
+  test/utils/inventory_grouping_test.dart,
+  test/screens/home_screen_test.dart)
+
 - **Placeholder-state notifiers (audit Q5)**: active inventory, settings,
   theme mode and the onboarding flag are now AsyncNotifiers that load
   their persisted values in build — no more first-frame placeholder values
