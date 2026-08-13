@@ -1,6 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pantry_app/providers/firebase_cache_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 
@@ -16,6 +21,10 @@ import 'package:pantry_app/services/usda_api_client.dart';
 /// checks the production source tree and fails if a direct constructor call
 /// is reintroduced outside the allowlist.
 void main() {
+  setUpAll(() {
+    dotenv.loadFromString(isOptional: true, mergeWith: {});
+  });
+
   final bannedConstructors = <RegExp, (String, List<String>)>{
     // The negative lookahead excludes the class's own constructor
     // declaration, which is written as UsdaApiClient({...}).
@@ -71,4 +80,28 @@ void main() {
       },
     );
   }
+
+  test(
+    'usdaApiClientProvider yields one instance shared with all consumers',
+    () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final provided = container.read(usdaApiClientProvider);
+      expect(
+        identical(provided, container.read(usdaApiClientProvider)),
+        isTrue,
+      );
+
+      final firebaseCacheClient = container
+          .read(firebaseCacheProvider)
+          .usdaClient;
+      expect(identical(provided, firebaseCacheClient), isTrue);
+
+      final repositoryClient = container
+          .read(productRepositoryProvider)
+          .usdaClient;
+      expect(identical(provided, repositoryClient), isTrue);
+    },
+  );
 }
