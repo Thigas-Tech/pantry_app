@@ -14,6 +14,12 @@ void main() {
     ).readAsStringSync();
   });
 
+  group('Android backups disabled (S5)', () {
+    test('declares android:allowBackup="false"', () {
+      expect(manifest, contains('android:allowBackup="false"'));
+    });
+  });
+
   group('vestigial permissions (S7)', () {
     test('does not declare READ_EXTERNAL_STORAGE', () {
       expect(

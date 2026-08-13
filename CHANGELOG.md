@@ -4,6 +4,12 @@
 
 ### Security
 
+- **Disabled Android app-data backups (audit S5)**: [android:allowBackup]
+  is now [false], so the SQLite DB (including the unsubmitted feedback
+  queue) and SharedPreferences are no longer extractable via adb or cloud
+  backup. The manifest policy test guards the attribute.
+  (android/app/src/main/AndroidManifest.xml,
+  test/manifests/android_manifest_test.dart)
 - **Removed vestigial Android permissions (audit S7)**: dropped
   [READ_EXTERNAL_STORAGE], [SCHEDULE_EXACT_ALARM], [USE_EXACT_ALARM], and
   the [requestLegacyExternalStorage] attribute. Photo picking uses the
