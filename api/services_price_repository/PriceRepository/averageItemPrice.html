@@ -68,8 +68,10 @@
 distinct product in the given inventory, converted to <code>baseCurrency</code>,
 or null if no prices exist.</p>
 <p>Each price is converted individually before averaging so that
-mixed-currency inventories produce a meaningful average. Products held
-in larger quantities contribute proportionally more to the average.</p>
+mixed-currency inventories produce a meaningful average. Prices that
+carry a positive package size are reduced to their per-item value first
+(price / package size), matching recipe cost scaling. Products held in
+larger quantities contribute proportionally more to the average.</p>
 </section>
 
 
@@ -90,7 +92,7 @@ in larger quantities contribute proportionally more to the average.</p>
   var sum = 0.0;
   var totalQty = 0.0;
   for (final row in rows) {
-    final price = (row[&#39;price&#39;] as num).toDouble();
+    final price = _scaledLatestPrice(row);
     final currency = row[&#39;currency&#39;] as String;
     final qty = (row[&#39;total_quantity&#39;] as num?)?.toDouble() ?? 1;
     sum += await convertToBase(price, currency, baseCurrency) * qty;

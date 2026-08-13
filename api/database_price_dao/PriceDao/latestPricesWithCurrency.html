@@ -66,7 +66,10 @@
 <section class="desc markdown">
   <p>Returns the most recent price per distinct product in the inventory,
 with the total held quantity, for currency-aware averaging by the caller.</p>
-<p>Returns a list of maps with price, currency, total_quantity keys.</p>
+<p>Returns a list of maps with price, currency, package_quantity,
+package_unit, and total_quantity keys. The caller divides the price
+value by package_quantity (when positive) to obtain the per-item price
+before averaging.</p>
 </section>
 
 
@@ -79,7 +82,8 @@ with the total held quantity, for currency-aware averaging by the caller.</p>
 ) async {
   final result = await db.rawQuery(
     &#39;&#39;&#39;
-    SELECT p.price, p.currency, i.total_quantity
+    SELECT p.price, p.currency, p.package_quantity, p.package_unit,
+      i.total_quantity
     FROM prices p
     INNER JOIN (
       SELECT barcode, SUM(quantity) as total_quantity

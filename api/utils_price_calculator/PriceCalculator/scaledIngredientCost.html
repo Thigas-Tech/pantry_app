@@ -77,9 +77,12 @@ multiplies the package <code>price</code> by the fraction used.</p>
 <ul>
 <li>0.0 when the ingredient quantity is zero (nothing is used);</li>
 <li>null when the package size is missing, zero, negative, or
-non-finite, when <code>packageUnit</code> is missing, when the units belong
-to different measurement groups, or when the inputs are non-finite.</li>
+non-finite, when <code>packageUnit</code> is missing, when the price is not
+finite or positive, when the units belong to different measurement
+groups, or when the inputs are non-finite.</li>
 </ul>
+<p>The result is rounded to cents so recipe totals never carry fractional
+cents.</p>
 </section>
 
 
@@ -98,7 +101,7 @@ to different measurement groups, or when the inputs are non-finite.</li>
     return null;
   }
   if (packageUnit == null) return null;
-  if (!price.isFinite) return null;
+  if (!price.isFinite || price &lt;= 0) return null;
   if (!ingredientQuantity.isFinite) return null;
   if (ingredientQuantity &lt;= 0) return 0;
   if (!UnitConverter.areUnitsCompatible(ingredientUnit, packageUnit)) {
@@ -111,7 +114,8 @@ to different measurement groups, or when the inputs are non-finite.</li>
     packageUnit,
   );
   final scaled = price * (qtyInPackageUnits &#47; packageQty);
-  return scaled.isFinite ? scaled : null;
+  if (!scaled.isFinite) return null;
+  return Money.roundToCents(scaled);
 }</code></pre>
 </section>
 

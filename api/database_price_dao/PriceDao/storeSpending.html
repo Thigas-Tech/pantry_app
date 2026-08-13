@@ -88,7 +88,7 @@ Returns raw rows {store, total, item_count}.</p>
         GROUP BY barcode
       ),
       latest_prices AS (
-        SELECT p.barcode, p.price, p.store,
+        SELECT p.barcode, p.price, p.store, p.package_quantity,
           ib.total_quantity
         FROM prices p
         INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
@@ -104,7 +104,9 @@ Returns raw rows {store, total, item_count}.</p>
       )
       SELECT
         store,
-        SUM(price * total_quantity) AS total,
+        SUM(price * total_quantity &#47;
+          CASE WHEN package_quantity IS NOT NULL AND package_quantity &gt; 0
+            THEN package_quantity ELSE 1 END) AS total,
         COUNT(*) AS item_count
       FROM latest_prices
       GROUP BY store

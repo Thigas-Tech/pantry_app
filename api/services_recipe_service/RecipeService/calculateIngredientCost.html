@@ -71,12 +71,15 @@
 table for the given <code>inventoryId</code>, converted to <code>baseCurrency</code>.</p>
 <p>Each ingredient's cost is scaled by the fraction of the package
 actually used when a package size can be resolved. The package size is
-looked up in this order: the price row itself, the product's packaging
-quantity, then an inventory row for the same barcode. When no package
-size can be resolved, or the units are incompatible, the full price is
-charged (legacy behavior).</p>
+looked up in this order: the price row itself, then the product's
+packaging quantity. When the ingredient and package units are
+incompatible (e.g. pieces vs grams for produce), a per-piece serving
+weight is used to convert before scaling. When no package size or
+conversion can be resolved, the full price is charged (legacy
+behavior).</p>
 <p>Ingredients without a barcode, or with no price recorded in
-<code>inventoryId</code>, contribute zero. Returns 0.0 when nothing can be priced.</p>
+<code>inventoryId</code>, contribute zero. Each ingredient cost and the final
+total are rounded to cents. Returns 0.0 when nothing can be priced.</p>
 </section>
 
 
@@ -92,8 +95,9 @@ charged (legacy behavior).</p>
 }) async {
   var total = 0.0;
   for (final ingredient in ingredients) {
-    final barcode = ingredient.barcode;
-    if (barcode == null || barcode.isEmpty) continue;
+    final rawBarcode = ingredient.barcode;
+    if (rawBarcode == null || rawBarcode.isEmpty) continue;
+    final barcode = normalizeProduceBarcode(rawBarcode);
 
     final rows = await database.rawQuery(
       &#39;SELECT price, currency, package_quantity, package_unit FROM prices&#39;
@@ -110,25 +114,30 @@ charged (legacy behavior).</p>
     final packageSize = await _resolvePackageSize(
       database,
       barcode,
-      inventoryId,
       priceRow: rows.first,
     );
     if (packageSize != null) {
       cost =
-          PriceCalculator.scaledIngredientCost(
+          await _scaleIngredientCost(
+            database,
+            barcode,
+            inventoryId,
             price: price,
-            ingredientQuantity: ingredient.quantity,
-            ingredientUnit: ingredient.unit,
-            packageQuantity: packageSize.packageQuantity,
-            packageUnit: packageSize.packageUnit,
+            ingredient: ingredient,
+            package: packageSize,
           ) ??
           price;
     }
 
-    total += await currencyService.convert(cost, currency, baseCurrency);
+    final converted = await currencyService.convert(
+      cost,
+      currency,
+      baseCurrency,
+    );
+    total += Money.roundToCents(converted);
   }
 
-  return total;
+  return Money.roundToCents(total);
 }</code></pre>
 </section>
 

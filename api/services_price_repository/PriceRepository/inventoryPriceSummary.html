@@ -72,7 +72,8 @@ latest-price subquery per aggregate, which the stats screen
 previously did on every visit.</p>
 <p>The value sums per-currency subtotals converted to <code>baseCurrency</code>;
 the average is the quantity-weighted mean of the latest price per
-product. Returns nulls for total and average when no prices exist.</p>
+product, reduced to per-item values for prices that carry a package
+size. Returns nulls for total and average when no prices exist.</p>
 </section>
 
 
@@ -94,7 +95,7 @@ product. Returns nulls for total and average when no prices exist.</p>
   var totalQty = 0.0;
   final subtotals = &lt;String, double&gt;{};
   for (final row in rows) {
-    final price = (row[&#39;price&#39;] as num).toDouble();
+    final price = _scaledLatestPrice(row);
     final currency = row[&#39;currency&#39;] as String;
     final qty = (row[&#39;total_quantity&#39;] as num?)?.toDouble() ?? 1;
     weightedSum += await convertToBase(price, currency, baseCurrency) * qty;

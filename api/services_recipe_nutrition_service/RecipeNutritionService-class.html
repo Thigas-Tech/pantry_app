@@ -57,8 +57,9 @@
   <p>Aggregates nutrition data from a list of <a href="../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a>s and their
 corresponding <a href="../models_product/Product-class.html">Product</a> data.</p>
 <p>Ingredients without a barcode or whose product is not in the products map
-are skipped (they contribute zero nutrients). Piece-based ingredients
-without a known per-piece weight are also skipped.</p>
+are skipped (they contribute zero nutrients). Piece-based ingredients are
+converted using the product's USDA gram weight or the produce serving
+presets; when neither is known they are skipped.</p>
 </section>
 
 

@@ -67,8 +67,11 @@
   <p>Returns the total inventory value broken down by currency, using the
 most recent price per distinct product multiplied by the held
 quantity. Each row contains currency and subtotal columns.</p>
-<p>When all prices use the same currency, this returns a single row.
-When no items have prices, this returns an empty list.</p>
+<p>Prices that carry a positive package size are scaled per row (price x
+quantity / package size) so a dozen eggs priced for a 12-pack held as
+12 pieces contribute one package price, not twelve. When all prices use
+the same currency, this returns a single row. When no items have
+prices, this returns an empty list.</p>
 </section>
 
 
@@ -81,7 +84,10 @@ When no items have prices, this returns an empty list.</p>
 ) async {
   final result = await db.rawQuery(
     &#39;&#39;&#39;
-    SELECT p.currency, SUM(p.price * i.total_quantity) as subtotal
+    SELECT p.currency,
+      SUM(p.price * i.total_quantity &#47;
+        CASE WHEN p.package_quantity IS NOT NULL AND p.package_quantity &gt; 0
+          THEN p.package_quantity ELSE 1 END) as subtotal
     FROM prices p
     INNER JOIN (
       SELECT barcode, SUM(quantity) as total_quantity

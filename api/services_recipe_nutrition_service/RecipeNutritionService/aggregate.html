@@ -94,7 +94,15 @@ Ingredients whose barcode is null or not present in the map are skipped.
     final product = productsByBarcode[ingredient.barcode];
     if (product == null) continue;
 
-    final grams = _convertToGrams(ingredient.quantity, ingredient.unit);
+    final perPieceWeightG = ingredient.unit == &#39;pieces&#39;
+        ? _resolvePerPieceWeight(product, ingredient.name)
+        : null;
+    final grams = _convertToGrams(
+      ingredient.quantity,
+      ingredient.unit,
+      perPieceWeightG: perPieceWeightG,
+      ingredientName: ingredient.name,
+    );
     if (grams &lt;= 0) continue;
 
     final factor = grams &#47; 100;

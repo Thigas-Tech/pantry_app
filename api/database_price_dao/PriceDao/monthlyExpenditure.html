@@ -88,7 +88,7 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
         GROUP BY barcode
       ),
       latest_prices AS (
-        SELECT p.barcode, p.price, p.date_purchased,
+        SELECT p.barcode, p.price, p.date_purchased, p.package_quantity,
           ib.total_quantity
         FROM prices p
         INNER JOIN inventory_barcodes ib ON p.barcode = ib.barcode
@@ -103,7 +103,9 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
       )
       SELECT
         strftime(&#39;%Y-%m&#39;, date_purchased &#47; 1000, &#39;unixepoch&#39;) AS month,
-        SUM(price * total_quantity) AS total
+        SUM(price * total_quantity &#47;
+          CASE WHEN package_quantity IS NOT NULL AND package_quantity &gt; 0
+            THEN package_quantity ELSE 1 END) AS total
       FROM latest_prices
       GROUP BY month
       ORDER BY month ASC
