@@ -36,14 +36,16 @@ jobs:
         working-directory: firebase_tests
 
       - name: Run security rules against the emulator
-        run: ./firebase_tests/node_modules/.bin/firebase emulators:exec \
-          --only firestore --project demo-pantry-app \
-          'node firebase_tests/firestore.rules.test.js'
+        run: |
+          ./firebase_tests/node_modules/.bin/firebase emulators:exec \
+            --only firestore --project demo-pantry-app \
+            'node firebase_tests/firestore.rules.test.js'
 
   deploy-rules:
     name: Deploy Firestore rules
-    if: github.ref == 'refs/heads/main' && secrets.FIREBASE_TOKEN != ''
     runs-on: ubuntu-latest
+    env:
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
     steps:
       - name: Clone the repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -60,7 +62,7 @@ jobs:
         working-directory: firebase_tests
 
       - name: Deploy Firestore security rules
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: ./firebase_tests/node_modules/.bin/firebase deploy \
-          --only firestore:rules --project pantry-app-c5c36
+        if: github.ref == 'refs/heads/main' && env.FIREBASE_TOKEN != ''
+        run: |
+          ./firebase_tests/node_modules/.bin/firebase deploy \
+            --only firestore:rules --project pantry-app-c5c36
