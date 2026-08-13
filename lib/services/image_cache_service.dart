@@ -100,7 +100,8 @@ class ImageCacheService {
 
   Future<String?> _cacheImageImpl(String imageUrl, String barcode) async {
     final cacheDir = await _imageCacheDirectory();
-    final cachedFile = File('${cacheDir.path}/$barcode.webp');
+    final safeBarcode = _sanitizeBarcode(barcode);
+    final cachedFile = File('${cacheDir.path}/$safeBarcode.webp');
 
     if (await cachedFile.exists()) {
       return cachedFile.path;
@@ -123,6 +124,15 @@ class ImageCacheService {
       logError('Failed to cache image for $barcode: $e');
       return null;
     }
+  }
+
+  /// Replaces characters that are unsafe in a file name with underscores.
+  ///
+  /// Barcodes originate from OFF/USDA records and camera scans, so a
+  /// malicious value such as `../../evil` must not escape the cache
+  /// directory. Keeps alphanumerics, underscore and hyphen.
+  String _sanitizeBarcode(String barcode) {
+    return barcode.replaceAll(RegExp('[^A-Za-z0-9_-]'), '_');
   }
 
   /// Evicts the oldest cached files (by last-modified time) until the
