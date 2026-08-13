@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
@@ -79,13 +80,21 @@ Future<PantryStats> stats(Ref ref) async {
   final monthlyRows = results[13] as List<Map<String, dynamic>>;
   final storeRows = results[14] as List<Map<String, dynamic>>;
   final nutriscoreByStoreRows = results[15] as List<Map<String, dynamic>>;
-  // Compute parent categories from hierarchy data.
+  // Compute parent categories from hierarchy data in a background
+  // isolate (per-row JSON decoding was previously on the UI path).
+  final parentNames = await compute(
+    _parentCategoriesForRows,
+    [
+      for (final row in productCategories)
+        (
+          row['category'] as String?,
+          row['categories_hierarchy'] as String?,
+        ),
+    ],
+  );
   final parentCounts = <String, int>{};
-  for (final row in productCategories) {
-    final parent = parentCategory(
-      row['category'] as String?,
-      row['categories_hierarchy'] as String?,
-    );
+  for (var i = 0; i < parentNames.length; i++) {
+    final parent = parentNames[i];
     if (parent != null) {
       parentCounts[parent] = (parentCounts[parent] ?? 0) + 1;
     }
@@ -121,23 +130,18 @@ Future<PantryStats> stats(Ref ref) async {
     }
   }
 
+  final priceSummary = await priceRepo.inventoryPriceSummary(
+    activeId,
+    baseCurrency: baseCurrency,
+  );
+
   return PantryStats(
     totalProducts: prodCount,
     totalItems: itemCount,
     averageNutriscoreNumeric: avgNutri,
-    totalValue:
-        await priceRepo.totalInventoryValue(
-          activeId,
-          baseCurrency: baseCurrency,
-        ) ??
-        0,
-    averagePrice:
-        await priceRepo.averageItemPrice(
-          activeId,
-          baseCurrency: baseCurrency,
-        ) ??
-        0,
-    pricedItemCount: await priceRepo.pricedItemCount(activeId),
+    totalValue: priceSummary.total ?? 0,
+    averagePrice: priceSummary.average ?? 0,
+    pricedItemCount: priceSummary.count,
     expiredCount: expiryDist['expired'] ?? 0,
     expiringSoonCount: expiryDist['expiring'] ?? 0,
     goodCount: expiryDist['good'] ?? 0,
@@ -247,4 +251,15 @@ String? parentCategory(String? rawCategory, String? hierarchyJson) {
     }
   }
   return null;
+}
+
+/// Maps each (category, hierarchyJson) pair to its parent category.
+///
+/// Top-level compute() target so per-row JSON decoding runs off the UI
+/// isolate when the stats provider processes the full products scan.
+List<String?> _parentCategoriesForRows(List<(String?, String?)> rows) {
+  return [
+    for (final (category, hierarchy) in rows)
+      parentCategory(category, hierarchy),
+  ];
 }

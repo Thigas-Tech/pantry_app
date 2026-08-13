@@ -12,6 +12,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
@@ -33,6 +34,8 @@ class _FailingHttpClient extends http.BaseClient {
     throw Exception('FailingHttpClient: no network in test');
   }
 }
+
+class _MockPriceRepository extends Mock implements PriceRepository {}
 
 class _TestSettingsNotifier extends SettingsNotifier {
   _TestSettingsNotifier(this._settings);
@@ -318,6 +321,51 @@ void main() {
       expect(stats.localPhotos.total, 1);
       expect(stats.offPhotos.total, 1);
       expect(stats.offPhotos.withProduct, 0);
+    });
+
+    test('derives price aggregates from a single latest-price pass', () async {
+      final mockPriceRepo = _MockPriceRepository();
+      when(
+        () => mockPriceRepo.inventoryPriceSummary(1, baseCurrency: 'EUR'),
+      ).thenAnswer((_) async => (total: 42.5, average: 7.5, count: 3));
+
+      final container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(dbHelper),
+          activeInventoryProvider.overrideWith(
+            _TestActiveInventoryNotifier.new,
+          ),
+          settingsProvider.overrideWith(
+            () => _TestSettingsNotifier(
+              const Settings(baseCurrency: 'EUR'),
+            ),
+          ),
+          priceRepositoryProvider.overrideWithValue(mockPriceRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final stats = await container.read(statsProvider.future);
+
+      expect(stats.totalValue, 42.5);
+      expect(stats.averagePrice, 7.5);
+      expect(stats.pricedItemCount, 3);
+      verify(
+        () => mockPriceRepo.inventoryPriceSummary(1, baseCurrency: 'EUR'),
+      ).called(1);
+      verifyNever(
+        () => mockPriceRepo.totalInventoryValue(
+          any(),
+          baseCurrency: any(named: 'baseCurrency'),
+        ),
+      );
+      verifyNever(
+        () => mockPriceRepo.averageItemPrice(
+          any(),
+          baseCurrency: any(named: 'baseCurrency'),
+        ),
+      );
+      verifyNever(() => mockPriceRepo.pricedItemCount(any()));
     });
 
     /// Verifies [statsProvider] handles product with null category
