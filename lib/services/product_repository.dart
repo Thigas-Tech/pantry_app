@@ -437,6 +437,12 @@ class ProductRepository {
     return _db.deleteInventoryItem(id);
   }
 
+  /// Deletes multiple inventory items in one batch by their [ids].
+  Future<int> deleteInventoryItems(List<int> ids) {
+    logInfo('Deleting ${ids.length} inventory item(s) in batch');
+    return _db.deleteInventoryItems(ids);
+  }
+
   /// Moves multiple inventory items to a different inventory (pantry).
   Future<void> moveItemsToInventory(
     List<int> itemIds,

@@ -175,17 +175,13 @@ void main() {
   });
 
   group('pendingSyncCountProvider', () {
-    test('delegates to repository.getPendingSyncPrices', () async {
-      final pending = [
-        const Price(barcode: '1', price: 1, syncStatus: 'pending'),
-        const Price(barcode: '2', price: 2, syncStatus: 'pending'),
-      ];
-      when(() => mockRepo.getPendingSyncPrices()).thenAnswer(
-        (_) async => pending,
-      );
+    test('delegates to repository.getPendingSyncCount', () async {
+      when(() => mockRepo.getPendingSyncCount()).thenAnswer((_) async => 2);
 
       final result = await container.read(pendingSyncCountProvider.future);
       expect(result, 2);
+      verify(() => mockRepo.getPendingSyncCount()).called(1);
+      verifyNever(() => mockRepo.getPendingSyncPrices());
     });
   });
 }

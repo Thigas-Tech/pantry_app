@@ -227,6 +227,10 @@ class PriceRepository {
   Future<List<Price>> getPendingSyncPrices() =>
       _db.getPricesBySyncStatus(priceSyncPending);
 
+  /// Counts prices pending sync to Open Prices without loading the rows.
+  Future<int> getPendingSyncCount() =>
+      _db.countPricesBySyncStatus(priceSyncPending);
+
   /// Syncs all pending prices to the Open Prices database.
   ///
   /// Returns a [SyncResult] with counts of synced/failed prices.

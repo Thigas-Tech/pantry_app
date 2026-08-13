@@ -71,9 +71,7 @@ class HomeScreenController extends _$HomeScreenController {
   Future<void> deleteSelected() async {
     if (state.selectedIds.isEmpty) return;
     final repo = ref.read(productRepositoryProvider);
-    for (final id in state.selectedIds) {
-      await repo.deleteInventoryItem(id);
-    }
+    await repo.deleteInventoryItems(state.selectedIds.toList());
     if (ref.mounted) ref.invalidate(pantryProvider);
     exitSelectionMode();
   }

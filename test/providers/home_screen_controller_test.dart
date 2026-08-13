@@ -23,8 +23,9 @@ void main() {
   }
 
   test('deleteSelected delegates to the product repository', () async {
-    when(() => mockRepo.deleteInventoryItem(1)).thenAnswer((_) async => 1);
-    when(() => mockRepo.deleteInventoryItem(2)).thenAnswer((_) async => 1);
+    when(
+      () => mockRepo.deleteInventoryItems([1, 2]),
+    ).thenAnswer((_) async => 2);
 
     final container = containerWith();
     final notifier = container.read(homeScreenControllerProvider.notifier)
@@ -33,8 +34,8 @@ void main() {
 
     await notifier.deleteSelected();
 
-    verify(() => mockRepo.deleteInventoryItem(1)).called(1);
-    verify(() => mockRepo.deleteInventoryItem(2)).called(1);
+    verify(() => mockRepo.deleteInventoryItems([1, 2])).called(1);
+    verifyNever(() => mockRepo.deleteInventoryItems(any()));
     expect(
       container.read(homeScreenControllerProvider).selectionMode,
       isFalse,
@@ -47,7 +48,7 @@ void main() {
 
     await notifier.deleteSelected();
 
-    verifyNever(() => mockRepo.deleteInventoryItem(any()));
+    verifyNever(() => mockRepo.deleteInventoryItems(any()));
   });
 
   test('moveSelected delegates to the product repository', () async {

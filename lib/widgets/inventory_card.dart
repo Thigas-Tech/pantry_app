@@ -246,17 +246,30 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
   }
 
   Widget _buildSubtitle(AppLocalizations l10n) {
-    final settings = ref.watch(settingsProvider).value ?? const Settings();
-    final inventorySystem = UnitResolver.systemFor(
-      settings: settings,
-      context: UnitContext.inventory,
+    final inventorySystem = ref.watch(
+      settingsProvider.select(
+        (s) => UnitResolver.systemFor(
+          settings: s.value ?? const Settings(),
+          context: UnitContext.inventory,
+        ),
+      ),
+    );
+    final weightPref = ref.watch(
+      settingsProvider.select(
+        (s) => s.value?.preferredWeightUnit ?? WeightUnitPreference.auto,
+      ),
+    );
+    final volumePref = ref.watch(
+      settingsProvider.select(
+        (s) => s.value?.preferredVolumeUnit ?? VolumeUnitPreference.auto,
+      ),
     );
     final display = UnitConverter.displayUnit(
       widget.item.quantity,
       widget.item.unit,
       inventorySystem,
-      weightPref: settings.preferredWeightUnit,
-      volumePref: settings.preferredVolumeUnit,
+      weightPref: weightPref,
+      volumePref: volumePref,
     );
     final sb = StringBuffer()
       ..write(
@@ -273,8 +286,10 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
   }
 
   Widget _buildPriceLine(AppLocalizations l10n) {
-    final settings = ref.watch(settingsProvider).value ?? const Settings();
-    if (!settings.priceTrackingEnabled) return const SizedBox.shrink();
+    final priceTrackingEnabled = ref.watch(
+      settingsProvider.select((s) => s.value?.priceTrackingEnabled ?? false),
+    );
+    if (!priceTrackingEnabled) return const SizedBox.shrink();
 
     final activeId = ref.watch(activeInventoryProvider).value ?? 1;
     final priceAsync = ref.watch(

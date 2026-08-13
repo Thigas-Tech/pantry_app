@@ -76,8 +76,7 @@ Future<int> pricedItemCount(Ref ref) {
 
 /// Provides the count of prices pending sync to Open Prices.
 @riverpod
-Future<int> pendingSyncCount(Ref ref) async {
+Future<int> pendingSyncCount(Ref ref) {
   final repo = ref.watch(priceRepositoryProvider);
-  final pending = await repo.getPendingSyncPrices();
-  return pending.length;
+  return repo.getPendingSyncCount();
 }

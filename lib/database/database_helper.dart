@@ -81,8 +81,6 @@ class DatabaseHelper {
 
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
-  Database? _database;
-
   /// DAO for the products table.
   final ProductDao productDao = const ProductDao();
 
@@ -130,12 +128,13 @@ class DatabaseHelper {
   /// version in [allMigrations].
   static const int databaseVersion = 39;
 
-  /// The lazily‑opened database instance.
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+  /// The lazily‑opened database instance, with in-flight dedup so several
+  /// concurrent first accesses share a single open.
+  Future<Database> get database {
+    return _databaseFuture ??= _initDatabase();
   }
+
+  Future<Database>? _databaseFuture;
 
   Future<Database> _initDatabase() async {
     final dbPath = _customPath ?? (await _getDefaultPath());
@@ -596,6 +595,12 @@ class DatabaseHelper {
     return inventoryDao.delete(db, id);
   }
 
+  /// Deletes multiple inventory items in one batch by their IDs.
+  Future<int> deleteInventoryItems(List<int> ids) async {
+    final db = await database;
+    return inventoryDao.deleteMany(db, ids);
+  }
+
   /// Moves multiple inventory items to a different inventory (pantry).
   Future<void> moveItemsToInventory(
     List<int> itemIds,
@@ -770,6 +775,12 @@ class DatabaseHelper {
   Future<List<Price>> getPricesBySyncStatus(String syncStatus) async {
     final db = await database;
     return priceDao.getBySyncStatus(db, syncStatus);
+  }
+
+  /// Counts prices with the given [syncStatus] without loading the rows.
+  Future<int> countPricesBySyncStatus(String syncStatus) async {
+    final db = await database;
+    return priceDao.countBySyncStatus(db, syncStatus);
   }
 
   // ---- Shopping list (delegating to ShoppingListDao) ------------
