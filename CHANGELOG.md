@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### Performance
+
+- **Futures created in build() moved to cached providers (audit P2)**:
+  product detail, settings, and recipe screens re-created futures inside
+  build(), so any rebuild re-ran the DB query or image-cache call and the
+  FutureBuilders flashed the loading state. New autoDispose
+  FutureProvider families ([inventoryForBarcodeProvider],
+  [cachedImageProvider], [recipeCostProvider], [averageRecipeCostProvider],
+  [canScheduleExactNotificationsProvider], [currencyCacheSizeProvider],
+  [pendingFeedbackCountProvider]) follow the existing price-provider
+  pattern; mutation handlers invalidate the family instead of bumping the
+  hand-rolled inventory-version counter, which was deleted. The recipe
+  list's per-card ingredient-count future now reuses the existing
+  [allRecipeIngredientsProvider] family. (lib/providers/*, 
+  lib/screens/product_detail_screen.dart, lib/screens/settings_screen.dart,
+  lib/screens/recipe_list_screen.dart, lib/screens/recipe_detail_screen.dart,
+  test/providers/*, test/screens/*)
+
 ### Fixed
 
 - **Items expiring exactly N days from now disappear from the home list

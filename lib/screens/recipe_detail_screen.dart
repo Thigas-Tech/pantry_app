@@ -137,20 +137,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     }
   }
 
-  /// Computes the recipe cost for the widget's recipe, resolving the
-  /// active inventory and base currency asynchronously.
-  Future<double> _recipeCost() async {
-    final activeId = await ref.read(activeInventoryProvider.future);
-    final baseCurrency = (await ref.read(settingsProvider.future)).baseCurrency;
-    return ref
-        .read(recipeServiceProvider)
-        .calculateRecipeCost(
-          widget.recipeId,
-          activeInventoryId: activeId,
-          baseCurrency: baseCurrency,
-        );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -158,6 +144,17 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     final priceTrackingEnabled = settings.priceTrackingEnabled;
     final currencyCode = settings.baseCurrency;
     final symbol = currencySymbolFor(currencyCode);
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
+    final cost =
+        ref
+            .watch(
+              recipeCostProvider((widget.recipeId, activeId, currencyCode)),
+            )
+            .value ??
+        0.0;
+    final costPerServing = _recipe != null && _recipe!.servings > 0
+        ? cost / _recipe!.servings
+        : 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -288,58 +285,7 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   Text(_recipe!.instructions),
                   const SizedBox(height: 16),
                 ],
-                FutureBuilder<double>(
-                  future: _recipeCost(),
-                  builder: (context, snapshot) {
-                    final cost = snapshot.data ?? 0.0;
-                    final formatted = '$symbol${cost.toStringAsFixed(2)}';
-                    final servings = _recipe!.servings;
-                    final perServing = servings > 0 ? cost / servings : 0.0;
-                    final perServingFormatted = perServing > 0
-                        ? '$symbol${perServing.toStringAsFixed(2)}'
-                        : null;
-                    return Column(
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              l10n.recipeCost,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            const Spacer(),
-                            PriceMask(
-                              formattedPrice: formatted,
-                              child: Text(
-                                formatted,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (perServingFormatted != null) ...[
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Text(
-                                l10n.costPerServing,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              const Spacer(),
-                              PriceMask(
-                                formattedPrice: perServingFormatted,
-                                child: Text(
-                                  perServingFormatted,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    );
-                  },
-                ),
+                _buildCostSection(l10n, symbol, cost, costPerServing),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -362,42 +308,99 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
     );
   }
 
+  /// Builds the recipe cost row and the per-serving breakdown, if the
+  /// recipe has servings.
+  Widget _buildCostSection(
+    AppLocalizations l10n,
+    String symbol,
+    double cost,
+    double costPerServing,
+  ) {
+    final formatted = '$symbol${cost.toStringAsFixed(2)}';
+    final perServingFormatted = costPerServing > 0
+        ? '$symbol${costPerServing.toStringAsFixed(2)}'
+        : null;
+    return Column(
+      children: [
+        Row(
+          children: [
+            Text(
+              l10n.recipeCost,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const Spacer(),
+            PriceMask(
+              formattedPrice: formatted,
+              child: Text(
+                formatted,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (perServingFormatted != null) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Text(
+                l10n.costPerServing,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const Spacer(),
+              PriceMask(
+                formattedPrice: perServingFormatted,
+                child: Text(
+                  perServingFormatted,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _buildIngredientImage(String? imageUrl, String? barcode) {
     if (imageUrl == null || barcode == null) {
       return _fallbackIngredientIcon();
     }
-    final imageCache = ref.read(imageCacheProvider);
-    return FutureBuilder<String?>(
-      future: imageCache.cacheImage(imageUrl, barcode),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
-          return ClipOval(
-            child: Image.file(
-              File(snapshot.data!),
-              width: 40,
-              height: 40,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => _fallbackIngredientIcon(),
-            ),
+    final imagePath = ref.watch(cachedImageProvider((imageUrl, barcode)));
+    return imagePath.when(
+      data: (path) => path != null
+          ? ClipOval(
+              child: Image.file(
+                File(path),
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => _fallbackIngredientIcon(),
+              ),
+            )
+          : _networkIngredientImage(imageUrl),
+      loading: () => _networkIngredientImage(imageUrl),
+      error: (_, _) => _networkIngredientImage(imageUrl),
+    );
+  }
+
+  Widget _networkIngredientImage(String imageUrl) {
+    return ClipOval(
+      child: Image.network(
+        imageUrl,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return CircleAvatar(
+            radius: 20,
+            child: ProgressIndicatorHelper.build(),
           );
-        }
-        return ClipOval(
-          child: Image.network(
-            imageUrl,
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
-              return CircleAvatar(
-                radius: 20,
-                child: ProgressIndicatorHelper.build(),
-              );
-            },
-            errorBuilder: (_, _, _) => _fallbackIngredientIcon(),
-          ),
-        );
-      },
+        },
+        errorBuilder: (_, _, _) => _fallbackIngredientIcon(),
+      ),
     );
   }
 

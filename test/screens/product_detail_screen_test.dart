@@ -32,10 +32,13 @@ import 'dart:typed_data';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart'; // for Override
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
@@ -46,6 +49,7 @@ import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
@@ -1779,6 +1783,74 @@ void main() {
       ).called(1);
     });
   });
+
+  testWidgets(
+    'inventory list does not refetch or flash loading when the screen '
+    'rebuilds',
+    (tester) async {
+      setLargeScreen(tester);
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer(
+        (_) async => const [InventoryItem(barcode: '5901234123457')],
+      );
+
+      final mockImageCache = MockImageCacheService();
+      when(
+        () => mockImageCache.cacheImage(any(), any()),
+      ).thenAnswer((_) async => null);
+
+      final container = ProviderContainer(
+        overrides: [
+          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+          imageCacheProvider.overrideWithValue(mockImageCache),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      Future<void> pumpDetail(Product product) {
+        return tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              locale: const Locale('en'),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: ProductDetailScreen(product: product),
+            ),
+          ),
+        );
+      }
+
+      await pumpDetail(testProduct);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Pantry'), findsOneWidget);
+
+      // A fresh query would now hang forever: any refetch on rebuild would
+      // leave the list stuck on the loading spinner.
+      when(
+        () => mockRepo.getInventoryForBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) => Completer<List<InventoryItem>>().future);
+
+      await pumpDetail(testProduct.copyWith(brand: 'Changed'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.textContaining('Pantry'), findsOneWidget);
+    },
+  );
 }
 
 // ---------------------------------------------------------------------------

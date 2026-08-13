@@ -13,3 +13,11 @@ part 'notification_service_provider.g.dart';
 NotificationService notificationService(Ref ref) {
   return FlutterNotificationService();
 }
+
+/// Provides whether the platform allows scheduling exact alarms.
+///
+/// autoDispose: only needed while the settings screen is visible.
+@riverpod
+Future<bool?> canScheduleExactNotifications(Ref ref) {
+  return ref.read(notificationServiceProvider).canScheduleExactNotifications();
+}

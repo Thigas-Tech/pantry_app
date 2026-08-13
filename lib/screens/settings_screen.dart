@@ -213,22 +213,16 @@ class SettingsScreen extends ConsumerWidget {
               ),
               ListTile(
                 title: Text(l10n.testScheduledNotification),
-                subtitle: FutureBuilder<bool?>(
-                  future: ref
-                      .read(notificationServiceProvider)
-                      .canScheduleExactNotifications(),
-                  builder: (context, snapshot) {
-                    if (snapshot.data == false) {
-                      return Text(
+                subtitle:
+                    ref.watch(canScheduleExactNotificationsProvider).value ==
+                        false
+                    ? Text(
                         l10n.exactAlarmsDeniedHint,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.error,
                         ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
+                      )
+                    : const SizedBox.shrink(),
                 onTap: () async {
                   if (!context.mounted) return;
                   final proceed = await _showPermissionRationaleIfNeeded(
@@ -481,24 +475,17 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: Text(l10n.flushCacheSub),
                 trailing: Consumer(
                   builder: (context, ref, child) {
-                    return FutureBuilder<int>(
-                      future: ref
-                          .read(currencyServiceProvider)
-                          .cacheSizeBytes(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == 0) {
-                          return const SizedBox.shrink();
-                        }
-                        return Text(
-                          _formatBytes(snapshot.data!, l10n),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                        );
-                      },
+                    final size = ref.watch(currencyCacheSizeProvider).value;
+                    if (size == null || size == 0) {
+                      return const SizedBox.shrink();
+                    }
+                    return Text(
+                      _formatBytes(size, l10n),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant,
+                      ),
                     );
                   },
                 ),
@@ -525,31 +512,28 @@ class SettingsScreen extends ConsumerWidget {
                 Consumer(
                   builder: (context, ref, _) {
                     final service = ref.watch(githubIssueServiceProvider);
-                    return FutureBuilder<int>(
-                      future: service.pendingCount(),
-                      builder: (context, snapshot) {
-                        final count = snapshot.data ?? 0;
-                        if (count == 0) return const SizedBox.shrink();
-                        return ListTile(
-                          leading: const Icon(Icons.cloud_upload_outlined),
-                          title: Text(l10n.pendingFeedback(count)),
-                          trailing: TextButton(
-                            onPressed: () async {
-                              final result = await service.flushQueue();
-                              if (context.mounted) {
-                                SnackbarHelper.showInfo(
-                                  context,
-                                  l10n.submissionResult(
-                                    result.failed,
-                                    result.submitted,
-                                  ),
-                                );
-                              }
-                            },
-                            child: Text(l10n.retryNow),
-                          ),
-                        );
-                      },
+                    final count =
+                        ref.watch(pendingFeedbackCountProvider).value ?? 0;
+                    if (count == 0) return const SizedBox.shrink();
+                    return ListTile(
+                      leading: const Icon(Icons.cloud_upload_outlined),
+                      title: Text(l10n.pendingFeedback(count)),
+                      trailing: TextButton(
+                        onPressed: () async {
+                          final result = await service.flushQueue();
+                          ref.invalidate(pendingFeedbackCountProvider);
+                          if (context.mounted) {
+                            SnackbarHelper.showInfo(
+                              context,
+                              l10n.submissionResult(
+                                result.failed,
+                                result.submitted,
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(l10n.retryNow),
+                      ),
                     );
                   },
                 ),

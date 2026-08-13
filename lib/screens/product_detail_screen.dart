@@ -13,6 +13,7 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
+import 'package:pantry_app/providers/inventory_for_barcode_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
@@ -61,11 +62,11 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// ## State
 ///
-/// The screen is a [ConsumerStatefulWidget] because it needs to rebuild the
-/// inventory list after adding, editing, or deleting an item. A simple
-/// counter _inventoryVersion is incremented after every mutation; it is
-/// used as the [ValueKey] of the [FutureBuilder] so that the future is
-/// re‑evaluated and the list refreshes.
+/// The screen is a [ConsumerStatefulWidget] because it manages inventory
+/// operations and the image service lifecycle. The inventory list is
+/// provided by [inventoryForBarcodeProvider]; after adding, editing, or
+/// deleting an item the provider family is invalidated so the list
+/// refreshes.
 ///
 /// ## Expiry suggestions
 ///
@@ -93,10 +94,6 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
-  /// Incremented after every inventory mutation to force the [FutureBuilder]
-  /// to re‑fetch the inventory list.
-  int _inventoryVersion = 0;
-
   /// The latest product snapshot. Starts from [ProductDetailScreen.product]
   /// and is refreshed from the local cache after a submission retry or when
   /// the submission notifier reports a terminal state for this barcode.
@@ -136,10 +133,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider).value ?? const Settings();
     final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-    final repo = ref.watch(productRepositoryProvider);
-    final inventoryFuture = repo.getInventoryForBarcode(
-      _product.barcode,
-      inventoryId: activeId,
+    final inventoryFuture = ref.watch(
+      inventoryForBarcodeProvider((_product.barcode, activeId)).future,
     );
 
     final priceTrackingEnabled =
@@ -192,68 +187,17 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                 tag: 'detail_${_product.barcode}',
                 child: Consumer(
                   builder: (context, ref, _) {
-                    final imageCache = ref.read(imageCacheProvider);
-                    return FutureBuilder<String?>(
-                      future: imageCache.cacheImage(
-                        _product.imageUrl,
-                        _product.barcode,
+                    final imagePath = ref.watch(
+                      cachedImageProvider(
+                        (_product.imageUrl!, _product.barcode),
                       ),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data != null) {
-                          return ClipRect(
-                            child: InteractiveViewer(
-                              minScale: 0.5,
-                              maxScale: 3,
-                              child: Image.file(
-                                File(snapshot.data!),
-                                height: 200,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.broken_image, size: 48),
-                              ),
-                            ),
-                          );
-                        }
-                        return ClipRect(
-                          child: InteractiveViewer(
-                            minScale: 0.5,
-                            maxScale: 3,
-                            child: Image.network(
-                              _product.imageUrl!,
-                              height: 200,
-                              cacheWidth:
-                                  (MediaQuery.sizeOf(context).width *
-                                          MediaQuery.devicePixelRatioOf(
-                                            context,
-                                          ))
-                                      .round(),
-                              cacheHeight:
-                                  (200 * MediaQuery.devicePixelRatioOf(context))
-                                      .round(),
-                              fit: BoxFit.contain,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: ProgressIndicatorHelper.build(
-                                        value:
-                                            loadingProgress
-                                                    .expectedTotalBytes !=
-                                                null
-                                            ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
-                                            : null,
-                                      ),
-                                    );
-                                  },
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image, size: 48),
-                            ),
-                          ),
-                        );
-                      },
+                    );
+                    return imagePath.when(
+                      data: (path) => path != null
+                          ? _buildCachedProductImage(context, path)
+                          : _buildNetworkProductImage(context),
+                      loading: () => _buildNetworkProductImage(context),
+                      error: (_, _) => _buildNetworkProductImage(context),
                     );
                   },
                 ),
@@ -276,6 +220,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     final currentLocale = Localizations.localeOf(
                       context,
                     ).languageCode;
+                    final repo = ref.read(productRepositoryProvider);
                     try {
                       final product = await repo.getProduct(
                         _product.barcode,
@@ -388,9 +333,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
             const SizedBox(height: 8),
 
-            // Inventory list (rebuilds when _inventoryVersion changes)
+            // Inventory list (refreshed by invalidating
+            // inventoryForBarcodeProvider after mutations)
             FutureBuilder<List<InventoryItem>>(
-              key: ValueKey(_inventoryVersion),
               future: inventoryFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -451,6 +396,64 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               label: Text(l10n.addToShoppingList),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Invalidates the cached inventory list for this product so the next
+  /// build refetches it after a mutation.
+  void _invalidateInventory() {
+    final activeId = ref.read(activeInventoryProvider).value ?? 1;
+    ref.invalidate(inventoryForBarcodeProvider((_product.barcode, activeId)));
+  }
+
+  /// Builds the product image from a locally cached WebP file at [path].
+  Widget _buildCachedProductImage(BuildContext context, String path) {
+    return ClipRect(
+      child: InteractiveViewer(
+        minScale: 0.5,
+        maxScale: 3,
+        child: Image.file(
+          File(path),
+          height: 200,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.broken_image, size: 48),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the product image streamed from [Product.imageUrl] with a
+  /// resolution-aware decode size.
+  Widget _buildNetworkProductImage(BuildContext context) {
+    return ClipRect(
+      child: InteractiveViewer(
+        minScale: 0.5,
+        maxScale: 3,
+        child: Image.network(
+          _product.imageUrl!,
+          height: 200,
+          cacheWidth:
+              (MediaQuery.sizeOf(context).width *
+                      MediaQuery.devicePixelRatioOf(context))
+                  .round(),
+          cacheHeight: (200 * MediaQuery.devicePixelRatioOf(context)).round(),
+          fit: BoxFit.contain,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: ProgressIndicatorHelper.build(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) =>
+              const Icon(Icons.broken_image, size: 48),
         ),
       ),
     );
@@ -1080,7 +1083,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             SnackbarHelper.showInfo(context, l10n.itemAdded);
           }
         }
-        setState(() => _inventoryVersion++);
+        _invalidateInventory();
       } on Exception catch (e) {
         logError('Inventory operation failed: $e');
         if (mounted) {
@@ -1113,7 +1116,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         channelDescription: l10n.expiryChannelDescription,
       );
       logInfo('Quantity updated: ${item.barcode} — $newQuantity');
-      setState(() => _inventoryVersion++);
+      _invalidateInventory();
     } on Exception catch (e) {
       logError('Failed to update quantity: $e');
       if (mounted) {
@@ -1171,14 +1174,14 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               );
               if (mounted) {
                 SnackbarHelper.showInfo(context, l10n.itemRestored);
-                setState(() => _inventoryVersion++);
+                _invalidateInventory();
               }
             } on Exception catch (e) {
               logError('Failed to undo delete: $e');
             }
           });
         }
-        setState(() => _inventoryVersion++);
+        _invalidateInventory();
       } on Exception catch (e) {
         logError('Failed to delete item: $e');
         if (mounted) {

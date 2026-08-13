@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- As telas de detalhes do produto e de receitas nao mostram mais
+  brevemente um indicador de carregamento quando a tela atualiza por
+  outros motivos (por exemplo, apos mudar as configuracoes): os dados
+  permanecem visiveis enquanto estao atualizados.
+
 - A lista inicial agora carrega apenas os itens que estao visiveis, entao
   percorrer despensas grandes e mais suave e usa menos memoria.
 
