@@ -59,6 +59,7 @@
 <li><span class="parameter" id="fromRecipe-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, {</span></li>
 <li><span class="parameter" id="fromRecipe-param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span></li>
 <li><span class="parameter" id="fromRecipe-param-createdAt"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">createdAt</span>, </span></li>
+<li><span class="parameter" id="fromRecipe-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">recipeId</span>, </span></li>
 </ol>})
 
       
@@ -66,11 +67,12 @@
     </section>
     
 <section class="desc markdown">
-  <p>Creates an anonymized cache entry from a local <a href="../../models_recipe/Recipe-class.html">Recipe</a> and its
+  <p>Creates an obfuscated cache entry from a local <a href="../../models_recipe/Recipe-class.html">Recipe</a> and its
 <code>ingredients</code>.</p>
 <p><code>imageUrl</code> is the optional Firebase Storage URL for the recipe photo
 (never a local file path). If <code>createdAt</code> is omitted, it defaults to
-the current time.</p>
+the current time. When <code>recipeId</code> is omitted, a random UUID4 is
+generated so the document id cannot be derived from the recipe.</p>
 </section>
 
 
@@ -82,17 +84,14 @@ the current time.</p>
   List&lt;RecipeIngredient&gt; ingredients, {
   String? imageUrl,
   int? createdAt,
+  String? recipeId,
 }) {
   final now = DateTime.now().millisecondsSinceEpoch;
   final effectiveCreatedAt = createdAt ?? recipe.createdAt;
-  final recipeId = _computeRecipeId(
-    recipe.name,
-    effectiveCreatedAt,
-    recipe.inventoryId,
-  );
+  final effectiveRecipeId = recipeId ?? const Uuid().v4();
 
   return RecipeCacheEntry(
-    recipeId: recipeId,
+    recipeId: effectiveRecipeId,
     name: recipe.name,
     instructions: recipe.instructions,
     servings: recipe.servings,

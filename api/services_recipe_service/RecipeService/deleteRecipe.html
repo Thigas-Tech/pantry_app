@@ -74,15 +74,9 @@
   final recipe = await _db.getRecipe(id);
   await _db.deleteRecipe(id);
   logInfo(&#39;Recipe $id deleted&#39;);
-  if (recipe != null) {
+  if (recipe != null &amp;&amp; recipe.sharedRecipeId.isNotEmpty) {
     unawaited(
-      _cache.deleteSharedRecipe(
-        _computeSharedRecipeId(
-          recipe.name,
-          recipe.createdAt,
-          recipe.inventoryId,
-        ),
-      ),
+      _cache.deleteSharedRecipe(recipe.sharedRecipeId),
     );
   }
 }</code></pre>

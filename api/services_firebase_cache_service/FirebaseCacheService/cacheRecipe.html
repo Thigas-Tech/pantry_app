@@ -58,6 +58,7 @@
 <span class="name ">cacheRecipe</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="cacheRecipe-param-recipe"><span class="type-annotation"><a href="../../models_recipe/Recipe-class.html">Recipe</a></span> <span class="parameter-name">recipe</span>, </span></li>
 <li><span class="parameter" id="cacheRecipe-param-ingredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a></span>&gt;</span></span> <span class="parameter-name">ingredients</span>, {</span></li>
 <li><span class="parameter" id="cacheRecipe-param-imageUrl"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">imageUrl</span>, </span></li>
+<li><span class="parameter" id="cacheRecipe-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">recipeId</span>, </span></li>
 </ol>})
 
       
@@ -67,8 +68,10 @@
 <section class="desc markdown">
   <p>Writes a <a href="../../models_recipe/Recipe-class.html">Recipe</a> and its <a href="../../models_recipe_ingredient/RecipeIngredient-class.html">RecipeIngredient</a> list to the Firebase
 cache (fire-and-forget).</p>
-<p>The recipe is anonymized via <a href="../../models_recipe_cache_entry/RecipeCacheEntryConversions/fromRecipe.html">RecipeCacheEntryConversions.fromRecipe</a>
-— no local DB IDs, user IDs, or file paths are stored. Errors are
+<p>The recipe is obfuscated via <a href="../../models_recipe_cache_entry/RecipeCacheEntryConversions/fromRecipe.html">RecipeCacheEntryConversions.fromRecipe</a>
+— no local DB IDs, user IDs, or file paths are stored, and the doc id
+is a random UUID4. <code>recipeId</code> pins that id so the caller can persist
+it for later cleanup; when omitted a new one is generated. Errors are
 caught and logged.</p>
 </section>
 
@@ -80,6 +83,7 @@ caught and logged.</p>
   Recipe recipe,
   List&lt;RecipeIngredient&gt; ingredients, {
   String? imageUrl,
+  String? recipeId,
 }) async {
   if (!isAvailable) return;
   try {
@@ -87,6 +91,7 @@ caught and logged.</p>
       recipe,
       ingredients,
       imageUrl: imageUrl,
+      recipeId: recipeId,
     );
     await _firebaseClient.setRecipe(entry);
     await _upsertMeta(entry.recipeId, &#39;recipe&#39;);

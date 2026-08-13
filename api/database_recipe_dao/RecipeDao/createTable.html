@@ -82,6 +82,7 @@
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       inventory_id INTEGER NOT NULL DEFAULT 1,
+      shared_recipe_id TEXT NOT NULL DEFAULT &#39;&#39;,
       FOREIGN KEY (inventory_id) REFERENCES inventories(id)
         ON DELETE CASCADE
     )
