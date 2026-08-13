@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -58,5 +59,8 @@ FirebaseCacheService firebaseCache(Ref ref) {
     firebaseClient: client,
     usdaClient: ref.read(usdaApiClientProvider),
     offAdapter: api,
+    currentUid: () => AppConfig.firebaseEnabled
+        ? FirebaseAuth.instance.currentUser?.uid
+        : null,
   );
 }

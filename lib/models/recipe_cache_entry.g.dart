@@ -16,6 +16,7 @@ _RecipeCacheEntry _$RecipeCacheEntryFromJson(Map<String, dynamic> json) =>
       createdAt: (json['createdAt'] as num).toInt(),
       lastRefreshedAt: (json['lastRefreshedAt'] as num).toInt(),
       nextRefreshAt: (json['nextRefreshAt'] as num).toInt(),
+      ingestedBy: json['ingestedBy'] as String? ?? '',
       imageUrl: json['imageUrl'] as String?,
       schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? 1,
     );
@@ -30,6 +31,7 @@ Map<String, dynamic> _$RecipeCacheEntryToJson(_RecipeCacheEntry instance) =>
       'createdAt': instance.createdAt,
       'lastRefreshedAt': instance.lastRefreshedAt,
       'nextRefreshAt': instance.nextRefreshAt,
+      'ingestedBy': instance.ingestedBy,
       'imageUrl': ?instance.imageUrl,
       'schemaVersion': instance.schemaVersion,
     };

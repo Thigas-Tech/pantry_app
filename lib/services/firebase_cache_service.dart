@@ -42,13 +42,15 @@ class FirebaseCacheService {
   /// Creates a [FirebaseCacheService].
   ///
   /// All dependencies are required except [metaDao]; when omitted the
-  /// instance from [db] is used.
+  /// instance from [db] is used. [currentUid], when provided, resolves the
+  /// signed-in user id used to attribute shared recipe writes.
   FirebaseCacheService({
     required DatabaseHelper db,
     required this._firebaseClient,
     required this._usdaClient,
     required this._offAdapter,
     FirebaseCacheMetaDao? metaDao,
+    this.currentUid,
   }) : _db = db,
        _metaDao = metaDao ?? db.firebaseCacheMetaDao;
 
@@ -57,6 +59,10 @@ class FirebaseCacheService {
   final UsdaApiClient _usdaClient;
   final OffAdapter _offAdapter;
   final FirebaseCacheMetaDao _metaDao;
+
+  /// Resolves the anonymous-auth uid of the current user, or null when no
+  /// user is signed in (or Firebase is disabled).
+  final FutureOr<String?> Function()? currentUid;
 
   /// Whether the underlying Firebase client is available.
   bool get isAvailable => _firebaseClient.isAvailable;
@@ -358,8 +364,10 @@ class FirebaseCacheService {
   /// The recipe is obfuscated via [RecipeCacheEntryConversions.fromRecipe]
   /// — no local DB IDs, user IDs, or file paths are stored, and the doc id
   /// is a random UUID4. [recipeId] pins that id so the caller can persist
-  /// it for later cleanup; when omitted a new one is generated. Errors are
-  /// caught and logged.
+  /// it for later cleanup; when omitted a new one is generated. The write
+  /// is attributed to the signed-in user via [currentUid] so Firestore
+  /// rules can scope it to its author; when no user is signed in the
+  /// write is skipped. Errors are caught and logged.
   Future<void> cacheRecipe(
     Recipe recipe,
     List<RecipeIngredient> ingredients, {
@@ -368,11 +376,17 @@ class FirebaseCacheService {
   }) async {
     if (!isAvailable) return;
     try {
+      final uid = await currentUid?.call();
+      if (uid == null || uid.isEmpty) {
+        logWarning('cacheRecipe skipped: no signed-in user');
+        return;
+      }
       final entry = RecipeCacheEntryConversions.fromRecipe(
         recipe,
         ingredients,
         imageUrl: imageUrl,
         recipeId: recipeId,
+        ingestedBy: uid,
       );
       await _firebaseClient.setRecipe(entry);
       await _upsertMeta(entry.recipeId, 'recipe');

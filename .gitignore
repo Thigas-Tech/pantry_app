@@ -61,3 +61,5 @@ test/screens/failures/
 
 # FVM Version Cache
 .fvm/
+# Firebase rules test harness (Node)
+firebase_tests/node_modules/

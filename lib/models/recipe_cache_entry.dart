@@ -57,6 +57,12 @@ abstract class RecipeCacheEntry with _$RecipeCacheEntry {
     /// Epoch ms of next scheduled refresh.
     required int nextRefreshAt,
 
+    /// Anonymous-auth uid of the user who shared the recipe.
+    ///
+    /// Used by Firestore rules to scope create/update/delete of
+    /// recipe_cache documents to their author. Empty when not signed in.
+    @Default('') String ingestedBy,
+
     /// Optional Firebase Storage URL for the recipe photo.
     ///
     /// Null when no photo has been uploaded. Never a local file path.
@@ -88,6 +94,7 @@ extension RecipeCacheEntryConversions on RecipeCacheEntry {
     String? imageUrl,
     int? createdAt,
     String? recipeId,
+    String ingestedBy = '',
   }) {
     final now = DateTime.now().millisecondsSinceEpoch;
     final effectiveCreatedAt = createdAt ?? recipe.createdAt;
@@ -102,6 +109,7 @@ extension RecipeCacheEntryConversions on RecipeCacheEntry {
           .map(RecipeIngredientCacheConversions.fromIngredient)
           .toList(),
       createdAt: effectiveCreatedAt,
+      ingestedBy: ingestedBy,
       lastRefreshedAt: now,
       nextRefreshAt: now + recipeRefreshIntervalMs,
       imageUrl: imageUrl,

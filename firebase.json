@@ -19,6 +19,14 @@
       }
     }
   },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8080
+    }
+  },
   "auth": {
     "providers": {
       "anonymous": true,

@@ -4,6 +4,16 @@
 
 ### Security
 
+- **Firestore security rules added and deployed via CI (audit S2)**: the
+  repo shipped no rules file, so anonymous users could overwrite or poison
+  the shared product/produce cache. New `firestore.rules`: cache reads stay
+  public, product_cache/produce_cache writes require a signed-in user and a
+  schema-valid document, and recipe_cache documents carry an `ingestedBy`
+  uid so only their author can update or delete them. Rules are unit-tested
+  against the Firestore emulator (`firebase_tests/`) and deployed on main.
+  (firestore.rules new, firebase.json, .github/workflows/firebase-rules.yml
+  new, lib/models/recipe_cache_entry.dart, lib/services/firebase_cache_service.dart,
+  lib/providers/firebase_cache_provider.dart, firebase_tests/ new)
 - **Random recipe share ids (audit S8)**: the recipe_cache document id was
   a deterministic SHA-256 of name/createdAt/inventory, which low-entropy
   recipe names made dictionary-attackable. It is now a random UUID4 that
