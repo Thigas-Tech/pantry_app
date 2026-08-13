@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- O app agora abre mais rapidamente em redes lentas: o login e a
+  atualizacao dos dados em cache acontecem depois que a primeira tela
+  aparece, em vez de atrasar a abertura.
+
 - As telas de receitas agora carregam as informacoes dos produtos e os
   custos mais rapidamente, especialmente em receitas com muitos
   ingredientes.

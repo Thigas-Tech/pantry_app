@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The app now opens faster on slow networks: signing in and refreshing
+  cached data happen after the first screen appears instead of delaying
+  the start.
+
 - Recipe screens now load product information and costs faster, especially
   for recipes with many ingredients.
 

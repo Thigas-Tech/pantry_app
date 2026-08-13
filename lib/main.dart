@@ -7,14 +7,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
@@ -30,6 +28,7 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
+import 'package:pantry_app/services/app_update_handler.dart';
 import 'package:pantry_app/services/cache_refresh_coordinator.dart';
 import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/notification_background_handler.dart';
@@ -58,11 +57,14 @@ late final ProviderContainer appContainer;
 /// Startup sequence:
 /// 1. Flutter binding.
 /// 2. Environment variables loaded via flutter_dotenv.
-/// 3. App version check — clears stale caches when the app was updated.
-/// 4. Notification service initialized (timezone, channel, plugin).
-/// 5. Notification permission requested (system dialog, after first frame).
-/// 6. Database cleanup, feedback flush, cache refresh (after first frame).
-/// 7. App launched inside [UncontrolledProviderScope] so all providers
+/// 3. App version comparison (one fast platform call); the changelog
+///    flag and post-update cache flush run after the first frame.
+/// 4. Firebase initialized; the anonymous sign-in (a network call) is
+///    deferred until after the first frame.
+/// 5. Notification service initialized (timezone, channel, plugin).
+/// 6. Notification permission requested (system dialog, after first frame).
+/// 7. Database cleanup, feedback flush, cache refresh (after first frame).
+/// 8. App launched inside [UncontrolledProviderScope] so all providers
 ///    share the same [appContainer].
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -84,10 +86,8 @@ Future<void> main() async {
     try {
       await Firebase.initializeApp();
       logInfo('Firebase initialized successfully');
-      await FirebaseAuth.instance.signInAnonymously();
-      logInfo('Anonymous auth initialized');
     } on Exception catch (e) {
-      logWarning('Firebase init/auth failed (graceful degradation): $e');
+      logWarning('Firebase init failed (graceful degradation): $e');
     }
   }
 
@@ -116,7 +116,7 @@ Future<void> main() async {
   );
   logInfo('InternetConnectionChecker configured with OFF endpoints');
 
-  await _handleAppUpdate();
+  await _handleAppUpdateCheck();
 
   try {
     final notifService = appContainer.read(notificationServiceProvider);
@@ -144,6 +144,11 @@ Future<void> main() async {
     _runPostInitTasks();
   });
 
+  // Anonymous sign-in is a network call; defer it past the first frame so
+  // a slow or blocked network cannot delay startup. The Firebase cache
+  // path already degrades gracefully when auth is unavailable.
+  unawaited(_signInAnonymously());
+
   // Notification permission request — needs the Activity to be visible.
   // This runs ~100ms after the first frame so the system dialog does not
   // overlap the initial UI setup.
@@ -155,9 +160,21 @@ Future<void> main() async {
   );
 }
 
+/// Signs into Firebase anonymously after the first frame.
+Future<void> _signInAnonymously() async {
+  if (!AppConfig.firebaseEnabled) return;
+  try {
+    await FirebaseAuth.instance.signInAnonymously();
+    logInfo('Anonymous auth initialized');
+  } on Exception catch (e) {
+    logWarning('Firebase auth failed (graceful degradation): $e');
+  }
+}
+
 /// Runs non-critical post-init tasks sequentially with delays to avoid
 /// janking the first few frames.
 void _runPostInitTasks() {
+  unawaited(_handleAppUpdatePostFrame());
   unawaited(_handleColdStartNotification());
   unawaited(_scheduleCacheRefresh());
   unawaited(
@@ -252,54 +269,46 @@ Future<void> _handleColdStartNotification() async {
   }
 }
 
-/// Clears the product database and image cache when the app version changes.
+/// Compares the installed app version with the last-seen one before the
+/// first frame (a single fast platform call), remembering whether an
+/// update happened so the cache flush can run post-frame.
 ///
-/// This ensures products cached before the Nutri-Score badge feature (or any
-/// other schema change) get re-fetched from Open Food Facts with fresh data.
-///
-/// The changelog detection is content-hash‑driven (compares the hash of
-/// CHANGELOG.md file) so that new Unreleased entries surface even when the
-/// app version string has not changed between development builds.
-Future<void> _handleAppUpdate() async {
+/// The changelog content-hash check and the cache flush were moved to
+/// [_handleAppUpdatePostFrame] so startup does not block on asset loads
+/// or database writes.
+Future<void> _handleAppUpdateCheck() async {
   try {
     final prefs = await SharedPreferences.getInstance();
-    final info = await PackageInfo.fromPlatform();
-    final currentVersion = '${info.version}+${info.buildNumber}';
-    final lastVersion = prefs.getString('app_version');
-
-    // Changelog tracking — content-hash-driven, not version-driven.
-    // This ensures new [Unreleased] entries are surfaced even when the
-    // app version string has not changed between development builds.
-    final raw = await rootBundle.loadString('USER_CHANGELOG.md');
-    final contentHash = raw.hashCode.toString();
-    final lastSeenHash = prefs.getString('changelog_content_hash');
-
-    if (lastSeenHash != null && lastSeenHash != contentHash) {
-      await prefs.setString('changelog_show_pending', 'true');
-      logInfo('Changelog content changed — flagged for display');
-    }
-    await prefs.setString('changelog_content_hash', contentHash);
-
-    if (lastVersion == currentVersion) {
-      logInfo('Version unchanged ($currentVersion) — skipping cache flush');
-      return;
-    }
-
-    logInfo(
-      'App updated from ${lastVersion ?? 'first install'} to $currentVersion',
+    final handler = AppUpdateHandler(
+      prefs: prefs,
+      db: appContainer.read(databaseProvider),
+      imageCache: appContainer.read(imageCacheProvider),
     );
+    _appUpdateVersionChanged = await handler.checkVersionChanged();
+  } on Exception catch (e) {
+    logError('App update check failed: $e');
+  }
+}
 
-    // Clear image cache so stale images don't persist across updates.
-    await appContainer.read(imageCacheProvider).clearCache();
+/// Whether the installed version changed since the last launch.
+bool _appUpdateVersionChanged = false;
 
-    // Clear only API‑fetched product records so they get re‑fetched with
-    // fresh OFF data (including fields added in newer versions).
-    // Manual products entered by the user are preserved.
-    final db = appContainer.read(databaseProvider);
-    await db.clearCachedProducts();
-
-    await prefs.setString('app_version', currentVersion);
-    logInfo('Caches flushed for app update');
+/// Runs the post-frame half of app-update handling: flags the changelog
+/// badge when its content changed and, on a version change, clears the
+/// image cache and API-fetched products so they are re-fetched with
+/// fresh OFF data (manual products are preserved).
+Future<void> _handleAppUpdatePostFrame() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final handler = AppUpdateHandler(
+      prefs: prefs,
+      db: appContainer.read(databaseProvider),
+      imageCache: appContainer.read(imageCacheProvider),
+    );
+    await handler.updateChangelogFlag();
+    if (_appUpdateVersionChanged) {
+      await handler.flushCaches();
+    }
   } on Exception catch (e) {
     logError('App update handling failed: $e');
   }
