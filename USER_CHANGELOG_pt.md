@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-- Os relatorios de feedback no aplicativo agora sao enviados por um
-  retransmissor de servidor seguro, entao nenhuma credencial de conta
-  fica armazenada no seu dispositivo.
+- Os relatorios de feedback no aplicativo foram removidos. O app agora
+  usa apenas os servicos gratuitos do Firebase; voce pode entrar em
+  contato diretamente pelo repositorio do projeto no GitHub.
 
 - O app agora abre mais rapidamente em redes lentas: o login e a
   atualizacao dos dados em cache acontecem depois que a primeira tela

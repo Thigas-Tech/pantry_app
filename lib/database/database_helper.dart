@@ -1,4 +1,3 @@
-import 'package:pantry_app/database/feedback_queue_dao.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
@@ -44,7 +43,6 @@ import 'package:sqflite/sqflite.dart';
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
-/// - feedback_queue – offline queue for GitHub issue reports.
 /// - product_submission_queue – offline queue for OFF product submissions.
 /// - prices – purchase price observations per barcode.
 /// - shopping_list – items the user intends to buy.
@@ -59,7 +57,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// CRUD operations are delegated to dedicated DAO classes:
 /// [ProductDao], [InventoryDao], [InventoriesDao], [PriceDao],
-/// [ShoppingListDao], [StoreDao], [FeedbackQueueDao],
+/// [ShoppingListDao], [StoreDao],
 /// [ProductSubmissionQueueDao], [FirebaseCacheMetaDao],
 /// [RecipeDao], [RecipeIngredientDao], [ScanHistoryDao].
 ///
@@ -89,9 +87,6 @@ class DatabaseHelper {
 
   /// DAO for the inventories table.
   final InventoriesDao inventoriesDao = const InventoriesDao();
-
-  /// DAO for the feedback_queue table.
-  final FeedbackQueueDao feedbackQueueDao = const FeedbackQueueDao();
 
   /// DAO for the product_submission_queue table.
   final ProductSubmissionQueueDao productSubmissionQueueDao =
@@ -272,8 +267,6 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_products_source ON products(source)',
     );
-
-    await feedbackQueueDao.createTable(db);
 
     await productSubmissionQueueDao.createTable(db);
 
@@ -630,58 +623,6 @@ class DatabaseHelper {
   Future<int> getInventoryCount({int? inventoryId}) async {
     final db = await database;
     return inventoryDao.count(db, inventoryId: inventoryId);
-  }
-
-  // ---- Feedback queue (delegating to FeedbackQueueDao) ------
-
-  /// Queues a feedback issue for offline submission.
-  Future<int> queueFeedbackIssue({
-    required String title,
-    required String body,
-    String? label,
-    String? screenshotPath,
-  }) async {
-    final db = await database;
-    return feedbackQueueDao.insert(
-      db,
-      title: title,
-      body: body,
-      label: label,
-      screenshotPath: screenshotPath,
-    );
-  }
-
-  /// Returns all pending (non-failed) feedback queue rows.
-  Future<List<Map<String, dynamic>>> getPendingFeedbackIssues() async {
-    final db = await database;
-    return feedbackQueueDao.getAllPending(db);
-  }
-
-  /// Deletes a feedback queue row.
-  Future<void> deleteFeedbackIssue(int id) async {
-    final db = await database;
-    return feedbackQueueDao.delete(db, id);
-  }
-
-  /// Increments the retry count for a feedback queue row.
-  Future<void> incrementFeedbackRetry(int id) async {
-    final db = await database;
-    return feedbackQueueDao.incrementRetry(db, id);
-  }
-
-  /// Marks a feedback queue row as permanently failed.
-  Future<void> markFeedbackFailed(int id) async {
-    final db = await database;
-    return feedbackQueueDao.markFailed(db, id);
-  }
-
-  /// Deletes stale failed feedback queue rows.
-  Future<int> deleteStaleFeedbackFailures({int olderThanDays = 30}) async {
-    final db = await database;
-    return feedbackQueueDao.deleteStaleFailures(
-      db,
-      olderThanDays: olderThanDays,
-    );
   }
 
   // ---- Prices (delegating to PriceDao) ------------------------

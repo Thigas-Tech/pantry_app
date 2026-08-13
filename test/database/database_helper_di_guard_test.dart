@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
-import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 
 /// Guards the single dependency-injection path for [DatabaseHelper] and
@@ -18,10 +17,7 @@ import 'package:pantry_app/services/image_cache_service.dart';
 ///
 /// Allowed direct construction:
 /// - the owning provider files (the provider body itself),
-/// - [DatabaseHelper]'s own factory definition,
-/// - [GithubIssueService]'s constructor default
-///   (`databaseHelper ?? DatabaseHelper()`), which is a legitimate
-///   dependency-injection fallback.
+/// - [DatabaseHelper]'s own factory definition.
 void main() {
   final bannedConstructors = <RegExp, (String, List<String>)>{
     RegExp(r'DatabaseHelper\((?!\{)'): (

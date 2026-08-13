@@ -10,7 +10,6 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/cache_refresh_coordinator_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
-import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -20,7 +19,6 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/ui_flags_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/app_update_handler.dart';
-import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/notification_coordinator.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/navigator_key.dart';
@@ -123,7 +121,6 @@ class AppStartupService {
     await _delay(const Duration(milliseconds: 200));
     await _runDatabaseCleanup();
     await _delay(const Duration(milliseconds: 400));
-    await _flushFeedbackQueue();
     await _delay(const Duration(milliseconds: 600));
     await _schedulePostInitNotifications();
     await _delay(const Duration(milliseconds: 800));
@@ -289,24 +286,6 @@ class AppStartupService {
       logInfo('Database cleanup completed');
     } on Exception catch (e) {
       logError('Database cleanup failed: $e');
-    }
-  }
-
-  /// Flushes any queued feedback issues at startup.
-  Future<void> _flushFeedbackQueue() async {
-    logInfo('Checking for pending feedback issues');
-    await GithubIssueService.initPreferences();
-    try {
-      final service = container.read(githubIssueServiceProvider);
-      final result = await service.flushQueue();
-      if (result.submitted > 0) {
-        logInfo('Flushed ${result.submitted} queued feedback issues');
-      }
-      if (result.failed > 0) {
-        logWarning('${result.failed} feedback issues failed to flush');
-      }
-    } on Exception catch (e) {
-      logWarning('Feedback queue flush skipped: $e');
     }
   }
 

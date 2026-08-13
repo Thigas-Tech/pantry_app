@@ -10,7 +10,8 @@
 /// - Tapping the manage inventories tile navigates to
 ///   [ManageInventoriesScreen].
 /// - Expiring-soon days tile opens and saves a dialog value.
-/// - "What's New" and "Send Feedback" tiles are present.
+/// - The "What's New" tile is present and there is no "Send Feedback"
+///   entry (in-app feedback was removed).
 ///
 /// All tests use the pumpApp helper.  We override themeModeProvider and
 /// settingsProvider with controlled fakes to isolate the screen from real
@@ -467,8 +468,9 @@ void main() {
     },
   );
 
-  /// Verifies the "Send Feedback" tile is present.
-  testWidgets('shows send feedback tile', (tester) async {
+  /// Regression lock: in-app feedback was removed (free-tier Firebase only),
+  /// so the About section must not show a "Send Feedback" entry.
+  testWidgets('does not show a send feedback tile', (tester) async {
     await pumpApp(
       tester,
       const SettingsScreen(),
@@ -484,7 +486,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.info_outline));
     await tester.pumpAndSettle();
 
-    expect(find.text('Send Feedback'), findsOneWidget);
+    expect(find.text('Send Feedback'), findsNothing);
   });
 
   // ---- Unit system -------------------------------------------------------

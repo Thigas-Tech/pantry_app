@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
-import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/providers/ui_flags_provider.dart';
@@ -136,8 +135,6 @@ class _PantryShellState extends ConsumerState<PantryShell> {
 
     final online = next.asData?.value;
     if (online == true) {
-      final feedbackService = ref.read(githubIssueServiceProvider);
-      unawaited(feedbackService.flushQueue());
       final submissionService = ref.read(productSubmissionServiceProvider);
       unawaited(submissionService.flushQueue());
     }

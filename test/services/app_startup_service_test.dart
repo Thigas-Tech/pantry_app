@@ -8,14 +8,12 @@ import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/providers/cache_refresh_coordinator_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/firebase_cache_provider.dart';
-import 'package:pantry_app/providers/github_issue_service_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/services/app_startup_service.dart';
 import 'package:pantry_app/services/cache_refresh_coordinator.dart';
 import 'package:pantry_app/services/firebase_cache_service.dart';
-import 'package:pantry_app/services/github_issue_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,8 +30,6 @@ class _MockDatabase extends Mock implements Database {}
 class _MockImageCache extends Mock implements ImageCacheService {}
 
 class _MockRefreshCoordinator extends Mock implements CacheRefreshCoordinator {}
-
-class _MockGithubService extends Mock implements GithubIssueService {}
 
 class _MockSubmissionService extends Mock implements ProductSubmissionService {}
 
@@ -279,7 +275,6 @@ void main() {
       final notif = MockNotificationService();
       final imageCache = _MockImageCache();
       final refresh = _MockRefreshCoordinator();
-      final github = _MockGithubService();
       final submission = _MockSubmissionService();
       final firebaseCache = _MockFirebaseCache();
       final database = _MockDatabase();
@@ -327,9 +322,6 @@ void main() {
         ),
       ).thenAnswer((_) => Future<void>.value());
       when(refresh.refreshIfOverdue).thenAnswer((_) async => 0);
-      when(github.flushQueue).thenAnswer(
-        (_) async => (submitted: 0, failed: 0),
-      );
       when(submission.flushQueue).thenAnswer((_) async => 0);
       when(() => firebaseCache.isAvailable).thenReturn(true);
       when(firebaseCache.refreshStaleEntries).thenAnswer((_) async => 0);
@@ -340,7 +332,6 @@ void main() {
           imageCacheProvider.overrideWithValue(imageCache),
           notificationServiceProvider.overrideWithValue(notif),
           cacheRefreshCoordinatorProvider.overrideWithValue(refresh),
-          githubIssueServiceProvider.overrideWithValue(github),
           productSubmissionServiceProvider.overrideWithValue(submission),
           firebaseCacheProvider.overrideWithValue(firebaseCache),
         ],
@@ -360,7 +351,6 @@ void main() {
       verify(
         () => db.cleanupOldEntries(retentionDays: any(named: 'retentionDays')),
       ).called(1);
-      verify(github.flushQueue).called(1);
       verify(
         () => notif.rescheduleAllItems(
           any(),

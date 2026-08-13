@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- In-app feedback reports are now sent through a secure server relay, so
-  no account credentials are stored on your device.
+- In-app feedback reports have been removed. The app now runs entirely on
+  free Firebase services; you can reach me directly through the project's
+  GitHub repository instead.
 
 - The app now opens faster on slow networks: signing in and refreshing
   cached data happen after the first screen appears instead of delaying

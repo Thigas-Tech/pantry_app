@@ -1,6 +1,5 @@
 import 'package:pantry_app/database/migrations/migration.dart';
 import 'package:pantry_app/database/migrations/v10_categories_hierarchy.dart';
-import 'package:pantry_app/database/migrations/v11_feedback_queue.dart';
 import 'package:pantry_app/database/migrations/v12_prices_table.dart';
 import 'package:pantry_app/database/migrations/v13_shopping_list_table.dart';
 import 'package:pantry_app/database/migrations/v14_inventory_date_added_index.dart';
@@ -52,7 +51,6 @@ List<Migration> allMigrations() => [
   MigrationV8(),
   MigrationV9(),
   MigrationV10(),
-  MigrationV11(),
   MigrationV12(),
   MigrationV13(),
   MigrationV14(),
