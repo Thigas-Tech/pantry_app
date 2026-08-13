@@ -4,6 +4,17 @@
 
 ### Performance
 
+- **Connectivity check no longer caches the first result forever
+  (audit P7)**: [hasConnectionProvider] is a non-autoDispose one-shot
+  check that was never invalidated, so an app started offline kept
+  reporting offline all session (and vice versa). [PantryShell] now
+  invalidates it on every connectivity-stream change, so the 8 call
+  sites (search, cache refresh, settings, submission flows) get fresh
+  answers. (lib/screens/pantry_shell.dart,
+  test/screens/pantry_shell_test.dart)
+
+### Performance
+
 - **Startup no longer blocks on network and asset loads (audit P6)**:
   the anonymous Firebase sign-in (a network call) ran before runApp and
   the app-update handler loaded PackageInfo, the changelog asset, and
