@@ -214,9 +214,45 @@ void main() {
       expect(cols.map((c) => c['name']), contains('inventory_id'));
     });
 
+    test('createTable includes shared_recipe_id column', () async {
+      final cols = await db.rawQuery("PRAGMA table_info('recipes')");
+      expect(cols.map((c) => c['name']), contains('shared_recipe_id'));
+    });
+
     test('toMap writes inventory_id', () {
       final map = dao.toMap(const Recipe(name: 'Soup', inventoryId: 2));
       expect(map['inventory_id'], 2);
+    });
+
+    test('toMap writes shared_recipe_id', () {
+      final map = dao.toMap(
+        const Recipe(name: 'Soup', sharedRecipeId: 'shared-abc'),
+      );
+      expect(map['shared_recipe_id'], 'shared-abc');
+    });
+
+    test('fromMap reads shared_recipe_id with empty default', () {
+      final recipe = dao.fromMap({
+        'id': 1,
+        'name': 'Soup',
+        'instructions': '',
+        'servings': 2,
+        'image_path': '',
+        'created_at': 100,
+        'updated_at': 200,
+        'inventory_id': 2,
+        'shared_recipe_id': 'shared-abc',
+      });
+      expect(recipe.sharedRecipeId, 'shared-abc');
+
+      final fallback = dao.fromMap({
+        'id': 2,
+        'name': 'Soup',
+        'created_at': 100,
+        'updated_at': 200,
+        'inventory_id': 1,
+      });
+      expect(fallback.sharedRecipeId, '');
     });
 
     test('fromMap reads inventory_id with default 1', () {

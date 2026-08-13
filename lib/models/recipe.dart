@@ -52,5 +52,12 @@ abstract class Recipe with _$Recipe {
     /// Defaults to 1 (the seeded "Home" inventory) so recipes created before
     /// the per-inventory feature remain in the first pantry.
     @Default(1) int inventoryId,
+
+    /// The recipe_cache Firestore document id for the shared snapshot.
+    ///
+    /// A random UUID4 assigned when the recipe is cached. Empty until
+    /// then, and used to delete the shared document when the recipe is
+    /// removed.
+    @Default('') String sharedRecipeId,
   }) = _Recipe;
 }

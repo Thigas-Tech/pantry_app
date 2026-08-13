@@ -126,7 +126,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 39;
+  static const int databaseVersion = 40;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.

@@ -4,6 +4,16 @@
 
 ### Security
 
+- **Random recipe share ids (audit S8)**: the recipe_cache document id was
+  a deterministic SHA-256 of name/createdAt/inventory, which low-entropy
+  recipe names made dictionary-attackable. It is now a random UUID4 that
+  cannot be traced back to the owner, and the recipe row persists the id
+  so the shared document can still be removed on delete (DB migration
+  v40). Doc comments updated to state the real property: obfuscated, not
+  anonymous.
+  (lib/models/recipe_cache_entry.dart, lib/models/recipe.dart,
+  lib/services/recipe_service.dart, lib/services/firebase_cache_service.dart,
+  lib/database/recipe_dao.dart, lib/database/migrations/v40_recipe_shared_id.dart)
 - **Disabled Android app-data backups (audit S5)**: [android:allowBackup]
   is now [false], so the SQLite DB (including the unsubmitted feedback
   queue) and SharedPreferences are no longer extractable via adb or cloud

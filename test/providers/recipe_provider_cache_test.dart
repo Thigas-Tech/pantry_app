@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/recipe.dart';
-import 'package:pantry_app/models/recipe_cache_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -126,7 +125,11 @@ void main() {
       tester,
     ) async {
       when(
-        () => mockCache.cacheRecipe(any(), any()),
+        () => mockCache.cacheRecipe(
+          any(),
+          any(),
+          recipeId: any(named: 'recipeId'),
+        ),
       ).thenAnswer((_) async => {});
 
       await tester.pumpWidget(
@@ -150,14 +153,24 @@ void main() {
       verify(
         () => mockDb.insertRecipeWithIngredients(any(), any()),
       ).called(1);
-      verify(() => mockCache.cacheRecipe(any(), any())).called(1);
+      verify(
+        () => mockCache.cacheRecipe(
+          any(),
+          any(),
+          recipeId: any(named: 'recipeId'),
+        ),
+      ).called(1);
     });
 
     testWidgets('calls cacheRecipe when updating an existing recipe', (
       tester,
     ) async {
       when(
-        () => mockCache.cacheRecipe(any(), any()),
+        () => mockCache.cacheRecipe(
+          any(),
+          any(),
+          recipeId: any(named: 'recipeId'),
+        ),
       ).thenAnswer((_) async => {});
 
       await tester.pumpWidget(
@@ -182,12 +195,24 @@ void main() {
       verify(
         () => mockDb.updateRecipeWithIngredients(any(), any()),
       ).called(1);
-      verify(() => mockCache.cacheRecipe(any(), any())).called(1);
+      verify(
+        () => mockCache.cacheRecipe(
+          any(),
+          any(),
+          recipeId: any(named: 'recipeId'),
+        ),
+      ).called(1);
     });
 
     testWidgets('caches recipe with correct id after insert', (tester) async {
       final captured = <(Recipe, List<RecipeIngredient>)>[];
-      when(() => mockCache.cacheRecipe(any(), any())).thenAnswer(
+      when(
+        () => mockCache.cacheRecipe(
+          any(),
+          any(),
+          recipeId: any(named: 'recipeId'),
+        ),
+      ).thenAnswer(
         (invocation) async {
           captured.add((
             invocation.positionalArguments[0] as Recipe,
@@ -218,6 +243,57 @@ void main() {
       expect(captured.first.$1.id, 1);
     });
 
+    testWidgets(
+      'saveRecipe assigns a shared recipe id and passes it to cache',
+      (
+        tester,
+      ) async {
+        final captured = <(Recipe, List<RecipeIngredient>)>[];
+        when(
+          () => mockCache.cacheRecipe(
+            any(),
+            any(),
+            recipeId: any(named: 'recipeId'),
+          ),
+        ).thenAnswer(
+          (invocation) async {
+            captured.add((
+              invocation.positionalArguments[0] as Recipe,
+              invocation.positionalArguments[1] as List<RecipeIngredient>,
+            ));
+          },
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              databaseProvider.overrideWithValue(mockDb),
+              firebaseCacheProvider.overrideWithValue(mockCache),
+              activeInventoryProvider.overrideWith(
+                () => _MutableActiveInventory(1),
+              ),
+            ],
+            child: const _SaveRecipeTestWidget(
+              name: 'Soup',
+              ingredients: [RecipeIngredient(recipeId: 0, name: 'Carrots')],
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(captured, hasLength(1));
+        expect(
+          captured.single.$1.sharedRecipeId,
+          matches(
+            RegExp(
+              r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+            ),
+          ),
+        );
+      },
+    );
+
     testWidgets('saveRecipe stamps the active inventory on create', (
       tester,
     ) async {
@@ -229,7 +305,11 @@ void main() {
         },
       );
       when(
-        () => mockCache.cacheRecipe(any(), any()),
+        () => mockCache.cacheRecipe(
+          any(),
+          any(),
+          recipeId: any(named: 'recipeId'),
+        ),
       ).thenAnswer((_) async => {});
 
       await tester.pumpWidget(
@@ -272,7 +352,11 @@ void main() {
         },
       );
       when(
-        () => mockCache.cacheRecipe(any(), any()),
+        () => mockCache.cacheRecipe(
+          any(),
+          any(),
+          recipeId: any(named: 'recipeId'),
+        ),
       ).thenAnswer((_) async => {});
 
       await tester.pumpWidget(
@@ -311,9 +395,16 @@ void main() {
       ).thenAnswer((_) async => {});
     });
 
-    testWidgets('calls deleteSharedRecipe when recipe exists', (tester) async {
+    testWidgets('calls deleteSharedRecipe with the stored shared id', (
+      tester,
+    ) async {
       when(() => mockDb.getRecipe(1)).thenAnswer(
-        (_) async => const Recipe(id: 1, name: 'Soup', createdAt: 1000),
+        (_) async => const Recipe(
+          id: 1,
+          name: 'Soup',
+          createdAt: 1000,
+          sharedRecipeId: 'shared-id-123',
+        ),
       );
       when(() => mockDb.deleteRecipe(any())).thenAnswer((_) async => 1);
 
@@ -331,7 +422,7 @@ void main() {
 
       verify(() => mockDb.getRecipe(1)).called(1);
       verify(() => mockDb.deleteRecipe(1)).called(1);
-      verify(() => mockCache.deleteSharedRecipe(any())).called(1);
+      verify(() => mockCache.deleteSharedRecipe('shared-id-123')).called(1);
     });
 
     testWidgets(
@@ -358,50 +449,29 @@ void main() {
       },
     );
 
-    testWidgets('deletes the inventory-scoped shared recipe key', (
-      tester,
-    ) async {
-      when(() => mockDb.getRecipe(1)).thenAnswer(
-        (_) async => const Recipe(
-          id: 1,
-          name: 'Soup',
-          createdAt: 1000,
-          inventoryId: 2,
-        ),
-      );
-      when(() => mockDb.deleteRecipe(any())).thenAnswer((_) async => 1);
-      final keys = <String>[];
-      when(() => mockCache.deleteSharedRecipe(any())).thenAnswer(
-        (invocation) async {
-          keys.add(invocation.positionalArguments[0] as String);
-        },
-      );
+    testWidgets(
+      'does not call deleteSharedRecipe when recipe has no shared id',
+      (tester) async {
+        when(() => mockDb.getRecipe(2)).thenAnswer(
+          (_) async => const Recipe(id: 2, name: 'Soup', createdAt: 1000),
+        );
+        when(() => mockDb.deleteRecipe(any())).thenAnswer((_) async => 1);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            databaseProvider.overrideWithValue(mockDb),
-            firebaseCacheProvider.overrideWithValue(mockCache),
-          ],
-          child: const _DeleteRecipeTestWidget(id: 1),
-        ),
-      );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              databaseProvider.overrideWithValue(mockDb),
+              firebaseCacheProvider.overrideWithValue(mockCache),
+            ],
+            child: const _DeleteRecipeTestWidget(id: 2),
+          ),
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      expect(keys, hasLength(1));
-      const recipeInv1 = Recipe(name: 'Soup', createdAt: 1000);
-      const recipeInv2 = Recipe(name: 'Soup', createdAt: 1000, inventoryId: 2);
-      final keyInv1 = RecipeCacheEntryConversions.fromRecipe(
-        recipeInv1,
-        [],
-      ).recipeId;
-      final keyInv2 = RecipeCacheEntryConversions.fromRecipe(
-        recipeInv2,
-        [],
-      ).recipeId;
-      expect(keyInv1, isNot(keyInv2));
-      expect(keys.single, keyInv2);
-    });
+        verify(() => mockDb.deleteRecipe(2)).called(1);
+        verifyNever(() => mockCache.deleteSharedRecipe(any()));
+      },
+    );
   });
 }

@@ -203,7 +203,7 @@ void main() {
       expect(entry.imageUrl, 'https://example.com/pasta.jpg');
     });
 
-    test('fromRecipe generates deterministic recipeId', () {
+    test('fromRecipe generates a random, unguessable recipeId', () {
       const recipe = Recipe(
         name: 'Toast',
         createdAt: 7000,
@@ -212,7 +212,27 @@ void main() {
       final entry1 = RecipeCacheEntryConversions.fromRecipe(recipe, []);
       final entry2 = RecipeCacheEntryConversions.fromRecipe(recipe, []);
 
-      expect(entry1.recipeId, entry2.recipeId);
+      expect(entry1.recipeId, isNot(entry2.recipeId));
+      expect(
+        entry1.recipeId,
+        matches(
+          RegExp(
+            r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+          ),
+        ),
+      );
+    });
+
+    test('fromRecipe uses the provided recipeId', () {
+      const recipe = Recipe(name: 'Toast', createdAt: 7000);
+
+      final entry = RecipeCacheEntryConversions.fromRecipe(
+        recipe,
+        [],
+        recipeId: 'fixed-id',
+      );
+
+      expect(entry.recipeId, 'fixed-id');
     });
 
     test('fromRecipe generates different IDs for different names', () {
@@ -240,7 +260,7 @@ void main() {
     );
 
     test(
-      'fromRecipe generates identical IDs for the same recipe in the same'
+      'fromRecipe generates distinct IDs for the same recipe in the same'
       ' inventory',
       () {
         const recipe = Recipe(name: 'Toast', createdAt: 7000, inventoryId: 2);
@@ -248,7 +268,7 @@ void main() {
         final entry1 = RecipeCacheEntryConversions.fromRecipe(recipe, []);
         final entry2 = RecipeCacheEntryConversions.fromRecipe(recipe, []);
 
-        expect(entry1.recipeId, entry2.recipeId);
+        expect(entry1.recipeId, isNot(entry2.recipeId));
       },
     );
 
