@@ -1149,4 +1149,127 @@ void main() {
       );
     });
   });
+
+  group('getProductsForBarcodes', () {
+    test('batches cached lookups and fetches only the misses', () async {
+      when(() => mockDb.getProductsByBarcodes(['a', 'b', 'c'])).thenAnswer(
+        (_) async => [
+          const Product(barcode: 'a', name: 'Alpha'),
+          const Product(barcode: 'b', name: 'Bravo'),
+        ],
+      );
+      when(() => mockDb.getProduct('c')).thenAnswer((_) async => null);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => 1);
+      when(
+        () => mockApi.getByBarcode(
+          'c',
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenAnswer(
+        (_) async => const Product(barcode: 'c', name: 'Charlie'),
+      );
+
+      final result = await repository.getProductsForBarcodes(['a', 'b', 'c']);
+
+      expect(result.keys.toSet(), {'a', 'b', 'c'});
+      expect(result['a']!.name, 'Alpha');
+      expect(result['c']!.name, 'Charlie');
+      verify(() => mockDb.getProductsByBarcodes(['a', 'b', 'c'])).called(1);
+      verifyNever(
+        () => mockApi.getByBarcode(
+          'a',
+          languageCode: any(named: 'languageCode'),
+        ),
+      );
+      verifyNever(
+        () => mockApi.getByBarcode(
+          'b',
+          languageCode: any(named: 'languageCode'),
+        ),
+      );
+      verify(
+        () => mockApi.getByBarcode(
+          'c',
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).called(1);
+    });
+
+    test('skips barcodes whose fetch fails', () async {
+      when(() => mockDb.getProductsByBarcodes(['a', 'b'])).thenAnswer(
+        (_) async => [const Product(barcode: 'a', name: 'Alpha')],
+      );
+      when(() => mockDb.getProduct('b')).thenAnswer((_) async => null);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => 1);
+      when(
+        () => mockApi.getByBarcode(
+          'b',
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenThrow(Exception('Network error'));
+
+      final result = await repository.getProductsForBarcodes(['a', 'b']);
+
+      expect(result.keys.toSet(), {'a'});
+    });
+
+    test('returns empty for an empty input', () async {
+      when(() => mockDb.getProductsByBarcodes([])).thenAnswer((_) async => []);
+      final result = await repository.getProductsForBarcodes([]);
+      expect(result, isEmpty);
+    });
+  });
+
+  group('getProduct single-flight', () {
+    test(
+      'shares one API request between concurrent lookups of the same barcode',
+      () async {
+      when(() => mockDb.getProduct(testBarcode)).thenAnswer((_) async => null);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => 1);
+      when(
+        () => mockApi.getByBarcode(
+          testBarcode,
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenAnswer(
+        (_) async => testProduct,
+      );
+
+      final first = repository.getProduct(testBarcode);
+      final second = repository.getProduct(testBarcode);
+      final results = await Future.wait([first, second]);
+
+      expect(results.map((p) => p.barcode), [testBarcode, testBarcode]);
+      verify(
+        () => mockApi.getByBarcode(
+          testBarcode,
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).called(1);
+      verify(() => mockDb.insertProduct(testProduct)).called(1);
+    });
+
+    test('does not deduplicate requests for different barcodes', () async {
+      when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => 1);
+      when(
+        () => mockApi.getByBarcode(
+          any(),
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenAnswer((_) async => const Product(barcode: 'x', name: 'X'));
+
+      await Future.wait([
+        repository.getProduct('x1'),
+        repository.getProduct('x2'),
+      ]);
+
+      verify(
+        () => mockApi.getByBarcode(
+          any(),
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).called(2);
+    });
+  });
 }

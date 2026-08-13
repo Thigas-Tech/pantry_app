@@ -4,6 +4,26 @@
 
 ### Performance
 
+- **Recipe N+1 cascade removed (audit P4)**: the recipe nutrition,
+  ingredient, and Nutri-Score providers fetched products one sequential
+  [getProduct] call per barcode (each a DB query and possibly a network
+  fetch) and pinned every viewed recipe with keepAlive. New
+  [ProductDao.getByBarcodes] / [ProductRepository.getProductsForBarcodes]
+  resolve a recipe's ingredients with one batched cached query, fetching
+  only the misses; the keepAlive pins are dropped so providers auto-dispose.
+  [ProductRepository.getProduct] deduplicates concurrent in-flight
+  lookups per barcode. [CurrencyService] now caches rates in memory per
+  calendar day, removing a SharedPreferences read and jsonDecode from
+  every ingredient-cost conversion. (lib/database/product_dao.dart,
+  lib/database/database_helper.dart, lib/services/product_repository.dart,
+  lib/services/currency_service.dart, lib/providers/recipe_provider.dart,
+  test/database/product_dao_test.dart,
+  test/services/product_repository_test.dart,
+  test/services/currency_service_test.dart,
+  test/providers/recipe_nutrition_provider_test.dart)
+
+### Performance
+
 - **Image cache: downscale, size cap, in-flight dedup (audit P3)**:
   [ImageCacheService] stored full-resolution WebP files with no eviction
   or cap, and concurrent requests for the same barcode downloaded twice.

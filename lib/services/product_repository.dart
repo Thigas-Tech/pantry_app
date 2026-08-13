@@ -83,10 +83,29 @@ class ProductRepository {
   /// Returns a [Product] for the given [barcode], either from cache or from
   /// the remote API.
   ///
+  /// Concurrent calls for the same [barcode] share one in-flight lookup
+  /// instead of issuing duplicate network requests.
+  ///
   /// Throws [ProductNotFoundException] if the barcode is unknown to all
   /// sources. Throws [FetchFailedException] on network errors when no
   /// cache exists.
-  Future<Product> getProduct(String barcode, {String? languageCode}) async {
+  Future<Product> getProduct(String barcode, {String? languageCode}) {
+    final inFlight = _getProductInFlight[barcode];
+    if (inFlight != null) return inFlight;
+    final future = _getProductImpl(barcode, languageCode);
+    _getProductInFlight[barcode] = future;
+    return future.whenComplete(() {
+      final _ = _getProductInFlight.remove(barcode);
+    });
+  }
+
+  /// In-flight single lookups keyed by barcode.
+  final Map<String, Future<Product>> _getProductInFlight = {};
+
+  Future<Product> _getProductImpl(
+    String barcode,
+    String? languageCode,
+  ) async {
     logInfo('Looking up $barcode');
     final lang = languageCode ?? _currentLanguageCode();
 
@@ -176,6 +195,29 @@ class ProductRepository {
   /// network requests.
   Future<Product?> getProductFromCache(String barcode) {
     return _db.getProduct(barcode);
+  }
+
+  /// Resolves products for multiple [barcodes] with a single cached
+  /// lookup, fetching only the misses from the remote API.
+  ///
+  /// Returns a map keyed by barcode. Barcodes whose fetch fails (unknown
+  /// product or network error) are omitted, matching the per-barcode
+  /// tolerance of the recipe providers.
+  Future<Map<String, Product>> getProductsForBarcodes(
+    List<String> barcodes,
+  ) async {
+    final unique = barcodes.toSet().toList();
+    final cached = await _db.getProductsByBarcodes(unique);
+    final result = {for (final product in cached) product.barcode: product};
+    for (final barcode in unique) {
+      if (result.containsKey(barcode)) continue;
+      try {
+        result[barcode] = await getProduct(barcode);
+      } on Exception catch (e) {
+        logWarning('Could not fetch product $barcode for batch lookup: $e');
+      }
+    }
+    return result;
   }
 
   // ---------- Named inventories ----------

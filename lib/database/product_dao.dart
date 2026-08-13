@@ -192,6 +192,25 @@ class ProductDao {
     }
   }
 
+  /// Looks up all cached products whose barcode is in [barcodes].
+  ///
+  /// Returns only the products that exist in the cache; unknown barcodes
+  /// are silently omitted. An empty [barcodes] list returns an empty list
+  /// without touching the database.
+  Future<List<Product>> getByBarcodes(
+    Database db,
+    List<String> barcodes,
+  ) async {
+    if (barcodes.isEmpty) return const [];
+    final placeholders = barcodes.map((_) => '?').join(',');
+    final result = await db.query(
+      'products',
+      where: 'barcode IN ($placeholders)',
+      whereArgs: barcodes,
+    );
+    return result.map(fromMap).toList();
+  }
+
   /// Returns the total number of cached product records.
   Future<int> count(Database db) async {
     return Sqflite.firstIntValue(
