@@ -54,3 +54,47 @@ final class CurrencyServiceProvider
 }
 
 String _$currencyServiceHash() => r'5ea63bad2d2793ebf9dde8e92887eb431546da13';
+
+/// Provides the size in bytes of the on-disk currency rate cache.
+///
+/// autoDispose: only needed while the settings screen is visible.
+
+@ProviderFor(currencyCacheSize)
+final currencyCacheSizeProvider = CurrencyCacheSizeProvider._();
+
+/// Provides the size in bytes of the on-disk currency rate cache.
+///
+/// autoDispose: only needed while the settings screen is visible.
+
+final class CurrencyCacheSizeProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  /// Provides the size in bytes of the on-disk currency rate cache.
+  ///
+  /// autoDispose: only needed while the settings screen is visible.
+  CurrencyCacheSizeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currencyCacheSizeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currencyCacheSizeHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int> create(Ref ref) {
+    return currencyCacheSize(ref);
+  }
+}
+
+String _$currencyCacheSizeHash() => r'83266230271dd79e5b3497b35dd42bcd805ef462';

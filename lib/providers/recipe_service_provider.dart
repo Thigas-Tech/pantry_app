@@ -19,3 +19,37 @@ RecipeService recipeService(Ref ref) {
     ref.read(currencyServiceProvider),
   );
 }
+
+/// Provides the cost of a single recipe for the given inventory and base
+/// currency.
+///
+/// Keyed by a (recipeId, inventoryId, baseCurrency) record so the cost
+/// query is cached across rebuilds and only recomputed when one of the
+/// inputs changes.
+@riverpod
+Future<double> recipeCost(Ref ref, (int, int, String) args) {
+  final (recipeId, inventoryId, baseCurrency) = args;
+  return ref
+      .read(recipeServiceProvider)
+      .calculateRecipeCost(
+        recipeId,
+        activeInventoryId: inventoryId,
+        baseCurrency: baseCurrency,
+      );
+}
+
+/// Provides the average cost across all recipes for the given inventory
+/// and base currency.
+///
+/// Keyed by a (inventoryId, baseCurrency) record so the cost query is
+/// cached across rebuilds.
+@riverpod
+Future<double> averageRecipeCost(Ref ref, (int, String) args) {
+  final (inventoryId, baseCurrency) = args;
+  return ref
+      .read(recipeServiceProvider)
+      .calculateAverageRecipeCost(
+        activeInventoryId: inventoryId,
+        baseCurrency: baseCurrency,
+      );
+}

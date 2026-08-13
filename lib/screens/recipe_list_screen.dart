@@ -6,9 +6,7 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/recipe.dart';
-import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
-import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/recipe_service_provider.dart';
@@ -193,46 +191,36 @@ class _AverageCostBanner extends ConsumerWidget {
     final settings = ref.watch(settingsProvider).value ?? const Settings();
     final currencyCode = settings.baseCurrency;
     final symbol = currencySymbolFor(currencyCode);
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
+    final averageCost =
+        ref.watch(averageRecipeCostProvider((activeId, currencyCode))).value ??
+        0.0;
 
-    return FutureBuilder<double>(
-      future: ref
-          .read(recipeServiceProvider)
-          .calculateAverageRecipeCost(
-            activeInventoryId: ref.read(activeInventoryProvider).value ?? 1,
-            baseCurrency:
-                (ref.watch(settingsProvider).value ?? const Settings())
-                    .baseCurrency,
-          ),
-      builder: (context, snapshot) {
-        final cost = snapshot.data ?? 0.0;
-
-        return Card(
-          margin: const EdgeInsets.all(16).copyWith(bottom: 8),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                const Icon(Icons.account_balance_wallet),
-                const SizedBox(width: 12),
-                Text(
-                  l10n.recipeAverageCost,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const Spacer(),
-                PriceMask(
-                  formattedPrice: '$symbol${cost.toStringAsFixed(2)}',
-                  child: Text(
-                    '$symbol${cost.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
+    return Card(
+      margin: const EdgeInsets.all(16).copyWith(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            const Icon(Icons.account_balance_wallet),
+            const SizedBox(width: 12),
+            Text(
+              l10n.recipeAverageCost,
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-          ),
-        );
-      },
+            const Spacer(),
+            PriceMask(
+              formattedPrice: '$symbol${averageCost.toStringAsFixed(2)}',
+              child: Text(
+                '$symbol${averageCost.toStringAsFixed(2)}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -309,27 +297,17 @@ class _RecipeCard extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           title: Text(recipe.name),
-          subtitle: FutureBuilder<List<RecipeIngredient>>(
-            future: ref
-                .read(databaseProvider)
-                .getRecipeIngredients(
-                  recipe.id!,
-                ),
-            builder: (context, snapshot) {
-              final count = snapshot.data?.length ?? 0;
-              return Row(
-                children: [
-                  Text(l10n.ingredientCount(count)),
-                  const SizedBox(width: 12),
-                  _RecipeNutriScoreBadge(recipeId: recipe.id!),
-                  const SizedBox(width: 8),
-                  _RecipeCostLabel(
-                    recipeId: recipe.id!,
-                    currencySymbol: symbol,
-                  ),
-                ],
-              );
-            },
+          subtitle: Row(
+            children: [
+              _IngredientCountLabel(recipeId: recipe.id!),
+              const SizedBox(width: 12),
+              _RecipeNutriScoreBadge(recipeId: recipe.id!),
+              const SizedBox(width: 8),
+              _RecipeCostLabel(
+                recipeId: recipe.id!,
+                currencySymbol: symbol,
+              ),
+            ],
           ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () {
@@ -370,6 +348,21 @@ class _RecipeNutriScoreBadge extends ConsumerWidget {
   }
 }
 
+/// A small label showing the ingredient count of a recipe.
+class _IngredientCountLabel extends ConsumerWidget {
+  const _IngredientCountLabel({required this.recipeId});
+
+  final int recipeId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final count =
+        ref.watch(allRecipeIngredientsProvider(recipeId)).value?.length ?? 0;
+    return Text(l10n.ingredientCount(count));
+  }
+}
+
 /// A label showing the calculated cost of a single recipe.
 class _RecipeCostLabel extends ConsumerWidget {
   const _RecipeCostLabel({
@@ -383,38 +376,31 @@ class _RecipeCostLabel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
+    final baseCurrency =
+        (ref.watch(settingsProvider).value ?? const Settings()).baseCurrency;
+    final cost = ref
+        .watch(recipeCostProvider((recipeId, activeId, baseCurrency)))
+        .value;
 
-    return FutureBuilder<double>(
-      future: ref
-          .read(recipeServiceProvider)
-          .calculateRecipeCost(
-            recipeId,
-            activeInventoryId: ref.read(activeInventoryProvider).value ?? 1,
-            baseCurrency: (ref.read(settingsProvider).value ?? const Settings())
-                .baseCurrency,
-          ),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox.shrink();
-        final cost = snapshot.data!;
-        if (cost <= 0) {
-          return Text(
-            l10n.recipeCostUnknown,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          );
-        }
-        final formattedPrice = '$currencySymbol${cost.toStringAsFixed(2)}';
-        return PriceMask(
-          formattedPrice: formattedPrice,
-          child: Text(
-            formattedPrice,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        );
-      },
+    if (cost == null) return const SizedBox.shrink();
+    if (cost <= 0) {
+      return Text(
+        l10n.recipeCostUnknown,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      );
+    }
+    final formattedPrice = '$currencySymbol${cost.toStringAsFixed(2)}';
+    return PriceMask(
+      formattedPrice: formattedPrice,
+      child: Text(
+        formattedPrice,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

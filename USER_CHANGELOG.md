@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The product detail and recipe screens no longer briefly show a loading
+  spinner when the screen refreshes for other reasons (for example after
+  changing settings): the data stays visible while it is up to date.
+
 - The home list now loads only the items you can see, so scrolling through
   large pantries is smoother and uses less memory.
 
