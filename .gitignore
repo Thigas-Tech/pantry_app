@@ -63,4 +63,3 @@ test/screens/failures/
 .fvm/
 # Firebase rules test harness (Node)
 firebase_tests/node_modules/
-functions/node_modules/

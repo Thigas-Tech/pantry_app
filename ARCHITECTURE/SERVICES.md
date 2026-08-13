@@ -122,26 +122,12 @@ User scans barcode
 - **Auth requirement**: anonymous Firebase Auth is enabled and the app signs
   in at startup; writes without a signed-in user are rejected by the rules.
 
-### 3.7 Feedback service (GitHub Issues)
+### 3.7 Feedback
 
-- `GithubIssueService` submits issues either through the **serverless
-  feedback proxy** (release builds; a Cloud Function that holds the GitHub
-  PAT server-side and enforces per-device rate limits) or directly to the
-  GitHub Issues API with a development PAT (`.env`, never shipped).
-- No credentials are bundled in release builds — `.env` is not a Flutter
-  asset and CI no longer injects secrets.
-- Offline queue: unresolved issues stored in `feedback_queue` SQLite table
-  (version 11 migration). Flushed when `connectivityProvider` emits `true`
-  via listener in `PantryShell` and at app startup.
-- Screenshots: user attaches from gallery or camera via `image_picker`,
-  encoded as WebP (800px max, compact) and uploaded to catbox.moe,
-  producing rendered image URLs in GitHub issues. Falls back to a
-  collapsible base64 block if the upload fails.
-- Rate limiting: max 1 issue per 60 seconds, max 5 per 24h per device
-  (via `SharedPreferences` counters).
-- Duplicate detection: hash of title+body, skipped if submitted within 24h.
-- Platform gating: on web/mobile the feedback from opens the `FeedbackScreen`;
-  screenshot attachment hidden on web and desktop platforms.
+In-app GitHub feedback was **removed** (free-tier Firebase decision — the
+serverless proxy would have required the paid Blaze plan). There is no
+feedback submission, no PAT, and no feedback queue. Reach the maintainer
+through the project's GitHub repository.
 
 ### 3.8 Price repository
 
