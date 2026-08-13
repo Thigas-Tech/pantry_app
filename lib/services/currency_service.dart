@@ -79,14 +79,14 @@ class CurrencyService {
           'ExchangeRate-API returned ${response.statusCode} for '
           '$normalized',
         );
-        return _tryFallbackCache(normalized);
+        return await _tryFallbackCache(normalized);
       }
       final body = jsonDecode(response.body) as Map<String, dynamic>;
       if (body['result'] != 'success') {
         logWarning(
           'ExchangeRate-API error for $normalized: ${body['result']}',
         );
-        return _tryFallbackCache(normalized);
+        return await _tryFallbackCache(normalized);
       }
       final rawRates = body['rates'] as Map<String, dynamic>;
       final rates = rawRates.map(
