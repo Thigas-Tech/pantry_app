@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Security
+
+- **Removed vestigial Android permissions (audit S7)**: dropped
+  [READ_EXTERNAL_STORAGE], [SCHEDULE_EXACT_ALARM], [USE_EXACT_ALARM], and
+  the [requestLegacyExternalStorage] attribute. Photo picking uses the
+  system photo picker (no permission needed) and notifications only
+  schedule inexact alarms. A manifest policy test now guards against
+  regressions.
+  (android/app/src/main/AndroidManifest.xml,
+  test/manifests/android_manifest_test.dart new)
+
 ### Maintainability
 
 - **One-shot UI flags routed through a [UiFlagsNotifier] (audit MA7)**:
