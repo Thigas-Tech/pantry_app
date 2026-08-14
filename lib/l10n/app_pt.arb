@@ -374,16 +374,7 @@
   "settingsAbout": "Sobre",
   "priceTracking": "Controle de Preços",
   "priceTrackingDescription": "Acompanhe seus gastos.",
-  "receiptTracking": "Notas NFC-e",
-  "receiptTrackingDescription": "Escanear notas para adicionar produtos.",
   "photoCompletenessTitle": "Fotos dos Produtos",
-  "contributePhotos": "Contribuir com fotos",
-  "offNeedsPhotos": "OFF precisa de fotos para {count} produtos",
-  "@offNeedsPhotos": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "noCategories": "Nenhuma categoria",
   "addedThisWeekLabel": "Esta semana",
   "addedThisMonthLabel": "Este mês",

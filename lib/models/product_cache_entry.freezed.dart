@@ -26,7 +26,7 @@ mixin _$ProductCacheEntry {
 @JsonKey(includeIfNull: false) List<String>? get categoriesHierarchy;/// The full ingredients list as plain text.
 @JsonKey(includeIfNull: false) String? get ingredients;/// The suggested serving size (e.g. "15 g").
 @JsonKey(includeIfNull: false) String? get servingSize;/// The normalized numeric serving quantity from the OFF API
-/// (e.g. [30.0] for a serving size of "30 g").
+/// (e.g. 30.0 for a serving size of "30 g").
 @JsonKey(includeIfNull: false) double? get servingQuantity;/// The display quantity as printed on packaging (e.g. "500 ml").
 @JsonKey(includeIfNull: false) String? get quantity;/// Normalized numeric product quantity in g or ml.
 @JsonKey(includeIfNull: false) double? get productQuantity;/// Energy in kilocalories per 100 g.
@@ -307,7 +307,7 @@ class _ProductCacheEntry extends ProductCacheEntry {
 /// The suggested serving size (e.g. "15 g").
 @override@JsonKey(includeIfNull: false) final  String? servingSize;
 /// The normalized numeric serving quantity from the OFF API
-/// (e.g. [30.0] for a serving size of "30 g").
+/// (e.g. 30.0 for a serving size of "30 g").
 @override@JsonKey(includeIfNull: false) final  double? servingQuantity;
 /// The display quantity as printed on packaging (e.g. "500 ml").
 @override@JsonKey(includeIfNull: false) final  String? quantity;

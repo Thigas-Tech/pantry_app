@@ -73,7 +73,7 @@ abstract class ProductCacheEntry with _$ProductCacheEntry {
     @JsonKey(includeIfNull: false) String? servingSize,
 
     /// The normalized numeric serving quantity from the OFF API
-    /// (e.g. [30.0] for a serving size of "30 g").
+    /// (e.g. 30.0 for a serving size of "30 g").
     @JsonKey(includeIfNull: false) double? servingQuantity,
 
     /// The display quantity as printed on packaging (e.g. "500 ml").

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The "NFC-e Receipts" placeholder and the "Contribute to Open Food Facts"
+  button on the Statistics screen have been removed as part of a scope
+  reduction. The app no longer advertises features that are not planned.
+
 - Prices now record the size of the package you bought (for example 12 eggs
   or 1 L of milk), so per-unit prices and recipe cost estimates are accurate
   even when the product has no packaging data on file.

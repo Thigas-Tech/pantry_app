@@ -57,7 +57,6 @@ StatsScreen
 ├── LocationChart (fl_chart BarChart by storage location)
 ├── Photo completeness (local vs OFF photos)
 ├── PriceStatistics (total value, average price, priced item count)
-├── ComingSoonView (NFC-e receipts -- placeholder)
 └── RefreshIndicator (pull-to-refresh)
 
 ScannerScreen

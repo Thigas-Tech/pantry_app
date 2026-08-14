@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- O marcador "Notas NFC-e" e o botao "Contribuir com fotos" na tela de
+  Estatisticas foram removidos como parte de uma reducao de escopo. O app
+  nao divulga mais funcionalidades que nao estao planejadas.
+
 - Os precos agora registram o tamanho da embalagem comprada (por exemplo
   12 ovos ou 1 L de leite), para que o preco unitario e a estimativa de
   custo da receita sejam precisos mesmo quando o produto nao tem dados de

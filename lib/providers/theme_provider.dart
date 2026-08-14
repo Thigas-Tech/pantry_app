@@ -21,9 +21,9 @@ enum ThemeModeOption {
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
-/// Loads the persisted mode in [build] so no placeholder value flashes.
-/// Used by [themeModeProvider] so that any widget can read or change the
-/// theme mode.
+/// Loads the persisted mode during its build so no placeholder value
+/// flashes. Used by [themeModeProvider] so that any widget can read or
+/// change the theme mode.
 @Riverpod(keepAlive: true)
 class ThemeModeNotifier extends _$ThemeModeNotifier {
   static const _key = 'theme_mode';

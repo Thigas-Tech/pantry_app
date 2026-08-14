@@ -27,8 +27,9 @@ abstract class RecipeHistoryEntry with _$RecipeHistoryEntry {
     /// Epoch millis timestamp of when the recipe was made.
     required int madeAt,
 
-    /// JSON-encoded snapshot of [{barcode, name, quantity, unit}] at cook
-    /// time, so the entry is accurate even if the recipe changes later.
+    /// JSON-encoded snapshot of the ingredient fields barcode, name,
+    /// quantity, and unit at cook time, so the entry is accurate even if
+    /// the recipe changes later.
     required String ingredientSnapshot,
 
     /// Auto-increment primary key from the recipe_history table.
