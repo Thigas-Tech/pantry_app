@@ -121,7 +121,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 40;
+  static const int databaseVersion = 41;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
@@ -758,6 +758,12 @@ class DatabaseHelper {
     return shoppingListDao.update(db, item);
   }
 
+  /// Reorders pending shopping items to match the given [itemIds] order.
+  Future<void> reorderShoppingItems(List<int> itemIds) async {
+    final db = await database;
+    return shoppingListDao.reorder(db, itemIds);
+  }
+
   /// Updates only the price-related columns for the shopping item
   /// with the given [id].
   Future<int> updateShoppingItemPriceFields(
@@ -765,7 +771,6 @@ class DatabaseHelper {
     double? priceAmount,
     String? priceCurrency,
     String? priceStore,
-    String? pricePhotoPath,
   }) async {
     final db = await database;
     return shoppingListDao.updatePriceFields(
@@ -774,7 +779,6 @@ class DatabaseHelper {
       priceAmount: priceAmount,
       priceCurrency: priceCurrency,
       priceStore: priceStore,
-      pricePhotoPath: pricePhotoPath,
     );
   }
 

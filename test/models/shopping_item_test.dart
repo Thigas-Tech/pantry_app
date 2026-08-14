@@ -63,7 +63,6 @@ void main() {
       expect(item.priceAmount, isNull);
       expect(item.priceCurrency, isNull);
       expect(item.priceStore, isNull);
-      expect(item.pricePhotoPath, isNull);
     });
 
     test('creates with price fields', () {
@@ -72,12 +71,10 @@ void main() {
         priceAmount: 3.99,
         priceCurrency: 'USD',
         priceStore: 'Whole Foods',
-        pricePhotoPath: '/photos/1.jpg',
       );
       expect(item.priceAmount, 3.99);
       expect(item.priceCurrency, 'USD');
       expect(item.priceStore, 'Whole Foods');
-      expect(item.pricePhotoPath, '/photos/1.jpg');
     });
 
     test('copyWith preserves price fields', () {

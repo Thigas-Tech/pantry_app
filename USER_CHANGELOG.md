@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- The shopping list is easier to use: each item on the "To buy" list now
+  has quick + and - buttons to change the quantity, and you can tap the
+  quantity (or the pencil icon) to edit the item's name, quantity, or unit.
+  You can also drag items to reorder them, and the navigation bar shows a
+  badge with how many items are still to buy.
+
 - The "NFC-e Receipts" placeholder and the "Contribute to Open Food Facts"
   button on the Statistics screen have been removed as part of a scope
   reduction. The app no longer advertises features that are not planned.

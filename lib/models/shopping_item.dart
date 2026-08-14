@@ -12,16 +12,15 @@ part 'shopping_item.freezed.dart';
 ///
 /// ## Price tracking
 ///
-/// [priceAmount], [priceCurrency], [priceStore], and [pricePhotoPath]
-/// store price data entered while shopping. When the item is moved to
-/// inventory, the price is saved to the canonical price table.
+/// [priceAmount], [priceCurrency], and [priceStore] store price data
+/// entered while shopping. When the item is moved to inventory, the price
+/// is saved to the canonical price table.
 ///
-/// ## NFC-e integration
+/// ## Ordering
 ///
-/// When the receipt scanning feature parses an NFC-e QR code, items in
-/// the shopping list whose barcode matches a receipt line are
-/// automatically marked as purchased via
-/// ShoppingListDao.markPurchasedByBarcode.
+/// Pending items are manually ordered via [sortOrder], driven by the
+/// drag-to-reorder gesture on the shopping list screen. Purchased items
+/// keep sortOrder zero and are ordered by purchase date instead.
 ///
 /// See also:
 /// - ShoppingListDao — data-access layer for this model.
@@ -72,7 +71,7 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// Store where the item was or will be purchased.
     String? priceStore,
 
-    /// Local file path to a photo of the price tag, or null if none.
-    String? pricePhotoPath,
+    /// Manual ordering position for pending items. Defaults to 0.
+    @Default(0) double sortOrder,
   }) = _ShoppingItem;
 }

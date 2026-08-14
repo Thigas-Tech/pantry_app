@@ -526,6 +526,9 @@
   "ingredientsTranslated": "Show translated ingredients",
   "invalidPriceAmount": "Digite um valor de preço válido",
   "itemName": "Nome do item",
+  "unit": "Unidade",
+  "editItem": "Editar item",
+  "editQuantity": "Editar quantidade",
   "itemWithPriceCount": "{count} de {total} itens tem precos",
   "@itemWithPriceCount": {
     "placeholders": {

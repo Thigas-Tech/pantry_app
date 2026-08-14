@@ -5,7 +5,6 @@ import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/photo_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/shopping_list_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -16,8 +15,6 @@ class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 class MockShoppingListDao extends Mock implements ShoppingListDao {}
 
 class MockProductRepository extends Mock implements ProductRepository {}
-
-class MockPhotoService extends Mock implements PhotoService {}
 
 void main() {
   setUpAll(() {
@@ -31,7 +28,6 @@ void main() {
   late MockDatabaseHelper mockDb;
   late MockShoppingListDao mockDao;
   late MockProductRepository mockRepo;
-  late MockPhotoService mockPhotoService;
 
   setUp(() async {
     db = await databaseFactory.openDatabase(inMemoryDatabasePath);
@@ -40,7 +36,6 @@ void main() {
     mockDb = MockDatabaseHelper();
     mockDao = MockShoppingListDao();
     mockRepo = MockProductRepository();
-    mockPhotoService = MockPhotoService();
 
     when(() => mockDb.database).thenAnswer((_) async => db);
     when(() => mockDb.shoppingListDao).thenReturn(mockDao);
@@ -61,7 +56,6 @@ void main() {
   ShoppingListService service() => ShoppingListService(
     mockDb,
     mockRepo,
-    mockPhotoService,
   );
 
   group('addShoppingItem product existence guard', () {
@@ -212,15 +206,11 @@ void main() {
   });
 
   group('deleteShoppingItem', () {
-    test('deletes the photo and the item', () async {
-      when(() => mockPhotoService.deletePhotoForItem(3)).thenAnswer(
-        (_) async {},
-      );
+    test('deletes the item', () async {
       when(() => mockDb.deleteShoppingItem(3)).thenAnswer((_) async => 1);
 
       await service().deleteShoppingItem(3);
 
-      verify(() => mockPhotoService.deletePhotoForItem(3)).called(1);
       verify(() => mockDb.deleteShoppingItem(3)).called(1);
     });
   });
@@ -245,7 +235,6 @@ void main() {
           priceAmount: any(named: 'priceAmount'),
           priceCurrency: any(named: 'priceCurrency'),
           priceStore: any(named: 'priceStore'),
-          pricePhotoPath: any(named: 'pricePhotoPath'),
         ),
       ).thenAnswer((_) async => 1);
 
@@ -264,6 +253,34 @@ void main() {
           priceStore: 'Lidl',
         ),
       ).called(1);
+    });
+  });
+
+  group('updateShoppingItem', () {
+    test('persists the item via the database', () async {
+      when(() => mockDb.updateShoppingItem(any())).thenAnswer((_) async => 1);
+
+      await service().updateShoppingItem(
+        const ShoppingItem(name: 'Milk', quantity: 3),
+      );
+
+      verify(
+        () => mockDb.updateShoppingItem(
+          const ShoppingItem(name: 'Milk', quantity: 3),
+        ),
+      ).called(1);
+    });
+  });
+
+  group('reorderShoppingItems', () {
+    test('forwards the ordered ids to the database', () async {
+      when(() => mockDb.reorderShoppingItems(any())).thenAnswer(
+        (_) async => 1,
+      );
+
+      await service().reorderShoppingItems([3, 1, 2]);
+
+      verify(() => mockDb.reorderShoppingItems([3, 1, 2])).called(1);
     });
   });
 }

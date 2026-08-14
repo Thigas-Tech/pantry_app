@@ -517,6 +517,9 @@
   "invalidBarcode": "Digite um código de barras válido.",
   "invalidPriceAmount": "Digite um valor de preço válido",
   "itemName": "Nome do item",
+  "unit": "Unidade",
+  "editItem": "Editar item",
+  "editQuantity": "Editar quantidade",
   "itemWithPriceCount": "{count} de {total} itens tem precos",
   "@itemWithPriceCount": {
     "placeholders": {

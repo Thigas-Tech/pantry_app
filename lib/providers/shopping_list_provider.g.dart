@@ -8,52 +8,6 @@ part of 'shopping_list_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provides a singleton [PhotoService] instance.
-
-@ProviderFor(photoService)
-final photoServiceProvider = PhotoServiceProvider._();
-
-/// Provides a singleton [PhotoService] instance.
-
-final class PhotoServiceProvider
-    extends $FunctionalProvider<PhotoService, PhotoService, PhotoService>
-    with $Provider<PhotoService> {
-  /// Provides a singleton [PhotoService] instance.
-  PhotoServiceProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'photoServiceProvider',
-        isAutoDispose: false,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$photoServiceHash();
-
-  @$internal
-  @override
-  $ProviderElement<PhotoService> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  PhotoService create(Ref ref) {
-    return photoService(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(PhotoService value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<PhotoService>(value),
-    );
-  }
-}
-
-String _$photoServiceHash() => r'9edcf0ebaf6bf82d66bba3d5ec4788b38528107c';
-
 /// Provides all shopping list items, scoped to the active inventory.
 
 @ProviderFor(shoppingList)

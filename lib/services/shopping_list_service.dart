@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/photo_service.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/logger.dart';
 
@@ -33,12 +32,10 @@ class ShoppingListService {
   ShoppingListService(
     this._db,
     this._productRepository,
-    this._photoService,
   );
 
   final DatabaseHelper _db;
   final ProductRepository _productRepository;
-  final PhotoService _photoService;
 
   /// Adds an item to the shopping list, merging by barcode if a pending
   /// item with the same barcode and unit already exists.
@@ -108,11 +105,10 @@ class ShoppingListService {
     await _db.toggleShoppingItemPurchased(id);
   }
 
-  /// Deletes a shopping list item by [id], including its photo.
+  /// Deletes a shopping list item by [id].
   Future<void> deleteShoppingItem(int id) async {
     logInfo('Delete shopping item — id=$id');
     try {
-      await _photoService.deletePhotoForItem(id);
       await _db.deleteShoppingItem(id);
     } on Exception catch (e) {
       logError('Failed to delete shopping item id=$id: $e');
@@ -137,15 +133,42 @@ class ShoppingListService {
     double? priceAmount,
     String? priceCurrency,
     String? priceStore,
-    String? pricePhotoPath,
   }) async {
     await _db.updateShoppingItemPriceFields(
       id,
       priceAmount: priceAmount,
       priceCurrency: priceCurrency,
       priceStore: priceStore,
-      pricePhotoPath: pricePhotoPath,
     );
+  }
+
+  /// Updates an existing shopping item (name, quantity, unit, or price).
+  ///
+  /// Persists the whole [ShoppingItem] via the DAO's update path. The
+  /// caller is responsible for re-reading the item first if only some
+  /// fields changed.
+  Future<void> updateShoppingItem(ShoppingItem item) async {
+    logInfo('Update shopping item — id=${item.id} name="${item.name}"');
+    try {
+      await _db.updateShoppingItem(item);
+    } on Exception catch (e) {
+      logError('Failed to update shopping item id=${item.id}: $e');
+      rethrow;
+    }
+  }
+
+  /// Persists a manual drag-to-reorder of pending items for an inventory.
+  ///
+  /// [itemIds] holds the pending item ids in their new visual order. The
+  /// first id receives sort_order 1, and so on.
+  Future<void> reorderShoppingItems(List<int> itemIds) async {
+    logInfo('Reorder shopping items — count=${itemIds.length}');
+    try {
+      await _db.reorderShoppingItems(itemIds);
+    } on Exception catch (e) {
+      logError('Failed to reorder shopping items: $e');
+      rethrow;
+    }
   }
 
   /// Moves purchased items (with barcodes) to the active inventory.

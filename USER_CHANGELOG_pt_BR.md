@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A lista de compras ficou mais facil de usar: cada item da lista "Para
+  comprar" agora tem botoes + e - para mudar a quantidade, e voce pode
+  tocar na quantidade (ou no icone de lapis) para editar o nome, a
+  quantidade ou a unidade do item. Tambem e possivel arrastar os itens para
+  reordenar, e a barra de navegacao mostra um selo com quantos itens ainda
+  faltam comprar.
+
 - O marcador "Notas NFC-e" e o botao "Contribuir com fotos" na tela de
   Estatisticas foram removidos como parte de uma reducao de escopo. O app
   nao divulga mais funcionalidades que nao estao planejadas.

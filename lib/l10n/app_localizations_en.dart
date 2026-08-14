@@ -1213,6 +1213,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemName => 'Item name';
 
   @override
+  String get unit => 'Unit';
+
+  @override
+  String get editItem => 'Edit item';
+
+  @override
+  String get editQuantity => 'Edit quantity';
+
+  @override
   String get markPurchased => 'Mark purchased';
 
   @override

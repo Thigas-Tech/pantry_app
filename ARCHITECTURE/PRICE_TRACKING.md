@@ -235,9 +235,6 @@ Current storage:
 
 - The `prices` table has no proof column. Proofs are not persisted or
   uploaded anywhere.
-- `PhotoService` (`lib/services/photo_service.dart`) manages price-tag photos
-  keyed by **shopping item** id under `shopping_photos/<itemId>.jpg`, used
-  only by the shopping-list flow -- not by price observations.
 
 Planned path, in order:
 
