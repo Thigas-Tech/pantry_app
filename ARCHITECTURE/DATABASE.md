@@ -1,15 +1,14 @@
 ## 2. Database layer (`lib/database/`)
 
-### 2.1 Schema (version 38)
+### 2.1 Schema (version 41)
 
-Thirteen tables:
+Twelve tables:
 
 | Table | Purpose |
 |---|---|
 | `products` | Cached product data from Open Food Facts. PK = barcode. Includes `source` column: `'api'` (OFF-fetched, flushable) or `'manual'` (user-entered, protected). |
 | `inventories` | Named pantries (e.g. "Home", "Work"). PK = id |
 | `inventory` | Instances of products in a pantry. FK -> products, inventories |
-| `feedback_queue` | Offline queue for GitHub issue reports |
 | `product_submission_queue` | Offline queue for OFF product submissions |
 | `prices` | Purchase price observations per barcode, scoped to their owning inventory via `inventory_id`, with optional package size for per-unit pricing |
 | `shopping_list` | Items the user intends to buy |
@@ -29,7 +28,6 @@ Each table has a dedicated Data Access Object:
 | `ProductDao` | Upsert / lookup products, count, source-aware queries |
 | `InventoryDao` | CRUD items, joined queries |
 | `InventoriesDao` | CRUD named pantries, migrations |
-| `FeedbackQueueDao` | CRUD offline feedback queue |
 | `ProductSubmissionQueueDao` | CRUD offline submission queue |
 | `PriceDao` | CRUD prices, quantity-scaled aggregation queries (total value, average, monthly/store spending) |
 | `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
@@ -59,7 +57,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v38).
+- `_onUpgrade` handles version bumps (currently v1 -> v41).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -74,8 +72,7 @@ Version history:
 | v7 -> v8 | Added `submission_status` column for OFF product submission |
 | v8 -> v9 | Added 3 OFF image URL columns for photo-completeness |
 | v9 -> v10 | Added `categories_hierarchy` column |
-| v10 -> v11 | Added `feedback_queue` table for offline issue reporting |
-| v11 -> v12 | Added `prices` table for purchase price observations |
+| v10 -> v12 | Added `prices` table for purchase price observations (v11 was the removed `feedback_queue` migration) |
 | v12 -> v13 | Added `shopping_list` table |
 | v13 -> v14 | Added `idx_inventory_date_added` index on `inventory` |
 | v14 -> v15 | Added `language_code TEXT` column to `products` |
@@ -102,6 +99,9 @@ Version history:
 | v35 -> v36 | Replaced the unique index on `inventory(barcode, inventory_id)` with a non-unique index so distinct expiry batches can coexist |
 | v36 -> v37 | Added `package_quantity` / `package_unit` to `prices` and `quantity` / `product_quantity` to `products` for unit-aware price math |
 | v37 -> v38 | Dropped redundant indexes (`idx_barcode` on the products PK, `idx_inventory_barcode` covered by the composite); added `idx_prices_barcode_inventory_date`, `idx_recipes_inventory_updated`, `idx_products_source` |
+| v38 -> v39 | Added `idx_inventory_inventory_expiry` on `inventory(inventory_id, expiry_date)` and `idx_shopping_list_inventory_purchased_date` on `shopping_list(inventory_id, is_purchased, date_added)` |
+| v39 -> v40 | Added `shared_recipe_id TEXT NOT NULL DEFAULT ''` column on `recipes` for the Firestore recipe_cache document id |
+| v40 -> v41 | Added `sort_order REAL NOT NULL DEFAULT 0` column on `shopping_list`; pending items backfilled to keep current date-added order |
 
 **Migration v30 search_text backfill**: the recipe `search_text` backfill
 intentionally runs in Dart via `normalizeForSearch()` instead of raw SQL.

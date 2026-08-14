@@ -9,6 +9,12 @@ All monetization features are deferred until a lawyer and accountant are
 consulted. This document serves as the implementation reference when
 the time comes.
 
+Tracking issues #191 (AdMob), #192 (GDPR/LGPD consent), #193 (donations),
+#194 (Pro subscription), #195 (Google Sign-In), and #196 (cloud backup)
+are labeled `priority: low` to match this deferred status. They will be
+re-scoped once the Google Play listing is live and the legal/accounting
+review is complete.
+
 ## AdMob (banner and native ads)
 
 ### Overview

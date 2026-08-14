@@ -18,5 +18,4 @@ for JSON deserialization from the Open Food Facts API, except where noted.
 | `AuthUser` | plain Dart | Authenticated user (uid, isAnonymous, email, displayName) |
 | `ProductCacheEntry` | freezed | Firestore document for `product_cache/{barcode}` |
 | `ProduceCacheEntry` | freezed | Firestore document for `produce_cache/{name}` |
-| `FeedbackQueueEntry` | freezed | Offline queue item for GitHub issue reports |
 | `ProductSubmissionQueueEntry` | freezed | Offline queue item for OFF product submissions |
