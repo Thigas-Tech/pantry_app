@@ -25,7 +25,6 @@ void main() {
       <String>[
         'database_helper.dart',
         'database_provider.dart',
-        'github_issue_service.dart',
       ],
     ),
     RegExp(r'ImageCacheService\((?!\{)'): (

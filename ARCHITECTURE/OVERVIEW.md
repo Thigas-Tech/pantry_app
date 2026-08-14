@@ -43,11 +43,11 @@
 ┌─────────▼─────────────────┐  ┌──▼───────────────┐   ┌───────▼─────────┐
 │ Local DB                  │  │ Remote API       │   │ Cloud Cache     │
 │ database/                 │  │ services/        │   │ Cloud Firestore │
-│ SQLite - 13 tables:       │  │ Open Food Facts  │   │ product_cache/  │
+│ SQLite - 12 tables:       │  │ Open Food Facts  │   │ product_cache/  │
 │ products                  │  │ v3 REST (SDK)    │   │ produce_cache/  │
 │ inventories               │  │ Open Prices API  │   └─────────────────┘
 │ inventory                 │  │ ExchangeRate-API │                      
-│ feedback_queue            │  └──────────────────┘                      
+│ product_submission_queue  │  └──────────────────┘                      
 │ product_submission_queue  │                                            
 │ prices                    │                                            
 │ shopping_list             │                                            

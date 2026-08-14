@@ -1745,7 +1745,7 @@ group('Migration v23 -> v24', () {
     final v23Db = await openDatabase(v23Path, version: 23,
       onCreate: (db, _) async {
         // Create all v23 tables (products, inventories, inventory,
-        // feedback_queue, product_submission_queue, prices,
+        // product_submission_queue, prices,
         // shopping_list, stores)
         await db.execute('''
           CREATE TABLE products (
@@ -1780,7 +1780,7 @@ group('Migration v23 -> v24', () {
             product_type TEXT NOT NULL DEFAULT 'barcoded'
           )
         ''');
-        // ... inventories, inventory, feedback_queue,
+        // ... inventories, inventory,
         //     product_submission_queue, prices,
         //     shopping_list, stores tables ...
         await db.execute('''

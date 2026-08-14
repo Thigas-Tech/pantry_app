@@ -18,6 +18,17 @@
 
 ### Maintainability
 
+- **Docs synced with the feedback removal and current schema**: removed the
+  stale `feedback_queue` references from [ARCHITECTURE/DATABASE.md],
+  [ARCHITECTURE/OVERVIEW.md], [ARCHITECTURE/MODELS.md], and the
+  firebase_cache plan docs; DATABASE.md now documents the schema at version
+  41 (v38-v41 migration rows added) and the README project-structure tree
+  reflects the current services/widgets. The database DI-guard test no
+  longer whitelists the deleted `github_issue_service.dart`.
+- **Monetization deferred explicitly**: tracking issues #191-#196 were
+  re-labeled `priority: low` and [docs/superpowers/agents/monetization.md]
+  now states they are deferred pending legal/accounting review and Google
+  Play launch.
 - **Removed dead price-photo plumbing from the shopping list**: the
   `pricePhotoPath` field was never populated (no photo capture exists), so
   the field, the [PhotoService] class, its provider, and the photo cleanup
