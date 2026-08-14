@@ -101,37 +101,47 @@ lib/
   main.dart            # Entry point
   database/
     database_helper.dart   # Singleton, schema, migrations
+    migrations/            # One file per schema version bump
     product_dao.dart       # Product table CRUD
-    inventory_dao.dart       # Inventory items CRUD + joins
-    inventories_dao.dart     # Named pantries CRUD
-    feedback_queue_dao.dart  # Offline feedback submission queue
-    price_dao.dart           # Price observations CRUD + aggregation
-    shopping_list_dao.dart   # Shopping list CRUD (per-inventory)
-    store_dao.dart           # Saved store names CRUD
+    inventory_dao.dart     # Inventory items CRUD + joins
+    inventories_dao.dart   # Named pantries CRUD
+    price_dao.dart         # Price observations CRUD + aggregation
+    shopping_list_dao.dart # Shopping list CRUD (per-inventory)
+    store_dao.dart         # Saved store names CRUD
     product_submission_queue_dao.dart  # OFF submission queue
+    recipe_dao.dart, recipe_history_dao.dart, recipe_ingredient_dao.dart  # Recipes
+    scan_history_dao.dart  # Recent scanned barcodes
     firebase_cache_meta_dao.dart  # Firestore cache sync metadata
-  l10n/                # App translations (English ARB)
+  l10n/                # App translations (ARB files, generated)
   models/              # Freezed data models
   providers/           # Riverpod state & dependency injection
   screens/             # UI pages
   services/            # Business logic
     product_repository.dart   # Offline-first product cache + API
     off_adapter.dart          # Open Food Facts API wrapper
+    off_query.dart            # OFF request query builder
     firebase_cache_client.dart  # Firestore read/write client
     firebase_cache_service.dart  # 180-day Firestore cache coordinator
     firebase_firestore_client_adapter.dart  # Serialization adapter
     auth_service.dart         # Firebase Auth / no-op
     firebase_auth_service.dart   # Firebase anonymous auth
+    notification_coordinator.dart  # Notification scheduling orchestrator
     notification_service.dart  # Expiry reminder scheduling
     image_cache_service.dart   # WebP image download & cache
     price_repository.dart      # Price CRUD + Open Prices sync
     currency_service.dart      # Exchange rate conversion
     open_prices_api_client.dart  # Open Prices API HTTP client
     open_prices_service.dart     # Open Prices sync coordinator
-    github_issue_service.dart    # GitHub Issues API wrapper
-    photo_service.dart           # Price tag photo cleanup for shopping items
     plu_service.dart             # PLU code lookup for produce
+    usda_api_client.dart         # USDA produce nutrition data
+    produce_*.dart               # Produce barcode/nutrition mapping helpers
     product_submission_service.dart  # OFF offline submission queue
+    product_image_service.dart, product_image_compressor.dart  # Product photos
+    product_photo_picker.dart, product_photo_cropper.dart      # Photo capture
+    recipe_service.dart, recipe_nutrition_service.dart, recipe_nutri_score_service.dart
+    shopping_list_service.dart  # Shopping list business logic
+    camera_service.dart, camera_image_processor.dart  # Camera capture
+    app_startup_service.dart, app_update_handler.dart  # App lifecycle
   utils/               # Logger, snackbar helpers
     price_calculator.dart   # Unit-aware price math (per-unit price, scaled cost)
     unit_conversion.dart    # Unit normalization & conversion

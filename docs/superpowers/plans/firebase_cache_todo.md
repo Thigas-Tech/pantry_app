@@ -793,7 +793,7 @@ Future<void> _refreshFirebaseCache() async {
 
 - [P9] If the user closes the app during refresh, unprocessed entries stay stale and will be retried next startup
 - [P12] Large stale entry counts are handled by `maxBatchSize: 20` — no need to worry about long-running operations blocking startup
-- The 8-second delay avoids competing with `_scheduleCacheRefresh`, `_runDatabaseCleanup`, `_flushFeedbackQueue`, `_schedulePostInitNotifications`, and `_flushProductSubmissionQueue` for network bandwidth
+- The 8-second delay avoids competing with `_scheduleCacheRefresh`, `_runDatabaseCleanup`, `_schedulePostInitNotifications`, and `_flushProductSubmissionQueue` for network bandwidth
 
 ### [x] 7.3 Verify compile
 
