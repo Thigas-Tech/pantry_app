@@ -67,15 +67,17 @@
     </section>
     
 <section class="desc markdown">
-  <p>JSON-encoded snapshot of <code>{barcode, name, quantity, unit}</code> at cook
-time, so the entry is accurate even if the recipe changes later.</p>
+  <p>JSON-encoded snapshot of the ingredient fields barcode, name,
+quantity, and unit at cook time, so the entry is accurate even if
+the recipe changes later.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get madeAt;&#47;&#47;&#47; JSON-encoded snapshot of [{barcode, name, quantity, unit}] at cook
-&#47;&#47;&#47; time, so the entry is accurate even if the recipe changes later.
+  <pre class="language-dart"><code class="language-dart">int get madeAt;&#47;&#47;&#47; JSON-encoded snapshot of the ingredient fields barcode, name,
+&#47;&#47;&#47; quantity, and unit at cook time, so the entry is accurate even if
+&#47;&#47;&#47; the recipe changes later.
 String get ingredientSnapshot;</code></pre>
 </section>
 

@@ -79,8 +79,9 @@ defaults to 0.0 for recipes with no priced ingredients.</p>
   &#47;&#47;&#47; Epoch millis timestamp of when the recipe was made.
   required int madeAt,
 
-  &#47;&#47;&#47; JSON-encoded snapshot of [{barcode, name, quantity, unit}] at cook
-  &#47;&#47;&#47; time, so the entry is accurate even if the recipe changes later.
+  &#47;&#47;&#47; JSON-encoded snapshot of the ingredient fields barcode, name,
+  &#47;&#47;&#47; quantity, and unit at cook time, so the entry is accurate even if
+  &#47;&#47;&#47; the recipe changes later.
   required String ingredientSnapshot,
 
   &#47;&#47;&#47; Auto-increment primary key from the recipe_history table.
