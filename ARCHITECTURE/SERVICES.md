@@ -68,6 +68,17 @@ User scans barcode
   product detail screen; it resolves display names only for items with an
   expiry date via one batched query instead of loading the whole products
   table.
+- **Weekly recipe suggestion**: a weekly notification suggesting a recipe
+  matched against the user's inventory. The coordinator gathers up to 5
+  distinct ingredient names (expiring items first), asks
+  `RecipeSuggestionService` for a suggestion (excluding the last one
+  suggested), and schedules it via
+  `scheduleWeeklyRecipeSuggestion()` on a dedicated
+  `recipe_suggestions_channel`. Uses fixed ID `999_999_002`,
+  `DateTimeComponents.dayOfWeekAndTime`, and the configured day/time
+  (default Sunday 18:00). The tap payload is `weekly_recipe_suggestion`,
+  which is intentionally non-navigating in Phase 1 (no recipe detail
+  screen yet).
 - **Permission**: `requestPermission()` requests `POST_NOTIFICATIONS` on
   Android 13+. Returns `bool` — the settings screen reacts accordingly.
 - **Background handler**: Separated into

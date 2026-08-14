@@ -6,8 +6,10 @@ import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
+import 'package:pantry_app/models/recipe_suggestion.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/notification_coordinator.dart';
+import 'package:pantry_app/services/recipe_suggestion_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'mock_notification_service.dart';
@@ -18,6 +20,9 @@ class _MockInventoryDao extends Mock implements InventoryDao {}
 
 class _MockDatabase extends Mock implements Database {}
 
+class _MockRecipeSuggestionService extends Mock
+    implements RecipeSuggestionService {}
+
 void main() {
   registerFallbackValue(_MockDatabase());
 
@@ -25,6 +30,7 @@ void main() {
   late _MockInventoryDao inventoryDao;
   late _MockDatabase database;
   late MockNotificationService notif;
+  late _MockRecipeSuggestionService suggestionService;
   late NotificationCoordinator coordinator;
   late AppLocalizations l10n;
 
@@ -43,6 +49,7 @@ void main() {
     inventoryDao = _MockInventoryDao();
     database = _MockDatabase();
     notif = MockNotificationService();
+    suggestionService = _MockRecipeSuggestionService();
     when(() => db.inventoryDao).thenReturn(inventoryDao);
     when(() => db.database).thenAnswer((_) async => database);
     when(() => db.getInventories()).thenAnswer(
@@ -56,6 +63,12 @@ void main() {
         inventoryId: any(named: 'inventoryId'),
       ),
     ).thenAnswer((_) async => [expiringItem, noExpiryItem]);
+    when(
+      () => inventoryDao.listWithProduct(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => const <Map<String, dynamic>>[]);
     when(
       () => db.getProductsByBarcodes(any()),
     ).thenAnswer((_) async => <Product>[]);
@@ -88,9 +101,25 @@ void main() {
         notificationsEnabled: any(named: 'notificationsEnabled'),
       ),
     ).thenAnswer((_) => Future<void>.value());
+    when(
+      () => notif.cancelWeeklyRecipeSuggestion(),
+    ).thenAnswer((_) => Future<void>.value());
+    when(
+      () => notif.scheduleWeeklyRecipeSuggestion(
+        title: any(named: 'title'),
+        body: any(named: 'body'),
+        dayOfWeek: any(named: 'dayOfWeek'),
+        hour: any(named: 'hour'),
+        minute: any(named: 'minute'),
+        channelName: any(named: 'channelName'),
+        channelDescription: any(named: 'channelDescription'),
+        notificationsEnabled: any(named: 'notificationsEnabled'),
+      ),
+    ).thenAnswer((_) => Future<void>.value());
     coordinator = NotificationCoordinator(
       notificationService: notif,
       db: db,
+      recipeSuggestionService: suggestionService,
     );
     l10n = lookupAppLocalizations(const Locale('en'));
   });
@@ -269,6 +298,209 @@ void main() {
           notificationsEnabled: any(named: 'notificationsEnabled'),
         ),
       ).called(1);
+    });
+  });
+
+  group('rescheduleWeeklyRecipeSuggestion', () {
+    const recipeSuggestion = RecipeSuggestion(name: 'Curry', idMeal: '42');
+
+    Settings enabledSettings() => const Settings(
+      weeklyRecipeSuggestionEnabled: true,
+      weeklyRecipeSuggestionDay: 1,
+      weeklyRecipeSuggestionHour: 9,
+      weeklyRecipeSuggestionMinute: 30,
+    );
+
+    test('cancels then schedules when enabled and ingredients exist', () async {
+      when(
+        () => inventoryDao.listWithProduct(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          {'product_name': 'Chicken', 'expiry_date': '2026-09-01'},
+          {'product_name': 'Rice', 'expiry_date': null},
+        ],
+      );
+      when(
+        () => suggestionService.pickSuggestion(any()),
+      ).thenAnswer((_) async => recipeSuggestion);
+
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: enabledSettings(),
+      );
+
+      verify(() => notif.cancelWeeklyRecipeSuggestion()).called(1);
+      verify(
+        () => notif.scheduleWeeklyRecipeSuggestion(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          dayOfWeek: 1,
+          hour: 9,
+          minute: 30,
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+          notificationsEnabled: any(named: 'notificationsEnabled'),
+        ),
+      ).called(1);
+      verify(
+        () => suggestionService.pickSuggestion(['Chicken', 'Rice']),
+      ).called(1);
+    });
+
+    test('prefers expiring ingredients first', () async {
+      when(
+        () => inventoryDao.listWithProduct(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          {'product_name': 'Rice', 'expiry_date': null},
+          {'product_name': 'Chicken', 'expiry_date': '2026-09-01'},
+        ],
+      );
+      when(
+        () => suggestionService.pickSuggestion(any()),
+      ).thenAnswer((_) async => recipeSuggestion);
+
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: enabledSettings(),
+      );
+
+      verify(
+        () => suggestionService.pickSuggestion(['Chicken', 'Rice']),
+      ).called(1);
+    });
+
+    test('skips when the weekly suggestion is disabled', () async {
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: const Settings(),
+      );
+
+      verifyNever(() => notif.cancelWeeklyRecipeSuggestion());
+      verifyNever(
+        () => notif.scheduleWeeklyRecipeSuggestion(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          dayOfWeek: any(named: 'dayOfWeek'),
+          hour: any(named: 'hour'),
+          minute: any(named: 'minute'),
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+          notificationsEnabled: any(named: 'notificationsEnabled'),
+        ),
+      );
+    });
+
+    test('skips when notifications are disabled', () async {
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: const Settings(
+          weeklyRecipeSuggestionEnabled: true,
+          notificationsEnabled: false,
+        ),
+      );
+
+      verifyNever(() => notif.cancelWeeklyRecipeSuggestion());
+      verifyNever(
+        () => notif.scheduleWeeklyRecipeSuggestion(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          dayOfWeek: any(named: 'dayOfWeek'),
+          hour: any(named: 'hour'),
+          minute: any(named: 'minute'),
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+          notificationsEnabled: any(named: 'notificationsEnabled'),
+        ),
+      );
+    });
+
+    test('skips when the inventory has no product names', () async {
+      when(
+        () => inventoryDao.listWithProduct(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          {'product_name': 'Unknown', 'expiry_date': null},
+          {'product_name': '', 'expiry_date': null},
+        ],
+      );
+
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: enabledSettings(),
+      );
+
+      verifyNever(
+        () => suggestionService.pickSuggestion(any()),
+      );
+      verifyNever(
+        () => notif.scheduleWeeklyRecipeSuggestion(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          dayOfWeek: any(named: 'dayOfWeek'),
+          hour: any(named: 'hour'),
+          minute: any(named: 'minute'),
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+          notificationsEnabled: any(named: 'notificationsEnabled'),
+        ),
+      );
+    });
+
+    test('cancels without scheduling when no suggestion is returned', () async {
+      when(
+        () => inventoryDao.listWithProduct(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer(
+        (_) async => [
+          {'product_name': 'Chicken', 'expiry_date': '2026-09-01'},
+        ],
+      );
+      when(
+        () => suggestionService.pickSuggestion(any()),
+      ).thenAnswer((_) async => null);
+
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: enabledSettings(),
+      );
+
+      verify(() => notif.cancelWeeklyRecipeSuggestion()).called(1);
+      verifyNever(
+        () => notif.scheduleWeeklyRecipeSuggestion(
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          dayOfWeek: any(named: 'dayOfWeek'),
+          hour: any(named: 'hour'),
+          minute: any(named: 'minute'),
+          channelName: any(named: 'channelName'),
+          channelDescription: any(named: 'channelDescription'),
+          notificationsEnabled: any(named: 'notificationsEnabled'),
+        ),
+      );
+    });
+
+    test('skips when the notification service is not initialized', () async {
+      when(() => notif.initialized).thenReturn(false);
+
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: enabledSettings(),
+      );
+
+      verifyNever(() => notif.cancelWeeklyRecipeSuggestion());
+      verifyNever(() => suggestionService.pickSuggestion(any()));
     });
   });
 }

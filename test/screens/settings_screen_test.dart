@@ -53,6 +53,14 @@ class FakeSettingsNotifierNotifsOff extends SettingsNotifier {
   Future<Settings> build() async => const Settings(notificationsEnabled: false);
 }
 
+/// A fake with the weekly recipe suggestion enabled.
+class FakeSettingsNotifierWeekly extends SettingsNotifier {
+  @override
+  Future<Settings> build() async => const Settings(
+    weeklyRecipeSuggestionEnabled: true,
+  );
+}
+
 /// A fake with imperial unit system.
 class FakeSettingsNotifierImperial extends SettingsNotifier {
   @override
@@ -574,5 +582,45 @@ void main() {
 
     expect(find.text('Weight preference'), findsNothing);
     expect(find.text('Volume preference'), findsNothing);
+  });
+
+  testWidgets('weekly recipe suggestion toggle schedules and cancels', (
+    tester,
+  ) async {
+    final mockNotif = MockNotificationService();
+    when(mockNotif.requestPermission).thenAnswer((_) async => true);
+    when(mockNotif.cancelWeeklyRecipeSuggestion).thenAnswer((_) async {});
+    when(mockNotif.canScheduleExactNotifications).thenAnswer((_) async => true);
+
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifierWeekly.new),
+        notificationServiceProvider.overrideWithValue(mockNotif),
+      ],
+    );
+
+    // Scroll down to reveal the weekly recipe suggestions section.
+    await tester.drag(find.byType(ListView), const Offset(0, -1000));
+    await tester.pumpAndSettle();
+
+    // Expand the weekly recipe suggestions section.
+    await tester.tap(find.text('Weekly recipe suggestions'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Suggestion day'), findsOneWidget);
+    expect(find.text('Suggestion time'), findsOneWidget);
+
+    // The master switch is on; toggle it off, which cancels.
+    final switchFinder = find.widgetWithText(
+      SwitchListTile,
+      'Weekly recipe suggestions',
+    );
+    expect(switchFinder, findsOneWidget);
+    await tester.tap(switchFinder);
+    await tester.pumpAndSettle();
+    verify(mockNotif.cancelWeeklyRecipeSuggestion).called(1);
   });
 }

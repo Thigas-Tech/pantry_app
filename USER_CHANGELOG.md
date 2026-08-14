@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- You can now turn on weekly recipe suggestions in Settings. Once enabled,
+  the app picks a recipe that matches ingredients you have in your pantry
+  and shows it as a notification every week at a day and time you choose.
+  Suggestions skip the last recipe you were shown.
+
 - The shopping list is easier to use: each item on the "To buy" list now
   has quick + and - buttons to change the quantity, and you can tap the
   quantity (or the pencil icon) to edit the item's name, quantity, or unit.

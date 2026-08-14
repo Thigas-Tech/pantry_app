@@ -3,6 +3,7 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/notification_service_interface.dart';
+import 'package:pantry_app/services/recipe_suggestion_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 
 /// Single owner of notification (re)scheduling used by every call site.
@@ -28,6 +29,7 @@ class NotificationCoordinator {
   NotificationCoordinator({
     required this.notificationService,
     required this.db,
+    required this.recipeSuggestionService,
   });
 
   /// The [NotificationService] that performs the platform scheduling.
@@ -35,6 +37,9 @@ class NotificationCoordinator {
 
   /// The database used to load inventory items and product names.
   final DatabaseHelper db;
+
+  /// Picks the weekly recipe suggestion from the user's inventory.
+  final RecipeSuggestionService recipeSuggestionService;
 
   /// Reschedules expiry reminders for every inventory item with a future
   /// expiry date.
@@ -121,13 +126,103 @@ class NotificationCoordinator {
   }
 
   /// Runs the full startup reschedule: expiry reminders followed by the
-  /// inactivity reminder.
+  /// inactivity reminder and the weekly recipe suggestion.
   Future<void> rescheduleAll({
     required AppLocalizations l10n,
     required Settings settings,
   }) async {
     await rescheduleExpiryReminders(l10n: l10n, settings: settings);
     await rescheduleInactivityReminder(l10n: l10n, settings: settings);
+    await rescheduleWeeklyRecipeSuggestion(l10n: l10n, settings: settings);
+  }
+
+  /// Cancels and re-schedules the weekly recipe suggestion.
+  ///
+  /// Loads distinct ingredient names from the active inventory, picks a
+  /// suggestion (skipping the last one suggested), and schedules the
+  /// weekly notification at the configured day and time. Skips when the
+  /// service is not initialized, the suggestion is disabled in settings,
+  /// notifications are disabled, the inventory is empty, or no recipe is
+  /// returned by the API.
+  Future<void> rescheduleWeeklyRecipeSuggestion({
+    required AppLocalizations l10n,
+    required Settings settings,
+  }) async {
+    final notifService = notificationService;
+    if (!notifService.initialized) {
+      logWarning(
+        'Notification service not initialized, skipping weekly recipe '
+        'suggestion',
+      );
+      return;
+    }
+
+    if (!settings.weeklyRecipeSuggestionEnabled ||
+        !settings.notificationsEnabled) {
+      logInfo('Weekly recipe suggestion disabled in settings, skipping');
+      return;
+    }
+
+    await notifService.cancelWeeklyRecipeSuggestion();
+
+    final ingredientNames = await _inventoryIngredientNames();
+    if (ingredientNames.isEmpty) {
+      logInfo('No ingredients in inventory, skipping weekly recipe suggestion');
+      return;
+    }
+
+    final suggestion = await recipeSuggestionService.pickSuggestion(
+      ingredientNames,
+    );
+    if (suggestion == null) {
+      logWarning('No recipe suggestion available, skipping');
+      return;
+    }
+
+    await notifService.scheduleWeeklyRecipeSuggestion(
+      title: l10n.weeklyRecipeSuggestionTitle,
+      body: l10n.weeklyRecipeSuggestionBody(
+        suggestion.name,
+        ingredientNames.length,
+      ),
+      dayOfWeek: settings.weeklyRecipeSuggestionDay,
+      hour: settings.weeklyRecipeSuggestionHour,
+      minute: settings.weeklyRecipeSuggestionMinute,
+      channelName: l10n.weeklyRecipeSuggestionChannelName,
+      channelDescription: l10n.weeklyRecipeSuggestionChannelDescription,
+      notificationsEnabled: settings.notificationsEnabled,
+    );
+    logInfo('Weekly recipe suggestion scheduling completed');
+  }
+
+  /// Returns up to 5 distinct, non-empty product names from the active
+  /// inventory, preferring items that expire soon.
+  Future<List<String>> _inventoryIngredientNames() async {
+    final database = await db.database;
+    final inventories = await db.getInventories();
+    final expiringFirst = <String>[];
+    final remaining = <String>[];
+    final seen = <String>{};
+
+    void add(List<String> bucket, String name) {
+      if (name.isEmpty || name == 'Unknown') return;
+      if (seen.add(name)) bucket.add(name);
+    }
+
+    for (final inv in inventories) {
+      final rows = await db.inventoryDao.listWithProduct(
+        database,
+        inventoryId: inv['id'] as int,
+      );
+      for (final row in rows) {
+        final name = (row['product_name'] as String?)?.trim() ?? '';
+        if (name.isEmpty || name == 'Unknown') continue;
+        final expiry = row['expiry_date'] as String?;
+        final isExpiring = expiry != null && expiry.isNotEmpty;
+        add(isExpiring ? expiringFirst : remaining, name);
+      }
+    }
+    return [...expiringFirst, ...remaining].take(5).toList();
   }
 
   /// Builds a barcode-to-name map for the items that have an expiry date.

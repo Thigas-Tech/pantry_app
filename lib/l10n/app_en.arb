@@ -485,6 +485,26 @@
   "inactivityThresholdDays": "Inactivity threshold (days)",
   "inactivityReminderChannelName": "Inactivity reminders",
   "inactivityReminderChannelDescription": "Reminds you to add products regularly",
+  "weeklyRecipeSuggestionTitle": "Recipe idea from your pantry",
+  "weeklyRecipeSuggestionBody": "How about {recipeName}? It matches {itemCount} ingredients you have. Always check ingredients for dietary suitability.",
+  "@weeklyRecipeSuggestionBody": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String",
+        "example": "Chicken Handi"
+      },
+      "itemCount": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "weeklyRecipeSuggestionEnabled": "Weekly recipe suggestions",
+  "weeklyRecipeSuggestionDay": "Suggestion day",
+  "weeklyRecipeSuggestionTime": "Suggestion time",
+  "weeklyRecipeSuggestionSet": "Weekly recipe suggestion updated.",
+  "weeklyRecipeSuggestionChannelName": "Recipe suggestions",
+  "weeklyRecipeSuggestionChannelDescription": "Weekly recipe ideas from your pantry",
   "notificationDeniedWarning": "Notifications are disabled. Expiry and inactivity reminders will only show when you open the app. Enable them in Settings at any time.",
   "inactivityThresholdSet": "Inactivity threshold set to {days} days.",
   "@inactivityThresholdSet": {

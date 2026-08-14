@@ -97,6 +97,24 @@ abstract class NotificationService {
   /// Cancels the daily inactivity reminder.
   Future<void> cancelInactivityReminder();
 
+  /// Schedules a weekly recipe-suggestion notification.
+  ///
+  /// Fires at [hour]:[minute] on [dayOfWeek] (1 = Monday ... 7 = Sunday)
+  /// and repeats weekly via [DateTimeComponents.dayOfWeekAndTime].
+  Future<void> scheduleWeeklyRecipeSuggestion({
+    required String title,
+    required String body,
+    required int dayOfWeek,
+    required int hour,
+    required int minute,
+    required String channelName,
+    required String channelDescription,
+    bool notificationsEnabled = true,
+  });
+
+  /// Cancels the weekly recipe-suggestion notification.
+  Future<void> cancelWeeklyRecipeSuggestion();
+
   /// Reschedules expiry reminders for all given [items].
   Future<void> rescheduleAllItems(
     List<InventoryItem> items, {

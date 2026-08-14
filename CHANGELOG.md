@@ -4,6 +4,19 @@
 
 ### Features
 
+- **Weekly recipe suggestions**: an optional weekly notification that
+  suggests a recipe matched against your current inventory. The
+  suggestion is picked from TheMealDB (free, no API key), skipping the
+  last one suggested, and is scheduled at a configurable day and time
+  (default Sunday 18:00) on its own channel. Off, empty-inventory, and
+  API-failure cases skip scheduling. Phase 1 is notification-only — the
+  tap does not navigate yet. (lib/models/recipe_suggestion.dart new,
+  lib/services/recipe_api_client.dart new,
+  lib/services/recipe_suggestion_service.dart new,
+  lib/providers/recipe_suggestion_provider.dart new,
+  lib/services/notification_service.dart,
+  lib/services/notification_coordinator.dart,
+  lib/providers/settings_provider.dart, lib/screens/settings_screen.dart)
 - **Shopping list UX upgrade**: pending items now show a quick quantity
   stepper (plus/minus and tap-to-type via the edit sheet), a long-press or
   pencil icon opens an edit sheet to rename or change quantity and unit,

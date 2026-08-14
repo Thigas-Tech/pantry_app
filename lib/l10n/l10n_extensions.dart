@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/l10n/app_localizations.dart';
 
@@ -208,6 +209,16 @@ extension AppLocalizationsX on AppLocalizations {
       default:
         return modeName;
     }
+  }
+
+  /// Returns the localized name of a weekday.
+  ///
+  /// [day] follows [DateTime.weekday]: 1 = Monday ... 7 = Sunday. The name
+  /// is rendered in the current app locale via [DateFormat] using a fixed
+  /// reference week (2026-01-05 is a Monday).
+  String localizeWeekday(int day) {
+    final referenceDate = DateTime(2026, 1, 5 + (day - 1));
+    return DateFormat('EEEE', localeName).format(referenceDate);
   }
 
   /// Returns the localized name for a product category.

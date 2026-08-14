@@ -1,5 +1,6 @@
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
+import 'package:pantry_app/providers/recipe_suggestion_provider.dart';
 import 'package:pantry_app/services/notification_coordinator.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,5 +16,6 @@ NotificationCoordinator notificationCoordinator(Ref ref) {
   return NotificationCoordinator(
     notificationService: ref.read(notificationServiceProvider),
     db: ref.read(databaseProvider),
+    recipeSuggestionService: ref.read(recipeSuggestionServiceProvider),
   );
 }

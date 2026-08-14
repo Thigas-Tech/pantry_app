@@ -421,6 +421,26 @@
   "inactivityThresholdDays": "Limite de inatividade (dias)",
   "inactivityReminderChannelName": "Lembretes de inatividade",
   "inactivityReminderChannelDescription": "Lembra voce de adicionar produtos regularmente",
+  "weeklyRecipeSuggestionTitle": "Ideia de receita da sua despensa",
+  "weeklyRecipeSuggestionBody": "Que tal {recipeName}? Combina com {itemCount} ingredientes que voce tem. Sempre confira os ingredientes por questoes alimentares.",
+  "@weeklyRecipeSuggestionBody": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String",
+        "example": "Frango ao molho"
+      },
+      "itemCount": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "weeklyRecipeSuggestionEnabled": "Sugestoes semanais de receitas",
+  "weeklyRecipeSuggestionDay": "Dia da sugestao",
+  "weeklyRecipeSuggestionTime": "Horario da sugestao",
+  "weeklyRecipeSuggestionSet": "Sugestao semanal de receita atualizada.",
+  "weeklyRecipeSuggestionChannelName": "Sugestoes de receitas",
+  "weeklyRecipeSuggestionChannelDescription": "Ideias semanais de receitas da sua despensa",
   "notificationDeniedWarning": "Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.",
   "inactivityThresholdSet": "Limite de inatividade definido para {days} dias.",
   "@inactivityThresholdSet": {

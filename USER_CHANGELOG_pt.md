@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Agora voce pode ativar sugestoes semanais de receitas nas Configuracoes.
+  Quando ativado, o app escolhe uma receita que combina com os ingredientes
+  que voce tem na despensa e mostra como uma notificacao toda semana, no dia
+  e horario que voce escolher. As sugestoes pulam a ultima receita exibida.
+
 - A lista de compras ficou mais facil de usar: cada item da lista "Para
   comprar" agora tem botoes + e - para mudar a quantidade, e voce pode
   tocar na quantidade (ou no icone de lapis) para editar o nome, a

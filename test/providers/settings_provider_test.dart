@@ -142,6 +142,10 @@ void main() {
               expiringSoonDays: 7,
               inactivityReminderEnabled: false,
               inactivityThresholdDays: 14,
+              weeklyRecipeSuggestionEnabled: true,
+              weeklyRecipeSuggestionDay: 1,
+              weeklyRecipeSuggestionHour: 9,
+              weeklyRecipeSuggestionMinute: 30,
               amoledDarkMode: true,
               priceTrackingEnabled: true,
               priceRetentionDays: 365,
@@ -160,6 +164,10 @@ void main() {
       expect(prefs.getInt('expiringSoonDays'), 7);
       expect(prefs.getBool('inactivityReminderEnabled'), false);
       expect(prefs.getInt('inactivityThresholdDays'), 14);
+      expect(prefs.getBool('weeklyRecipeSuggestionEnabled'), true);
+      expect(prefs.getInt('weeklyRecipeSuggestionDay'), 1);
+      expect(prefs.getInt('weeklyRecipeSuggestionHour'), 9);
+      expect(prefs.getInt('weeklyRecipeSuggestionMinute'), 30);
       expect(prefs.getBool('amoledDarkMode'), true);
       expect(prefs.getBool('priceTrackingEnabled'), true);
       expect(prefs.getInt('priceRetentionDays'), 365);
@@ -297,6 +305,44 @@ void main() {
       expect(prefs.containsKey('unitSystemInventory'), isFalse);
       container.dispose();
     });
+
+    test('weekly recipe suggestion setters update state and persist', () async {
+      SharedPreferences.setMockInitialValues({});
+      final container = ProviderContainer();
+      container.read(settingsProvider.notifier)
+        ..setWeeklyRecipeSuggestionEnabled(value: true)
+        ..setWeeklyRecipeSuggestionDay(1)
+        ..setWeeklyRecipeSuggestionHour(9)
+        ..setWeeklyRecipeSuggestionMinute(30);
+
+      final settings = container.read(settingsProvider).value!;
+      expect(settings.weeklyRecipeSuggestionEnabled, isTrue);
+      expect(settings.weeklyRecipeSuggestionDay, 1);
+      expect(settings.weeklyRecipeSuggestionHour, 9);
+      expect(settings.weeklyRecipeSuggestionMinute, 30);
+
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('weeklyRecipeSuggestionEnabled'), isTrue);
+      expect(prefs.getInt('weeklyRecipeSuggestionDay'), 1);
+      expect(prefs.getInt('weeklyRecipeSuggestionHour'), 9);
+      expect(prefs.getInt('weeklyRecipeSuggestionMinute'), 30);
+      container.dispose();
+    });
+
+    test(
+      'weekly recipe suggestion defaults are disabled with Sunday 18:00',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final container = ProviderContainer();
+        final settings = await container.read(settingsProvider.future);
+        expect(settings.weeklyRecipeSuggestionEnabled, isFalse);
+        expect(settings.weeklyRecipeSuggestionDay, 7);
+        expect(settings.weeklyRecipeSuggestionHour, 18);
+        expect(settings.weeklyRecipeSuggestionMinute, 0);
+        container.dispose();
+      },
+    );
 
     test('setPreferredWeightUnit persists', () async {
       SharedPreferences.setMockInitialValues({});

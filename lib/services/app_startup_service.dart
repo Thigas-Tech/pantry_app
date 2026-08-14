@@ -201,6 +201,11 @@ class AppStartupService {
       return;
     }
 
+    if (payload == 'weekly_recipe_suggestion') {
+      logInfo('Notification tap for weekly recipe suggestion — no navigation');
+      return;
+    }
+
     logInfo(
       'Notification tap: payload=$payload, actionId=${response.actionId}',
     );
@@ -221,6 +226,7 @@ class AppStartupService {
       final payload = details?.notificationResponse?.payload;
       if (payload == null || payload.isEmpty) return;
       if (payload == 'inactivity_reminder') return;
+      if (payload == 'weekly_recipe_suggestion') return;
 
       logInfo('Cold-start notification: payload=$payload');
       WidgetsBinding.instance.addPostFrameCallback((_) {
