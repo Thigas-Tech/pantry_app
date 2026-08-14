@@ -68,7 +68,7 @@ reads it from the provider).</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ShoppingListService.new" class="callable">
-          <span class="name"><a href="../services_shopping_list_service/ShoppingListService/ShoppingListService.html">ShoppingListService</a></span><span class="signature">(<span class="parameter" id="param-_db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span><span class="parameter" id="param-_productRepository"><span class="type-annotation"><a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a></span> <span class="parameter-name">_productRepository</span>, </span><span class="parameter" id="param-_photoService"><span class="type-annotation"><a href="../services_photo_service/PhotoService-class.html">PhotoService</a></span> <span class="parameter-name">_photoService</span></span>)</span>
+          <span class="name"><a href="../services_shopping_list_service/ShoppingListService/ShoppingListService.html">ShoppingListService</a></span><span class="signature">(<span class="parameter" id="param-_db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span><span class="parameter" id="param-_productRepository"><span class="type-annotation"><a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a></span> <span class="parameter-name">_productRepository</span></span>)</span>
         </dt>
         <dd>
           Creates a <a href="../services_shopping_list_service/ShoppingListService-class.html">ShoppingListService</a>.
@@ -150,7 +150,7 @@ item with the same barcode and unit already exists.
 
 </dt>
 <dd>
-  Deletes a shopping list item by <code>id</code>, including its photo.
+  Deletes a shopping list item by <code>id</code>.
   
 
 </dd>
@@ -181,6 +181,19 @@ item with the same barcode and unit already exists.
 
 </dd>
 
+        <dt id="reorderShoppingItems" class="callable">
+  <span class="name"><a href="../services_shopping_list_service/ShoppingListService/reorderShoppingItems.html">reorderShoppingItems</a></span><span class="signature">(<wbr><span class="parameter" id="reorderShoppingItems-param-itemIds"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span> <span class="parameter-name">itemIds</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Persists a manual drag-to-reorder of pending items for an inventory.
+  
+
+</dd>
+
         <dt id="toggleShoppingItem" class="callable">
   <span class="name"><a href="../services_shopping_list_service/ShoppingListService/toggleShoppingItem.html">toggleShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="toggleShoppingItem-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -207,8 +220,21 @@ item with the same barcode and unit already exists.
 
 </dd>
 
+        <dt id="updateShoppingItem" class="callable">
+  <span class="name"><a href="../services_shopping_list_service/ShoppingListService/updateShoppingItem.html">updateShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="updateShoppingItem-param-item"><span class="type-annotation"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span> <span class="parameter-name">item</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates an existing shopping item (name, quantity, unit, or price).
+  
+
+</dd>
+
         <dt id="updateShoppingItemPrice" class="callable">
-  <span class="name"><a href="../services_shopping_list_service/ShoppingListService/updateShoppingItemPrice.html">updateShoppingItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="updateShoppingItemPrice-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span>, {</span><span class="parameter" id="updateShoppingItemPrice-param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-pricePhotoPath"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">pricePhotoPath</span></span>})
+  <span class="name"><a href="../services_shopping_list_service/ShoppingListService/updateShoppingItemPrice.html">updateShoppingItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="updateShoppingItemPrice-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span>, {</span><span class="parameter" id="updateShoppingItemPrice-param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
   </span>
   

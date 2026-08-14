@@ -66,7 +66,8 @@
 <section class="desc markdown">
   <p>Returns all shopping list items, optionally scoped to an inventory.</p>
 <p>When <code>inventoryId</code> is non-null, only items for that inventory are
-returned. Ordered by dateAdded descending.</p>
+returned. Ordered by sort_order ascending (manual order for pending),
+with date_added descending as a tie-breaker.</p>
 </section>
 
 
@@ -79,7 +80,7 @@ returned. Ordered by dateAdded descending.</p>
       &#39;shopping_list&#39;,
       where: inventoryId != null ? &#39;inventory_id = ?&#39; : null,
       whereArgs: inventoryId != null ? [inventoryId] : null,
-      orderBy: &#39;date_added DESC&#39;,
+      orderBy: &#39;sort_order ASC, date_added DESC&#39;,
     );
     return result.map(fromMap).toList();
   } on Exception catch (e) {

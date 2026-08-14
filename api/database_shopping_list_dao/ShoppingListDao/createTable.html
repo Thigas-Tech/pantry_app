@@ -86,6 +86,7 @@
       price_currency TEXT,
       price_store TEXT,
       price_photo_path TEXT,
+      sort_order REAL NOT NULL DEFAULT 0,
       FOREIGN KEY (barcode) REFERENCES products(barcode)
         ON DELETE SET NULL,
       FOREIGN KEY (inventory_id) REFERENCES inventories(id)

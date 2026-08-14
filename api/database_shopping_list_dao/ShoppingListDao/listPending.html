@@ -65,7 +65,7 @@
     
 <section class="desc markdown">
   <p>Returns only pending (not purchased) items, optionally scoped to an
-inventory. Ordered by dateAdded desc.</p>
+inventory. Ordered by sort_order ascending.</p>
 </section>
 
 
@@ -85,7 +85,7 @@ inventory. Ordered by dateAdded desc.</p>
       &#39;shopping_list&#39;,
       where: where,
       whereArgs: whereArgs,
-      orderBy: &#39;date_added DESC&#39;,
+      orderBy: &#39;sort_order ASC, date_added DESC&#39;,
     );
     return result.map(fromMap).toList();
   } on Exception catch (e) {

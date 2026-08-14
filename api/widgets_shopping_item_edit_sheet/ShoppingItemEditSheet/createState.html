@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the debugGetCreateSourceHash method from the PhotoServiceProvider class, for the Dart programming language.">
-  <title>debugGetCreateSourceHash method - PhotoServiceProvider class - shopping_list_provider library - Dart API</title>
+  <meta name="description" content="API docs for the createState method from the ShoppingItemEditSheet class, for the Dart programming language.">
+  <title>createState method - ShoppingItemEditSheet class - shopping_item_edit_sheet library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../providers_shopping_list_provider/">providers&#47;shopping_list_provider.dart</a></li>
-    <li><a href="../../providers_shopping_list_provider/PhotoServiceProvider-class.html">PhotoServiceProvider</a></li>
-    <li class="self-crumb">debugGetCreateSourceHash method</li>
+    <li><a href="../../widgets_shopping_item_edit_sheet/">widgets&#47;shopping_item_edit_sheet.dart</a></li>
+    <li><a href="../../widgets_shopping_item_edit_sheet/ShoppingItemEditSheet-class.html">ShoppingItemEditSheet</a></li>
+    <li class="self-crumb">createState method</li>
   </ol>
-  <div class="self-name">debugGetCreateSourceHash</div>
+  <div class="self-name">createState</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,10 +46,10 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="providers_shopping_list_provider&#47;PhotoServiceProvider-class-sidebar.html"
+    data-above-sidebar="widgets_shopping_item_edit_sheet&#47;ShoppingItemEditSheet-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">debugGetCreateSourceHash</span> method 
+<h1><span class="kind-method">createState</span> method 
 </h1></div>
 
     <section class="multi-line-signature">
@@ -59,20 +59,27 @@
         <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
     </ol>
   </div>
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-<span class="name ">debugGetCreateSourceHash</span>(<wbr>)
+<span class="returntype"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/ConsumerState-class.html">ConsumerState</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../widgets_shopping_item_edit_sheet/ShoppingItemEditSheet-class.html">ShoppingItemEditSheet</a></span>&gt;</span></span>
+<span class="name ">createState</span>(<wbr>)
 
-      
+      <div class="features"><span class="feature">override</span></div>
 
     </section>
     
 <section class="desc markdown">
-  <p>A debug-only function for obtaining a hash of the source code of the
-initialization function.</p>
-<p>If after a hot-reload this function returns a different result, the
-provider will be re-executed.</p>
-<p>This method only returns a non-null value when using <code>riverpod_generator</code>.
-@nodoc</p>
+  <p>Creates the mutable state for this widget at a given location in the tree.</p>
+<p>Subclasses should override this method to return a newly created
+instance of their associated <a href="https://api.flutter.dev/flutter/widgets/State-class.html">State</a> subclass:</p>
+<pre class="language-dart"><code class="language-dart">@override
+State&lt;SomeWidget&gt; createState() =&gt; _SomeWidgetState();
+</code></pre>
+<p>The framework can call this method multiple times over the lifetime of
+a <a href="https://api.flutter.dev/flutter/widgets/StatefulWidget-class.html">StatefulWidget</a>. For example, if the widget is inserted into the tree
+in multiple locations, the framework will create a separate <a href="https://api.flutter.dev/flutter/widgets/State-class.html">State</a> object
+for each location. Similarly, if the widget is removed from the tree and
+later inserted into the tree again, the framework will call <a href="../../widgets_shopping_item_edit_sheet/ShoppingItemEditSheet/createState.html">createState</a>
+again to create a fresh <a href="https://api.flutter.dev/flutter/widgets/State-class.html">State</a> object, simplifying the lifecycle of
+<a href="https://api.flutter.dev/flutter/widgets/State-class.html">State</a> objects.</p>
 </section>
 
 
@@ -80,7 +87,8 @@ provider will be re-executed.</p>
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
-String debugGetCreateSourceHash() =&gt; _$photoServiceHash();</code></pre>
+ConsumerState&lt;ShoppingItemEditSheet&gt; createState() =&gt;
+    _ShoppingItemEditSheetState();</code></pre>
 </section>
 
 
@@ -94,12 +102,12 @@ String debugGetCreateSourceHash() =&gt; _$photoServiceHash();</code></pre>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../providers_shopping_list_provider/">shopping_list_provider</a></li>
-    <li><a href="../../providers_shopping_list_provider/PhotoServiceProvider-class.html">PhotoServiceProvider</a></li>
-    <li class="self-crumb">debugGetCreateSourceHash method</li>
+    <li><a href="../../widgets_shopping_item_edit_sheet/">shopping_item_edit_sheet</a></li>
+    <li><a href="../../widgets_shopping_item_edit_sheet/ShoppingItemEditSheet-class.html">ShoppingItemEditSheet</a></li>
+    <li class="self-crumb">createState method</li>
 </ol>
 
-    <h5>PhotoServiceProvider class</h5>
+    <h5>ShoppingItemEditSheet class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

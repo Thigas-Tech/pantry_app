@@ -63,7 +63,7 @@
     </section>
     
 <section class="desc markdown">
-  <p>Deletes a shopping list item by <code>id</code>, including its photo.</p>
+  <p>Deletes a shopping list item by <code>id</code>.</p>
 </section>
 
 
@@ -73,7 +73,6 @@
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteShoppingItem(int id) async {
   logInfo(&#39;Delete shopping item — id=$id&#39;);
   try {
-    await _photoService.deletePhotoForItem(id);
     await _db.deleteShoppingItem(id);
   } on Exception catch (e) {
     logError(&#39;Failed to delete shopping item id=$id: $e&#39;);

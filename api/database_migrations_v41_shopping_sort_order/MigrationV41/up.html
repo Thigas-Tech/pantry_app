@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the overrideWith method from the PhotoServiceProvider class, for the Dart programming language.">
-  <title>overrideWith method - PhotoServiceProvider class - shopping_list_provider library - Dart API</title>
+  <meta name="description" content="API docs for the up method from the MigrationV41 class, for the Dart programming language.">
+  <title>up method - MigrationV41 class - v41_shopping_sort_order library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../providers_shopping_list_provider/">providers&#47;shopping_list_provider.dart</a></li>
-    <li><a href="../../providers_shopping_list_provider/PhotoServiceProvider-class.html">PhotoServiceProvider</a></li>
-    <li class="self-crumb">overrideWith method</li>
+    <li><a href="../../database_migrations_v41_shopping_sort_order/">database&#47;migrations&#47;v41_shopping_sort_order.dart</a></li>
+    <li><a href="../../database_migrations_v41_shopping_sort_order/MigrationV41-class.html">MigrationV41</a></li>
+    <li class="self-crumb">up method</li>
   </ol>
-  <div class="self-name">overrideWith</div>
+  <div class="self-name">up</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,62 +46,63 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="providers_shopping_list_provider&#47;PhotoServiceProvider-class-sidebar.html"
+    data-above-sidebar="database_migrations_v41_shopping_sort_order&#47;MigrationV41-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">overrideWith</span> method 
+<h1><span class="kind-method">up</span> method 
 </h1></div>
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://pub.dev/documentation/riverpod_annotation/4.0.3/riverpod_annotation/Override-class.html">Override</a></span>
-<span class="name ">overrideWith</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="overrideWith-param-create"><span class="type-annotation">Create<span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../services_photo_service/PhotoService-class.html">PhotoService</a></span>&gt;</span></span> <span class="parameter-name">create</span></span></li>
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">up</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="up-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span></li>
 </ol>)
 
-      <div class="features"><span class="feature">inherited</span></div>
+      <div class="features"><span class="feature">override</span></div>
 
     </section>
     
 <section class="desc markdown">
-  <p>Override the provider with a new initialization function.</p>
-<p>This will also disable the auto-scoping mechanism, meaning that if the
-overridden provider specified <code>dependencies</code>, it will have no effect.</p>
-<p>The override must not specify a <code>dependencies</code>.</p>
-<p>Some common use-cases are:</p>
-<ul>
-<li>testing, by replacing a service with a fake implementation, or to reach
-a very specific state easily.</li>
-<li>multiple environments, by changing the implementation of a class
-based on the platform or other parameters.</li>
-</ul>
-<p>This function should be used in combination with <code>ProviderScope.overrides</code>
-or <code>ProviderContainer.overrides</code>:</p>
-<pre class="language-dart"><code class="language-dart">final myService = Provider((ref) =&gt; MyService());
-
-runApp(
-  ProviderScope(
-    overrides: [
-      // Replace the implementation of the provider with a different one
-      myService.overrideWith((ref) {
-        ref.watch('other');
-        return MyFakeService(),
-      })),
-    ],
-    child: MyApp(),
-  ),
-);
-</code></pre>
+  <p>Applies the schema changes for this migration.</p>
+<p>Called inside the onUpgrade callback. Should be resilient to
+re-execution (idempotent) whenever possible.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Override overrideWith(Create&lt;CreatedT&gt; create) {
-  return $ProviderOverride(
-    origin: this,
-    providerOverride: $view(create: create),
-  );
+  <pre class="language-dart"><code class="language-dart">@override
+Future&lt;void&gt; up(Database db) async {
+  try {
+    if (!await columnExists(db, &#39;shopping_list&#39;, &#39;sort_order&#39;)) {
+      await db.execute(
+        &#39;ALTER TABLE shopping_list ADD COLUMN sort_order REAL&#39;
+        &#39; NOT NULL DEFAULT 0&#39;,
+      );
+    }
+    final pending = await db.rawQuery(
+      &#39;SELECT id FROM shopping_list WHERE is_purchased = 0&#39;
+      &#39; ORDER BY inventory_id ASC, date_added DESC&#39;,
+    );
+    for (var i = 0; i &lt; pending.length; i++) {
+      await db.update(
+        &#39;shopping_list&#39;,
+        {&#39;sort_order&#39;: i + 1},
+        where: &#39;id = ?&#39;,
+        whereArgs: [pending[i][&#39;id&#39;]],
+      );
+    }
+    logInfo(&#39;Migration v41 completed (shopping_list.sort_order)&#39;);
+  } on Exception catch (e) {
+    logWarning(&#39;Migration v41 failed: $e&#39;);
+    rethrow;
+  }
 }</code></pre>
 </section>
 
@@ -116,12 +117,12 @@ runApp(
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../providers_shopping_list_provider/">shopping_list_provider</a></li>
-    <li><a href="../../providers_shopping_list_provider/PhotoServiceProvider-class.html">PhotoServiceProvider</a></li>
-    <li class="self-crumb">overrideWith method</li>
+    <li><a href="../../database_migrations_v41_shopping_sort_order/">v41_shopping_sort_order</a></li>
+    <li><a href="../../database_migrations_v41_shopping_sort_order/MigrationV41-class.html">MigrationV41</a></li>
+    <li class="self-crumb">up method</li>
 </ol>
 
-    <h5>PhotoServiceProvider class</h5>
+    <h5>MigrationV41 class</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">

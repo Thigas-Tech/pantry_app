@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the deletePhotoForItem method from the PhotoService class, for the Dart programming language.">
-  <title>deletePhotoForItem method - PhotoService class - photo_service library - Dart API</title>
+  <meta name="description" content="API docs for the editQuantity property from the AppLocalizationsEn class, for the Dart programming language.">
+  <title>editQuantity property - AppLocalizationsEn class - app_localizations_en library - Dart API</title>
 
 
   
@@ -25,11 +25,11 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../services_photo_service/">services&#47;photo_service.dart</a></li>
-    <li><a href="../../services_photo_service/PhotoService-class.html">PhotoService</a></li>
-    <li class="self-crumb">deletePhotoForItem method</li>
+    <li><a href="../../l10n_app_localizations_en/">l10n&#47;app_localizations_en.dart</a></li>
+    <li><a href="../../l10n_app_localizations_en/AppLocalizationsEn-class.html">AppLocalizationsEn</a></li>
+    <li class="self-crumb">editQuantity property</li>
   </ol>
-  <div class="self-name">deletePhotoForItem</div>
+  <div class="self-name">editQuantity</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -46,45 +46,50 @@
 <div
     id="dartdoc-main-content"
     class="main-content"
-    data-above-sidebar="services_photo_service&#47;PhotoService-class-sidebar.html"
+    data-above-sidebar="l10n_app_localizations_en&#47;AppLocalizationsEn-class-sidebar.html"
     data-below-sidebar="">
     <div>
-<h1><span class="kind-method">deletePhotoForItem</span> method 
+<h1><span class="kind-property">editQuantity</span> property 
 </h1></div>
 
+    
+
+    
+        
+  <section id="getter">
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">deletePhotoForItem</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="deletePhotoForItem-param-itemId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">itemId</span></span></li>
-</ol>)
-
-      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+      <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
+      get
+      <span class="name ">editQuantity</span>
+      <div class="features"><span class="feature">override</span></div>
 
     </section>
     
 <section class="desc markdown">
-  <p>Deletes the photo associated with the given shopping <code>itemId</code>.</p>
+  <p>No description provided for @editQuantity.</p>
+<p>In en, this message translates to:
+<strong>'Edit quantity'</strong></p>
 </section>
-
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deletePhotoForItem(int itemId) async {
-  final dir = await _photoDirectory();
-  final path = join(dir.path, &#39;$itemId.jpg&#39;);
-  final file = File(path);
-  if (await file.exists()) {
-    await file.delete();
-    logInfo(&#39;Photo deleted for item $itemId&#39;);
-  }
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">@override
+String get editQuantity =&gt; &#39;Edit quantity&#39;;</code></pre>
 </section>
 
+  </section>
 
-  </div> <!-- /.main-content -->
-  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
-    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+
+</div> <!-- /.main-content -->
+<div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+  <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
 <header id="header-search-sidebar" class="hidden-l">
   <form class="search-sidebar" role="search">
     <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
@@ -92,15 +97,15 @@
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../../index.html">pantry_app</a></li>
-    <li><a href="../../services_photo_service/">photo_service</a></li>
-    <li><a href="../../services_photo_service/PhotoService-class.html">PhotoService</a></li>
-    <li class="self-crumb">deletePhotoForItem method</li>
+    <li><a href="../../l10n_app_localizations_en/">app_localizations_en</a></li>
+    <li><a href="../../l10n_app_localizations_en/AppLocalizationsEn-class.html">AppLocalizationsEn</a></li>
+    <li class="self-crumb">editQuantity property</li>
 </ol>
 
-    <h5>PhotoService class</h5>
-    <div id="dartdoc-sidebar-left-content"></div>
-  </div><!--/.sidebar-offcanvas-->
-  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  <h5>AppLocalizationsEn class</h5>
+  <div id="dartdoc-sidebar-left-content"></div>
+</div><!--/.sidebar-offcanvas-->
+<div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
 </div><!--/.sidebar-offcanvas-->
 </main>
 <footer>

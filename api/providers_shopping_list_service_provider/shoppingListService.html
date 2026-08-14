@@ -82,7 +82,6 @@ ShoppingListService shoppingListService(Ref ref) {
   return ShoppingListService(
     ref.read(databaseProvider),
     ref.read(productRepositoryProvider),
-    ref.read(photoServiceProvider),
   );
 }</code></pre>
 </section>
