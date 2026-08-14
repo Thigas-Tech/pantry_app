@@ -76,12 +76,18 @@ SettingsScreen
 └── Sign out (Firebase Auth)
 
 ShoppingListScreen
-├── AppBar (add-to-pantry button, clear-purchased, refresh)
+├── AppBar (move-to-pantry button, clear-purchased, share)
 ├── PendingSection (items not yet purchased)
-│   ├── ShoppingItemTile (name, qty, price, store; swipe actions)
+│   ├── ShoppingItemTile (name, qty stepper, price, store; swipe actions,
+│   │   edit sheet via pencil/long-press, drag handle)
 │   └── SectionHeader with per-currency running totals
 ├── PurchasedSection (items marked purchased)
-└── FAB -> AddToShoppingListSheet (search cached products or manual entry)
+├── FAB -> AddToShoppingListSheet (search cached products or manual entry)
+└── ShoppingItemEditSheet (rename item, change quantity/unit)
+
+PantryShell
+└── NavigationBar with Badge on the List destination showing the pending
+    shopping item count
 
 PriceEntrySheet (bottom sheet, reused from multiple screens)
 ├── Amount field (TextFormField with locale-aware decimal formatter)

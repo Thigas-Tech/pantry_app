@@ -1213,6 +1213,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get itemName => 'Nome do item';
 
   @override
+  String get unit => 'Unidade';
+
+  @override
+  String get editItem => 'Editar item';
+
+  @override
+  String get editQuantity => 'Editar quantidade';
+
+  @override
   String get markPurchased => 'Marcar como comprado';
 
   @override
@@ -3325,6 +3334,15 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get itemName => 'Nome do item';
+
+  @override
+  String get unit => 'Unidade';
+
+  @override
+  String get editItem => 'Editar item';
+
+  @override
+  String get editQuantity => 'Editar quantidade';
 
   @override
   String get markPurchased => 'Marcar como comprado';

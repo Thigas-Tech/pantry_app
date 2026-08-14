@@ -14,6 +14,7 @@ import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/screens/pantry_shell.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
@@ -169,4 +170,77 @@ void main() {
       expect(reads, 2);
     },
   );
+
+  testWidgets('shows pending count badge on the list destination', (
+    tester,
+  ) async {
+    final mockDb = _MockDatabaseHelper();
+    when(mockDb.getInventories).thenAnswer((_) async => []);
+    when(
+      () => mockDb.getInventoryWithProduct(
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => []);
+
+    await pumpApp(
+      tester,
+      const PantryShell(),
+      settle: false,
+      overrides: [
+        databaseProvider.overrideWithValue(mockDb),
+        inventoryListProvider.overrideWith((ref) => <InventorySummary>[]),
+        inventoryCountProvider.overrideWith((ref) => 0),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        onboardingProvider.overrideWith(FakeOnboardingNotifier.new),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+        connectivityProvider.overrideWith((ref) => const Stream.empty()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+        allRecipesProvider.overrideWith((ref) => []),
+        pendingShoppingCountProvider.overrideWith((ref) => 3),
+      ],
+    );
+    await tester.pump();
+
+    expect(find.byType(Badge), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+  });
+
+  testWidgets('hides badge when pending count is zero', (tester) async {
+    final mockDb = _MockDatabaseHelper();
+    when(mockDb.getInventories).thenAnswer((_) async => []);
+    when(
+      () => mockDb.getInventoryWithProduct(
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => []);
+
+    await pumpApp(
+      tester,
+      const PantryShell(),
+      settle: false,
+      overrides: [
+        databaseProvider.overrideWithValue(mockDb),
+        inventoryListProvider.overrideWith((ref) => <InventorySummary>[]),
+        inventoryCountProvider.overrideWith((ref) => 0),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        onboardingProvider.overrideWith(FakeOnboardingNotifier.new),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+        connectivityProvider.overrideWith((ref) => const Stream.empty()),
+        productRepositoryProvider.overrideWithValue(
+          createMockProductRepository(),
+        ),
+        allRecipesProvider.overrideWith((ref) => []),
+        pendingShoppingCountProvider.overrideWith((ref) => 0),
+      ],
+    );
+    await tester.pump();
+
+    expect(find.byType(Badge), findsNothing);
+  });
 }

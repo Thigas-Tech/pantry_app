@@ -188,18 +188,20 @@ through the project's GitHub repository.
 
 - `ShoppingListDao` -- all shopping list CRUD scoped to the active inventory.
   Items can have optional barcode links to products, quantities, units, and
-  price fields.
+  price fields. Pending items are ordered by a `sort_order` column
+  (migration v41) so manual drag-to-reorder persists; `reorder` assigns
+  sequential order values inside a transaction.
+- `ShoppingListService` -- owns shopping list business logic:
+  `addShoppingItem`, `toggleShoppingItem`, `deleteShoppingItem`,
+  `clearPurchasedShoppingItems`, `updateShoppingItemPrice`,
+  `updateShoppingItem`, `reorderShoppingItems`, and the
+  `movePurchasedToInventory` transaction.
 - `addShoppingItem` and other mutation functions in
   `providers/shopping_list_provider.dart` manage state invalidation and DB
-  writes.
+  writes. `pendingShoppingCountProvider` feeds the nav-bar badge on the
+  shopping list destination.
 
-### 3.13 Photo service
-
-- `PhotoService` -- manages price tag photos keyed by shopping item ID.
-  `deletePhotoForItem` removes the photo when a shopping item is deleted.
-  Used by the shopping list flow to clean up cached photos.
-
-### 3.14 Store persistence
+### 3.13 Store persistence
 
 - `StoreDao` -- stores saved store names in the `stores` table (version 19
   migration). `insert` is case-insensitive and deduplicates. `getAll` returns
@@ -209,7 +211,7 @@ through the project's GitHub repository.
 - New store names submitted through the price entry sheet are automatically
   persisted to the `stores` table.
 
-### 3.15 USDA API client
+### 3.14 USDA API client
 
 - `UsdaApiClient` -- HTTP client for the
   [USDA FoodData Central API](https://fdc.nal.usda.gov/).
@@ -219,37 +221,37 @@ through the project's GitHub repository.
 - API key is read from `.env` (`USDA_API_KEY`) and sent as a URL query
   parameter. Returns a distinct `usdaAuthFailed` message on 403.
 
-### 3.16 Produce category mapper
+### 3.15 Produce category mapper
 
 - `ProduceCategoryMapper` -- maps PLU codes and produce names to OFF
   taxonomy categories with a fallback heuristic based on produce type
   (fruit, vegetable, herb, mushroom).
 
-### 3.17 Produce nutrition fallback
+### 3.16 Produce nutrition fallback
 
 - `ProduceNutritionFallback` -- hard-coded approximate nutrition values
   for ~70 common produce items (energy, protein, carbs, fat, fiber).
   Used when the USDA API is unreachable or the PLU code is not in the
   USDA database.
 
-### 3.18 Produce serving presets
+### 3.17 Produce serving presets
 
 - `ProduceServingPresets` -- maps ~35 produce names to Small/Medium/Large
   serving sizes with `servingWeightG` defaults for the weight/unit toggle.
 
-### 3.19 Produce purchase tracker
+### 3.18 Produce purchase tracker
 
 - `ProducePurchaseTracker` -- tracks how often the user buys each produce
   item via SharedPreferences. Used by the quick-add carousel to surface
   frequently-bought items.
 
-### 3.20 PLU service
+### 3.19 PLU service
 
 - `PluService` -- local lookup table of ~70 common PLU codes (e.g. 4011
   for Banana) mapped to produce names. Used for barcode-less produce
   entry on the scanner screen.
 
-### 3.21 Changelog loader
+### 3.20 Changelog loader
 
 - `ChangelogLoader` utility at `lib/utils/changelog_loader.dart` provides
   `loadLocalizedChangelog(Locale)` that resolves locale-specific
@@ -257,7 +259,7 @@ through the project's GitHub repository.
   the "What's New" sheet to display user-facing changelog in the app's
   current language.
 
-### 3.22 Product photo picker
+### 3.21 Product photo picker
 
 - `ProductPhotoPicker` (at `lib/services/product_photo_picker.dart`)
   picks product photos from the camera or the device gallery for the
@@ -282,7 +284,7 @@ through the project's GitHub repository.
   action (`showCameraPermissionDialog` at
   `lib/utils/camera_permission_dialog.dart`).
 
-### 3.23 Product image service
+### 3.22 Product image service
 
 - `ProductImageService` (at `lib/services/product_image_service.dart`) is
   the testable boundary for product photo persistence in the manual form.
@@ -316,7 +318,7 @@ through the project's GitHub repository.
 - The slot snapshot is modeled by the immutable `ProductPhotoSlots`
   (`lib/models/product_photo_slots.dart`).
 
-### 3.24 Product photo cropper
+### 3.23 Product photo cropper
 
 - `ProductPhotoCropper` (at `lib/services/product_photo_cropper.dart`)
   produces cropped and rotated copies of local product photos for the

@@ -24,8 +24,7 @@
 │  apiServiceProvider        inventoryCountProvider                                │
 │  priceRepositoryProvider   priceHistoryProvider                                  │
 │  shoppingListProvider      storesProvider                                        │
-│  currencyServiceProvider   photoServiceProvider                                  │
-│  firebaseCacheProvider     authServiceProvider                                   │
+│  currencyServiceProvider   firebaseCacheProvider                                 │
 │  authStateProvider         inventoryProductsProvider                             │
 └───────────┬──────────────────────────────────────────────────────────────────────┘
             │ calls                                                                 
@@ -35,7 +34,7 @@
 │  ProductRepository    OffAdapter    NotificationService                          │
 │  ImageCacheService    GithubIssueService                                         │
 │  PriceRepository      CurrencyService  OpenPricesService                         │
-│  StoreDao             ShoppingListDao  PhotoService                              │
+│  StoreDao             ShoppingListDao  ShoppingListService                       │
 │  FirebaseCacheService  FirebaseCacheClient                                       │
 │  FirebaseFirestoreClientAdapter  AuthService                                     │
 │  FirebaseAuthService                                                             │

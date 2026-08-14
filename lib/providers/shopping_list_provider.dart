@@ -3,17 +3,10 @@ import 'package:pantry_app/models/inventory_product_option.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/services/photo_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'shopping_list_provider.g.dart';
-
-/// Provides a singleton [PhotoService] instance.
-@Riverpod(keepAlive: true)
-PhotoService photoService(Ref ref) {
-  return PhotoService();
-}
 
 /// Provides all shopping list items, scoped to the active inventory.
 @riverpod

@@ -68,4 +68,4 @@ final class ShoppingListServiceProvider
 }
 
 String _$shoppingListServiceHash() =>
-    r'b279f1fcbfd7c11bad16e3841cd9a772b9ae7592';
+    r'1e63c923fcaa7ee8463da632d5ead5bb67d8f301';

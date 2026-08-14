@@ -243,7 +243,6 @@ void main() {
           priceAmount: 2.99,
           priceCurrency: 'USD',
           priceStore: 'Kroger',
-          pricePhotoPath: '/photos/1.jpg',
         ),
       );
 
@@ -251,7 +250,6 @@ void main() {
       expect(item!.priceAmount, 2.99);
       expect(item.priceCurrency, 'USD');
       expect(item.priceStore, 'Kroger');
-      expect(item.pricePhotoPath, '/photos/1.jpg');
     });
 
     test('price fields survive toggle purchased', () async {
@@ -286,7 +284,6 @@ void main() {
         priceAmount: 3,
         priceCurrency: 'EUR',
         priceStore: 'Aldi',
-        pricePhotoPath: '/photos/2.jpg',
       );
 
       final item = await dao.getById(db, id);
@@ -296,7 +293,6 @@ void main() {
       expect(item.priceAmount, 3.00);
       expect(item.priceCurrency, 'EUR');
       expect(item.priceStore, 'Aldi');
-      expect(item.pricePhotoPath, '/photos/2.jpg');
     });
 
     test('updatePriceFields clears price fields when null', () async {
@@ -570,6 +566,48 @@ void main() {
         expect(newest.barcode, isNull);
         expect(newest.quantity, 2);
       });
+    });
+  });
+
+  group('sort_order', () {
+    test('pending items ordered by sort_order ascending', () async {
+      final a = await dao.insert(db, const ShoppingItem(name: 'A'));
+      final b = await dao.insert(db, const ShoppingItem(name: 'B'));
+      final c = await dao.insert(db, const ShoppingItem(name: 'C'));
+
+      await dao.reorder(db, [c, a, b]);
+
+      final pending = await dao.listPending(db);
+      expect(pending.map((e) => e.name).toList(), ['C', 'A', 'B']);
+      expect(pending.map((e) => e.id).toList(), [c, a, b]);
+    });
+
+    test('reorder applies atomically and persists', () async {
+      final a = await dao.insert(db, const ShoppingItem(name: 'A'));
+      final b = await dao.insert(db, const ShoppingItem(name: 'B'));
+
+      await dao.reorder(db, [b, a]);
+
+      final items = await dao.listAll(db);
+      expect(items.map((e) => e.name).toList(), ['B', 'A']);
+      expect(items.first.sortOrder, 1);
+      expect(items.last.sortOrder, 2);
+    });
+
+    test('listPending falls back to date_added tie-break', () async {
+      final a = await dao.insert(
+        db,
+        const ShoppingItem(name: 'A', dateAdded: 100),
+      );
+      final b = await dao.insert(
+        db,
+        const ShoppingItem(name: 'B', dateAdded: 200),
+      );
+
+      // Both at sort_order 0 -> newer date first.
+      final pending = await dao.listPending(db);
+      expect(pending.map((e) => e.name).toList(), ['B', 'A']);
+      expect(pending.map((e) => e.id).toList(), [b, a]);
     });
   });
 }

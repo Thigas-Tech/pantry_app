@@ -2376,6 +2376,24 @@ abstract class AppLocalizations {
   /// **'Item name'**
   String get itemName;
 
+  /// No description provided for @unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get unit;
+
+  /// No description provided for @editItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get editItem;
+
+  /// No description provided for @editQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit quantity'**
+  String get editQuantity;
+
   /// No description provided for @markPurchased.
   ///
   /// In en, this message translates to:

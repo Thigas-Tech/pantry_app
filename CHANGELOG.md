@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### Features
+
+- **Shopping list UX upgrade**: pending items now show a quick quantity
+  stepper (plus/minus and tap-to-type via the edit sheet), a long-press or
+  pencil icon opens an edit sheet to rename or change quantity and unit,
+  and pending items can be drag-reordered. The bottom navigation shows a
+  badge with the pending item count. (lib/screens/shopping_list_screen.dart,
+  lib/widgets/shopping_item_edit_sheet.dart new, lib/screens/pantry_shell.dart)
+- **Shopping list reorder persistence**: a new `sort_order` column on the
+  shopping_list table (migration v41) stores the manual pending-item order;
+  the DAO orders pending items by sort_order and reorder runs in a
+  transaction. (lib/database/migrations/v41_shopping_sort_order.dart new,
+  lib/database/shopping_list_dao.dart, lib/database/database_helper.dart)
+
+### Maintainability
+
+- **Removed dead price-photo plumbing from the shopping list**: the
+  `pricePhotoPath` field was never populated (no photo capture exists), so
+  the field, the [PhotoService] class, its provider, and the photo cleanup
+  calls were removed. The database column is kept to avoid a destructive
+  migration. (lib/models/shopping_item.dart,
+  lib/database/shopping_list_dao.dart, lib/services/shopping_list_service.dart,
+  lib/providers/shopping_list_provider.dart, lib/services/photo_service.dart
+  removed)
+
 ### Scope reduction
 
 - **Health platform integrations removed (scope reduction)**: the planned

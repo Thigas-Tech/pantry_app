@@ -1,6 +1,5 @@
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/services/shopping_list_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,6 +14,5 @@ ShoppingListService shoppingListService(Ref ref) {
   return ShoppingListService(
     ref.read(databaseProvider),
     ref.read(productRepositoryProvider),
-    ref.read(photoServiceProvider),
   );
 }

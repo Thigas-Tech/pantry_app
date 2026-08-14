@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/providers/ui_flags_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
@@ -178,6 +179,8 @@ class _PantryShellState extends ConsumerState<PantryShell> {
     final l10n = AppLocalizations.of(context)!;
     ref.listen(connectivityProvider, _onConnectivityChanged);
 
+    final pendingCount = ref.watch(pendingShoppingCountProvider).value ?? 0;
+
     return Scaffold(
       body: SafeArea(
         top: false,
@@ -227,8 +230,18 @@ class _PantryShellState extends ConsumerState<PantryShell> {
             label: l10n.navStats,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.shopping_cart_outlined),
-            selectedIcon: const Icon(Icons.shopping_cart),
+            icon: pendingCount > 0
+                ? Badge(
+                    label: Text('$pendingCount'),
+                    child: const Icon(Icons.shopping_cart_outlined),
+                  )
+                : const Icon(Icons.shopping_cart_outlined),
+            selectedIcon: pendingCount > 0
+                ? Badge(
+                    label: Text('$pendingCount'),
+                    child: const Icon(Icons.shopping_cart),
+                  )
+                : const Icon(Icons.shopping_cart),
             label: l10n.navList,
           ),
           NavigationDestination(

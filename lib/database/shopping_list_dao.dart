@@ -28,6 +28,7 @@ class ShoppingListDao {
         price_currency TEXT,
         price_store TEXT,
         price_photo_path TEXT,
+        sort_order REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (barcode) REFERENCES products(barcode)
           ON DELETE SET NULL,
         FOREIGN KEY (inventory_id) REFERENCES inventories(id)
@@ -58,7 +59,7 @@ class ShoppingListDao {
     'price_amount': item.priceAmount,
     'price_currency': item.priceCurrency,
     'price_store': item.priceStore,
-    'price_photo_path': item.pricePhotoPath,
+    'sort_order': item.sortOrder,
   };
 
   /// Converts a database row map into a [ShoppingItem].
@@ -75,7 +76,7 @@ class ShoppingListDao {
     priceAmount: (map['price_amount'] as num?)?.toDouble(),
     priceCurrency: map['price_currency'] as String?,
     priceStore: map['price_store'] as String?,
-    pricePhotoPath: map['price_photo_path'] as String?,
+    sortOrder: (map['sort_order'] as num?)?.toDouble() ?? 0,
   );
 
   /// Inserts a shopping list item and returns its row ID.
@@ -171,14 +172,15 @@ class ShoppingListDao {
   /// Returns all shopping list items, optionally scoped to an inventory.
   ///
   /// When [inventoryId] is non-null, only items for that inventory are
-  /// returned. Ordered by dateAdded descending.
+  /// returned. Ordered by sort_order ascending (manual order for pending),
+  /// with date_added descending as a tie-breaker.
   Future<List<ShoppingItem>> listAll(Database db, {int? inventoryId}) async {
     try {
       final result = await db.query(
         'shopping_list',
         where: inventoryId != null ? 'inventory_id = ?' : null,
         whereArgs: inventoryId != null ? [inventoryId] : null,
-        orderBy: 'date_added DESC',
+        orderBy: 'sort_order ASC, date_added DESC',
       );
       return result.map(fromMap).toList();
     } on Exception catch (e) {
@@ -188,7 +190,7 @@ class ShoppingListDao {
   }
 
   /// Returns only pending (not purchased) items, optionally scoped to an
-  /// inventory. Ordered by dateAdded desc.
+  /// inventory. Ordered by sort_order ascending.
   Future<List<ShoppingItem>> listPending(
     Database db, {
     int? inventoryId,
@@ -202,7 +204,7 @@ class ShoppingListDao {
         'shopping_list',
         where: where,
         whereArgs: whereArgs,
-        orderBy: 'date_added DESC',
+        orderBy: 'sort_order ASC, date_added DESC',
       );
       return result.map(fromMap).toList();
     } on Exception catch (e) {
@@ -261,7 +263,6 @@ class ShoppingListDao {
     double? priceAmount,
     String? priceCurrency,
     String? priceStore,
-    String? pricePhotoPath,
   }) async {
     logInfo('Updating price fields for shopping item $id');
     try {
@@ -271,7 +272,6 @@ class ShoppingListDao {
           'price_amount': priceAmount,
           'price_currency': priceCurrency,
           'price_store': priceStore,
-          'price_photo_path': pricePhotoPath,
         },
         where: 'id = ?',
         whereArgs: [id],
@@ -280,6 +280,32 @@ class ShoppingListDao {
       return affected;
     } on Exception catch (e) {
       logError('Failed to update price fields for item $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Assigns sequential sort_order values to the given pending [itemIds]
+  /// for an inventory, preserving the drag-to-reorder result.
+  ///
+  /// Runs inside a transaction so the whole reorder applies atomically.
+  /// The first id in the list ends up with sort_order 1, the next with 2,
+  /// and so on.
+  Future<void> reorder(Database db, List<int> itemIds) async {
+    logInfo('Reordering shopping items — count=${itemIds.length}');
+    try {
+      await db.transaction((txn) async {
+        for (var i = 0; i < itemIds.length; i++) {
+          await txn.update(
+            'shopping_list',
+            {'sort_order': i + 1},
+            where: 'id = ?',
+            whereArgs: [itemIds[i]],
+          );
+        }
+      });
+      logInfo('Shopping items reordered');
+    } on Exception catch (e) {
+      logError('Failed to reorder shopping items: $e');
       rethrow;
     }
   }
