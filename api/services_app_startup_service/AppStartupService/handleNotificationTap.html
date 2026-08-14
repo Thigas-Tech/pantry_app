@@ -85,6 +85,11 @@ they have no associated product.</p>
     return;
   }
 
+  if (payload == &#39;weekly_recipe_suggestion&#39;) {
+    logInfo(&#39;Notification tap for weekly recipe suggestion — no navigation&#39;);
+    return;
+  }
+
   logInfo(
     &#39;Notification tap: payload=$payload, actionId=${response.actionId}&#39;,
   );

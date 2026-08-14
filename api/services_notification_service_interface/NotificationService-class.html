@@ -203,6 +203,19 @@ is not fully initialized — they log warnings and return gracefully.</p>
 
 </dd>
 
+        <dt id="cancelWeeklyRecipeSuggestion" class="callable">
+  <span class="name"><a href="../services_notification_service_interface/NotificationService/cancelWeeklyRecipeSuggestion.html">cancelWeeklyRecipeSuggestion</a></span><span class="signature">(<wbr>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Cancels the weekly recipe-suggestion notification.
+  
+
+</dd>
+
         <dt id="canScheduleExactNotifications" class="callable">
   <span class="name"><a href="../services_notification_service_interface/NotificationService/canScheduleExactNotifications.html">canScheduleExactNotifications</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span>&gt;</span></span>
@@ -342,6 +355,19 @@ is not fully initialized — they log warnings and return gracefully.</p>
 </dt>
 <dd>
   Schedules a test notification for 5 seconds from now.
+  
+
+</dd>
+
+        <dt id="scheduleWeeklyRecipeSuggestion" class="callable">
+  <span class="name"><a href="../services_notification_service_interface/NotificationService/scheduleWeeklyRecipeSuggestion.html">scheduleWeeklyRecipeSuggestion</a></span><span class="signature">(<wbr>{<span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-title"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span>, </span><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-body"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span>, </span><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-dayOfWeek"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">dayOfWeek</span>, </span><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-hour"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">hour</span>, </span><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-minute"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">minute</span>, </span><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-channelName"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span>, </span><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-channelDescription"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span>, </span><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Schedules a weekly recipe-suggestion notification.
   
 
 </dd>

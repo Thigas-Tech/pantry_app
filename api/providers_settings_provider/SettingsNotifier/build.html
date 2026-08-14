@@ -82,6 +82,14 @@ Future&lt;Settings&gt; build() async {
       inactivityReminderEnabled:
           prefs.getBool(&#39;inactivityReminderEnabled&#39;) ?? true,
       inactivityThresholdDays: prefs.getInt(&#39;inactivityThresholdDays&#39;) ?? 10,
+      weeklyRecipeSuggestionEnabled:
+          prefs.getBool(&#39;weeklyRecipeSuggestionEnabled&#39;) ?? false,
+      weeklyRecipeSuggestionDay:
+          prefs.getInt(&#39;weeklyRecipeSuggestionDay&#39;) ?? 7,
+      weeklyRecipeSuggestionHour:
+          prefs.getInt(&#39;weeklyRecipeSuggestionHour&#39;) ?? 18,
+      weeklyRecipeSuggestionMinute:
+          prefs.getInt(&#39;weeklyRecipeSuggestionMinute&#39;) ?? 0,
       amoledDarkMode: prefs.getBool(&#39;amoledDarkMode&#39;) ?? false,
       priceTrackingEnabled: prefs.getBool(&#39;priceTrackingEnabled&#39;) ?? false,
       priceRetentionDays: prefs.getInt(&#39;priceRetentionDays&#39;) ?? 0,

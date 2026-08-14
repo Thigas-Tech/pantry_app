@@ -83,6 +83,7 @@ NotificationCoordinator notificationCoordinator(Ref ref) {
   return NotificationCoordinator(
     notificationService: ref.read(notificationServiceProvider),
     db: ref.read(databaseProvider),
+    recipeSuggestionService: ref.read(recipeSuggestionServiceProvider),
   );
 }</code></pre>
 </section>

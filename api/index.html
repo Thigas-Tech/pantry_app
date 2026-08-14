@@ -68,6 +68,7 @@ never waste food again.</p>
 <li><strong>Manual product entry</strong> — full form with nutrition table and camera capture when a barcode is unknown or you're offline</li>
 <li><strong>Price tracking</strong> — record purchase prices with store, date, currency, and package size; view price history, per-unit prices, and total inventory value</li>
 <li><strong>Shopping list</strong> — add items from cached products or free-text, mark as purchased, batch-move to pantry</li>
+<li><strong>Weekly recipe suggestions</strong> — optional weekly notification suggesting a recipe that matches your current inventory (via TheMealDB)</li>
 <li><strong>Store autocomplete</strong> — saved store names persist across uses, suggested in the price entry sheet</li>
 <li><strong>Barcode history</strong> — the last 50 scanned barcodes are kept locally on your device</li>
 </ul>
@@ -159,6 +160,7 @@ flutter build appbundle --debug
     product_image_service.dart, product_image_compressor.dart  # Product photos
     product_photo_picker.dart, product_photo_cropper.dart      # Photo capture
     recipe_service.dart, recipe_nutrition_service.dart, recipe_nutri_score_service.dart
+    recipe_api_client.dart, recipe_suggestion_service.dart  # Weekly recipe suggestions
     shopping_list_service.dart  # Shopping list business logic
     camera_service.dart, camera_image_processor.dart  # Camera capture
     app_startup_service.dart, app_update_handler.dart  # App lifecycle
@@ -854,6 +856,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="recipe_suggestion">
+  <span class="name"><a href="models_recipe_suggestion/">models/recipe_suggestion</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="scan_history_entry">
   <span class="name"><a href="models_scan_history_entry/">models/scan_history_entry</a></span> 
 
@@ -1066,6 +1075,13 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="recipe_service_provider">
   <span class="name"><a href="providers_recipe_service_provider/">providers/recipe_service_provider</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="recipe_suggestion_provider">
+  <span class="name"><a href="providers_recipe_suggestion_provider/">providers/recipe_suggestion_provider</a></span> 
 
 </dt>
 <dd>
@@ -1498,6 +1514,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="recipe_api_client">
+  <span class="name"><a href="services_recipe_api_client/">services/recipe_api_client</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="recipe_nutri_score_service">
   <span class="name"><a href="services_recipe_nutri_score_service/">services/recipe_nutri_score_service</a></span> 
 
@@ -1514,6 +1537,13 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="recipe_service">
   <span class="name"><a href="services_recipe_service/">services/recipe_service</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="recipe_suggestion_service">
+  <span class="name"><a href="services_recipe_suggestion_service/">services/recipe_suggestion_service</a></span> 
 
 </dt>
 <dd>
@@ -2031,6 +2061,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="models_recipe_ingredient/">models/recipe_ingredient</a></li>
       <li><a href="models_recipe_ingredient_cache/">models/recipe_ingredient_cache</a></li>
       <li><a href="models_recipe_nutrition/">models/recipe_nutrition</a></li>
+      <li><a href="models_recipe_suggestion/">models/recipe_suggestion</a></li>
       <li><a href="models_scan_history_entry/">models/scan_history_entry</a></li>
       <li><a href="models_search_filter/">models/search_filter</a></li>
       <li><a href="models_search_result/">models/search_result</a></li>
@@ -2062,6 +2093,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="providers_product_submission_provider/">providers/product_submission_provider</a></li>
       <li><a href="providers_recipe_provider/">providers/recipe_provider</a></li>
       <li><a href="providers_recipe_service_provider/">providers/recipe_service_provider</a></li>
+      <li><a href="providers_recipe_suggestion_provider/">providers/recipe_suggestion_provider</a></li>
       <li><a href="providers_scan_history_provider/">providers/scan_history_provider</a></li>
       <li><a href="providers_scanner_providers/">providers/scanner_providers</a></li>
       <li><a href="providers_search_panel_controller/">providers/search_panel_controller</a></li>
@@ -2123,9 +2155,11 @@ dart pub global run dhttpd --path doc/api
       <li><a href="services_product_photo_picker/">services/product_photo_picker</a></li>
       <li><a href="services_product_repository/">services/product_repository</a></li>
       <li><a href="services_product_submission_service/">services/product_submission_service</a></li>
+      <li><a href="services_recipe_api_client/">services/recipe_api_client</a></li>
       <li><a href="services_recipe_nutri_score_service/">services/recipe_nutri_score_service</a></li>
       <li><a href="services_recipe_nutrition_service/">services/recipe_nutrition_service</a></li>
       <li><a href="services_recipe_service/">services/recipe_service</a></li>
+      <li><a href="services_recipe_suggestion_service/">services/recipe_suggestion_service</a></li>
       <li><a href="services_shopping_list_service/">services/shopping_list_service</a></li>
       <li><a href="services_usda_api_client/">services/usda_api_client</a></li>
       <li><a href="utils_bottom_sheet_helper/">utils/bottom_sheet_helper</a></li>

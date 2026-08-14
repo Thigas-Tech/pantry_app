@@ -65,7 +65,7 @@
     
 <section class="desc markdown">
   <p>Runs the full startup reschedule: expiry reminders followed by the
-inactivity reminder.</p>
+inactivity reminder and the weekly recipe suggestion.</p>
 </section>
 
 
@@ -78,6 +78,7 @@ inactivity reminder.</p>
 }) async {
   await rescheduleExpiryReminders(l10n: l10n, settings: settings);
   await rescheduleInactivityReminder(l10n: l10n, settings: settings);
+  await rescheduleWeeklyRecipeSuggestion(l10n: l10n, settings: settings);
 }</code></pre>
 </section>
 

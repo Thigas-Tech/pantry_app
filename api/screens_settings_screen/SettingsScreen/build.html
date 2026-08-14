@@ -427,6 +427,69 @@ Widget build(BuildContext context, WidgetRef ref) {
           ],
         ),
         ExpansionTile(
+          leading: const Icon(Icons.restaurant_menu),
+          title: Text(l10n.weeklyRecipeSuggestionEnabled),
+          children: [
+            SwitchListTile(
+              title: Text(l10n.weeklyRecipeSuggestionEnabled),
+              value: settings.weeklyRecipeSuggestionEnabled,
+              onChanged: (value) async {
+                logInfo(&#39;Weekly recipe suggestion toggled: $value&#39;);
+                final notifService = ref.read(notificationServiceProvider);
+                if (value) {
+                  if (!context.mounted) return;
+                  final proceed = await _showPermissionRationaleIfNeeded(
+                    context,
+                    ref,
+                    l10n,
+                  );
+                  if (!proceed) return;
+                  final granted = await notifService.requestPermission();
+                  if (granted == false) {
+                    if (context.mounted) {
+                      await _showPermissionDeniedDialog(context, l10n);
+                    }
+                    return;
+                  }
+                } else {
+                  await notifService.cancelWeeklyRecipeSuggestion();
+                }
+                ref
+                    .read(settingsProvider.notifier)
+                    .setWeeklyRecipeSuggestionEnabled(value: value);
+                if (value) {
+                  unawaited(_rescheduleWeeklyRecipeSuggestion(ref, l10n));
+                }
+                if (context.mounted) {
+                  SnackbarHelper.showInfo(
+                    context,
+                    value
+                        ? l10n.weeklyRecipeSuggestionSet
+                        : l10n.notificationsDisabled,
+                  );
+                }
+              },
+            ),
+            ListTile(
+              title: Text(l10n.weeklyRecipeSuggestionDay),
+              subtitle: Text(
+                _weekdayName(l10n, settings.weeklyRecipeSuggestionDay),
+              ),
+              onTap: () =&gt; _showRecipeSuggestionDayDialog(context, ref),
+            ),
+            ListTile(
+              title: Text(l10n.weeklyRecipeSuggestionTime),
+              subtitle: Text(
+                TimeOfDay(
+                  hour: settings.weeklyRecipeSuggestionHour,
+                  minute: settings.weeklyRecipeSuggestionMinute,
+                ).format(context),
+              ),
+              onTap: () =&gt; _showRecipeSuggestionTimeDialog(context, ref),
+            ),
+          ],
+        ),
+        ExpansionTile(
           leading: const Icon(Icons.timer),
           title: Text(l10n.settingsDataManagement),
           children: [

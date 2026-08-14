@@ -60,6 +60,10 @@
 <li><span class="parameter" id="copyWith-param-expiringSoonDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">expiringSoonDays</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-inactivityReminderEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">inactivityReminderEnabled</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-inactivityThresholdDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">inactivityThresholdDays</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-weeklyRecipeSuggestionEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">weeklyRecipeSuggestionEnabled</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-weeklyRecipeSuggestionDay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">weeklyRecipeSuggestionDay</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-weeklyRecipeSuggestionHour"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">weeklyRecipeSuggestionHour</span>, </span></li>
+<li><span class="parameter" id="copyWith-param-weeklyRecipeSuggestionMinute"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">weeklyRecipeSuggestionMinute</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-amoledDarkMode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">amoledDarkMode</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-priceTrackingEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">priceTrackingEnabled</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-priceRetentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">priceRetentionDays</span>, </span></li>
@@ -95,6 +99,10 @@
   int? expiringSoonDays,
   bool? inactivityReminderEnabled,
   int? inactivityThresholdDays,
+  bool? weeklyRecipeSuggestionEnabled,
+  int? weeklyRecipeSuggestionDay,
+  int? weeklyRecipeSuggestionHour,
+  int? weeklyRecipeSuggestionMinute,
   bool? amoledDarkMode,
   bool? priceTrackingEnabled,
   int? priceRetentionDays,
@@ -117,6 +125,14 @@
         inactivityReminderEnabled ?? this.inactivityReminderEnabled,
     inactivityThresholdDays:
         inactivityThresholdDays ?? this.inactivityThresholdDays,
+    weeklyRecipeSuggestionEnabled:
+        weeklyRecipeSuggestionEnabled ?? this.weeklyRecipeSuggestionEnabled,
+    weeklyRecipeSuggestionDay:
+        weeklyRecipeSuggestionDay ?? this.weeklyRecipeSuggestionDay,
+    weeklyRecipeSuggestionHour:
+        weeklyRecipeSuggestionHour ?? this.weeklyRecipeSuggestionHour,
+    weeklyRecipeSuggestionMinute:
+        weeklyRecipeSuggestionMinute ?? this.weeklyRecipeSuggestionMinute,
     amoledDarkMode: amoledDarkMode ?? this.amoledDarkMode,
     priceTrackingEnabled: priceTrackingEnabled ?? this.priceTrackingEnabled,
     priceRetentionDays: priceRetentionDays ?? this.priceRetentionDays,

@@ -56,6 +56,7 @@
       
       <span class="name ">NotificationCoordinator</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-notificationService"><span>required</span> <span class="type-annotation"><a href="../../services_notification_service_interface/NotificationService-class.html">NotificationService</a></span> <span class="parameter-name">notificationService</span>, </span></li>
 <li><span class="parameter" id="param-db"><span>required</span> <span class="type-annotation"><a href="../../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">db</span>, </span></li>
+<li><span class="parameter" id="param-recipeSuggestionService"><span>required</span> <span class="type-annotation"><a href="../../services_recipe_suggestion_service/RecipeSuggestionService-class.html">RecipeSuggestionService</a></span> <span class="parameter-name">recipeSuggestionService</span>, </span></li>
 </ol>})
     </section>
     
@@ -72,6 +73,7 @@ unit-tested with mocks and shared via the riverpod container.</p>
   <pre class="language-dart"><code class="language-dart">NotificationCoordinator({
   required this.notificationService,
   required this.db,
+  required this.recipeSuggestionService,
 });</code></pre>
 </section>
 

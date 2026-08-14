@@ -77,7 +77,7 @@ read data through <a href="../database_database_helper/DatabaseHelper-class.html
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="NotificationCoordinator.new" class="callable">
-          <span class="name"><a href="../services_notification_coordinator/NotificationCoordinator/NotificationCoordinator.html">NotificationCoordinator</a></span><span class="signature">({<span class="parameter" id="param-notificationService"><span>required</span> <span class="type-annotation"><a href="../services_notification_service_interface/NotificationService-class.html">NotificationService</a></span> <span class="parameter-name">notificationService</span>, </span><span class="parameter" id="param-db"><span>required</span> <span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">db</span></span>})</span>
+          <span class="name"><a href="../services_notification_coordinator/NotificationCoordinator/NotificationCoordinator.html">NotificationCoordinator</a></span><span class="signature">({<span class="parameter" id="param-notificationService"><span>required</span> <span class="type-annotation"><a href="../services_notification_service_interface/NotificationService-class.html">NotificationService</a></span> <span class="parameter-name">notificationService</span>, </span><span class="parameter" id="param-db"><span>required</span> <span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="param-recipeSuggestionService"><span>required</span> <span class="type-annotation"><a href="../services_recipe_suggestion_service/RecipeSuggestionService-class.html">RecipeSuggestionService</a></span> <span class="parameter-name">recipeSuggestionService</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../services_notification_coordinator/NotificationCoordinator-class.html">NotificationCoordinator</a>.
@@ -126,6 +126,18 @@ read data through <a href="../database_database_helper/DatabaseHelper-class.html
 
 </dd>
 
+        <dt id="recipeSuggestionService" class="property">
+  <span class="name"><a href="../services_notification_coordinator/NotificationCoordinator/recipeSuggestionService.html">recipeSuggestionService</a></span>
+  <span class="signature">&#8594; <a href="../services_recipe_suggestion_service/RecipeSuggestionService-class.html">RecipeSuggestionService</a></span>
+  
+
+</dt>
+<dd>
+  Picks the weekly recipe suggestion from the user's inventory.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="runtimeType" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/Type-class.html">Type</a></span>
@@ -169,7 +181,7 @@ read data through <a href="../database_database_helper/DatabaseHelper-class.html
 </dt>
 <dd>
   Runs the full startup reschedule: expiry reminders followed by the
-inactivity reminder.
+inactivity reminder and the weekly recipe suggestion.
   
 
 </dd>
@@ -197,6 +209,19 @@ expiry date.
 </dt>
 <dd>
   Cancels and re-schedules the inactivity reminder.
+  
+
+</dd>
+
+        <dt id="rescheduleWeeklyRecipeSuggestion" class="callable">
+  <span class="name"><a href="../services_notification_coordinator/NotificationCoordinator/rescheduleWeeklyRecipeSuggestion.html">rescheduleWeeklyRecipeSuggestion</a></span><span class="signature">(<wbr>{<span class="parameter" id="rescheduleWeeklyRecipeSuggestion-param-l10n"><span>required</span> <span class="type-annotation"><a href="../l10n_app_localizations/AppLocalizations-class.html">AppLocalizations</a></span> <span class="parameter-name">l10n</span>, </span><span class="parameter" id="rescheduleWeeklyRecipeSuggestion-param-settings"><span>required</span> <span class="type-annotation"><a href="../providers_settings_provider/Settings-class.html">Settings</a></span> <span class="parameter-name">settings</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Cancels and re-schedules the weekly recipe suggestion.
   
 
 </dd>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the scheduleWeeklyRecipeSuggestion method from the FlutterNotificationService class, for the Dart programming language.">
+  <title>scheduleWeeklyRecipeSuggestion method - FlutterNotificationService class - notification_service library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_notification_service/">services&#47;notification_service.dart</a></li>
+    <li><a href="../../services_notification_service/FlutterNotificationService-class.html">FlutterNotificationService</a></li>
+    <li class="self-crumb">scheduleWeeklyRecipeSuggestion method</li>
+  </ol>
+  <div class="self-name">scheduleWeeklyRecipeSuggestion</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_notification_service&#47;FlutterNotificationService-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">scheduleWeeklyRecipeSuggestion</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.flutter.dev/flutter/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="name ">scheduleWeeklyRecipeSuggestion</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-title"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">title</span>, </span></li>
+<li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-body"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">body</span>, </span></li>
+<li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-dayOfWeek"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">dayOfWeek</span>, </span></li>
+<li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-hour"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">hour</span>, </span></li>
+<li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-minute"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">minute</span>, </span></li>
+<li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-channelName"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelName</span>, </span></li>
+<li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-channelDescription"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">channelDescription</span>, </span></li>
+<li><span class="parameter" id="scheduleWeeklyRecipeSuggestion-param-notificationsEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">notificationsEnabled</span> = <span class="default-value">true</span>, </span></li>
+</ol>})
+
+      <div class="features"><span class="feature">override</span></div>
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Schedules a weekly recipe-suggestion notification.</p>
+<p>Fires at <code>hour</code>:<code>minute</code> on <code>dayOfWeek</code> (1 = Monday ... 7 = Sunday)
+and repeats weekly via <a href="https://pub.dev/documentation/flutter_local_notifications_platform_interface/12.1.0/flutter_local_notifications_platform_interface/DateTimeComponents.html">DateTimeComponents.dayOfWeekAndTime</a>.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+Future&lt;void&gt; scheduleWeeklyRecipeSuggestion({
+  required String title,
+  required String body,
+  required int dayOfWeek,
+  required int hour,
+  required int minute,
+  required String channelName,
+  required String channelDescription,
+  bool notificationsEnabled = true,
+}) async {
+  if (!notificationsEnabled) {
+    logInfo(&#39;Notifications disabled, skipping weekly recipe suggestion&#39;);
+    return;
+  }
+
+  final systemEnabled = await areNotificationsEnabled();
+  if (systemEnabled == false) {
+    logWarning(
+      &#39;System notifications disabled, skipping weekly recipe suggestion&#39;,
+    );
+    return;
+  }
+
+  final channel = AndroidNotificationChannel(
+    &#39;recipe_suggestions_channel&#39;,
+    channelName,
+    description: channelDescription,
+    importance: Importance.low,
+  );
+  final androidPlugin = _plugin
+      .resolvePlatformSpecificImplementation&lt;
+        AndroidFlutterLocalNotificationsPlugin
+      &gt;();
+  if (androidPlugin != null) {
+    try {
+      await androidPlugin.createNotificationChannel(channel);
+      logInfo(&#39;Recipe suggestion notification channel created&#47;verified&#39;);
+    } on Exception catch (e) {
+      logWarning(&#39;Failed to create recipe suggestion channel: $e&#39;);
+    }
+  }
+
+  final scheduledDate = _nextDayOfWeekOccurrence(
+    dayOfWeek,
+    hour,
+    minute,
+  );
+  final notificationDetails = NotificationDetails(
+    android: AndroidNotificationDetails(
+      &#39;recipe_suggestions_channel&#39;,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.low,
+      category: AndroidNotificationCategory.recommendation,
+    ),
+    iOS: const DarwinNotificationDetails(),
+  );
+
+  try {
+    await _plugin.zonedSchedule(
+      id: _weeklyRecipeSuggestionId,
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
+      notificationDetails: notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: &#39;weekly_recipe_suggestion&#39;,
+      matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+    );
+    logInfo(
+      &#39;Scheduled weekly recipe suggestion for $scheduledDate&#39;,
+    );
+  } on Exception catch (e) {
+    logError(&#39;Failed to schedule weekly recipe suggestion: $e&#39;);
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_notification_service/">notification_service</a></li>
+    <li><a href="../../services_notification_service/FlutterNotificationService-class.html">FlutterNotificationService</a></li>
+    <li class="self-crumb">scheduleWeeklyRecipeSuggestion method</li>
+</ol>
+
+    <h5>FlutterNotificationService class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.9+5
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+
