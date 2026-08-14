@@ -1626,35 +1626,11 @@ abstract class AppLocalizations {
   /// **'Record purchase prices and track how much you spend.'**
   String get priceTrackingDescription;
 
-  /// No description provided for @receiptTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'NFC-e Receipts'**
-  String get receiptTracking;
-
-  /// No description provided for @receiptTrackingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan tax receipts to add products.'**
-  String get receiptTrackingDescription;
-
   /// No description provided for @photoCompletenessTitle.
   ///
   /// In en, this message translates to:
   /// **'Photo Completeness'**
   String get photoCompletenessTitle;
-
-  /// No description provided for @contributePhotos.
-  ///
-  /// In en, this message translates to:
-  /// **'Contribute to Open Food Facts'**
-  String get contributePhotos;
-
-  /// No description provided for @offNeedsPhotos.
-  ///
-  /// In en, this message translates to:
-  /// **'OFF needs photos for {count} products'**
-  String offNeedsPhotos(Object count);
 
   /// No description provided for @noCategories.
   ///

@@ -820,21 +820,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get priceTrackingDescription => 'Acompanhe seus gastos.';
 
   @override
-  String get receiptTracking => 'Notas NFC-e';
-
-  @override
-  String get receiptTrackingDescription => 'Escanear notas para adicionar produtos.';
-
-  @override
   String get photoCompletenessTitle => 'Fotos dos Produtos';
-
-  @override
-  String get contributePhotos => 'Contribuir com fotos';
-
-  @override
-  String offNeedsPhotos(Object count) {
-    return 'OFF precisa de fotos para $count produtos';
-  }
 
   @override
   String get noCategories => 'Nenhuma categoria';
@@ -2948,21 +2934,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get priceTrackingDescription => 'Acompanhe seus gastos.';
 
   @override
-  String get receiptTracking => 'Notas NFC-e';
-
-  @override
-  String get receiptTrackingDescription => 'Escanear notas para adicionar produtos.';
-
-  @override
   String get photoCompletenessTitle => 'Fotos dos Produtos';
-
-  @override
-  String get contributePhotos => 'Contribuir com fotos';
-
-  @override
-  String offNeedsPhotos(Object count) {
-    return 'OFF precisa de fotos para $count produtos';
-  }
 
   @override
   String get noCategories => 'Nenhuma categoria';

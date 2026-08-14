@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,10 +7,8 @@ import 'package:pantry_app/models/pantry_stats.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/stats_provider.dart';
-import 'package:pantry_app/screens/coming_soon_screen.dart';
 import 'package:pantry_app/utils/nutriscore.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
-import 'package:pantry_app/widgets/coming_soon_view.dart';
 import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
@@ -20,8 +16,8 @@ import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 /// Displays aggregated statistics for the active pantry.
 ///
 /// Shows summary cards, Nutri-Score distribution, category breakdown,
-/// location breakdown, expiry donut, photo completeness, and Coming Soon
-/// stubs for price tracking and NFC-e receipts.
+/// location breakdown, expiry donut, photo completeness, and pricing
+/// sections.
 ///
 /// Uses fl_chart for PieChart and BarChart. All charts support touch
 /// interaction (tap a section to highlight it and its legend).
@@ -112,7 +108,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: 11,
+        itemCount: 10,
         itemBuilder: (context, index) {
           switch (index) {
             case 0:
@@ -145,21 +141,13 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               );
             case 7:
               return RepaintBoundary(
-                child: ComingSoonView(
-                  title: l10n.receiptTracking,
-                  subtitle: l10n.receiptTrackingDescription,
-                  icon: Icons.receipt_long,
-                ),
+                child: _buildMonthlySpending(context, l10n, stats, ref),
               );
             case 8:
               return RepaintBoundary(
-                child: _buildMonthlySpending(context, l10n, stats, ref),
-              );
-            case 9:
-              return RepaintBoundary(
                 child: _buildStoreSpending(context, l10n, stats, ref),
               );
-            case 10:
+            case 9:
               return RepaintBoundary(
                 child: _buildNutriscoreByStore(context, l10n, stats),
               );
@@ -413,7 +401,13 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle(context, l10n.categoryLabel),
-          ComingSoonView(title: l10n.noCategories),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              l10n.noCategories,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
         ],
       );
     }
@@ -635,26 +629,6 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             ],
           ),
         ),
-        if (stats.offPhotos.total > 0) ...[
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                unawaited(
-                  Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                          ComingSoonScreen(title: l10n.contributePhotos),
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.open_in_browser),
-              label: Text(l10n.contributePhotos),
-            ),
-          ),
-        ],
       ],
     );
   }

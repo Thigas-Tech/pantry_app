@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### Scope reduction
+
+- **Health platform integrations removed (scope reduction)**: the planned
+  Health Connect, Samsung Health Data SDK, Samsung Food, Apple HealthKit,
+  and health abstraction-layer work is no longer on the roadmap. No code
+  shipped; the TODO.md section and the related GitHub issues (#216-#220)
+  were removed.
+- **AI and heavy features removed (scope reduction)**: AI produce
+  recognition, NFC-e receipt scanning, photo contribution to Open Food
+  Facts, WHO-based food quality recommendations, and cosmetics/toiletries
+  support are no longer on the roadmap. The stats screen no longer shows
+  the "NFC-e Receipts" placeholder tab or the "Contribute to Open Food
+  Facts" button; the shared [ComingSoonView] and [ComingSoonScreen]
+  widgets were deleted. The informational `offPhotos` photo-completeness
+  stat stays. (lib/screens/stats_screen.dart, lib/l10n/*.arb, TODO.md,
+  lib/screens/coming_soon_screen.dart removed,
+  lib/widgets/coming_soon_view.dart removed)
+
 ### Security
 
 - **Removed the Blaze feedback infrastructure (free-tier cleanup)**: the

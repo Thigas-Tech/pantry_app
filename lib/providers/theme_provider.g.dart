@@ -11,9 +11,9 @@ part of 'theme_provider.dart';
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
-/// Loads the persisted mode in [build] so no placeholder value flashes.
-/// Used by [themeModeProvider] so that any widget can read or change the
-/// theme mode.
+/// Loads the persisted mode during its build so no placeholder value
+/// flashes. Used by [themeModeProvider] so that any widget can read or
+/// change the theme mode.
 
 @ProviderFor(ThemeModeNotifier)
 final themeModeProvider = ThemeModeNotifierProvider._();
@@ -21,17 +21,17 @@ final themeModeProvider = ThemeModeNotifierProvider._();
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
-/// Loads the persisted mode in [build] so no placeholder value flashes.
-/// Used by [themeModeProvider] so that any widget can read or change the
-/// theme mode.
+/// Loads the persisted mode during its build so no placeholder value
+/// flashes. Used by [themeModeProvider] so that any widget can read or
+/// change the theme mode.
 final class ThemeModeNotifierProvider
     extends $AsyncNotifierProvider<ThemeModeNotifier, ThemeModeOption> {
   /// A notifier that holds the current [ThemeModeOption] and persists it to
   /// [SharedPreferences] under the theme_mode key.
   ///
-  /// Loads the persisted mode in [build] so no placeholder value flashes.
-  /// Used by [themeModeProvider] so that any widget can read or change the
-  /// theme mode.
+  /// Loads the persisted mode during its build so no placeholder value
+  /// flashes. Used by [themeModeProvider] so that any widget can read or
+  /// change the theme mode.
   ThemeModeNotifierProvider._()
     : super(
         from: null,
@@ -56,9 +56,9 @@ String _$themeModeNotifierHash() => r'fef597261d1cdde6467f6cd4934d4a60148013ef';
 /// A notifier that holds the current [ThemeModeOption] and persists it to
 /// [SharedPreferences] under the theme_mode key.
 ///
-/// Loads the persisted mode in [build] so no placeholder value flashes.
-/// Used by [themeModeProvider] so that any widget can read or change the
-/// theme mode.
+/// Loads the persisted mode during its build so no placeholder value
+/// flashes. Used by [themeModeProvider] so that any widget can read or
+/// change the theme mode.
 
 abstract class _$ThemeModeNotifier extends $AsyncNotifier<ThemeModeOption> {
   FutureOr<ThemeModeOption> build();

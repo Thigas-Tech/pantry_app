@@ -253,16 +253,6 @@ infrastructure or external server hosting are listed last.
   with per-product price history, total inventory value, and store autocomplete.
   See `lib/database/price_dao.dart`, `lib/services/price_repository.dart`,
   `lib/services/open_prices_service.dart`, `lib/widgets/price_entry_sheet.dart`.
-- [ ] **NFC-e receipt scanning** — parse Brazilian electronic tax receipts
-  (NFC-e QR codes) to auto-populate product lists with quantities and
-  prices. Requires camera integration, SEFAZ API for QR decoding, and
-  product-name matching against the local pantry. Stubbed with
-  `ComingSoonView` on Stats screen.
-- [ ] **Photo contribution to Open Food Facts** — identify products in the
-  user's pantry that lack nutrition/ingredient/product photos on OFF and
-  prompt the user to contribute via the OFF product submission API.
-  Composite stat already tracked in `PhotoStats.offPhotos`.
-
 ### Documentation
 
 - [x] `ARCHITECTURE/INDEX.md` — add security section.
@@ -270,9 +260,6 @@ infrastructure or external server hosting are listed last.
 - [x] `AGENTS.md` — add "always check TODO.md before starting new work".
 - [x] **Small-screen golden tests (partial)** — `HomeScreen`, `SettingsScreen`,
   and `StatsScreen` have golden tests. `ProductDetailScreen` still pending.
-- [ ] **NFC‑e reference doc** — create `lib/docs/nfce_reference.md` with
-  complete technical reference (QR code URL formats, state variations,
-  v2 vs v3, parsing approach, open‑source tools).
 
 ---
 
@@ -936,17 +923,6 @@ infrastructure or external server hosting are listed last.
   "scan your first item" flow instead of just the empty state widget.
 - [x] **Offline-first product submission queue** — queue `submitProduct`
   calls when offline; flush when `connectivityProvider` emits `true`.
-- [ ] **WHO-based food quality recommendations** — research complete:
-  ADI-based additive safety warnings, non‑sugar sweetener health guidance,
-  free‑sugar threshold alerts (5 g per 100 g), sodium level awareness labels
-  (low/medium/high per WHO thresholds), balanced diet prompts, and Five
-  Keys to Safer Food tips.
-- [ ] **Cosmetics & toiletries support** — extend OFF API integration to
-  query Open Beauty Facts (`openbeautyfacts.org`), add `productType` to the
-  `Product` model (`'food'` / `'beauty'` / `'petfood'`), add
-  cosmetic‑specific fields (periodAfterOpening, beauty category), hide
-  nutrition/Nutri‑Score for non‑food items, and add filter chips on the
-  home screen.
 - [ ] **Custom eco-mode** — implement `EcoModeNotifier` (similar to
   `ThemeModeNotifier`) with a toggle in Settings. When enabled: reduce
   animation complexity, throttle network refresh interval, disable
@@ -992,10 +968,7 @@ infrastructure or external server hosting are listed last.
   recommendations from pantry" (Medium Effort). If both are implemented,
   the notification feature triggers on a schedule, while the full Recipe
   suggestions tab provides a richer UI with filtering, saving, and meal
-  planning. Coordinate with Samsung Food meal planning integration below
-  — if all three are implemented, Samsung Food can serve as the meal
-  planning UI layer and recipe source, while the generic recipe API
-  provides wider coverage in regions where Samsung Food is unavailable.
+  planning.
 - [ ] **Patrol E2E tests** — real‑device integration tests via
   [Patrol](https://patrol.leancode.co). Uses `patrol_cli` and `patrol`
   dev-dependency. Replace the generic `integration_test/` with
@@ -1030,261 +1003,6 @@ infrastructure or external server hosting are listed last.
   Publish as a standalone ruleset. Rules would cover: `ListView()` vs
   `ListView.builder`, `setState` scope, `ShaderMask` grouping, `compute()`
   for heavy parsing, and image resolution checking.
-
----
-
-## Health Platform Integrations
-
-- [ ] **Health Connect (Android) — nutrition read/write** — integrate
-  Android Health Connect Jetpack (`v1.1.0+`) via
-  `androidx.health.connect:connect-client`. Read/write `NutritionRecord`
-  (calories, macros). Universal Android coverage (API 28+).
-
-  **Implementation (Phase 1 — foundation)**:
-  1. Add `health-connect-client` Flutter plugin or write platform channel
-     in `android/app/src/main/kotlin/`. Audit pub.dev packages first.
-  2. Create `lib/services/health_connect_service.dart` — wraps
-     `HealthConnectClient` init, permission requests, CRUD operations.
-  3. Define `HealthNutritionData` model (calories_kcal, protein_g, carbs_g,
-     fat_g, fiber_g, timestamp, meal_type).
-  4. Add `NutritionRecord` write — triggered when user logs a meal or adds
-     an item to inventory with known nutrition data.
-  5. Add `NutritionRecord` read — fetch today's totals from Health Connect
-     for a nutrition dashboard.
-  6. Request permissions on first write attempt (lazy permission model).
-  7. New ARB strings: `healthConnectPermission`, `nutritionSynced`,
-     `nutritionSyncFailed`, `todayCalories`.
-
-  **Implementation (Phase 2 — meal logging)**:
-  1. Add "Log Meal" button on `ProductDetailScreen`.
-  2. Add "Today's Nutrition" summary card on `StatsScreen` or `HomeScreen`.
-  3. Background sync: flush pending nutrition records when connectivity
-     permits.
-
-  **Pitfalls & edge cases**:
-  - **Flutter plugin maturity**: The `health_connect` package on pub.dev
-    may have incomplete `NutritionRecord` support. Audit source before
-    committing. Be prepared to write a custom platform channel in Kotlin.
-  - **Health Connect must be installed separately**: Not built into
-    Android. `HealthConnectClient.getSdkStatus()` returns
-    `SdkStatus.AVAILABLE` only when "Health Connect by Google" is installed
-    from Play Store. If unavailable, show setup prompt with Play Store deep
-    link. Do not crash.
-  - **System permission sheet UX**: Health Connect uses a system-level
-    permission sheet, NOT standard Android runtime permissions. User grants
-    per-data-type access. This sheet cannot be styled. If user denies a
-    type, writes to that type fail silently — always check
-    `getGrantedPermissions()` before writing.
-  - **No aggregation — raw records**: Writing breakfast and lunch produces
-    two separate records. Implement idempotency: generate a deterministic
-    `uid` from `product_barcode + timestamp + meal_type` and check for
-    existing records before inserting.
-  - **Uninstall = permanent data loss**: ALL stored data across all apps is
-    deleted if user uninstalls Health Connect. Detect uninstall between
-    launches and warn. Keep your own sync log in SQLite.
-  - **Android backup excludes Health Connect**: After device restore,
-    Health Connect starts empty. Detect "first launch after restore" and
-    offer to re-sync.
-  - **API 28 minimum**: Health Connect requires Android 9+. On API 27 and
-    below, hide all Health Connect UI. SDK methods throw
-    `UnsupportedOperationException` if called.
-  - **Permission revocation at any time**: Before every write, re-check
-    `getGrantedPermissions()`. Show snackbar with "Fix" button to open
-    permission settings.
-  - **Background sync restrictions**: Android 14+ limits background work.
-    Use `WorkManager` with `PeriodicWorkRequest` (minimum 15‑minute
-    interval). Test on Android 14+.
-  - **Testing without physical device**: CI emulators (GitHub Actions)
-    generally don't have Health Connect. Mock `HealthConnectClient` with
-    `mocktail` in unit tests.
-  - **NutritionRecord data model mismatch**: Health Connect uses `Energy`
-    (kcal), `Mass` (g) for macros, and `MealType` enum. Map cleanly to
-    `HealthNutritionData`. Use `MEAL_UNKNOWN` as fallback.
-
-- [ ] **Samsung Health Data SDK — nutrition sync** — integrate Samsung's
-  active Health Data SDK (NOT the deprecated SDK). Write
-  `HealthConstants.Food` (calories) and `HealthConstants.Nutrition`
-  (macros) to Samsung Health. Works on all Android phones with Samsung
-  Health app 6.30.2+.
-
-  **Implementation**:
-  1. Create Android platform channel or use community Flutter plugin for
-     Samsung Health Data SDK.
-  2. Implement `HealthDataStore` connection lifecycle.
-  3. Request permissions via `HealthPermissionManager` per data type.
-  4. Build `InsertRequest` with `HealthDataResolver` to write food intake.
-  5. Align with Health Connect abstraction: write to both platforms via the
-     same `HealthNutritionData` model.
-  6. New ARB strings: `samsungHealthPermission`, `samsungHealthConnected`.
-
-  **Pitfalls & edge cases**:
-  - **Deprecated SDK cut-off**: Old "Samsung Health SDK for Android" was
-    deprecated as of 31 July 2025. Verify integration uses **Samsung Health
-    Data SDK** (new). Migration guide: [developer.samsung.com](https://developer.samsung.com/health/data/migration-guide/overview.html).
-  - **Samsung Health app must be installed AND at v6.30.2+**: If missing or
-    outdated, `HealthDataStore.connectService()` fails. Show Play Store
-    deep link.
-  - **SI units only — no imperial**: `CALORIE` is in kcal (not cal),
-    `WEIGHT` in kg (not lb). Convert before writing if app allows imperial
-    display.
-  - **Partner registration for write access**: Some data types require a
-    [Partner Request](https://developer.samsung.com/SHealth/business-partner/m48wvqi1mt9w2w4c).
-    Food/Nutrition may be restricted. Register early — approval can take
-    weeks.
-  - **Connection lifecycle is fragile**: Register a strong
-    `HealthDataStore.ConnectionListener` that reconnects automatically.
-    Test by force-stopping Samsung Health from Settings.
-  - **Non-Samsung devices work too**: SDK works on any Android phone
-    (Marshmallow+) with Samsung Health installed. Do not gate behind
-    `Build.MANUFACTURER == "samsung"`.
-  - **Disconnection on app background**: SDK auto-disconnects. Reconnect
-    in `onResume()` or `onForeground()`.
-  - **Threading**: All SDK callbacks run on a binder thread. Post results
-    to main thread before updating UI. Failure causes
-    `CalledFromWrongThreadException`.
-  - **Data deduplication across platforms**: If Samsung Health syncs to
-    Health Connect, writing to both creates duplicates. Check "Sync with
-    Health Connect" setting before writing.
-  - **Official docs links**:
-    - [Health Data Store Guide](https://developer.samsung.com/health/android/data/guide/health-data-store.html)
-    - [API Reference 1.5.1](https://developer.samsung.com/health/android/data/api-reference/overview-summary.html)
-    - [Programming Guide](https://developer.samsung.com/health/android/data/guide/intro.html)
-    - [FoodNote Sample](https://developer.samsung.com/health/data/sample/foodnote.html)
-
-- [ ] **Samsung Food (formerly Whisk) — meal planning UX** — integrate
-  Samsung Food's meal planning pattern (recipe saving, drag-and-drop weekly
-  planner, auto-generated grocery lists). Uses Samsung Health Data SDK
-  underneath for nutrition sync.
-
-  **Implementation**:
-  1. Research Samsung Food public API / integration points.
-  2. Implement meal suggestion from expiring items (coordinate with Recipe
-     suggestions item above).
-  3. Add weekly meal plan UI: drag-and-drop items into day slots,
-     auto-generate grocery list from planned meals.
-  4. Write planned meals' nutrition data to Samsung Health via the SDK.
-  5. New ARB strings: `mealPlan`, `weeklyPlanner`, `groceryList`,
-     `addToPlan`.
-
-  **Pitfalls & edge cases**:
-  - **API access may require partnership**: Samsung Food's integration API
-    may require business partnership. Research access requirements before
-    scoping.
-  - **Regional availability**: Not available in all countries. Check
-    [samsungfood.com](https://samsungfood.com/). If unavailable, hide meal
-    planning UI with "Not available in your region" message.
-  - **Recipe suggestions overlap**: Decide whether to use Samsung Food as
-    the recipe source or keep a generic recipe API for wider coverage.
-  - **Data portability lock-in**: If user builds their weekly meal plan in
-    Samsung Food, they cannot export. Consider export-to-SQLite option.
-  - **Meal plan → grocery list → inventory conflict**: Samsung Food
-    auto-generates grocery lists. Implement "mark as purchased" flow that
-    cross-references with existing inventory items.
-  - **Official docs links**:
-    - [Samsung Food](https://samsungfood.com/)
-    - [FoodNote Sample](https://developer.samsung.com/health/data/sample/foodnote.html)
-
-- [ ] **Apple HealthKit (future iOS version)** — integrate HealthKit via
-  `HKHealthStore` for reading/writing `HKQuantitySample` with
-  `HKQuantityTypeIdentifier.dietaryEnergyConsumed` and related nutrition
-  types. Minimum iOS 8.0+.
-
-  **Implementation**:
-  1. Add HealthKit capability in Xcode when building iOS.
-  2. Use `health` Flutter package or platform channel for `HKHealthStore`.
-  3. Request per-type permissions.
-  4. Write nutrition records using same `HealthNutritionData` model.
-  5. New ARB strings: `appleHealthPermission`, `healthKitSynced`.
-
-  **Pitfalls & edge cases**:
-  - **iOS-only**: Gate all HealthKit code behind
-    `defaultTargetPlatform == TargetPlatform.iOS`.
-  - **Entitlement provisioning**: Requires Apple Developer account (paid).
-    Missing entitlement → `HKHealthStore.isHealthDataAvailable()` returns
-    `false`.
-  - **Per-type permission granularity — no bulk requests**: Request
-    read/write for EACH data type individually. Maintain list and verify
-    each is granted before writing.
-  - **No cross-device sync without iCloud**: Detect iCloud Health sync
-    status and surface in UI.
-  - **Private medical data — no server transmission**: Apple guidelines
-    prohibit transmitting to third-party servers without explicit consent.
-  - **Simulator limitations**: Works on simulator but with restrictions.
-    End-to-end testing requires physical device.
-  - **Background delivery**: iOS may delay delivery for power management.
-    Use foreground queries for dashboard.
-  - **User can delete records from Health app**: Implement periodic
-    reconciliation between SQLite log and HealthKit records.
-  - **HealthKit data deletion on app uninstall**: All records written by
-    your app are deleted per Apple's privacy model. Warn user.
-  - **Official docs links**:
-    - [HealthKit Framework](https://developer.apple.com/documentation/healthkit)
-
-### Health platform abstraction layer
-
-- [ ] **Health platform abstraction layer** — create a unified Dart
-  interface `HealthService` with methods `writeNutrition()`,
-  `readNutrition()`, `requestPermissions()`, `isAvailable()`. Implement for
-  each platform: `HealthConnectService`, `SamsungHealthService`,
-  `AppleHealthService`. Makes adding OEM platforms (Huawei Health Kit,
-  Xiaomi Health Cloud, etc.) a matter of writing a new implementation
-  class.
-
-  **Reference architecture**:
-  ```
-  Your Pantry App
-        │
-        ▼
-  HealthService (abstract interface)
-        │
-        ├── HealthConnectService (Android — universal)
-        ├── SamsungHealthService (Android — Samsung Health app)
-        └── AppleHealthService (iOS — future)
-              │
-              ▼
-        Health platform's native SDK
-  ```
-
-  **Pitfalls & edge cases**:
-  - **Platform channel complexity multiplies**: Each health SDK requires
-    its own platform channel code. Use separate `MethodChannel` per service.
-    Do NOT share a single channel for all health operations.
-  - **Testing across platforms is hard**: Unit tests can mock the
-    `HealthService` interface. Integration tests require real devices with
-    Health Connect / Samsung Health / HealthKit installed. Keep in a
-    separate `health_integration_test/` directory run manually.
-  - **Cross-platform data deduplication**: If both Health Connect and
-    Samsung Health are active AND Samsung Health syncs to Health Connect,
-    writing to both creates duplicates. Detect cross-sync before writing.
-  - **User consent fatigue**: Up to 3 permission sheets on first use.
-    Stagger requests: Health Connect on first nutrition write, Samsung
-    Health when user opens Samsung Health settings, HealthKit on first
-    iOS nutrition dashboard visit.
-  - **Privacy regulations (LGPD/GDPR)**: Health data is sensitive personal
-    data. Get explicit consent, provide deletion mechanism, include in
-    privacy policy.
-  - **App store scrutiny**: Additional review requirements on Google Play
-    and Apple App Store. Prepare documents before release.
-  - **Error aggregation**: Create typed error classes per platform with
-    clear user-facing messages. Never show raw SDK errors in UI.
-  - **Feature flagging**: Each health platform integration should be behind
-    a feature flag that can be disabled remotely or via debug menu.
-
-### Quick-reference table
-
-```
-| Platform | Write | Nutrition | Meal Plan | Docs |
-|----------|-------|-----------|-----------|------|
-| Health Connect (Android) | Yes | Yes NutritionRecord | No | [developer.android.com](https://developer.android.com/health-and-fitness/health-connect) |
-| Samsung Health Data SDK | Yes | Yes Food/Nutrition | Yes via Samsung Food | [developer.samsung.com](https://developer.samsung.com/health) |
-| Samsung Food | N/A (via SDK) | Yes | Yes meal planner | [samsungfood.com](https://samsungfood.com/) |
-| Apple HealthKit | Yes (future) | Yes dietary energy | No | [developer.apple.com](https://developer.apple.com/documentation/healthkit) |
-| Huawei Health Kit | Yes | Yes limited | No | [developer.huawei.com](https://developer.huawei.com/consumer/en/hms/huawei-healthkit) |
-| Xiaomi Health Cloud | Yes | limited | No | [dev.mi.com](http://developer.mi.com) |
-| OPPO Health | Yes | limited | No | [open.oppomobile.com](https://open.oppomobile.com/) |
-| vivo Health Kit | Yes | limited | No | [developers.vivo.com](https://developers.vivo.com/) |
-| Honor Health Kit | Yes | limited | No | [developer.honor.com](https://developer.honor.com/) |
-```
 
 ---
 
@@ -1356,69 +1074,6 @@ storage costs.
   - **User‑entered vs API conflict resolution**: Local wins. Show both in
     detail view: "Your price: $4.99 | Store average: $5.20."
 
-- [ ] **NFC‑e importing from QR code** — detect NFC‑e QR URLs on the
-  scanner screen (pattern `fazenda.*/nfce/qrcode`). Fetch SEFAZ page via
-  HTTP GET. Parse product items from DANFE HTML using `package:html`. Map
-  items to `Product` + `InventoryItem`. Show review screen with checkboxes
-  and quantity edits before importing. Phase 2: dedicated backend service
-  (nfce-scraper Docker).
-
-  **Implementation (Phase 1 — in‑app scraping)**:
-  1. Add `html` package to `pubspec.yaml`.
-  2. Create `lib/services/nfce_service.dart` — validate NFC‑e URL, HTTP
-     GET SEFAZ page, parse DANFE HTML table rows.
-  3. Create `NfceItem` model (description, quantity, unit, unit_price,
-     total).
-  4. Detect NFC‑e QR code on `ScannerScreen` or add "Import NFC‑e" button
-     on home screen.
-  5. Show review screen: list of parsed items with checkboxes +
-     quantity/price edits.
-  6. On confirm: `upsertProduct` + `addInventoryItem` for each checked
-     item.
-  7. New ARB strings: `importNfce`, `nfceItemCount`, `nfceImportSuccess`,
-     `nfceImportFailed`, `nfceParseError`.
-  8. Create `lib/docs/nfce_reference.md`.
-
-  **Implementation (Phase 2 — backend service, costs hosting)**:
-  - Deploy `nfce-scraper` (Python FastAPI) as Docker service.
-  - Flutter sends QR URL → backend returns JSON.
-  - Backend handles multi‑state HTML variations.
-
-  **Pitfalls & edge cases**:
-  - **25+ Brazilian states, each with unique HTML structure**: Build
-    state‑detection layer and route to state‑specific parsers. Start with
-    the most common states.
-  - **SEFAZ can change HTML structure at any time**: Scraping is
-    inherently fragile. Implement `version` field in parser; log raw HTML
-    on failure.
-  - **`package:html` O(n²) tokenizer on large invoices**: Confirmed open
-    issue (`dart-lang/html#18`). Use `parseFragment()` instead of
-    `parse()`. Consider chunk‑based processing.
-  - **QR code v2 vs v3 format**: v3 mandatory from Sep 2025. Parse URL
-    parameters to determine version.
-  - **Offline contingency QR codes** (`tpEmis=9`): Extra fields, different
-    content/layout. Handle gracefully.
-  - **No barcode on NFC‑e items**: Map to `Product` with
-    `source: 'manual'` and generated ID. Cache by description hash.
-  - **Duplicate detection**: Show warning in review screen. Let user
-    choose: skip, add as new, or increment quantity.
-  - **Network errors fetching SEFAZ page**: Show loading with 10s timeout.
-    Retry once, then show error with "Try again" button.
-  - **Encoding**: Brazilian Portuguese uses ISO‑8859-1 / Latin-1 in some
-    SEFAZ pages. Detect charset from HTML `<meta>` tag or Content-Type
-    header. Convert to UTF‑8 before parsing.
-  - **Privacy**: NFC‑e URLs may encode consumer's CPF. Warn user before
-    fetching. Never cache raw HTML.
-  - **Large invoices (50+ items)**: Use `ListView.builder` on review
-    screen. Show progress indicator during parsing.
-  - **HTML5 "error recovery"**: `package:html` silently "fixes" malformed
-    HTML (auto‑closes tags, injects `<tbody>`). Test against real SEFAZ
-    pages with fixture files.
-  - **State‑specific error pages**: Detect error keywords in response.
-    Show descriptive error in user's language.
-  - **Rate limiting by SEFAZ**: Add 1‑second delay between fetch and
-    retry.
-
 - [ ] **Cloud backup** — upload DB to Firebase Storage / S3. Restore on a
   new device. **Costs**: Firebase Storage ($0.026/GB stored, $0.12/GB
   transferred) or S3 ($0.023/GB). Ongoing hosting expense.
@@ -1447,15 +1102,15 @@ High impact      │ Batch delete            │ Shopping list
                  │ Expiry date guard       │ Changelog at startup
                  │ Expiry parsing extract  │ Product name translations
                  │ GitHub CI pipeline      │ Ingredients translations
-                 │ Repaint boundaries      │ Health Connect nutrition sync
-                 │ ListView.builder audit  │ Samsung Health Data SDK
-                 │ Confine setState audit  │ Samsung Food meal planning
-                 │ Image resolution audit  │ Health abstraction layer
-                 │ Impeller check          │ Custom eco-mode
-                 │ Tree shaking audit      │ Deferred components
-                 │ Dark mode nudge         │ Patrol E2E tests
-                 │ Thread strategy audit   │ Low-end device testing
-                 │ Flashlight local setup  │ Remake notifications
+                 │ Repaint boundaries      │ Custom eco-mode
+                 │ ListView.builder audit  │ Deferred components
+                 │ Confine setState audit  │ Patrol E2E tests
+                 │ Image resolution audit  │ Low-end device testing
+                 │ Impeller check          │ Remake notifications
+                 │ Tree shaking audit      │
+                 │ Dark mode nudge         │
+                 │ Thread strategy audit   │
+                 │ Flashlight local setup  │
                  │─────────────────────────│──────────────────────────
                  │ Golden tests            │ Multi-language support
                  │ Accessibility audit     │ Recipe suggestions
@@ -1464,15 +1119,10 @@ High impact      │ Batch delete            │ Shopping list
                  │ Empty-pantry onboarding │ Barcode history
                  │ Asset optimization      │ Cloud backup (paid)
                  │ Expensive raster ops    │ Product prices (paid)
-                 │ EcoCode contribution    │ NFC-e importing (paid)
-                 │ Small-screen golden     │ WHO food recommendations
- Low impact      │ Performance docs        │ Cosmetics/toiletries
-                 │ NavigationRail          │ Apple HealthKit (future)
-                 │                         │ Remove functional debt
-                 │                         │ BFF evaluation (paid)
-                 │                         │ OEM platforms (Xiaomi, etc.)
-                 │                         │ Flashlight CI baseline
-                 │                         │ Perfetto CI trace analysis
+                 │ EcoCode contribution    │ Remove functional debt
+                 │ Small-screen golden     │ BFF evaluation (paid)
+ Low impact      │ Performance docs        │ Flashlight CI baseline
+                 │ NavigationRail          │ Perfetto CI trace analysis
                  │                         │ Play Store CI deploy
 ```
 
@@ -1488,8 +1138,8 @@ cases** section covering:
 | **API limitations** | Rate limits, silent fallbacks, undocumented behaviour, CORS |
 | **Platform quirks** | iOS locale differences, Android background isolates, Windows locale bugs |
 | **Data quality** | Missing translations, no accuracy guarantees, stale prices, different HTML structures |
-| **Security/privacy** | NFC-e URLs with CPF, proof photos as PII, offline submission queuing |
-| **Performance** | HTML parser O(n²), large markdown ASTs, DB size for multilingual fields |
+| **Security/privacy** | Proof photos as PII, offline submission queuing |
+| **Performance** | Large markdown ASTs, DB size for multilingual fields |
 | **UX edge cases** | First install vs update, accumulated version skips, partial imports, mixed-language results |
-| **Dependency risk** | Discontinued packages (`flutter_markdown`), fragile scraping (SEFAZ), license obligations (OdBL) |
+| **Dependency risk** | Discontinued packages (`flutter_markdown`), license obligations (OdBL) |
 | **Safety** | Allergen mistranslation, dietary restriction implications, no authoritative translation claims |

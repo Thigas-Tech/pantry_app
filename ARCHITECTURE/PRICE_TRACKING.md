@@ -42,7 +42,7 @@ Created by migration v12 and extended by v37:
 | `sync_status` | TEXT NOT NULL DEFAULT 'local_only' | see lifecycle below |
 | `open_prices_id` | INTEGER | Remote id after sync |
 | `location_osm_id` / `location_osm_type` | TEXT | OSM location (NODE/WAY/RELATION) |
-| `receipt_series` / `receipt_number` / `receipt_item_index` | TEXT/TEXT/INTEGER | Reserved for NFC-e receipts |
+| `receipt_series` / `receipt_number` / `receipt_item_index` | TEXT/TEXT/INTEGER | Reserved (unused) |
 | `notes` | TEXT | Free-form |
 | `package_quantity` | REAL | Package size, e.g. 12 (eggs), 1 (1 L), 500 (500 g) |
 | `package_unit` | TEXT | 'pieces', 'g', 'kg', 'ml', 'L', ... |

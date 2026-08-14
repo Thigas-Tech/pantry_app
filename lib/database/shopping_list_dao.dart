@@ -376,9 +376,7 @@ class ShoppingListDao {
   /// scoped to an inventory.
   ///
   /// When [inventoryId] is non-null, only pending items in that inventory
-  /// are marked. When null, items across all inventories are marked
-  /// (used by NFC-e receipt scanning where a receipt may span multiple
-  /// pantries).
+  /// are marked. When null, items across all inventories are marked.
   Future<int> markPurchasedByBarcode(
     Database db,
     String barcode, {
