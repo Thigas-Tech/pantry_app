@@ -12,6 +12,12 @@ import 'package:timezone/timezone.dart' as tz;
 /// with expiry IDs (which use itemId * 2 / itemId * 2 + 1).
 const _inactivityReminderId = 999_999_001;
 
+/// Notification ID for the single weekly recipe-suggestion notification.
+///
+/// Also chosen far above realistic [InventoryItem.id] values so it never
+/// collides with expiry IDs (itemId * 2 / itemId * 2 + 1).
+const _weeklyRecipeSuggestionId = 999_999_002;
+
 /// Manages local notifications for expiry and inactivity reminders.
 ///
 /// Designed for **Android** (and ready for iOS when that platform is added).
@@ -475,6 +481,95 @@ class FlutterNotificationService implements NotificationService {
   }
 
   @override
+  Future<void> scheduleWeeklyRecipeSuggestion({
+    required String title,
+    required String body,
+    required int dayOfWeek,
+    required int hour,
+    required int minute,
+    required String channelName,
+    required String channelDescription,
+    bool notificationsEnabled = true,
+  }) async {
+    if (!notificationsEnabled) {
+      logInfo('Notifications disabled, skipping weekly recipe suggestion');
+      return;
+    }
+
+    final systemEnabled = await areNotificationsEnabled();
+    if (systemEnabled == false) {
+      logWarning(
+        'System notifications disabled, skipping weekly recipe suggestion',
+      );
+      return;
+    }
+
+    final channel = AndroidNotificationChannel(
+      'recipe_suggestions_channel',
+      channelName,
+      description: channelDescription,
+      importance: Importance.low,
+    );
+    final androidPlugin = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidPlugin != null) {
+      try {
+        await androidPlugin.createNotificationChannel(channel);
+        logInfo('Recipe suggestion notification channel created/verified');
+      } on Exception catch (e) {
+        logWarning('Failed to create recipe suggestion channel: $e');
+      }
+    }
+
+    final scheduledDate = _nextDayOfWeekOccurrence(
+      dayOfWeek,
+      hour,
+      minute,
+    );
+    final notificationDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'recipe_suggestions_channel',
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.low,
+        category: AndroidNotificationCategory.recommendation,
+      ),
+      iOS: const DarwinNotificationDetails(),
+    );
+
+    try {
+      await _plugin.zonedSchedule(
+        id: _weeklyRecipeSuggestionId,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: 'weekly_recipe_suggestion',
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+      );
+      logInfo(
+        'Scheduled weekly recipe suggestion for $scheduledDate',
+      );
+    } on Exception catch (e) {
+      logError('Failed to schedule weekly recipe suggestion: $e');
+    }
+  }
+
+  @override
+  Future<void> cancelWeeklyRecipeSuggestion() async {
+    logInfo('Cancelling weekly recipe suggestion');
+    try {
+      await _plugin.cancel(id: _weeklyRecipeSuggestionId);
+      logInfo('Weekly recipe suggestion cancelled');
+    } on Exception catch (e) {
+      logError('Failed to cancel weekly recipe suggestion: $e');
+    }
+  }
+
+  @override
   Future<void> rescheduleAllItems(
     List<InventoryItem> items, {
     required String expiringSoonTitle,
@@ -708,5 +803,31 @@ class FlutterNotificationService implements NotificationService {
   tz.TZDateTime _toMorningTZDateTime(DateTime date) {
     final morning = DateTime(date.year, date.month, date.day, 9);
     return tz.TZDateTime.from(morning, tz.local);
+  }
+
+  /// Returns the next occurrence of [dayOfWeek] at [hour]:[minute] in the
+  /// local timezone.
+  ///
+  /// [dayOfWeek] follows [DateTime.weekday]: 1 = Monday ... 7 = Sunday.
+  /// If the requested day and time has already passed today, the next
+  /// week's occurrence is returned.
+  tz.TZDateTime _nextDayOfWeekOccurrence(
+    int dayOfWeek,
+    int hour,
+    int minute,
+  ) {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduled = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+    while (scheduled.weekday != dayOfWeek || !scheduled.isAfter(now)) {
+      scheduled = scheduled.add(const Duration(days: 1));
+    }
+    return scheduled;
   }
 }

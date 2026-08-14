@@ -500,6 +500,26 @@
   },
   "inactivityReminderChannelDescription": "Lembra voce de adicionar produtos regularmente",
   "inactivityReminderChannelName": "Lembretes de inatividade",
+  "weeklyRecipeSuggestionTitle": "Ideia de receita da sua despensa",
+  "weeklyRecipeSuggestionBody": "Que tal {recipeName}? Combina com {itemCount} ingredientes que voce tem. Sempre confira os ingredientes por questoes alimentares.",
+  "@weeklyRecipeSuggestionBody": {
+    "placeholders": {
+      "recipeName": {
+        "type": "String",
+        "example": "Frango ao molho"
+      },
+      "itemCount": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "weeklyRecipeSuggestionEnabled": "Sugestoes semanais de receitas",
+  "weeklyRecipeSuggestionDay": "Dia da sugestao",
+  "weeklyRecipeSuggestionTime": "Horario da sugestao",
+  "weeklyRecipeSuggestionSet": "Sugestao semanal de receita atualizada.",
+  "weeklyRecipeSuggestionChannelName": "Sugestoes de receitas",
+  "weeklyRecipeSuggestionChannelDescription": "Ideias semanais de receitas da sua despensa",
   "inactivityReminderEnabled": "Lembrar de adicionar produtos regularmente",
   "inactivityReminderTitle": "Hora de reabastecer sua despensa?",
   "inactivityThresholdDays": "Limite de inatividade (dias)",

@@ -26,6 +26,7 @@ never waste food again.
 - **Manual product entry** — full form with nutrition table and camera capture when a barcode is unknown or you're offline
 - **Price tracking** — record purchase prices with store, date, currency, and package size; view price history, per-unit prices, and total inventory value
 - **Shopping list** — add items from cached products or free-text, mark as purchased, batch-move to pantry
+- **Weekly recipe suggestions** — optional weekly notification suggesting a recipe that matches your current inventory (via TheMealDB)
 - **Store autocomplete** — saved store names persist across uses, suggested in the price entry sheet
 - **Barcode history** — the last 50 scanned barcodes are kept locally on your device
 
@@ -139,6 +140,7 @@ lib/
     product_image_service.dart, product_image_compressor.dart  # Product photos
     product_photo_picker.dart, product_photo_cropper.dart      # Photo capture
     recipe_service.dart, recipe_nutrition_service.dart, recipe_nutri_score_service.dart
+    recipe_api_client.dart, recipe_suggestion_service.dart  # Weekly recipe suggestions
     shopping_list_service.dart  # Shopping list business logic
     camera_service.dart, camera_image_processor.dart  # Camera capture
     app_startup_service.dart, app_update_handler.dart  # App lifecycle

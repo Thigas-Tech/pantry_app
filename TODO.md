@@ -539,7 +539,7 @@ infrastructure or external server hosting are listed last.
   (`lib/widgets/search_ingredient_sheet.dart`)
 - [x] **Duplicate ingredient merging** — same barcode added twice increments
   quantity instead of duplicate row.
-- [ ] **Recipe recommendation notifications from pantry** — generate
+- [x] **Recipe recommendation notifications from pantry** — generate
   personalised recipe suggestions based on the user's current inventory:
   "Hey, how about making a chicken sandwich today? You have all the
   ingredients!" Fetch recipes from a public recipe API (e.g. Spoonacular,

@@ -349,6 +349,69 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           ExpansionTile(
+            leading: const Icon(Icons.restaurant_menu),
+            title: Text(l10n.weeklyRecipeSuggestionEnabled),
+            children: [
+              SwitchListTile(
+                title: Text(l10n.weeklyRecipeSuggestionEnabled),
+                value: settings.weeklyRecipeSuggestionEnabled,
+                onChanged: (value) async {
+                  logInfo('Weekly recipe suggestion toggled: $value');
+                  final notifService = ref.read(notificationServiceProvider);
+                  if (value) {
+                    if (!context.mounted) return;
+                    final proceed = await _showPermissionRationaleIfNeeded(
+                      context,
+                      ref,
+                      l10n,
+                    );
+                    if (!proceed) return;
+                    final granted = await notifService.requestPermission();
+                    if (granted == false) {
+                      if (context.mounted) {
+                        await _showPermissionDeniedDialog(context, l10n);
+                      }
+                      return;
+                    }
+                  } else {
+                    await notifService.cancelWeeklyRecipeSuggestion();
+                  }
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setWeeklyRecipeSuggestionEnabled(value: value);
+                  if (value) {
+                    unawaited(_rescheduleWeeklyRecipeSuggestion(ref, l10n));
+                  }
+                  if (context.mounted) {
+                    SnackbarHelper.showInfo(
+                      context,
+                      value
+                          ? l10n.weeklyRecipeSuggestionSet
+                          : l10n.notificationsDisabled,
+                    );
+                  }
+                },
+              ),
+              ListTile(
+                title: Text(l10n.weeklyRecipeSuggestionDay),
+                subtitle: Text(
+                  _weekdayName(l10n, settings.weeklyRecipeSuggestionDay),
+                ),
+                onTap: () => _showRecipeSuggestionDayDialog(context, ref),
+              ),
+              ListTile(
+                title: Text(l10n.weeklyRecipeSuggestionTime),
+                subtitle: Text(
+                  TimeOfDay(
+                    hour: settings.weeklyRecipeSuggestionHour,
+                    minute: settings.weeklyRecipeSuggestionMinute,
+                  ).format(context),
+                ),
+                onTap: () => _showRecipeSuggestionTimeDialog(context, ref),
+              ),
+            ],
+          ),
+          ExpansionTile(
             leading: const Icon(Icons.timer),
             title: Text(l10n.settingsDataManagement),
             children: [
@@ -1036,6 +1099,101 @@ class SettingsScreen extends ConsumerWidget {
         );
       }
     }
+  }
+
+  /// Reschedules the weekly recipe suggestion after the toggle changes.
+  Future<void> _rescheduleWeeklyRecipeSuggestion(
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) async {
+    try {
+      final coordinator = ref.read(notificationCoordinatorProvider);
+      final settings = await ref.read(settingsProvider.future);
+      await coordinator.rescheduleWeeklyRecipeSuggestion(
+        l10n: l10n,
+        settings: settings,
+      );
+    } on Exception catch (e) {
+      logError('Failed to reschedule weekly recipe suggestion: $e');
+    }
+  }
+
+  /// Shows a day-of-week picker dialog for the recipe suggestion.
+  Future<void> _showRecipeSuggestionDayDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) {
+        final dialogL10n = AppLocalizations.of(ctx)!;
+        return SimpleDialog(
+          title: Text(dialogL10n.weeklyRecipeSuggestionDay),
+          children: [
+            RadioGroup<int>(
+              groupValue: current.weeklyRecipeSuggestionDay,
+              onChanged: (v) => Navigator.pop(ctx, v),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var day = 1; day <= 7; day++)
+                    RadioListTile<int>(
+                      title: Text(_weekdayName(dialogL10n, day)),
+                      value: day,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    if (result != null && context.mounted) {
+      logInfo('Recipe suggestion day changed to $result');
+      ref.read(settingsProvider.notifier).setWeeklyRecipeSuggestionDay(result);
+      unawaited(_rescheduleWeeklyRecipeSuggestion(ref, l10n));
+      if (context.mounted) {
+        SnackbarHelper.showInfo(context, l10n.weeklyRecipeSuggestionSet);
+      }
+    }
+  }
+
+  /// Shows a time-of-day picker dialog for the recipe suggestion.
+  Future<void> _showRecipeSuggestionTimeDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final current = await ref.read(settingsProvider.future);
+    if (!context.mounted) return;
+    final result = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: current.weeklyRecipeSuggestionHour,
+        minute: current.weeklyRecipeSuggestionMinute,
+      ),
+    );
+    if (result != null && context.mounted) {
+      logInfo('Recipe suggestion time changed to $result');
+      ref
+          .read(settingsProvider.notifier)
+          .setWeeklyRecipeSuggestionHour(result.hour);
+      ref
+          .read(settingsProvider.notifier)
+          .setWeeklyRecipeSuggestionMinute(result.minute);
+      unawaited(_rescheduleWeeklyRecipeSuggestion(ref, l10n));
+      if (context.mounted) {
+        SnackbarHelper.showInfo(context, l10n.weeklyRecipeSuggestionSet);
+      }
+    }
+  }
+
+  /// Returns the localized name of a weekday (1 = Monday ... 7 = Sunday).
+  String _weekdayName(AppLocalizations l10n, int day) {
+    return l10n.localizeWeekday(day);
   }
 
   Future<void> _flushCache(BuildContext context, WidgetRef ref) async {

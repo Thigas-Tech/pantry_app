@@ -71,4 +71,4 @@ final class NotificationCoordinatorProvider
 }
 
 String _$notificationCoordinatorHash() =>
-    r'dde47db884c4cbe24e551e2b80c705891000d8f3';
+    r'6a929546d3e9e50ab33efdb52e2f70e3f203b99b';

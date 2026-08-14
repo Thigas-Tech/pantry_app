@@ -856,6 +856,153 @@ void main() {
     });
   });
 
+  group('scheduleWeeklyRecipeSuggestion', () {
+    const title = 'Recipe idea from your pantry';
+    const channelName = 'Recipe suggestions';
+    const channelDescription = 'Weekly recipe ideas from your pantry';
+    const weeklyRecipeSuggestionId = 999_999_002;
+
+    void stubZonedSchedule() {
+      when(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+          matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+        ),
+      ).thenAnswer((_) => Future.value());
+    }
+
+    void stubNotificationsEnabled() {
+      when(
+        mockAndroidPlugin.areNotificationsEnabled,
+      ).thenAnswer((_) => Future.value(true));
+    }
+
+    test('skips when notifications disabled', () async {
+      await service.scheduleWeeklyRecipeSuggestion(
+        title: title,
+        body: 'body',
+        dayOfWeek: 7,
+        hour: 18,
+        minute: 0,
+        channelName: channelName,
+        channelDescription: channelDescription,
+        notificationsEnabled: false,
+      );
+
+      verifyNever(
+        () => mockPlugin.zonedSchedule(
+          id: any(named: 'id'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          scheduledDate: any(named: 'scheduledDate'),
+          notificationDetails: any(named: 'notificationDetails'),
+          androidScheduleMode: any(named: 'androidScheduleMode'),
+          payload: any(named: 'payload'),
+          matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+        ),
+      );
+    });
+
+    test(
+      'schedules with the fixed ID, weekly components and payload',
+      () async {
+        stubNotificationsEnabled();
+        when(
+          () => mockAndroidPlugin.createNotificationChannel(any()),
+        ).thenAnswer((_) => Future.value());
+        stubZonedSchedule();
+
+        await service.scheduleWeeklyRecipeSuggestion(
+          title: title,
+          body: 'How about Curry?',
+          dayOfWeek: 7,
+          hour: 18,
+          minute: 0,
+          channelName: channelName,
+          channelDescription: channelDescription,
+        );
+
+        verify(
+          () => mockPlugin.zonedSchedule(
+            id: weeklyRecipeSuggestionId,
+            title: title,
+            body: 'How about Curry?',
+            scheduledDate: any(named: 'scheduledDate'),
+            notificationDetails: any(named: 'notificationDetails'),
+            androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+            payload: 'weekly_recipe_suggestion',
+            matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'schedules for the next occurrence of the requested day and time',
+      () async {
+        stubNotificationsEnabled();
+        when(
+          () => mockAndroidPlugin.createNotificationChannel(any()),
+        ).thenAnswer((_) => Future.value());
+        stubZonedSchedule();
+
+        await service.scheduleWeeklyRecipeSuggestion(
+          title: title,
+          body: 'body',
+          dayOfWeek: 7,
+          hour: 18,
+          minute: 0,
+          channelName: channelName,
+          channelDescription: channelDescription,
+        );
+
+        final captured = verify(
+          () => mockPlugin.zonedSchedule(
+            id: any(named: 'id'),
+            title: any(named: 'title'),
+            body: any(named: 'body'),
+            scheduledDate: captureAny(named: 'scheduledDate'),
+            notificationDetails: any(named: 'notificationDetails'),
+            androidScheduleMode: any(named: 'androidScheduleMode'),
+            payload: any(named: 'payload'),
+            matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+          ),
+        ).captured;
+        final scheduled = captured.single as tz.TZDateTime;
+        expect(scheduled.weekday, 7);
+        expect(scheduled.hour, 18);
+        expect(scheduled.minute, 0);
+        expect(scheduled.isAfter(tz.TZDateTime.now(tz.UTC)), isTrue);
+      },
+    );
+  });
+
+  group('cancelWeeklyRecipeSuggestion', () {
+    test('cancels the fixed weekly recipe ID', () async {
+      when(
+        () => mockPlugin.cancel(id: any(named: 'id')),
+      ).thenAnswer((_) => Future.value());
+
+      await service.cancelWeeklyRecipeSuggestion();
+
+      verify(() => mockPlugin.cancel(id: 999_999_002)).called(1);
+    });
+
+    test('handles cancel throwing gracefully', () async {
+      when(
+        () => mockPlugin.cancel(id: any(named: 'id')),
+      ).thenThrow(Exception('cancel failed'));
+
+      await expectLater(service.cancelWeeklyRecipeSuggestion(), completes);
+    });
+  });
+
   group('cancelReminders', () {
     test('cancels both notification IDs', () async {
       when(

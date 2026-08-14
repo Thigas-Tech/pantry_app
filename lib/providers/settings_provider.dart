@@ -59,6 +59,10 @@ class Settings {
     this.expiringSoonDays = 3,
     this.inactivityReminderEnabled = true,
     this.inactivityThresholdDays = 10,
+    this.weeklyRecipeSuggestionEnabled = false,
+    this.weeklyRecipeSuggestionDay = 7,
+    this.weeklyRecipeSuggestionHour = 18,
+    this.weeklyRecipeSuggestionMinute = 0,
     this.amoledDarkMode = false,
     this.priceTrackingEnabled = false,
     this.priceRetentionDays = 0,
@@ -94,6 +98,26 @@ class Settings {
   /// The reminder fires at 9 AM on the day after this threshold is crossed.
   /// Defaults to 10.
   final int inactivityThresholdDays;
+
+  /// Whether the weekly recipe-suggestion notification is enabled.
+  ///
+  /// When disabled, no recipe-suggestion notification is scheduled.
+  final bool weeklyRecipeSuggestionEnabled;
+
+  /// Day of the week for the recipe suggestion, 1 = Monday ... 7 = Sunday.
+  ///
+  /// Defaults to Sunday (7).
+  final int weeklyRecipeSuggestionDay;
+
+  /// Hour of the day (0-23) for the recipe-suggestion notification.
+  ///
+  /// Defaults to 18 (6 PM).
+  final int weeklyRecipeSuggestionHour;
+
+  /// Minute of the hour (0-59) for the recipe-suggestion notification.
+  ///
+  /// Defaults to 0.
+  final int weeklyRecipeSuggestionMinute;
 
   /// Whether pure-black surfaces should be used in dark mode.
   ///
@@ -152,6 +176,10 @@ class Settings {
     int? expiringSoonDays,
     bool? inactivityReminderEnabled,
     int? inactivityThresholdDays,
+    bool? weeklyRecipeSuggestionEnabled,
+    int? weeklyRecipeSuggestionDay,
+    int? weeklyRecipeSuggestionHour,
+    int? weeklyRecipeSuggestionMinute,
     bool? amoledDarkMode,
     bool? priceTrackingEnabled,
     int? priceRetentionDays,
@@ -174,6 +202,14 @@ class Settings {
           inactivityReminderEnabled ?? this.inactivityReminderEnabled,
       inactivityThresholdDays:
           inactivityThresholdDays ?? this.inactivityThresholdDays,
+      weeklyRecipeSuggestionEnabled:
+          weeklyRecipeSuggestionEnabled ?? this.weeklyRecipeSuggestionEnabled,
+      weeklyRecipeSuggestionDay:
+          weeklyRecipeSuggestionDay ?? this.weeklyRecipeSuggestionDay,
+      weeklyRecipeSuggestionHour:
+          weeklyRecipeSuggestionHour ?? this.weeklyRecipeSuggestionHour,
+      weeklyRecipeSuggestionMinute:
+          weeklyRecipeSuggestionMinute ?? this.weeklyRecipeSuggestionMinute,
       amoledDarkMode: amoledDarkMode ?? this.amoledDarkMode,
       priceTrackingEnabled: priceTrackingEnabled ?? this.priceTrackingEnabled,
       priceRetentionDays: priceRetentionDays ?? this.priceRetentionDays,
@@ -216,6 +252,14 @@ class SettingsNotifier extends _$SettingsNotifier {
         inactivityReminderEnabled:
             prefs.getBool('inactivityReminderEnabled') ?? true,
         inactivityThresholdDays: prefs.getInt('inactivityThresholdDays') ?? 10,
+        weeklyRecipeSuggestionEnabled:
+            prefs.getBool('weeklyRecipeSuggestionEnabled') ?? false,
+        weeklyRecipeSuggestionDay:
+            prefs.getInt('weeklyRecipeSuggestionDay') ?? 7,
+        weeklyRecipeSuggestionHour:
+            prefs.getInt('weeklyRecipeSuggestionHour') ?? 18,
+        weeklyRecipeSuggestionMinute:
+            prefs.getInt('weeklyRecipeSuggestionMinute') ?? 0,
         amoledDarkMode: prefs.getBool('amoledDarkMode') ?? false,
         priceTrackingEnabled: prefs.getBool('priceTrackingEnabled') ?? false,
         priceRetentionDays: prefs.getInt('priceRetentionDays') ?? 0,
@@ -320,6 +364,44 @@ class SettingsNotifier extends _$SettingsNotifier {
   void setInactivityThresholdDays(int value) {
     final updated = (state.value ?? const Settings()).copyWith(
       inactivityThresholdDays: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
+  }
+
+  /// Sets whether the weekly recipe-suggestion notification is enabled.
+  void setWeeklyRecipeSuggestionEnabled({required bool value}) {
+    final updated = (state.value ?? const Settings()).copyWith(
+      weeklyRecipeSuggestionEnabled: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
+  }
+
+  /// Sets the day of the week for the recipe suggestion.
+  ///
+  /// [value] follows [DateTime.weekday]: 1 = Monday ... 7 = Sunday.
+  void setWeeklyRecipeSuggestionDay(int value) {
+    final updated = (state.value ?? const Settings()).copyWith(
+      weeklyRecipeSuggestionDay: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
+  }
+
+  /// Sets the hour (0-23) of the recipe-suggestion notification.
+  void setWeeklyRecipeSuggestionHour(int value) {
+    final updated = (state.value ?? const Settings()).copyWith(
+      weeklyRecipeSuggestionHour: value,
+    );
+    state = AsyncValue.data(updated);
+    unawaited(_persist(updated));
+  }
+
+  /// Sets the minute (0-59) of the recipe-suggestion notification.
+  void setWeeklyRecipeSuggestionMinute(int value) {
+    final updated = (state.value ?? const Settings()).copyWith(
+      weeklyRecipeSuggestionMinute: value,
     );
     state = AsyncValue.data(updated);
     unawaited(_persist(updated));
@@ -458,6 +540,22 @@ class SettingsNotifier extends _$SettingsNotifier {
       await prefs.setInt(
         'inactivityThresholdDays',
         settings.inactivityThresholdDays,
+      );
+      await prefs.setBool(
+        'weeklyRecipeSuggestionEnabled',
+        settings.weeklyRecipeSuggestionEnabled,
+      );
+      await prefs.setInt(
+        'weeklyRecipeSuggestionDay',
+        settings.weeklyRecipeSuggestionDay,
+      );
+      await prefs.setInt(
+        'weeklyRecipeSuggestionHour',
+        settings.weeklyRecipeSuggestionHour,
+      );
+      await prefs.setInt(
+        'weeklyRecipeSuggestionMinute',
+        settings.weeklyRecipeSuggestionMinute,
       );
       await prefs.setBool('amoledDarkMode', settings.amoledDarkMode);
       await prefs.setBool(
