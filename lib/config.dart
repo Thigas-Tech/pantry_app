@@ -60,16 +60,4 @@ class AppConfig {
   /// Register for free at https://fdc.nal.usda.gov/api-key-signup.html.
   /// Leave empty to disable USDA API fallback for produce searches.
   static String get usdaApiKey => dotenv.env['USDA_API_KEY'] ?? '';
-
-  /// Whether Firebase integration is enabled.
-  ///
-  /// Controlled by the `FIREBASE_ENABLED` `--dart-define` build flag
-  /// (CI sets it true for release builds) with a .env override for local
-  /// development. When false, all Firebase operations are no-ops and the
-  /// app works exactly as before.
-  static bool get firebaseEnabled {
-    final env = dotenv.env['FIREBASE_ENABLED'];
-    if (env != null) return env.toLowerCase() == 'true';
-    return const String.fromEnvironment('FIREBASE_ENABLED') == 'true';
-  }
 }
