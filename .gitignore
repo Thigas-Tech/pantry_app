@@ -54,12 +54,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 test_output.txt
-android/app/google-services.json
 
 # Golden test failure diffs (regenerated on failure)
 test/screens/failures/
 
 # FVM Version Cache
 .fvm/
-# Firebase rules test harness (Node)
-firebase_tests/node_modules/
