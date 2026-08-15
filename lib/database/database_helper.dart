@@ -134,10 +134,15 @@ class DatabaseHelper {
         version: databaseVersion,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
-          await db.execute('PRAGMA journal_mode = WAL');
+          // Use the multiplatform helper: Android execSQL rejects the
+          // row-returning PRAGMA journal_mode = WAL, so setJournalMode
+          // falls back to rawQuery there (sqflite issue #929).
+          await db.setJournalMode('WAL');
           await db.execute('PRAGMA synchronous = FULL');
           await db.execute('PRAGMA cache_size = -2000');
-          await db.execute('PRAGMA mmap_size = 268435456');
+          // PRAGMA mmap_size returns the new value as a row, which Android
+          // execSQL rejects; run it through rawQuery instead.
+          await db.rawQuery('PRAGMA mmap_size = 268435456');
         },
         onCreate: _onCreate,
         onUpgrade: _onUpgrade,

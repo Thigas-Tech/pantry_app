@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Corrigido um problema que impedia o banco de dados local do app de abrir
+  em alguns dispositivos Android mais recentes, o que fazia o app iniciar
+  sem seus produtos e configuracoes salvos.
+
 - Seu cache de produtos agora e armazenado apenas no seu dispositivo.
   Informacoes de produtos em cache com mais de dois meses sao removidas
   automaticamente e recarregadas na proxima vez que voce visualizar o

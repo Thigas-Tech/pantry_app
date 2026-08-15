@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fixed an issue that prevented the app's local database from opening on
+  some newer Android devices, which caused the app to start without your
+  saved products and settings.
+
 - Your product cache is now stored only on your device. Cached product
   information older than two months is removed automatically and re-loaded
   the next time you view that product, so the app keeps working offline
