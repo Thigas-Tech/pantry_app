@@ -53,6 +53,7 @@ never waste food again.</p>
 <ul>
 <li><strong>Barcode scanning</strong> — camera-based via Google ML Kit (<code>mobile_scanner</code>) or manual text entry</li>
 <li><strong>Product lookup</strong> — fetches name, brand, nutrition, ingredients from Open Food Facts</li>
+<li><strong>Localized product data</strong> — OFF product names/categories/ingredients are fetched in your device's language (with a "Show in language" re-fetch chip on product details)</li>
 <li><strong>Local database</strong> — products are cached locally in SQLite; works without internet for known items</li>
 <li><strong>Cloud product cache</strong> — Firestore-backed 180-day rolling cache for OFF barcoded and USDA produce products with offline-first fallback</li>
 <li><strong>Multiple pantries</strong> — create, rename, and delete named inventories (e.g. Home, Work)</li>
@@ -167,6 +168,7 @@ flutter build appbundle --debug
   utils/               # Logger, snackbar helpers
     price_calculator.dart   # Unit-aware price math (per-unit price, scaled cost)
     unit_conversion.dart    # Unit normalization &amp; conversion
+    off_language.dart       # App locale -&gt; OFF language code mapping
   widgets/             # Reusable components
 test/                  # Unit and widget tests
 </code></pre>
@@ -947,6 +949,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="current_locale_provider">
+  <span class="name"><a href="providers_current_locale_provider/">providers/current_locale_provider</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="database_provider">
   <span class="name"><a href="providers_database_provider/">providers/database_provider</a></span> 
 
@@ -1654,6 +1663,13 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
+          <dt id="off_language">
+  <span class="name"><a href="utils_off_language/">utils/off_language</a></span> 
+
+</dt>
+<dd>
+</dd>
+
           <dt id="off_units">
   <span class="name"><a href="utils_off_units/">utils/off_units</a></span> 
 
@@ -2074,6 +2090,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="providers_cache_refresh_coordinator_provider/">providers/cache_refresh_coordinator_provider</a></li>
       <li><a href="providers_connectivity_provider/">providers/connectivity_provider</a></li>
       <li><a href="providers_currency_service_provider/">providers/currency_service_provider</a></li>
+      <li><a href="providers_current_locale_provider/">providers/current_locale_provider</a></li>
       <li><a href="providers_database_provider/">providers/database_provider</a></li>
       <li><a href="providers_firebase_cache_provider/">providers/firebase_cache_provider</a></li>
       <li><a href="providers_home_screen_controller/">providers/home_screen_controller</a></li>
@@ -2175,6 +2192,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="utils_nutrient_catalog/">utils/nutrient_catalog</a></li>
       <li><a href="utils_nutrient_conversion/">utils/nutrient_conversion</a></li>
       <li><a href="utils_nutriscore/">utils/nutriscore</a></li>
+      <li><a href="utils_off_language/">utils/off_language</a></li>
       <li><a href="utils_off_units/">utils/off_units</a></li>
       <li><a href="utils_price_calculator/">utils/price_calculator</a></li>
       <li><a href="utils_progress_indicator_helper/">utils/progress_indicator_helper</a></li>

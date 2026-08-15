@@ -56,7 +56,8 @@
         
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span>
 <span class="name ">parentCategory</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="parentCategory-param-rawCategory"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">rawCategory</span>, </span></li>
-<li><span class="parameter" id="parentCategory-param-hierarchyJson"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">hierarchyJson</span></span></li>
+<li><span class="parameter" id="parentCategory-param-hierarchyJson"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">hierarchyJson</span>, </span></li>
+<li><span class="parameter" id="parentCategory-param-languageCode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span></span></li>
 </ol>)
 
         
@@ -65,7 +66,7 @@
     
 <section class="desc markdown">
   <p>Returns a broad parent category from OFF hierarchy data.</p>
-<p>When <code>hierarchyJson</code> is available, prefers Portuguese tags (pt:) over
+<p>Prefers tags in the user's language code (e.g. 'pt', 'fr') over
 English (en:) so that users get locale‑appropriate names when OFF data
 includes them. For each language group, picks the second‑to‑last entry
 (e.g. en:eggs from en:products, en:eggs-and-their-products,
@@ -78,15 +79,19 @@ when both inputs are unavailable.</p>
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">String? parentCategory(String? rawCategory, String? hierarchyJson) {
+  <pre class="language-dart"><code class="language-dart">String? parentCategory(
+  String? rawCategory,
+  String? hierarchyJson,
+  String languageCode,
+) {
   if (hierarchyJson != null &amp;&amp; hierarchyJson.isNotEmpty) {
     try {
       final hierarchy = (jsonDecode(hierarchyJson) as List).cast&lt;String&gt;();
       if (hierarchy.isNotEmpty) {
         var matchedEntries = hierarchy
-            .where((t) =&gt; t.startsWith(&#39;pt:&#39;))
+            .where((t) =&gt; t.startsWith(&#39;$languageCode:&#39;))
             .toList();
-        var prefixLength = 3;
+        var prefixLength = languageCode.length + 1;
         if (matchedEntries.isEmpty) {
           matchedEntries = hierarchy.where((t) =&gt; t.startsWith(&#39;en:&#39;)).toList();
           prefixLength = 3;

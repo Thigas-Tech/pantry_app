@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the refreshProductLanguage method from the ProductRepository class, for the Dart programming language.">
+  <title>refreshProductLanguage method - ProductRepository class - product_repository library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_product_repository/">services&#47;product_repository.dart</a></li>
+    <li><a href="../../services_product_repository/ProductRepository-class.html">ProductRepository</a></li>
+    <li class="self-crumb">refreshProductLanguage method</li>
+  </ol>
+  <div class="self-name">refreshProductLanguage</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="services_product_repository&#47;ProductRepository-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">refreshProductLanguage</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../models_product/Product-class.html">Product</a></span>&gt;</span></span>
+<span class="name ">refreshProductLanguage</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="refreshProductLanguage-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, {</span></li>
+<li><span class="parameter" id="refreshProductLanguage-param-languageCode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">languageCode</span>, </span></li>
+</ol>})
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Re-fetches a product in the requested language code, ignoring the
+local cache, and caches the merged result.</p>
+<p>Used by the "Show in language" chip on the product detail screen:
+the product is already cached (that is what the screen displays), so
+<a href="../../services_product_repository/ProductRepository/getProduct.html">getProduct</a> would return the cache without making a network call.
+This method forces a fresh fetch from the remote sources, then merges
+with the existing cache row:</p>
+<ul>
+<li>API products merge via <a href="../../models_product/ProductMerge.html">ProductMerge</a>'s mergeFromApi helper, which
+now also updates the product's stored language code to the requested
+language.</li>
+<li>Manual products merge via the mergeLanguageOnly helper, so the
+user-entered fields are never overwritten by API data.</li>
+</ul>
+<p>Throws <a href="../../services_exceptions/FetchFailedException-class.html">FetchFailedException</a> on network errors and
+<a href="../../services_exceptions/ProductNotFoundException-class.html">ProductNotFoundException</a> when the barcode is unknown to all
+sources.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;Product&gt; refreshProductLanguage(
+  String barcode, {
+  required String languageCode,
+}) async {
+  logInfo(&#39;Refreshing $barcode in $languageCode&#39;);
+  final remote = await _fetchRemoteProduct(barcode, languageCode);
+  final existing = await _db.getProduct(barcode);
+  final merged = existing == null
+      ? remote
+      : existing.source == &#39;manual&#39;
+      ? existing.mergeLanguageOnly(remote)
+      : existing.mergeFromApi(remote);
+  await _db.insertProduct(merged);
+  logInfo(&#39;Refreshed and cached $barcode in $languageCode&#39;);
+  return merged;
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../services_product_repository/">product_repository</a></li>
+    <li><a href="../../services_product_repository/ProductRepository-class.html">ProductRepository</a></li>
+    <li class="self-crumb">refreshProductLanguage method</li>
+</ol>
+
+    <h5>ProductRepository class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.9+5
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

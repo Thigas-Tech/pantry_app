@@ -81,6 +81,8 @@ release memory when leaving the Stats tab.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@riverpod
 Future&lt;PantryStats&gt; stats(Ref ref) async {
+  final locale = ref.watch(currentLocaleProvider);
+  final languageCode = offLanguageFromLocale(locale);
   final activeId = await ref.watch(activeInventoryProvider.future);
   final db = ref.watch(databaseProvider);
   final settings = await ref.watch(settingsProvider.future);
@@ -140,16 +142,21 @@ Future&lt;PantryStats&gt; stats(Ref ref) async {
   final storeRows = results[14] as List&lt;Map&lt;String, dynamic&gt;&gt;;
   final nutriscoreByStoreRows = results[15] as List&lt;Map&lt;String, dynamic&gt;&gt;;
   &#47;&#47; Compute parent categories from hierarchy data in a background
-  &#47;&#47; isolate (per-row JSON decoding was previously on the UI path).
+  &#47;&#47; isolate (per-row JSON decoding was previously on the UI path). The
+  &#47;&#47; current locale&#39;s language prefix is threaded in so OFF hierarchy tags
+  &#47;&#47; resolve in the user&#39;s language with an en: fallback.
   final parentNames = await compute(
     _parentCategoriesForRows,
-    [
-      for (final row in productCategories)
-        (
-          row[&#39;category&#39;] as String?,
-          row[&#39;categories_hierarchy&#39;] as String?,
-        ),
-    ],
+    (
+      [
+        for (final row in productCategories)
+          (
+            row[&#39;category&#39;] as String?,
+            row[&#39;categories_hierarchy&#39;] as String?,
+          ),
+      ],
+      languageCode,
+    ),
   );
   final parentCounts = &lt;String, int&gt;{};
   for (var i = 0; i &lt; parentNames.length; i++) {
