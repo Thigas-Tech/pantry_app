@@ -88,36 +88,44 @@
   );
 
   try {
-    final deletedItems = await db.delete(
-      &#39;inventory&#39;,
-      where: &#39;date_added &lt; ?&#39;,
-      whereArgs: [cutoff],
-    );
-    logInfo(&#39;Removed $deletedItems old inventory items&#39;);
-
-    await db.rawDelete(&#39;&#39;&#39;
-      DELETE FROM prices
-      WHERE NOT EXISTS (
-        SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
-      )
-    &#39;&#39;&#39;);
-
-    final deletedProducts = await db.rawDelete(&#39;&#39;&#39;
-      DELETE FROM products
-      WHERE NOT EXISTS (
-        SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
-      )
-    &#39;&#39;&#39;);
-    logInfo(&#39;Removed $deletedProducts orphaned products&#39;);
-
-    if (priceRetentionDays &gt; 0) {
-      final deletedPrices = await priceDao.deleteStale(
-        db,
-        priceRetentionDays,
+    await db.transaction((txn) async {
+      final deletedItems = await txn.delete(
+        &#39;inventory&#39;,
+        where: &#39;date_added &lt; ?&#39;,
+        whereArgs: [cutoff],
       );
-      logInfo(&#39;Removed $deletedPrices old price rows&#39;);
-    }
+      logInfo(&#39;Removed $deletedItems old inventory items&#39;);
 
+      await txn.rawDelete(&#39;&#39;&#39;
+        DELETE FROM prices
+        WHERE NOT EXISTS (
+          SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
+        )
+      &#39;&#39;&#39;);
+
+      final deletedProducts = await txn.rawDelete(&#39;&#39;&#39;
+        DELETE FROM products
+        WHERE NOT EXISTS (
+          SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
+        )
+      &#39;&#39;&#39;);
+      logInfo(&#39;Removed $deletedProducts orphaned products&#39;);
+
+      if (priceRetentionDays &gt; 0) {
+        final cutoffMillis = DateTime.now()
+            .subtract(Duration(days: priceRetentionDays))
+            .millisecondsSinceEpoch;
+        final deletedPrices = await txn.delete(
+          &#39;prices&#39;,
+          where: &#39;date_purchased &lt; ? AND sync_status != ?&#39;,
+          whereArgs: [cutoffMillis, priceSyncPending],
+        );
+        logInfo(&#39;Removed $deletedPrices old price rows&#39;);
+      }
+    });
+
+    &#47;&#47; Self-contained and atomic; runs after the main cleanup so its own
+    &#47;&#47; PRAGMA foreign_keys toggling is not nested inside the transaction.
     await flushExpiredCachedProducts();
 
     &#47;&#47; Refresh query planner statistics after the bulk deletions.

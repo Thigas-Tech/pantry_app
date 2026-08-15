@@ -112,7 +112,11 @@ conditions.</p>
           &#39;Merged inventory quantity for ${item.barcode}: &#39;
           &#39;${existingItem.quantity} + ${item.quantity} = $mergedQty&#39;,
         );
-        return existingItem.id!;
+        final existingId = existingItem.id;
+        if (existingId == null) {
+          throw StateError(&#39;inventory row ${existingItem.id} has no id&#39;);
+        }
+        return existingId;
       }
       final id = await txn.insert(&#39;inventory&#39;, toMap(item));
       logInfo(&#39;Inventory item inserted with id $id&#39;);

@@ -75,7 +75,9 @@ successfully timestamped.</p>
 <p>Foreign key enforcement is temporarily disabled because inventory rows
 survive the flush (they are LEFT JOINed and re-fetched later), mirroring
 <a href="../../database_database_helper/DatabaseHelper/clearCachedProducts.html">clearCachedProducts</a>. Shopping list barcode references are explicitly
-nulled before the deletion.</p>
+nulled before the deletion. PRAGMA foreign_keys is a no-op inside a
+transaction, so it is toggled around (not within) the transaction that
+makes the deletion atomic.</p>
 <p>Returns the number of deleted product rows. <code>now</code> is injectable for
 deterministic tests and defaults to <a href="https://api.flutter.dev/flutter/dart-core/DateTime/DateTime.now.html">DateTime.now</a>.</p>
 </section>
@@ -100,21 +102,23 @@ deterministic tests and defaults to <a href="https://api.flutter.dev/flutter/dar
 
   await db.execute(&#39;PRAGMA foreign_keys = OFF&#39;);
   try {
-    await db.rawUpdate(
-      &#39;&#39;&#39;
-      UPDATE shopping_list SET barcode = NULL
-      WHERE barcode IN (
-        SELECT barcode FROM products
-        WHERE source = &#39;api&#39; AND (last_synced IS NULL OR last_synced &lt; ?)
-      )
-    &#39;&#39;&#39;,
-      [cutoff],
-    );
-    final deleted = await db.delete(
-      &#39;products&#39;,
-      where: &quot;source = &#39;api&#39; AND (last_synced IS NULL OR last_synced &lt; ?)&quot;,
-      whereArgs: [cutoff],
-    );
+    final deleted = await db.transaction&lt;int&gt;((txn) async {
+      await txn.rawUpdate(
+        &#39;&#39;&#39;
+        UPDATE shopping_list SET barcode = NULL
+        WHERE barcode IN (
+          SELECT barcode FROM products
+          WHERE source = &#39;api&#39; AND (last_synced IS NULL OR last_synced &lt; ?)
+        )
+      &#39;&#39;&#39;,
+        [cutoff],
+      );
+      return txn.delete(
+        &#39;products&#39;,
+        where: &quot;source = &#39;api&#39; AND (last_synced IS NULL OR last_synced &lt; ?)&quot;,
+        whereArgs: [cutoff],
+      );
+    });
     logInfo(&#39;Removed $deleted expired cached products&#39;);
     await db.execute(&#39;PRAGMA optimize&#39;);
     return deleted;

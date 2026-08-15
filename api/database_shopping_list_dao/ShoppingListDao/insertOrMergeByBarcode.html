@@ -112,7 +112,13 @@ race conditions.</p>
             &#39;Merged quantity for ${item.barcode}: &#39;
             &#39;${existingItem.quantity} + ${item.quantity} = $mergedQty&#39;,
           );
-          return existingItem.id!;
+          final existingId = existingItem.id;
+          if (existingId == null) {
+            throw StateError(
+              &#39;shopping_list row ${existingItem.id} has no id&#39;,
+            );
+          }
+          return existingId;
         }
       }
       try {
