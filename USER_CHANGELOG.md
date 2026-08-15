@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- The "Market trip" screen's camera now fits neatly in its own box without
+  a duplicate title bar, so the scanning area looks clean.
+
+- Items you add during a market trip (by scanning, manually, or from the
+  produce search) now appear on the trip list right away instead of only
+  after leaving and reopening the screen.
+
+- The shopping list no longer overflows with long product names: names are
+  trimmed with an ellipsis and the quantity buttons stay in place. You can
+  still edit an item by pressing and holding it or by tapping its quantity.
+
 - The "Market trip" option in the home screen menu is now available. You
   pick which pantry the trip is for (when you have more than one), scan
   items in sequence with the camera, and finish the trip to move what you

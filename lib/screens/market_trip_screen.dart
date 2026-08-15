@@ -148,11 +148,11 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
             ),
             activeInventoryId: tripId,
           );
-      invalidateShoppingList(ref);
+      invalidateShoppingListForInventory(ref, tripId);
       if (!mounted) return;
       await _offerEstimate(product, tripId);
     } else {
-      invalidateShoppingList(ref);
+      invalidateShoppingListForInventory(ref, tripId);
     }
 
     ref.read(scannerCameraProvider.notifier).clearResolution();
@@ -170,14 +170,15 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
         ref.read(settingsProvider).value?.priceTrackingEnabled ?? false;
     if (!priceTrackingEnabled) return;
 
-    final tracked = ref
-        .read(latestPriceProvider((product.barcode, tripId)))
-        .value;
+    final tracked = await ref.read(
+      latestPriceProvider((product.barcode, tripId)).future,
+    );
     if (tracked == null) return;
 
     final repo = ref.read(priceRepositoryProvider);
     final formatted = repo.formatPrice(tracked.price, tracked.currency);
 
+    if (!mounted) return;
     final action = await showModalBottomSheet<String>(
       context: context,
       builder: (ctx) => SafeArea(
@@ -226,7 +227,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
             priceCurrency: tracked.currency,
             priceStore: tracked.store,
           );
-      invalidateShoppingList(ref);
+      invalidateShoppingListForInventory(ref, tripId);
     } else if (action == 'enter') {
       if (!mounted) return;
       final price = await PriceEntrySheet.show(
@@ -245,7 +246,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
             priceCurrency: price.currency,
             priceStore: price.store,
           );
-      invalidateShoppingList(ref);
+      invalidateShoppingListForInventory(ref, tripId);
     }
   }
 
@@ -270,7 +271,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
           item.copyWith(inventoryId: tripId),
           activeInventoryId: tripId,
         );
-    invalidateShoppingList(ref);
+    invalidateShoppingListForInventory(ref, tripId);
   }
 
   Future<void> _finish() async {
@@ -357,7 +358,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
           ),
           activeInventoryId: tripId,
         );
-    invalidateShoppingList(ref);
+    invalidateShoppingListForInventory(ref, tripId);
     if (mounted) {
       final l10n = AppLocalizations.of(context)!;
       SnackbarHelper.showInfo(
@@ -372,7 +373,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
     final service = ref.read(shoppingListServiceProvider);
     try {
       final result = await service.finishShoppingTrip(inventoryId: tripId);
-      invalidateShoppingList(ref);
+      invalidateShoppingListForInventory(ref, tripId);
       ref.invalidate(pantryProvider);
       if (!mounted) return;
       SnackbarHelper.showInfo(
@@ -503,10 +504,14 @@ class _TripBody extends ConsumerWidget {
     return Column(
       children: [
         SizedBox(
-          height: 220,
-          child: ScannerCameraView(
-            onSwitchToManual: onManualAdd,
-            onSwitchToPlu: onManualAdd,
+          height: 200,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: ScannerCameraView(
+              onSwitchToManual: onManualAdd,
+              onSwitchToPlu: onManualAdd,
+              embedded: true,
+            ),
           ),
         ),
         Padding(

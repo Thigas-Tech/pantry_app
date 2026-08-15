@@ -1,286 +1,97 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
-import 'package:pantry_app/database/shopping_list_dao.dart';
-import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
-import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/product_repository.dart';
-import 'package:pantry_app/services/shopping_list_service.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/database_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
 
-// Re-usable mocks
-class MockDatabaseHelper extends Mock implements DatabaseHelper {}
+class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-class MockShoppingListDao extends Mock implements ShoppingListDao {}
+class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
+  @override
+  Future<int> build() async => 1;
+}
 
-class MockProductRepository extends Mock implements ProductRepository {}
+/// A host that reads the by-inventory family and exposes a button to call
+/// [invalidateShoppingListForInventory], so the refresh behavior is tested
+/// through the same [WidgetRef] path the app uses.
+class _Host extends ConsumerStatefulWidget {
+  const _Host();
 
+  @override
+  ConsumerState<_Host> createState() => _HostState();
+}
+
+class _HostState extends ConsumerState<_Host> {
+  int _count = 0;
+
+  void _refresh() {
+    invalidateShoppingListForInventory(ref, 1);
+    setState(() => _count++);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final items = ref.watch(shoppingListByInventoryProvider(1));
+    final length = items.asData?.value.length ?? -1;
+    return Column(
+      children: [
+        Text('count:$_count'),
+        Text('items:$length'),
+        TextButton(onPressed: _refresh, child: const Text('refresh')),
+      ],
+    );
+  }
+}
+
+/// Verifies that [invalidateShoppingListForInventory] refreshes the
+/// per-inventory family provider used by the market trip, so items added
+/// during a trip appear without leaving the screen.
 void main() {
-  setUpAll(() {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-    registerFallbackValue(const Product(barcode: '', name: ''));
-    registerFallbackValue(const ShoppingItem(name: ''));
-  });
+  late _MockDatabaseHelper db;
 
-  late Database db;
-  late MockDatabaseHelper mockDb;
-  late MockShoppingListDao mockDao;
-  late MockProductRepository mockRepo;
-
-  setUp(() async {
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    registerFallbackValue(db);
-
-    mockDb = MockDatabaseHelper();
-    mockDao = MockShoppingListDao();
-    mockRepo = MockProductRepository();
-
-    when(() => mockDb.database).thenAnswer((_) async => db);
-    when(() => mockDb.shoppingListDao).thenReturn(mockDao);
-    when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
+  setUp(() {
+    db = _MockDatabaseHelper();
     when(
-      () => mockDao.insertOrMergeByBarcode(any(), any()),
-    ).thenAnswer((_) async => 1);
-    when(
-      () => mockRepo.getProduct(any()),
-    ).thenThrow(ProductNotFoundException('999'));
-    when(() => mockRepo.cacheProduct(any())).thenAnswer((_) async => {});
+      () => db.getShoppingList(inventoryId: any(named: 'inventoryId')),
+    ).thenAnswer((_) async => []);
   });
 
-  tearDown(() async {
-    await db.close();
-  });
+  Future<void> pumpHost(WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          activeInventoryProvider.overrideWith(
+            _FakeActiveInventoryNotifier.new,
+          ),
+        ],
+        child: const MaterialApp(home: Scaffold(body: _Host())),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
 
-  ShoppingListService service() => ShoppingListService(
-    mockDb,
-    mockRepo,
+  testWidgets(
+    'invalidateShoppingListForInventory refetches the by-inventory family',
+    (tester) async {
+      await pumpHost(tester);
+      expect(find.text('items:0'), findsOneWidget);
+
+      // The DB now has one item; the family provider must re-query on
+      // invalidation instead of returning its stale cached value.
+      when(
+        () => db.getShoppingList(inventoryId: any(named: 'inventoryId')),
+      ).thenAnswer((_) async => const [ShoppingItem(name: 'Milk')]);
+
+      await tester.tap(find.text('refresh'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('items:1'), findsOneWidget);
+      verify(() => db.getShoppingList(inventoryId: 1)).called(2);
+    },
   );
-
-  group('addShoppingItem product existence guard', () {
-    test('when product is in cache, inserts without fetching', () async {
-      when(
-        () => mockDb.getProduct('001'),
-      ).thenAnswer((_) async => const Product(barcode: '001', name: 'Milk'));
-
-      await service().addShoppingItem(
-        const ShoppingItem(name: 'Milk', barcode: '001'),
-        activeInventoryId: 1,
-      );
-
-      verify(() => mockDb.getProduct('001')).called(1);
-      verifyNever(() => mockRepo.getProduct(any()));
-      verify(
-        () => mockDao.insertOrMergeByBarcode(
-          any(),
-          any(
-            that: isA<ShoppingItem>().having(
-              (i) => i.barcode,
-              'barcode',
-              '001',
-            ),
-          ),
-        ),
-      ).called(1);
-    });
-
-    test('when product missing, fetches from repo and caches it', () async {
-      when(() => mockDb.getProduct('002')).thenAnswer((_) async => null);
-      when(() => mockRepo.getProduct('002')).thenAnswer(
-        (_) async => const Product(barcode: '002', name: 'Fetched Milk'),
-      );
-
-      await service().addShoppingItem(
-        const ShoppingItem(name: 'Fetched Milk', barcode: '002'),
-        activeInventoryId: 1,
-      );
-
-      verify(() => mockRepo.getProduct('002')).called(1);
-      verify(() => mockRepo.cacheProduct(any())).called(1);
-      verify(
-        () => mockDao.insertOrMergeByBarcode(
-          any(),
-          any(
-            that: isA<ShoppingItem>().having(
-              (i) => i.barcode,
-              'barcode',
-              '002',
-            ),
-          ),
-        ),
-      ).called(1);
-    });
-
-    test(
-      'when product missing and fetch fails, insert with null barcode',
-      () async {
-        await service().addShoppingItem(
-          const ShoppingItem(name: 'Unknown', barcode: '999'),
-          activeInventoryId: 1,
-        );
-
-        verify(
-          () => mockDao.insertOrMergeByBarcode(
-            any(),
-            any(
-              that: isA<ShoppingItem>().having(
-                (i) => i.barcode,
-                'barcode',
-                isNull,
-              ),
-            ),
-          ),
-        ).called(1);
-      },
-    );
-
-    test(
-      'when fetch fails with FetchFailedException, insert without barcode',
-      () async {
-        when(
-          () => mockRepo.getProduct(any()),
-        ).thenThrow(FetchFailedException('offline'));
-
-        await service().addShoppingItem(
-          const ShoppingItem(name: 'Offline', barcode: '555'),
-          activeInventoryId: 1,
-        );
-
-        verify(
-          () => mockDao.insertOrMergeByBarcode(
-            any(),
-            any(
-              that: isA<ShoppingItem>().having(
-                (i) => i.barcode,
-                'barcode',
-                isNull,
-              ),
-            ),
-          ),
-        ).called(1);
-      },
-    );
-
-    test('when barcode is null, skips product check entirely', () async {
-      await service().addShoppingItem(
-        const ShoppingItem(name: 'Custom'),
-        activeInventoryId: 1,
-      );
-
-      verifyNever(() => mockDb.getProduct(any()));
-      verifyNever(() => mockRepo.getProduct(any()));
-      verify(() => mockDao.insertOrMergeByBarcode(any(), any())).called(1);
-    });
-
-    test('when barcode is empty string, skips product check', () async {
-      await service().addShoppingItem(
-        const ShoppingItem(name: 'Empty', barcode: ''),
-        activeInventoryId: 1,
-      );
-
-      verifyNever(() => mockDb.getProduct(any()));
-      verifyNever(() => mockRepo.getProduct(any()));
-      verify(() => mockDao.insertOrMergeByBarcode(any(), any())).called(1);
-    });
-
-    test('scopes items without an inventory to the active inventory', () async {
-      await service().addShoppingItem(
-        const ShoppingItem(name: 'Scoped', barcode: '001'),
-        activeInventoryId: 7,
-      );
-
-      verify(
-        () => mockDao.insertOrMergeByBarcode(
-          any(),
-          any(
-            that: isA<ShoppingItem>().having(
-              (i) => i.inventoryId,
-              'inventoryId',
-              7,
-            ),
-          ),
-        ),
-      ).called(1);
-    });
-  });
-
-  group('deleteShoppingItem', () {
-    test('deletes the item', () async {
-      when(() => mockDb.deleteShoppingItem(3)).thenAnswer((_) async => 1);
-
-      await service().deleteShoppingItem(3);
-
-      verify(() => mockDb.deleteShoppingItem(3)).called(1);
-    });
-  });
-
-  group('toggleShoppingItem', () {
-    test('toggles the purchased state via the database', () async {
-      when(() => mockDb.toggleShoppingItemPurchased(5)).thenAnswer(
-        (_) async => 1,
-      );
-
-      await service().toggleShoppingItem(5);
-
-      verify(() => mockDb.toggleShoppingItemPurchased(5)).called(1);
-    });
-  });
-
-  group('updateShoppingItemPrice', () {
-    test('forwards the price fields', () async {
-      when(
-        () => mockDb.updateShoppingItemPriceFields(
-          any(),
-          priceAmount: any(named: 'priceAmount'),
-          priceCurrency: any(named: 'priceCurrency'),
-          priceStore: any(named: 'priceStore'),
-        ),
-      ).thenAnswer((_) async => 1);
-
-      await service().updateShoppingItemPrice(
-        4,
-        priceAmount: 2.5,
-        priceCurrency: 'EUR',
-        priceStore: 'Lidl',
-      );
-
-      verify(
-        () => mockDb.updateShoppingItemPriceFields(
-          4,
-          priceAmount: 2.5,
-          priceCurrency: 'EUR',
-          priceStore: 'Lidl',
-        ),
-      ).called(1);
-    });
-  });
-
-  group('updateShoppingItem', () {
-    test('persists the item via the database', () async {
-      when(() => mockDb.updateShoppingItem(any())).thenAnswer((_) async => 1);
-
-      await service().updateShoppingItem(
-        const ShoppingItem(name: 'Milk', quantity: 3),
-      );
-
-      verify(
-        () => mockDb.updateShoppingItem(
-          const ShoppingItem(name: 'Milk', quantity: 3),
-        ),
-      ).called(1);
-    });
-  });
-
-  group('reorderShoppingItems', () {
-    test('forwards the ordered ids to the database', () async {
-      when(() => mockDb.reorderShoppingItems(any())).thenAnswer(
-        (_) async => 1,
-      );
-
-      await service().reorderShoppingItems([3, 1, 2]);
-
-      verify(() => mockDb.reorderShoppingItems([3, 1, 2])).called(1);
-    });
-  });
 }

@@ -123,6 +123,8 @@ void main() {
     expect(find.text('Market trip'), findsOneWidget);
     expect(find.text('Finish trip'), findsOneWidget);
     expect(find.byType(ScannerCameraView), findsOneWidget);
+    // Embedded camera must not render its own AppBar inside the trip.
+    expect(find.text('Scan Barcode'), findsNothing);
   });
 
   testWidgets('multiple inventories show a selection prompt', (tester) async {

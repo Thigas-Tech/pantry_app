@@ -880,5 +880,45 @@ void main() {
         expect(find.text('Local Milk'), findsOneWidget);
       },
     );
+
+    testWidgets('rapid typing triggers a single debounced search', (
+      tester,
+    ) async {
+      when(() => mockDb.searchProducts(any())).thenAnswer(
+        (_) async => <Product>[],
+      );
+
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => AddToShoppingListSheet.show(
+              context,
+              debounceDuration: const Duration(milliseconds: 100),
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: sheetOverrides(),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      // Type three characters faster than the debounce window.
+      await tester.enterText(find.byType(SearchBar), 'mil');
+      await tester.pump(const Duration(milliseconds: 20));
+      await tester.enterText(find.byType(SearchBar), 'milk');
+      await tester.pump(const Duration(milliseconds: 20));
+
+      // No search yet: the debounce has not elapsed.
+      verifyNever(() => mockDb.searchProducts(any()));
+
+      // Elapse the debounce window: exactly one search fires.
+      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pumpAndSettle();
+
+      verify(() => mockDb.searchProducts('milk')).called(1);
+    });
   });
 }

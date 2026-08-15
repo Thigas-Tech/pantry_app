@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- A camera da tela "Ida ao mercado" agora se ajusta na propria caixa sem uma
+  barra de titulo duplicada, entao a area de leitura fica limpa.
+
+- Itens que voce adiciona durante uma ida ao mercado (lendo, manualmente ou
+  pela busca de hortalicas) agora aparecem na lista da ida imediatamente em
+  vez de so depois de sair e reabrir a tela.
+
+- A lista de compras nao transborda mais com nomes de produtos longos: os
+  nomes sao cortados com reticencias e os botoes de quantidade permanecem no
+  lugar. Voce ainda pode editar um item pressionando e segurando ou tocando
+  na quantidade dele.
+
 - A opcao "Ida ao mercado" no menu da tela inicial agora esta disponivel.
   Voce escolhe para qual despensa e a ida (quando tem mais de uma), escaneia
   itens em sequencia com a camera e finaliza a ida para mover o que comprou

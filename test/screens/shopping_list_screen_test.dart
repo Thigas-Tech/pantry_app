@@ -294,7 +294,7 @@ void main() {
 
       expect(find.byIcon(Icons.add_circle_outline), findsOneWidget);
       expect(find.byIcon(Icons.remove_circle_outline), findsOneWidget);
-      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.attach_money_outlined), findsOneWidget);
     });
 
     testWidgets('tapping plus calls updateShoppingItem', (tester) async {
@@ -401,7 +401,7 @@ void main() {
         ],
       );
 
-      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.longPress(find.text('Milk'));
       await tester.pumpAndSettle();
 
       expect(find.byType(ShoppingItemEditSheet), findsOneWidget);
@@ -433,7 +433,7 @@ void main() {
         ],
       );
 
-      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.longPress(find.text('Milk'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextFormField).first, 'Cream');

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/price.dart';
@@ -146,6 +147,68 @@ void main() {
       );
 
       expect(find.textContaining('Est.'), findsNothing);
+    });
+
+    testWidgets('does not overflow with a long name and estimate', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      const item = ShoppingItem(
+        name: 'Creme de Leite Qualitá Ultra Pasteurizado',
+        barcode: '123',
+      );
+      final repo = MockPriceRepository();
+      when(() => repo.formatPrice(any(), any())).thenAnswer((_) => r'$4.99');
+      await pumpApp(
+        tester,
+        const ShoppingItemTile(
+          item: ShoppingItem(
+            name: 'Creme de Leite Qualitá Ultra Pasteurizado',
+            barcode: '123',
+          ),
+        ),
+        overrides: [
+          settingsProvider.overrideWith(
+            () => _FakeSettingsNotifier(
+              const Settings(priceTrackingEnabled: true),
+            ),
+          ),
+          activeInventoryProvider.overrideWith(
+            _FakeActiveInventoryNotifier.new,
+          ),
+          latestPriceProvider((item.barcode!, 1)).overrideWith(
+            (ref) => const Price(barcode: '123', price: 4.99),
+          ),
+          priceRepositoryProvider.overrideWithValue(repo),
+          shoppingListServiceProvider.overrideWithValue(
+            MockShoppingListService(),
+          ),
+          shoppingListProvider.overrideWith((ref) => <ShoppingItem>[]),
+        ],
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Est.'), findsOneWidget);
+    });
+
+    testWidgets('does not overflow a purchased item with a long name', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      const item = ShoppingItem(
+        name: 'Creme de Leite Qualitá Ultra Pasteurizado',
+        barcode: '123',
+        isPurchased: true,
+      );
+      await pumpTile(tester, item: item);
+
+      expect(tester.takeException(), isNull);
     });
   });
 }

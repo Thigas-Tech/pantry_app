@@ -66,7 +66,7 @@ class ShoppingItemTile extends ConsumerWidget {
               .deleteShoppingItem(item.id!)
               .then((_) {
                 if (!context.mounted) return;
-                invalidateShoppingList(ref);
+                _invalidateList(ref);
                 SnackbarHelper.showUndo(
                   context,
                   l10n.undoDeleteShoppingItem,
@@ -79,7 +79,7 @@ class ShoppingItemTile extends ConsumerWidget {
                             activeInventoryProvider.future,
                           ),
                         );
-                    invalidateShoppingList(ref);
+                    _invalidateList(ref);
                   },
                 );
               }),
@@ -98,14 +98,13 @@ class ShoppingItemTile extends ConsumerWidget {
                 ref
                     .read(shoppingListServiceProvider)
                     .toggleShoppingItem(item.id!)
-                    .then((_) => invalidateShoppingList(ref)),
+                    .then((_) => _invalidateList(ref)),
               );
             },
           ),
           title: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(
+              Expanded(
                 child: Text(
                   item.name,
                   maxLines: 1,
@@ -119,24 +118,38 @@ class ShoppingItemTile extends ConsumerWidget {
                 ),
               ),
               if (!item.isPurchased) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: 2),
                 IconButton(
-                  icon: const Icon(Icons.remove_circle_outline, size: 20),
+                  icon: const Icon(Icons.remove_circle_outline, size: 18),
                   visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints(
+                    minWidth: 26,
+                    minHeight: 26,
+                  ),
                   tooltip: l10n.editQuantity,
                   onPressed: () =>
                       _changeQuantity(context, ref, item.quantity - 1),
                 ),
                 GestureDetector(
                   onTap: () => _showEditSheet(context, ref),
-                  child: Text(
-                    _quantityText(context, ref),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Text(
+                      _quantityText(context, ref),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.add_circle_outline, size: 20),
+                  icon: const Icon(Icons.add_circle_outline, size: 18),
                   visualDensity: VisualDensity.compact,
+                  constraints: const BoxConstraints(
+                    minWidth: 26,
+                    minHeight: 26,
+                  ),
                   tooltip: l10n.editQuantity,
                   onPressed: () =>
                       _changeQuantity(context, ref, item.quantity + 1),
@@ -150,18 +163,13 @@ class ShoppingItemTile extends ConsumerWidget {
             children: [
               if (!item.isPurchased)
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 20),
-                  tooltip: l10n.editItem,
-                  onPressed: () => _showEditSheet(context, ref),
-                ),
-              if (!item.isPurchased)
-                IconButton(
                   icon: Icon(
                     item.priceAmount != null
                         ? Icons.attach_money
                         : Icons.attach_money_outlined,
                     size: 20,
                   ),
+                  visualDensity: VisualDensity.compact,
                   tooltip: item.priceAmount != null
                       ? l10n.removePrice
                       : l10n.addPrice,
@@ -175,11 +183,12 @@ class ShoppingItemTile extends ConsumerWidget {
                     await ref
                         .read(shoppingListServiceProvider)
                         .toggleShoppingItem(item.id!);
-                    invalidateShoppingList(ref);
+                    _invalidateList(ref);
                   },
                 ),
               IconButton(
                 icon: const Icon(Icons.delete, size: 20),
+                visualDensity: VisualDensity.compact,
                 onPressed: () {
                   unawaited(
                     ref
@@ -187,7 +196,7 @@ class ShoppingItemTile extends ConsumerWidget {
                         .deleteShoppingItem(item.id!)
                         .then((_) {
                           if (!context.mounted) return;
-                          invalidateShoppingList(ref);
+                          _invalidateList(ref);
                           SnackbarHelper.showUndo(
                             context,
                             l10n.undoDeleteShoppingItem,
@@ -200,7 +209,7 @@ class ShoppingItemTile extends ConsumerWidget {
                                       activeInventoryProvider.future,
                                     ),
                                   );
-                              invalidateShoppingList(ref);
+                              _invalidateList(ref);
                             },
                           );
                         }),
@@ -223,6 +232,21 @@ class ShoppingItemTile extends ConsumerWidget {
     );
   }
 
+  /// Invalidates the shopping list providers scoped to this item's
+  /// inventory when known, falling back to the active-inventory providers.
+  ///
+  /// The tile is shared between the shopping list tab (active inventory) and
+  /// the market trip (a chosen inventory), so both the active-scoped and the
+  /// per-inventory family providers must be refreshed after a mutation.
+  void _invalidateList(WidgetRef ref) {
+    final inventoryId = item.inventoryId;
+    if (inventoryId != null) {
+      invalidateShoppingListForInventory(ref, inventoryId);
+    } else {
+      invalidateShoppingList(ref);
+    }
+  }
+
   void _changeQuantity(
     BuildContext context,
     WidgetRef ref,
@@ -233,7 +257,7 @@ class ShoppingItemTile extends ConsumerWidget {
         ref.read(shoppingListServiceProvider).deleteShoppingItem(item.id!).then(
           (_) {
             if (!context.mounted) return;
-            invalidateShoppingList(ref);
+            _invalidateList(ref);
             SnackbarHelper.showUndo(
               context,
               AppLocalizations.of(context)!.undoDeleteShoppingItem,
@@ -246,7 +270,7 @@ class ShoppingItemTile extends ConsumerWidget {
                         activeInventoryProvider.future,
                       ),
                     );
-                invalidateShoppingList(ref);
+                _invalidateList(ref);
               },
             );
           },
@@ -258,7 +282,7 @@ class ShoppingItemTile extends ConsumerWidget {
       ref
           .read(shoppingListServiceProvider)
           .updateShoppingItem(item.copyWith(quantity: newQuantity))
-          .then((_) => invalidateShoppingList(ref)),
+          .then((_) => _invalidateList(ref)),
     );
   }
 
@@ -297,7 +321,7 @@ class ShoppingItemTile extends ConsumerWidget {
             unit: result.unit,
           ),
         );
-    invalidateShoppingList(ref);
+    _invalidateList(ref);
   }
 
   Widget _buildSubtitle(
@@ -321,6 +345,9 @@ class ShoppingItemTile extends ConsumerWidget {
       display.quantity,
       l10n.localizeUnit(display.unit),
     );
+    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
 
     if (item.priceAmount != null) {
       final symbol = currencySymbolFor(item.priceCurrency ?? 'USD');
@@ -329,50 +356,35 @@ class ShoppingItemTile extends ConsumerWidget {
       final priceStr = store != null ? '$priceText — $store' : priceText;
       return Text(
         item.isPurchased ? '$quantityText — $priceStr' : priceStr,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        style: style,
       );
     }
 
     final estimate = _estimatePrice(context, ref);
     if (estimate != null) {
-      return Text.rich(
-        TextSpan(
-          children: [
-            if (item.isPurchased) TextSpan(text: '$quantityText — '),
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: estimate,
-            ),
-          ],
-        ),
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+      final label = item.isPurchased
+          ? '$quantityText — ${l10n.estimatedPrice(estimate)}'
+          : l10n.estimatedPrice(estimate);
+      return PriceMask(
+        formattedPrice: estimate,
+        child: Text(label, style: style),
       );
     }
 
     if (item.isPurchased) {
-      return Text(
-        quantityText,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      );
+      return Text(quantityText, style: style);
     }
 
     return const SizedBox.shrink();
   }
 
-  /// Returns the "Est. price" widget for the item when an estimate is
-  /// available, or null.
+  /// Returns the formatted estimated price (e.g. "R$ 4,99") for the item when
+  /// an estimate is available, or null.
   ///
   /// An estimate is shown only when the item has no entered price, has a
   /// barcode, price tracking is enabled, and a tracked price exists for the
   /// barcode in the active inventory.
-  Widget? _estimatePrice(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
+  String? _estimatePrice(BuildContext context, WidgetRef ref) {
     if (item.priceAmount != null || item.barcode == null) return null;
 
     final priceTrackingEnabled =
@@ -387,16 +399,7 @@ class ShoppingItemTile extends ConsumerWidget {
     if (price == null) return null;
 
     final repo = ref.read(priceRepositoryProvider);
-    final formatted = repo.formatPrice(price.price, price.currency);
-    return PriceMask(
-      formattedPrice: formatted,
-      child: Text(
-        l10n.estimatedPrice(formatted),
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-    );
+    return repo.formatPrice(price.price, price.currency);
   }
 
   Future<void> _showPriceEntry(
@@ -434,7 +437,7 @@ class ShoppingItemTile extends ConsumerWidget {
         await ref
             .read(shoppingListServiceProvider)
             .updateShoppingItemPrice(item.id!);
-        invalidateShoppingList(ref);
+        _invalidateList(ref);
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.removePrice);
         }
@@ -463,7 +466,7 @@ class ShoppingItemTile extends ConsumerWidget {
           priceCurrency: price.currency,
           priceStore: price.store,
         );
-    invalidateShoppingList(ref);
+    _invalidateList(ref);
 
     if (context.mounted) {
       SnackbarHelper.showInfo(context, l10n.addPrice);

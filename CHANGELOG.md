@@ -28,6 +28,32 @@
 
 ### Fixed
 
+- **Market trip camera layout**: the trip screen embedded the full scanner
+  view (with its own AppBar and torch/PLU/manual buttons) inside a fixed
+  box, which rendered the camera squished and a redundant "Scan Barcode"
+  AppBar. ScannerCameraView now supports an embedded mode that renders only
+  the camera preview and overlay, and the trip uses it in a rounded,
+  fixed-height box. (lib/widgets/scanner_camera_view.dart,
+  lib/screens/market_trip_screen.dart)
+- **Market trip list did not refresh after additions**: mutations (scan-add,
+  manual add, produce add, toggles, price updates, finish) invalidated only
+  the active-inventory providers, never the per-inventory family the trip
+  screen watches, so items added during a trip were not shown until the
+  screen reopened. New invalidateShoppingListForInventory refreshes the
+  by-inventory family too, and the shared ShoppingItemTile uses it for all
+  its mutations. (lib/providers/shopping_list_provider.dart,
+  lib/widgets/shopping_item_tile.dart, lib/screens/market_trip_screen.dart)
+- **Shopping list tiles overflowed with long product names**: the tile
+  title used a min-size Row with a Flexible name that could not shrink,
+  overflowing on narrow screens with long OFF names. The name now expands
+  and ellipsizes, quantity steppers are compact, and the redundant edit
+  pencil was removed (editing stays available via long-press or tapping the
+  quantity). The estimate subtitle no longer nests a widget inside a text
+  span. (lib/widgets/shopping_item_tile.dart)
+- **Manual-add search logged on every keystroke**: AddToShoppingListSheet
+  logged "Search queued" on each character before re-arming the debounce,
+  making it look like searches fired per keystroke. The log now only fires
+  when a search actually executes. (lib/widgets/add_to_shopping_list_sheet.dart)
 - **Database failed to open on Android 16**: `PRAGMA journal_mode = WAL` and
   `PRAGMA mmap_size` were executed via Database.execute, which Android
   rejects for statements that return a result row ("Queries can be performed

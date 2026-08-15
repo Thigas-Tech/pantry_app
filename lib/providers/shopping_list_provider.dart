@@ -67,6 +67,17 @@ void invalidateShoppingList(WidgetRef ref) {
     ..invalidate(pendingShoppingCountProvider);
 }
 
+/// Invalidates the shopping list providers for a specific [inventoryId].
+///
+/// Invalidates [shoppingListByInventoryProvider] (used by the market trip,
+/// which is scoped to a chosen pantry rather than the active one) in
+/// addition to the active-inventory providers via [invalidateShoppingList].
+/// Call this after every mutation that targets [inventoryId].
+void invalidateShoppingListForInventory(WidgetRef ref, int inventoryId) {
+  invalidateShoppingList(ref);
+  ref.invalidate(shoppingListByInventoryProvider(inventoryId));
+}
+
 /// Provides distinct product barcodes and names from the active inventory
 /// for the "From your pantry" suggestions in the add-to-shopping-list sheet.
 @riverpod
