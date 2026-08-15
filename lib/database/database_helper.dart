@@ -1,5 +1,4 @@
 import 'package:pantry_app/cache_config.dart';
-import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/migrations/all_migrations.dart';
@@ -40,7 +39,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Thirteen tables are created on first launch (version 37):
+/// Eleven tables are created on first launch:
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -48,7 +47,6 @@ import 'package:sqflite/sqflite.dart';
 /// - prices – purchase price observations per barcode.
 /// - shopping_list – items the user intends to buy.
 /// - stores – saved store names for autocomplete.
-/// - firebase_cache_meta – Firestore cache sync metadata.
 /// - recipes – user-created recipes.
 /// - recipe_ingredients – ingredients linked to a recipe.
 /// - recipe_history – history of cooked recipes.
@@ -58,8 +56,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// CRUD operations are delegated to dedicated DAO classes:
 /// [ProductDao], [InventoryDao], [InventoriesDao], [PriceDao],
-/// [ShoppingListDao], [StoreDao],
-/// [ProductSubmissionQueueDao], [FirebaseCacheMetaDao],
+/// [ShoppingListDao], [StoreDao], [ProductSubmissionQueueDao],
 /// [RecipeDao], [RecipeIngredientDao], [ScanHistoryDao].
 ///
 /// See also:
@@ -102,10 +99,6 @@ class DatabaseHelper {
   /// DAO for the stores table.
   final StoreDao storeDao = const StoreDao();
 
-  /// DAO for the firebase_cache_meta table.
-  final FirebaseCacheMetaDao firebaseCacheMetaDao =
-      const FirebaseCacheMetaDao();
-
   /// DAO for the recipes table.
   final RecipeDao recipeDao = const RecipeDao();
 
@@ -122,7 +115,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 41;
+  static const int databaseVersion = 43;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
@@ -286,8 +279,6 @@ class DatabaseHelper {
     );
 
     await _createStoresTable(db);
-
-    await firebaseCacheMetaDao.createTable(db);
 
     await recipeDao.createTable(db);
 

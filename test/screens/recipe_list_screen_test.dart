@@ -7,11 +7,9 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
-import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,8 +17,6 @@ import 'package:sqflite/sqflite.dart';
 import '../helpers/pump_app.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
-
-class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
 
 class MockSqfliteDatabase extends Mock implements Database {}
 
@@ -123,7 +119,6 @@ void main() {
         activeInventoryProvider.overrideWith(
           FakeActiveInventoryNotifier.new,
         ),
-        firebaseCacheProvider.overrideWithValue(MockFirebaseCacheService()),
         ...extraOverrides,
       ],
       settle: false,

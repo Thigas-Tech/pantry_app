@@ -12,21 +12,24 @@ void main() {
   group('CacheStalenessStore', () {
     test('lastRefresh is null when nothing has been recorded', () async {
       final prefs = await SharedPreferences.getInstance();
-      final store = CacheStalenessStore(prefs);
+      final store = CacheStalenessStore(Future.value(prefs));
       expect(await store.lastRefresh(), isNull);
     });
 
     test('recordRefresh stores the injected now time', () async {
       final prefs = await SharedPreferences.getInstance();
       final now = DateTime(2026, 1, 1, 12);
-      final store = CacheStalenessStore(prefs, now: () => now);
+      final store = CacheStalenessStore(
+        Future.value(prefs),
+        now: () => now,
+      );
       await store.recordRefresh();
       expect(await store.lastRefresh(), now);
     });
 
     test('isOverdue is true when nothing has been recorded', () async {
       final prefs = await SharedPreferences.getInstance();
-      final store = CacheStalenessStore(prefs);
+      final store = CacheStalenessStore(Future.value(prefs));
       expect(await store.isOverdue(const Duration(days: 5)), isTrue);
     });
 
@@ -35,9 +38,12 @@ void main() {
       () async {
         final prefs = await SharedPreferences.getInstance();
         final base = DateTime(2026, 1, 1, 12);
-        await CacheStalenessStore(prefs, now: () => base).recordRefresh();
+        await CacheStalenessStore(
+          Future.value(prefs),
+          now: () => base,
+        ).recordRefresh();
         final store = CacheStalenessStore(
-          prefs,
+          Future.value(prefs),
           now: () => base.add(const Duration(days: 4)),
         );
         expect(await store.isOverdue(const Duration(days: 5)), isFalse);
@@ -49,9 +55,12 @@ void main() {
       () async {
         final prefs = await SharedPreferences.getInstance();
         final base = DateTime(2026, 1, 1, 12);
-        await CacheStalenessStore(prefs, now: () => base).recordRefresh();
+        await CacheStalenessStore(
+          Future.value(prefs),
+          now: () => base,
+        ).recordRefresh();
         final store = CacheStalenessStore(
-          prefs,
+          Future.value(prefs),
           now: () => base.add(const Duration(days: 6)),
         );
         expect(await store.isOverdue(const Duration(days: 5)), isTrue);
@@ -61,9 +70,12 @@ void main() {
     test('isOverdue is true exactly at the window boundary', () async {
       final prefs = await SharedPreferences.getInstance();
       final base = DateTime(2026, 1, 1, 12);
-      await CacheStalenessStore(prefs, now: () => base).recordRefresh();
+      await CacheStalenessStore(
+        Future.value(prefs),
+        now: () => base,
+      ).recordRefresh();
       final store = CacheStalenessStore(
-        prefs,
+        Future.value(prefs),
         now: () => base.add(const Duration(days: 5)),
       );
       expect(await store.isOverdue(const Duration(days: 5)), isTrue);

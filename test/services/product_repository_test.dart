@@ -1,12 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
-import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/services/cache_staleness_store.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
@@ -18,9 +17,7 @@ class MockOffAdapter extends Mock implements OffAdapter {}
 
 class MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
-class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
-
-class MockFirebaseCacheMetaDao extends Mock implements FirebaseCacheMetaDao {}
+class MockCacheStalenessStore extends Mock implements CacheStalenessStore {}
 
 class FakeDatabase extends Fake implements Database {}
 
@@ -30,13 +27,12 @@ void main() {
   late MockOffAdapter mockApi;
   late MockOffAdapter fallbackApi;
   late MockUsdaApiClient mockUsda;
-  late MockFirebaseCacheService mockFirebaseCache;
-  late MockFirebaseCacheMetaDao mockMetaDao;
-  late ProductRepository fbRepo;
+  late MockCacheStalenessStore mockStaleness;
 
   setUpAll(() {
     registerFallbackValue(FakeDatabase());
     registerFallbackValue(const Product(barcode: '', name: ''));
+    registerFallbackValue(Duration.zero);
   });
 
   setUp(() {
@@ -47,24 +43,14 @@ void main() {
     when(() => mockUsda.enrichProductWithServingData(any())).thenAnswer(
       (_) async => null,
     );
-    mockFirebaseCache = MockFirebaseCacheService();
-    mockMetaDao = MockFirebaseCacheMetaDao();
+    mockStaleness = MockCacheStalenessStore();
     when(() => mockDb.database).thenAnswer((_) async => FakeDatabase());
-    when(() => mockFirebaseCache.isAvailable).thenReturn(true);
     repository = ProductRepository(
       mockDb,
       mockApi,
       fallbackApi: fallbackApi,
       usdaClient: mockUsda,
-      metaDao: mockMetaDao,
-    );
-    fbRepo = ProductRepository(
-      mockDb,
-      mockApi,
-      fallbackApi: fallbackApi,
-      usdaClient: mockUsda,
-      firebaseCache: mockFirebaseCache,
-      metaDao: mockMetaDao,
+      stalenessStore: mockStaleness,
     );
     registerFallbackValue(const Product(barcode: '', name: ''));
     registerFallbackValue(const InventoryItem(barcode: ''));
@@ -112,7 +98,7 @@ void main() {
         final repoNoFallback = ProductRepository(
           mockDb,
           mockApi,
-          metaDao: mockMetaDao,
+          stalenessStore: mockStaleness,
         );
         when(
           () => mockDb.getProduct(testBarcode),
@@ -587,9 +573,7 @@ void main() {
 
   group('refresh time tracking', () {
     test('getLastRefreshTime returns null when never set', () async {
-      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
-        (_) async => null,
-      );
+      when(() => mockStaleness.lastRefresh()).thenAnswer((_) async => null);
 
       final time = await repository.getLastRefreshTime();
       expect(time, isNull);
@@ -597,60 +581,40 @@ void main() {
 
     test('getLastRefreshTime returns DateTime when set', () async {
       final now = DateTime.now();
-      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
-        (_) async => <String, dynamic>{
-          'cache_key': '__global_refresh__',
-          'cache_type': 'global_refresh',
-          'last_refreshed_at': now.millisecondsSinceEpoch,
-          'next_refresh_at':
-              now.millisecondsSinceEpoch + 5 * 24 * 60 * 60 * 1000,
-        },
-      );
+      when(() => mockStaleness.lastRefresh()).thenAnswer((_) async => now);
 
       final time = await repository.getLastRefreshTime();
       expect(time, isNotNull);
-      expect(
-        now.difference(time!).inSeconds,
-        lessThan(5),
-      );
+      expect(now.difference(time!).inSeconds, lessThan(5));
+    });
+
+    test('setLastRefreshTime records the refresh through the store', () async {
+      when(() => mockStaleness.recordRefresh()).thenAnswer((_) async {});
+
+      await repository.setLastRefreshTime();
+
+      verify(() => mockStaleness.recordRefresh()).called(1);
     });
 
     test('isCacheOverdue returns true when never refreshed', () async {
-      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
-        (_) async => null,
-      );
+      when(() => mockStaleness.isOverdue(any())).thenAnswer((_) async => true);
 
       final overdue = await repository.isCacheOverdue();
       expect(overdue, isTrue);
+      verify(
+        () => mockStaleness.isOverdue(const Duration(days: 5)),
+      ).called(1);
     });
 
     test('isCacheOverdue returns true when past overdue days', () async {
-      final staleTime = DateTime.now().subtract(const Duration(days: 6));
-      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
-        (_) async => <String, dynamic>{
-          'cache_key': '__global_refresh__',
-          'cache_type': 'global_refresh',
-          'last_refreshed_at': staleTime.millisecondsSinceEpoch,
-          'next_refresh_at':
-              staleTime.millisecondsSinceEpoch + 5 * 24 * 60 * 60 * 1000,
-        },
-      );
+      when(() => mockStaleness.isOverdue(any())).thenAnswer((_) async => true);
 
       final overdue = await repository.isCacheOverdue();
       expect(overdue, isTrue);
     });
 
     test('isCacheOverdue returns false when just refreshed', () async {
-      final now = DateTime.now();
-      when(() => mockMetaDao.getGlobalRefreshTime(any())).thenAnswer(
-        (_) async => <String, dynamic>{
-          'cache_key': '__global_refresh__',
-          'cache_type': 'global_refresh',
-          'last_refreshed_at': now.millisecondsSinceEpoch,
-          'next_refresh_at':
-              now.millisecondsSinceEpoch + 5 * 24 * 60 * 60 * 1000,
-        },
-      );
+      when(() => mockStaleness.isOverdue(any())).thenAnswer((_) async => false);
 
       final overdue = await repository.isCacheOverdue();
       expect(overdue, isFalse);
@@ -838,7 +802,7 @@ void main() {
         final minimalRepo = ProductRepository(
           mockDb,
           mockApi,
-          metaDao: mockMetaDao,
+          stalenessStore: mockStaleness,
         );
         when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);
 
@@ -1025,229 +989,6 @@ void main() {
 
       verify(() => mockDb.insertOrMergeInventoryItem(any())).called(1);
       verifyNever(() => mockDb.insertInventoryItem(any()));
-    });
-  });
-
-  group('Firebase cache integration', () {
-    group('getProduct', () {
-      test(
-        'calls Firebase cache after local miss and returns Firebase product',
-        () async {
-          when(
-            () => mockDb.getProduct(testBarcode),
-          ).thenAnswer((_) async => null);
-          when(
-            () => mockFirebaseCache.resolveBarcodedProduct(
-              testBarcode,
-              languageCode: any(named: 'languageCode'),
-            ),
-          ).thenAnswer((_) async => testProduct);
-
-          final product = await fbRepo.getProduct(testBarcode);
-
-          expect(product, testProduct);
-          verify(
-            () => mockFirebaseCache.resolveBarcodedProduct(
-              testBarcode,
-              languageCode: any(named: 'languageCode'),
-            ),
-          ).called(1);
-          verifyNever(() => mockApi.getByBarcode(any()));
-        },
-      );
-
-      test('does NOT call Firebase when product is in local cache', () async {
-        when(
-          () => mockDb.getProduct(testBarcode),
-        ).thenAnswer((_) async => testProduct);
-
-        final product = await fbRepo.getProduct(testBarcode);
-
-        expect(product, testProduct);
-        verifyNever(
-          () => mockFirebaseCache.resolveBarcodedProduct(
-            any(),
-            languageCode: any(named: 'languageCode'),
-          ),
-        );
-        verifyNever(() => mockApi.getByBarcode(any()));
-      });
-
-      test(
-        'skips direct OFF API when Firebase returns null '
-        '(service already tried OFF)',
-        () async {
-          when(
-            () => mockDb.getProduct(testBarcode),
-          ).thenAnswer((_) async => null);
-          when(
-            () => mockFirebaseCache.resolveBarcodedProduct(
-              testBarcode,
-              languageCode: any(named: 'languageCode'),
-            ),
-          ).thenAnswer((_) async => null);
-          when(
-            () => fallbackApi.getByBarcode(
-              testBarcode,
-              languageCode: any(named: 'languageCode'),
-            ),
-          ).thenThrow(ProductNotFoundException(testBarcode));
-
-          await expectLater(
-            () => fbRepo.getProduct(testBarcode),
-            throwsA(isA<ProductNotFoundException>()),
-          );
-
-          verify(
-            () => mockFirebaseCache.resolveBarcodedProduct(
-              testBarcode,
-              languageCode: any(named: 'languageCode'),
-            ),
-          ).called(1);
-          verifyNever(() => mockApi.getByBarcode(any()));
-        },
-      );
-
-      test(
-        'falls through to OFF API when Firebase throws',
-        () async {
-          when(
-            () => mockDb.getProduct(testBarcode),
-          ).thenAnswer((_) async => null);
-          when(
-            () => mockFirebaseCache.resolveBarcodedProduct(
-              testBarcode,
-              languageCode: any(named: 'languageCode'),
-            ),
-          ).thenThrow(Exception('Firestore down'));
-          when(
-            () => mockApi.getByBarcode(testBarcode),
-          ).thenAnswer((_) async => testProduct);
-          when(
-            () => mockDb.insertProduct(testProduct),
-          ).thenAnswer((_) async => {});
-
-          final product = await fbRepo.getProduct(testBarcode);
-
-          expect(product, testProduct);
-          verify(() => mockApi.getByBarcode(testBarcode)).called(1);
-        },
-      );
-    });
-
-    group('resolveProduceProduct', () {
-      const produceName = 'Apple';
-      const produceBarcode = 'produce-apple';
-
-      test(
-        'checks Firebase before USDA when resolving produce',
-        () async {
-          when(
-            () => mockFirebaseCache.resolveProduceProduct(produceName),
-          ).thenAnswer(
-            (_) async => testProduct.copyWith(
-              barcode: produceBarcode,
-              name: produceName,
-              productType: ProductType.produce,
-            ),
-          );
-
-          final product = await fbRepo.resolveProduceProduct(produceName);
-
-          expect(product, isNotNull);
-          expect(product.barcode, produceBarcode);
-          expect(product.productType, ProductType.produce);
-          expect(product.source, 'manual');
-          expect(product.category, 'Fruit');
-          verify(
-            () => mockFirebaseCache.resolveProduceProduct(produceName),
-          ).called(1);
-          verifyNever(() => mockUsda.searchFood(any()));
-        },
-      );
-
-      test(
-        'uses USDA when firebaseCache is null',
-        () async {
-          final repoNoFb = ProductRepository(
-            mockDb,
-            mockApi,
-            usdaClient: mockUsda,
-            metaDao: mockMetaDao,
-          );
-          when(
-            () => mockUsda.searchFood(produceName),
-          ).thenAnswer((_) async => []);
-
-          final product = await repoNoFb.resolveProduceProduct(produceName);
-
-          expect(product, isNotNull);
-          expect(product.barcode, produceBarcode);
-          verify(() => mockUsda.searchFood(produceName)).called(1);
-        },
-      );
-
-      test(
-        'falls through to USDA when Firebase produce lookup throws',
-        () async {
-          when(
-            () => mockFirebaseCache.resolveProduceProduct(produceName),
-          ).thenThrow(Exception('Firestore down'));
-          when(() => mockUsda.searchFood(produceName)).thenAnswer(
-            (_) async => [],
-          );
-
-          final product = await fbRepo.resolveProduceProduct(produceName);
-
-          expect(product, isNotNull);
-          expect(product.barcode, produceBarcode);
-          verify(
-            () => mockFirebaseCache.resolveProduceProduct(produceName),
-          ).called(1);
-          verify(() => mockUsda.searchFood(produceName)).called(1);
-        },
-      );
-    });
-
-    group('addProduceToInventory', () {
-      const produceBarcode = 'produce-apple';
-      const produceName = 'Apple';
-
-      setUp(() {
-        when(
-          () => mockDb.insertOrMergeInventoryItem(any()),
-        ).thenAnswer((_) async => 42);
-        when(() => mockDb.insertProduct(any())).thenAnswer((_) async => {});
-      });
-
-      test(
-        'uses Firebase when local cache misses for produce',
-        () async {
-          when(
-            () => mockDb.getProduct(produceBarcode),
-          ).thenAnswer((_) async => null);
-          when(
-            () => mockFirebaseCache.resolveProduceProduct(produceName),
-          ).thenAnswer(
-            (_) async => testProduct.copyWith(
-              name: produceName,
-              energyKcal: 52,
-            ),
-          );
-
-          final id = await fbRepo.addProduceToInventory(
-            produceName,
-            inventoryId: 1,
-          );
-
-          expect(id, 42);
-          verify(
-            () => mockFirebaseCache.resolveProduceProduct(produceName),
-          ).called(1);
-          verify(() => mockDb.insertProduct(captureAny()));
-          verifyNever(() => mockUsda.searchFood(any()));
-        },
-      );
     });
   });
 

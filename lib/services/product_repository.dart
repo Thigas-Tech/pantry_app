@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:pantry_app/cache_config.dart';
 import 'package:pantry_app/database/database_helper.dart';
-import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
+import 'package:pantry_app/services/cache_staleness_store.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/off_adapter.dart';
 import 'package:pantry_app/services/produce_barcode.dart';
 import 'package:pantry_app/services/produce_category_mapper.dart';
@@ -52,24 +51,22 @@ class ProductRepository {
   /// fetch nutrition data for produce items from the USDA FoodData Central
   /// API when a product is not already cached locally.
   ///
-  /// The [FirebaseCacheMetaDao] is the single source of truth for
-  /// cache-staleness tracking (replacing the old SharedPreferences-based
-  /// approach).
+  /// The [CacheStalenessStore] is the single source of truth for
+  /// cache-staleness tracking, persisting the last inventory refresh in
+  /// SharedPreferences.
   ProductRepository(
     this._db,
     this._api, {
-    required this._metaDao,
+    required this._stalenessStore,
     this._fallbackApi,
     this._usdaClient,
-    this._firebaseCache,
   });
 
   final DatabaseHelper _db;
   final OffAdapter _api;
   final OffAdapter? _fallbackApi;
   final UsdaApiClient? _usdaClient;
-  final FirebaseCacheService? _firebaseCache;
-  final FirebaseCacheMetaDao _metaDao;
+  final CacheStalenessStore _stalenessStore;
 
   /// The injected [UsdaApiClient] used for produce nutrition lookups, or
   /// null when none was provided.
@@ -116,31 +113,6 @@ class ProductRepository {
     if (cached != null) {
       logInfo('Cache hit for $barcode');
       return cached;
-    }
-
-    // 1.5 Firebase cache
-    if (_firebaseCache != null && _firebaseCache.isAvailable) {
-      try {
-        final fbProduct = await _firebaseCache.resolveBarcodedProduct(
-          barcode,
-          languageCode: lang,
-        );
-        if (fbProduct != null) {
-          logInfo('Firebase cache hit for $barcode');
-          return fbProduct;
-        }
-        logInfo(
-          'Firebase miss for $barcode '
-          '- resolveBarcodedProduct already tried OFF; skipping retry',
-        );
-        // The service already tried OFF internally.  Skip the direct OFF
-        // call (step 2) and proceed to the fallback chain.
-        return await _fallbackOrThrow(barcode, lang);
-      } on ProductNotFoundException {
-        rethrow;
-      } on Exception catch (e) {
-        logWarning('Firebase cache lookup failed for $barcode: $e');
-      }
     }
 
     // 2. Try primary API
@@ -196,36 +168,12 @@ class ProductRepository {
     return merged;
   }
 
-  /// Fetches [barcode] from the remote sources (Firebase cache, primary
-  /// API, fallback API) in the given language, without consulting the
-  /// local cache.
+  /// Fetches [barcode] from the remote sources (primary API, fallback API)
+  /// in the given language, without consulting the local cache.
   ///
   /// Unlike the cache-first path in [_getProductImpl], this always makes a
-  /// network call (or reads the Firebase cache). Callers decide whether to
-  /// cache the result.
+  /// network call. Callers decide whether to cache the result.
   Future<Product> _fetchRemoteProduct(String barcode, String lang) async {
-    if (_firebaseCache != null && _firebaseCache.isAvailable) {
-      try {
-        final fbProduct = await _firebaseCache.resolveBarcodedProduct(
-          barcode,
-          languageCode: lang,
-        );
-        if (fbProduct != null) {
-          logInfo('Firebase cache hit for $barcode');
-          return fbProduct;
-        }
-        logInfo(
-          'Firebase miss for $barcode '
-          '- resolveBarcodedProduct already tried OFF; skipping retry',
-        );
-        return await _fallbackOrThrow(barcode, lang);
-      } on ProductNotFoundException {
-        rethrow;
-      } on Exception catch (e) {
-        logWarning('Firebase cache lookup failed for $barcode: $e');
-      }
-    }
-
     try {
       logInfo('Fetching $barcode from primary API');
       return await _api.getByBarcode(barcode, languageCode: lang);
@@ -242,7 +190,7 @@ class ProductRepository {
 
   /// Tries the fallback API (if configured) or throws.
   ///
-  /// Shared between the direct-API path and the Firebase-cache path so the
+  /// Shared between the direct-API path and the language-refresh path so the
   /// fallback behaviour is identical regardless of which source was tried
   /// first.
   Future<Product> _fallbackOrThrow(String barcode, String lang) async {
@@ -431,25 +379,6 @@ class ProductRepository {
     String produceName,
     String barcode,
   ) async {
-    if (_firebaseCache != null && _firebaseCache.isAvailable) {
-      try {
-        final cached = await _firebaseCache.resolveProduceProduct(produceName);
-        if (cached != null) {
-          return cached.copyWith(
-            barcode: barcode,
-            productType: ProductType.produce,
-            source: 'manual',
-            category: ProduceCategoryMapper.forName(produceName),
-            lastSynced: DateTime.now().millisecondsSinceEpoch,
-          );
-        }
-        // Service already tried USDA internally; skip direct USDA call.
-        return _produceFallbackOrMinimal(produceName, barcode);
-      } on Exception catch (e) {
-        logWarning('Firebase produce cache lookup failed: $e');
-      }
-    }
-
     if (_usdaClient != null) {
       try {
         final usdaResults = await _usdaClient.searchFood(produceName);
@@ -679,25 +608,16 @@ class ProductRepository {
   ///
   /// Used together with [isCacheOverdue] to trigger automatic background
   /// refreshes after [cacheOverdueDays] of inactivity. Delegates to
-  /// [FirebaseCacheMetaDao.setGlobalRefreshTime], which is the single source
-  /// of truth for cache staleness.
+  /// [CacheStalenessStore.recordRefresh], the single source of truth for
+  /// cache staleness.
   Future<void> setLastRefreshTime() async {
-    final db = await _db.database;
-    await _metaDao.setGlobalRefreshTime(db);
+    await _stalenessStore.recordRefresh();
     logInfo('Last refresh time updated');
   }
 
   /// Returns the stored last‑refresh timestamp, or null if no refresh has
-  /// ever been recorded. Reads from [FirebaseCacheMetaDao] instead of
-  /// SharedPreferences.
-  Future<DateTime?> getLastRefreshTime() async {
-    final db = await _db.database;
-    final entry = await _metaDao.getGlobalRefreshTime(db);
-    if (entry == null) return null;
-    final raw = entry['last_refreshed_at'] as int?;
-    if (raw == null) return null;
-    return DateTime.fromMillisecondsSinceEpoch(raw);
-  }
+  /// ever been recorded.
+  Future<DateTime?> getLastRefreshTime() => _stalenessStore.lastRefresh();
 
   /// The number of days after which the cached product data is considered
   /// stale and a background refresh should be scheduled.
@@ -706,15 +626,9 @@ class ProductRepository {
   /// Returns true when the last refresh timestamp is missing or older than
   /// [cacheOverdueDays] days.
   ///
-  /// Queries [FirebaseCacheMetaDao] for the global refresh entry instead of
-  /// reading from local preferences. When the entry is missing or its
-  /// nextRefreshAt column has passed, the cache is considered overdue.
-  Future<bool> isCacheOverdue() async {
-    final db = await _db.database;
-    final entry = await _metaDao.getGlobalRefreshTime(db);
-    if (entry == null) return true;
-    final nextRefreshAt = entry['next_refresh_at'] as int?;
-    if (nextRefreshAt == null) return true;
-    return DateTime.now().millisecondsSinceEpoch >= nextRefreshAt;
-  }
+  /// Delegates to [CacheStalenessStore.isOverdue] with the overdue window
+  /// from [cacheOverdueDays].
+  Future<bool> isCacheOverdue() => _stalenessStore.isOverdue(
+    const Duration(days: inventoryRefreshOverdueDays),
+  );
 }

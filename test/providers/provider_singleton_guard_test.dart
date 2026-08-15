@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Guards against duplicate singleton service construction in providers.
 ///
@@ -23,6 +23,10 @@ import 'package:pantry_app/services/usda_api_client.dart';
 void main() {
   setUpAll(() {
     dotenv.loadFromString(isOptional: true, mergeWith: {});
+  });
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
   });
 
   final bannedConstructors = <RegExp, (String, List<String>)>{
@@ -92,11 +96,6 @@ void main() {
         identical(provided, container.read(usdaApiClientProvider)),
         isTrue,
       );
-
-      final firebaseCacheClient = container
-          .read(firebaseCacheProvider)
-          .usdaClient;
-      expect(identical(provided, firebaseCacheClient), isTrue);
 
       final repositoryClient = container
           .read(productRepositoryProvider)

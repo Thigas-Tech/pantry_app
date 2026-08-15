@@ -9,7 +9,6 @@ import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/cache_refresh_coordinator_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -125,8 +124,6 @@ class AppStartupService {
     await _schedulePostInitNotifications();
     await _delay(const Duration(milliseconds: 800));
     await _flushProductSubmissionQueue();
-    await _delay(const Duration(seconds: 8));
-    await _refreshFirebaseCache();
   }
 
   /// Signs into Firebase anonymously after the first frame.
@@ -321,25 +318,6 @@ class AppStartupService {
       }
     } on Exception catch (e) {
       logWarning('Product submission queue flush failed: $e');
-    }
-  }
-
-  /// Refreshes stale Firebase cache entries in the background.
-  ///
-  /// Runs 8 seconds after startup to avoid competing with other post-init
-  /// tasks for network bandwidth. If Firebase is not available (feature flag
-  /// off, missing config, runtime error) this is a no-op.
-  Future<void> _refreshFirebaseCache() async {
-    try {
-      final cacheService = container.read(firebaseCacheProvider);
-      if (cacheService.isAvailable) {
-        final refreshed = await cacheService.refreshStaleEntries();
-        if (refreshed > 0) {
-          logInfo('Firebase cache: $refreshed entries refreshed');
-        }
-      }
-    } on Exception catch (e) {
-      logWarning('Firebase cache refresh failed: $e');
     }
   }
 

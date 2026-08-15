@@ -7,7 +7,6 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/produce_barcode.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -17,7 +16,6 @@ import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/serving_weight.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
 
 /// Groups ingredients by barcode with a summed quantity.
 class _GroupedIngredient {
@@ -80,12 +78,10 @@ class RecipeService {
   /// Creates a [RecipeService].
   RecipeService(
     this._db,
-    this._cache,
     this._currencyService,
   );
 
   final DatabaseHelper _db;
-  final FirebaseCacheService _cache;
   final CurrencyService _currencyService;
 
   /// Saves a recipe — creates a new one or updates an existing one.
@@ -120,19 +116,10 @@ class RecipeService {
         imagePath: imagePath,
         inventoryId: existing?.inventoryId ?? activeInventoryId,
         updatedAt: now,
-        sharedRecipeId: existing?.sharedRecipeId ?? _newSharedId(),
       );
       await _db.updateRecipeWithIngredients(recipe, ingredients);
       logInfo('Recipe $existingRecipeId updated: $name');
-      unawaited(
-        _cache.cacheRecipe(
-          recipe,
-          ingredients,
-          recipeId: recipe.sharedRecipeId,
-        ),
-      );
     } else {
-      final sharedId = _newSharedId();
       final recipe = Recipe(
         name: name.trim(),
         instructions: instructions.trim(),
@@ -141,37 +128,20 @@ class RecipeService {
         inventoryId: activeInventoryId,
         createdAt: now,
         updatedAt: now,
-        sharedRecipeId: sharedId,
       );
-      final newId = await _db.insertRecipeWithIngredients(
+      await _db.insertRecipeWithIngredients(
         recipe,
         ingredients,
       );
       logInfo('Recipe created: $name');
-      unawaited(
-        _cache.cacheRecipe(
-          recipe.copyWith(id: newId),
-          ingredients,
-          recipeId: sharedId,
-        ),
-      );
     }
   }
 
-  /// Deletes a recipe by [id], including its shared-cache entry.
+  /// Deletes a recipe by [id].
   Future<void> deleteRecipe(int id) async {
-    final recipe = await _db.getRecipe(id);
     await _db.deleteRecipe(id);
     logInfo('Recipe $id deleted');
-    if (recipe != null && recipe.sharedRecipeId.isNotEmpty) {
-      unawaited(
-        _cache.deleteSharedRecipe(recipe.sharedRecipeId),
-      );
-    }
   }
-
-  /// Returns a fresh random id for a recipe's shared-cache snapshot.
-  String _newSharedId() => const Uuid().v4();
 
   /// Calculates the total cost of [recipeId] from its ingredients' latest
   /// prices, scoped to the recipe's own inventory (falling back to
