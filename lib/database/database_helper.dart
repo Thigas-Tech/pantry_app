@@ -1,3 +1,4 @@
+import 'package:pantry_app/cache_config.dart';
 import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
@@ -408,6 +409,62 @@ class DatabaseHelper {
     }
   }
 
+  /// Removes API-fetched product rows whose [Product.lastSynced] timestamp is
+  /// older than [maxAge].
+  ///
+  /// This is the age-based device cache flush: cached products older than the
+  /// two-month [productCacheMaxAge] window are removed so they are re-fetched
+  /// on the next access or background refresh. Manual products
+  /// ([Product.source] 'manual') are always preserved. A product with a null
+  /// [Product.lastSynced] is treated as expired because it was never
+  /// successfully timestamped.
+  ///
+  /// Foreign key enforcement is temporarily disabled because inventory rows
+  /// survive the flush (they are LEFT JOINed and re-fetched later), mirroring
+  /// [clearCachedProducts]. Shopping list barcode references are explicitly
+  /// nulled before the deletion.
+  ///
+  /// Returns the number of deleted product rows. [now] is injectable for
+  /// deterministic tests and defaults to [DateTime.now].
+  Future<int> flushExpiredCachedProducts({
+    Duration maxAge = productCacheMaxAge,
+    DateTime Function()? now,
+  }) async {
+    final db = await database;
+    final cutoff = (now ?? DateTime.now)()
+        .subtract(maxAge)
+        .millisecondsSinceEpoch;
+    logInfo(
+      'Flushing cached products last synced before '
+      '${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}'
+      ' (max age: ${maxAge.inDays} days)',
+    );
+
+    await db.execute('PRAGMA foreign_keys = OFF');
+    try {
+      await db.rawUpdate(
+        '''
+        UPDATE shopping_list SET barcode = NULL
+        WHERE barcode IN (
+          SELECT barcode FROM products
+          WHERE source = 'api' AND (last_synced IS NULL OR last_synced < ?)
+        )
+      ''',
+        [cutoff],
+      );
+      final deleted = await db.delete(
+        'products',
+        where: "source = 'api' AND (last_synced IS NULL OR last_synced < ?)",
+        whereArgs: [cutoff],
+      );
+      logInfo('Removed $deleted expired cached products');
+      await db.execute('PRAGMA optimize');
+      return deleted;
+    } finally {
+      await db.execute('PRAGMA foreign_keys = ON');
+    }
+  }
+
   /// Deletes every product from the products table.
   ///
   /// Intended for teardown in integration tests only. Production code
@@ -465,6 +522,8 @@ class DatabaseHelper {
         );
         logInfo('Removed $deletedPrices old price rows');
       }
+
+      await flushExpiredCachedProducts();
 
       // Refresh query planner statistics after the bulk deletions.
       await db.execute('PRAGMA optimize');

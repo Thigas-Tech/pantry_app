@@ -487,8 +487,19 @@ void main() {
     test(
       'removes items older than retention days and orphaned products',
       () async {
-        await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
-        await db.insertProduct(const Product(barcode: 'p2', name: 'P2'));
+        final freshSync = DateTime.now().millisecondsSinceEpoch;
+        await db.insertProduct(
+          const Product(
+            barcode: 'p1',
+            name: 'P1',
+          ).copyWith(lastSynced: freshSync),
+        );
+        await db.insertProduct(
+          const Product(
+            barcode: 'p2',
+            name: 'P2',
+          ).copyWith(lastSynced: freshSync),
+        );
         final oldItem = InventoryItem(
           barcode: 'p1',
           dateAdded: DateTime.now()
