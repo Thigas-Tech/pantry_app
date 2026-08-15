@@ -41,6 +41,15 @@ independently. DAOs that must compose inside transactions (such as
 `ScanHistoryDao`) accept a `DatabaseExecutor` instead, which covers both a
 `Database` and a `Transaction`.
 
+**Atomic multi-step writes**: `DatabaseHelper` wraps multi-statement
+destructive operations (`clearCachedProducts`,
+`flushExpiredCachedProducts`, `cleanupOldEntries`) in a `db.transaction` so
+a mid-operation failure rolls back every earlier write. Because
+`PRAGMA foreign_keys` is a no-op inside a transaction, the FK toggle stays
+outside the transaction boundary; `cleanupOldEntries` runs its own deletes
+in one transaction and then calls the self-contained
+`flushExpiredCachedProducts` afterwards to avoid nesting transactions.
+
 `DatabaseHelper` is the singleton that owns the connection, runs schema
 migrations, and delegates CRUD to the DAOs.  It is the **only public entry
 point** for database access in production code.
@@ -102,6 +111,7 @@ Version history:
 | v40 -> v41 | Added `sort_order REAL NOT NULL DEFAULT 0` column on `shopping_list`; pending items backfilled to keep current date-added order |
 | v41 -> v42 | Dropped the `firebase_cache_meta` table (Firebase cache removed) |
 | v42 -> v43 | Dropped the `shared_recipe_id` column on `recipes` (shared-recipe cache removed). On SQLite < 3.35 (Android < 13) the drop is skipped and the inert column is retained so the upgrade is never blocked. |
+| v43 -> v44 | Added `idx_inventory_inventory_barcode` on `inventory(inventory_id, barcode)` (price statistics GROUP BY barcode, "from your pantry" suggestions) and `idx_shopping_inventory_purchased_sort` on `shopping_list(inventory_id, is_purchased, sort_order)` (pending-item drag order) |
 
 **Migration safety under foreign keys**: sqflite runs `onUpgrade` inside a
 transaction with `PRAGMA foreign_keys = ON` already applied (from

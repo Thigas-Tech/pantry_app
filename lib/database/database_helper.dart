@@ -115,7 +115,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 43;
+  static const int databaseVersion = 44;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
@@ -264,6 +264,10 @@ class DatabaseHelper {
       ' ON inventory(inventory_id, expiry_date)',
     );
     await db.execute(
+      'CREATE INDEX idx_inventory_inventory_barcode'
+      ' ON inventory(inventory_id, barcode)',
+    );
+    await db.execute(
       'CREATE INDEX idx_products_source ON products(source)',
     );
 
@@ -281,6 +285,10 @@ class DatabaseHelper {
     await db.execute(
       'CREATE INDEX idx_shopping_list_inventory_purchased_date'
       ' ON shopping_list(inventory_id, is_purchased, date_added)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_shopping_inventory_purchased_sort'
+      ' ON shopping_list(inventory_id, is_purchased, sort_order)',
     );
 
     await _createStoresTable(db);
@@ -389,17 +397,26 @@ class DatabaseHelper {
   /// and prices legitimately survive cache flushes (they are LEFT JOINed).
   /// Shopping list items have ON DELETE SET NULL which also requires FK
   /// enforcement to be active — after deletion, shopping list barcode
-  /// references are explicitly cleaned up.
+  /// references are explicitly cleaned up. PRAGMA foreign_keys is a no-op
+  /// inside a transaction, so it is toggled around (not within) the
+  /// transaction that makes the deletion atomic.
   Future<void> clearCachedProducts() async {
     final db = await database;
     await db.execute('PRAGMA foreign_keys = OFF');
     try {
-      // Null out shopping list barcode refs to API products before deleting.
-      await db.rawUpdate('''
-        UPDATE shopping_list SET barcode = NULL
-        WHERE barcode IN (SELECT barcode FROM products WHERE source = 'api')
-      ''');
-      return await productDao.deleteBySource(db, 'api');
+      await db.transaction((txn) async {
+        // Null out shopping list barcode refs to API products before
+        // deleting.
+        await txn.rawUpdate('''
+          UPDATE shopping_list SET barcode = NULL
+          WHERE barcode IN (SELECT barcode FROM products WHERE source = 'api')
+        ''');
+        final count = await txn.delete(
+          'products',
+          where: "source = 'api'",
+        );
+        logInfo('Deleted $count products with source "api"');
+      });
     } finally {
       await db.execute('PRAGMA foreign_keys = ON');
     }
@@ -418,7 +435,9 @@ class DatabaseHelper {
   /// Foreign key enforcement is temporarily disabled because inventory rows
   /// survive the flush (they are LEFT JOINed and re-fetched later), mirroring
   /// [clearCachedProducts]. Shopping list barcode references are explicitly
-  /// nulled before the deletion.
+  /// nulled before the deletion. PRAGMA foreign_keys is a no-op inside a
+  /// transaction, so it is toggled around (not within) the transaction that
+  /// makes the deletion atomic.
   ///
   /// Returns the number of deleted product rows. [now] is injectable for
   /// deterministic tests and defaults to [DateTime.now].
@@ -438,21 +457,23 @@ class DatabaseHelper {
 
     await db.execute('PRAGMA foreign_keys = OFF');
     try {
-      await db.rawUpdate(
-        '''
-        UPDATE shopping_list SET barcode = NULL
-        WHERE barcode IN (
-          SELECT barcode FROM products
-          WHERE source = 'api' AND (last_synced IS NULL OR last_synced < ?)
-        )
-      ''',
-        [cutoff],
-      );
-      final deleted = await db.delete(
-        'products',
-        where: "source = 'api' AND (last_synced IS NULL OR last_synced < ?)",
-        whereArgs: [cutoff],
-      );
+      final deleted = await db.transaction<int>((txn) async {
+        await txn.rawUpdate(
+          '''
+          UPDATE shopping_list SET barcode = NULL
+          WHERE barcode IN (
+            SELECT barcode FROM products
+            WHERE source = 'api' AND (last_synced IS NULL OR last_synced < ?)
+          )
+        ''',
+          [cutoff],
+        );
+        return txn.delete(
+          'products',
+          where: "source = 'api' AND (last_synced IS NULL OR last_synced < ?)",
+          whereArgs: [cutoff],
+        );
+      });
       logInfo('Removed $deleted expired cached products');
       await db.execute('PRAGMA optimize');
       return deleted;
@@ -489,36 +510,44 @@ class DatabaseHelper {
     );
 
     try {
-      final deletedItems = await db.delete(
-        'inventory',
-        where: 'date_added < ?',
-        whereArgs: [cutoff],
-      );
-      logInfo('Removed $deletedItems old inventory items');
-
-      await db.rawDelete('''
-        DELETE FROM prices
-        WHERE NOT EXISTS (
-          SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
-        )
-      ''');
-
-      final deletedProducts = await db.rawDelete('''
-        DELETE FROM products
-        WHERE NOT EXISTS (
-          SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
-        )
-      ''');
-      logInfo('Removed $deletedProducts orphaned products');
-
-      if (priceRetentionDays > 0) {
-        final deletedPrices = await priceDao.deleteStale(
-          db,
-          priceRetentionDays,
+      await db.transaction((txn) async {
+        final deletedItems = await txn.delete(
+          'inventory',
+          where: 'date_added < ?',
+          whereArgs: [cutoff],
         );
-        logInfo('Removed $deletedPrices old price rows');
-      }
+        logInfo('Removed $deletedItems old inventory items');
 
+        await txn.rawDelete('''
+          DELETE FROM prices
+          WHERE NOT EXISTS (
+            SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
+          )
+        ''');
+
+        final deletedProducts = await txn.rawDelete('''
+          DELETE FROM products
+          WHERE NOT EXISTS (
+            SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
+          )
+        ''');
+        logInfo('Removed $deletedProducts orphaned products');
+
+        if (priceRetentionDays > 0) {
+          final cutoffMillis = DateTime.now()
+              .subtract(Duration(days: priceRetentionDays))
+              .millisecondsSinceEpoch;
+          final deletedPrices = await txn.delete(
+            'prices',
+            where: 'date_purchased < ? AND sync_status != ?',
+            whereArgs: [cutoffMillis, priceSyncPending],
+          );
+          logInfo('Removed $deletedPrices old price rows');
+        }
+      });
+
+      // Self-contained and atomic; runs after the main cleanup so its own
+      // PRAGMA foreign_keys toggling is not nested inside the transaction.
       await flushExpiredCachedProducts();
 
       // Refresh query planner statistics after the bulk deletions.

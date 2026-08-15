@@ -138,7 +138,13 @@ class ShoppingListDao {
               'Merged quantity for ${item.barcode}: '
               '${existingItem.quantity} + ${item.quantity} = $mergedQty',
             );
-            return existingItem.id!;
+            final existingId = existingItem.id;
+            if (existingId == null) {
+              throw StateError(
+                'shopping_list row ${existingItem.id} has no id',
+              );
+            }
+            return existingId;
           }
         }
         try {

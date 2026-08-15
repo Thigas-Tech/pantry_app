@@ -68,6 +68,24 @@
   test/services/usda_api_client_test.dart,
   test/database/distinct_products_query_test.dart new,
   test/database/flush_expired_cache_test.dart, test/database/database_helper_test.dart)
+- **Multi-step database writes are now atomic**: clearCachedProducts,
+  flushExpiredCachedProducts, and cleanupOldEntries run their destructive
+  steps inside a single transaction, so a mid-operation failure rolls back
+  every earlier write instead of leaving partially-deleted state. Because
+  PRAGMA foreign_keys is a no-op inside a transaction, the FK toggle stays
+  outside the transaction boundary and cleanupOldEntries runs its own
+  deletes before the self-contained flush. Removed `!` null-asserts on
+  DB-derived PKs in the shopping-list and inventory merge paths.
+- **v44 query performance indexes**: added
+  idx_inventory_inventory_barcode on inventory(inventory_id, barcode) for
+  per-inventory price statistics and "from your pantry" suggestions, and
+  idx_shopping_inventory_purchased_sort on
+  shopping_list(inventory_id, is_purchased, sort_order) for the pending-item
+  drag order. databaseVersion bumped to 44.
+  (lib/database/database_helper.dart, lib/database/migrations/v44 new,
+  lib/database/inventory_dao.dart, lib/database/shopping_list_dao.dart,
+  test/database/migrations/v44_query_performance_indexes_test.dart new,
+  test/database/flush_expired_cache_test.dart)
 
 ### Features
 
