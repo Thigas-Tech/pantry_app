@@ -118,10 +118,10 @@ whitespace normalization, and idempotency.
 | PRAGMA | Value | Rationale |
 |---|---|---|
 | `foreign_keys` | ON | Enforces referential integrity (children are never orphaned by parent deletes). |
-| `journal_mode` | WAL | Better read/write concurrency and crash safety than the default DELETE journal. |
+| `journal_mode` | WAL | Better read/write concurrency and crash safety than the default DELETE journal. Set via `Database.setJournalMode` (falls back to `rawQuery` on Android, whose `execSQL` rejects row-returning PRAGMAs) and enabled natively through the `com.tekartik.sqflite.wal_enabled` manifest flag. |
 | `synchronous` | FULL | Safest durability guarantee; with WAL it syncs on every commit. Slightly slower than NORMAL, chosen for correctness. |
 | `cache_size` | -2000 (2 MB) | SQLite default page cache, tuned down for mobile memory constraints. |
-| `mmap_size` | 268435456 (256 MB) | Cap for memory-mapped I/O; pages are mapped on demand, so the cap is a limit, not an allocation. |
+| `mmap_size` | 268435456 (256 MB) | Cap for memory-mapped I/O; pages are mapped on demand, so the cap is a limit, not an allocation. Run via `rawQuery` because the setter returns the new value as a row, which Android `execSQL` rejects. |
 
 `PRAGMA quick_check` runs only after a schema upgrade (not on every open,
 to keep startup fast on large databases). `PRAGMA optimize` runs on every

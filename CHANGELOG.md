@@ -26,6 +26,21 @@
   and re-fetched on the next access or background refresh. Manual products
   are always preserved. (lib/cache_config.dart, lib/database/database_helper.dart)
 
+### Fixed
+
+- **Database failed to open on Android 16**: `PRAGMA journal_mode = WAL` and
+  `PRAGMA mmap_size` were executed via Database.execute, which Android
+  rejects for statements that return a result row ("Queries can be performed
+  using SQLiteDatabase query or rawQuery methods only"), breaking every
+  database-backed flow. Journal mode is now set through
+  Database.setJournalMode (falls back to rawQuery on Android), mmap_size runs
+  through rawQuery, and the manifest opts into the native
+  com.tekartik.sqflite.wal_enabled flag. Guard test added because
+  sqflite_common_ffi cannot reproduce the Android-only restriction.
+  (lib/database/database_helper.dart,
+  android/app/src/main/AndroidManifest.xml,
+  test/database/pragma_execsql_guard_test.dart new)
+
 ### Features
 
 - **OFF language & localization strategy**: Open Food Facts data is now
