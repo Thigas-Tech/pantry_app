@@ -30,21 +30,18 @@ background cache refresh is throttled (5+ days overdue, connectivity
 required), and only API-sourced products are refreshed — user-entered
 products are never re-fetched.
 
-### 11.4 Firestore cloud cache
+### 11.4 Device-only product cache
 
-`FirebaseCacheService` adds a remote caching layer on top of the local
-SQLite cache. Product data is replicated to Cloud Firestore with a 180-day
-rolling refresh window. Benefits:
+The local SQLite `products` table is the only product cache — there is no
+server-side or intermediate cache. Two mechanisms keep it fresh:
 
-- Survives local cache flushes — products are still available from Firestore
-  after the user clears their local cache.
-- Reduces OFF API calls — repeated lookups for popular barcodes hit the
-  Firestore cache instead of the upstream API.
-- Write-throttled — the 180-day TTL and per-entry refresh tracking ensure
-  the Firestore free-tier daily write limits are respected.
-- Graceful degradation — all Firestore operations are wrapped in try/catch
-  with `isAvailable: false` fallback. No errors propagate to the UI when
-  Firebase is unavailable.
+- **Two-month flush**: `DatabaseHelper.flushExpiredCachedProducts` removes
+  API-sourced rows older than `productCacheMaxAge` (60 days) on startup via
+  `cleanupOldEntries`. Manual products and inventory rows survive; flushed
+  products are re-fetched on the next access or background refresh.
+- **Background refresh**: `CacheRefreshCoordinator` re-fetches inventory
+  products when the cache is overdue (5 days, tracked in SharedPreferences
+  by `CacheStalenessStore`), gated by connectivity.
 
 ### 11.5 RepaintBoundary placement
 

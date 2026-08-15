@@ -15,7 +15,4 @@ for JSON deserialization from the Open Food Facts API, except where noted.
 | `PantryStats` | freezed | Aggregated statistics for the stats screen |
 | `Store` | freezed | Saved store name for autocomplete |
 | `ProductType` | enum | Barcoded, produce, or custom |
-| `AuthUser` | plain Dart | Authenticated user (uid, isAnonymous, email, displayName) |
-| `ProductCacheEntry` | freezed | Firestore document for `product_cache/{barcode}` |
-| `ProduceCacheEntry` | freezed | Firestore document for `produce_cache/{name}` |
 | `ProductSubmissionQueueEntry` | freezed | Offline queue item for OFF product submissions |

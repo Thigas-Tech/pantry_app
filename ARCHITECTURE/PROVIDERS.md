@@ -70,8 +70,6 @@ to enforce the convention mechanically.
 | `purchasedShoppingListProvider` | `FutureProvider` | Purchased items |
 | `pendingShoppingCountProvider` | `FutureProvider` | Pending item count |
 | `storesProvider` | `FutureProvider` | Saved store names for autocomplete |
-| `firebaseCacheProvider` | `Provider` | Singleton `FirebaseCacheService` |
+| `cacheStalenessStoreProvider` | `Provider` | SharedPreferences-backed last-refresh timestamp store |
 | `inventoryProductsProvider` | `FutureProvider` | Distinct products from active inventory |
-| `authServiceProvider` | `Provider` | `AuthService` (FirebaseAuth or no-op) |
-| `authStateProvider` | `StreamProvider` | Reactive `AuthUser` stream |
 | `searchPanelControllerProvider` | `NotifierProvider.family` | Async search state for SearchPanel (debounced query, source, in-pantry filter) |

@@ -118,37 +118,29 @@ User scans barcode
 - Pro subscription: auto-renewing, monthly ($0.99) and yearly ($9.99).
 - `isPro` flag derived from `queryPastPurchases()` — checked before showing ads and enabling cloud backup.
 
-### 3.6 Firebase cache service
+### 3.6 Product cache service
 
-- `FirebaseCacheService` manages a **two-tier cache** for product data using
-  Cloud Firestore as a persistent remote cache alongside the local SQLite DB.
-- **Firestore collections**: `product_cache/{barcode}` for OFF barcoded items
-  and `produce_cache/{name}` for USDA produce items.
-- **Lookup chain**: SQLite → Firestore → OFF/USDA API → fallback. Firestore
-  acts as a mid-tier cache that survives local cache flushes.
-- **180-day rolling refresh**: Each cache entry stores a `lastRefreshedAt`
-  timestamp. Entries are refreshed only after 180 days (configurable via
-  `FirebaseCacheMetaDao`), respecting Firestore free-tier daily write limits.
-- **Graceful degradation**: If Firebase is disabled, unavailable, or the
-  project has no authentication configured, the cache service sets
-  `isAvailable: false` and all operations become no-ops. No errors propagate
-  to the UI.
-- **Dependencies**: `firebase_core`, `cloud_firestore`, `firebase_auth`.
-  All three are optional (`FIREBASE_ENABLED` flag in `.env`).
-- **Security rules**: `firestore.rules` (deployed via CI) allows public reads
-  of the cache collections; `product_cache`/`produce_cache` writes require a
-  signed-in user and a schema-valid document; `recipe_cache` writes/deletes
-  are scoped to the document's `ingestedBy` uid (the author). Rule behaviour
-  is covered by emulator-based tests in `firebase_tests/`.
-- **Auth requirement**: anonymous Firebase Auth is enabled and the app signs
-  in at startup; writes without a signed-in user are rejected by the rules.
+- `ProductRepository` owns the **single-tier, device-only cache**: the local
+  SQLite `products` table is the only place product data is stored. There is
+  no server-side or intermediate cache.
+- **Lookup chain**: SQLite → OFF/USDA API → hardcoded fallback. A cache miss
+  fetches from the API and stores the result locally for offline use.
+- **Two-month flush**: `DatabaseHelper.flushExpiredCachedProducts` removes
+  API-fetched product rows whose `lastSynced` is older than
+  `productCacheMaxAge` (60 days), preserving manual products and surviving
+  inventory rows. It runs on startup inside `cleanupOldEntries`; flushed
+  products are re-fetched on the next access or background refresh.
+- **Background refresh**: `CacheRefreshCoordinator` refreshes inventory
+  products when the cache is overdue (5 days), gated by connectivity and
+  tracked via `CacheStalenessStore` in SharedPreferences.
+- **No auth**: the app does not use Firebase Authentication or any remote
+  service that requires a signed-in user.
 
 ### 3.7 Feedback
 
-In-app GitHub feedback was **removed** (free-tier Firebase decision — the
-serverless proxy would have required the paid Blaze plan). There is no
-feedback submission, no PAT, and no feedback queue. Reach the maintainer
-through the project's GitHub repository.
+In-app GitHub feedback was **removed**. There is no feedback submission, no
+PAT, and no feedback queue. Reach the maintainer through the project's GitHub
+repository.
 
 ### 3.8 Price repository
 

@@ -42,8 +42,8 @@ infrastructure or external server hosting are listed last.
   - Upload both to Google Play Console via `r0adkll/upload-google-play`
   - Triggered by `build.yml` publish job (creates GitHub Release) or
     manual release creation.
-  - Requires: Play Store service account JSON, signing keystore, and
-    AdMob/Firebase configs stored as GitHub secrets.
+  - Requires: Play Store service account JSON and signing keystore
+    stored as GitHub secrets.
 - [x] **Deploy-to-Play-Store workflow file** — exists at
   `.github/workflows/deploy-to-playstore.yml`. Triggers on
   `release: [published]`.
@@ -65,16 +65,12 @@ infrastructure or external server hosting are listed last.
 - [ ] **Pro subscription** — monthly ($0.99) and yearly ($9.99)
   auto-renewing subscription. Removes all ads when active. Tied to
   cloud backup feature.
-- [x] **Firebase core setup** — Firebase project created, `google-services.json`
-  downloaded, `firebase_core` + `cloud_firestore` + `firebase_auth`
-  added as dependencies. Product cache and anonymous auth are live.
-- [ ] **Google Sign-In** — enable Google Sign-In in Firebase Console,
-  add `google_sign_in` package, wire into `AuthService`.
-- [ ] **Cloud backup service** — `FirebaseService` (Auth + Storage init),
-  `CloudBackupService` (export DB → upload to `users/{uid}/backup.db`,
-  restore by download + replace + provider invalidation).
-  `CloudBackupScreen` with sign-in prompt, backup/restore buttons,
-  last-backup metadata display. Gated behind Pro subscription.
+- [x] **Firebase removed** — cloud_firestore, firebase_auth, and
+  firebase_core are removed; no Firebase account, Auth, or cloud cache.
+  Product data is cached only on the device.
+- [ ] **Cloud backup service** — optional cloud sync/backup. Pending
+  provider choice (see Cloud backup item below). Includes last-backup
+  metadata display and is gated behind the Pro subscription.
 
 ---
 
@@ -788,8 +784,8 @@ infrastructure or external server hosting are listed last.
     a backend proxy or GitHub App installation token flow. For Phase 1,
     accept this limitation (token with `public_repo` scope only, for a
     bot account with no other privileges). Phase 2: add a lightweight
-    Cloudflare Worker / Firebase Function that proxies the request with
-    the token stored server-side.
+    Cloudflare Worker that proxies the request with the token stored
+    server-side.
   - **Token expiry**: GitHub PATs can expire. If the token expires, all
     submissions fail silently. Log the failure and show a generic "Could
     not submit. Please try again later." message.
@@ -943,10 +939,9 @@ infrastructure or external server hosting are listed last.
 
 ### Database migrations
 
-- [x] **DB migrations through v30** -- schema is at version 30 with all
-  planned migrations including firebase_cache_meta (v24), recipe tables (v25,
-  v26), and subsequent schema evolution. Further version bumps for new
-  features still needed.
+- [x] **DB migrations through v43** -- schema is at version 43. The
+  Firebase cache metadata table (v24) and the recipes.shared_recipe_id
+  column (v40) were dropped in v42/v43 when Firebase was removed.
 
 ---
 
@@ -1074,9 +1069,9 @@ storage costs.
   - **User‑entered vs API conflict resolution**: Local wins. Show both in
     detail view: "Your price: $4.99 | Store average: $5.20."
 
-- [ ] **Cloud backup** — upload DB to Firebase Storage / S3. Restore on a
-  new device. **Costs**: Firebase Storage ($0.026/GB stored, $0.12/GB
-  transferred) or S3 ($0.023/GB). Ongoing hosting expense.
+- [ ] **Cloud backup** — upload DB to a cloud storage provider. Restore on
+  a new device. **Costs**: S3 ($0.023/GB stored) or similar. Ongoing
+  hosting expense.
 - [ ] **Backend for Frontend (BFF) evaluation** — evaluate offloading OFF
   API response transformation (JSON → freezed model mapping) to a
   lightweight backend service. Tradeoff: reduces client CPU but adds

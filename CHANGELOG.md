@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### Removed
+
+- **Firebase removed entirely**: the app no longer depends on Firebase
+  (cloud_firestore, firebase_auth, firebase_core), Firebase Authentication,
+  or the Firestore-backed product/recipe cache. The local SQLite database is
+  now the only cache. ProductRepository drops the Firebase lookup branch and
+  tracks cache staleness via CacheStalenessStore (SharedPreferences);
+  RecipeService and the Recipe model no longer write shared-recipe snapshots.
+  Schema migrations v42/v43 drop the firebase_cache_meta table and the
+  recipes.shared_recipe_id column. Android builds no longer apply the
+  google-services Gradle plugin; firebase.json, firestore.rules,
+  firebase_tests/, firebase_options.dart, and the firebase-rules CI workflow
+  are deleted. (lib/cache_config.dart new, lib/services/cache_staleness_store.dart new,
+  lib/providers/cache_staleness_store_provider.dart new,
+  lib/services/product_repository.dart, lib/services/recipe_service.dart,
+  lib/models/recipe.dart, lib/database/database_helper.dart,
+  lib/database/migrations/v42_remove_firebase_cache_meta.dart new,
+  lib/database/migrations/v43_remove_recipe_shared_id.dart new, lib/main.dart,
+  lib/config.dart, lib/services/app_startup_service.dart, pubspec.yaml)
+- **Device cache flush policy**: cached API-fetched products older than two
+  months are now removed on startup (DatabaseHelper.flushExpiredCachedProducts)
+  and re-fetched on the next access or background refresh. Manual products
+  are always preserved. (lib/cache_config.dart, lib/database/database_helper.dart)
+
 ### Features
 
 - **OFF language & localization strategy**: Open Food Facts data is now

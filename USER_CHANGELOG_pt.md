@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Seu cache de produtos agora e armazenado apenas no seu dispositivo.
+  Informacoes de produtos em cache com mais de dois meses sao removidas
+  automaticamente e recarregadas na proxima vez que voce visualizar o
+  produto, entao o app continua funcionando offline enquanto permanece
+  organizado ao longo do tempo.
+
+- O app nao usa mais o Firebase nem exige uma conta. Tudo o que voce insere
+  permanece no seu dispositivo e nada e enviado para a nuvem.
+
 - As informacoes de produtos do Open Food Facts agora aparecem no idioma
   do seu dispositivo quando disponivel (por exemplo, usuarios de frances
   veem nomes de produtos em frances). Se um produto aparecer em outro

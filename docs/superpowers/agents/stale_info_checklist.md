@@ -67,13 +67,11 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 ## 7. `docs/superpowers/agents/*.md` and `docs/superpowers/plans/*.md`
 
 | File | Staleness trigger |
-|---|---|---|
+|---|---|
 | `playstore.md` | CI/CD deploy workflow changed |
 | `play_console_later.md` | Play Console verification complete |
 | `FEATURE_FREEZE.md` | Feature freeze checkbox added or removed |
 | `wiki.md` | Wiki CI workflow changed |
-| `docs/superpowers/plans/firebase_cache_plan.md` | Architecture diagram changes, schema version bumped, new cache tier added |
-| `docs/superpowers/plans/firebase_cache_todo.md` | Any Firebase-related feature or fix committed |
 
 ---
 
@@ -83,7 +81,7 @@ These patterns reappear frequently. Search for them when auditing:
 
 - **Removed feature mentioned as current**: CSV import/export, Dio, `exportData()`
 - **Price tracking described as fully synced**: Open Prices sync currently marks prices `synced` locally without HTTP, there is no `proof_image_path` column, and `submitPrice` does not send `price_per` yet (see `ARCHITECTURE/PRICE_TRACKING.md`)
-- **Non-existent provider listed**: `adServiceProvider`, `donationServiceProvider`, `firebaseServiceProvider`, `cloudBackupServiceProvider`, `backupStatusProvider`, `isProProvider`, `isAdFreeProvider` (note: `firebaseCacheProvider`, `authServiceProvider`, and `authStateProvider` now exist)
+- **Non-existent provider listed**: `adServiceProvider`, `donationServiceProvider`, `firebaseServiceProvider`, `cloudBackupServiceProvider`, `backupStatusProvider`, `isProProvider`, `isAdFreeProvider`, `firebaseCacheProvider`, `authServiceProvider`, `authStateProvider` (all Firebase and auth providers were removed with Firebase)
 - **Implemented feature marked `[ ]`**: Check `TODO.md` against actual source files
 - **Contradictory `[Unreleased]` entries**: Earlier changelog sections may describe the true current state
 - **Wrong dependency name**: `connectivity_plus` vs `internet_connection_checker`, `dio` vs `http`

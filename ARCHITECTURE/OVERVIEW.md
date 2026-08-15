@@ -24,8 +24,8 @@
 │  apiServiceProvider        inventoryCountProvider                                │
 │  priceRepositoryProvider   priceHistoryProvider                                  │
 │  shoppingListProvider      storesProvider                                        │
-│  currencyServiceProvider   firebaseCacheProvider                                 │
-│  authStateProvider         inventoryProductsProvider                             │
+│  currencyServiceProvider   inventoryProductsProvider                             │
+│  cacheStalenessStoreProvider                                                     │
 └───────────┬──────────────────────────────────────────────────────────────────────┘
             │ calls                                                                 
 ┌───────────▼──────────────────────────────────────────────────────────────────────┐
@@ -35,36 +35,30 @@
 │  ImageCacheService    GithubIssueService                                         │
 │  PriceRepository      CurrencyService  OpenPricesService                         │
 │  StoreDao             ShoppingListDao  ShoppingListService                       │
-│  FirebaseCacheService  FirebaseCacheClient                                       │
-│  FirebaseFirestoreClientAdapter  AuthService                                     │
-│  FirebaseAuthService                                                             │
-└─────────────┬───────────────────────────┬──────────────────────┬─────────────────┘
-              │                           │                      │                  
-┌─────────▼─────────────────┐  ┌──▼───────────────┐   ┌───────▼─────────┐
-│ Local DB                  │  │ Remote API       │   │ Cloud Cache     │
-│ database/                 │  │ services/        │   │ Cloud Firestore │
-│ SQLite - 12 tables:       │  │ Open Food Facts  │   │ product_cache/  │
-│ products                  │  │ v3 REST (SDK)    │   │ produce_cache/  │
-│ inventories               │  │ Open Prices API  │   └─────────────────┘
-│ inventory                 │  │ ExchangeRate-API │                      
-│ product_submission_queue  │  └──────────────────┘                      
-│ product_submission_queue  │                                            
-│ prices                    │                                            
-│ shopping_list             │                                            
-│ stores                    │                                            
-│ firebase_cache_meta       │                                            
-│ recipes                   │                                            
-│ recipe_ingredients        │                                            
-│ recipe_history            │                                            
-│ scan_history              │                                            
-│ DAO pattern               │                                            
-└───────────────────────────┘                                            
-                                          │
-   ┌───────────────────────────────┐                                                
-   │  [Planned] Firebase Services   │                                               
-   │  Auth (Google Sign-In)        │                                                
-   │  Storage (cloud backup)       │                                                
-   │  AdMob (ads)                  │                                                
-   │  Play Billing (IAP)           │                                                
-   └───────────────────────────────┘                                                
+│  CacheStalenessStore                                                             │
+└─────────────┬───────────────────────────┬────────────────────────────────────────┘
+              │                           │                                          
+┌─────────▼─────────────────┐  ┌──▼───────────────┐                               
+│ Local DB                  │  │ Remote API       │                               
+│ database/                 │  │ services/        │                               
+│ SQLite - 11 tables:       │  │ Open Food Facts  │                               
+│ products                  │  │ v3 REST (SDK)    │                               
+│ inventories               │  │ Open Prices API  │                               
+│ inventory                 │  │ ExchangeRate-API │                               
+│ product_submission_queue  │  └──────────────────┘                               
+│ prices                    │                                                      
+│ shopping_list             │                                                      
+│ stores                    │                                                      
+│ recipes                   │                                                      
+│ recipe_ingredients        │                                                      
+│ recipe_history            │                                                      
+│ scan_history              │                                                      
+│ DAO pattern               │                                                      
+└───────────────────────────┘                                                      
+                                           │
+   ┌───────────────────────────────┐                                               
+   │  [Planned] Services           │                                               
+   │  AdMob (ads)                 │                                               
+   │  Play Billing (IAP)          │                                               
+   └───────────────────────────────┘                                               
 ```

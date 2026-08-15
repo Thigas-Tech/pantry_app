@@ -73,7 +73,6 @@ SettingsScreen
 ├── Manage Inventories link
 ├── Flush cache (API products + image cache)
 ├── About (What's New changelog sheet)
-└── Sign out (Firebase Auth)
 
 ShoppingListScreen
 ├── AppBar (move-to-pantry button, clear-purchased, share)
