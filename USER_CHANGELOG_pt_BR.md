@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- As informacoes de produtos do Open Food Facts agora aparecem no idioma
+  do seu dispositivo quando disponivel (por exemplo, usuarios de frances
+  veem nomes de produtos em frances). Se um produto aparecer em outro
+  idioma, um botao "Mostrar em [idioma]" permite recarregar no seu idioma
+  com um toque.
+
 - Agora voce pode ativar sugestoes semanais de receitas nas Configuracoes.
   Quando ativado, o app escolhe uma receita que combina com os ingredientes
   que voce tem na despensa e mostra como uma notificacao toda semana, no dia

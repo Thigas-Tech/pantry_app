@@ -11,6 +11,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_for_barcode_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
@@ -221,15 +222,27 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       context,
                     ).languageCode;
                     final repo = ref.read(productRepositoryProvider);
+                    final isOnline = await ref.read(
+                      hasConnectionProvider.future,
+                    );
+                    if (!isOnline) {
+                      if (context.mounted) {
+                        SnackbarHelper.showInfo(
+                          context,
+                          l10n.showInLanguageOffline(
+                            currentLocale.toUpperCase(),
+                          ),
+                        );
+                      }
+                      return;
+                    }
                     try {
-                      final product = await repo.getProduct(
+                      final product = await repo.refreshProductLanguage(
                         _product.barcode,
                         languageCode: currentLocale,
                       );
                       if (context.mounted) {
-                        await repo.cacheProduct(product);
-                        if (!context.mounted) return;
-                        setState(() {});
+                        setState(() => _product = product);
                         SnackbarHelper.showInfo(context, l10n.productUpdated);
                       }
                     } on FetchFailedException catch (e) {

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Product information from Open Food Facts now appears in your device's
+  language when available (for example, French users see French product
+  names). If a product is shown in another language, a "Show in [language]"
+  button lets you re-load it in your language with one tap.
+
 - You can now turn on weekly recipe suggestions in Settings. Once enabled,
   the app picks a recipe that matches ingredients you have in your pantry
   and shows it as a notification every week at a day and time you choose.

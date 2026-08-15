@@ -491,13 +491,21 @@ void main() {
         () => mockDb.searchProducts(barcode),
       ).thenAnswer((_) async => []);
       when(
-        () => mockRepo.getProduct(barcode),
+        () => mockRepo.getProduct(
+          barcode,
+          languageCode: any(named: 'languageCode'),
+        ),
       ).thenAnswer((_) async => barcodeProduct);
 
       notifierOf(container).onQuerySubmitted(barcode, languageCode: 'en');
       await pumpEventQueue();
 
-      verify(() => mockRepo.getProduct(barcode)).called(1);
+      verify(
+        () => mockRepo.getProduct(
+          barcode,
+          languageCode: 'en',
+        ),
+      ).called(1);
       final results = stateOf(container).results;
       expect(results, hasLength(1));
       expect(results.single.product.barcode, barcode);

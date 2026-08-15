@@ -300,7 +300,10 @@ class SearchPanelController extends _$SearchPanelController {
           notifyOffline();
         } else {
           final repo = ref.read(productRepositoryProvider);
-          final product = await repo.getProduct(normalizedQuery);
+          final product = await repo.getProduct(
+            normalizedQuery,
+            languageCode: languageCode,
+          );
           if (capturedRequestId != _requestId || !ref.mounted) {
             return (results: const <SearchResult>[], apiHadResults: false);
           }

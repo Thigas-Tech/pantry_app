@@ -4,6 +4,23 @@
 
 ### Features
 
+- **OFF language & localization strategy**: Open Food Facts data is now
+  fetched in the user's device language instead of being hardcoded to
+  English. A new [offLanguageFromLocale] utility normalizes the locale
+  (`pt_BR` → `pt`, `und` → `en`) and passes through other languages
+  (`fr`, `es`, ...). The "Show in language" chip on the product detail
+  screen now actually re-fetches the product in the current locale,
+  merges the result (updating the stored language code, and never
+  overwriting manual products' user-entered fields), and hides once the
+  language matches; an offline guard shows a localized snackbar instead.
+  Stats categories resolve OFF hierarchy tags in the user's language with
+  an `en:` fallback, and the scanner/search paths pass a normalized
+  language code to OFF. (lib/utils/off_language.dart new,
+  lib/providers/current_locale_provider.dart new,
+  lib/models/product.dart, lib/services/product_repository.dart,
+  lib/providers/stats_provider.dart, lib/screens/product_detail_screen.dart,
+  lib/screens/scanner_screen.dart,
+  lib/providers/search_panel_controller.dart)
 - **Weekly recipe suggestions**: an optional weekly notification that
   suggests a recipe matched against your current inventory. The
   suggestion is picked from TheMealDB (free, no API key), skipping the

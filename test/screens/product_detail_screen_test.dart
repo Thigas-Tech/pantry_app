@@ -48,6 +48,7 @@ import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -365,6 +366,7 @@ List<Override> screenOverrides({
   MockPriceRepository? mockPriceRepo,
   ProductImageService? imageService,
   MockProductPhotoPicker? mockPicker,
+  bool online = true,
 }) {
   final effectiveImageService = imageService ?? MockProductImageService();
   // Always default deleteOrphanedFiles to a no-op; tests exercising real
@@ -378,6 +380,7 @@ List<Override> screenOverrides({
   return [
     productRepositoryProvider.overrideWithValue(mockRepo),
     notificationServiceProvider.overrideWithValue(mockNotif),
+    hasConnectionProvider.overrideWithValue(AsyncValue.data(online)),
     if (mockSubmissionService != null)
       productSubmissionServiceProvider.overrideWithValue(mockSubmissionService),
     if (mockDb != null) databaseProvider.overrideWithValue(mockDb),
@@ -975,7 +978,7 @@ void main() {
   testWidgets('shows localized error when re-fetching in another language '
       'fails', (tester) async {
     when(
-      () => mockRepo.getProduct(
+      () => mockRepo.refreshProductLanguage(
         any(),
         languageCode: any(named: 'languageCode'),
       ),
@@ -997,6 +1000,103 @@ void main() {
       find.text('Failed to fetch product. Please check your connection.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('show-in-language chip appears only when the product language '
+      'differs from the locale', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: foreignLanguageProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    expect(find.text('Show in EN'), findsOneWidget);
+  });
+
+  testWidgets('show-in-language chip is hidden when language matches the '
+      'locale', (tester) async {
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: testProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    expect(find.text('Show in EN'), findsNothing);
+  });
+
+  testWidgets('show-in-language chip shows an offline snackbar without '
+      'fetching when offline', (tester) async {
+    when(
+      () => mockRepo.refreshProductLanguage(
+        any(),
+        languageCode: any(named: 'languageCode'),
+      ),
+    ).thenAnswer((_) async => testProduct);
+
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: foreignLanguageProduct),
+      overrides: screenOverrides(
+        mockRepo: mockRepo,
+        mockNotif: mockNotif,
+        online: false,
+      ),
+    );
+
+    await tester.tap(find.text('Show in EN'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(
+      find.text(
+        'You need an internet connection to load this product in EN.',
+      ),
+      findsOneWidget,
+    );
+    verifyNever(
+      () => mockRepo.refreshProductLanguage(
+        any(),
+        languageCode: any(named: 'languageCode'),
+      ),
+    );
+  });
+
+  testWidgets('show-in-language chip re-fetches, updates the product, and '
+      'hides the chip', (tester) async {
+    final translated = foreignLanguageProduct.copyWith(
+      name: 'Produit Français',
+      languageCode: 'en',
+    );
+    when(
+      () => mockRepo.refreshProductLanguage(
+        any(),
+        languageCode: any(named: 'languageCode'),
+      ),
+    ).thenAnswer((_) async => translated);
+
+    setLargeScreen(tester);
+    await pumpApp(
+      tester,
+      const ProductDetailScreen(product: foreignLanguageProduct),
+      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
+    );
+
+    await tester.tap(find.text('Show in EN'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Produit Français'), findsOneWidget);
+    // The language now matches the locale, so the chip disappears.
+    expect(find.text('Show in EN'), findsNothing);
+    verify(
+      () => mockRepo.refreshProductLanguage(
+        '1112223334445',
+        languageCode: 'en',
+      ),
+    ).called(1);
   });
 
   // --------------------------------------------------------------------------

@@ -15,6 +15,7 @@ import 'package:pantry_app/services/produce_category_mapper.dart';
 import 'package:pantry_app/services/produce_nutrition_fallback.dart';
 import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/off_language.dart';
 
 /// The central data access point that implements the offline‑first pattern.
 ///
@@ -78,10 +79,7 @@ class ProductRepository {
   ///
   /// Falls back to 'en' when the platform locale cannot be determined.
   String _currentLanguageCode() {
-    final locale = PlatformDispatcher.instance.locale;
-    final code = locale.languageCode;
-    if (code.isEmpty || code == 'und') return 'en';
-    return code;
+    return offLanguageFromLocale(PlatformDispatcher.instance.locale);
   }
 
   /// Returns a [Product] for the given [barcode], either from cache or from
@@ -152,6 +150,85 @@ class ProductRepository {
       await _db.insertProduct(remote);
       logInfo('Fetched and cached $barcode');
       return remote;
+    } on ProductNotFoundException {
+      logWarning('Product $barcode not found in primary API');
+      return _fallbackOrThrow(barcode, lang);
+    } on Exception catch (e) {
+      logError('Network error for $barcode: $e');
+      throw FetchFailedException(
+        'Failed to fetch product. Please check your connection.',
+      );
+    }
+  }
+
+  /// Re-fetches a product in the requested language code, ignoring the
+  /// local cache, and caches the merged result.
+  ///
+  /// Used by the "Show in language" chip on the product detail screen:
+  /// the product is already cached (that is what the screen displays), so
+  /// [getProduct] would return the cache without making a network call.
+  /// This method forces a fresh fetch from the remote sources, then merges
+  /// with the existing cache row:
+  ///
+  /// - API products merge via [ProductMerge]'s mergeFromApi helper, which
+  ///   now also updates the product's stored language code to the requested
+  ///   language.
+  /// - Manual products merge via the mergeLanguageOnly helper, so the
+  ///   user-entered fields are never overwritten by API data.
+  ///
+  /// Throws [FetchFailedException] on network errors and
+  /// [ProductNotFoundException] when the barcode is unknown to all
+  /// sources.
+  Future<Product> refreshProductLanguage(
+    String barcode, {
+    required String languageCode,
+  }) async {
+    logInfo('Refreshing $barcode in $languageCode');
+    final remote = await _fetchRemoteProduct(barcode, languageCode);
+    final existing = await _db.getProduct(barcode);
+    final merged = existing == null
+        ? remote
+        : existing.source == 'manual'
+        ? existing.mergeLanguageOnly(remote)
+        : existing.mergeFromApi(remote);
+    await _db.insertProduct(merged);
+    logInfo('Refreshed and cached $barcode in $languageCode');
+    return merged;
+  }
+
+  /// Fetches [barcode] from the remote sources (Firebase cache, primary
+  /// API, fallback API) in the given language, without consulting the
+  /// local cache.
+  ///
+  /// Unlike the cache-first path in [_getProductImpl], this always makes a
+  /// network call (or reads the Firebase cache). Callers decide whether to
+  /// cache the result.
+  Future<Product> _fetchRemoteProduct(String barcode, String lang) async {
+    if (_firebaseCache != null && _firebaseCache.isAvailable) {
+      try {
+        final fbProduct = await _firebaseCache.resolveBarcodedProduct(
+          barcode,
+          languageCode: lang,
+        );
+        if (fbProduct != null) {
+          logInfo('Firebase cache hit for $barcode');
+          return fbProduct;
+        }
+        logInfo(
+          'Firebase miss for $barcode '
+          '- resolveBarcodedProduct already tried OFF; skipping retry',
+        );
+        return await _fallbackOrThrow(barcode, lang);
+      } on ProductNotFoundException {
+        rethrow;
+      } on Exception catch (e) {
+        logWarning('Firebase cache lookup failed for $barcode: $e');
+      }
+    }
+
+    try {
+      logInfo('Fetching $barcode from primary API');
+      return await _api.getByBarcode(barcode, languageCode: lang);
     } on ProductNotFoundException {
       logWarning('Product $barcode not found in primary API');
       return _fallbackOrThrow(barcode, lang);

@@ -43,6 +43,16 @@ User scans barcode
 - **Staging**: `https://world.openfoodfacts.net`
 - **Config**: `lib/config.dart` (credentials, email, staging flag)
 - **Submission**: Legacy `/cgi/product_jqm2.pl` and v3 PATCH endpoints available
+- **Language strategy**: product data is requested in the user's device
+  language. `lib/utils/off_language.dart` maps the app locale to an OFF
+  language code (`pt_BR` → `pt`, `und`/empty → `en`, other languages pass
+  through) and `OffQuery` builds the per-query language. The product detail
+  screen re-fetches a cached product in the current locale via
+  `ProductRepository.refreshProductLanguage`, which merges via
+  `mergeFromApi` (API products) or `mergeLanguageOnly` (manual products,
+  so user-entered fields are never overwritten). Stats categories resolve
+  OFF hierarchy tags in the current locale (from
+  `currentLocaleProvider`) with an `en:` fallback.
 
 ### 3.3 Notification service
 

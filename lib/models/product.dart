@@ -515,6 +515,7 @@ extension ProductMerge on Product {
       nutriscoreNotApplicableCategory:
           nonEmpty(api.nutriscoreNotApplicableCategory) ??
           nutriscoreNotApplicableCategory,
+      languageCode: api.languageCode,
       lastSynced: api.lastSynced ?? lastSynced,
       usdaServingAmount: api.usdaServingAmount ?? usdaServingAmount,
       usdaServingUnit: api.usdaServingUnit ?? usdaServingUnit,
@@ -575,5 +576,16 @@ extension ProductMerge on Product {
       offProductImageUrl: offProductImageUrl,
       categoriesHierarchy: categoriesHierarchy,
     );
+  }
+
+  /// Updates only the stored language code from an API-fetched [api]
+  /// product.
+  ///
+  /// Used when re-fetching a manual product in another language: the user
+  /// explicitly requested a different language, so the stored language
+  /// code should change, but the user-entered fields (name, brand,
+  /// ingredients, etc.) must never be overwritten by API data.
+  Product mergeLanguageOnly(Product api) {
+    return copyWith(languageCode: api.languageCode);
   }
 }
