@@ -1,15 +1,12 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show PlatformDispatcher;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pantry_app/config.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/cache_refresh_coordinator_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
@@ -39,13 +36,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppStartupService {
   /// Creates an [AppStartupService].
   ///
-  /// The delay function defaults to [Future.delayed]; anonymousSignIn
-  /// defaults to FirebaseAuth.instance.signInAnonymously. Both are
-  /// injectable so tests can avoid real timers and network calls.
+  /// The delay function defaults to [Future.delayed]. Both the delay and the
+  /// version source are injectable so tests can avoid real timers and
+  /// platform calls.
   AppStartupService({
     required this.container,
     Future<void> Function(Duration delay)? delay,
-    this.anonymousSignIn,
     this.versionInfo,
   }) : _delay = delay ?? _defaultDelay;
 
@@ -53,10 +49,6 @@ class AppStartupService {
   final ProviderContainer container;
 
   final Future<void> Function(Duration delay) _delay;
-
-  /// Injectable anonymous sign-in implementation, or null to use the real
-  /// Firebase Auth call.
-  Future<void> Function()? anonymousSignIn;
 
   /// Injectable version source, or null to use the platform implementation.
   VersionInfoSource? versionInfo;
@@ -125,23 +117,6 @@ class AppStartupService {
     await _schedulePostInitNotifications();
     await _delay(const Duration(milliseconds: 800));
     await _flushProductSubmissionQueue();
-    await _delay(const Duration(seconds: 8));
-    await _refreshFirebaseCache();
-  }
-
-  /// Signs into Firebase anonymously after the first frame.
-  ///
-  /// Uses the injected [anonymousSignIn] when provided, otherwise the real
-  /// Firebase Auth call. A no-op when [AppConfig.firebaseEnabled] is false.
-  Future<void> signInAnonymously() async {
-    if (!AppConfig.firebaseEnabled) return;
-    try {
-      final signIn = anonymousSignIn ?? _firebaseSignIn;
-      await signIn();
-      logInfo('Anonymous auth initialized');
-    } on Exception catch (e) {
-      logWarning('Firebase auth failed (graceful degradation): $e');
-    }
   }
 
   /// Requests notification permission after the first frame.
@@ -324,25 +299,6 @@ class AppStartupService {
     }
   }
 
-  /// Refreshes stale Firebase cache entries in the background.
-  ///
-  /// Runs 8 seconds after startup to avoid competing with other post-init
-  /// tasks for network bandwidth. If Firebase is not available (feature flag
-  /// off, missing config, runtime error) this is a no-op.
-  Future<void> _refreshFirebaseCache() async {
-    try {
-      final cacheService = container.read(firebaseCacheProvider);
-      if (cacheService.isAvailable) {
-        final refreshed = await cacheService.refreshStaleEntries();
-        if (refreshed > 0) {
-          logInfo('Firebase cache: $refreshed entries refreshed');
-        }
-      }
-    } on Exception catch (e) {
-      logWarning('Firebase cache refresh failed: $e');
-    }
-  }
-
   /// Reschedules all expiry reminders through the shared
   /// [NotificationCoordinator] after notification permission is granted.
   Future<void> _rescheduleNotifications() async {
@@ -371,8 +327,4 @@ class AppStartupService {
 
   static Future<void> _defaultDelay(Duration delay) =>
       Future<void>.delayed(delay);
-
-  static Future<void> _firebaseSignIn() async {
-    await FirebaseAuth.instance.signInAnonymously();
-  }
 }

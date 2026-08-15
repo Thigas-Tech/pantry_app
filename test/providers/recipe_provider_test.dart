@@ -12,23 +12,19 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
-import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/recipe_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
-class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
-
-/// Builds a [RecipeService] backed by [db] with a disabled cache and the
-/// default currency service.
+/// Builds a [RecipeService] backed by [db] with the default currency
+/// service.
 RecipeService _service(MockDatabaseHelper db) {
-  return RecipeService(db, MockFirebaseCacheService(), CurrencyService());
+  return RecipeService(db, CurrencyService());
 }
 
 class _MutableActiveInventory extends ActiveInventoryNotifier {
@@ -728,9 +724,6 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
-              firebaseCacheProvider.overrideWithValue(
-                MockFirebaseCacheService(),
-              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(1),
               ),
@@ -776,9 +769,6 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
-              firebaseCacheProvider.overrideWithValue(
-                MockFirebaseCacheService(),
-              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(2),
               ),
@@ -861,9 +851,6 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
-              firebaseCacheProvider.overrideWithValue(
-                MockFirebaseCacheService(),
-              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(1),
               ),
@@ -1479,9 +1466,6 @@ void main() {
           ProviderScope(
             overrides: [
               databaseProvider.overrideWithValue(mockDb),
-              firebaseCacheProvider.overrideWithValue(
-                MockFirebaseCacheService(),
-              ),
               activeInventoryProvider.overrideWith(
                 () => _MutableActiveInventory(1),
               ),

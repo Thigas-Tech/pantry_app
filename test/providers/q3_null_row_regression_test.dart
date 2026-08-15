@@ -10,18 +10,14 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
-import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/recipe_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
-
-class MockFirebaseCacheService extends Mock implements FirebaseCacheService {}
 
 class MockDatabase extends Mock implements Database {}
 
@@ -80,11 +76,7 @@ void main() {
         ),
       ];
 
-      final service = RecipeService(
-        mockDb,
-        MockFirebaseCacheService(),
-        CurrencyService(),
-      );
+      final service = RecipeService(mockDb, CurrencyService());
       final shortages = await service.checkIngredientShortages(ingredients, 1);
 
       expect(shortages, {'Eggs': 2.0});
@@ -178,7 +170,6 @@ void main() {
         ProviderScope(
           overrides: [
             databaseProvider.overrideWithValue(mockDb),
-            firebaseCacheProvider.overrideWithValue(MockFirebaseCacheService()),
             activeInventoryProvider.overrideWith(
               FakeActiveInventoryNotifier.new,
             ),

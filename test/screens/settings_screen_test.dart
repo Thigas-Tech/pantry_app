@@ -476,8 +476,8 @@ void main() {
     },
   );
 
-  /// Regression lock: in-app feedback was removed (free-tier Firebase only),
-  /// so the About section must not show a "Send Feedback" entry.
+  /// Regression lock: in-app feedback was removed, so the About section
+  /// must not show a "Send Feedback" entry.
   testWidgets('does not show a send feedback tile', (tester) async {
     await pumpApp(
       tester,

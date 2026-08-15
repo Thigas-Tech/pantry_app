@@ -64,7 +64,7 @@ final class RecipeServiceProvider
   }
 }
 
-String _$recipeServiceHash() => r'1cc59a19dd0bfee58d19b953ae7a895f05201436';
+String _$recipeServiceHash() => r'5d89deba79810e02ca9aeef591ff6d8eb13f0007';
 
 /// Provides the cost of a single recipe for the given inventory and base
 /// currency.

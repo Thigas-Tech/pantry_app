@@ -7,13 +7,11 @@ import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/providers/cache_refresh_coordinator_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/firebase_cache_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/services/app_startup_service.dart';
 import 'package:pantry_app/services/cache_refresh_coordinator.dart';
-import 'package:pantry_app/services/firebase_cache_service.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,8 +30,6 @@ class _MockImageCache extends Mock implements ImageCacheService {}
 class _MockRefreshCoordinator extends Mock implements CacheRefreshCoordinator {}
 
 class _MockSubmissionService extends Mock implements ProductSubmissionService {}
-
-class _MockFirebaseCache extends Mock implements FirebaseCacheService {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -118,32 +114,6 @@ void main() {
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('changelog_show_pending'), 'true');
-    });
-  });
-
-  group('sign in', () {
-    test('is a no-op when firebase is disabled', () async {
-      final calls = <bool>[];
-      final service = AppStartupService(
-        container: ProviderContainer(),
-        anonymousSignIn: () async => calls.add(true),
-      );
-      await service.signInAnonymously();
-      expect(calls, isEmpty);
-    });
-
-    test('calls the injected sign-in when firebase is enabled', () async {
-      dotenv.loadFromString(
-        isOptional: true,
-        mergeWith: {'FIREBASE_ENABLED': 'true'},
-      );
-      final calls = <bool>[];
-      final service = AppStartupService(
-        container: ProviderContainer(),
-        anonymousSignIn: () async => calls.add(true),
-      );
-      await service.signInAnonymously();
-      expect(calls, [true]);
     });
   });
 
@@ -276,7 +246,6 @@ void main() {
       final imageCache = _MockImageCache();
       final refresh = _MockRefreshCoordinator();
       final submission = _MockSubmissionService();
-      final firebaseCache = _MockFirebaseCache();
       final database = _MockDatabase();
 
       when(() => db.inventoryDao).thenReturn(inventoryDao);
@@ -323,8 +292,6 @@ void main() {
       ).thenAnswer((_) => Future<void>.value());
       when(refresh.refreshIfOverdue).thenAnswer((_) async => 0);
       when(submission.flushQueue).thenAnswer((_) async => 0);
-      when(() => firebaseCache.isAvailable).thenReturn(true);
-      when(firebaseCache.refreshStaleEntries).thenAnswer((_) async => 0);
 
       final container = ProviderContainer(
         overrides: [
@@ -333,7 +300,6 @@ void main() {
           notificationServiceProvider.overrideWithValue(notif),
           cacheRefreshCoordinatorProvider.overrideWithValue(refresh),
           productSubmissionServiceProvider.overrideWithValue(submission),
-          firebaseCacheProvider.overrideWithValue(firebaseCache),
         ],
       );
       addTearDown(container.dispose);
@@ -374,7 +340,6 @@ void main() {
         ),
       ).called(1);
       verify(submission.flushQueue).called(1);
-      verify(firebaseCache.refreshStaleEntries).called(1);
     });
   });
 }

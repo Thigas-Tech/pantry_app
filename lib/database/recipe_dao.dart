@@ -27,7 +27,6 @@ class RecipeDao {
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         inventory_id INTEGER NOT NULL DEFAULT 1,
-        shared_recipe_id TEXT NOT NULL DEFAULT '',
         FOREIGN KEY (inventory_id) REFERENCES inventories(id)
           ON DELETE CASCADE
       )
@@ -54,7 +53,6 @@ class RecipeDao {
     'created_at': recipe.createdAt,
     'updated_at': recipe.updatedAt,
     'inventory_id': recipe.inventoryId,
-    'shared_recipe_id': recipe.sharedRecipeId,
     'search_text': buildRecipeSearchText(recipe),
   };
 
@@ -68,7 +66,6 @@ class RecipeDao {
     createdAt: map['created_at'] as int? ?? 0,
     updatedAt: map['updated_at'] as int? ?? 0,
     inventoryId: (map['inventory_id'] as num?)?.toInt() ?? 1,
-    sharedRecipeId: map['shared_recipe_id'] as String? ?? '',
   );
 
   /// Inserts a recipe and returns its row ID.

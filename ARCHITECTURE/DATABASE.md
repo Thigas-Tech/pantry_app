@@ -13,7 +13,6 @@ Twelve tables:
 | `prices` | Purchase price observations per barcode, scoped to their owning inventory via `inventory_id`, with optional package size for per-unit pricing |
 | `shopping_list` | Items the user intends to buy |
 | `stores` | Saved store names for autocomplete on price entry |
-| `firebase_cache_meta` | Tracks last-refresh timestamps for product cache entries synced to Firestore |
 | `recipes` | User-created recipes, scoped to their owning inventory via `inventory_id` |
 | `recipe_ingredients` | Ingredients linked to a recipe |
 | `recipe_history` | Audit log of recipes marked as made |
@@ -32,7 +31,6 @@ Each table has a dedicated Data Access Object:
 | `PriceDao` | CRUD prices, quantity-scaled aggregation queries (total value, average, monthly/store spending) |
 | `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
 | `StoreDao` | CRUD saved store names, case-insensitive lookup |
-| `FirebaseCacheMetaDao` | CRUD Firestore cache sync metadata, next-refresh tracking |
 | `RecipeDao` | CRUD recipes |
 | `RecipeIngredientDao` | CRUD recipe ingredients |
 | `RecipeHistoryDao` | CRUD recipe history entries |
@@ -84,7 +82,7 @@ Version history:
 | v20 -> v21 | Added `plu_code TEXT` and `product_type TEXT NOT NULL DEFAULT 'barcoded'` to `products` |
 | v21 -> v22 | Added `serving_weight_g REAL` to `inventory` for produce serving sizes |
 | v22 -> v23 | Backfill `category` for produce items with default "Fruits and vegetables based foods" |
-| v23 -> v24 | Added `firebase_cache_meta` table for Firestore cache sync tracking |
+| v23 -> v24 | Added `firebase_cache_meta` table (dropped in v42) |
 | v24 -> v25 | Added `recipes` and `recipe_ingredients` tables |
 | v25 -> v26 | Added `recipe_history` table |
 | v26 -> v27 | Skipped (intended columns already present in v25 CREATE TABLE) |
@@ -100,8 +98,10 @@ Version history:
 | v36 -> v37 | Added `package_quantity` / `package_unit` to `prices` and `quantity` / `product_quantity` to `products` for unit-aware price math |
 | v37 -> v38 | Dropped redundant indexes (`idx_barcode` on the products PK, `idx_inventory_barcode` covered by the composite); added `idx_prices_barcode_inventory_date`, `idx_recipes_inventory_updated`, `idx_products_source` |
 | v38 -> v39 | Added `idx_inventory_inventory_expiry` on `inventory(inventory_id, expiry_date)` and `idx_shopping_list_inventory_purchased_date` on `shopping_list(inventory_id, is_purchased, date_added)` |
-| v39 -> v40 | Added `shared_recipe_id TEXT NOT NULL DEFAULT ''` column on `recipes` for the Firestore recipe_cache document id |
+| v39 -> v40 | Added `shared_recipe_id TEXT NOT NULL DEFAULT ''` column on `recipes` (dropped in v43) |
 | v40 -> v41 | Added `sort_order REAL NOT NULL DEFAULT 0` column on `shopping_list`; pending items backfilled to keep current date-added order |
+| v41 -> v42 | Dropped the `firebase_cache_meta` table (Firebase cache removed) |
+| v42 -> v43 | Dropped the `shared_recipe_id` column on `recipes` (shared-recipe cache removed) |
 
 **Migration v30 search_text backfill**: the recipe `search_text` backfill
 intentionally runs in Dart via `normalizeForSearch()` instead of raw SQL.

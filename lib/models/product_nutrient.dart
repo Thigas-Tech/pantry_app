@@ -41,7 +41,7 @@ abstract class ProductNutrient with _$ProductNutrient {
   /// Creates a [ProductNutrient] from a JSON map.
   ///
   /// Used when decoding the additional_nutrients JSON column of the local
-  /// database and the product cache entries stored in Firestore.
+  /// database and the cached product rows.
   factory ProductNutrient.fromJson(Map<String, dynamic> json) =>
       _$ProductNutrientFromJson(json);
 }

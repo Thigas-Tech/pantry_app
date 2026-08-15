@@ -1,4 +1,4 @@
-import 'package:pantry_app/database/firebase_cache_meta_dao.dart';
+import 'package:pantry_app/cache_config.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/migrations/all_migrations.dart';
@@ -39,7 +39,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// ## Schema overview
 ///
-/// Thirteen tables are created on first launch (version 37):
+/// Eleven tables are created on first launch:
 /// - products – product data fetched from Open Food Facts.
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
@@ -47,7 +47,6 @@ import 'package:sqflite/sqflite.dart';
 /// - prices – purchase price observations per barcode.
 /// - shopping_list – items the user intends to buy.
 /// - stores – saved store names for autocomplete.
-/// - firebase_cache_meta – Firestore cache sync metadata.
 /// - recipes – user-created recipes.
 /// - recipe_ingredients – ingredients linked to a recipe.
 /// - recipe_history – history of cooked recipes.
@@ -57,8 +56,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// CRUD operations are delegated to dedicated DAO classes:
 /// [ProductDao], [InventoryDao], [InventoriesDao], [PriceDao],
-/// [ShoppingListDao], [StoreDao],
-/// [ProductSubmissionQueueDao], [FirebaseCacheMetaDao],
+/// [ShoppingListDao], [StoreDao], [ProductSubmissionQueueDao],
 /// [RecipeDao], [RecipeIngredientDao], [ScanHistoryDao].
 ///
 /// See also:
@@ -101,10 +99,6 @@ class DatabaseHelper {
   /// DAO for the stores table.
   final StoreDao storeDao = const StoreDao();
 
-  /// DAO for the firebase_cache_meta table.
-  final FirebaseCacheMetaDao firebaseCacheMetaDao =
-      const FirebaseCacheMetaDao();
-
   /// DAO for the recipes table.
   final RecipeDao recipeDao = const RecipeDao();
 
@@ -121,7 +115,7 @@ class DatabaseHelper {
   ///
   /// Increment this when adding a new [Migration]. Must match the highest
   /// version in [allMigrations].
-  static const int databaseVersion = 41;
+  static const int databaseVersion = 43;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
@@ -286,8 +280,6 @@ class DatabaseHelper {
 
     await _createStoresTable(db);
 
-    await firebaseCacheMetaDao.createTable(db);
-
     await recipeDao.createTable(db);
 
     for (final col in ['name', 'created_at', 'updated_at']) {
@@ -408,6 +400,62 @@ class DatabaseHelper {
     }
   }
 
+  /// Removes API-fetched product rows whose [Product.lastSynced] timestamp is
+  /// older than [maxAge].
+  ///
+  /// This is the age-based device cache flush: cached products older than the
+  /// two-month [productCacheMaxAge] window are removed so they are re-fetched
+  /// on the next access or background refresh. Manual products
+  /// ([Product.source] 'manual') are always preserved. A product with a null
+  /// [Product.lastSynced] is treated as expired because it was never
+  /// successfully timestamped.
+  ///
+  /// Foreign key enforcement is temporarily disabled because inventory rows
+  /// survive the flush (they are LEFT JOINed and re-fetched later), mirroring
+  /// [clearCachedProducts]. Shopping list barcode references are explicitly
+  /// nulled before the deletion.
+  ///
+  /// Returns the number of deleted product rows. [now] is injectable for
+  /// deterministic tests and defaults to [DateTime.now].
+  Future<int> flushExpiredCachedProducts({
+    Duration maxAge = productCacheMaxAge,
+    DateTime Function()? now,
+  }) async {
+    final db = await database;
+    final cutoff = (now ?? DateTime.now)()
+        .subtract(maxAge)
+        .millisecondsSinceEpoch;
+    logInfo(
+      'Flushing cached products last synced before '
+      '${DateTime.fromMillisecondsSinceEpoch(cutoff).toIso8601String()}'
+      ' (max age: ${maxAge.inDays} days)',
+    );
+
+    await db.execute('PRAGMA foreign_keys = OFF');
+    try {
+      await db.rawUpdate(
+        '''
+        UPDATE shopping_list SET barcode = NULL
+        WHERE barcode IN (
+          SELECT barcode FROM products
+          WHERE source = 'api' AND (last_synced IS NULL OR last_synced < ?)
+        )
+      ''',
+        [cutoff],
+      );
+      final deleted = await db.delete(
+        'products',
+        where: "source = 'api' AND (last_synced IS NULL OR last_synced < ?)",
+        whereArgs: [cutoff],
+      );
+      logInfo('Removed $deleted expired cached products');
+      await db.execute('PRAGMA optimize');
+      return deleted;
+    } finally {
+      await db.execute('PRAGMA foreign_keys = ON');
+    }
+  }
+
   /// Deletes every product from the products table.
   ///
   /// Intended for teardown in integration tests only. Production code
@@ -465,6 +513,8 @@ class DatabaseHelper {
         );
         logInfo('Removed $deletedPrices old price rows');
       }
+
+      await flushExpiredCachedProducts();
 
       // Refresh query planner statistics after the bulk deletions.
       await db.execute('PRAGMA optimize');

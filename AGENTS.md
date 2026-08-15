@@ -107,7 +107,6 @@ unawaited() for fire-and-forget futures (import dart:async).
 
 Read these when implementing specific features:
 - Gestures & touch behaviors -> ~/.config/opencode/instructions/flutter_gestures.md
-- Firebase / FlutterFire -> ~/.config/opencode/instructions/firebase_refs.md
 - OFF API / SDK -> ~/.config/opencode/instructions/off_refs.md
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
 - Project architecture -> ARCHITECTURE/INDEX.md

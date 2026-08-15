@@ -13,7 +13,6 @@ import 'package:pantry_app/database/migrations/v20_backfill_inventory_id.dart';
 import 'package:pantry_app/database/migrations/v21_plu_and_product_type.dart';
 import 'package:pantry_app/database/migrations/v22_serving_weight_g.dart';
 import 'package:pantry_app/database/migrations/v23_backfill_produce_category.dart';
-import 'package:pantry_app/database/migrations/v24_firebase_cache_meta.dart';
 import 'package:pantry_app/database/migrations/v25_recipes.dart';
 import 'package:pantry_app/database/migrations/v26_recipe_history.dart';
 import 'package:pantry_app/database/migrations/v27_skipped.dart';
@@ -31,8 +30,9 @@ import 'package:pantry_app/database/migrations/v37_prices_package.dart';
 import 'package:pantry_app/database/migrations/v38_index_optimizations.dart';
 import 'package:pantry_app/database/migrations/v39_inventory_shopping_indexes.dart';
 import 'package:pantry_app/database/migrations/v3_normalize_units.dart';
-import 'package:pantry_app/database/migrations/v40_recipe_shared_id.dart';
 import 'package:pantry_app/database/migrations/v41_shopping_sort_order.dart';
+import 'package:pantry_app/database/migrations/v42_remove_firebase_cache_meta.dart';
+import 'package:pantry_app/database/migrations/v43_remove_recipe_shared_id.dart';
 import 'package:pantry_app/database/migrations/v4_nutriscore_grade.dart';
 import 'package:pantry_app/database/migrations/v5_nutriscore_not_applicable.dart';
 import 'package:pantry_app/database/migrations/v6_source_column.dart';
@@ -64,7 +64,6 @@ List<Migration> allMigrations() => [
   MigrationV21(),
   MigrationV22(),
   MigrationV23(),
-  MigrationV24(),
   MigrationV25(),
   MigrationV26(),
   MigrationV27(),
@@ -80,6 +79,7 @@ List<Migration> allMigrations() => [
   MigrationV37(),
   MigrationV38(),
   MigrationV39(),
-  MigrationV40(),
   MigrationV41(),
+  MigrationV42(),
+  MigrationV43(),
 ];

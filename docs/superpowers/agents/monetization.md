@@ -117,7 +117,7 @@ logic — one-time purchases only.
 ### Overview
 
 Monthly and yearly auto-renewing subscriptions that remove all ads and
-enable cloud backup (Firebase).
+enable cloud backup.
 
 ### Product IDs (to create in Play Console)
 
@@ -135,25 +135,22 @@ enable cloud backup (Firebase).
 - [ ] Hide all ads when `isPro` is true
 - [ ] Handle subscription cancellation/expiry gracefully
 
-## Firebase cloud backup
+## Cloud backup
 
 ### Overview
 
-Pro subscribers can back up their local SQLite database to Firebase
-Storage and restore it on a new device.
+Pro subscribers can back up their local SQLite database to a cloud storage
+provider and restore it on a new device. The provider is undecided (S3 or
+similar); Firebase was removed from the project.
 
 ### Implementation checklist
 
-- [ ] Create Firebase project at https://console.firebase.google.com/
-- [ ] Register Android app with package `com.thigas_tech.pantry_app`
-- [ ] Download `google-services.json` to `android/app/`
-- [ ] `flutter pub add firebase_core firebase_auth firebase_storage`
-- [ ] `flutter pub add google_sign_in`
-- [ ] Enable Google Sign-In in Firebase Console
-- [ ] Create `lib/services/firebase_service.dart` (init, Auth, Storage)
+- [ ] Choose a cloud storage provider
+- [ ] Create the storage bucket/bucket container
+- [ ] Add the storage upload dependency to `pubspec.yaml`
 - [ ] Create `lib/services/cloud_backup_service.dart` (export, restore)
 - [ ] Create `lib/screens/cloud_backup_screen.dart` (UI)
-- [ ] Firebase Storage security rules
+- [ ] Storage access rules
 - [ ] New ARB strings for backup: `backup`, `restore`, `lastBackup`,
   `backupFailed`, `restoreFailed`, `signInRequired`, `proRequired`
 
@@ -164,6 +161,4 @@ Storage and restore it on a new device.
 - [UMP SDK GDPR guide](https://developers.google.com/admob/flutter/privacy/gdpr)
 - [in_app_purchase](https://pub.dev/packages/in_app_purchase)
 - [Play Billing subscriptions](https://developer.android.com/google/play/billing/subscriptions)
-- [Firebase Flutter setup](https://firebase.flutter.dev/docs/overview)
-- [Firebase Storage](https://firebase.google.com/docs/storage)
 - [ARCHITECTURE/SERVICES.md](../../ARCHITECTURE/SERVICES.md)

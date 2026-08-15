@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -46,13 +45,11 @@ late final ProviderContainer appContainer;
 /// 3. App version comparison (one fast platform call) via
 ///    [AppStartupService.checkAppUpdateBeforeFrame]; the changelog flag and
 ///    post-update cache flush run after the first frame.
-/// 4. Firebase initialized; the anonymous sign-in (a network call) is
-///    deferred until after the first frame.
-/// 5. Notification service initialized (timezone, channel, plugin).
-/// 6. Notification permission requested (system dialog, after first frame).
-/// 7. Database cleanup, feedback flush, cache refresh (after first frame),
+/// 4. Notification service initialized (timezone, channel, plugin).
+/// 5. Notification permission requested (system dialog, after first frame).
+/// 6. Database cleanup, feedback flush, cache refresh (after first frame),
 ///    all owned by [AppStartupService.schedulePostInitTasks].
-/// 8. App launched inside [UncontrolledProviderScope] so all providers
+/// 7. App launched inside [UncontrolledProviderScope] so all providers
 ///    share the same [appContainer].
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,15 +67,6 @@ Future<void> main() async {
   // same singleton instances as the widget tree.
   appContainer = ProviderContainer();
   final appStartup = AppStartupService(container: appContainer);
-
-  if (AppConfig.firebaseEnabled) {
-    try {
-      await Firebase.initializeApp();
-      logInfo('Firebase initialized successfully');
-    } on Exception catch (e) {
-      logWarning('Firebase init failed (graceful degradation): $e');
-    }
-  }
 
   off.OpenFoodAPIConfiguration.userAgent = off.UserAgent(
     name: 'PantryApp',
@@ -132,11 +120,6 @@ Future<void> main() async {
   WidgetsBinding.instance.addPostFrameCallback((_) {
     unawaited(appStartup.schedulePostInitTasks());
   });
-
-  // Anonymous sign-in is a network call; defer it past the first frame so
-  // a slow or blocked network cannot delay startup. The Firebase cache
-  // path already degrades gracefully when auth is unavailable.
-  unawaited(appStartup.signInAnonymously());
 
   // Notification permission request — needs the Activity to be visible.
   // This runs ~100ms after the first frame so the system dialog does not

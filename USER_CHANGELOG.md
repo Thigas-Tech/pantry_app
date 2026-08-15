@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Your product cache is now stored only on your device. Cached product
+  information older than two months is removed automatically and re-loaded
+  the next time you view that product, so the app keeps working offline
+  while staying tidy over time.
+
+- The app no longer uses Firebase or requires an account. Everything you
+  enter stays on your device and nothing is uploaded.
+
 - Product information from Open Food Facts now appears in your device's
   language when available (for example, French users see French product
   names). If a product is shown in another language, a "Show in [language]"

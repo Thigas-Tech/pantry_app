@@ -13,7 +13,7 @@ never waste food again.
 - **Product lookup** — fetches name, brand, nutrition, ingredients from Open Food Facts
 - **Localized product data** — OFF product names/categories/ingredients are fetched in your device's language (with a "Show in language" re-fetch chip on product details)
 - **Local database** — products are cached locally in SQLite; works without internet for known items
-- **Cloud product cache** — Firestore-backed 180-day rolling cache for OFF barcoded and USDA produce products with offline-first fallback
+- **Device-only cache** — no server-side cache; cached products older than two months are flushed and re-fetched on demand
 - **Multiple pantries** — create, rename, and delete named inventories (e.g. Home, Work)
 - **Expiry tracking** — items grouped into Expired / Expiring Soon / Good on the home screen
 - **Local notifications** — two reminders per item: one day before expiry and on expiry day
@@ -113,7 +113,6 @@ lib/
     product_submission_queue_dao.dart  # OFF submission queue
     recipe_dao.dart, recipe_history_dao.dart, recipe_ingredient_dao.dart  # Recipes
     scan_history_dao.dart  # Recent scanned barcodes
-    firebase_cache_meta_dao.dart  # Firestore cache sync metadata
   l10n/                # App translations (ARB files, generated)
   models/              # Freezed data models
   providers/           # Riverpod state & dependency injection
@@ -122,11 +121,7 @@ lib/
     product_repository.dart   # Offline-first product cache + API
     off_adapter.dart          # Open Food Facts API wrapper
     off_query.dart            # OFF request query builder
-    firebase_cache_client.dart  # Firestore read/write client
-    firebase_cache_service.dart  # 180-day Firestore cache coordinator
-    firebase_firestore_client_adapter.dart  # Serialization adapter
-    auth_service.dart         # Firebase Auth / no-op
-    firebase_auth_service.dart   # Firebase anonymous auth
+    cache_staleness_store.dart  # Last-refresh timestamp (SharedPreferences)
     notification_coordinator.dart  # Notification scheduling orchestrator
     notification_service.dart  # Expiry reminder scheduling
     image_cache_service.dart   # WebP image download & cache
@@ -184,7 +179,6 @@ flutter test --concurrency=2 --coverage  # With coverage
 | Language           | Dart 3.12+                      |
 | State management   | Riverpod 3.x                    |
 | Local database     | SQLite (sqflite)                |
-| Cloud database     | Cloud Firestore                  |
 | HTTP client        | http                             |
 | OFF SDK            | openfoodfacts                   |
 | Code generation    | freezed, json_serializable      |
