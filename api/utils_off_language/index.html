@@ -105,9 +105,9 @@ Food Facts API for the given device locale.
     <h5><span class="package-name">pantry_app</span> <span class="package-kind">package</span></h5>
     <ol>
       <li class="section-title">Libraries</li>
+      <li><a href="../cache_config/">cache_config</a></li>
       <li><a href="../config/">config</a></li>
       <li><a href="../database_database_helper/">database/database_helper</a></li>
-      <li><a href="../database_firebase_cache_meta_dao/">database/firebase_cache_meta_dao</a></li>
       <li><a href="../database_inventories_dao/">database/inventories_dao</a></li>
       <li><a href="../database_inventory_dao/">database/inventory_dao</a></li>
       <li><a href="../database_migrations_all_migrations/">database/migrations/all_migrations</a></li>
@@ -136,7 +136,6 @@ Food Facts API for the given device locale.
       <li><a href="../database_migrations_v21_plu_and_product_type/">database/migrations/v21_plu_and_product_type</a></li>
       <li><a href="../database_migrations_v22_serving_weight_g/">database/migrations/v22_serving_weight_g</a></li>
       <li><a href="../database_migrations_v23_backfill_produce_category/">database/migrations/v23_backfill_produce_category</a></li>
-      <li><a href="../database_migrations_v24_firebase_cache_meta/">database/migrations/v24_firebase_cache_meta</a></li>
       <li><a href="../database_migrations_v25_recipes/">database/migrations/v25_recipes</a></li>
       <li><a href="../database_migrations_v26_recipe_history/">database/migrations/v26_recipe_history</a></li>
       <li><a href="../database_migrations_v27_skipped/">database/migrations/v27_skipped</a></li>
@@ -152,8 +151,9 @@ Food Facts API for the given device locale.
       <li><a href="../database_migrations_v37_prices_package/">database/migrations/v37_prices_package</a></li>
       <li><a href="../database_migrations_v38_index_optimizations/">database/migrations/v38_index_optimizations</a></li>
       <li><a href="../database_migrations_v39_inventory_shopping_indexes/">database/migrations/v39_inventory_shopping_indexes</a></li>
-      <li><a href="../database_migrations_v40_recipe_shared_id/">database/migrations/v40_recipe_shared_id</a></li>
       <li><a href="../database_migrations_v41_shopping_sort_order/">database/migrations/v41_shopping_sort_order</a></li>
+      <li><a href="../database_migrations_v42_remove_firebase_cache_meta/">database/migrations/v42_remove_firebase_cache_meta</a></li>
+      <li><a href="../database_migrations_v43_remove_recipe_shared_id/">database/migrations/v43_remove_recipe_shared_id</a></li>
       <li><a href="../database_price_dao/">database/price_dao</a></li>
       <li><a href="../database_product_dao/">database/product_dao</a></li>
       <li><a href="../database_product_submission_queue_dao/">database/product_submission_queue_dao</a></li>
@@ -163,15 +163,12 @@ Food Facts API for the given device locale.
       <li><a href="../database_scan_history_dao/">database/scan_history_dao</a></li>
       <li><a href="../database_shopping_list_dao/">database/shopping_list_dao</a></li>
       <li><a href="../database_store_dao/">database/store_dao</a></li>
-      <li><a href="../firebase_cache_config/">firebase_cache_config</a></li>
-      <li><a href="../firebase_options/">firebase_options</a></li>
       <li><a href="../formatters_price_calculator_formatter/">formatters/price_calculator_formatter</a></li>
       <li><a href="../l10n_app_localizations/">l10n/app_localizations</a></li>
       <li><a href="../l10n_app_localizations_en/">l10n/app_localizations_en</a></li>
       <li><a href="../l10n_app_localizations_pt/">l10n/app_localizations_pt</a></li>
       <li><a href="../l10n_l10n_extensions/">l10n/l10n_extensions</a></li>
       <li><a href="../main/">main</a></li>
-      <li><a href="../models_auth_user/">models/auth_user</a></li>
       <li><a href="../models_camera_capture_result/">models/camera_capture_result</a></li>
       <li><a href="../models_image_field/">models/image_field</a></li>
       <li><a href="../models_inventory_item/">models/inventory_item</a></li>
@@ -182,17 +179,13 @@ Food Facts API for the given device locale.
       <li><a href="../models_photo_permission/">models/photo_permission</a></li>
       <li><a href="../models_photo_pick_result/">models/photo_pick_result</a></li>
       <li><a href="../models_price/">models/price</a></li>
-      <li><a href="../models_produce_cache_entry/">models/produce_cache_entry</a></li>
       <li><a href="../models_product/">models/product</a></li>
-      <li><a href="../models_product_cache_entry/">models/product_cache_entry</a></li>
       <li><a href="../models_product_nutrient/">models/product_nutrient</a></li>
       <li><a href="../models_product_photo_slots/">models/product_photo_slots</a></li>
       <li><a href="../models_product_type/">models/product_type</a></li>
       <li><a href="../models_recipe/">models/recipe</a></li>
-      <li><a href="../models_recipe_cache_entry/">models/recipe_cache_entry</a></li>
       <li><a href="../models_recipe_history_entry/">models/recipe_history_entry</a></li>
       <li><a href="../models_recipe_ingredient/">models/recipe_ingredient</a></li>
-      <li><a href="../models_recipe_ingredient_cache/">models/recipe_ingredient_cache</a></li>
       <li><a href="../models_recipe_nutrition/">models/recipe_nutrition</a></li>
       <li><a href="../models_recipe_suggestion/">models/recipe_suggestion</a></li>
       <li><a href="../models_scan_history_entry/">models/scan_history_entry</a></li>
@@ -203,13 +196,12 @@ Food Facts API for the given device locale.
       <li><a href="../models_submission_progress/">models/submission_progress</a></li>
       <li><a href="../providers_active_inventory_provider/">providers/active_inventory_provider</a></li>
       <li><a href="../providers_api_service_provider/">providers/api_service_provider</a></li>
-      <li><a href="../providers_auth_provider/">providers/auth_provider</a></li>
       <li><a href="../providers_cache_refresh_coordinator_provider/">providers/cache_refresh_coordinator_provider</a></li>
+      <li><a href="../providers_cache_staleness_store_provider/">providers/cache_staleness_store_provider</a></li>
       <li><a href="../providers_connectivity_provider/">providers/connectivity_provider</a></li>
       <li><a href="../providers_currency_service_provider/">providers/currency_service_provider</a></li>
       <li><a href="../providers_current_locale_provider/">providers/current_locale_provider</a></li>
       <li><a href="../providers_database_provider/">providers/database_provider</a></li>
-      <li><a href="../providers_firebase_cache_provider/">providers/firebase_cache_provider</a></li>
       <li><a href="../providers_home_screen_controller/">providers/home_screen_controller</a></li>
       <li><a href="../providers_image_cache_provider/">providers/image_cache_provider</a></li>
       <li><a href="../providers_inventory_for_barcode_provider/">providers/inventory_for_barcode_provider</a></li>
@@ -258,16 +250,12 @@ Food Facts API for the given device locale.
       <li><a href="../screens_stats_screen/">screens/stats_screen</a></li>
       <li><a href="../services_app_startup_service/">services/app_startup_service</a></li>
       <li><a href="../services_app_update_handler/">services/app_update_handler</a></li>
-      <li><a href="../services_auth_service/">services/auth_service</a></li>
       <li><a href="../services_cache_refresh_coordinator/">services/cache_refresh_coordinator</a></li>
+      <li><a href="../services_cache_staleness_store/">services/cache_staleness_store</a></li>
       <li><a href="../services_camera_image_processor/">services/camera_image_processor</a></li>
       <li><a href="../services_camera_service/">services/camera_service</a></li>
       <li><a href="../services_currency_service/">services/currency_service</a></li>
       <li><a href="../services_exceptions/">services/exceptions</a></li>
-      <li><a href="../services_firebase_auth_service/">services/firebase_auth_service</a></li>
-      <li><a href="../services_firebase_cache_client/">services/firebase_cache_client</a></li>
-      <li><a href="../services_firebase_cache_service/">services/firebase_cache_service</a></li>
-      <li><a href="../services_firebase_firestore_client_adapter/">services/firebase_firestore_client_adapter</a></li>
       <li><a href="../services_image_cache_service/">services/image_cache_service</a></li>
       <li><a href="../services_notification_background_handler/">services/notification_background_handler</a></li>
       <li><a href="../services_notification_coordinator/">services/notification_coordinator</a></li>

@@ -85,7 +85,7 @@ is desired.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ProductRepository.new" class="callable">
-          <span class="name"><a href="../services_product_repository/ProductRepository/ProductRepository.html">ProductRepository</a></span><span class="signature">(<span class="parameter" id="param-_db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span><span class="parameter" id="param-_api"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">_api</span>, {</span><span class="parameter" id="param-metaDao"><span>required</span> <span class="type-annotation"><a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a></span> <span class="parameter-name">metaDao</span>, </span><span class="parameter" id="param-fallbackApi"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a>?</span> <span class="parameter-name">fallbackApi</span>, </span><span class="parameter" id="param-usdaClient"><span class="type-annotation"><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a>?</span> <span class="parameter-name">usdaClient</span>, </span><span class="parameter" id="param-firebaseCache"><span class="type-annotation"><a href="../services_firebase_cache_service/FirebaseCacheService-class.html">FirebaseCacheService</a>?</span> <span class="parameter-name">firebaseCache</span></span>})</span>
+          <span class="name"><a href="../services_product_repository/ProductRepository/ProductRepository.html">ProductRepository</a></span><span class="signature">(<span class="parameter" id="param-_db"><span class="type-annotation"><a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a></span> <span class="parameter-name">_db</span>, </span><span class="parameter" id="param-_api"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">_api</span>, {</span><span class="parameter" id="param-stalenessStore"><span>required</span> <span class="type-annotation"><a href="../services_cache_staleness_store/CacheStalenessStore-class.html">CacheStalenessStore</a></span> <span class="parameter-name">stalenessStore</span>, </span><span class="parameter" id="param-fallbackApi"><span class="type-annotation"><a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a>?</span> <span class="parameter-name">fallbackApi</span>, </span><span class="parameter" id="param-usdaClient"><span class="type-annotation"><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a>?</span> <span class="parameter-name">usdaClient</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a> with the given <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> and
@@ -328,8 +328,7 @@ or globally if null.
 </dt>
 <dd>
   Returns the stored last‑refresh timestamp, or null if no refresh has
-ever been recorded. Reads from <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a> instead of
-SharedPreferences.
+ever been recorded.
   
 
 </dd>

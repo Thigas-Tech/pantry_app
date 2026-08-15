@@ -82,7 +82,6 @@ state, so a single instance is safe.</p>
 RecipeService recipeService(Ref ref) {
   return RecipeService(
     ref.read(databaseProvider),
-    ref.read(firebaseCacheProvider),
     ref.read(currencyServiceProvider),
   );
 }</code></pre>

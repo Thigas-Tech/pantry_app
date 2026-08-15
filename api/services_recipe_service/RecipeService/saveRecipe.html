@@ -106,19 +106,10 @@ inventory defaults to <code>activeInventoryId</code>.</p>
       imagePath: imagePath,
       inventoryId: existing?.inventoryId ?? activeInventoryId,
       updatedAt: now,
-      sharedRecipeId: existing?.sharedRecipeId ?? _newSharedId(),
     );
     await _db.updateRecipeWithIngredients(recipe, ingredients);
     logInfo(&#39;Recipe $existingRecipeId updated: $name&#39;);
-    unawaited(
-      _cache.cacheRecipe(
-        recipe,
-        ingredients,
-        recipeId: recipe.sharedRecipeId,
-      ),
-    );
   } else {
-    final sharedId = _newSharedId();
     final recipe = Recipe(
       name: name.trim(),
       instructions: instructions.trim(),
@@ -127,20 +118,12 @@ inventory defaults to <code>activeInventoryId</code>.</p>
       inventoryId: activeInventoryId,
       createdAt: now,
       updatedAt: now,
-      sharedRecipeId: sharedId,
     );
-    final newId = await _db.insertRecipeWithIngredients(
+    await _db.insertRecipeWithIngredients(
       recipe,
       ingredients,
     );
     logInfo(&#39;Recipe created: $name&#39;);
-    unawaited(
-      _cache.cacheRecipe(
-        recipe.copyWith(id: newId),
-        ingredients,
-        recipeId: sharedId,
-      ),
-    );
   }
 }</code></pre>
 </section>

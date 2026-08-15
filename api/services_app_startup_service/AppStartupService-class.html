@@ -72,7 +72,7 @@ anonymous sign-in implementation.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="AppStartupService.new" class="callable">
-          <span class="name"><a href="../services_app_startup_service/AppStartupService/AppStartupService.html">AppStartupService</a></span><span class="signature">({<span class="parameter" id="param-container"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/ProviderContainer-class.html">ProviderContainer</a></span> <span class="parameter-name">container</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span> <span class="parameter-name">delay</span>(<span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?, </span><span class="parameter" id="param-anonymousSignIn"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span> <span class="parameter-name">anonymousSignIn</span>()?, </span><span class="parameter" id="param-versionInfo"><span class="type-annotation"><a href="../services_app_update_handler/VersionInfoSource.html">VersionInfoSource</a>?</span> <span class="parameter-name">versionInfo</span></span>})</span>
+          <span class="name"><a href="../services_app_startup_service/AppStartupService/AppStartupService.html">AppStartupService</a></span><span class="signature">({<span class="parameter" id="param-container"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/ProviderContainer-class.html">ProviderContainer</a></span> <span class="parameter-name">container</span>, </span><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span> <span class="parameter-name">delay</span>(<span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span>)?, </span><span class="parameter" id="param-versionInfo"><span class="type-annotation"><a href="../services_app_update_handler/VersionInfoSource.html">VersionInfoSource</a>?</span> <span class="parameter-name">versionInfo</span></span>})</span>
         </dt>
         <dd>
           Creates an <a href="../services_app_startup_service/AppStartupService-class.html">AppStartupService</a>.
@@ -85,19 +85,6 @@ anonymous sign-in implementation.</p>
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
-        <dt id="anonymousSignIn" class="property">
-  <span class="name"><a href="../services_app_startup_service/AppStartupService/anonymousSignIn.html">anonymousSignIn</a></span>
-  <span class="signature">&#8596; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span> Function<span class="signature">()</span>?</span>
-  
-
-</dt>
-<dd>
-  Injectable anonymous sign-in implementation, or null to use the real
-Firebase Auth call.
-  <div class="features"><span class="feature">getter/setter pair</span></div>
-
-</dd>
-
         <dt id="container" class="property">
   <span class="name"><a href="../services_app_startup_service/AppStartupService/container.html">container</a></span>
   <span class="signature">&#8594; <a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/ProviderContainer-class.html">ProviderContainer</a></span>
@@ -235,19 +222,6 @@ fresh OFF data (manual products are preserved).
 <dd>
   Runs non-critical post-init tasks sequentially with delays to avoid
 janking the first few frames.
-  
-
-</dd>
-
-        <dt id="signInAnonymously" class="callable">
-  <span class="name"><a href="../services_app_startup_service/AppStartupService/signInAnonymously.html">signInAnonymously</a></span><span class="signature">(<wbr>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Signs into Firebase anonymously after the first frame.
   
 
 </dd>

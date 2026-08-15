@@ -118,6 +118,8 @@
       logInfo(&#39;Removed $deletedPrices old price rows&#39;);
     }
 
+    await flushExpiredCachedProducts();
+
     &#47;&#47; Refresh query planner statistics after the bulk deletions.
     await db.execute(&#39;PRAGMA optimize&#39;);
 

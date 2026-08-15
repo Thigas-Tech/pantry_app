@@ -70,8 +70,6 @@
 <li>App version comparison (one fast platform call) via
 <a href="../services_app_startup_service/AppStartupService/checkAppUpdateBeforeFrame.html">AppStartupService.checkAppUpdateBeforeFrame</a>; the changelog flag and
 post-update cache flush run after the first frame.</li>
-<li>Firebase initialized; the anonymous sign-in (a network call) is
-deferred until after the first frame.</li>
 <li>Notification service initialized (timezone, channel, plugin).</li>
 <li>Notification permission requested (system dialog, after first frame).</li>
 <li>Database cleanup, feedback flush, cache refresh (after first frame),
@@ -101,15 +99,6 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   &#47;&#47; same singleton instances as the widget tree.
   appContainer = ProviderContainer();
   final appStartup = AppStartupService(container: appContainer);
-
-  if (AppConfig.firebaseEnabled) {
-    try {
-      await Firebase.initializeApp();
-      logInfo(&#39;Firebase initialized successfully&#39;);
-    } on Exception catch (e) {
-      logWarning(&#39;Firebase init failed (graceful degradation): $e&#39;);
-    }
-  }
 
   off.OpenFoodAPIConfiguration.userAgent = off.UserAgent(
     name: &#39;PantryApp&#39;,
@@ -163,11 +152,6 @@ share the same <a href="../main/appContainer.html">appContainer</a>.</li>
   WidgetsBinding.instance.addPostFrameCallback((_) {
     unawaited(appStartup.schedulePostInitTasks());
   });
-
-  &#47;&#47; Anonymous sign-in is a network call; defer it past the first frame so
-  &#47;&#47; a slow or blocked network cannot delay startup. The Firebase cache
-  &#47;&#47; path already degrades gracefully when auth is unavailable.
-  unawaited(appStartup.signInAnonymously());
 
   &#47;&#47; Notification permission request — needs the Activity to be visible.
   &#47;&#47; This runs ~100ms after the first frame so the system dialog does not

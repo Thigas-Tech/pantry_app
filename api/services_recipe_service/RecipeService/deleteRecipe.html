@@ -63,7 +63,7 @@
     </section>
     
 <section class="desc markdown">
-  <p>Deletes a recipe by <code>id</code>, including its shared-cache entry.</p>
+  <p>Deletes a recipe by <code>id</code>.</p>
 </section>
 
 
@@ -71,14 +71,8 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteRecipe(int id) async {
-  final recipe = await _db.getRecipe(id);
   await _db.deleteRecipe(id);
   logInfo(&#39;Recipe $id deleted&#39;);
-  if (recipe != null &amp;&amp; recipe.sharedRecipeId.isNotEmpty) {
-    unawaited(
-      _cache.deleteSharedRecipe(recipe.sharedRecipeId),
-    );
-  }
 }</code></pre>
 </section>
 

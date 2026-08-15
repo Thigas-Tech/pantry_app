@@ -63,22 +63,14 @@
     
 <section class="desc markdown">
   <p>Returns the stored last‑refresh timestamp, or null if no refresh has
-ever been recorded. Reads from <a href="../../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a> instead of
-SharedPreferences.</p>
+ever been recorded.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;DateTime?&gt; getLastRefreshTime() async {
-  final db = await _db.database;
-  final entry = await _metaDao.getGlobalRefreshTime(db);
-  if (entry == null) return null;
-  final raw = entry[&#39;last_refreshed_at&#39;] as int?;
-  if (raw == null) return null;
-  return DateTime.fromMillisecondsSinceEpoch(raw);
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">Future&lt;DateTime?&gt; getLastRefreshTime() =&gt; _stalenessStore.lastRefresh();</code></pre>
 </section>
 
 

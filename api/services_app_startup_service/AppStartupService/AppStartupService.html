@@ -57,16 +57,15 @@
       <span class="name ">AppStartupService</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-container"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/ProviderContainer-class.html">ProviderContainer</a></span> <span class="parameter-name">container</span>, </span></li>
 <li><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span> <span class="parameter-name">delay</span>(<ol class="parameter-list single-line"> <li><span class="parameter" id="param-delay"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">delay</span></span></li>
 </ol>)?, </span></li>
-<li><span class="parameter" id="param-anonymousSignIn"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span> <span class="parameter-name">anonymousSignIn</span>()?, </span></li>
 <li><span class="parameter" id="param-versionInfo"><span class="type-annotation"><a href="../../services_app_update_handler/VersionInfoSource.html">VersionInfoSource</a>?</span> <span class="parameter-name">versionInfo</span>, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates an <a href="../../services_app_startup_service/AppStartupService-class.html">AppStartupService</a>.</p>
-<p>The delay function defaults to <a href="https://api.flutter.dev/flutter/dart-async/Future/Future.delayed.html">Future.delayed</a>; anonymousSignIn
-defaults to FirebaseAuth.instance.signInAnonymously. Both are
-injectable so tests can avoid real timers and network calls.</p>
+<p>The delay function defaults to <a href="https://api.flutter.dev/flutter/dart-async/Future/Future.delayed.html">Future.delayed</a>. Both the delay and the
+version source are injectable so tests can avoid real timers and
+platform calls.</p>
 </section>
 
 
@@ -76,7 +75,6 @@ injectable so tests can avoid real timers and network calls.</p>
   <pre class="language-dart"><code class="language-dart">AppStartupService({
   required this.container,
   Future&lt;void&gt; Function(Duration delay)? delay,
-  this.anonymousSignIn,
   this.versionInfo,
 }) : _delay = delay ?? _defaultDelay;</code></pre>
 </section>

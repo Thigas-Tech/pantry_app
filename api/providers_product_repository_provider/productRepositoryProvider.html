@@ -70,16 +70,17 @@
 <p>The repository combines the local database (from <a href="../providers_database_provider/databaseProvider.html">databaseProvider</a>),
 the Open Food Facts SDK adapter (from <a href="../providers_api_service_provider/apiServiceProvider.html">apiServiceProvider</a>), and the
 USDA FoodData Central API client to implement offline-first product
-lookup and produce quick-add with nutrition data.</p>
-<p>When the Firebase cache provider creates a <a href="../services_firebase_cache_service/FirebaseCacheService-class.html">FirebaseCacheService</a> where
-<a href="../services_firebase_cache_service/FirebaseCacheService/isAvailable.html">FirebaseCacheService.isAvailable</a> is true, the repository also consults
-the shared Firebase cache before falling through to the primary API.</p>
+lookup and produce quick-add with nutrition data. The local SQLite
+database is the only cache; the cacheStalenessStoreProvider tracks when
+the background inventory refresh last ran.</p>
 <h2 id="dependencies">Dependencies</h2>
 <ul>
 <li><a href="../providers_database_provider/databaseProvider.html">databaseProvider</a> — supplies the <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> singleton for local
 caching and inventory operations.</li>
 <li><a href="../providers_api_service_provider/apiServiceProvider.html">apiServiceProvider</a> — supplies the configured OFF SDK adapter for
 fetching product data from the internet.</li>
+<li><a href="../providers_cache_staleness_store_provider/cacheStalenessStoreProvider.html">cacheStalenessStoreProvider</a> — supplies the SharedPreferences-backed
+store that records the last inventory refresh.</li>
 <li><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> — created inline for the USDA nutrition lookup
 fallback chain.</li>
 </ul>

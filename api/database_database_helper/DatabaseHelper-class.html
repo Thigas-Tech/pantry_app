@@ -62,7 +62,7 @@ database operations use the same connection.</p>
 constructor <a href="../database_database_helper/DatabaseHelper/DatabaseHelper.withPath.html">DatabaseHelper.withPath</a>, which opens an in‑memory database
 or a temporary file.</p>
 <h2 id="schema-overview">Schema overview</h2>
-<p>Thirteen tables are created on first launch (version 37):</p>
+<p>Eleven tables are created on first launch:</p>
 <ul>
 <li>products – product data fetched from Open Food Facts.</li>
 <li>inventories – named pantries (e.g. "Home", "Work").</li>
@@ -71,7 +71,6 @@ or a temporary file.</p>
 <li>prices – purchase price observations per barcode.</li>
 <li>shopping_list – items the user intends to buy.</li>
 <li>stores – saved store names for autocomplete.</li>
-<li>firebase_cache_meta – Firestore cache sync metadata.</li>
 <li>recipes – user-created recipes.</li>
 <li>recipe_ingredients – ingredients linked to a recipe.</li>
 <li>recipe_history – history of cooked recipes.</li>
@@ -80,8 +79,7 @@ or a temporary file.</p>
 <h2 id="delegation">Delegation</h2>
 <p>CRUD operations are delegated to dedicated DAO classes:
 <a href="../database_product_dao/ProductDao-class.html">ProductDao</a>, <a href="../database_inventory_dao/InventoryDao-class.html">InventoryDao</a>, <a href="../database_inventories_dao/InventoriesDao-class.html">InventoriesDao</a>, <a href="../database_price_dao/PriceDao-class.html">PriceDao</a>,
-<a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a>, <a href="../database_store_dao/StoreDao-class.html">StoreDao</a>,
-<a href="../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>, <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a>,
+<a href="../database_shopping_list_dao/ShoppingListDao-class.html">ShoppingListDao</a>, <a href="../database_store_dao/StoreDao-class.html">StoreDao</a>, <a href="../database_product_submission_queue_dao/ProductSubmissionQueueDao-class.html">ProductSubmissionQueueDao</a>,
 <a href="../database_recipe_dao/RecipeDao-class.html">RecipeDao</a>, <a href="../database_recipe_ingredient_dao/RecipeIngredientDao-class.html">RecipeIngredientDao</a>, <a href="../database_scan_history_dao/ScanHistoryDao-class.html">ScanHistoryDao</a>.</p>
 <p>See also:</p>
 <ul>
@@ -129,18 +127,6 @@ used for local storage.</li>
   The lazily‑opened database instance, with in-flight dedup so several
 concurrent first accesses share a single open.
   <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
-        <dt id="firebaseCacheMetaDao" class="property">
-  <span class="name"><a href="../database_database_helper/DatabaseHelper/firebaseCacheMetaDao.html">firebaseCacheMetaDao</a></span>
-  <span class="signature">&#8594; <a href="../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a></span>
-  
-
-</dt>
-<dd>
-  DAO for the firebase_cache_meta table.
-  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
@@ -501,6 +487,20 @@ inventory.
 </dt>
 <dd>
   Deletes a shopping list item by <code>id</code>.
+  
+
+</dd>
+
+        <dt id="flushExpiredCachedProducts" class="callable">
+  <span class="name"><a href="../database_database_helper/DatabaseHelper/flushExpiredCachedProducts.html">flushExpiredCachedProducts</a></span><span class="signature">(<wbr>{<span class="parameter" id="flushExpiredCachedProducts-param-maxAge"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Duration-class.html">Duration</a></span> <span class="parameter-name">maxAge</span> = <span class="default-value">productCacheMaxAge</span>, </span><span class="parameter" id="flushExpiredCachedProducts-param-now"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/DateTime-class.html">DateTime</a></span> <span class="parameter-name">now</span>()?</span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Removes API-fetched product rows whose <code>Product.lastSynced</code> timestamp is
+older than <code>maxAge</code>.
   
 
 </dd>

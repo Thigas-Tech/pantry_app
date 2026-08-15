@@ -64,23 +64,17 @@
 <section class="desc markdown">
   <p>Returns true when the last refresh timestamp is missing or older than
 <a href="../../services_product_repository/ProductRepository/cacheOverdueDays.html">cacheOverdueDays</a> days.</p>
-<p>Queries <a href="../../database_firebase_cache_meta_dao/FirebaseCacheMetaDao-class.html">FirebaseCacheMetaDao</a> for the global refresh entry instead of
-reading from local preferences. When the entry is missing or its
-nextRefreshAt column has passed, the cache is considered overdue.</p>
+<p>Delegates to <a href="../../services_cache_staleness_store/CacheStalenessStore/isOverdue.html">CacheStalenessStore.isOverdue</a> with the overdue window
+from <a href="../../services_product_repository/ProductRepository/cacheOverdueDays.html">cacheOverdueDays</a>.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; isCacheOverdue() async {
-  final db = await _db.database;
-  final entry = await _metaDao.getGlobalRefreshTime(db);
-  if (entry == null) return true;
-  final nextRefreshAt = entry[&#39;next_refresh_at&#39;] as int?;
-  if (nextRefreshAt == null) return true;
-  return DateTime.now().millisecondsSinceEpoch &gt;= nextRefreshAt;
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">Future&lt;bool&gt; isCacheOverdue() =&gt; _stalenessStore.isOverdue(
+  const Duration(days: inventoryRefreshOverdueDays),
+);</code></pre>
 </section>
 
 
