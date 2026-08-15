@@ -231,6 +231,45 @@ void main() {
         expect(merged.nutritionImagePath, '/a.jpg');
       });
 
+      test('API languageCode overwrites cached value', () {
+        const cached = Product(
+          barcode: '1',
+          name: 'Milk',
+        );
+        const api = Product(
+          barcode: '1',
+          name: 'Leite',
+          languageCode: 'pt',
+        );
+        final merged = cached.mergeFromApi(api);
+        expect(merged.languageCode, 'pt');
+      });
+
+      group('mergeLanguageOnly', () {
+        test('updates languageCode and preserves user-entered fields', () {
+          const cached = Product(
+            barcode: '1',
+            name: 'My Note',
+            brand: 'My Brand',
+            ingredients: 'user ingredients',
+            source: 'manual',
+          );
+          const api = Product(
+            barcode: '1',
+            name: 'API Name',
+            brand: 'API Brand',
+            ingredients: 'api ingredients',
+            languageCode: 'fr',
+          );
+          final merged = cached.mergeLanguageOnly(api);
+          expect(merged.languageCode, 'fr');
+          expect(merged.name, 'My Note');
+          expect(merged.brand, 'My Brand');
+          expect(merged.ingredients, 'user ingredients');
+          expect(merged.source, 'manual');
+        });
+      });
+
       group('toOffProduct', () {
         test('maps nutrition values per 100g', () {
           const product = Product(

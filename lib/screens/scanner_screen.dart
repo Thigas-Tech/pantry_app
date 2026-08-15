@@ -11,6 +11,7 @@ import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/plu_service.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/off_language.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 
@@ -122,14 +123,15 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
 
   void _submitPlu(String pluCode, String produceName) {
     logInfo('PLU submitted: $pluCode — $produceName');
-    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context);
+    final languageCode = offLanguageFromLocale(locale);
     unawaited(
       ref
           .read(scannerCameraProvider.notifier)
           .resolvePlu(
             pluCode: pluCode,
             produceName: produceName,
-            languageCode: l10n.localeName,
+            languageCode: languageCode,
           ),
     );
   }

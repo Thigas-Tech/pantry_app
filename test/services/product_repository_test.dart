@@ -211,6 +211,107 @@ void main() {
     );
   });
 
+  group('refreshProductLanguage', () {
+    const frProduct = Product(
+      barcode: testBarcode,
+      name: 'Produit Français',
+      languageCode: 'fr',
+    );
+
+    setUp(() {
+      when(
+        () => mockDb.getProduct(testBarcode),
+      ).thenAnswer((_) async => testProduct);
+      when(
+        () => mockDb.insertProduct(any()),
+      ).thenAnswer((_) async => {});
+      when(
+        () => mockApi.getByBarcode(
+          testBarcode,
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenAnswer((_) async => frProduct);
+    });
+
+    test('fetches from the API even when cached, with the requested '
+        'language', () async {
+      final result = await repository.refreshProductLanguage(
+        testBarcode,
+        languageCode: 'fr',
+      );
+
+      expect(result.languageCode, 'fr');
+      verify(
+        () => mockApi.getByBarcode(
+          testBarcode,
+          languageCode: 'fr',
+        ),
+      ).called(1);
+    });
+
+    test('caches the refreshed product', () async {
+      await repository.refreshProductLanguage(
+        testBarcode,
+        languageCode: 'fr',
+      );
+
+      verify(() => mockDb.insertProduct(any())).called(1);
+    });
+
+    test('merges from API for api-source products (updates name and '
+        'languageCode)', () async {
+      when(
+        () => mockDb.getProduct(testBarcode),
+      ).thenAnswer((_) async => testProduct);
+
+      final result = await repository.refreshProductLanguage(
+        testBarcode,
+        languageCode: 'fr',
+      );
+
+      expect(result.name, 'Produit Français');
+      expect(result.languageCode, 'fr');
+    });
+
+    test('only updates languageCode for manual-source products', () async {
+      const manualProduct = Product(
+        barcode: testBarcode,
+        name: 'My Manual Entry',
+        ingredients: 'user entered',
+        source: 'manual',
+      );
+      when(
+        () => mockDb.getProduct(testBarcode),
+      ).thenAnswer((_) async => manualProduct);
+
+      final result = await repository.refreshProductLanguage(
+        testBarcode,
+        languageCode: 'fr',
+      );
+
+      expect(result.languageCode, 'fr');
+      expect(result.name, 'My Manual Entry');
+      expect(result.ingredients, 'user entered');
+    });
+
+    test('throws FetchFailedException when the API call fails', () {
+      when(
+        () => mockApi.getByBarcode(
+          testBarcode,
+          languageCode: any(named: 'languageCode'),
+        ),
+      ).thenThrow(Exception('network down'));
+
+      expect(
+        () => repository.refreshProductLanguage(
+          testBarcode,
+          languageCode: 'fr',
+        ),
+        throwsA(isA<FetchFailedException>()),
+      );
+    });
+  });
+
   group('inventory item delegation', () {
     test('getInventoryForBarcode delegates to DB', () async {
       final items = [const InventoryItem(barcode: testBarcode)];
@@ -1224,30 +1325,33 @@ void main() {
     test(
       'shares one API request between concurrent lookups of the same barcode',
       () async {
-      when(() => mockDb.getProduct(testBarcode)).thenAnswer((_) async => null);
-      when(() => mockDb.insertProduct(any())).thenAnswer((_) async => 1);
-      when(
-        () => mockApi.getByBarcode(
-          testBarcode,
-          languageCode: any(named: 'languageCode'),
-        ),
-      ).thenAnswer(
-        (_) async => testProduct,
-      );
+        when(
+          () => mockDb.getProduct(testBarcode),
+        ).thenAnswer((_) async => null);
+        when(() => mockDb.insertProduct(any())).thenAnswer((_) async => 1);
+        when(
+          () => mockApi.getByBarcode(
+            testBarcode,
+            languageCode: any(named: 'languageCode'),
+          ),
+        ).thenAnswer(
+          (_) async => testProduct,
+        );
 
-      final first = repository.getProduct(testBarcode);
-      final second = repository.getProduct(testBarcode);
-      final results = await Future.wait([first, second]);
+        final first = repository.getProduct(testBarcode);
+        final second = repository.getProduct(testBarcode);
+        final results = await Future.wait([first, second]);
 
-      expect(results.map((p) => p.barcode), [testBarcode, testBarcode]);
-      verify(
-        () => mockApi.getByBarcode(
-          testBarcode,
-          languageCode: any(named: 'languageCode'),
-        ),
-      ).called(1);
-      verify(() => mockDb.insertProduct(testProduct)).called(1);
-    });
+        expect(results.map((p) => p.barcode), [testBarcode, testBarcode]);
+        verify(
+          () => mockApi.getByBarcode(
+            testBarcode,
+            languageCode: any(named: 'languageCode'),
+          ),
+        ).called(1);
+        verify(() => mockDb.insertProduct(testProduct)).called(1);
+      },
+    );
 
     test('does not deduplicate requests for different barcodes', () async {
       when(() => mockDb.getProduct(any())).thenAnswer((_) async => null);

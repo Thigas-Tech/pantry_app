@@ -48,7 +48,7 @@ class OffQuery {
   }
 
   /// Returns a [ProductQueryConfiguration] for fetching a product by barcode
-  /// in the given [language] (two-letter code like 'en', 'fr', 'pt').
+  /// in the given language (two-letter code like 'en', 'fr', 'pt').
   static ProductQueryConfiguration barcodeConfig(
     String barcode, {
     String language = 'en',
@@ -62,7 +62,7 @@ class OffQuery {
   }
 
   /// Returns a [ProductSearchQueryConfiguration] for searching products
-  /// by name or barcode prefix, in the given [language].
+  /// by name or barcode prefix, in the given language.
   static ProductSearchQueryConfiguration searchConfig(
     String query, {
     int pageSize = 20,

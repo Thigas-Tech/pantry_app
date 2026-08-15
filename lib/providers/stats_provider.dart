@@ -6,10 +6,12 @@ import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/models/pantry_stats.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/current_locale_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/utils/nutriscore.dart';
+import 'package:pantry_app/utils/off_language.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'stats_provider.g.dart';
@@ -22,6 +24,8 @@ part 'stats_provider.g.dart';
 /// release memory when leaving the Stats tab.
 @riverpod
 Future<PantryStats> stats(Ref ref) async {
+  final locale = ref.watch(currentLocaleProvider);
+  final languageCode = offLanguageFromLocale(locale);
   final activeId = await ref.watch(activeInventoryProvider.future);
   final db = ref.watch(databaseProvider);
   final settings = await ref.watch(settingsProvider.future);
@@ -81,16 +85,21 @@ Future<PantryStats> stats(Ref ref) async {
   final storeRows = results[14] as List<Map<String, dynamic>>;
   final nutriscoreByStoreRows = results[15] as List<Map<String, dynamic>>;
   // Compute parent categories from hierarchy data in a background
-  // isolate (per-row JSON decoding was previously on the UI path).
+  // isolate (per-row JSON decoding was previously on the UI path). The
+  // current locale's language prefix is threaded in so OFF hierarchy tags
+  // resolve in the user's language with an en: fallback.
   final parentNames = await compute(
     _parentCategoriesForRows,
-    [
-      for (final row in productCategories)
-        (
-          row['category'] as String?,
-          row['categories_hierarchy'] as String?,
-        ),
-    ],
+    (
+      [
+        for (final row in productCategories)
+          (
+            row['category'] as String?,
+            row['categories_hierarchy'] as String?,
+          ),
+      ],
+      languageCode,
+    ),
   );
   final parentCounts = <String, int>{};
   for (var i = 0; i < parentNames.length; i++) {
@@ -209,22 +218,26 @@ Future<PantryStats> stats(Ref ref) async {
 
 /// Returns a broad parent category from OFF hierarchy data.
 ///
-/// When [hierarchyJson] is available, prefers Portuguese tags (pt:) over
+/// Prefers tags in the user's language code (e.g. 'pt', 'fr') over
 /// English (en:) so that users get locale‑appropriate names when OFF data
 /// includes them. For each language group, picks the second‑to‑last entry
 /// (e.g. en:eggs from en:products, en:eggs-and-their-products,
 /// en:eggs, en:chicken-eggs). When no hierarchy is available, falls back
 /// to the first non‑language‑tagged word of [rawCategory]. Returns null
 /// when both inputs are unavailable.
-String? parentCategory(String? rawCategory, String? hierarchyJson) {
+String? parentCategory(
+  String? rawCategory,
+  String? hierarchyJson,
+  String languageCode,
+) {
   if (hierarchyJson != null && hierarchyJson.isNotEmpty) {
     try {
       final hierarchy = (jsonDecode(hierarchyJson) as List).cast<String>();
       if (hierarchy.isNotEmpty) {
         var matchedEntries = hierarchy
-            .where((t) => t.startsWith('pt:'))
+            .where((t) => t.startsWith('$languageCode:'))
             .toList();
-        var prefixLength = 3;
+        var prefixLength = languageCode.length + 1;
         if (matchedEntries.isEmpty) {
           matchedEntries = hierarchy.where((t) => t.startsWith('en:')).toList();
           prefixLength = 3;
@@ -257,9 +270,14 @@ String? parentCategory(String? rawCategory, String? hierarchyJson) {
 ///
 /// Top-level compute() target so per-row JSON decoding runs off the UI
 /// isolate when the stats provider processes the full products scan.
-List<String?> _parentCategoriesForRows(List<(String?, String?)> rows) {
+/// Receives the rows and the preferred language code as a record so the
+/// OFF hierarchy is resolved in the user's language inside the isolate.
+List<String?> _parentCategoriesForRows(
+  (List<(String?, String?)>, String) input,
+) {
+  final (rows, languageCode) = input;
   return [
     for (final (category, hierarchy) in rows)
-      parentCategory(category, hierarchy),
+      parentCategory(category, hierarchy, languageCode),
   ];
 }

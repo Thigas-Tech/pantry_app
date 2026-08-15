@@ -674,6 +674,15 @@
       }
     }
   },
+  "showInLanguageOffline": "Voce precisa de conexao com a internet para carregar este produto em {language}.",
+  "@showInLanguageOffline": {
+    "description": "Shown when the user taps the show-in-language chip while offline",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
   "store": "Loja",
   "addNewStore": "Adicionar nova loja",
   "storeAdded": "Loja adicionada",

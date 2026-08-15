@@ -171,7 +171,7 @@ infrastructure or external server hosting are listed last.
   Detect via `MediaQuery.platformBrightness` at launch.
 - [x] **SegmentedButton** — replaced `FilterChip` row on home screen with
   M3 `SegmentedButton` inside horizontal `SingleChildScrollView`.
-- [ ] **OFF language & localization strategy** — product names, categories,
+- [x] **OFF language & localization strategy** — product names, categories,
   and ingredients from Open Food Facts are currently hardcoded to English
   regardless of the user's app locale. Define a strategy to fetch and
   display OFF data in the user's preferred language.

@@ -11,6 +11,7 @@ never waste food again.
 
 - **Barcode scanning** — camera-based via Google ML Kit (`mobile_scanner`) or manual text entry
 - **Product lookup** — fetches name, brand, nutrition, ingredients from Open Food Facts
+- **Localized product data** — OFF product names/categories/ingredients are fetched in your device's language (with a "Show in language" re-fetch chip on product details)
 - **Local database** — products are cached locally in SQLite; works without internet for known items
 - **Cloud product cache** — Firestore-backed 180-day rolling cache for OFF barcoded and USDA produce products with offline-first fallback
 - **Multiple pantries** — create, rename, and delete named inventories (e.g. Home, Work)
@@ -147,6 +148,7 @@ lib/
   utils/               # Logger, snackbar helpers
     price_calculator.dart   # Unit-aware price math (per-unit price, scaled cost)
     unit_conversion.dart    # Unit normalization & conversion
+    off_language.dart       # App locale -> OFF language code mapping
   widgets/             # Reusable components
 test/                  # Unit and widget tests
 ```

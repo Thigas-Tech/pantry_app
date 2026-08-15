@@ -330,6 +330,15 @@
       }
     }
   },
+  "showInLanguageOffline": "You need an internet connection to load this product in {language}.",
+  "@showInLanguageOffline": {
+    "description": "Shown when the user taps the show-in-language chip while offline",
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
   "ingredientsOriginal": "Show original ingredients",
   "ingredientsTranslated": "Show translated ingredients",
   "submissionNotSubmitted": "Not submitted to Open Food Facts",

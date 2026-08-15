@@ -340,7 +340,7 @@ class OffAdapter {
 
   /// Fetches a product by barcode from Open Food Facts.
   ///
-  /// [languageCode] is a two-letter code (e.g. 'en', 'fr', 'pt')
+  /// The language code is a two-letter code (e.g. 'en', 'fr', 'pt')
   /// that requests product data in the user's preferred language.
   ///
   /// Retries up to [maxRetries] times on transient failures (network
@@ -402,7 +402,7 @@ class OffAdapter {
 
   /// Searches for products matching [query] by name or barcode prefix.
   ///
-  /// [languageCode] requests product data in the user's preferred language.
+  /// The language code requests product data in the user's preferred language.
   ///
   /// Returns an empty list on any error after exhausting retries
   /// (graceful degradation). Results are deduplicated by barcode and

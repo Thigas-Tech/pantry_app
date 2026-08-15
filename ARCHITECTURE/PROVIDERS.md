@@ -52,10 +52,10 @@ to enforce the convention mechanically.
 | `averageNutriscoreProvider` | `FutureProvider` | Average Nutri-Score for inventory |
 | `connectivityProvider` | `StreamProvider` | Internet connectivity status |
 | `hasConnectionProvider` | `Provider` | Cached connectivity boolean |
+| `currentLocaleProvider` | `Provider` | Current platform `Locale` (dart:ui dispatcher) |
 | `settingsProvider` | `AsyncNotifierProvider` | Notifications, retention, threshold (loaded from prefs in build) |
 | `themeModeProvider` | `AsyncNotifierProvider` | Light / dark / system theme (loaded from prefs in build) |
 | `productSubmissionServiceProvider` | `Provider` | OFF product submission |
-| `githubIssueServiceProvider` | `Provider` | GitHub Issues API wrapper |
 | `priceRepositoryProvider` | `Provider` | Price CRUD + Open Prices sync |
 | `priceHistoryProvider` | `FutureProvider.family` | Price history for (barcode, inventoryId) |
 | `latestPriceProvider` | `FutureProvider.family` | Latest price for (barcode, inventoryId) |

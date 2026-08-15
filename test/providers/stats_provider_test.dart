@@ -75,7 +75,7 @@ void main() {
         'en:eggs',
         'en:chicken-eggs',
       ]);
-      final result = parentCategory(null, hierarchy);
+      final result = parentCategory(null, hierarchy, 'en');
       expect(result, 'Eggs');
     });
 
@@ -86,39 +86,39 @@ void main() {
         'en:hot-beverages',
         'en:coffee',
       ]);
-      final result = parentCategory(null, hierarchy);
+      final result = parentCategory(null, hierarchy, 'en');
       expect(result, 'Hot beverages');
     });
 
     /// Verifies fallback to the raw category when hierarchy is null.
     test('falls back to raw category without language prefix', () {
-      final result = parentCategory('Dairy', null);
+      final result = parentCategory('Dairy', null, 'en');
       expect(result, 'Dairy');
     });
 
     /// Verifies a comma-separated raw category with language tags is
     /// stripped to the first untagged part.
     test('strips language-tagged parts from raw category', () {
-      final result = parentCategory('en:dairy, Dairy', null);
+      final result = parentCategory('en:dairy, Dairy', null, 'en');
       expect(result, 'Dairy');
     });
 
     /// Verifies a raw category that is entirely language-tagged
     /// returns null.
     test('returns null when raw category has no untagged part', () {
-      final result = parentCategory('en:dairy, fr:produit-laitier', null);
+      final result = parentCategory('en:dairy, fr:produit-laitier', null, 'en');
       expect(result, null);
     });
 
     /// Verifies both inputs null returns null.
     test('returns null when both inputs are null', () {
-      final result = parentCategory(null, null);
+      final result = parentCategory(null, null, 'en');
       expect(result, null);
     });
 
     /// Verifies empty hierarchy JSON uses raw category.
     test('empty hierarchy falls back to raw category', () {
-      final result = parentCategory('Snacks', '[]');
+      final result = parentCategory('Snacks', '[]', 'en');
       expect(result, 'Snacks');
     });
 
@@ -128,26 +128,26 @@ void main() {
         'fr:produits',
         'fr:boissons',
       ]);
-      final result = parentCategory('Beverages', hierarchy);
+      final result = parentCategory('Beverages', hierarchy, 'en');
       expect(result, 'Beverages');
     });
 
     /// Verifies invalid JSON falls back gracefully.
     test('invalid JSON falls back to raw category', () {
-      final result = parentCategory('Bread', 'not-valid-json');
+      final result = parentCategory('Bread', 'not-valid-json', 'en');
       expect(result, 'Bread');
     });
 
     /// Verifies empty string inputs.
     test('returns null for empty string inputs', () {
-      final result = parentCategory('', '');
+      final result = parentCategory('', '', 'en');
       expect(result, null);
     });
 
     /// Verifies single en: entry in hierarchy uses it as parent.
     test('single en: entry in hierarchy', () {
       final hierarchy = jsonEncode(['en:fruits']);
-      final result = parentCategory(null, hierarchy);
+      final result = parentCategory(null, hierarchy, 'en');
       expect(result, 'Fruits');
     });
 
@@ -158,7 +158,7 @@ void main() {
         'en:sweet-spreads',
         'en:hazelnut-cocoa-spreads',
       ]);
-      final result = parentCategory(null, hierarchy);
+      final result = parentCategory(null, hierarchy, 'en');
       expect(result, 'Sweet spreads');
     });
 
@@ -174,7 +174,7 @@ void main() {
         'pt:leite',
         'pt:leite-integral',
       ]);
-      final result = parentCategory(null, hierarchy);
+      final result = parentCategory(null, hierarchy, 'pt');
       expect(result, 'Leite');
     });
 
@@ -186,7 +186,7 @@ void main() {
         'pt:leites',
         'pt:leite-gordo',
       ]);
-      final result = parentCategory('Milk', hierarchy);
+      final result = parentCategory('Milk', hierarchy, 'pt');
       expect(result, 'Leites');
     });
 
@@ -198,7 +198,7 @@ void main() {
         'en:cheeses',
         'en:cheddar',
       ]);
-      final result = parentCategory(null, hierarchy);
+      final result = parentCategory(null, hierarchy, 'pt');
       expect(result, 'Cheeses');
     });
 
@@ -211,8 +211,54 @@ void main() {
         'pt:salgadinhos',
         'pt:batata-frita',
       ]);
-      final result = parentCategory(null, hierarchy);
+      final result = parentCategory(null, hierarchy, 'pt');
       expect(result, 'Salgadinhos');
+    });
+
+    /// Verifies fr: tags are preferred when the locale is French.
+    test('prefers fr: tags for a French locale', () {
+      final hierarchy = jsonEncode([
+        'en:products',
+        'en:dairy',
+        'en:milk',
+        'en:whole-milk',
+        'fr:produits',
+        'fr:produits-laitiers',
+        'fr:lait',
+        'fr:lait-entier',
+      ]);
+      final result = parentCategory(null, hierarchy, 'fr');
+      expect(result, 'Lait');
+    });
+
+    /// Verifies fallback to en: when the requested language is absent.
+    test('falls back to en: when the requested language has no tags', () {
+      final hierarchy = jsonEncode([
+        'en:products',
+        'en:dairy',
+        'en:cheeses',
+        'en:cheddar',
+        'fr:produits',
+        'fr:fromages',
+      ]);
+      final result = parentCategory(null, hierarchy, 'de');
+      expect(result, 'Cheeses');
+    });
+
+    /// Verifies en: tags are used directly for an English locale.
+    test('uses en: tags for an English locale', () {
+      final hierarchy = jsonEncode([
+        'pt:produtos',
+        'pt:laticinios',
+        'pt:queijos',
+        'pt:queijo-cheddar',
+        'en:products',
+        'en:dairy',
+        'en:cheeses',
+        'en:cheddar',
+      ]);
+      final result = parentCategory(null, hierarchy, 'en');
+      expect(result, 'Cheeses');
     });
   });
 
