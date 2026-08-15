@@ -31,6 +31,7 @@ import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:pantry_app/utils/product_package_size.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -734,7 +735,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   Future<void> _addPrice(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final package = _productPackageSize();
+    final package = productPackageSize(_product);
     final price = await PriceEntrySheet.show(
       context,
       barcode: _product.barcode,
@@ -807,21 +808,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         }
       }
     }
-  }
-
-  /// Resolves the product's packaging size for pre-filling the price sheet.
-  ///
-  /// Parses the OFF packaging fields ([Product.quantity] /
-  /// [Product.productQuantity]) into a (amount, unit) pair, using the
-  /// per-unit value for multi-pack strings. Returns null when nothing is
-  /// parseable so the price is entered without a package size.
-  ({double quantity, String unit})? _productPackageSize() {
-    final parsed = parseQuantity(
-      productQuantity: _product.productQuantity,
-      quantity: _product.quantity,
-    );
-    if (parsed == null) return null;
-    return (quantity: parsed.amount, unit: parsed.unit);
   }
 
   Future<void> _editPrice(BuildContext context, Price price) async {

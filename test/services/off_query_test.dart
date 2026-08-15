@@ -12,6 +12,13 @@ void main() {
       expect(OffQuery.productFields, contains(ProductField.NUTRISCORE));
     });
 
+    test('productFields requests quantity and serving fields for pre-fill', () {
+      expect(OffQuery.productFields, contains(ProductField.QUANTITY));
+      expect(OffQuery.productFields, contains(ProductField.SERVING_SIZE));
+      expect(OffQuery.productFields, contains(ProductField.SERVING_QUANTITY));
+      expect(OffQuery.productFields, contains(ProductField.PACKAGING_QUANTITY));
+    });
+
     test('barcodeConfig returns ProductQueryConfiguration', () {
       final config = OffQuery.barcodeConfig('5901234123457');
       expect(config.barcode, '5901234123457');

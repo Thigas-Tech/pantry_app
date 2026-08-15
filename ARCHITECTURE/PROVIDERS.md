@@ -73,3 +73,41 @@ to enforce the convention mechanically.
 | `cacheStalenessStoreProvider` | `Provider` | SharedPreferences-backed last-refresh timestamp store |
 | `inventoryProductsProvider` | `FutureProvider` | Distinct products from active inventory |
 | `searchPanelControllerProvider` | `NotifierProvider.family` | Async search state for SearchPanel (debounced query, source, in-pantry filter) |
+| `marketTripItemControllerProvider` | `NotifierProvider.family` | Adds a scanned/produce item to a market trip as purchased, applying optional price + expiry (autoDispose, keyed by trip inventory id) |
+| `mobileScannerControllerProvider` | `Provider` | Auto-disposed `MobileScannerController` for the scanner camera |
+| `scannerCameraProvider` | `NotifierProvider` | Scanner camera lifecycle + scan resolution |
+
+### 4.1 Market trip item controller
+
+`marketTripItemControllerProvider(tripId)` owns the single unit of work that
+adds a scanned (or produce-searched) product to a trip: it marks a pending
+row purchased, or merges into an existing purchased row by quantity, or
+inserts a new purchased row, then writes an optional price and expiry and
+invalidates the shopping list providers. The confirm screen keeps the
+autoDispose notifier alive for the screen's lifetime by watching its
+`.notifier` in `build`; when the screen pops the notifier is disposed.
+
+**Async-gap safety**: the notifier is autoDispose, so if the confirm screen
+is popped while `addScannedProduct` is in flight, the provider is disposed
+and `ref`/`state` can no longer be used. Every `await` in the method is
+followed by a `ref.mounted` guard (returning `null` early) and the `catch`/
+`finally` state writes are guarded the same way, so a dispose mid-add
+completes cleanly instead of throwing "Ref after it has been disposed". The
+confirm screen also wraps itself in `PopScope(canPop: !_saving)` so the
+system back button cannot pop it while the add is being persisted.
+
+### 4.2 Deferred provider invalidations
+
+Invalidating a provider during a widget build phase is not allowed by
+Riverpod: if a provider whose `build` uses `ref.watch` is dirty when a route
+pop resumes a paused subscriber (e.g. `Pantry` when the market trip pops
+during its `TickerMode` rebuild), the refresh can be scheduled mid-build and
+throws "setState() or markNeedsBuild() called during build" on the app's
+`UncontrolledProviderScope`. Invalidations that can coincide with a route
+transition therefore run through `afterFrame()` in
+`lib/utils/deferred_refresh.dart`, which defers them to the end of the
+current frame so the refresh flushes in a normal frame. Callers guard the
+deferred callback with their own mounted checks (`State.mounted`,
+`context.mounted`, or `Ref.mounted`); if the owning widget is disposed
+before the callback fires, the refresh is skipped (pops animate over ~300 ms
+and the home screen is keep-alive, so this is unreachable in practice).

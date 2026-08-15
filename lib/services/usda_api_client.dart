@@ -132,6 +132,13 @@ class UsdaApiClient {
         }),
       );
 
+      if (response.statusCode == 429) {
+        logWarning(
+          'USDA rate limit hit (429) for "$query" — '
+          'the API key is temporarily blocked',
+        );
+        return [];
+      }
       if (response.statusCode == 403) {
         logWarning(
           'USDA API returned 403 — check your API key in .env (USDA_API_KEY)',

@@ -2,12 +2,29 @@
 
 ## Unreleased
 
-- Scanning an item that can't be found no longer opens the search screen:
-  the market trip stays on the camera and shows a "Product not found"
-  message. You can still add it manually with the + button.
+- Produce you add in a market trip or to your pantry now defaults to a grams
+  unit and a 14-day expiry date, which you can still change or clear.
 
-- The scanning guide in the market trip is no longer cut off at the top of
-  the camera box.
+- When recording a price in a market trip, the package size and unit are now
+  filled in automatically from the product's label, so the unit price is
+  calculated without extra typing. If the product has no package size on
+  record, its serving size is used instead.
+
+- Scanning an item during a market trip now opens a quick confirmation where
+  you can set an optional price and expiry date (the price is pre-filled from
+  the last price you recorded); confirming adds the item to the trip as
+  already bought. The same confirmation appears for produce you add without
+  a barcode.
+
+- Market trip items are always marked as bought: the list no longer shows
+  checkboxes, quantity buttons, price buttons, or an "Add again" toggle.
+  You can still delete an item you scanned by accident.
+
+- Scanning the same barcode repeatedly no longer adds the item multiple
+  times to the trip.
+
+- The barcode scanning frame is now centred on the camera, and the "Align
+  the barcode" guide sits clearly above it, easier to read.
 
 - The shopping list (and market trip list) now shows a thumbnail of the
   product when one is available, and long product names wrap to two lines

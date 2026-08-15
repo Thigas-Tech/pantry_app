@@ -1382,6 +1382,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get enterPrice => 'Informar preco';
 
   @override
+  String get priceNotSet => 'Sem preco';
+
+  @override
+  String get addExpiryDate => 'Adicionar data de validade';
+
+  @override
+  String get noExpiry => 'Sem validade';
+
+  @override
   String get addProduce => 'Adicionar hortalicas';
 
   @override
@@ -3604,6 +3613,15 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get enterPrice => 'Informar preco';
+
+  @override
+  String get priceNotSet => 'Sem preco';
+
+  @override
+  String get addExpiryDate => 'Adicionar data de validade';
+
+  @override
+  String get noExpiry => 'Sem validade';
 
   @override
   String get addProduce => 'Adicionar hortalicas';

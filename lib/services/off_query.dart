@@ -25,6 +25,11 @@ class OffQuery {
     ProductField.CATEGORIES,
     ProductField.INGREDIENTS_TEXT,
     ProductField.SERVING_SIZE,
+    // The numeric values power the package-size/serving-size pre-fill in the
+    // price sheets; request them explicitly so the API always returns them
+    // rather than relying on the server including extra fields.
+    ProductField.SERVING_QUANTITY,
+    ProductField.PACKAGING_QUANTITY,
     ProductField.NUTRIMENTS,
     ProductField.NUTRISCORE,
     ProductField.QUANTITY,

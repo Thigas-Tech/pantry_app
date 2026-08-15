@@ -64,7 +64,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v41).
+- `_onUpgrade` handles version bumps (currently v1 -> v45).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -112,6 +112,24 @@ Version history:
 | v41 -> v42 | Dropped the `firebase_cache_meta` table (Firebase cache removed) |
 | v42 -> v43 | Dropped the `shared_recipe_id` column on `recipes` (shared-recipe cache removed). On SQLite < 3.35 (Android < 13) the drop is skipped and the inert column is retained so the upgrade is never blocked. |
 | v43 -> v44 | Added `idx_inventory_inventory_barcode` on `inventory(inventory_id, barcode)` (price statistics GROUP BY barcode, "from your pantry" suggestions) and `idx_shopping_inventory_purchased_sort` on `shopping_list(inventory_id, is_purchased, sort_order)` (pending-item drag order) |
+| v44 -> v45 | Added `expiry_date TEXT` to `shopping_list` so a market trip can carry expiry dates captured at scan time into the pantry on finish |
+
+**Migration idempotency**: every migration must tolerate re-execution so the
+replay path used by `oncreate_schema_parity_test.dart` (which rebuilds a
+fresh-install schema by replaying all migrations from 0) never double-applies
+a change. Migrations that add columns guard with `columnExists`/`tableColumns`
+(`lib/database/migrations/column_existence.dart`). v45 is a canonical
+example: the fresh-install path (v13) already creates `shopping_list` with
+`expiry_date`, so the v45 `ALTER TABLE` is skipped when the column exists.
+
+**Expiry batch merge semantics**: a shopping item moved to the pantry on trip
+finish (or an inventory item added via `insertOrMergeByBarcode`) is the same
+batch as an existing row only when barcode, inventory, expiry, unit, and
+location all match. Undated items merge with undated rows and stay separate
+from dated batches. The expiry comparison builds the clause dynamically
+(`expiry_date IS NULL` when no date is set, `= ?` otherwise) because sqflite
+rejects `null` query arguments — never pass a nullable value in `whereArgs`
+(AGENTS rule 12).
 
 **Migration safety under foreign keys**: sqflite runs `onUpgrade` inside a
 transaction with `PRAGMA foreign_keys = ON` already applied (from

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pantry_app/models/inventory_item.dart';
 
 part 'shopping_item.freezed.dart';
 
@@ -70,6 +71,11 @@ abstract class ShoppingItem with _$ShoppingItem {
 
     /// Store where the item was or will be purchased.
     String? priceStore,
+
+    /// Optional expiry date in ISO 8601 format (YYYY-MM-DD), mirroring
+    /// [InventoryItem.expiryDate]. Captured for market trip items so it can
+    /// be carried into the pantry when the trip is finished.
+    String? expiryDate,
 
     /// Manual ordering position for pending items. Defaults to 0.
     @Default(0) double sortOrder,

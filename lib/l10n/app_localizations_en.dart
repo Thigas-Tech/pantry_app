@@ -1382,6 +1382,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterPrice => 'Enter price';
 
   @override
+  String get priceNotSet => 'No price';
+
+  @override
+  String get addExpiryDate => 'Add expiry date';
+
+  @override
+  String get noExpiry => 'No expiry';
+
+  @override
   String get addProduce => 'Add produce';
 
   @override

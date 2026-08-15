@@ -3,6 +3,7 @@ import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'pantry_provider.g.dart';
@@ -38,6 +39,8 @@ class Pantry extends _$Pantry {
     final repo = ref.read(productRepositoryProvider);
     await repo.refreshInventoryProducts(activeId);
     await repo.setLastRefreshTime();
-    ref.invalidateSelf();
+    afterFrame(() {
+      if (ref.mounted) ref.invalidateSelf();
+    });
   }
 }

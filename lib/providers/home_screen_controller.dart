@@ -2,6 +2,7 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -72,7 +73,11 @@ class HomeScreenController extends _$HomeScreenController {
     if (state.selectedIds.isEmpty) return;
     final repo = ref.read(productRepositoryProvider);
     await repo.deleteInventoryItems(state.selectedIds.toList());
-    if (ref.mounted) ref.invalidate(pantryProvider);
+    afterFrame(() {
+      afterFrame(() {
+        if (ref.mounted) ref.invalidate(pantryProvider);
+      });
+    });
     exitSelectionMode();
   }
 
@@ -86,7 +91,11 @@ class HomeScreenController extends _$HomeScreenController {
       state.selectedIds.toList(),
       targetInventoryId,
     );
-    if (ref.mounted) ref.invalidate(pantryProvider);
+    afterFrame(() {
+      afterFrame(() {
+        if (ref.mounted) ref.invalidate(pantryProvider);
+      });
+    });
     exitSelectionMode();
   }
 
@@ -107,7 +116,11 @@ class HomeScreenController extends _$HomeScreenController {
       final activeId = await ref.read(activeInventoryProvider.future);
       await repo.refreshInventoryProducts(activeId);
       await repo.setLastRefreshTime();
-      if (ref.mounted) ref.invalidate(pantryProvider);
+      afterFrame(() {
+      afterFrame(() {
+        if (ref.mounted) ref.invalidate(pantryProvider);
+      });
+    });
     } on Exception catch (e) {
       logWarning('Overdue cache refresh failed: $e');
     }

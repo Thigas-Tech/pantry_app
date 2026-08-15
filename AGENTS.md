@@ -87,6 +87,13 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 - Branch from main: git checkout -b feat/description
 - Implement -> pre-commit gate -> push
 - Open draft PR -> wait for CI -> convert to ready -> merge
+- Device builds inject the .env credentials at build time (the .env is never
+  bundled as an asset): `flutter run --dart-define-from-file=.env` or
+  `flutter build apk --debug --dart-define-from-file=.env`. The plain
+  `flutter build apk --debug` in the pre-commit gate intentionally builds
+  WITHOUT credentials — USDA produce search and OFF submission degrade
+  gracefully when their credential is absent. The Play Store release
+  workflow recreates .env from GitHub secrets for the same flag.
 - Never commit directly to main.
 - After merge: git checkout main && git pull
 

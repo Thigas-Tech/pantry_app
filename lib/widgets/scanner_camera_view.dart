@@ -8,6 +8,7 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
+import 'package:pantry_app/utils/scan_cooldown.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/scanner_error_content.dart';
 import 'package:pantry_app/widgets/scanner_overlay_painter.dart';
@@ -51,6 +52,9 @@ class ScannerCameraView extends ConsumerStatefulWidget {
 class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _animationController;
+
+  /// Suppresses re-detections of the same barcode while it stays in frame.
+  final ScanDedupe _scanDedupe = ScanDedupe();
 
   @override
   void initState() {
@@ -103,6 +107,12 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
 
     final state = ref.read(scannerCameraProvider);
     if (state.scanResolution != null) return;
+
+    // The camera reports the same barcode continuously while it stays in
+    // frame; without this, once the resolution clears the same barcode is
+    // re-detected and re-added (duplicate shopping items in a trip).
+    if (!_scanDedupe.shouldDispatch(barcode)) return;
+    _scanDedupe.markDispatched(barcode);
 
     logInfo('Barcode scanned: $barcode');
     unawaited(HapticFeedback.mediumImpact());

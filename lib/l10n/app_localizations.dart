@@ -2682,6 +2682,24 @@ abstract class AppLocalizations {
   /// **'Enter price'**
   String get enterPrice;
 
+  /// No description provided for @priceNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No price'**
+  String get priceNotSet;
+
+  /// No description provided for @addExpiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expiry date'**
+  String get addExpiryDate;
+
+  /// No description provided for @noExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'No expiry'**
+  String get noExpiry;
+
   /// No description provided for @addProduce.
   ///
   /// In en, this message translates to:

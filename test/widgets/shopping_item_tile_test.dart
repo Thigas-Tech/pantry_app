@@ -49,6 +49,7 @@ void main() {
     required ShoppingItem item,
     Settings settings = const Settings(),
     MockPriceRepository? priceRepo,
+    bool marketTripMode = false,
   }) async {
     final repo = priceRepo ?? MockPriceRepository();
     when(() => repo.formatPrice(any(), any())).thenAnswer(
@@ -56,7 +57,7 @@ void main() {
     );
     await pumpApp(
       tester,
-      ShoppingItemTile(item: item),
+      ShoppingItemTile(item: item, marketTripMode: marketTripMode),
       overrides: [
         settingsProvider.overrideWith(() => _FakeSettingsNotifier(settings)),
         activeInventoryProvider.overrideWith(
@@ -363,6 +364,59 @@ void main() {
 
       expect(find.byType(Image), findsNothing);
       expect(find.byType(Checkbox), findsOneWidget);
+    });
+
+    testWidgets(
+      'market trip mode renders no checkbox or add-again on a purchased item',
+      (tester) async {
+        const item = ShoppingItem(
+          name: 'Milk',
+          barcode: '123',
+          isPurchased: true,
+        );
+        await pumpTile(tester, item: item, marketTripMode: true);
+
+        expect(find.byType(Checkbox), findsNothing);
+        expect(find.text('Add again'), findsNothing);
+        expect(find.byIcon(Icons.attach_money_outlined), findsNothing);
+        // Delete remains available in the trip.
+        expect(find.byIcon(Icons.delete), findsOneWidget);
+        // The trip placeholder replaces the checkbox.
+        expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'market trip mode hides quantity steppers even for pending items',
+      (tester) async {
+        const item = ShoppingItem(name: 'Milk', barcode: '123');
+        await pumpTile(tester, item: item, marketTripMode: true);
+
+        expect(find.byType(Checkbox), findsNothing);
+        expect(find.byIcon(Icons.remove_circle_outline), findsNothing);
+        expect(find.byIcon(Icons.add_circle_outline), findsNothing);
+      },
+    );
+
+    testWidgets('shows the expiry date in the subtitle when set', (
+      tester,
+    ) async {
+      const item = ShoppingItem(
+        name: 'Milk',
+        barcode: '123',
+        isPurchased: true,
+        expiryDate: '2026-12-31',
+      );
+      await pumpTile(tester, item: item);
+
+      expect(find.text('Exp: 2026-12-31'), findsOneWidget);
+    });
+
+    testWidgets('hides the expiry line when no expiry is set', (tester) async {
+      const item = ShoppingItem(name: 'Milk', barcode: '123');
+      await pumpTile(tester, item: item);
+
+      expect(find.textContaining('Exp:'), findsNothing);
     });
   });
 }

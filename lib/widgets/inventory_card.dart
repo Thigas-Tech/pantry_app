@@ -21,6 +21,7 @@ import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
+import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
@@ -224,7 +225,9 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
                       ),
                     );
                     if (context.mounted) {
-                      ref.invalidate(pantryProvider);
+                      afterFrame(() {
+                        if (context.mounted) ref.invalidate(pantryProvider);
+                      });
                     }
                   } on FetchFailedException {
                     logError(

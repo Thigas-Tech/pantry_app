@@ -148,7 +148,15 @@ class ScannerCamera extends _$ScannerCamera {
 
   @override
   ScannerCameraState build() {
-    _controller = ref.watch(mobileScannerControllerProvider);
+    // Read (not watch) the controller: the notifier and the controller share
+    // the screen's lifetime and are rebuilt together on every entry, so there
+    // is no state to react to. Watching the autoDispose controller provider
+    // here means that when the screen pops (and the controller provider is
+    // disposed) the watch listener invalidates this notifier while the
+    // framework is rebuilding TickerMode, which triggers the Riverpod
+    // "setState() called during build" scheduler crash. See the scanner pop
+    // regression test.
+    _controller = ref.read(mobileScannerControllerProvider);
     ref.onDispose(() {
       _controller?.removeListener(_onControllerState);
       _controller = null;
@@ -238,6 +246,10 @@ class ScannerCamera extends _$ScannerCamera {
 
   Future<void> _startController() async {
     if (_controller == null) return;
+    // The controller reports its own starting flag; guard against a second
+    // start() racing an in-flight one (e.g. permission granted upon resume
+    // while the first start is still initialising).
+    if (state.isStarting) return;
     logInfo('Starting camera controller');
     try {
       await _controller!.start();

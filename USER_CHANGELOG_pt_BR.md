@@ -2,12 +2,33 @@
 
 ## Unreleased
 
-- Escanear um item que nao e encontrado nao abre mais a tela de busca: a ida
-  ao mercado permanece na camera e mostra uma mensagem "Produto nao
-  encontrado". Voce ainda pode adiciona-lo manualmente com o botao +.
+- Hortalicas que voce adiciona em uma ida ao mercado ou na despensa agora
+  padronizam para gramas e uma data de validade de 14 dias, que voce ainda
+  pode alterar ou limpar.
 
-- A guia de leitura da ida ao mercado nao e mais cortada no topo da caixa da
-  camera.
+- Ao registrar um preco em uma ida ao mercado, o tamanho e a unidade da
+  embalagem agora sao preenchidos automaticamente a partir do rotulo do
+  produto, para que o preco unitario seja calculado sem digitar mais nada.
+  Se o produto nao tiver tamanho de embalagem registrado, o tamanho da
+  porcao e usado no lugar.
+
+- Escanear um item durante uma ida ao mercado agora abre uma confirmacao
+  rapida onde voce pode definir um preco e uma data de validade opcionais (o
+  preco vem preenchido com o ultimo preco registrado); confirmar adiciona o
+  item a ida como ja comprado. A mesma confirmacao aparece para hortalicas
+  que voce adicionar sem codigo de barras.
+
+- Os itens da ida ao mercado sao sempre marcados como comprados: a lista nao
+  mostra mais caixas de selecao, botoes de quantidade, botoes de preco nem o
+  botao "Comprar de novo". Voce ainda pode excluir um item escaneado por
+  engano.
+
+- Escanear o mesmo codigo de barras varias vezes nao adiciona mais o item
+  multiplas vezes a ida.
+
+- A moldura de leitura de codigo de barras agora fica centralizada na camera,
+  e a guia "Alinhe o codigo de barras" fica claramente acima dela, mais
+  facil de ler.
 
 - A lista de compras (e a lista da ida ao mercado) agora mostra uma miniatura
   do produto quando disponivel, e nomes de produtos longos quebram em duas

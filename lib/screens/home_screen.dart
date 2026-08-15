@@ -19,6 +19,7 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
+import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/inventory_grouping.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -86,7 +87,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
     );
     if (mounted) {
-      ref.invalidate(pantryProvider);
+      afterFrame(() {
+        if (mounted) ref.invalidate(pantryProvider);
+      });
     }
   }
 
@@ -264,7 +267,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                     );
                     if (result == true && context.mounted) {
-                      ref.invalidate(pantryProvider);
+                      afterFrame(() {
+                        if (context.mounted) ref.invalidate(pantryProvider);
+                      });
                     }
                   },
                 ),

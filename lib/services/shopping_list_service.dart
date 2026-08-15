@@ -65,7 +65,9 @@ class ShoppingListService {
   /// cache to avoid FOREIGN KEY constraint failures. If the product is
   /// missing and cannot be fetched, the barcode is set to null so the
   /// insert still succeeds.
-  Future<void> addShoppingItem(
+  ///
+  /// Returns the id of the inserted or merged row.
+  Future<int> addShoppingItem(
     ShoppingItem item, {
     required int activeInventoryId,
   }) async {
@@ -109,7 +111,12 @@ class ShoppingListService {
       'inventoryId=${scopedItem.inventoryId}',
     );
     try {
-      await _db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
+      final id = await _db.shoppingListDao.insertOrMergeByBarcode(
+        database,
+        scopedItem,
+      );
+      logInfo('Shopping item persisted with id=$id');
+      return id;
     } on Exception catch (e) {
       logError('Failed to add shopping item: $e');
       rethrow;
@@ -170,6 +177,20 @@ class ShoppingListService {
       await _db.updateShoppingItem(item);
     } on Exception catch (e) {
       logError('Failed to update shopping item id=${item.id}: $e');
+      rethrow;
+    }
+  }
+
+  /// Updates only the expiry date for the shopping item with the given [id].
+  ///
+  /// [expiryDate] is an ISO 8601 date string (YYYY-MM-DD) or null to clear
+  /// it. Used by the market trip to finalize an item's expiry after a scan.
+  Future<void> updateShoppingItemExpiry(int id, String? expiryDate) async {
+    logInfo('Update expiry for shopping item $id — $expiryDate');
+    try {
+      await _db.updateShoppingItemExpiry(id, expiryDate: expiryDate);
+    } on Exception catch (e) {
+      logError('Failed to update expiry for shopping item $id: $e');
       rethrow;
     }
   }
@@ -329,12 +350,21 @@ class ShoppingListService {
         continue;
       }
 
+      final expiryClause = item.expiryDate == null
+          ? 'expiry_date IS NULL'
+          : 'expiry_date = ?';
       final existingInv = await txn.query(
         'inventory',
         where:
             'barcode = ? AND inventory_id = ?'
-            ' AND expiry_date IS NULL AND unit = ? AND location = ?',
-        whereArgs: [item.barcode, inventoryId, item.unit, 'pantry'],
+            ' AND $expiryClause AND unit = ? AND location = ?',
+        whereArgs: [
+          item.barcode,
+          inventoryId,
+          if (item.expiryDate != null) item.expiryDate,
+          item.unit,
+          'pantry',
+        ],
         limit: 1,
       );
       if (existingInv.isNotEmpty) {
@@ -357,6 +387,7 @@ class ShoppingListService {
           'unit': item.unit,
           'location': 'pantry',
           'inventory_id': inventoryId,
+          'expiry_date': item.expiryDate,
           'date_added': DateTime.now().millisecondsSinceEpoch,
         });
         logInfo(

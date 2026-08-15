@@ -88,5 +88,14 @@ void main() {
       expect(copied.priceCurrency, 'USD');
       expect(copied.quantity, 3.0);
     });
+
+    test('expiry date defaults to null and is set via copyWith', () {
+      const item = ShoppingItem(name: 'Milk');
+      expect(item.expiryDate, isNull);
+
+      final dated = item.copyWith(expiryDate: '2026-12-31');
+      expect(dated.expiryDate, '2026-12-31');
+      expect(dated.name, 'Milk');
+    });
   });
 }

@@ -65,10 +65,26 @@ jobs:
           fi
 
       - name: Build release App Bundle
-        run: flutter build appbundle --release
+        env:
+          OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
+          OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
+          USDA_API_KEY: ${{ secrets.USDA_API_KEY }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+        run: |
+          printf 'OFF_USER_ID=%s\nOFF_PASSWORD=%s\nUSDA_API_KEY=%s\nCONTACT_EMAIL=%s\n' \
+            "$OFF_USER_ID" "$OFF_PASSWORD" "$USDA_API_KEY" "$CONTACT_EMAIL" > .env
+          flutter build appbundle --release --dart-define-from-file=.env
 
       - name: Build release APK
-        run: flutter build apk --release
+        env:
+          OFF_USER_ID: ${{ secrets.OFF_USER_ID }}
+          OFF_PASSWORD: ${{ secrets.OFF_PASSWORD }}
+          USDA_API_KEY: ${{ secrets.USDA_API_KEY }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+        run: |
+          printf 'OFF_USER_ID=%s\nOFF_PASSWORD=%s\nUSDA_API_KEY=%s\nCONTACT_EMAIL=%s\n' \
+            "$OFF_USER_ID" "$OFF_PASSWORD" "$USDA_API_KEY" "$CONTACT_EMAIL" > .env
+          flutter build apk --release --dart-define-from-file=.env
 
       - name: Upload AAB to Google Play Console
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5  # v1.1.5

@@ -349,7 +349,7 @@ void main() {
           any(),
           activeInventoryId: any(named: 'activeInventoryId'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => 1);
 
       await pumpApp(
         tester,

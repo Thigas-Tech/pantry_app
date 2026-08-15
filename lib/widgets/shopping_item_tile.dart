@@ -39,6 +39,7 @@ class ShoppingItemTile extends ConsumerWidget {
   const ShoppingItemTile({
     required this.item,
     this.reorderIndex,
+    this.marketTripMode = false,
     super.key,
   });
 
@@ -48,6 +49,11 @@ class ShoppingItemTile extends ConsumerWidget {
   /// The item's index within the reorderable pending list, or null when the
   /// tile is not reorderable (e.g. purchased items).
   final int? reorderIndex;
+
+  /// When true, hides every purchase-state control (checkbox, add-again,
+  /// quantity steppers, price button) because everything scanned or added in
+  /// a market trip is already purchased. Deletion (swipe and button) stays.
+  final bool marketTripMode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -102,7 +108,7 @@ class ShoppingItemTile extends ConsumerWidget {
                   item.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: item.isPurchased
+                  style: item.isPurchased && !marketTripMode
                       ? TextStyle(
                           decoration: TextDecoration.lineThrough,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -110,7 +116,7 @@ class ShoppingItemTile extends ConsumerWidget {
                       : null,
                 ),
               ),
-              if (!item.isPurchased) ...[
+              if (!marketTripMode && !item.isPurchased) ...[
                 const SizedBox(width: 2),
                 IconButton(
                   icon: const Icon(Icons.remove_circle_outline, size: 18),
@@ -154,8 +160,8 @@ class ShoppingItemTile extends ConsumerWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (_showsImage(ref)) _buildCheckbox(ref),
-              if (!item.isPurchased)
+              if (!marketTripMode && _showsImage(ref)) _buildCheckbox(ref),
+              if (!marketTripMode && !item.isPurchased)
                 IconButton(
                   icon: Icon(
                     item.priceAmount != null
@@ -169,7 +175,7 @@ class ShoppingItemTile extends ConsumerWidget {
                       : l10n.addPrice,
                   onPressed: () => _showPriceEntry(context, ref),
                 ),
-              if (item.isPurchased)
+              if (!marketTripMode && item.isPurchased)
                 TextButton.icon(
                   icon: const Icon(Icons.add_shopping_cart, size: 18),
                   label: Text(l10n.addAgain),
@@ -258,10 +264,15 @@ class ShoppingItemTile extends ConsumerWidget {
   }
 
   /// Builds the leading widget: the product thumbnail when available,
-  /// otherwise the purchase checkbox.
+  /// otherwise the purchase checkbox (or a neutral placeholder in market
+  /// trip mode, where nothing is selectable).
   Widget _buildLeading(BuildContext context, WidgetRef ref) {
     final imageUrl = _productImageUrl(ref);
-    if (imageUrl == null) return _buildCheckbox(ref);
+    if (imageUrl == null) {
+      return marketTripMode
+          ? _buildTripPlaceholder(context)
+          : _buildCheckbox(ref);
+    }
 
     final barcode = item.barcode!;
     final cached = ref.watch(cachedImageProvider((imageUrl, barcode)));
@@ -272,13 +283,17 @@ class ShoppingItemTile extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
         child: cached.when(
           data: (path) => path == null
-              ? _buildCheckbox(ref)
+              ? marketTripMode
+                    ? _buildTripPlaceholder(context)
+                    : _buildCheckbox(ref)
               : Image.file(
                   File(path),
                   width: 40,
                   height: 40,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => _buildCheckbox(ref),
+                  errorBuilder: (_, _, _) => marketTripMode
+                      ? _buildTripPlaceholder(context)
+                      : _buildCheckbox(ref),
                 ),
           loading: () => Container(
             width: 40,
@@ -291,8 +306,29 @@ class ShoppingItemTile extends ConsumerWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
           ),
-          error: (_, _) => _buildCheckbox(ref),
+          error: (_, _) => marketTripMode
+              ? _buildTripPlaceholder(context)
+              : _buildCheckbox(ref),
         ),
+      ),
+    );
+  }
+
+  /// Builds a neutral 40x40 placeholder for items in a market trip, where a
+  /// purchase checkbox would be meaningless.
+  Widget _buildTripPlaceholder(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.check_circle_outline,
+        size: 20,
+        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }
@@ -414,33 +450,45 @@ class ShoppingItemTile extends ConsumerWidget {
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
 
+    Widget primary;
     if (item.priceAmount != null) {
       final symbol = currencySymbolFor(item.priceCurrency ?? 'USD');
       final priceText = '$symbol${item.priceAmount!.toStringAsFixed(2)}';
       final store = item.priceStore;
       final priceStr = store != null ? '$priceText — $store' : priceText;
-      return Text(
+      primary = Text(
         item.isPurchased ? '$quantityText — $priceStr' : priceStr,
         style: style,
       );
+    } else {
+      final estimate = _estimatePrice(context, ref);
+      if (estimate != null) {
+        final label = item.isPurchased
+            ? '$quantityText — ${l10n.estimatedPrice(estimate)}'
+            : l10n.estimatedPrice(estimate);
+        primary = PriceMask(
+          formattedPrice: estimate,
+          child: Text(label, style: style),
+        );
+      } else if (item.isPurchased) {
+        primary = Text(quantityText, style: style);
+      } else {
+        return const SizedBox.shrink();
+      }
     }
 
-    final estimate = _estimatePrice(context, ref);
-    if (estimate != null) {
-      final label = item.isPurchased
-          ? '$quantityText — ${l10n.estimatedPrice(estimate)}'
-          : l10n.estimatedPrice(estimate);
-      return PriceMask(
-        formattedPrice: estimate,
-        child: Text(label, style: style),
-      );
-    }
-
-    if (item.isPurchased) {
-      return Text(quantityText, style: style);
-    }
-
-    return const SizedBox.shrink();
+    final expiry = item.expiryDate;
+    if (expiry == null || expiry.isEmpty) return primary;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        primary,
+        Text(
+          '${l10n.expiryPrefix}: $expiry',
+          style: style,
+        ),
+      ],
+    );
   }
 
   /// Returns the formatted estimated price (e.g. "R$ 4,99") for the item when

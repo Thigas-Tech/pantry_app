@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
@@ -9,24 +8,24 @@ import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
-import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
-import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
+import 'package:pantry_app/screens/add_product_screen.dart';
+import 'package:pantry_app/screens/market_trip_item_screen.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
+import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/shopping_price.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
-import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:pantry_app/widgets/produce_search_sheet.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 import 'package:pantry_app/widgets/shopping_item_tile.dart';
@@ -52,6 +51,11 @@ class MarketTripScreen extends ConsumerStatefulWidget {
 class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
   int? _tripInventoryId;
 
+  /// Whether a trip confirmation (or the contribution form) is currently
+  /// open; new scan resolutions are ignored while true so a second scan
+  /// cannot push a second screen over the first.
+  bool _confirmationOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +79,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
 
   Future<int?> _pickInventory(List<InventorySummary> inventories) async {
     final l10n = AppLocalizations.of(context)!;
-    final selected = await showModalBottomSheet<int>(
+    final selected = await BottomSheetHelper.show<int>(
       context: context,
       builder: (ctx) => SafeArea(
         child: Column(
@@ -113,15 +117,18 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
     final tripId = _tripInventoryId;
     if (tripId == null) return;
 
+    // Ignore resolutions while a confirmation (or the contribution form) is
+    // open so a second scan cannot push a second screen over the first.
+    if (_confirmationOpen) return;
+
     switch (resolution) {
       case ScanResolved(:final product):
         logInfo('Trip scan resolved: ${product.name}');
-        unawaited(_handleScannedProduct(product, tripId));
-      case ScanFailed(:final message) when message == 'PRODUCT_NOT_FOUND':
-        logInfo('Trip scan — product not found, staying on camera');
-        final l10n = AppLocalizations.of(context)!;
-        SnackbarHelper.showError(context, l10n.productNotFound);
-        ref.read(scannerCameraProvider.notifier).clearResolution();
+        unawaited(_handleResolved(product, tripId));
+      case ScanFailed(:final message, :final barcode)
+          when message == 'PRODUCT_NOT_FOUND':
+        logInfo('Trip scan — product not found, opening contribution form');
+        unawaited(_navigateToSubmit(barcode, tripId));
       case ScanFailed(:final message):
         logWarning('Trip scan failed: $message');
         final l10n = AppLocalizations.of(context)!;
@@ -132,136 +139,69 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
     }
   }
 
-  Future<void> _handleScannedProduct(Product product, int tripId) async {
-    final db = ref.read(databaseProvider);
-    final affected = await db.markShoppingItemsByBarcode(
-      product.barcode,
-      inventoryId: tripId,
-    );
-    if (affected == 0) {
-      await ref
-          .read(shoppingListServiceProvider)
-          .addShoppingItem(
-            ShoppingItem(
-              name: product.name != 'Unknown' ? product.name : product.barcode,
-              barcode: product.barcode,
-              inventoryId: tripId,
-              isPurchased: true,
-            ),
-            activeInventoryId: tripId,
-          );
-      invalidateShoppingListForInventory(ref, tripId);
-      if (!mounted) return;
-      await _offerEstimate(product, tripId);
-    } else {
-      invalidateShoppingListForInventory(ref, tripId);
-    }
-
-    ref.read(scannerCameraProvider.notifier).clearResolution();
-    if (mounted) {
-      unawaited(HapticFeedback.lightImpact());
-    }
-  }
-
-  /// Prompts the user to confirm or update the estimated price for [product]
-  /// when a tracked price exists and the item has no entered price.
-  Future<void> _offerEstimate(Product product, int tripId) async {
-    final l10n = AppLocalizations.of(context)!;
-    if (product.barcode.isEmpty) return;
-    final priceTrackingEnabled =
-        ref.read(settingsProvider).value?.priceTrackingEnabled ?? false;
-    if (!priceTrackingEnabled) return;
-
-    final tracked = await ref.read(
-      latestPriceProvider((product.barcode, tripId)).future,
-    );
-    if (tracked == null) return;
-
-    final repo = ref.read(priceRepositoryProvider);
-    final formatted = repo.formatPrice(tracked.price, tracked.currency);
-
-    if (!mounted) return;
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              child: Text(
-                l10n.confirmEstimateTitle,
-                style: Theme.of(ctx).textTheme.titleMedium,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Text(
-                l10n.confirmEstimateBody(product.name, formatted),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.check_circle_outline),
-              title: Text(l10n.useEstimate),
-              onTap: () => Navigator.pop(ctx, 'use'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: Text(l10n.enterPrice),
-              onTap: () => Navigator.pop(ctx, 'enter'),
-            ),
-          ],
+  /// Pushes the [MarketTripItemScreen] confirmation for [product].
+  ///
+  /// Returns true when the user confirmed the add, false or null otherwise.
+  /// The trip item controller does the actual work.
+  Future<bool?> _runConfirm(Product product, int tripId) {
+    return Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => MarketTripItemScreen(
+          product: product,
+          tripId: tripId,
         ),
       ),
     );
-    if (!mounted || action == null) return;
-
-    final item = await _findItemForBarcode(product.barcode, tripId);
-    if (item == null || !mounted) return;
-
-    if (action == 'use') {
-      await ref
-          .read(shoppingListServiceProvider)
-          .updateShoppingItemPrice(
-            item.id!,
-            priceAmount: tracked.price,
-            priceCurrency: tracked.currency,
-            priceStore: tracked.store,
-          );
-      invalidateShoppingListForInventory(ref, tripId);
-    } else if (action == 'enter') {
-      if (!mounted) return;
-      final price = await PriceEntrySheet.show(
-        context,
-        barcode: product.barcode,
-        existingAmount: tracked.price,
-        existingCurrency: tracked.currency,
-        existingStore: tracked.store,
-      );
-      if (price == null) return;
-      await ref
-          .read(shoppingListServiceProvider)
-          .updateShoppingItemPrice(
-            item.id!,
-            priceAmount: price.price,
-            priceCurrency: price.currency,
-            priceStore: price.store,
-          );
-      invalidateShoppingListForInventory(ref, tripId);
-    }
   }
 
-  Future<ShoppingItem?> _findItemForBarcode(String barcode, int tripId) async {
-    final items = await ref
-        .read(databaseProvider)
-        .getShoppingList(
-          inventoryId: tripId,
-        );
-    for (final item in items) {
-      if (item.barcode == barcode && !item.isPurchased) return item;
+  /// Shows the trip confirmation for a resolved [product] and then clears the
+  /// scan resolution so the camera can scan the next item.
+  Future<void> _handleResolved(Product product, int tripId) async {
+    _confirmationOpen = true;
+    try {
+      await _runConfirm(product, tripId);
+    } finally {
+      _confirmationOpen = false;
     }
-    return null;
+    if (!mounted) return;
+    ref.read(scannerCameraProvider.notifier).clearResolution();
+  }
+
+  /// Opens the [AddProductScreen] contribution form for a [barcode] that is
+  /// not in the database. On return, when the form produced a [Product], it
+  /// is confirmed for the trip (with the same single price/expiry prompt);
+  /// otherwise nothing is added and the scan resolution clears.
+  Future<void> _navigateToSubmit(String? barcode, int tripId) async {
+    _confirmationOpen = true;
+    try {
+      if (barcode == null) {
+        logWarning('Product not found without a barcode — clearing resolution');
+        ref.read(scannerCameraProvider.notifier).clearResolution();
+        return;
+      }
+      logInfo('Navigating to AddProductScreen for contribution: $barcode');
+      final navigator = Navigator.of(context);
+      final product = await navigator.push<Product>(
+        MaterialPageRoute(
+          builder: (_) => AddProductScreen(
+            barcode: barcode,
+            submitToOff: true,
+          ),
+        ),
+      );
+      if (!mounted) return;
+      if (product == null) {
+        logInfo('Contribution cancelled — clearing resolution');
+        ref.read(scannerCameraProvider.notifier).clearResolution();
+        return;
+      }
+      logInfo('Contributed product saved: ${product.name} — confirming');
+      await _runConfirm(product, tripId);
+      if (!mounted) return;
+      ref.read(scannerCameraProvider.notifier).clearResolution();
+    } finally {
+      _confirmationOpen = false;
+    }
   }
 
   Future<void> _openManualAdd(int tripId) async {
@@ -339,35 +279,34 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
   }
 
   Future<void> _addProduce(int tripId) async {
-    final product = await ProduceSearchSheet.show(context);
-    if (product == null || !mounted) return;
-
-    // Cache the product first so the "plu-" barcode survives insertion and
-    // the item can later be moved to inventory by barcode lookup.
+    // Guard the whole flow (the search sheet and the confirmation) so a scan
+    // resolution cannot push a screen over the open produce sheet.
+    if (_confirmationOpen) return;
+    _confirmationOpen = true;
     try {
-      await ref.read(productRepositoryProvider).cacheProduct(product);
-    } on Exception catch (e) {
-      logWarning('Failed to cache produce ${product.name}: $e');
-    }
+      final product = await ProduceSearchSheet.show(context);
+      if (product == null || !mounted) return;
 
-    await ref
-        .read(shoppingListServiceProvider)
-        .addShoppingItem(
-          ShoppingItem(
-            name: product.name,
-            barcode: product.barcode,
-            inventoryId: tripId,
-            isPurchased: true,
-          ),
-          activeInventoryId: tripId,
+      // Cache the product first so the "plu-" barcode survives insertion and
+      // the item can later be moved to inventory by barcode lookup.
+      try {
+        await ref.read(productRepositoryProvider).cacheProduct(product);
+      } on Exception catch (e) {
+        logWarning('Failed to cache produce ${product.name}: $e');
+      }
+
+      // Produce goes through the same single price/expiry confirmation as a
+      // scanned item, so the trip is consistent.
+      final confirmed = await _runConfirm(product, tripId);
+      if (confirmed == true && mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        SnackbarHelper.showInfo(
+          context,
+          l10n.productAddedToShoppingList(product.name),
         );
-    invalidateShoppingListForInventory(ref, tripId);
-    if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
-      SnackbarHelper.showInfo(
-        context,
-        l10n.productAddedToShoppingList(product.name),
-      );
+      }
+    } finally {
+      _confirmationOpen = false;
     }
   }
 
@@ -376,8 +315,18 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
     final service = ref.read(shoppingListServiceProvider);
     try {
       final result = await service.finishShoppingTrip(inventoryId: tripId);
-      invalidateShoppingListForInventory(ref, tripId);
-      ref.invalidate(pantryProvider);
+      // Defer the provider refreshes to after the current frame. Invalidating
+      // the pantry and shopping-list providers immediately before this route
+      // pops makes their refresh tasks flush during the pop's TickerMode
+      // rebuild, which schedules a provider refresh while the framework is
+      // building (the "setState() or markNeedsBuild() called during build"
+      // crash on UncontrolledProviderScope). Running them post-frame lets the
+      // refresh flush in a normal frame instead.
+      afterFrame(() {
+        if (!mounted) return;
+        invalidateShoppingListForInventory(ref, tripId);
+        ref.invalidate(pantryProvider);
+      });
       if (!mounted) return;
       SnackbarHelper.showInfo(
         context,
@@ -475,6 +424,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
               inventoryId: tripId,
               onScanStateChanged: _onScanStateChanged,
               onManualAdd: () => unawaited(_openManualAdd(tripId)),
+              onAddProduce: () => unawaited(_addProduce(tripId)),
               buildTotal: _buildTotal,
             ),
     );
@@ -487,6 +437,7 @@ class _TripBody extends ConsumerWidget {
     required this.inventoryId,
     required this.onScanStateChanged,
     required this.onManualAdd,
+    required this.onAddProduce,
     required this.buildTotal,
   });
 
@@ -494,6 +445,7 @@ class _TripBody extends ConsumerWidget {
   final void Function(ScannerCameraState?, ScannerCameraState)
   onScanStateChanged;
   final VoidCallback onManualAdd;
+  final VoidCallback onAddProduce;
   final Widget Function(BuildContext, List<ShoppingItem>) buildTotal;
 
   @override
@@ -534,6 +486,11 @@ class _TripBody extends ConsumerWidget {
                 tooltip: l10n.addItem,
                 onPressed: onManualAdd,
               ),
+              IconButton(
+                icon: const Icon(Icons.eco_outlined),
+                tooltip: l10n.addProduce,
+                onPressed: onAddProduce,
+              ),
             ],
           ),
         ),
@@ -550,7 +507,10 @@ class _TripBody extends ConsumerWidget {
               : ListView.builder(
                   itemCount: items.length,
                   itemBuilder: (context, index) {
-                    return ShoppingItemTile(item: items[index]);
+                    return ShoppingItemTile(
+                      item: items[index],
+                      marketTripMode: true,
+                    );
                   },
                 ),
         ),

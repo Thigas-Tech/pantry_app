@@ -609,5 +609,48 @@ void main() {
       expect(pending.map((e) => e.name).toList(), ['B', 'A']);
       expect(pending.map((e) => e.id).toList(), [b, a]);
     });
+
+    test('expiry date round-trips through insert and list', () async {
+      const item = ShoppingItem(
+        name: 'Milk',
+        barcode: '123',
+        expiryDate: '2026-12-31',
+      );
+      final id = await dao.insert(db, item);
+
+      final stored = await dao.getById(db, id);
+      expect(stored!.expiryDate, '2026-12-31');
+    });
+
+    test('updateExpiryFields sets and clears the expiry date', () async {
+      final id = await dao.insert(db, const ShoppingItem(name: 'Milk'));
+
+      await dao.updateExpiryFields(db, id, expiryDate: '2026-12-31');
+      expect((await dao.getById(db, id))!.expiryDate, '2026-12-31');
+
+      await dao.updateExpiryFields(db, id, expiryDate: null);
+      expect((await dao.getById(db, id))!.expiryDate, isNull);
+    });
+
+    test('updateExpiryFields leaves other columns unchanged', () async {
+      final id = await dao.insert(
+        db,
+        const ShoppingItem(
+          name: 'Milk',
+          priceAmount: 4.99,
+          priceCurrency: 'USD',
+          priceStore: 'Shop',
+        ),
+      );
+
+      await dao.updateExpiryFields(db, id, expiryDate: '2026-12-31');
+
+      final item = (await dao.getById(db, id))!;
+      expect(item.expiryDate, '2026-12-31');
+      expect(item.priceAmount, 4.99);
+      expect(item.priceCurrency, 'USD');
+      expect(item.priceStore, 'Shop');
+      expect(item.name, 'Milk');
+    });
   });
 }

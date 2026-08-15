@@ -28,16 +28,112 @@
 
 ### Fixed
 
-- **Market trip scan no longer opens the manual search**: when a scanned
-  barcode could not be resolved, the trip screen opened the add-to-shopping
-  list search sheet, interrupting the scan flow. It now shows a "Product not
-  found" snackbar and stays on the camera; manual add is available only via
-  the + button. (lib/screens/market_trip_screen.dart)
-- **Market trip camera overlay clipped at the top**: the scanner overlay
-  used a fixed 250x250 cutout meant for a full-screen camera, so in the
-  trip's short embedded box the cutout top was clipped. The cutout now
-  adapts to the available size and stays fully inside the preview.
-  (lib/widgets/scanner_overlay_painter.dart)
+- **USDA produce search returned nothing on built apps**: credentials were
+  read only from the local .env file, which is never bundled as a Flutter
+  asset, so USDA_API_KEY was empty at runtime on any installed build and the
+  search was skipped. Credentials (OFF user/password, USDA API key, contact
+  email) are now injectable at build time via --dart-define-from-file=.env,
+  and the Play Store release workflow recreates .env from GitHub secrets so
+  produce search and OFF product submission work on device and in release
+  builds. (lib/config.dart, .github/workflows/deploy-to-playstore.yml)
+- **Leaving the trip confirmation mid-save could crash**: the autoDispose
+  market-trip controller used its Ref after async gaps, so popping the
+  confirmation screen while an item was being saved disposed the provider
+  and threw "Cannot use Ref of ... after it has been disposed". The add now
+  checks ref.mounted after every await and the screen blocks the system back
+  button while saving. (lib/providers/market_trip_item_provider.dart,
+  lib/screens/market_trip_item_screen.dart)
+- **The OFF client now requests the numeric serving and packaging quantity
+  fields** so the price sheets' package/serving pre-fill does not depend on
+  the server returning extra fields. (lib/services/off_query.dart)
+- **USDA rate-limit responses (429) are now logged distinctly** instead of
+  falling into the generic error branch. (lib/services/usda_api_client.dart)
+
+- **Finishing a market trip could crash with "setState() or markNeedsBuild()
+  called during build"**: invalidating the pantry provider immediately before
+  the trip route popped made its refresh task flush during the pop's
+  TickerMode rebuild on UncontrolledProviderScope (home's paused subscription
+  resumed while the provider was still dirty). Provider invalidations that
+  can coincide with a route transition are now deferred to after the current
+  frame via a new afterFrame helper; applied defensively to every pantry
+  invalidation near a route change (finish trip, pull-to-refresh, returning
+  from product detail / add-product / inventory management, search panel, and
+  home selection actions). (lib/utils/deferred_refresh.dart new,
+  lib/screens/market_trip_screen.dart, lib/providers/pantry_provider.dart,
+  lib/screens/scanner_screen.dart, lib/screens/home_screen.dart,
+  lib/widgets/inventory_card.dart, lib/widgets/search_panel.dart,
+  lib/providers/home_screen_controller.dart)
+- **The trip price sheet pre-fills the package size from the product
+  label**: entering a price for a scanned (or produce) item during a market
+  trip now shows the product's package size and unit from its OFF label, so
+  the unit price is computed automatically. Products whose Open Food Facts
+  entry carries no packaging data fall back to their serving size (e.g. a
+  25 g serving) so a unit price is still derived. The parsing is shared with
+  the product detail screen. (lib/utils/product_package_size.dart new,
+  lib/screens/market_trip_item_screen.dart,
+  lib/screens/product_detail_screen.dart)
+- **No sqflite null-argument warning when finishing an undated trip item**:
+  the pantry merge passed a null expiry date as a query argument
+  ("Invalid argument null"), which sqflite warns about today and will reject
+  in a future version. The expiry match now uses "expiry_date IS NULL" when
+  no date is set and "= ?" otherwise, in both the trip finish merge and the
+  inventory merge. Merge semantics are unchanged: undated items merge with
+  undated pantry rows and stay separate from dated ones.
+  (lib/services/shopping_list_service.dart, lib/database/inventory_dao.dart)
+
+- **Market trip items are confirmed before being added**: each scanned (or
+  produce-searched) product now opens a lightweight confirmation screen with
+  an optional price (pre-filled from the latest tracked price) and an
+  optional expiry date, so price and expiry are asked exactly once per item
+  instead of being prompted inconsistently by the product-detail screen.
+  Confirming adds the item to the trip as already purchased. The full
+  Product Detail screen (and its pantry prompts — "Add to Inventory", "Add
+  to Shopping List", and the after-price pantry sheet) is no longer shown
+  during a trip, so nothing is written to the pantry mid-trip and the price
+  is recorded into the price history by the finish flow. Re-scanning a
+  barcode already in the trip merges the quantity instead of creating a
+  duplicate row. The add/price/expiry write lives in a new Riverpod
+  MarketTripItemController. Barcodes not found open the Add Product
+  contribution form; the saved product then goes through the same single
+  confirmation, and a contribution that was abandoned (or a failed OFF
+  submission the user backed out of) is never added.
+  (lib/screens/market_trip_item_screen.dart new,
+  lib/providers/market_trip_item_provider.dart new,
+  lib/screens/market_trip_screen.dart)
+- **Market trip items are always purchased**: the trip list no longer shows
+  purchase checkboxes, quantity steppers, price buttons, or the "Add again"
+  toggle, because everything added during a trip is bought by definition.
+  Deletion (swipe and button) stays. (lib/widgets/shopping_item_tile.dart,
+  lib/screens/market_trip_screen.dart)
+- **Duplicate scans no longer add duplicate trip entries**: the camera
+  re-reports the same barcode on every frame while it stays in frame, so
+  once a scan resolved and cleared, the same barcode was added again
+  (device log showed ids 2-5 for one item). A short per-barcode cooldown now
+  ignores re-detections of the same barcode while allowing rapid scans of
+  different items. (lib/utils/scan_cooldown.dart new,
+  lib/widgets/scanner_camera_view.dart)
+- **Market trip items can carry an expiry date**: the trip confirmation
+  offers an optional expiry date (picker limited to today or later) which is
+  stored on the shopping item and carried into the pantry on finish; the
+  tile shows "Exp: YYYY-MM-DD" when set. The pantry merge now follows the
+  app's batch semantics (same barcode, inventory, expiry, unit, and
+  location), so dated items merge with dated rows and stay separate from
+  undated ones. Schema v45 adds shopping_list.expiry_date.
+  (lib/models/shopping_item.dart, lib/database/shopping_list_dao.dart,
+  lib/database/migrations/v45_shopping_expiry.dart new,
+  lib/services/shopping_list_service.dart, lib/screens/market_trip_screen.dart)
+- **Scanner overlay is centred with a readable hint**: the cutout now
+  reserves a top hint band and centres within the camera preview (it was
+  biased toward the bottom on large previews), and the "Align the barcode"
+  instruction is drawn above the cutout on a contrast chip instead of being
+  squeezed at the bottom edge. (lib/widgets/scanner_overlay_painter.dart)
+- **Scanner screen pop could throw setState during build**: popping the
+  market trip or the standalone scanner screen while the camera was active
+  could trigger the Riverpod scheduler's "setState() or markNeedsBuild()
+  called during build" exception on UncontrolledProviderScope. The scanner
+  notifier now reads the camera controller instead of watching it, so
+  disposing the auto-dispose controller provider during the route pop no
+  longer invalidates the notifier mid-build. (lib/providers/scanner_providers.dart)
 - **Shopping list tiles show product images and wrap names**: the tile
   leading is now the cached product thumbnail when one exists (with the
   purchase checkbox moving to the trailing), and long product names wrap to
@@ -137,6 +233,18 @@
 
 ### Features
 
+- **Produce defaults to grams and a 14-day expiry**: produce added in a
+  market trip or to the pantry now defaults to a grams unit and a pre-filled
+  expiry 14 days out (still changeable or clearable), matching how fresh
+  items are usually tracked. (lib/utils/date_helpers.dart,
+  lib/providers/market_trip_item_provider.dart,
+  lib/screens/market_trip_item_screen.dart,
+  lib/screens/add_to_inventory_screen.dart)
+- **Market trip lets you add produce before finishing**: a produce button
+  (leaf icon) in the trip's scan-header row opens the produce search directly,
+  in addition to the existing "Add produce" step inside the finish flow, so
+  non-barcoded items can be added at any point during the trip.
+  (lib/screens/market_trip_screen.dart)
 - **OFF language & localization strategy**: Open Food Facts data is now
   fetched in the user's device language instead of being hardcoded to
   English. A new [offLanguageFromLocale] utility normalizes the locale
