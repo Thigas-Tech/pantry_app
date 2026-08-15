@@ -87,17 +87,24 @@ Future&lt;void&gt; up(Database db) async {
       );
 
       &#47;&#47; Backfill pre-existing prices to the first inventory (seeded Home).
-      final minId = await db.rawQuery(
-        &#39;SELECT COALESCE(&#39;
-        &#39;(SELECT id FROM inventories ORDER BY id ASC LIMIT 1),&#39;
-        &#39; 1&#39;
-        &#39;) AS result&#39;,
+      &#47;&#47; If every pantry was deleted before upgrading, skip the backfill:
+      &#47;&#47; writing a phantom id would violate the prices FK and block the
+      &#47;&#47; upgrade.
+      final hasInventory = await db.rawQuery(
+        &#39;SELECT 1 FROM inventories LIMIT 1&#39;,
       );
-      final defaultId = minId.first[&#39;result&#39;] as int? ?? 1;
-      await db.rawUpdate(
-        &#39;UPDATE prices SET inventory_id = ?&#39;,
-        [defaultId],
-      );
+      if (hasInventory.isNotEmpty) {
+        final minId = await db.rawQuery(
+          &#39;SELECT MIN(id) AS result FROM inventories&#39;,
+        );
+        final defaultId = minId.first[&#39;result&#39;] as int?;
+        if (defaultId != null) {
+          await db.rawUpdate(
+            &#39;UPDATE prices SET inventory_id = ?&#39;,
+            [defaultId],
+          );
+        }
+      }
     }
 
     await db.execute(

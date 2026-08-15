@@ -83,10 +83,17 @@ Future&lt;void&gt; up(Database db) async {
     if (!await columnExists(db, &#39;recipes&#39;, &#39;shared_recipe_id&#39;)) {
       return;
     }
-    await db.execute(
-      &#39;ALTER TABLE recipes DROP COLUMN shared_recipe_id&#39;,
-    );
-    logInfo(&#39;Migration v43 completed (recipes.shared_recipe_id dropped)&#39;);
+    try {
+      await db.execute(
+        &#39;ALTER TABLE recipes DROP COLUMN shared_recipe_id&#39;,
+      );
+      logInfo(&#39;Migration v43 completed (recipes.shared_recipe_id dropped)&#39;);
+    } on Exception catch (e) {
+      logWarning(
+        &#39;Migration v43 could not drop recipes.shared_recipe_id&#39;
+        &#39; (SQLite &lt; 3.35 on this device); retaining the inert column: $e&#39;,
+      );
+    }
   } on Exception catch (e) {
     logWarning(&#39;Migration v43 failed: $e&#39;);
     rethrow;

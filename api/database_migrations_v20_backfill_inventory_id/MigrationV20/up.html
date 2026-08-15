@@ -79,13 +79,19 @@ re-execution (idempotent) whenever possible.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 Future&lt;void&gt; up(Database db) async {
-  final minId = await db.rawQuery(
-    &#39;SELECT COALESCE(&#39;
-    &#39;(SELECT id FROM inventories ORDER BY id ASC LIMIT 1),&#39;
-    &#39; 1&#39;
-    &#39;) AS result&#39;,
+  &#47;&#47; Only backfill when at least one inventory exists. If the user deleted
+  &#47;&#47; every pantry before upgrading, writing a phantom id would violate the
+  &#47;&#47; shopping_list FK and block the upgrade; rows are left unassigned
+  &#47;&#47; instead.
+  final hasInventory = await db.rawQuery(
+    &#39;SELECT 1 FROM inventories LIMIT 1&#39;,
   );
-  final defaultId = minId.first[&#39;result&#39;] as int? ?? 1;
+  if (hasInventory.isEmpty) return;
+  final minId = await db.rawQuery(
+    &#39;SELECT MIN(id) AS result FROM inventories&#39;,
+  );
+  final defaultId = minId.first[&#39;result&#39;] as int?;
+  if (defaultId == null) return;
   await db.rawUpdate(
     &#39;UPDATE shopping_list SET inventory_id = ?&#39;
     &#39; WHERE inventory_id IS NULL&#39;,

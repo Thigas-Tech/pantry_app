@@ -79,6 +79,14 @@ re-execution (idempotent) whenever possible.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 Future&lt;void&gt; up(Database db) async {
+  &#47;&#47; Foreign keys are enabled (onConfigure runs before onUpgrade) while the
+  &#47;&#47; upgrade runs inside a transaction. Normalizing products.barcode (the
+  &#47;&#47; FK parent) first would violate the child FKs in inventory, prices, and
+  &#47;&#47; shopping_list the instant the parent key changes. Deferring the checks
+  &#47;&#47; to the outer COMMIT lets all tables normalize together; by then every
+  &#47;&#47; barcode is consistent. defer_foreign_keys is reset at each COMMIT, so
+  &#47;&#47; this stays scoped to the upgrade transaction.
+  await db.execute(&#39;PRAGMA defer_foreign_keys = ON&#39;);
   for (final table in [
     &#39;products&#39;,
     &#39;inventory&#39;,
