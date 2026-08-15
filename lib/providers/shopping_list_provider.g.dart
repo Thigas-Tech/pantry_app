@@ -54,6 +54,114 @@ final class ShoppingListProvider
 
 String _$shoppingListHash() => r'9f797101de088ce7685e8f387fce1c58e53eaf5f';
 
+/// Provides all shopping list items for a specific [inventoryId].
+///
+/// Unlike [shoppingList] (which follows the active inventory), this family
+/// is keyed by an explicit inventory so the market trip can operate on a
+/// chosen pantry independently of the active one.
+
+@ProviderFor(shoppingListByInventory)
+final shoppingListByInventoryProvider = ShoppingListByInventoryFamily._();
+
+/// Provides all shopping list items for a specific [inventoryId].
+///
+/// Unlike [shoppingList] (which follows the active inventory), this family
+/// is keyed by an explicit inventory so the market trip can operate on a
+/// chosen pantry independently of the active one.
+
+final class ShoppingListByInventoryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ShoppingItem>>,
+          List<ShoppingItem>,
+          FutureOr<List<ShoppingItem>>
+        >
+    with
+        $FutureModifier<List<ShoppingItem>>,
+        $FutureProvider<List<ShoppingItem>> {
+  /// Provides all shopping list items for a specific [inventoryId].
+  ///
+  /// Unlike [shoppingList] (which follows the active inventory), this family
+  /// is keyed by an explicit inventory so the market trip can operate on a
+  /// chosen pantry independently of the active one.
+  ShoppingListByInventoryProvider._({
+    required ShoppingListByInventoryFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'shoppingListByInventoryProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$shoppingListByInventoryHash();
+
+  @override
+  String toString() {
+    return r'shoppingListByInventoryProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<ShoppingItem>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<ShoppingItem>> create(Ref ref) {
+    final argument = this.argument as int;
+    return shoppingListByInventory(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ShoppingListByInventoryProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$shoppingListByInventoryHash() =>
+    r'720682fcab901e5f486829521f44cc637536e6b9';
+
+/// Provides all shopping list items for a specific [inventoryId].
+///
+/// Unlike [shoppingList] (which follows the active inventory), this family
+/// is keyed by an explicit inventory so the market trip can operate on a
+/// chosen pantry independently of the active one.
+
+final class ShoppingListByInventoryFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<ShoppingItem>>, int> {
+  ShoppingListByInventoryFamily._()
+    : super(
+        retry: null,
+        name: r'shoppingListByInventoryProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provides all shopping list items for a specific [inventoryId].
+  ///
+  /// Unlike [shoppingList] (which follows the active inventory), this family
+  /// is keyed by an explicit inventory so the market trip can operate on a
+  /// chosen pantry independently of the active one.
+
+  ShoppingListByInventoryProvider call(int inventoryId) =>
+      ShoppingListByInventoryProvider._(argument: inventoryId, from: this);
+
+  @override
+  String toString() => r'shoppingListByInventoryProvider';
+}
+
 /// Provides only pending (not purchased) shopping list items, scoped to the
 /// active inventory.
 

@@ -2,6 +2,70 @@
 
 ## Unreleased
 
+## [0.0.10+6]
+
+- Hortalicas que voce adiciona em uma ida ao mercado ou na despensa agora
+  padronizam para gramas e uma data de validade de 14 dias, que voce ainda
+  pode alterar ou limpar.
+
+- Ao registrar um preco em uma ida ao mercado, o tamanho e a unidade da
+  embalagem agora sao preenchidos automaticamente a partir do rotulo do
+  produto, para que o preco unitario seja calculado sem digitar mais nada.
+  Se o produto nao tiver tamanho de embalagem registrado, o tamanho da
+  porcao e usado no lugar.
+
+- Escanear um item durante uma ida ao mercado agora abre uma confirmacao
+  rapida onde voce pode definir um preco e uma data de validade opcionais (o
+  preco vem preenchido com o ultimo preco registrado); confirmar adiciona o
+  item a ida como ja comprado. A mesma confirmacao aparece para hortalicas
+  que voce adicionar sem codigo de barras.
+
+- Os itens da ida ao mercado sao sempre marcados como comprados: a lista nao
+  mostra mais caixas de selecao, botoes de quantidade, botoes de preco nem o
+  botao "Comprar de novo". Voce ainda pode excluir um item escaneado por
+  engano.
+
+- Escanear o mesmo codigo de barras varias vezes nao adiciona mais o item
+  multiplas vezes a ida.
+
+- A moldura de leitura de codigo de barras agora fica centralizada na camera,
+  e a guia "Alinhe o codigo de barras" fica claramente acima dela, mais
+  facil de ler.
+
+- A lista de compras (e a lista da ida ao mercado) agora mostra uma miniatura
+  do produto quando disponivel, e nomes de produtos longos quebram em duas
+  linhas em vez de serem cortados.
+
+- Terminar uma ida ao mercado agora move tudo o que voce escaneou (ou
+  adicionou manualmente, incluindo hortalicas) para a despensa escolhida na
+  hora, em vez de deixar na lista de compras.
+
+- A camera da tela "Ida ao mercado" agora se ajusta na propria caixa sem uma
+  barra de titulo duplicada, entao a area de leitura fica limpa.
+
+- Itens que voce adiciona durante uma ida ao mercado (lendo, manualmente ou
+  pela busca de hortalicas) agora aparecem na lista da ida imediatamente em
+  vez de so depois de sair e reabrir a tela.
+
+- A lista de compras nao transborda mais com nomes de produtos longos: os
+  nomes sao cortados com reticencias e os botoes de quantidade permanecem no
+  lugar. Voce ainda pode editar um item pressionando e segurando ou tocando
+  na quantidade dele.
+
+- A opcao "Ida ao mercado" no menu da tela inicial agora esta disponivel.
+  Voce escolhe para qual despensa e a ida (quando tem mais de uma), escaneia
+  itens em sequencia com a camera e finaliza a ida para mover o que comprou
+  para a despensa. Se um item tem um preco informado antes, o app pergunta
+  se aquele preco estimado ainda esta correto ou se voce quer atualiza-lo.
+  Voce tambem pode adicionar hortalicas sem codigo de barras no fim da ida
+  buscando pelo nome.
+
+- A lista de compras agora mostra um preco estimado para itens ainda sem
+  preco, baseado no ultimo preco informado para aquele produto (marcado com
+  "Est."). Os totais incluem essas estimativas e mostram quanto e estimado.
+  Um preco informado por voce para um item sempre tem prioridade sobre a
+  estimativa.
+
 - Itens de hortifruti adicionados pelo banco de dados de alimentos integrado
   nao sao mais removidos pela limpeza automatica de cache de dois meses,
   entao as informacoes nutricionais que voce consulta permanecem

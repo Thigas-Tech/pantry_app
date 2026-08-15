@@ -103,7 +103,6 @@ class _AddToShoppingListSheetState
     }
     _requestId++;
     final locale = Localizations.localeOf(context).languageCode;
-    logInfo('Search queued — query="$query" locale=$locale');
     _debounce = Timer(
       widget.searchDebounceDuration,
       () => _search(query, locale),

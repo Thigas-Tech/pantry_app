@@ -8,6 +8,7 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
+import 'package:pantry_app/utils/scan_cooldown.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/scanner_error_content.dart';
 import 'package:pantry_app/widgets/scanner_overlay_painter.dart';
@@ -19,11 +20,18 @@ import 'package:permission_handler/permission_handler.dart';
 /// [mobileScannerControllerProvider] for the [MobileScannerController].
 /// Renders the camera preview, animated overlay (only when streaming),
 /// and error content when an error occurs.
+///
+/// When [embedded] is true, the widget renders only the camera preview
+/// (plus overlay and error content) without its own [Scaffold] or [AppBar],
+/// so it can be placed inside a parent screen that owns the chrome (such as
+/// the market trip). The AppBar actions (torch, PLU, manual entry) are
+/// omitted in embedded mode; hosts provide their own controls.
 class ScannerCameraView extends ConsumerStatefulWidget {
   /// Creates a [ScannerCameraView] widget.
   const ScannerCameraView({
     required this.onSwitchToManual,
     required this.onSwitchToPlu,
+    this.embedded = false,
     super.key,
   });
 
@@ -33,6 +41,10 @@ class ScannerCameraView extends ConsumerStatefulWidget {
   /// Called when the user switches to PLU code entry.
   final VoidCallback onSwitchToPlu;
 
+  /// When true, renders only the camera preview without a surrounding
+  /// [Scaffold]/[AppBar] so the host screen owns the chrome.
+  final bool embedded;
+
   @override
   ConsumerState<ScannerCameraView> createState() => _ScannerCameraViewState();
 }
@@ -40,6 +52,9 @@ class ScannerCameraView extends ConsumerStatefulWidget {
 class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _animationController;
+
+  /// Suppresses re-detections of the same barcode while it stays in frame.
+  final ScanDedupe _scanDedupe = ScanDedupe();
 
   @override
   void initState() {
@@ -93,6 +108,12 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
     final state = ref.read(scannerCameraProvider);
     if (state.scanResolution != null) return;
 
+    // The camera reports the same barcode continuously while it stays in
+    // frame; without this, once the resolution clears the same barcode is
+    // re-detected and re-added (duplicate shopping items in a trip).
+    if (!_scanDedupe.shouldDispatch(barcode)) return;
+    _scanDedupe.markDispatched(barcode);
+
     logInfo('Barcode scanned: $barcode');
     unawaited(HapticFeedback.mediumImpact());
     unawaited(
@@ -145,6 +166,14 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
     final l10n = AppLocalizations.of(context)!;
 
     if (cameraState.cameraError != null) {
+      final errorContent = ScannerErrorContent(
+        exception: cameraState.cameraError!,
+        onRetry: _retryOnResume,
+        onSwitchToManual: widget.onSwitchToManual,
+        onSwitchToPlu: widget.onSwitchToPlu,
+        onOpenSettings: _openSettings,
+      );
+      if (widget.embedded) return errorContent;
       return Scaffold(
         appBar: AppBar(
           title: Text(l10n.scanBarcode),
@@ -156,15 +185,35 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
             ),
           ],
         ),
-        body: ScannerErrorContent(
-          exception: cameraState.cameraError!,
-          onRetry: _retryOnResume,
-          onSwitchToManual: widget.onSwitchToManual,
-          onSwitchToPlu: widget.onSwitchToPlu,
-          onOpenSettings: _openSettings,
-        ),
+        body: errorContent,
       );
     }
+
+    final cameraBody = Stack(
+      children: [
+        MobileScanner(
+          controller: controller,
+          onDetect: _onBarcodeDetected,
+          onDetectError: _onDetectionError,
+          placeholderBuilder: _buildPlaceholder,
+          tapToFocus: true,
+        ),
+        if (cameraState.showOverlay)
+          Positioned.fill(
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (_, _) => CustomPaint(
+                painter: ScannerOverlayPainter(
+                  animationValue: _animationController.value,
+                  hintText: l10n.scanHint,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+
+    if (widget.embedded) return cameraBody;
 
     return Scaffold(
       appBar: AppBar(
@@ -196,29 +245,7 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          MobileScanner(
-            controller: controller,
-            onDetect: _onBarcodeDetected,
-            onDetectError: _onDetectionError,
-            placeholderBuilder: _buildPlaceholder,
-            tapToFocus: true,
-          ),
-          if (cameraState.showOverlay)
-            Positioned.fill(
-              child: AnimatedBuilder(
-                animation: _animationController,
-                builder: (_, _) => CustomPaint(
-                  painter: ScannerOverlayPainter(
-                    animationValue: _animationController.value,
-                    hintText: l10n.scanHint,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
+      body: cameraBody,
     );
   }
 }

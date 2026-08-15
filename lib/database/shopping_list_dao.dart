@@ -28,6 +28,7 @@ class ShoppingListDao {
         price_currency TEXT,
         price_store TEXT,
         price_photo_path TEXT,
+        expiry_date TEXT,
         sort_order REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (barcode) REFERENCES products(barcode)
           ON DELETE SET NULL,
@@ -59,6 +60,7 @@ class ShoppingListDao {
     'price_amount': item.priceAmount,
     'price_currency': item.priceCurrency,
     'price_store': item.priceStore,
+    'expiry_date': item.expiryDate,
     'sort_order': item.sortOrder,
   };
 
@@ -76,6 +78,7 @@ class ShoppingListDao {
     priceAmount: (map['price_amount'] as num?)?.toDouble(),
     priceCurrency: map['price_currency'] as String?,
     priceStore: map['price_store'] as String?,
+    expiryDate: map['expiry_date'] as String?,
     sortOrder: (map['sort_order'] as num?)?.toDouble() ?? 0,
   );
 
@@ -286,6 +289,31 @@ class ShoppingListDao {
       return affected;
     } on Exception catch (e) {
       logError('Failed to update price fields for item $id: $e');
+      rethrow;
+    }
+  }
+
+  /// Updates only the expiry date for the shopping item with the given [id].
+  ///
+  /// Leaves all other columns unchanged. [expiryDate] is an ISO 8601 date
+  /// string (YYYY-MM-DD) or null to clear it.
+  Future<int> updateExpiryFields(
+    Database db,
+    int id, {
+    required String? expiryDate,
+  }) async {
+    logInfo('Updating expiry fields for shopping item $id');
+    try {
+      final affected = await db.update(
+        'shopping_list',
+        {'expiry_date': expiryDate},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      logInfo('Expiry fields updated for shopping item $id');
+      return affected;
+    } on Exception catch (e) {
+      logError('Failed to update expiry fields for item $id: $e');
       rethrow;
     }
   }

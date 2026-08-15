@@ -7,6 +7,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/produce_serving_presets.dart';
+import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/off_units.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
@@ -93,12 +94,12 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
         ? DateTime.tryParse(existing!.expiryDate!)
         : (widget.suggestedExpiry != null
               ? DateTime.tryParse(widget.suggestedExpiry!)
-              : null);
+              : (_isProduce ? defaultProduceExpiry() : null));
     _notes = existing?.notes ?? '';
-    _produceIsWeightMode =
-        !_isProduce ||
-        (widget.product?.usdaGramWeight != null &&
-            widget.product!.usdaGramWeight! > 0);
+    // Produce defaults to weight mode (grams) whether or not USDA serving
+    // data is available; the serving-size (unit) mode stays reachable via
+    // the weight/unit toggle.
+    _produceIsWeightMode = true;
     _produceName =
         widget.produceName ??
         (widget.barcode.startsWith('produce-')
@@ -141,6 +142,8 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   /// For produce items, uses [parseUsdaQuantity] with USDA
   /// foodPortion data. Returns 'pieces' when no data is available.
   String _prefillUnit() {
+    // Produce defaults to grams even without any product data.
+    if (_isProduce && widget.product == null) return 'g';
     if (widget.product == null) return 'pieces';
 
     if (!_isProduce) {
@@ -158,6 +161,8 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
         usdaGramWeight: widget.product!.usdaGramWeight,
       );
       if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
+      // Produce defaults to grams even without USDA serving data.
+      return 'g';
     }
 
     return 'pieces';

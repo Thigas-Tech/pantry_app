@@ -10,6 +10,7 @@ import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/plu_service.dart';
+import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/off_language.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -91,7 +92,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     logInfo('Returned from ProductDetailScreen — clearing resolution');
     ref.read(scannerCameraProvider.notifier).clearResolution();
     if (!mounted) return;
-    ref.invalidate(pantryProvider);
+    afterFrame(() {
+      if (mounted) ref.invalidate(pantryProvider);
+    });
   }
 
   /// Opens the contribution form for a [barcode] that is not in the database.
@@ -111,7 +114,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     logInfo('Returned from AddProductScreen — clearing resolution');
     ref.read(scannerCameraProvider.notifier).clearResolution();
     if (!mounted) return;
-    ref.invalidate(pantryProvider);
+    afterFrame(() {
+      if (mounted) ref.invalidate(pantryProvider);
+    });
   }
 
   void _submitBarcode(String barcode) {

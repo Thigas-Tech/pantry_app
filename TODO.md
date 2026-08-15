@@ -249,6 +249,18 @@ infrastructure or external server hosting are listed last.
   with per-product price history, total inventory value, and store autocomplete.
   See `lib/database/price_dao.dart`, `lib/services/price_repository.dart`,
   `lib/services/open_prices_service.dart`, `lib/widgets/price_entry_sheet.dart`.
+- [x] **Market trip** — issue #155. Home action sheet "Market trip" opens a
+  scanning-driven trip over the per-inventory shopping list: pick the target
+  pantry (when several exist), scan items in sequence (existing pending items
+  are marked purchased, new ones are added), add non-barcoded produce via a
+  USDA-backed search sheet at the end, and finish to move purchased items into
+  the pantry. Estimated prices (latest tracked price) are shown for unpriced
+  items and confirmed or updated on scan-add. The shopping list tile and
+  totals are shared between the tab and the trip.
+  See `lib/screens/market_trip_screen.dart`,
+  `lib/widgets/produce_search_sheet.dart`,
+  `lib/widgets/shopping_item_tile.dart`, `lib/utils/shopping_price.dart`,
+  `lib/services/shopping_list_service.dart`.
 ### Documentation
 
 - [x] `ARCHITECTURE/INDEX.md` — add security section.

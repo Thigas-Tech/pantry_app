@@ -2,7 +2,6 @@ import 'package:pantry_app/cache_config.dart';
 import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/migrations/all_migrations.dart';
-import 'package:pantry_app/database/migrations/migration.dart';
 import 'package:pantry_app/database/migrations/migration_runner.dart';
 import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
@@ -113,9 +112,9 @@ class DatabaseHelper {
 
   /// The current database schema version.
   ///
-  /// Increment this when adding a new [Migration]. Must match the highest
-  /// version in [allMigrations].
-  static const int databaseVersion = 44;
+  /// Must match the highest (and last) migration declared
+  /// in [allMigrations].
+  static const int databaseVersion = 45;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
@@ -864,6 +863,15 @@ class DatabaseHelper {
       priceCurrency: priceCurrency,
       priceStore: priceStore,
     );
+  }
+
+  /// Updates only the expiry date for the shopping item with the given [id].
+  Future<int> updateShoppingItemExpiry(
+    int id, {
+    required String? expiryDate,
+  }) async {
+    final db = await database;
+    return shoppingListDao.updateExpiryFields(db, id, expiryDate: expiryDate);
   }
 
   /// Deletes a shopping list item by [id].

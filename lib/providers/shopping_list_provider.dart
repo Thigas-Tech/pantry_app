@@ -16,6 +16,20 @@ Future<List<ShoppingItem>> shoppingList(Ref ref) async {
   return db.getShoppingList(inventoryId: inventoryId);
 }
 
+/// Provides all shopping list items for a specific [inventoryId].
+///
+/// Unlike [shoppingList] (which follows the active inventory), this family
+/// is keyed by an explicit inventory so the market trip can operate on a
+/// chosen pantry independently of the active one.
+@riverpod
+Future<List<ShoppingItem>> shoppingListByInventory(
+  Ref ref,
+  int inventoryId,
+) {
+  final db = ref.watch(databaseProvider);
+  return db.getShoppingList(inventoryId: inventoryId);
+}
+
 /// Provides only pending (not purchased) shopping list items, scoped to the
 /// active inventory.
 @riverpod
@@ -51,6 +65,17 @@ void invalidateShoppingList(WidgetRef ref) {
     ..invalidate(pendingShoppingListProvider)
     ..invalidate(purchasedShoppingListProvider)
     ..invalidate(pendingShoppingCountProvider);
+}
+
+/// Invalidates the shopping list providers for a specific [inventoryId].
+///
+/// Invalidates [shoppingListByInventoryProvider] (used by the market trip,
+/// which is scoped to a chosen pantry rather than the active one) in
+/// addition to the active-inventory providers via [invalidateShoppingList].
+/// Call this after every mutation that targets [inventoryId].
+void invalidateShoppingListForInventory(WidgetRef ref, int inventoryId) {
+  invalidateShoppingList(ref);
+  ref.invalidate(shoppingListByInventoryProvider(inventoryId));
 }
 
 /// Provides distinct product barcodes and names from the active inventory

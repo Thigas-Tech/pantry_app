@@ -1241,6 +1241,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addShoppingItem => 'Add item';
 
   @override
+  String get addItem => 'Add item';
+
+  @override
+  String productAddedToShoppingList(String product) {
+    return '$product added to shopping list';
+  }
+
+  @override
   String get itemName => 'Item name';
 
   @override
@@ -1328,6 +1336,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String shoppingTotal(String total) {
     return 'Total: $total';
   }
+
+  @override
+  String totalWithEstimated(String total, String estimated) {
+    return 'Total: $total (incl. $estimated estimated)';
+  }
+
+  @override
+  String estimatedPrice(String price) {
+    return 'Est. $price';
+  }
+
+  @override
+  String get marketTripTitle => 'Market trip';
+
+  @override
+  String get scanNextItem => 'Scan items to add them to this trip';
+
+  @override
+  String get finishTrip => 'Finish trip';
+
+  @override
+  String get finishTripConfirm => 'Finish this trip? Purchased items will be moved to your pantry.';
+
+  @override
+  String tripSummary(int moved, int cleaned) {
+    return 'Trip finished: $moved moved to pantry, $cleaned removed';
+  }
+
+  @override
+  String get chooseTripInventory => 'Which pantry is this trip for?';
+
+  @override
+  String get confirmEstimateTitle => 'Estimated price';
+
+  @override
+  String confirmEstimateBody(String product, String price) {
+    return 'The estimated price for $product is $price (from your last purchase). Is this correct?';
+  }
+
+  @override
+  String get useEstimate => 'Use estimate';
+
+  @override
+  String get enterPrice => 'Enter price';
+
+  @override
+  String get priceNotSet => 'No price';
+
+  @override
+  String get addExpiryDate => 'Add expiry date';
+
+  @override
+  String get noExpiry => 'No expiry';
+
+  @override
+  String get addProduce => 'Add produce';
+
+  @override
+  String get noProduceFinish => 'No, finish trip';
+
+  @override
+  String get produceSearchHint => 'Search produce without barcodes';
+
+  @override
+  String get produceNotFound => 'No produce found. Try a different name.';
+
+  @override
+  String get addToTrip => 'Add to trip';
+
+  @override
+  String get searchFailed => 'Search failed. Please try again.';
 
   @override
   String shoppingMixedCurrency(String total) {

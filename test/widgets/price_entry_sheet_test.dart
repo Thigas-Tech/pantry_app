@@ -211,6 +211,30 @@ void main() {
       expect(find.byIcon(Icons.calendar_today), findsOneWidget);
     });
 
+    testWidgets('hides the date picker when showDateField is false', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => PriceEntrySheet.show(
+              context,
+              barcode: '123',
+              showDateField: false,
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+        overrides: priceSheetOverrides(),
+      );
+
+      await openSheet(tester);
+
+      expect(find.byIcon(Icons.calendar_today), findsNothing);
+      expect(find.textContaining('Date purchased:'), findsNothing);
+    });
+
     testWidgets('shows notes field', (tester) async {
       await pumpApp(
         tester,

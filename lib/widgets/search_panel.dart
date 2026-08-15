@@ -19,6 +19,7 @@ import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/product_picker_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
+import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -122,7 +123,9 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
           )
           .then((_) {
             if (!context.mounted) return;
-            ref.invalidate(pantryProvider);
+            afterFrame(() {
+              if (context.mounted) ref.invalidate(pantryProvider);
+            });
           }),
     );
   }

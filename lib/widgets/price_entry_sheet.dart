@@ -34,6 +34,7 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
     this.existingStore,
     this.existingPackageQuantity,
     this.existingPackageUnit,
+    this.showDateField = true,
   });
 
   /// The product barcode this price is for.
@@ -57,6 +58,11 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
   /// Pre-fills the package unit when not using an existingPrice.
   final String? existingPackageUnit;
 
+  /// Whether the purchase-date picker is shown. When false the price is
+  /// recorded as purchased today (used by the market trip, where the
+  /// purchase date is always the scan date).
+  final bool showDateField;
+
   /// Shows the price entry bottom sheet and returns the entered [Price],
   /// or null if cancelled.
   static Future<Price?> show(
@@ -68,6 +74,7 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
     String? existingStore,
     double? existingPackageQuantity,
     String? existingPackageUnit,
+    bool showDateField = true,
   }) {
     return BottomSheetHelper.show<Price>(
       context: context,
@@ -79,6 +86,7 @@ class PriceEntrySheet extends ConsumerStatefulWidget {
         existingStore: existingStore,
         existingPackageQuantity: existingPackageQuantity,
         existingPackageUnit: existingPackageUnit,
+        showDateField: showDateField,
       ),
     );
   }
@@ -206,23 +214,25 @@ class _PriceEntrySheetState extends ConsumerState<PriceEntrySheet> {
               ),
               const SizedBox(height: 12),
               _buildStoreField(l10n),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _pickDate,
-                      icon: const Icon(Icons.calendar_today, size: 18),
-                      label: Text(
-                        '${l10n.datePurchased}: '
-                        '${_date.day.toString().padLeft(2, '0')}/'
-                        '${_date.month.toString().padLeft(2, '0')}/'
-                        '${_date.year}',
+              if (widget.showDateField) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _pickDate,
+                        icon: const Icon(Icons.calendar_today, size: 18),
+                        label: Text(
+                          '${l10n.datePurchased}: '
+                          '${_date.day.toString().padLeft(2, '0')}/'
+                          '${_date.month.toString().padLeft(2, '0')}/'
+                          '${_date.year}',
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 12),
               _buildPackageFields(l10n),
               const SizedBox(height: 12),

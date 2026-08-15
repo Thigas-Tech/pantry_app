@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
@@ -27,6 +29,11 @@ class _FakeSettingsNotifierImperial extends SettingsNotifier {
     preferredWeightUnit: WeightUnitPreference.auto,
     preferredVolumeUnit: VolumeUnitPreference.auto,
   );
+}
+
+class _FakeSettingsTrackingNotifier extends SettingsNotifier {
+  @override
+  Future<Settings> build() async => const Settings(priceTrackingEnabled: true);
 }
 
 void main() {
@@ -287,7 +294,7 @@ void main() {
 
       expect(find.byIcon(Icons.add_circle_outline), findsOneWidget);
       expect(find.byIcon(Icons.remove_circle_outline), findsOneWidget);
-      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.attach_money_outlined), findsOneWidget);
     });
 
     testWidgets('tapping plus calls updateShoppingItem', (tester) async {
@@ -342,7 +349,7 @@ void main() {
           any(),
           activeInventoryId: any(named: 'activeInventoryId'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => 1);
 
       await pumpApp(
         tester,
@@ -394,7 +401,7 @@ void main() {
         ],
       );
 
-      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.longPress(find.text('Milk'));
       await tester.pumpAndSettle();
 
       expect(find.byType(ShoppingItemEditSheet), findsOneWidget);
@@ -426,7 +433,7 @@ void main() {
         ],
       );
 
-      await tester.tap(find.byIcon(Icons.edit_outlined));
+      await tester.longPress(find.text('Milk'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextFormField).first, 'Cream');
@@ -513,6 +520,45 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => service.reorderShoppingItems(any())).called(1);
+    });
+  });
+
+  group('estimated totals', () {
+    testWidgets('shows total with estimated disclosure', (tester) async {
+      const entered = ShoppingItem(
+        name: 'Milk',
+        barcode: '1',
+        priceAmount: 2,
+        priceCurrency: 'USD',
+      );
+      const estimated = ShoppingItem(name: 'Bread', barcode: '2');
+      await pumpApp(
+        tester,
+        const ShoppingListScreen(),
+        overrides: [
+          activeInventoryProvider.overrideWith(
+            FakeActiveInventoryNotifier.new,
+          ),
+          settingsProvider.overrideWith(
+            _FakeSettingsTrackingNotifier.new,
+          ),
+          pendingShoppingListProvider.overrideWith(
+            (ref) => [entered, estimated],
+          ),
+          purchasedShoppingListProvider.overrideWith(
+            (ref) => <ShoppingItem>[],
+          ),
+          shoppingListProvider.overrideWith((ref) => [entered, estimated]),
+          latestPriceProvider(('2', 1)).overrideWith(
+            (ref) => const Price(barcode: '2', price: 3),
+          ),
+        ],
+      );
+
+      expect(
+        find.text(r'To buy (2) — Total: $5.00 (incl. $3.00 estimated)'),
+        findsOneWidget,
+      );
     });
   });
 }

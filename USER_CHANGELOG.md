@@ -2,6 +2,64 @@
 
 ## Unreleased
 
+## [0.0.10+6]
+
+- Produce you add in a market trip or to your pantry now defaults to a grams
+  unit and a 14-day expiry date, which you can still change or clear.
+
+- When recording a price in a market trip, the package size and unit are now
+  filled in automatically from the product's label, so the unit price is
+  calculated without extra typing. If the product has no package size on
+  record, its serving size is used instead.
+
+- Scanning an item during a market trip now opens a quick confirmation where
+  you can set an optional price and expiry date (the price is pre-filled from
+  the last price you recorded); confirming adds the item to the trip as
+  already bought. The same confirmation appears for produce you add without
+  a barcode.
+
+- Market trip items are always marked as bought: the list no longer shows
+  checkboxes, quantity buttons, price buttons, or an "Add again" toggle.
+  You can still delete an item you scanned by accident.
+
+- Scanning the same barcode repeatedly no longer adds the item multiple
+  times to the trip.
+
+- The barcode scanning frame is now centred on the camera, and the "Align
+  the barcode" guide sits clearly above it, easier to read.
+
+- The shopping list (and market trip list) now shows a thumbnail of the
+  product when one is available, and long product names wrap to two lines
+  instead of being cut short.
+
+- Finishing a market trip now moves everything you scanned (or added
+  manually, including produce) into the chosen pantry right away, instead of
+  leaving it on the shopping list.
+
+- The "Market trip" screen's camera now fits neatly in its own box without
+  a duplicate title bar, so the scanning area looks clean.
+
+- Items you add during a market trip (by scanning, manually, or from the
+  produce search) now appear on the trip list right away instead of only
+  after leaving and reopening the screen.
+
+- The shopping list no longer overflows with long product names: names are
+  trimmed with an ellipsis and the quantity buttons stay in place. You can
+  still edit an item by pressing and holding it or by tapping its quantity.
+
+- The "Market trip" option in the home screen menu is now available. You
+  pick which pantry the trip is for (when you have more than one), scan
+  items in sequence with the camera, and finish the trip to move what you
+  bought into your pantry. If an item has a price you entered before, the
+  app asks whether that estimated price is still correct or if you want to
+  update it. You can also add produce that has no barcode at the end of the
+  trip by searching for its name.
+
+- The shopping list now shows an estimated price for items without a price
+  yet, based on the last price you entered for that product (marked with
+  "Est."). Totals include those estimates and show how much is estimated.
+  A price you enter for an item always takes priority over the estimate.
+
 - Produce items added from the built-in food database are no longer removed
   by the automatic two-month cache cleanup, so the nutrition information you
   look up stays available.

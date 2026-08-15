@@ -1,10 +1,68 @@
 import 'package:flutter/material.dart';
 
-/// Paints a semi‑transparent dark overlay with a rounded‑rectangle cutout
+/// Maximum side length of the scanning cutout on large previews.
+const double kScannerMaxCutout = 250;
+
+/// Minimum side length of the scanning cutout on tiny previews.
+const double kScannerMinCutout = 80;
+
+/// Vertical space reserved at the top of the preview for the hint text.
+const double kScannerHintBand = 36;
+
+/// Top margin between the preview edge and the hint band.
+const double kScannerTopMargin = 12;
+
+/// Bottom margin between the cutout and the preview edge.
+const double kScannerBottomMargin = 16;
+
+/// Horizontal margin on each side of the preview.
+const double kScannerSideMargin = 16;
+
+/// Computes the scanning cutout rectangle for a camera preview of [size].
+///
+/// The cutout is centered in the space below the reserved hint band (see
+/// [kScannerHintBand]) so it works both in the full-screen scanner and in
+/// short embedded previews (such as the market trip's camera box). On large
+/// surfaces the cutout is capped at [kScannerMaxCutout] and stays near the
+/// centre; on small surfaces it shrinks to fit inside the bounds with the
+/// hint band and margins intact.
+Rect computeScannerCutout(Size size) {
+  final availableHeight =
+      size.height - kScannerHintBand - kScannerTopMargin - kScannerBottomMargin;
+  final height = availableHeight.clamp(kScannerMinCutout, kScannerMaxCutout);
+  final width = (size.width - 2 * kScannerSideMargin).clamp(
+    kScannerMinCutout,
+    kScannerMaxCutout,
+  );
+  final top =
+      kScannerHintBand + kScannerTopMargin + (availableHeight - height) / 2;
+  return Rect.fromLTWH((size.width - width) / 2, top, width, height);
+}
+
+/// Computes the rectangle for the hint text, centred in the reserved band
+/// between the preview top and the [cutout].
+///
+/// The returned rect is fully inside [size] and never overlaps the cutout;
+/// on very small surfaces where the band cannot fit [textSize] it is clamped
+/// to the available space.
+Rect computeHintRect(Size size, Rect cutout, Size textSize) {
+  const bandTop = kScannerTopMargin;
+  final bandBottom = cutout.top - kScannerTopMargin;
+  final available = (bandBottom - bandTop).clamp(0.0, double.infinity);
+  final hintHeight = textSize.height.clamp(0.0, available);
+  final maxLeft = (size.width - textSize.width).clamp(0.0, double.infinity);
+  final left = ((size.width - textSize.width) / 2).clamp(0.0, maxLeft);
+  final top = bandTop + (available - hintHeight) / 2;
+  return Rect.fromLTWH(left, top, textSize.width, hintHeight);
+}
+
+/// Paints a semi-transparent dark overlay with a rounded-rectangle cutout
 /// and an animated horizontal scanning line inside the cutout.
 ///
-/// The cutout is created using a path with [PathFillType.evenOdd] so that
-/// it works on all rendering backends (Impeller and Skia).
+/// The hint text is drawn on a rounded scrim chip in the reserved band above
+/// the cutout so it stays readable over a bright camera feed. The cutout is
+/// created using a path with [PathFillType.evenOdd] so that it works on all
+/// rendering backends (Impeller and Skia).
 class ScannerOverlayPainter extends CustomPainter {
   /// Creates a [ScannerOverlayPainter].
   const ScannerOverlayPainter({
@@ -16,18 +74,12 @@ class ScannerOverlayPainter extends CustomPainter {
   /// scanning line inside the cutout.
   final double animationValue;
 
-  /// The localised hint text shown below the cutout.
+  /// The localised hint text shown above the cutout.
   final String hintText;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const cutoutWidth = 250.0;
-    const cutoutHeight = 250.0;
-    final cutoutRect = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2 - 40),
-      width: cutoutWidth,
-      height: cutoutHeight,
-    );
+    final cutoutRect = computeScannerCutout(size);
     final cutoutRRect = RRect.fromRectAndRadius(
       cutoutRect,
       const Radius.circular(16),
@@ -96,13 +148,34 @@ class ScannerOverlayPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        (size.width - textPainter.width) / 2,
-        cutoutRect.bottom + 16,
-      ),
+    _paintHint(canvas, size, cutoutRect, textPainter);
+  }
+
+  /// Draws the hint text on a scrim chip above the cutout.
+  void _paintHint(
+    Canvas canvas,
+    Size size,
+    Rect cutout,
+    TextPainter textPainter,
+  ) {
+    final textSize = Size(textPainter.width, textPainter.height);
+    final hintRect = computeHintRect(size, cutout, textSize);
+    if (hintRect.isEmpty) return;
+
+    const chipPadding = EdgeInsets.symmetric(horizontal: 10, vertical: 4);
+    // The chip is the hint rect expanded by the padding.
+    final chip = Rect.fromLTRB(
+      hintRect.left - chipPadding.left,
+      hintRect.top - chipPadding.top,
+      hintRect.right + chipPadding.right,
+      hintRect.bottom + chipPadding.bottom,
     );
+    final chipPaint = Paint()..color = Colors.black.withValues(alpha: 0.6);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(chip, const Radius.circular(8)),
+      chipPaint,
+    );
+    textPainter.paint(canvas, hintRect.topLeft);
   }
 
   @override

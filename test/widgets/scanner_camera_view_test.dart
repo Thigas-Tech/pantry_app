@@ -107,5 +107,36 @@ void main() {
       expect(find.byIcon(Icons.dialpad), findsOneWidget);
       expect(find.byIcon(Icons.edit), findsOneWidget);
     });
+
+    testWidgets('embedded mode omits Scaffold, AppBar, and action buttons', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        ScannerCameraView(
+          onSwitchToManual: () {},
+          onSwitchToPlu: () {},
+          embedded: true,
+        ),
+        overrides: [
+          mobileScannerControllerProvider.overrideWithValue(
+            createFakeController(),
+          ),
+          scannerCameraProvider.overrideWithValue(
+            const ScannerCameraState(isStreaming: true),
+          ),
+        ],
+        settle: false,
+      );
+      await tester.pump();
+
+      expect(find.byType(Scaffold), findsNothing);
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.text('Scan Barcode'), findsNothing);
+      expect(find.byIcon(Icons.flash_off), findsNothing);
+      expect(find.byIcon(Icons.dialpad), findsNothing);
+      expect(find.byIcon(Icons.edit), findsNothing);
+      expect(_overlayPainterFinder, findsOneWidget);
+    });
   });
 }

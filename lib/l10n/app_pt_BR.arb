@@ -405,6 +405,15 @@
   "addAgain": "Adicionar de novo",
   "addPrice": "Preco salvo",
   "addShoppingItem": "Adicionar item",
+  "addItem": "Adicionar item",
+  "productAddedToShoppingList": "{product} adicionado a lista de compras",
+  "@productAddedToShoppingList": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
   "addToShoppingList": "Adicionar a lista de compras",
   "addToShoppingListTooltip": "Lista de compras",
   "productSearchHint": "Buscar produtos por nome",
@@ -420,6 +429,64 @@
       }
     }
   },
+  "totalWithEstimated": "Total: {total} (incl. {estimated} estimado)",
+  "@totalWithEstimated": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "estimatedPrice": "Est. {price}",
+  "@estimatedPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "marketTripTitle": "Ida ao mercado",
+  "scanNextItem": "Escanee itens para adiciona-los a esta ida",
+  "finishTrip": "Terminar ida",
+  "finishTripConfirm": "Terminar esta ida? Itens comprados serao movidos para a despensa.",
+  "tripSummary": "Ida terminada: {moved} movidos para a despensa, {cleaned} removidos",
+  "@tripSummary": {
+    "placeholders": {
+      "moved": {
+        "type": "int"
+      },
+      "cleaned": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseTripInventory": "Para qual despensa e esta ida?",
+  "confirmEstimateTitle": "Preco estimado",
+  "confirmEstimateBody": "O preco estimado para {product} e {price} (da sua ultima compra). Esta correto?",
+  "@confirmEstimateBody": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "useEstimate": "Usar estimativa",
+  "enterPrice": "Informar preco",
+  "priceNotSet": "Sem preco",
+  "addExpiryDate": "Adicionar data de validade",
+  "noExpiry": "Sem validade",
+  "addProduce": "Adicionar hortalicas",
+  "noProduceFinish": "Nao, terminar ida",
+  "produceSearchHint": "Buscar hortalicas sem codigo de barras",
+  "produceNotFound": "Nenhuma hortalica encontrada. Tente outro nome.",
+  "addToTrip": "Adicionar a ida",
+  "searchFailed": "Falha na busca. Tente novamente.",
   "shoppingMixedCurrency": "{total}",
   "@shoppingMixedCurrency": {
     "placeholders": {

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/cache_staleness_store_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -52,4 +53,15 @@ ProductRepository productRepository(Ref ref) {
     usdaClient: ref.read(usdaApiClientProvider),
     stalenessStore: ref.read(cacheStalenessStoreProvider),
   );
+}
+
+/// Provides the cached [Product] for a [barcode], or null.
+///
+/// Reads only from the local cache (never the network) so list tiles can
+/// resolve product metadata — such as the image URL — cheaply while
+/// rendering. Keyed by barcode so rebuilds share one lookup.
+@riverpod
+Future<Product?> productByBarcode(Ref ref, String barcode) {
+  final db = ref.watch(databaseProvider);
+  return db.getProduct(barcode);
 }

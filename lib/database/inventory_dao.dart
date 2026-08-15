@@ -76,15 +76,18 @@ class InventoryDao {
     logInfo('Insert/merge inventory item: ${item.barcode}');
     try {
       return await db.transaction<int>((txn) async {
+        final expiryClause = item.expiryDate == null
+            ? 'expiry_date IS NULL'
+            : 'expiry_date = ?';
         final existing = await txn.query(
           'inventory',
           where:
               'barcode = ? AND inventory_id = ?'
-              ' AND expiry_date IS ? AND unit IS ? AND location IS ?',
+              ' AND $expiryClause AND unit IS ? AND location IS ?',
           whereArgs: [
             item.barcode,
             item.inventoryId,
-            item.expiryDate,
+            if (item.expiryDate != null) item.expiryDate,
             item.unit,
             item.location,
           ],
