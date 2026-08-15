@@ -203,5 +203,44 @@ void main() {
       expect(await db.getProduct('old61'), isNull);
       expect(await db.getProduct('fresh1'), isNotNull);
     });
+
+    test(
+      'rolls back the barcode cleanup when the product delete fails',
+      () async {
+        // A BEFORE DELETE trigger aborts any product deletion, simulating a
+        // mid-flush failure. If the flush is atomic, the earlier
+        // shopping_list barcode cleanup inside the same transaction must be
+        // rolled back too.
+        final database = await db.database;
+        await database.execute('''
+          CREATE TRIGGER test_abort_product_delete
+          BEFORE DELETE ON products
+          BEGIN
+            SELECT RAISE(ABORT, 'injected flush failure');
+          END
+        ''');
+
+        await db.insertProduct(
+          const Product(barcode: 'x', name: 'X').copyWith(
+            lastSynced: ms(const Duration(days: 120)),
+          ),
+        );
+        await db.insertShoppingItem(
+          const ShoppingItem(name: 'Buy X', barcode: 'x'),
+        );
+
+        await expectLater(
+          db.flushExpiredCachedProducts(maxAge: maxAge, now: () => now),
+          throwsA(isA<Exception>()),
+        );
+
+        // The shopping list reference must survive the failed flush.
+        final items = await db.getShoppingList();
+        expect(items, hasLength(1));
+        expect(items.first.barcode, 'x');
+
+        await database.execute('DROP TRIGGER test_abort_product_delete');
+      },
+    );
   });
 }

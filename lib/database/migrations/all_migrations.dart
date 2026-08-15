@@ -33,6 +33,7 @@ import 'package:pantry_app/database/migrations/v3_normalize_units.dart';
 import 'package:pantry_app/database/migrations/v41_shopping_sort_order.dart';
 import 'package:pantry_app/database/migrations/v42_remove_firebase_cache_meta.dart';
 import 'package:pantry_app/database/migrations/v43_remove_recipe_shared_id.dart';
+import 'package:pantry_app/database/migrations/v44_query_performance_indexes.dart';
 import 'package:pantry_app/database/migrations/v4_nutriscore_grade.dart';
 import 'package:pantry_app/database/migrations/v5_nutriscore_not_applicable.dart';
 import 'package:pantry_app/database/migrations/v6_source_column.dart';
@@ -82,4 +83,5 @@ List<Migration> allMigrations() => [
   MigrationV41(),
   MigrationV42(),
   MigrationV43(),
+  MigrationV44(),
 ];

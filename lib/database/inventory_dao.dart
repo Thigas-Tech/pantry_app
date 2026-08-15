@@ -103,7 +103,11 @@ class InventoryDao {
             'Merged inventory quantity for ${item.barcode}: '
             '${existingItem.quantity} + ${item.quantity} = $mergedQty',
           );
-          return existingItem.id!;
+          final existingId = existingItem.id;
+          if (existingId == null) {
+            throw StateError('inventory row ${existingItem.id} has no id');
+          }
+          return existingId;
         }
         final id = await txn.insert('inventory', toMap(item));
         logInfo('Inventory item inserted with id $id');
