@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.0.10+6] — 2026-08-15
+
 ### Removed
 
 - **Firebase removed entirely**: the app no longer depends on Firebase

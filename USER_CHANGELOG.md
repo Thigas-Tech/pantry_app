@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.0.10+6]
+
 - Produce you add in a market trip or to your pantry now defaults to a grams
   unit and a 14-day expiry date, which you can still change or clear.
 

@@ -1,7 +1,7 @@
 name: pantry_app
 description: "Offline first pantry manager"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 0.0.9+5
+version: 0.0.10+6
 
 environment:
   sdk: ^3.12.2

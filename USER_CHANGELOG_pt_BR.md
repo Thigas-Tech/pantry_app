@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [0.0.10+6]
+
 - Hortalicas que voce adiciona em uma ida ao mercado ou na despensa agora
   padronizam para gramas e uma data de validade de 14 dias, que voce ainda
   pode alterar ou limpar.
