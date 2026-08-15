@@ -118,9 +118,10 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
         logInfo('Trip scan resolved: ${product.name}');
         unawaited(_handleScannedProduct(product, tripId));
       case ScanFailed(:final message) when message == 'PRODUCT_NOT_FOUND':
-        logInfo('Trip scan — product not found, opening manual entry');
+        logInfo('Trip scan — product not found, staying on camera');
+        final l10n = AppLocalizations.of(context)!;
+        SnackbarHelper.showError(context, l10n.productNotFound);
         ref.read(scannerCameraProvider.notifier).clearResolution();
-        unawaited(_openManualAdd(tripId));
       case ScanFailed(:final message):
         logWarning('Trip scan failed: $message');
         final l10n = AppLocalizations.of(context)!;
@@ -145,6 +146,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
               name: product.name != 'Unknown' ? product.name : product.barcode,
               barcode: product.barcode,
               inventoryId: tripId,
+              isPurchased: true,
             ),
             activeInventoryId: tripId,
           );
@@ -268,7 +270,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
     await ref
         .read(shoppingListServiceProvider)
         .addShoppingItem(
-          item.copyWith(inventoryId: tripId),
+          item.copyWith(inventoryId: tripId, isPurchased: true),
           activeInventoryId: tripId,
         );
     invalidateShoppingListForInventory(ref, tripId);
@@ -355,6 +357,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
             name: product.name,
             barcode: product.barcode,
             inventoryId: tripId,
+            isPurchased: true,
           ),
           activeInventoryId: tripId,
         );

@@ -28,6 +28,28 @@
 
 ### Fixed
 
+- **Market trip scan no longer opens the manual search**: when a scanned
+  barcode could not be resolved, the trip screen opened the add-to-shopping
+  list search sheet, interrupting the scan flow. It now shows a "Product not
+  found" snackbar and stays on the camera; manual add is available only via
+  the + button. (lib/screens/market_trip_screen.dart)
+- **Market trip camera overlay clipped at the top**: the scanner overlay
+  used a fixed 250x250 cutout meant for a full-screen camera, so in the
+  trip's short embedded box the cutout top was clipped. The cutout now
+  adapts to the available size and stays fully inside the preview.
+  (lib/widgets/scanner_overlay_painter.dart)
+- **Shopping list tiles show product images and wrap names**: the tile
+  leading is now the cached product thumbnail when one exists (with the
+  purchase checkbox moving to the trailing), and long product names wrap to
+  two lines instead of being cut. (lib/widgets/shopping_item_tile.dart,
+  lib/providers/product_repository_provider.dart)
+- **Finishing a trip now moves everything you scanned into the pantry**:
+  finishShoppingTrip previously moved only purchased items, so items added
+  during a trip (scanned, manual, or produce) stayed in the shopping list.
+  It now moves every trip item with a barcode and cached product, cleans the
+  rest, and trip-adds are created as purchased. The shopping list tab's
+  Move-to-inventory button still moves only purchased items.
+  (lib/services/shopping_list_service.dart, lib/screens/market_trip_screen.dart)
 - **Market trip camera layout**: the trip screen embedded the full scanner
   view (with its own AppBar and torch/PLU/manual buttons) inside a fixed
   box, which rendered the camera squished and a redundant "Scan Barcode"

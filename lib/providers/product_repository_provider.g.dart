@@ -152,3 +152,102 @@ final class ProductRepositoryProvider
 }
 
 String _$productRepositoryHash() => r'3fd599e9c90dabd5b12c1fb87c48952af437894c';
+
+/// Provides the cached [Product] for a [barcode], or null.
+///
+/// Reads only from the local cache (never the network) so list tiles can
+/// resolve product metadata — such as the image URL — cheaply while
+/// rendering. Keyed by barcode so rebuilds share one lookup.
+
+@ProviderFor(productByBarcode)
+final productByBarcodeProvider = ProductByBarcodeFamily._();
+
+/// Provides the cached [Product] for a [barcode], or null.
+///
+/// Reads only from the local cache (never the network) so list tiles can
+/// resolve product metadata — such as the image URL — cheaply while
+/// rendering. Keyed by barcode so rebuilds share one lookup.
+
+final class ProductByBarcodeProvider
+    extends
+        $FunctionalProvider<AsyncValue<Product?>, Product?, FutureOr<Product?>>
+    with $FutureModifier<Product?>, $FutureProvider<Product?> {
+  /// Provides the cached [Product] for a [barcode], or null.
+  ///
+  /// Reads only from the local cache (never the network) so list tiles can
+  /// resolve product metadata — such as the image URL — cheaply while
+  /// rendering. Keyed by barcode so rebuilds share one lookup.
+  ProductByBarcodeProvider._({
+    required ProductByBarcodeFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'productByBarcodeProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$productByBarcodeHash();
+
+  @override
+  String toString() {
+    return r'productByBarcodeProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Product?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Product?> create(Ref ref) {
+    final argument = this.argument as String;
+    return productByBarcode(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProductByBarcodeProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$productByBarcodeHash() => r'97b451e75730d7de9def067eacb67c57eb79d9d1';
+
+/// Provides the cached [Product] for a [barcode], or null.
+///
+/// Reads only from the local cache (never the network) so list tiles can
+/// resolve product metadata — such as the image URL — cheaply while
+/// rendering. Keyed by barcode so rebuilds share one lookup.
+
+final class ProductByBarcodeFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Product?>, String> {
+  ProductByBarcodeFamily._()
+    : super(
+        retry: null,
+        name: r'productByBarcodeProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provides the cached [Product] for a [barcode], or null.
+  ///
+  /// Reads only from the local cache (never the network) so list tiles can
+  /// resolve product metadata — such as the image URL — cheaply while
+  /// rendering. Keyed by barcode so rebuilds share one lookup.
+
+  ProductByBarcodeProvider call(String barcode) =>
+      ProductByBarcodeProvider._(argument: barcode, from: this);
+
+  @override
+  String toString() => r'productByBarcodeProvider';
+}

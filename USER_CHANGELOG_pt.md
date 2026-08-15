@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Escanear um item que nao e encontrado nao abre mais a tela de busca: a ida
+  ao mercado permanece na camera e mostra uma mensagem "Produto nao
+  encontrado". Voce ainda pode adiciona-lo manualmente com o botao +.
+
+- A guia de leitura da ida ao mercado nao e mais cortada no topo da caixa da
+  camera.
+
+- A lista de compras (e a lista da ida ao mercado) agora mostra uma miniatura
+  do produto quando disponivel, e nomes de produtos longos quebram em duas
+  linhas em vez de serem cortados.
+
+- Terminar uma ida ao mercado agora move tudo o que voce escaneou (ou
+  adicionou manualmente, incluindo hortalicas) para a despensa escolhida na
+  hora, em vez de deixar na lista de compras.
+
 - A camera da tela "Ida ao mercado" agora se ajusta na propria caixa sem uma
   barra de titulo duplicada, entao a area de leitura fica limpa.
 

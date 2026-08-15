@@ -115,21 +115,21 @@ class _MoveToInventoryButton extends ConsumerWidget {
         if (confirm != true) return;
 
         final inventoryId = await ref.read(activeInventoryProvider.future);
-        final cleanedBefore = await ref
+        final purchasedBefore = await ref
             .read(databaseProvider)
             .getPurchasedShoppingItems(inventoryId: inventoryId);
 
         try {
           final result = await ref
               .read(shoppingListServiceProvider)
-              .finishShoppingTrip(inventoryId: inventoryId);
+              .movePurchasedToInventory(inventoryId: inventoryId);
           invalidateShoppingList(ref);
           if (!context.mounted) return;
           SnackbarHelper.showUndo(
             context,
             l10n.itemsMovedToInventory(result.movedCount),
             () async {
-              for (final item in cleanedBefore) {
+              for (final item in purchasedBefore) {
                 await ref
                     .read(shoppingListServiceProvider)
                     .addShoppingItem(
@@ -140,10 +140,10 @@ class _MoveToInventoryButton extends ConsumerWidget {
               invalidateShoppingList(ref);
             },
           );
-          if (result.cleanedCount > 0) {
+          if (result.skippedCount > 0) {
             SnackbarHelper.showInfo(
               context,
-              l10n.itemsSkippedNoBarcode(result.cleanedCount),
+              l10n.itemsSkippedNoBarcode(result.skippedCount),
             );
           }
         } on Exception {

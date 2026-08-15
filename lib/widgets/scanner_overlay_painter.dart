@@ -1,5 +1,25 @@
 import 'package:flutter/material.dart';
 
+/// Computes the scanning cutout rectangle for a camera preview of [size].
+///
+/// The cutout scales to fit the available space so it works both in the
+/// full-screen scanner and in short embedded previews (such as the market
+/// trip's camera box). On large surfaces the cutout is capped at 250x250 and
+/// sits slightly above centre; on small surfaces it shrinks and stays fully
+/// inside the bounds with a small margin.
+Rect computeScannerCutout(Size size) {
+  const maxCutout = 250.0;
+  final width = (size.width - 32).clamp(80.0, maxCutout);
+  final height = (size.height - 48).clamp(80.0, maxCutout);
+  final top = (size.height / 2 - 40).clamp(8.0, size.height - height - 8);
+  return Rect.fromLTWH(
+    (size.width - width) / 2,
+    top,
+    width,
+    height,
+  );
+}
+
 /// Paints a semi‑transparent dark overlay with a rounded‑rectangle cutout
 /// and an animated horizontal scanning line inside the cutout.
 ///
@@ -21,13 +41,7 @@ class ScannerOverlayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const cutoutWidth = 250.0;
-    const cutoutHeight = 250.0;
-    final cutoutRect = Rect.fromCenter(
-      center: Offset(size.width / 2, size.height / 2 - 40),
-      width: cutoutWidth,
-      height: cutoutHeight,
-    );
+    final cutoutRect = computeScannerCutout(size);
     final cutoutRRect = RRect.fromRectAndRadius(
       cutoutRect,
       const Radius.circular(16),
@@ -96,11 +110,16 @@ class ScannerOverlayPainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
+    // Keep the hint inside the preview even in short embedded boxes.
+    final hintTop = (cutoutRect.bottom + 12).clamp(
+      0.0,
+      size.height - textPainter.height - 4,
+    );
     textPainter.paint(
       canvas,
       Offset(
         (size.width - textPainter.width) / 2,
-        cutoutRect.bottom + 16,
+        hintTop,
       ),
     );
   }

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Scanning an item that can't be found no longer opens the search screen:
+  the market trip stays on the camera and shows a "Product not found"
+  message. You can still add it manually with the + button.
+
+- The scanning guide in the market trip is no longer cut off at the top of
+  the camera box.
+
+- The shopping list (and market trip list) now shows a thumbnail of the
+  product when one is available, and long product names wrap to two lines
+  instead of being cut short.
+
+- Finishing a market trip now moves everything you scanned (or added
+  manually, including produce) into the chosen pantry right away, instead of
+  leaving it on the shopping list.
+
 - The "Market trip" screen's camera now fits neatly in its own box without
   a duplicate title bar, so the scanning area looks clean.
 

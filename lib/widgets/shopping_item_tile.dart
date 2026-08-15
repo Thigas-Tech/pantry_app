@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,8 +7,10 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
+import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
+import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
@@ -91,23 +94,13 @@ class ShoppingItemTile extends ConsumerWidget {
           onLongPress: item.isPurchased
               ? null
               : () => _showEditSheet(context, ref),
-          leading: Checkbox(
-            value: item.isPurchased,
-            onChanged: (_) {
-              unawaited(
-                ref
-                    .read(shoppingListServiceProvider)
-                    .toggleShoppingItem(item.id!)
-                    .then((_) => _invalidateList(ref)),
-              );
-            },
-          ),
+          leading: _buildLeading(context, ref),
           title: Row(
             children: [
               Expanded(
                 child: Text(
                   item.name,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: item.isPurchased
                       ? TextStyle(
@@ -161,6 +154,7 @@ class ShoppingItemTile extends ConsumerWidget {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (_showsImage(ref)) _buildCheckbox(ref),
               if (!item.isPurchased)
                 IconButton(
                   icon: Icon(
@@ -245,6 +239,77 @@ class ShoppingItemTile extends ConsumerWidget {
     } else {
       invalidateShoppingList(ref);
     }
+  }
+
+  /// Whether a cached product image is available for this item's barcode.
+  bool _showsImage(WidgetRef ref) {
+    final barcode = item.barcode;
+    if (barcode == null) return false;
+    final product = ref.watch(productByBarcodeProvider(barcode)).asData?.value;
+    final imageUrl = product?.imageUrl;
+    return imageUrl != null && imageUrl.isNotEmpty;
+  }
+
+  /// The cached product image URL for this item's barcode, or null.
+  String? _productImageUrl(WidgetRef ref) {
+    final barcode = item.barcode;
+    if (barcode == null) return null;
+    return ref.watch(productByBarcodeProvider(barcode)).asData?.value?.imageUrl;
+  }
+
+  /// Builds the leading widget: the product thumbnail when available,
+  /// otherwise the purchase checkbox.
+  Widget _buildLeading(BuildContext context, WidgetRef ref) {
+    final imageUrl = _productImageUrl(ref);
+    if (imageUrl == null) return _buildCheckbox(ref);
+
+    final barcode = item.barcode!;
+    final cached = ref.watch(cachedImageProvider((imageUrl, barcode)));
+
+    return Semantics(
+      label: item.name,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: cached.when(
+          data: (path) => path == null
+              ? _buildCheckbox(ref)
+              : Image.file(
+                  File(path),
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => _buildCheckbox(ref),
+                ),
+          loading: () => Container(
+            width: 40,
+            height: 40,
+            color: Colors.grey.shade300,
+            alignment: Alignment.center,
+            child: const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+          error: (_, _) => _buildCheckbox(ref),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the purchase checkbox.
+  Widget _buildCheckbox(WidgetRef ref) {
+    return Checkbox(
+      value: item.isPurchased,
+      onChanged: (_) {
+        unawaited(
+          ref
+              .read(shoppingListServiceProvider)
+              .toggleShoppingItem(item.id!)
+              .then((_) => _invalidateList(ref)),
+        );
+      },
+    );
   }
 
   void _changeQuantity(

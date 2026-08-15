@@ -242,16 +242,27 @@ class ShoppingListService {
   ///
   /// Runs inside a single SQLite transaction — all-or-nothing. Returns a
   /// [FinishShoppingTripResult] with the moved and cleaned counts.
+  /// Finishes a market trip by moving the trip's items into the inventory and
+  /// removing anything that could not be moved.
+  ///
+  /// Moves every item in the trip inventory (both pending and purchased) that
+  /// has a barcode and a cached product into the inventory (see
+  /// [movePurchasedToInventory]). Any remaining items — for example free-text
+  /// entries without a barcode, or products that are not in the cache — are
+  /// then deleted so the list is clean for the next trip.
+  ///
+  /// Runs inside a single SQLite transaction — all-or-nothing. Returns a
+  /// [FinishShoppingTripResult] with the moved and cleaned counts.
   Future<FinishShoppingTripResult> finishShoppingTrip({
     required int inventoryId,
   }) async {
     final database = await _db.database;
-    final allPurchased = await _db.getPurchasedShoppingItems(
+    final allItems = await _db.getShoppingList(
       inventoryId: inventoryId,
     );
 
     logInfo(
-      'Finish shopping trip — total=${allPurchased.length} '
+      'Finish shopping trip — total=${allItems.length} '
       'inventoryId=$inventoryId',
     );
 
@@ -259,32 +270,33 @@ class ShoppingListService {
     await database.transaction((txn) async {
       final result = await _movePurchasedItemsTxn(
         txn,
-        items: allPurchased,
+        items: allItems,
         inventoryId: inventoryId,
       );
       movedCount = result.movedCount;
 
-      // Remove purchased items that could not be moved (no barcode or no
-      // product in cache) so the list is clean after the trip.
+      // Remove any remaining trip items (no barcode or no product in cache)
+      // so the list is clean after the trip.
       final cleaned = await txn.delete(
         'shopping_list',
-        where: 'is_purchased = 1 AND inventory_id = ?',
+        where: 'inventory_id = ?',
         whereArgs: [inventoryId],
       );
-      logInfo('Cleaned $cleaned leftover purchased items after trip');
+      logInfo('Cleaned $cleaned leftover trip items after finish');
     });
 
     return FinishShoppingTripResult(
       movedCount: movedCount,
-      cleanedCount: allPurchased.length - movedCount,
+      cleanedCount: allItems.length - movedCount,
     );
   }
 
-  /// Moves a set of purchased items into the inventory inside [txn].
+  /// Moves a set of items into the inventory inside [txn].
   ///
   /// Mirrors the [movePurchasedToInventory] per-item logic but operates on
-  /// the caller-provided transaction so it can be composed into larger
-  /// transactions (such as finishing a market trip) without nesting.
+  /// the caller-provided transaction and the caller-supplied [items] (which
+  /// may be purchased items for the tab's move button, or the full trip list
+  /// when finishing a market trip) so it can be composed without nesting.
   Future<MoveToInventoryResult> _movePurchasedItemsTxn(
     DatabaseExecutor txn, {
     required List<ShoppingItem> items,

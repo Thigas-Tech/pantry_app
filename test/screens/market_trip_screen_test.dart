@@ -18,6 +18,7 @@ import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/market_trip_screen.dart';
 import 'package:pantry_app/services/price_repository.dart';
 import 'package:pantry_app/services/shopping_list_service.dart';
+import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 
 import '../helpers/pump_app.dart';
@@ -45,6 +46,12 @@ class _FakeScannerCamera extends ScannerCamera {
 
   void resolve(Product product) {
     state = state.copyWith(scanResolution: ScanResolved(product));
+  }
+
+  void failNotFound(String barcode) {
+    state = state.copyWith(
+      scanResolution: ScanFailed('PRODUCT_NOT_FOUND', barcode: barcode),
+    );
   }
 
   void clear() {
@@ -270,4 +277,58 @@ void main() {
       expect(find.text('Estimated price'), findsOneWidget);
     },
   );
+
+  testWidgets(
+    'an unknown product shows a snackbar and does not open the add sheet',
+    (tester) async {
+      final setup = await pumpTrip(
+        tester,
+        inventories: [inventory1],
+      );
+      when(
+        () => setup.db.markShoppingItemsByBarcode(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => 0);
+
+      setup.scanner.failNotFound('999');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byType(AddToShoppingListSheet), findsNothing);
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Product not found.'), findsOneWidget);
+    },
+  );
+
+  testWidgets('scanning a new product adds it as purchased', (tester) async {
+    final setup = await pumpTrip(
+      tester,
+      inventories: [inventory1],
+    );
+    when(
+      () => setup.db.markShoppingItemsByBarcode(
+        any(),
+        inventoryId: any(named: 'inventoryId'),
+      ),
+    ).thenAnswer((_) async => 0);
+    final captured = <ShoppingItem>[];
+    when(
+      () => setup.service.addShoppingItem(
+        any(),
+        activeInventoryId: any(named: 'activeInventoryId'),
+      ),
+    ).thenAnswer((inv) async {
+      captured.add(inv.positionalArguments[0] as ShoppingItem);
+    });
+
+    setup.scanner.resolve(const Product(barcode: '1', name: 'Milk'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(captured, hasLength(1));
+    expect(captured.first.barcode, '1');
+    expect(captured.first.isPurchased, isTrue);
+  });
 }

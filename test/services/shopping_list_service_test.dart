@@ -76,7 +76,7 @@ void main() {
       expect(await db.getShoppingList(inventoryId: 1), isEmpty);
     });
 
-    test('leaves pending (unpurchased) items untouched', () async {
+    test('moves pending items too when finishing a trip', () async {
       await seedPurchasableProduct();
       await db.insertShoppingItem(
         const ShoppingItem(
@@ -87,15 +87,34 @@ void main() {
         ),
       );
       await db.insertShoppingItem(
-        const ShoppingItem(name: 'Still to buy', inventoryId: 1),
+        const ShoppingItem(
+          name: 'Still to buy',
+          barcode: '123',
+          inventoryId: 1,
+        ),
       );
 
       final result = await service.finishShoppingTrip(inventoryId: 1);
 
-      expect(result.movedCount, 1);
-      final remaining = await db.getShoppingList(inventoryId: 1);
-      expect(remaining, hasLength(1));
-      expect(remaining.first.name, 'Still to buy');
+      // Both the purchased and the pending item move to inventory.
+      expect(result.movedCount, 2);
+      expect(result.cleanedCount, 0);
+      expect(await db.getShoppingList(inventoryId: 1), isEmpty);
+      final inv = await db.getInventoryWithProduct(inventoryId: 1);
+      expect(inv, hasLength(1));
+      expect(inv.first['quantity'], 2);
+    });
+
+    test('cleans pending items without a barcode', () async {
+      await db.insertShoppingItem(
+        const ShoppingItem(name: 'Free text', inventoryId: 1),
+      );
+
+      final result = await service.finishShoppingTrip(inventoryId: 1);
+
+      expect(result.movedCount, 0);
+      expect(result.cleanedCount, 1);
+      expect(await db.getShoppingList(inventoryId: 1), isEmpty);
     });
 
     test('rolls back everything when the trip finish fails', () async {
