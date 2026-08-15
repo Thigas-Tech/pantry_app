@@ -130,6 +130,29 @@
   the DAO orders pending items by sort_order and reorder runs in a
   transaction. (lib/database/migrations/v41_shopping_sort_order.dart new,
   lib/database/shopping_list_dao.dart, lib/database/database_helper.dart)
+- **Market trip**: a scanning-driven shopping trip started from the home
+  screen action sheet ("Market trip"). The user picks the target pantry
+  (when more than one exists), scans items in sequence with the embedded
+  camera (already-pending items are marked purchased; new items are added),
+  and finishes to move purchased items into the pantry. Non-barcoded
+  produce can be added at the end via a USDA-backed search sheet. When a
+  tracked price exists, the trip asks whether the estimated price is
+  correct or should be updated. (lib/screens/market_trip_screen.dart new,
+  lib/widgets/produce_search_sheet.dart new, lib/screens/home_screen.dart)
+- **Shopping list estimated prices**: items without an entered price now
+  show the latest tracked price for the product prefixed with "Est."
+  (when price tracking is enabled and a tracked price exists); section
+  totals include estimated amounts and disclose the estimated portion.
+  An entered price always wins over the estimate. The shared
+  ShoppingItemTile is reused by both the shopping list tab and the market
+  trip. (lib/widgets/shopping_item_tile.dart new, lib/utils/shopping_price.dart new,
+  lib/screens/shopping_list_screen.dart)
+- **Trip finishing moves and cleans purchased items**: finishShoppingTrip
+  moves purchased items (with barcodes) into the chosen pantry and removes
+  leftover purchased items that could not be moved (no barcode), in one
+  transaction. The shopping list tab's Move-to-inventory button uses the
+  same path with undo for cleaned items.
+  (lib/services/shopping_list_service.dart)
 
 ### Maintainability
 

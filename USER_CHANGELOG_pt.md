@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- A opcao "Ida ao mercado" no menu da tela inicial agora esta disponivel.
+  Voce escolhe para qual despensa e a ida (quando tem mais de uma), escaneia
+  itens em sequencia com a camera e finaliza a ida para mover o que comprou
+  para a despensa. Se um item tem um preco informado antes, o app pergunta
+  se aquele preco estimado ainda esta correto ou se voce quer atualiza-lo.
+  Voce tambem pode adicionar hortalicas sem codigo de barras no fim da ida
+  buscando pelo nome.
+
+- A lista de compras agora mostra um preco estimado para itens ainda sem
+  preco, baseado no ultimo preco informado para aquele produto (marcado com
+  "Est."). Os totais incluem essas estimativas e mostram quanto e estimado.
+  Um preco informado por voce para um item sempre tem prioridade sobre a
+  estimativa.
+
 - Itens de hortifruti adicionados pelo banco de dados de alimentos integrado
   nao sao mais removidos pela limpeza automatica de cache de dois meses,
   entao as informacoes nutricionais que voce consulta permanecem

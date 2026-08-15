@@ -2424,6 +2424,18 @@ abstract class AppLocalizations {
   /// **'Add item'**
   String get addShoppingItem;
 
+  /// No description provided for @addItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add item'**
+  String get addItem;
+
+  /// No description provided for @productAddedToShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'{product} added to shopping list'**
+  String productAddedToShoppingList(String product);
+
   /// No description provided for @itemName.
   ///
   /// In en, this message translates to:
@@ -2597,6 +2609,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total: {total}'**
   String shoppingTotal(String total);
+
+  /// No description provided for @totalWithEstimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {total} (incl. {estimated} estimated)'**
+  String totalWithEstimated(String total, String estimated);
+
+  /// No description provided for @estimatedPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Est. {price}'**
+  String estimatedPrice(String price);
+
+  /// No description provided for @marketTripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Market trip'**
+  String get marketTripTitle;
+
+  /// No description provided for @scanNextItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan items to add them to this trip'**
+  String get scanNextItem;
+
+  /// No description provided for @finishTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish trip'**
+  String get finishTrip;
+
+  /// No description provided for @finishTripConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish this trip? Purchased items will be moved to your pantry.'**
+  String get finishTripConfirm;
+
+  /// No description provided for @tripSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip finished: {moved} moved to pantry, {cleaned} removed'**
+  String tripSummary(int moved, int cleaned);
+
+  /// No description provided for @chooseTripInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Which pantry is this trip for?'**
+  String get chooseTripInventory;
+
+  /// No description provided for @confirmEstimateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated price'**
+  String get confirmEstimateTitle;
+
+  /// No description provided for @confirmEstimateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The estimated price for {product} is {price} (from your last purchase). Is this correct?'**
+  String confirmEstimateBody(String product, String price);
+
+  /// No description provided for @useEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Use estimate'**
+  String get useEstimate;
+
+  /// No description provided for @enterPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter price'**
+  String get enterPrice;
+
+  /// No description provided for @addProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Add produce'**
+  String get addProduce;
+
+  /// No description provided for @noProduceFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'No, finish trip'**
+  String get noProduceFinish;
+
+  /// No description provided for @produceSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search produce without barcodes'**
+  String get produceSearchHint;
+
+  /// No description provided for @produceNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No produce found. Try a different name.'**
+  String get produceNotFound;
+
+  /// No description provided for @addToTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to trip'**
+  String get addToTrip;
+
+  /// No description provided for @searchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed. Please try again.'**
+  String get searchFailed;
 
   /// No description provided for @shoppingMixedCurrency.
   ///

@@ -14,6 +14,7 @@ import 'package:pantry_app/providers/onboarding_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
+import 'package:pantry_app/screens/market_trip_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
@@ -143,7 +144,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 subtitle: Text(l10n.marketTripSubtitle),
                 onTap: () {
                   Navigator.pop(ctx);
-                  SnackbarHelper.showInfo(context, l10n.comingSoon);
+                  unawaited(
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute(
+                        builder: (_) => const MarketTripScreen(),
+                      ),
+                    ),
+                  );
                 },
               ),
             ],

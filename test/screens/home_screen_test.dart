@@ -21,6 +21,7 @@ import 'package:pantry_app/providers/onboarding_provider.dart'
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
+import 'package:pantry_app/screens/market_trip_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
@@ -428,7 +429,7 @@ void main() {
     expect(find.byType(RecipeListScreen), findsOneWidget);
   });
 
-  testWidgets('action sheet Market trip shows styled SnackbarHelper snackbar', (
+  testWidgets('action sheet Market trip navigates to MarketTripScreen', (
     tester,
   ) async {
     final mockDb = _createMockDb();
@@ -446,9 +447,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    final snackbar = tester.widget<SnackBar>(find.byType(SnackBar));
-    expect(snackbar.behavior, SnackBarBehavior.floating);
-    expect(find.byIcon(Icons.info_outline), findsOneWidget);
+    expect(find.byType(MarketTripScreen), findsOneWidget);
   });
 
   testWidgets(

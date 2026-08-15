@@ -16,6 +16,20 @@ Future<List<ShoppingItem>> shoppingList(Ref ref) async {
   return db.getShoppingList(inventoryId: inventoryId);
 }
 
+/// Provides all shopping list items for a specific [inventoryId].
+///
+/// Unlike [shoppingList] (which follows the active inventory), this family
+/// is keyed by an explicit inventory so the market trip can operate on a
+/// chosen pantry independently of the active one.
+@riverpod
+Future<List<ShoppingItem>> shoppingListByInventory(
+  Ref ref,
+  int inventoryId,
+) {
+  final db = ref.watch(databaseProvider);
+  return db.getShoppingList(inventoryId: inventoryId);
+}
+
 /// Provides only pending (not purchased) shopping list items, scoped to the
 /// active inventory.
 @riverpod

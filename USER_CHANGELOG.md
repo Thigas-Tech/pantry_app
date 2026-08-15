@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- The "Market trip" option in the home screen menu is now available. You
+  pick which pantry the trip is for (when you have more than one), scan
+  items in sequence with the camera, and finish the trip to move what you
+  bought into your pantry. If an item has a price you entered before, the
+  app asks whether that estimated price is still correct or if you want to
+  update it. You can also add produce that has no barcode at the end of the
+  trip by searching for its name.
+
+- The shopping list now shows an estimated price for items without a price
+  yet, based on the last price you entered for that product (marked with
+  "Est."). Totals include those estimates and show how much is estimated.
+  A price you enter for an item always takes priority over the estimate.
+
 - Produce items added from the built-in food database are no longer removed
   by the automatic two-month cache cleanup, so the nutrition information you
   look up stays available.

@@ -5,6 +5,7 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/utils/logger.dart';
+import 'package:sqflite/sqflite.dart';
 
 /// Holds the result of a move-to-inventory operation.
 class MoveToInventoryResult {
@@ -19,6 +20,22 @@ class MoveToInventoryResult {
 
   /// Number of items skipped (no barcode or no product in cache).
   final int skippedCount;
+}
+
+/// Holds the result of finishing a market trip.
+class FinishShoppingTripResult {
+  /// Creates a [FinishShoppingTripResult].
+  const FinishShoppingTripResult({
+    required this.movedCount,
+    required this.cleanedCount,
+  });
+
+  /// Number of items moved to the inventory.
+  final int movedCount;
+
+  /// Number of purchased items removed from the list without moving
+  /// (no barcode or no product in cache).
+  final int cleanedCount;
 }
 
 /// Owns all shopping list business logic: adding, toggling, deleting,
@@ -188,10 +205,6 @@ class ShoppingListService {
     required int inventoryId,
   }) async {
     final database = await _db.database;
-
-    var movedCount = 0;
-    var skippedCount = 0;
-
     final allPurchased = await _db.getPurchasedShoppingItems(
       inventoryId: inventoryId,
     );
@@ -201,88 +214,165 @@ class ShoppingListService {
       'inventoryId=$inventoryId',
     );
 
+    var movedCount = 0;
+    var skippedCount = 0;
     await database.transaction((txn) async {
-      for (final item in allPurchased) {
-        if (item.barcode == null || item.barcode!.isEmpty) {
-          logWarning(
-            'Skipped item id=${item.id} — no barcode',
-          );
-          skippedCount++;
-          continue;
-        }
-
-        final existingProduct = await txn.query(
-          'products',
-          where: 'barcode = ?',
-          whereArgs: [item.barcode],
-          limit: 1,
-        );
-        if (existingProduct.isEmpty) {
-          logWarning(
-            'Skipped item id=${item.id} barcode=${item.barcode} — '
-            'product not in cache',
-          );
-          skippedCount++;
-          continue;
-        }
-
-        final existingInv = await txn.query(
-          'inventory',
-          where:
-              'barcode = ? AND inventory_id = ?'
-              ' AND expiry_date IS NULL AND unit = ? AND location = ?',
-          whereArgs: [item.barcode, inventoryId, item.unit, 'pantry'],
-          limit: 1,
-        );
-        if (existingInv.isNotEmpty) {
-          final existingQty =
-              (existingInv.first['quantity'] as num?)?.toDouble() ?? 1;
-          await txn.update(
-            'inventory',
-            {'quantity': existingQty + item.quantity},
-            where: 'id = ?',
-            whereArgs: [existingInv.first['id']],
-          );
-          logInfo(
-            'Merged inventory — barcode=${item.barcode} '
-            'qty=${existingQty + item.quantity}',
-          );
-        } else {
-          await txn.insert('inventory', {
-            'barcode': item.barcode,
-            'quantity': item.quantity,
-            'unit': item.unit,
-            'location': 'pantry',
-            'inventory_id': inventoryId,
-            'date_added': DateTime.now().millisecondsSinceEpoch,
-          });
-          logInfo(
-            'Created inventory item — barcode=${item.barcode} '
-            'qty=${item.quantity}',
-          );
-        }
-
-        if (item.priceAmount != null) {
-          await txn.insert('prices', {
-            'barcode': item.barcode,
-            'price': item.priceAmount,
-            'currency': item.priceCurrency ?? 'USD',
-            'store': item.priceStore,
-            'date_purchased': DateTime.now().millisecondsSinceEpoch,
-            'date_added': DateTime.now().millisecondsSinceEpoch,
-            'sync_status': 'local_only',
-            'is_discounted': 0,
-          });
-        }
-
-        await txn.delete(
-          'shopping_list',
-          where: 'id = ?',
-          whereArgs: [item.id],
-        );
-        movedCount++;
-      }
+      final result = await _movePurchasedItemsTxn(
+        txn,
+        items: allPurchased,
+        inventoryId: inventoryId,
+      );
+      movedCount = result.movedCount;
+      skippedCount = result.skippedCount;
     });
+
+    return MoveToInventoryResult(
+      movedCount: movedCount,
+      skippedCount: skippedCount,
+    );
+  }
+
+  /// Finishes a market trip by moving purchased items to the inventory and
+  /// removing any purchased items that could not be moved.
+  ///
+  /// First moves every purchased item with a barcode and a cached product
+  /// into the inventory (see [movePurchasedToInventory]). Any remaining
+  /// purchased items in the inventory (for example free-text items without
+  /// a barcode) are then deleted so the list is clean for the next trip.
+  ///
+  /// Runs inside a single SQLite transaction — all-or-nothing. Returns a
+  /// [FinishShoppingTripResult] with the moved and cleaned counts.
+  Future<FinishShoppingTripResult> finishShoppingTrip({
+    required int inventoryId,
+  }) async {
+    final database = await _db.database;
+    final allPurchased = await _db.getPurchasedShoppingItems(
+      inventoryId: inventoryId,
+    );
+
+    logInfo(
+      'Finish shopping trip — total=${allPurchased.length} '
+      'inventoryId=$inventoryId',
+    );
+
+    var movedCount = 0;
+    await database.transaction((txn) async {
+      final result = await _movePurchasedItemsTxn(
+        txn,
+        items: allPurchased,
+        inventoryId: inventoryId,
+      );
+      movedCount = result.movedCount;
+
+      // Remove purchased items that could not be moved (no barcode or no
+      // product in cache) so the list is clean after the trip.
+      final cleaned = await txn.delete(
+        'shopping_list',
+        where: 'is_purchased = 1 AND inventory_id = ?',
+        whereArgs: [inventoryId],
+      );
+      logInfo('Cleaned $cleaned leftover purchased items after trip');
+    });
+
+    return FinishShoppingTripResult(
+      movedCount: movedCount,
+      cleanedCount: allPurchased.length - movedCount,
+    );
+  }
+
+  /// Moves a set of purchased items into the inventory inside [txn].
+  ///
+  /// Mirrors the [movePurchasedToInventory] per-item logic but operates on
+  /// the caller-provided transaction so it can be composed into larger
+  /// transactions (such as finishing a market trip) without nesting.
+  Future<MoveToInventoryResult> _movePurchasedItemsTxn(
+    DatabaseExecutor txn, {
+    required List<ShoppingItem> items,
+    required int inventoryId,
+  }) async {
+    var movedCount = 0;
+    var skippedCount = 0;
+
+    for (final item in items) {
+      if (item.barcode == null || item.barcode!.isEmpty) {
+        logWarning(
+          'Skipped item id=${item.id} — no barcode',
+        );
+        skippedCount++;
+        continue;
+      }
+
+      final existingProduct = await txn.query(
+        'products',
+        where: 'barcode = ?',
+        whereArgs: [item.barcode],
+        limit: 1,
+      );
+      if (existingProduct.isEmpty) {
+        logWarning(
+          'Skipped item id=${item.id} barcode=${item.barcode} — '
+          'product not in cache',
+        );
+        skippedCount++;
+        continue;
+      }
+
+      final existingInv = await txn.query(
+        'inventory',
+        where:
+            'barcode = ? AND inventory_id = ?'
+            ' AND expiry_date IS NULL AND unit = ? AND location = ?',
+        whereArgs: [item.barcode, inventoryId, item.unit, 'pantry'],
+        limit: 1,
+      );
+      if (existingInv.isNotEmpty) {
+        final existingQty =
+            (existingInv.first['quantity'] as num?)?.toDouble() ?? 1;
+        await txn.update(
+          'inventory',
+          {'quantity': existingQty + item.quantity},
+          where: 'id = ?',
+          whereArgs: [existingInv.first['id']],
+        );
+        logInfo(
+          'Merged inventory — barcode=${item.barcode} '
+          'qty=${existingQty + item.quantity}',
+        );
+      } else {
+        await txn.insert('inventory', {
+          'barcode': item.barcode,
+          'quantity': item.quantity,
+          'unit': item.unit,
+          'location': 'pantry',
+          'inventory_id': inventoryId,
+          'date_added': DateTime.now().millisecondsSinceEpoch,
+        });
+        logInfo(
+          'Created inventory item — barcode=${item.barcode} '
+          'qty=${item.quantity}',
+        );
+      }
+
+      if (item.priceAmount != null) {
+        await txn.insert('prices', {
+          'barcode': item.barcode,
+          'price': item.priceAmount,
+          'currency': item.priceCurrency ?? 'USD',
+          'store': item.priceStore,
+          'date_purchased': DateTime.now().millisecondsSinceEpoch,
+          'date_added': DateTime.now().millisecondsSinceEpoch,
+          'sync_status': 'local_only',
+          'is_discounted': 0,
+        });
+      }
+
+      await txn.delete(
+        'shopping_list',
+        where: 'id = ?',
+        whereArgs: [item.id],
+      );
+      movedCount++;
+    }
 
     return MoveToInventoryResult(
       movedCount: movedCount,

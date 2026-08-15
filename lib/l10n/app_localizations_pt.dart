@@ -1241,6 +1241,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addShoppingItem => 'Adicionar item';
 
   @override
+  String get addItem => 'Adicionar item';
+
+  @override
+  String productAddedToShoppingList(String product) {
+    return '$product adicionado a lista de compras';
+  }
+
+  @override
   String get itemName => 'Nome do item';
 
   @override
@@ -1328,6 +1336,68 @@ class AppLocalizationsPt extends AppLocalizations {
   String shoppingTotal(String total) {
     return 'Total: $total';
   }
+
+  @override
+  String totalWithEstimated(String total, String estimated) {
+    return 'Total: $total (incl. $estimated estimado)';
+  }
+
+  @override
+  String estimatedPrice(String price) {
+    return 'Est. $price';
+  }
+
+  @override
+  String get marketTripTitle => 'Ida ao mercado';
+
+  @override
+  String get scanNextItem => 'Escanee itens para adiciona-los a esta ida';
+
+  @override
+  String get finishTrip => 'Terminar ida';
+
+  @override
+  String get finishTripConfirm => 'Terminar esta ida? Itens comprados serao movidos para a despensa.';
+
+  @override
+  String tripSummary(int moved, int cleaned) {
+    return 'Ida terminada: $moved movidos para a despensa, $cleaned removidos';
+  }
+
+  @override
+  String get chooseTripInventory => 'Para qual despensa e esta ida?';
+
+  @override
+  String get confirmEstimateTitle => 'Preco estimado';
+
+  @override
+  String confirmEstimateBody(String product, String price) {
+    return 'O preco estimado para $product e $price (da sua ultima compra). Esta correto?';
+  }
+
+  @override
+  String get useEstimate => 'Usar estimativa';
+
+  @override
+  String get enterPrice => 'Informar preco';
+
+  @override
+  String get addProduce => 'Adicionar hortalicas';
+
+  @override
+  String get noProduceFinish => 'Nao, terminar ida';
+
+  @override
+  String get produceSearchHint => 'Buscar hortalicas sem codigo de barras';
+
+  @override
+  String get produceNotFound => 'Nenhuma hortalica encontrada. Tente outro nome.';
+
+  @override
+  String get addToTrip => 'Adicionar a ida';
+
+  @override
+  String get searchFailed => 'Falha na busca. Tente novamente.';
 
   @override
   String shoppingMixedCurrency(String total) {
@@ -3395,6 +3465,14 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get addShoppingItem => 'Adicionar item';
 
   @override
+  String get addItem => 'Adicionar item';
+
+  @override
+  String productAddedToShoppingList(String product) {
+    return '$product adicionado a lista de compras';
+  }
+
+  @override
   String get itemName => 'Nome do item';
 
   @override
@@ -3482,6 +3560,68 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String shoppingTotal(String total) {
     return 'Total: $total';
   }
+
+  @override
+  String totalWithEstimated(String total, String estimated) {
+    return 'Total: $total (incl. $estimated estimado)';
+  }
+
+  @override
+  String estimatedPrice(String price) {
+    return 'Est. $price';
+  }
+
+  @override
+  String get marketTripTitle => 'Ida ao mercado';
+
+  @override
+  String get scanNextItem => 'Escanee itens para adiciona-los a esta ida';
+
+  @override
+  String get finishTrip => 'Terminar ida';
+
+  @override
+  String get finishTripConfirm => 'Terminar esta ida? Itens comprados serao movidos para a despensa.';
+
+  @override
+  String tripSummary(int moved, int cleaned) {
+    return 'Ida terminada: $moved movidos para a despensa, $cleaned removidos';
+  }
+
+  @override
+  String get chooseTripInventory => 'Para qual despensa e esta ida?';
+
+  @override
+  String get confirmEstimateTitle => 'Preco estimado';
+
+  @override
+  String confirmEstimateBody(String product, String price) {
+    return 'O preco estimado para $product e $price (da sua ultima compra). Esta correto?';
+  }
+
+  @override
+  String get useEstimate => 'Usar estimativa';
+
+  @override
+  String get enterPrice => 'Informar preco';
+
+  @override
+  String get addProduce => 'Adicionar hortalicas';
+
+  @override
+  String get noProduceFinish => 'Nao, terminar ida';
+
+  @override
+  String get produceSearchHint => 'Buscar hortalicas sem codigo de barras';
+
+  @override
+  String get produceNotFound => 'Nenhuma hortalica encontrada. Tente outro nome.';
+
+  @override
+  String get addToTrip => 'Adicionar a ida';
+
+  @override
+  String get searchFailed => 'Falha na busca. Tente novamente.';
 
   @override
   String shoppingMixedCurrency(String total) {

@@ -621,6 +621,15 @@
   "navList": "List",
   "shoppingList": "Shopping List",
   "addShoppingItem": "Add item",
+  "addItem": "Add item",
+  "productAddedToShoppingList": "{product} added to shopping list",
+  "@productAddedToShoppingList": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      }
+    }
+  },
   "itemName": "Item name",
   "unit": "Unit",
   "editItem": "Edit item",
@@ -657,6 +666,61 @@
       }
     }
   },
+  "totalWithEstimated": "Total: {total} (incl. {estimated} estimated)",
+  "@totalWithEstimated": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "estimatedPrice": "Est. {price}",
+  "@estimatedPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "marketTripTitle": "Market trip",
+  "scanNextItem": "Scan items to add them to this trip",
+  "finishTrip": "Finish trip",
+  "finishTripConfirm": "Finish this trip? Purchased items will be moved to your pantry.",
+  "tripSummary": "Trip finished: {moved} moved to pantry, {cleaned} removed",
+  "@tripSummary": {
+    "placeholders": {
+      "moved": {
+        "type": "int"
+      },
+      "cleaned": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseTripInventory": "Which pantry is this trip for?",
+  "confirmEstimateTitle": "Estimated price",
+  "confirmEstimateBody": "The estimated price for {product} is {price} (from your last purchase). Is this correct?",
+  "@confirmEstimateBody": {
+    "placeholders": {
+      "product": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "useEstimate": "Use estimate",
+  "enterPrice": "Enter price",
+  "addProduce": "Add produce",
+  "noProduceFinish": "No, finish trip",
+  "produceSearchHint": "Search produce without barcodes",
+  "produceNotFound": "No produce found. Try a different name.",
+  "addToTrip": "Add to trip",
+  "searchFailed": "Search failed. Please try again.",
   "shoppingMixedCurrency": "{total}",
   "@shoppingMixedCurrency": {
     "placeholders": {
