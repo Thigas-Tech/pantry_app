@@ -19,17 +19,24 @@ class MigrationV33 extends Migration {
         );
 
         // Backfill pre-existing recipes to the first inventory (seeded Home).
-        final minId = await db.rawQuery(
-          'SELECT COALESCE('
-          '(SELECT id FROM inventories ORDER BY id ASC LIMIT 1),'
-          ' 1'
-          ') AS result',
+        // If every pantry was deleted before upgrading, skip the backfill:
+        // writing a phantom id would violate the recipes FK and block the
+        // upgrade.
+        final hasInventory = await db.rawQuery(
+          'SELECT 1 FROM inventories LIMIT 1',
         );
-        final defaultId = minId.first['result'] as int? ?? 1;
-        await db.rawUpdate(
-          'UPDATE recipes SET inventory_id = ?',
-          [defaultId],
-        );
+        if (hasInventory.isNotEmpty) {
+          final minId = await db.rawQuery(
+            'SELECT MIN(id) AS result FROM inventories',
+          );
+          final defaultId = minId.first['result'] as int?;
+          if (defaultId != null) {
+            await db.rawUpdate(
+              'UPDATE recipes SET inventory_id = ?',
+              [defaultId],
+            );
+          }
+        }
       }
 
       await db.execute(

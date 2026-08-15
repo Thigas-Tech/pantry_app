@@ -101,7 +101,16 @@ Version history:
 | v39 -> v40 | Added `shared_recipe_id TEXT NOT NULL DEFAULT ''` column on `recipes` (dropped in v43) |
 | v40 -> v41 | Added `sort_order REAL NOT NULL DEFAULT 0` column on `shopping_list`; pending items backfilled to keep current date-added order |
 | v41 -> v42 | Dropped the `firebase_cache_meta` table (Firebase cache removed) |
-| v42 -> v43 | Dropped the `shared_recipe_id` column on `recipes` (shared-recipe cache removed) |
+| v42 -> v43 | Dropped the `shared_recipe_id` column on `recipes` (shared-recipe cache removed). On SQLite < 3.35 (Android < 13) the drop is skipped and the inert column is retained so the upgrade is never blocked. |
+
+**Migration safety under foreign keys**: sqflite runs `onUpgrade` inside a
+transaction with `PRAGMA foreign_keys = ON` already applied (from
+`onConfigure`). Migrations that rewrite FK-parent keys (v28 produce barcode
+normalization) therefore set `PRAGMA defer_foreign_keys = ON` so checks run
+at the outer COMMIT once all tables are consistent. Migrations that
+backfill an `inventory_id` (v20/v33/v34) skip the backfill when every pantry
+has been deleted rather than writing a phantom id that would violate the
+child-table FK.
 
 **Migration v30 search_text backfill**: the recipe `search_text` backfill
 intentionally runs in Dart via `normalizeForSearch()` instead of raw SQL.
@@ -129,9 +138,13 @@ open and after `cleanupOldEntries` to refresh query-planner statistics.
 
 **SQLite version compatibility**: the app targets `minSdk 24` (Android
 7.0, system SQLite 3.9.2). All SQL must therefore stay within SQLite
-3.9.2 syntax — notably no `NULLS LAST` (3.30+) and no window functions
-like `ROW_NUMBER() OVER` (3.25+). `test/database/sqlite_compatibility_test.dart`
-scans `lib/` and fails if either syntax is reintroduced. FEFO ordering
+3.9.2 syntax — notably no `NULLS LAST` (3.30+), no window functions
+like `ROW_NUMBER() OVER` (3.25+), no `ALTER TABLE DROP COLUMN` /
+`RENAME COLUMN` (3.35+/3.25+), no UPSERT `ON CONFLICT DO UPDATE`
+(3.24+), and no `RETURNING` (3.35+).
+`test/database/sqlite_compatibility_test.dart` scans `lib/` and fails if any
+of these constructs are reintroduced (v43 is allowlisted because its
+`DROP COLUMN` is guarded to skip on old engines). FEFO ordering
 uses the portable `ORDER BY (expiry_date IS NULL), expiry_date ASC`, and
 "latest price per barcode" uses a correlated subquery
 (`ORDER BY date_purchased DESC, id DESC LIMIT 1`).

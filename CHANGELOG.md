@@ -40,6 +40,20 @@
   (lib/database/database_helper.dart,
   android/app/src/main/AndroidManifest.xml,
   test/database/pragma_execsql_guard_test.dart new)
+- **Database upgrade safety under foreign keys**: several migrations could
+  block upgrades for edge-case user states. v28 normalized produce barcodes
+  starting from the products table (FK parent) with foreign keys enabled,
+  violating child-table FKs whenever produce rows existed — it now sets
+  PRAGMA defer_foreign_keys so checks run at the outer COMMIT. v43's
+  ALTER TABLE DROP COLUMN requires SQLite 3.35 (Android 13+), so on older
+  Android the inert shared_recipe_id column is retained instead of failing
+  the upgrade. v20/v33/v34 skip their inventory_id backfill when every
+  pantry has been deleted rather than writing a phantom id that violates the
+  child-table FK. sqlite_compatibility_test now also scans for DROP/RENAME
+  COLUMN, UPSERT, and RETURNING; the schema-parity replay covers all
+  migrations up to the current version. (lib/database/migrations/v28/v43/v20/v33/v34,
+  test/database/migrations/*, test/database/sqlite_compatibility_test.dart,
+  test/database/oncreate_schema_parity_test.dart)
 
 ### Features
 
