@@ -81,5 +81,35 @@ void main() {
 
       await db.close();
     });
+
+    test(
+      'retains the column without error when DROP COLUMN is unsupported',
+      () async {
+        // Force DROP COLUMN to fail the same way an old SQLite (pre-3.35)
+        // would: an index on the column makes SQLite reject the statement
+        // even on modern engines. The migration must catch the failure, keep
+        // the column, and complete so the upgrade can proceed.
+        final db = await databaseFactory.openDatabase(inMemoryDatabasePath);
+        await db.execute('''
+          CREATE TABLE recipes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            inventory_id INTEGER NOT NULL DEFAULT 1,
+            shared_recipe_id TEXT NOT NULL DEFAULT ''
+          )
+        ''');
+        await db.execute(
+          'CREATE INDEX idx_shared_recipe_id ON recipes(shared_recipe_id)',
+        );
+
+        await MigrationV43().up(db);
+
+        expect(await columnExists(db, 'recipes', 'shared_recipe_id'), isTrue);
+
+        await db.close();
+      },
+    );
   });
 }

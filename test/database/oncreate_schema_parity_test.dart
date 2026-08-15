@@ -149,7 +149,7 @@ void main() {
     );
 
     test(
-      'onCreate schema matches a full migration replay (0 to 37)',
+      'onCreate schema matches a full migration replay (0 to current)',
       () async {
         // Fresh-install path: onCreate builds the schema directly.
         final fresh = DatabaseHelper.withPath(_uniqueDbPath());
@@ -157,7 +157,9 @@ void main() {
 
         // Upgrade path: replay every migration from scratch.
         final replayDb = await databaseFactory.openDatabase(_uniqueDbPath());
-        await MigrationRunner(allMigrations()).run(replayDb, 0, 37);
+        await MigrationRunner(
+          allMigrations(),
+        ).run(replayDb, 0, DatabaseHelper.databaseVersion);
 
         final freshTables = await _tableNames(freshDb);
         final replayTables = await _tableNames(replayDb);
