@@ -149,6 +149,16 @@ uses the portable `ORDER BY (expiry_date IS NULL), expiry_date ASC`, and
 "latest price per barcode" uses a correlated subquery
 (`ORDER BY date_purchased DESC, id DESC LIMIT 1`).
 
+**Name-based FEFO fallback** (`getInventoryRowsByProductName` and the
+recipe cook path) uses a leading-wildcard `LIKE` on `products.name`; the
+`%` and `_` characters in the search term are escaped with
+`ESCAPE '\'` (mirroring `ProductDao.search`) so they match literally.
+"From your pantry" suggestions (`distinctProductsFromInventory`) select
+`MAX(inventory.date_added) AS last_added` and `GROUP BY` barcode so the
+"most recent" ordering is deterministic on all supported SQLite versions
+(ordering a `SELECT DISTINCT` by a non-selected column is undefined and was
+an error on SQLite 3.9.2).
+
 ### 2.4 Connectivity layer
 
 `InternetConnectionChecker` monitors device connectivity via a

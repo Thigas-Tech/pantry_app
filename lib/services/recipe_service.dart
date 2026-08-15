@@ -534,12 +534,15 @@ class RecipeService {
         );
         if (rows.isEmpty && entry.value.name.isNotEmpty) {
           final normalizedName = entry.value.name.trim().toLowerCase();
+          final escaped = normalizedName
+              .replaceAll('%', r'\%')
+              .replaceAll('_', r'\_');
           rows = await txn.rawQuery(
             'SELECT i.* FROM inventory i'
             ' INNER JOIN products p ON p.barcode = i.barcode'
-            ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
+            r" WHERE LOWER(p.name) LIKE ? ESCAPE '\' AND i.inventory_id = ?"
             ' ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC',
-            ['%$normalizedName%', inventoryId],
+            ['%$escaped%', inventoryId],
           );
         }
         for (final row in rows) {

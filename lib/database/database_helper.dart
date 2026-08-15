@@ -1098,7 +1098,9 @@ class DatabaseHelper {
   /// The search is case-insensitive and trims the input to reduce false
   /// negatives from whitespace mismatch. This is a fallback when exact
   /// barcode lookup returns no results. The leading-wildcard LIKE forces
-  /// a scan, so results are capped at [limit] rows (default 20).
+  /// a scan, so results are capped at [limit] rows (default 20). LIKE
+  /// wildcards in [name] are escaped so a literal '%' or '_' cannot act
+  /// as a wildcard (mirrors [ProductDao.search]).
   Future<List<Map<String, dynamic>>> getInventoryRowsByProductName({
     required String name,
     required int inventoryId,
@@ -1106,13 +1108,14 @@ class DatabaseHelper {
   }) async {
     final db = await database;
     final normalized = name.trim().toLowerCase();
+    final escaped = normalized.replaceAll('%', r'\%').replaceAll('_', r'\_');
     return db.rawQuery(
       'SELECT i.* FROM inventory i'
       ' INNER JOIN products p ON p.barcode = i.barcode'
-      ' WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?'
+      r" WHERE LOWER(p.name) LIKE ? ESCAPE '\' AND i.inventory_id = ?"
       ' ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC'
       ' LIMIT ?',
-      ['%$normalized%', inventoryId, limit],
+      ['%$escaped%', inventoryId, limit],
     );
   }
 }

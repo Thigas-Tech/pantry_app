@@ -438,15 +438,17 @@ class InventoryDao {
     try {
       final result = await db.rawQuery(
         '''
-        SELECT DISTINCT
+        SELECT
           products.barcode,
           products.name,
           products.image_url,
-          products.product_type
+          products.product_type,
+          MAX(inventory.date_added) AS last_added
         FROM inventory
         INNER JOIN products ON inventory.barcode = products.barcode
         WHERE inventory.inventory_id = ?
-        ORDER BY inventory.date_added DESC
+        GROUP BY products.barcode
+        ORDER BY last_added DESC
         LIMIT ?
       ''',
         [inventoryId, limit],

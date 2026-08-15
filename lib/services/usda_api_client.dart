@@ -205,6 +205,10 @@ class UsdaApiClient {
       barcode: 'plu-$fdcId',
       name: description,
       productType: ProductType.produce,
+      // USDA products use synthetic plu- barcodes that cannot be re-fetched
+      // from Open Food Facts, so they must never be treated as disposable
+      // api cache rows (AGENTS rule 8).
+      source: 'manual',
       energyKcal: energyKcal,
       proteinG: proteinG,
       carbsG: carbsG,
