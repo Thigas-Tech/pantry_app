@@ -70,7 +70,9 @@ ordered by expiry_date ASC (nulls last) for FEFO deduction.</p>
 <p>The search is case-insensitive and trims the input to reduce false
 negatives from whitespace mismatch. This is a fallback when exact
 barcode lookup returns no results. The leading-wildcard LIKE forces
-a scan, so results are capped at <code>limit</code> rows (default 20).</p>
+a scan, so results are capped at <code>limit</code> rows (default 20). LIKE
+wildcards in <code>name</code> are escaped so a literal '%' or '_' cannot act
+as a wildcard (mirrors <a href="../../database_product_dao/ProductDao/search.html">ProductDao.search</a>).</p>
 </section>
 
 
@@ -84,13 +86,14 @@ a scan, so results are capped at <code>limit</code> rows (default 20).</p>
 }) async {
   final db = await database;
   final normalized = name.trim().toLowerCase();
+  final escaped = normalized.replaceAll(&#39;%&#39;, r&#39;\%&#39;).replaceAll(&#39;_&#39;, r&#39;\_&#39;);
   return db.rawQuery(
     &#39;SELECT i.* FROM inventory i&#39;
     &#39; INNER JOIN products p ON p.barcode = i.barcode&#39;
-    &#39; WHERE LOWER(p.name) LIKE ? AND i.inventory_id = ?&#39;
+    r&quot; WHERE LOWER(p.name) LIKE ? ESCAPE &#39;\&#39; AND i.inventory_id = ?&quot;
     &#39; ORDER BY (i.expiry_date IS NULL), i.expiry_date ASC&#39;
     &#39; LIMIT ?&#39;,
-    [&#39;%$normalized%&#39;, inventoryId, limit],
+    [&#39;%$escaped%&#39;, inventoryId, limit],
   );
 }</code></pre>
 </section>
