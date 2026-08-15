@@ -54,6 +54,20 @@
   migrations up to the current version. (lib/database/migrations/v28/v43/v20/v33/v34,
   test/database/migrations/*, test/database/sqlite_compatibility_test.dart,
   test/database/oncreate_schema_parity_test.dart)
+- **USDA produce products are now manual-sourced**: products built by the
+  USDA FoodData Central client previously omitted source and defaulted to
+  'api', so the age-based cache flush deleted them even though their
+  synthetic plu- barcodes cannot be re-fetched from Open Food Facts. They
+  are now tagged source 'manual' and survive cache flushes. The
+  "from your pantry" suggestions query now selects MAX(date_added) and
+  groups by barcode so ordering is deterministic on all supported SQLite
+  versions, and the name-based FEFO fallback escapes LIKE wildcards so a
+  literal % or _ in a search term cannot match unintended rows.
+  (lib/services/usda_api_client.dart, lib/database/inventory_dao.dart,
+  lib/database/database_helper.dart, lib/services/recipe_service.dart,
+  test/services/usda_api_client_test.dart,
+  test/database/distinct_products_query_test.dart new,
+  test/database/flush_expired_cache_test.dart, test/database/database_helper_test.dart)
 
 ### Features
 

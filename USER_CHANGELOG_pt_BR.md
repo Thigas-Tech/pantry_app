@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Itens de hortifruti adicionados pelo banco de dados de alimentos integrado
+  nao sao mais removidos pela limpeza automatica de cache de dois meses,
+  entao as informacoes nutricionais que voce consulta permanecem
+  disponiveis.
+
 - Corrigido um problema que impedia o banco de dados local do app de abrir
   em alguns dispositivos Android mais recentes, o que fazia o app iniciar
   sem seus produtos e configuracoes salvos.

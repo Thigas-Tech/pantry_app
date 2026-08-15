@@ -1097,7 +1097,6 @@ void main() {
     );
   });
 
-
   group('database getter dedup', () {
     test('returns the same future for concurrent first accesses', () async {
       final helper = DatabaseHelper.withPath(inMemoryDatabasePath);
@@ -1174,6 +1173,49 @@ void main() {
         inventoryId: 1,
       );
       expect(rows, isEmpty);
+    });
+
+    test('treats % and _ in the search term as literals', () async {
+      await db.insertProduct(
+        const Product(barcode: 'pct', name: 'Butter 100%'),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'pct'),
+      );
+      // False positives: without escaping, "100%" matches "1000" and
+      // "a_b" matches "acb".
+      await db.insertProduct(
+        const Product(barcode: 'pct0', name: 'Butter 1000g'),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'pct0'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'snake', name: 'Snake a_b'),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'snake'),
+      );
+      await db.insertProduct(
+        const Product(barcode: 'snake2', name: 'Snake acb'),
+      );
+      await db.insertInventoryItem(
+        const InventoryItem(barcode: 'snake2'),
+      );
+
+      // A literal % must not act as a wildcard.
+      var rows = await db.getInventoryRowsByProductName(
+        name: 'Butter 100%',
+        inventoryId: 1,
+      );
+      expect(rows.map((r) => r['barcode']).toList(), ['pct']);
+
+      // A literal _ must not act as a single-char wildcard.
+      rows = await db.getInventoryRowsByProductName(
+        name: 'Snake a_b',
+        inventoryId: 1,
+      );
+      expect(rows.map((r) => r['barcode']).toList(), ['snake']);
     });
   });
 

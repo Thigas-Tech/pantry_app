@@ -57,7 +57,7 @@ void main() {
       expect(apple.proteinG, closeTo(0.26, 0.01));
       expect(apple.carbsG, closeTo(13.81, 0.01));
       expect(apple.productType, ProductType.produce);
-      expect(apple.source, 'api');
+      expect(apple.source, 'manual');
     });
 
     test('returns empty list on API error', () async {

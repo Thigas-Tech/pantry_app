@@ -66,10 +66,21 @@ void main() {
           source: 'manual',
         ).copyWith(lastSynced: ms(const Duration(days: 400))),
       );
+      // USDA produce products use synthetic plu- barcodes that cannot be
+      // re-fetched from OFF; they are manual-sourced and must survive the
+      // flush too (data-loss regression).
+      await db.insertProduct(
+        const Product(
+          barcode: 'plu-9003',
+          name: 'Apple',
+          source: 'manual',
+        ).copyWith(lastSynced: ms(const Duration(days: 400))),
+      );
 
       await db.flushExpiredCachedProducts(maxAge: maxAge, now: () => now);
 
       expect(await db.getProduct('manual'), isNotNull);
+      expect(await db.getProduct('plu-9003'), isNotNull);
     });
 
     test('treats a null last_synced api product as expired', () async {

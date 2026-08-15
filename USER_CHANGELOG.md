@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Produce items added from the built-in food database are no longer removed
+  by the automatic two-month cache cleanup, so the nutrition information you
+  look up stays available.
+
 - Fixed an issue that prevented the app's local database from opening on
   some newer Android devices, which caused the app to start without your
   saved products and settings.
