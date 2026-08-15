@@ -74,7 +74,11 @@
   if (state.selectedIds.isEmpty) return;
   final repo = ref.read(productRepositoryProvider);
   await repo.deleteInventoryItems(state.selectedIds.toList());
-  if (ref.mounted) ref.invalidate(pantryProvider);
+  afterFrame(() {
+    afterFrame(() {
+      if (ref.mounted) ref.invalidate(pantryProvider);
+    });
+  });
   exitSelectionMode();
 }</code></pre>
 </section>
@@ -104,7 +108,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

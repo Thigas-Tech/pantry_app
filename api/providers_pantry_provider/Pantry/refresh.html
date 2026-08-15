@@ -77,7 +77,9 @@ TickerMode.didChangeDependencies resuming paused subscriptions).</p>
   final repo = ref.read(productRepositoryProvider);
   await repo.refreshInventoryProducts(activeId);
   await repo.setLastRefreshTime();
-  ref.invalidateSelf();
+  afterFrame(() {
+    if (ref.mounted) ref.invalidateSelf();
+  });
 }</code></pre>
 </section>
 
@@ -106,7 +108,7 @@ TickerMode.didChangeDependencies resuming paused subscriptions).</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

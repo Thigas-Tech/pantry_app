@@ -56,6 +56,7 @@
       const
       <span class="name ">ScannerCameraView</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="param-onSwitchToManual"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToManual</span>, </span></li>
 <li><span class="parameter" id="param-onSwitchToPlu"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToPlu</span>, </span></li>
+<li><span class="parameter" id="param-embedded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">embedded</span> = <span class="default-value">false</span>, </span></li>
 <li><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span>, </span></li>
 </ol>})
     </section>
@@ -71,6 +72,7 @@
   <pre class="language-dart"><code class="language-dart">const ScannerCameraView({
   required this.onSwitchToManual,
   required this.onSwitchToPlu,
+  this.embedded = false,
   super.key,
 });</code></pre>
 </section>
@@ -100,7 +102,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

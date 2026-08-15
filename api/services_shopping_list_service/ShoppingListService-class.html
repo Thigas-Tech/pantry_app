@@ -116,7 +116,7 @@ reads it from the provider).</p>
     <dl class="callables">
         <dt id="addShoppingItem" class="callable">
   <span class="name"><a href="../services_shopping_list_service/ShoppingListService/addShoppingItem.html">addShoppingItem</a></span><span class="signature">(<wbr><span class="parameter" id="addShoppingItem-param-item"><span class="type-annotation"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span> <span class="parameter-name">item</span>, {</span><span class="parameter" id="addShoppingItem-param-activeInventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">activeInventoryId</span></span>})
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
   </span>
   
 
@@ -151,6 +151,20 @@ item with the same barcode and unit already exists.
 </dt>
 <dd>
   Deletes a shopping list item by <code>id</code>.
+  
+
+</dd>
+
+        <dt id="finishShoppingTrip" class="callable">
+  <span class="name"><a href="../services_shopping_list_service/ShoppingListService/finishShoppingTrip.html">finishShoppingTrip</a></span><span class="signature">(<wbr>{<span class="parameter" id="finishShoppingTrip-param-inventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>})
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../services_shopping_list_service/FinishShoppingTripResult-class.html">FinishShoppingTripResult</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Finishes a market trip by moving purchased items to the inventory and
+removing any purchased items that could not be moved.
   
 
 </dd>
@@ -233,6 +247,19 @@ item with the same barcode and unit already exists.
 
 </dd>
 
+        <dt id="updateShoppingItemExpiry" class="callable">
+  <span class="name"><a href="../services_shopping_list_service/ShoppingListService/updateShoppingItemExpiry.html">updateShoppingItemExpiry</a></span><span class="signature">(<wbr><span class="parameter" id="updateShoppingItemExpiry-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span>, </span><span class="parameter" id="updateShoppingItemExpiry-param-expiryDate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">expiryDate</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Updates only the expiry date for the shopping item with the given <code>id</code>.
+  
+
+</dd>
+
         <dt id="updateShoppingItemPrice" class="callable">
   <span class="name"><a href="../services_shopping_list_service/ShoppingListService/updateShoppingItemPrice.html">updateShoppingItemPrice</a></span><span class="signature">(<wbr><span class="parameter" id="updateShoppingItemPrice-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span>, {</span><span class="parameter" id="updateShoppingItemPrice-param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span><span class="parameter" id="updateShoppingItemPrice-param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
@@ -297,7 +324,7 @@ item with the same barcode and unit already exists.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

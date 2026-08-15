@@ -54,7 +54,7 @@
 
     <section class="multi-line-signature">
       
-<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
 <span class="name ">addShoppingItem</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="addShoppingItem-param-item"><span class="type-annotation"><a href="../../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span> <span class="parameter-name">item</span>, {</span></li>
 <li><span class="parameter" id="addShoppingItem-param-activeInventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">activeInventoryId</span>, </span></li>
 </ol>})
@@ -73,13 +73,14 @@ The item's inventoryId defaults to the active inventory if not set.</p>
 cache to avoid FOREIGN KEY constraint failures. If the product is
 missing and cannot be fetched, the barcode is set to null so the
 insert still succeeds.</p>
+<p>Returns the id of the inserted or merged row.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; addShoppingItem(
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; addShoppingItem(
   ShoppingItem item, {
   required int activeInventoryId,
 }) async {
@@ -123,7 +124,12 @@ insert still succeeds.</p>
     &#39;inventoryId=${scopedItem.inventoryId}&#39;,
   );
   try {
-    await _db.shoppingListDao.insertOrMergeByBarcode(database, scopedItem);
+    final id = await _db.shoppingListDao.insertOrMergeByBarcode(
+      database,
+      scopedItem,
+    );
+    logInfo(&#39;Shopping item persisted with id=$id&#39;);
+    return id;
   } on Exception catch (e) {
     logError(&#39;Failed to add shopping item: $e&#39;);
     rethrow;
@@ -156,7 +162,7 @@ insert still succeeds.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

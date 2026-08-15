@@ -81,6 +81,11 @@ keeps API responses small and fast.</p>
   ProductField.CATEGORIES,
   ProductField.INGREDIENTS_TEXT,
   ProductField.SERVING_SIZE,
+  &#47;&#47; The numeric values power the package-size&#47;serving-size pre-fill in the
+  &#47;&#47; price sheets; request them explicitly so the API always returns them
+  &#47;&#47; rather than relying on the server including extra fields.
+  ProductField.SERVING_QUANTITY,
+  ProductField.PACKAGING_QUANTITY,
   ProductField.NUTRIMENTS,
   ProductField.NUTRISCORE,
   ProductField.QUANTITY,
@@ -113,7 +118,7 @@ keeps API responses small and fast.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

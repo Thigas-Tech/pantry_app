@@ -56,15 +56,22 @@
 <section class="desc markdown">
   <p>Application configuration.</p>
 <p>Credentials are read from a .env file loaded by <a href="https://pub.dev/documentation/flutter_dotenv/6.0.1/flutterdotenv/DotEnv-class.html">DotEnv</a> for local
-development only; the .env file is <strong>not</strong> a Flutter asset, so nothing
-sensitive is bundled into release builds. Non-secret feature toggles
-fall back to <code>--dart-define</code> build flags set by CI.</p>
-<h2 id="security-note">Security note</h2>
+development, or injected at build time via <code>--dart-define-from-file=.env</code>
+for device and release builds (the CI release workflow recreates .env from
+GitHub secrets). The .env file is <strong>never</strong> committed to version control
+and <strong>never</strong> shipped as a plaintext Flutter asset; injected values are
+compiled into the binary instead.</p>
+<h2 id="credential-model">Credential model</h2>
 <ul>
-<li>The .env file is <strong>never</strong> committed to version control and <strong>never</strong>
-shipped in an app artifact.</li>
+<li>The USDA FoodData Central key is a public client key (sent in every
+request URL), so embedding it is standard practice.</li>
+<li>The Open Food Facts user/password follow the SDK's supported "global
+user for your app" model (see the openfoodfacts-dart account guide):
+one dedicated app account carries submissions. Prefer a dedicated
+account over a personal one.</li>
 <li>Credential-backed features (OFF product submission, Open Prices,
-USDA) are disabled when their credential is absent.</li>
+USDA) are disabled when their credential is absent, so a build made
+without the flags degrades gracefully instead of failing.</li>
 </ul>
 <p>This class cannot be instantiated — all members are static.</p>
 </section>
@@ -278,7 +285,7 @@ production server (false).
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

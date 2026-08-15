@@ -100,6 +100,13 @@ whole foods. Generated products use a synthetic barcode prefixed with
       }),
     );
 
+    if (response.statusCode == 429) {
+      logWarning(
+        &#39;USDA rate limit hit (429) for &quot;$query&quot; — &#39;
+        &#39;the API key is temporarily blocked&#39;,
+      );
+      return [];
+    }
     if (response.statusCode == 403) {
       logWarning(
         &#39;USDA API returned 403 — check your API key in .env (USDA_API_KEY)&#39;,
@@ -162,7 +169,7 @@ whole foods. Generated products use a synthetic barcode prefixed with
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

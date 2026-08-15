@@ -110,13 +110,7 @@ obtain the correct rendering size.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 void paint(Canvas canvas, Size size) {
-  const cutoutWidth = 250.0;
-  const cutoutHeight = 250.0;
-  final cutoutRect = Rect.fromCenter(
-    center: Offset(size.width &#47; 2, size.height &#47; 2 - 40),
-    width: cutoutWidth,
-    height: cutoutHeight,
-  );
+  final cutoutRect = computeScannerCutout(size);
   final cutoutRRect = RRect.fromRectAndRadius(
     cutoutRect,
     const Radius.circular(16),
@@ -185,13 +179,7 @@ void paint(Canvas canvas, Size size) {
     ),
     textDirection: TextDirection.ltr,
   )..layout();
-  textPainter.paint(
-    canvas,
-    Offset(
-      (size.width - textPainter.width) &#47; 2,
-      cutoutRect.bottom + 16,
-    ),
-  );
+  _paintHint(canvas, size, cutoutRect, textPainter);
 }</code></pre>
 </section>
 
@@ -220,7 +208,7 @@ void paint(Canvas canvas, Size size) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

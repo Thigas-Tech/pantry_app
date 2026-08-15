@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the addScannedProduct method from the MarketTripItemController class, for the Dart programming language.">
+  <title>addScannedProduct method - MarketTripItemController class - market_trip_item_provider library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../providers_market_trip_item_provider/">providers&#47;market_trip_item_provider.dart</a></li>
+    <li><a href="../../providers_market_trip_item_provider/MarketTripItemController-class.html">MarketTripItemController</a></li>
+    <li class="self-crumb">addScannedProduct method</li>
+  </ol>
+  <div class="self-name">addScannedProduct</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+<div
+    id="dartdoc-main-content"
+    class="main-content"
+    data-above-sidebar="providers_market_trip_item_provider&#47;MarketTripItemController-class-sidebar.html"
+    data-below-sidebar="">
+    <div>
+<h1><span class="kind-method">addScannedProduct</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+<span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>&gt;</span></span>
+<span class="name ">addScannedProduct</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="addScannedProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span>, {</span></li>
+<li><span class="parameter" id="addScannedProduct-param-price"><span class="type-annotation"><a href="../../providers_market_trip_item_provider/TripItemPriceInput-class.html">TripItemPriceInput</a>?</span> <span class="parameter-name">price</span>, </span></li>
+<li><span class="parameter" id="addScannedProduct-param-expiryDate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">expiryDate</span>, </span></li>
+</ol>})
+
+      
+
+    </section>
+    
+<section class="desc markdown">
+  <p>Adds <code>product</code> to the trip as purchased and returns its id.</p>
+<p>Marks an existing pending row with the same barcode as purchased, or
+merges into an existing purchased row (same barcode) by incrementing
+its quantity, or inserts a new purchased row when neither exists.
+When <code>price</code> is given it is written to the item, and when <code>expiryDate</code>
+is given (and not before today) it is written too.</p>
+<p>Returns null when the call was ignored because an add for the same
+barcode is already in progress. Throws when the item cannot be
+resolved or persisted.</p>
+</section>
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">Future&lt;int?&gt; addScannedProduct(
+  Product product, {
+  TripItemPriceInput? price,
+  String? expiryDate,
+}) async {
+  if (state.processingBarcode == product.barcode) {
+    logInfo(&#39;Ignoring add for ${product.barcode} — already processing&#39;);
+    return null;
+  }
+  state = state.copyWith(
+    processingBarcode: product.barcode,
+    clearError: true,
+  );
+  try {
+    final db = ref.read(databaseProvider);
+    final service = ref.read(shoppingListServiceProvider);
+
+    final marked = await db.markShoppingItemsByBarcode(
+      product.barcode,
+      inventoryId: tripId,
+    );
+    &#47;&#47; The notifier is autoDispose: if the confirm screen popped while the
+    &#47;&#47; add was in flight, this provider is disposed and `ref`&#47;`state` can no
+    &#47;&#47; longer be used. Bail out early instead of throwing &quot;Ref after
+    &#47;&#47; disposed&quot; (the widgets that would react are gone anyway).
+    if (!ref.mounted) return null;
+
+    int? id;
+    if (marked &gt; 0) {
+      id = (await _findPurchasedByBarcode(product.barcode))?.id;
+    } else {
+      final existing = await _findPurchasedByBarcode(product.barcode);
+      if (!ref.mounted) return null;
+      if (existing != null &amp;&amp; existing.id != null) {
+        final existingId = existing.id!;
+        id = existingId;
+        await service.updateShoppingItem(
+          existing.copyWith(quantity: existing.quantity + 1),
+        );
+      } else {
+        id = await service.addShoppingItem(
+          ShoppingItem(
+            name: product.name != &#39;Unknown&#39; ? product.name : product.barcode,
+            barcode: product.barcode,
+            inventoryId: tripId,
+            isPurchased: true,
+            &#47;&#47; Produce is weighed in grams by default, matching the
+            &#47;&#47; add-to-inventory produce default.
+            unit: product.productType == ProductType.produce ? &#39;g&#39; : &#39;pieces&#39;,
+          ),
+          activeInventoryId: tripId,
+        );
+      }
+    }
+
+    if (id == null) {
+      throw StateError(&#39;No trip item id for barcode ${product.barcode}&#39;);
+    }
+    if (!ref.mounted) return null;
+
+    if (price != null) {
+      await service.updateShoppingItemPrice(
+        id,
+        priceAmount: price.amount,
+        priceCurrency: price.currency,
+        priceStore: price.store,
+      );
+      if (!ref.mounted) return null;
+    }
+
+    final iso = expiryDate;
+    if (iso != null) {
+      if (_isBeforeToday(iso)) {
+        throw ArgumentError.value(
+          iso,
+          &#39;expiryDate&#39;,
+          &#39;must not be before today&#39;,
+        );
+      }
+      await service.updateShoppingItemExpiry(id, iso);
+      if (!ref.mounted) return null;
+    }
+
+    ref
+      ..invalidate(shoppingListByInventoryProvider(tripId))
+      ..invalidate(shoppingListProvider)
+      ..invalidate(pendingShoppingListProvider)
+      ..invalidate(purchasedShoppingListProvider)
+      ..invalidate(pendingShoppingCountProvider);
+    return id;
+  } on Exception catch (e) {
+    logError(&#39;Failed to add scanned product to trip: $e&#39;);
+    if (ref.mounted) {
+      state = state.copyWith(lastError: e.toString());
+    }
+    rethrow;
+  } finally {
+    if (ref.mounted) {
+      state = state.copyWith(clearProcessing: true);
+    }
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">pantry_app</a></li>
+    <li><a href="../../providers_market_trip_item_provider/">market_trip_item_provider</a></li>
+    <li><a href="../../providers_market_trip_item_provider/MarketTripItemController-class.html">MarketTripItemController</a></li>
+    <li class="self-crumb">addScannedProduct method</li>
+</ol>
+
+    <h5>MarketTripItemController class</h5>
+    <div id="dartdoc-sidebar-left-content"></div>
+  </div><!--/.sidebar-offcanvas-->
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+</div><!--/.sidebar-offcanvas-->
+</main>
+<footer>
+  <span class="no-break">
+    pantry_app
+      0.0.10+6
+  </span>
+  
+</footer>
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

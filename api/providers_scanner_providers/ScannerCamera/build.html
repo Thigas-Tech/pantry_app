@@ -73,7 +73,15 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 ScannerCameraState build() {
-  _controller = ref.watch(mobileScannerControllerProvider);
+  &#47;&#47; Read (not watch) the controller: the notifier and the controller share
+  &#47;&#47; the screen&#39;s lifetime and are rebuilt together on every entry, so there
+  &#47;&#47; is no state to react to. Watching the autoDispose controller provider
+  &#47;&#47; here means that when the screen pops (and the controller provider is
+  &#47;&#47; disposed) the watch listener invalidates this notifier while the
+  &#47;&#47; framework is rebuilding TickerMode, which triggers the Riverpod
+  &#47;&#47; &quot;setState() called during build&quot; scheduler crash. See the scanner pop
+  &#47;&#47; regression test.
+  _controller = ref.read(mobileScannerControllerProvider);
   ref.onDispose(() {
     _controller?.removeListener(_onControllerState);
     _controller = null;
@@ -113,7 +121,7 @@ ScannerCameraState build() {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

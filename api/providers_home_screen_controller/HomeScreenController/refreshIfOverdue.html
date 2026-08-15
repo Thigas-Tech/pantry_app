@@ -82,7 +82,11 @@ prevents setState during build errors.</p>
     final activeId = await ref.read(activeInventoryProvider.future);
     await repo.refreshInventoryProducts(activeId);
     await repo.setLastRefreshTime();
-    if (ref.mounted) ref.invalidate(pantryProvider);
+    afterFrame(() {
+    afterFrame(() {
+      if (ref.mounted) ref.invalidate(pantryProvider);
+    });
+  });
   } on Exception catch (e) {
     logWarning(&#39;Overdue cache refresh failed: $e&#39;);
   }
@@ -114,7 +118,7 @@ prevents setState during build errors.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

@@ -68,14 +68,18 @@
     
 <section class="desc markdown">
   <p>The Open Food Facts user ID used for product submissions.</p>
-<p>Set to a non‑empty string in .env to enable product‑submission
-features. Leave empty to disable submissions.</p>
+<p>Read from the <code>OFF_USER_ID</code> dart-define at build time, falling back to
+.env for local development. Leave empty to disable submissions.</p>
 </section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static String get offUserId =&gt; dotenv.env[&#39;OFF_USER_ID&#39;] ?? &#39;&#39;;</code></pre>
+  <pre class="language-dart"><code class="language-dart">static String get offUserId {
+  const fromEnv = String.fromEnvironment(&#39;OFF_USER_ID&#39;);
+  if (fromEnv.isNotEmpty) return fromEnv;
+  return dotenv.env[&#39;OFF_USER_ID&#39;] ?? &#39;&#39;;
+}</code></pre>
 </section>
 
   </section>
@@ -105,7 +109,7 @@ features. Leave empty to disable submissions.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

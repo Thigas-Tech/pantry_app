@@ -85,15 +85,18 @@ conditions.</p>
   logInfo(&#39;Insert&#47;merge inventory item: ${item.barcode}&#39;);
   try {
     return await db.transaction&lt;int&gt;((txn) async {
+      final expiryClause = item.expiryDate == null
+          ? &#39;expiry_date IS NULL&#39;
+          : &#39;expiry_date = ?&#39;;
       final existing = await txn.query(
         &#39;inventory&#39;,
         where:
             &#39;barcode = ? AND inventory_id = ?&#39;
-            &#39; AND expiry_date IS ? AND unit IS ? AND location IS ?&#39;,
+            &#39; AND $expiryClause AND unit IS ? AND location IS ?&#39;,
         whereArgs: [
           item.barcode,
           item.inventoryId,
-          item.expiryDate,
+          if (item.expiryDate != null) item.expiryDate,
           item.unit,
           item.location,
         ],
@@ -154,7 +157,7 @@ conditions.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

@@ -72,6 +72,7 @@
 <li><span class="parameter" id="param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span></li>
 <li><span class="parameter" id="param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span></li>
 <li><span class="parameter" id="param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span>, </span></li>
+<li><span class="parameter" id="param-expiryDate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">expiryDate</span>, </span></li>
 <li><span class="parameter" id="param-sortOrder"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">sortOrder</span>, </span></li>
 </ol>)?, {</span></li>
 <li><span class="parameter" id="maybeWhen-param-orElse"><span>required</span> <span class="type-annotation">TResult</span> <span class="parameter-name">orElse</span>(), </span></li>
@@ -97,10 +98,10 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult maybeWhen&lt;TResult extends Object?&gt;(TResult Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased,  double? priceAmount,  String? priceCurrency,  String? priceStore,  double sortOrder)?  $default,{required TResult orElse(),}) {final _that = this;
+  <pre class="language-dart"><code class="language-dart">@optionalTypeArgs TResult maybeWhen&lt;TResult extends Object?&gt;(TResult Function( String name,  String? barcode,  double quantity,  String unit,  bool isPurchased,  int? id,  int? inventoryId,  int? dateAdded,  int? datePurchased,  double? priceAmount,  String? priceCurrency,  String? priceStore,  String? expiryDate,  double sortOrder)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ShoppingItem() when $default != null:
-return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased,_that.priceAmount,_that.priceCurrency,_that.priceStore,_that.sortOrder);case _:
+return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurchased,_that.id,_that.inventoryId,_that.dateAdded,_that.datePurchased,_that.priceAmount,_that.priceCurrency,_that.priceStore,_that.expiryDate,_that.sortOrder);case _:
   return orElse();
 
 }
@@ -132,7 +133,7 @@ return $default(_that.name,_that.barcode,_that.quantity,_that.unit,_that.isPurch
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

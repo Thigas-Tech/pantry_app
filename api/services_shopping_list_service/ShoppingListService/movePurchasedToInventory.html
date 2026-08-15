@@ -83,10 +83,6 @@ items. Runs inside a SQLite transaction — all-or-nothing.</p>
   required int inventoryId,
 }) async {
   final database = await _db.database;
-
-  var movedCount = 0;
-  var skippedCount = 0;
-
   final allPurchased = await _db.getPurchasedShoppingItems(
     inventoryId: inventoryId,
   );
@@ -96,87 +92,16 @@ items. Runs inside a SQLite transaction — all-or-nothing.</p>
     &#39;inventoryId=$inventoryId&#39;,
   );
 
+  var movedCount = 0;
+  var skippedCount = 0;
   await database.transaction((txn) async {
-    for (final item in allPurchased) {
-      if (item.barcode == null || item.barcode!.isEmpty) {
-        logWarning(
-          &#39;Skipped item id=${item.id} — no barcode&#39;,
-        );
-        skippedCount++;
-        continue;
-      }
-
-      final existingProduct = await txn.query(
-        &#39;products&#39;,
-        where: &#39;barcode = ?&#39;,
-        whereArgs: [item.barcode],
-        limit: 1,
-      );
-      if (existingProduct.isEmpty) {
-        logWarning(
-          &#39;Skipped item id=${item.id} barcode=${item.barcode} — &#39;
-          &#39;product not in cache&#39;,
-        );
-        skippedCount++;
-        continue;
-      }
-
-      final existingInv = await txn.query(
-        &#39;inventory&#39;,
-        where:
-            &#39;barcode = ? AND inventory_id = ?&#39;
-            &#39; AND expiry_date IS NULL AND unit = ? AND location = ?&#39;,
-        whereArgs: [item.barcode, inventoryId, item.unit, &#39;pantry&#39;],
-        limit: 1,
-      );
-      if (existingInv.isNotEmpty) {
-        final existingQty =
-            (existingInv.first[&#39;quantity&#39;] as num?)?.toDouble() ?? 1;
-        await txn.update(
-          &#39;inventory&#39;,
-          {&#39;quantity&#39;: existingQty + item.quantity},
-          where: &#39;id = ?&#39;,
-          whereArgs: [existingInv.first[&#39;id&#39;]],
-        );
-        logInfo(
-          &#39;Merged inventory — barcode=${item.barcode} &#39;
-          &#39;qty=${existingQty + item.quantity}&#39;,
-        );
-      } else {
-        await txn.insert(&#39;inventory&#39;, {
-          &#39;barcode&#39;: item.barcode,
-          &#39;quantity&#39;: item.quantity,
-          &#39;unit&#39;: item.unit,
-          &#39;location&#39;: &#39;pantry&#39;,
-          &#39;inventory_id&#39;: inventoryId,
-          &#39;date_added&#39;: DateTime.now().millisecondsSinceEpoch,
-        });
-        logInfo(
-          &#39;Created inventory item — barcode=${item.barcode} &#39;
-          &#39;qty=${item.quantity}&#39;,
-        );
-      }
-
-      if (item.priceAmount != null) {
-        await txn.insert(&#39;prices&#39;, {
-          &#39;barcode&#39;: item.barcode,
-          &#39;price&#39;: item.priceAmount,
-          &#39;currency&#39;: item.priceCurrency ?? &#39;USD&#39;,
-          &#39;store&#39;: item.priceStore,
-          &#39;date_purchased&#39;: DateTime.now().millisecondsSinceEpoch,
-          &#39;date_added&#39;: DateTime.now().millisecondsSinceEpoch,
-          &#39;sync_status&#39;: &#39;local_only&#39;,
-          &#39;is_discounted&#39;: 0,
-        });
-      }
-
-      await txn.delete(
-        &#39;shopping_list&#39;,
-        where: &#39;id = ?&#39;,
-        whereArgs: [item.id],
-      );
-      movedCount++;
-    }
+    final result = await _movePurchasedItemsTxn(
+      txn,
+      items: allPurchased,
+      inventoryId: inventoryId,
+    );
+    movedCount = result.movedCount;
+    skippedCount = result.skippedCount;
   });
 
   return MoveToInventoryResult(
@@ -211,7 +136,7 @@ items. Runs inside a SQLite transaction — all-or-nothing.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

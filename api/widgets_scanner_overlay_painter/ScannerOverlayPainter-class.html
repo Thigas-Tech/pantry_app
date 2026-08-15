@@ -54,10 +54,12 @@
 
     
 <section class="desc markdown">
-  <p>Paints a semi‑transparent dark overlay with a rounded‑rectangle cutout
+  <p>Paints a semi-transparent dark overlay with a rounded-rectangle cutout
 and an animated horizontal scanning line inside the cutout.</p>
-<p>The cutout is created using a path with <a href="https://api.flutter.dev/flutter/dart-ui/PathFillType.html">PathFillType.evenOdd</a> so that
-it works on all rendering backends (Impeller and Skia).</p>
+<p>The hint text is drawn on a rounded scrim chip in the reserved band above
+the cutout so it stays readable over a bright camera feed. The cutout is
+created using a path with <a href="https://api.flutter.dev/flutter/dart-ui/PathFillType.html">PathFillType.evenOdd</a> so that it works on all
+rendering backends (Impeller and Skia).</p>
 </section>
 
 
@@ -136,7 +138,7 @@ scanning line inside the cutout.
 
 </dt>
 <dd>
-  The localised hint text shown below the cutout.
+  The localised hint text shown above the cutout.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -341,7 +343,7 @@ implemented in terms of the former).
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

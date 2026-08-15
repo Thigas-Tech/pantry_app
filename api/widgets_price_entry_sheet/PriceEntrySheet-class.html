@@ -219,6 +219,20 @@ Example:</p>
 
 </dd>
 
+        <dt id="showDateField" class="property">
+  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/showDateField.html">showDateField</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd>
+  Whether the purchase-date picker is shown. When false the price is
+recorded as purchased today (used by the market trip, where the
+purchase date is always the scan date).
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
     </dl>
   </section>
 
@@ -389,7 +403,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
     <h2>Static Methods</h2>
     <dl class="callables">
         <dt id="show" class="callable">
-  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/show.html">show</a></span><span class="signature">(<wbr><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, {</span><span class="parameter" id="show-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span> = <span class="default-value">&#39;&#39;</span>, </span><span class="parameter" id="show-param-existingPrice"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a>?</span> <span class="parameter-name">existingPrice</span>, </span><span class="parameter" id="show-param-existingAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">existingAmount</span>, </span><span class="parameter" id="show-param-existingCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingCurrency</span>, </span><span class="parameter" id="show-param-existingStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingStore</span>, </span><span class="parameter" id="show-param-existingPackageQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">existingPackageQuantity</span>, </span><span class="parameter" id="show-param-existingPackageUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingPackageUnit</span></span>})
+  <span class="name"><a href="../widgets_price_entry_sheet/PriceEntrySheet/show.html">show</a></span><span class="signature">(<wbr><span class="parameter" id="show-param-context"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/widgets/BuildContext-class.html">BuildContext</a></span> <span class="parameter-name">context</span>, {</span><span class="parameter" id="show-param-barcode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span> = <span class="default-value">&#39;&#39;</span>, </span><span class="parameter" id="show-param-existingPrice"><span class="type-annotation"><a href="../models_price/Price-class.html">Price</a>?</span> <span class="parameter-name">existingPrice</span>, </span><span class="parameter" id="show-param-existingAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">existingAmount</span>, </span><span class="parameter" id="show-param-existingCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingCurrency</span>, </span><span class="parameter" id="show-param-existingStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingStore</span>, </span><span class="parameter" id="show-param-existingPackageQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">existingPackageQuantity</span>, </span><span class="parameter" id="show-param-existingPackageUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingPackageUnit</span>, </span><span class="parameter" id="show-param-showDateField"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">showDateField</span> = <span class="default-value">true</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_price/Price-class.html">Price</a>?</span>&gt;</span></span>
   </span>
   
@@ -429,7 +443,7 @@ or null if cancelled.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

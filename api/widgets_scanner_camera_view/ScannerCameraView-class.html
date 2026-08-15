@@ -59,6 +59,11 @@
 <a href="../providers_scanner_providers/mobileScannerControllerProvider.html">mobileScannerControllerProvider</a> for the <a href="https://pub.dev/documentation/mobile_scanner/7.4.0/mobile_scanner/MobileScannerController-class.html">MobileScannerController</a>.
 Renders the camera preview, animated overlay (only when streaming),
 and error content when an error occurs.</p>
+<p>When <a href="../widgets_scanner_camera_view/ScannerCameraView/embedded.html">embedded</a> is true, the widget renders only the camera preview
+(plus overlay and error content) without its own <a href="https://api.flutter.dev/flutter/material/Scaffold-class.html">Scaffold</a> or <a href="https://api.flutter.dev/flutter/material/AppBar-class.html">AppBar</a>,
+so it can be placed inside a parent screen that owns the chrome (such as
+the market trip). The AppBar actions (torch, PLU, manual entry) are
+omitted in embedded mode; hosts provide their own controls.</p>
 </section>
 
 
@@ -93,7 +98,7 @@ and error content when an error occurs.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ScannerCameraView.new" class="callable">
-          <span class="name"><a href="../widgets_scanner_camera_view/ScannerCameraView/ScannerCameraView.html">ScannerCameraView</a></span><span class="signature">({<span class="parameter" id="param-onSwitchToManual"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToManual</span>, </span><span class="parameter" id="param-onSwitchToPlu"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToPlu</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../widgets_scanner_camera_view/ScannerCameraView/ScannerCameraView.html">ScannerCameraView</a></span><span class="signature">({<span class="parameter" id="param-onSwitchToManual"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToManual</span>, </span><span class="parameter" id="param-onSwitchToPlu"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToPlu</span>, </span><span class="parameter" id="param-embedded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">embedded</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../widgets_scanner_camera_view/ScannerCameraView-class.html">ScannerCameraView</a> widget.
@@ -107,6 +112,19 @@ and error content when an error occurs.</p>
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
+        <dt id="embedded" class="property">
+  <span class="name"><a href="../widgets_scanner_camera_view/ScannerCameraView/embedded.html">embedded</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd>
+  When true, renders only the camera preview without a surrounding
+<a href="https://api.flutter.dev/flutter/material/Scaffold-class.html">Scaffold</a>/<a href="https://api.flutter.dev/flutter/material/AppBar-class.html">AppBar</a> so the host screen owns the chrome.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
         <dt id="hashCode" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/widgets/Widget/hashCode.html">hashCode</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>
@@ -358,7 +376,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

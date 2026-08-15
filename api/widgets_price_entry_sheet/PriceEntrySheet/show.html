@@ -63,6 +63,7 @@
 <li><span class="parameter" id="show-param-existingStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingStore</span>, </span></li>
 <li><span class="parameter" id="show-param-existingPackageQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">existingPackageQuantity</span>, </span></li>
 <li><span class="parameter" id="show-param-existingPackageUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">existingPackageUnit</span>, </span></li>
+<li><span class="parameter" id="show-param-showDateField"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">showDateField</span> = <span class="default-value">true</span>, </span></li>
 </ol>})
 
       
@@ -87,6 +88,7 @@ or null if cancelled.</p>
   String? existingStore,
   double? existingPackageQuantity,
   String? existingPackageUnit,
+  bool showDateField = true,
 }) {
   return BottomSheetHelper.show&lt;Price&gt;(
     context: context,
@@ -98,6 +100,7 @@ or null if cancelled.</p>
       existingStore: existingStore,
       existingPackageQuantity: existingPackageQuantity,
       existingPackageUnit: existingPackageUnit,
+      showDateField: showDateField,
     ),
   );
 }</code></pre>
@@ -128,7 +131,7 @@ or null if cancelled.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

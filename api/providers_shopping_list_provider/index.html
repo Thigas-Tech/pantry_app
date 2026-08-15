@@ -99,6 +99,22 @@ active inventory.
   Provides only purchased shopping list items, scoped to the active inventory.
 </dd>
 
+          <dt id="ShoppingListByInventoryFamily">
+  <span class="name "><a href="../providers_shopping_list_provider/ShoppingListByInventoryFamily-class.html">ShoppingListByInventoryFamily</a></span> 
+
+</dt>
+<dd>
+  Provides all shopping list items for a specific <code>inventoryId</code>.
+</dd>
+
+          <dt id="ShoppingListByInventoryProvider">
+  <span class="name "><a href="../providers_shopping_list_provider/ShoppingListByInventoryProvider-class.html">ShoppingListByInventoryProvider</a></span> 
+
+</dt>
+<dd>
+  Provides all shopping list items for a specific <code>inventoryId</code>.
+</dd>
+
           <dt id="ShoppingListProvider">
   <span class="name "><a href="../providers_shopping_list_provider/ShoppingListProvider-class.html">ShoppingListProvider</a></span> 
 
@@ -169,6 +185,18 @@ active inventory.
 
 </dd>
 
+          <dt id="shoppingListByInventoryProvider" class="property">
+  <span class="name"><a href="../providers_shopping_list_provider/shoppingListByInventoryProvider.html">shoppingListByInventoryProvider</a></span>
+  <span class="signature">&#8594; <a href="../providers_shopping_list_provider/ShoppingListByInventoryFamily-class.html">ShoppingListByInventoryFamily</a></span>
+  
+
+</dt>
+<dd>
+  Provides all shopping list items for a specific <code>inventoryId</code>.
+  <div class="features"><span class="feature">final</span></div>
+
+</dd>
+
           <dt id="shoppingListProvider" class="property">
   <span class="name"><a href="../providers_shopping_list_provider/shoppingListProvider.html">shoppingListProvider</a></span>
   <span class="signature">&#8594; <a href="../providers_shopping_list_provider/ShoppingListProvider-class.html">ShoppingListProvider</a></span>
@@ -196,6 +224,19 @@ active inventory.
 </dt>
 <dd>
   Invalidates all shopping list providers.
+  
+
+</dd>
+
+          <dt id="invalidateShoppingListForInventory" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/invalidateShoppingListForInventory.html">invalidateShoppingListForInventory</a></span><span class="signature">(<wbr><span class="parameter" id="invalidateShoppingListForInventory-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/flutter_riverpod/3.3.2/flutter_riverpod/WidgetRef-class.html">WidgetRef</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="invalidateShoppingListForInventory-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; void</span>
+  </span>
+  
+
+</dt>
+<dd>
+  Invalidates the shopping list providers for a specific <code>inventoryId</code>.
   
 
 </dd>
@@ -264,6 +305,19 @@ active inventory.
 </dt>
 <dd>
   Provides all shopping list items, scoped to the active inventory.
+  
+
+</dd>
+
+          <dt id="shoppingListByInventory" class="callable">
+  <span class="name"><a href="../providers_shopping_list_provider/shoppingListByInventory.html">shoppingListByInventory</a></span><span class="signature">(<wbr><span class="parameter" id="shoppingListByInventory-param-ref"><span class="type-annotation"><a href="https://pub.dev/documentation/riverpod/3.3.2/riverpod/Ref-class.html">Ref</a></span> <span class="parameter-name">ref</span>, </span><span class="parameter" id="shoppingListByInventory-param-inventoryId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">inventoryId</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_shopping_item/ShoppingItem-class.html">ShoppingItem</a></span>&gt;</span></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Provides all shopping list items for a specific <code>inventoryId</code>.
   
 
 </dd>
@@ -338,6 +392,7 @@ active inventory.
       <li><a href="../database_migrations_v42_remove_firebase_cache_meta/">database/migrations/v42_remove_firebase_cache_meta</a></li>
       <li><a href="../database_migrations_v43_remove_recipe_shared_id/">database/migrations/v43_remove_recipe_shared_id</a></li>
       <li><a href="../database_migrations_v44_query_performance_indexes/">database/migrations/v44_query_performance_indexes</a></li>
+      <li><a href="../database_migrations_v45_shopping_expiry/">database/migrations/v45_shopping_expiry</a></li>
       <li><a href="../database_price_dao/">database/price_dao</a></li>
       <li><a href="../database_product_dao/">database/product_dao</a></li>
       <li><a href="../database_product_submission_queue_dao/">database/product_submission_queue_dao</a></li>
@@ -390,6 +445,7 @@ active inventory.
       <li><a href="../providers_image_cache_provider/">providers/image_cache_provider</a></li>
       <li><a href="../providers_inventory_for_barcode_provider/">providers/inventory_for_barcode_provider</a></li>
       <li><a href="../providers_inventory_provider/">providers/inventory_provider</a></li>
+      <li><a href="../providers_market_trip_item_provider/">providers/market_trip_item_provider</a></li>
       <li><a href="../providers_notification_coordinator_provider/">providers/notification_coordinator_provider</a></li>
       <li><a href="../providers_notification_service_provider/">providers/notification_service_provider</a></li>
       <li><a href="../providers_onboarding_provider/">providers/onboarding_provider</a></li>
@@ -419,6 +475,8 @@ active inventory.
       <li><a href="../screens_camera_capture_screen/">screens/camera_capture_screen</a></li>
       <li><a href="../screens_home_screen/">screens/home_screen</a></li>
       <li><a href="../screens_manage_inventories_screen/">screens/manage_inventories_screen</a></li>
+      <li><a href="../screens_market_trip_item_screen/">screens/market_trip_item_screen</a></li>
+      <li><a href="../screens_market_trip_screen/">screens/market_trip_screen</a></li>
       <li><a href="../screens_pantry_shell/">screens/pantry_shell</a></li>
       <li><a href="../screens_price_history_screen/">screens/price_history_screen</a></li>
       <li><a href="../screens_product_detail_screen/">screens/product_detail_screen</a></li>
@@ -472,6 +530,7 @@ active inventory.
       <li><a href="../utils_camera_permission_dialog/">utils/camera_permission_dialog</a></li>
       <li><a href="../utils_changelog_loader/">utils/changelog_loader</a></li>
       <li><a href="../utils_date_helpers/">utils/date_helpers</a></li>
+      <li><a href="../utils_deferred_refresh/">utils/deferred_refresh</a></li>
       <li><a href="../utils_density_table/">utils/density_table</a></li>
       <li><a href="../utils_gallery_permission_dialog/">utils/gallery_permission_dialog</a></li>
       <li><a href="../utils_inventory_grouping/">utils/inventory_grouping</a></li>
@@ -484,11 +543,14 @@ active inventory.
       <li><a href="../utils_off_language/">utils/off_language</a></li>
       <li><a href="../utils_off_units/">utils/off_units</a></li>
       <li><a href="../utils_price_calculator/">utils/price_calculator</a></li>
+      <li><a href="../utils_product_package_size/">utils/product_package_size</a></li>
       <li><a href="../utils_progress_indicator_helper/">utils/progress_indicator_helper</a></li>
       <li><a href="../utils_quantity_parser/">utils/quantity_parser</a></li>
       <li><a href="../utils_redaction/">utils/redaction</a></li>
+      <li><a href="../utils_scan_cooldown/">utils/scan_cooldown</a></li>
       <li><a href="../utils_search_utils/">utils/search_utils</a></li>
       <li><a href="../utils_serving_weight/">utils/serving_weight</a></li>
+      <li><a href="../utils_shopping_price/">utils/shopping_price</a></li>
       <li><a href="../utils_snackbar_helper/">utils/snackbar_helper</a></li>
       <li><a href="../utils_submission_error_label/">utils/submission_error_label</a></li>
       <li><a href="../utils_submission_status_label/">utils/submission_status_label</a></li>
@@ -508,6 +570,7 @@ active inventory.
       <li><a href="../widgets_price_entry_sheet/">widgets/price_entry_sheet</a></li>
       <li><a href="../widgets_price_mask/">widgets/price_mask</a></li>
       <li><a href="../widgets_price_visibility_toggle/">widgets/price_visibility_toggle</a></li>
+      <li><a href="../widgets_produce_search_sheet/">widgets/produce_search_sheet</a></li>
       <li><a href="../widgets_product_photo_management/">widgets/product_photo_management</a></li>
       <li><a href="../widgets_product_photo_preview/">widgets/product_photo_preview</a></li>
       <li><a href="../widgets_product_photo_tile/">widgets/product_photo_tile</a></li>
@@ -523,6 +586,7 @@ active inventory.
       <li><a href="../widgets_search_source_selector/">widgets/search_source_selector</a></li>
       <li><a href="../widgets_section_header/">widgets/section_header</a></li>
       <li><a href="../widgets_shopping_item_edit_sheet/">widgets/shopping_item_edit_sheet</a></li>
+      <li><a href="../widgets_shopping_item_tile/">widgets/shopping_item_tile</a></li>
       <li><a href="../widgets_unit_price_label/">widgets/unit_price_label</a></li>
       <li><a href="../widgets_whats_new_sheet/">widgets/whats_new_sheet</a></li>
 </ol>
@@ -535,7 +599,7 @@ active inventory.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>

@@ -86,6 +86,7 @@
       price_currency TEXT,
       price_store TEXT,
       price_photo_path TEXT,
+      expiry_date TEXT,
       sort_order REAL NOT NULL DEFAULT 0,
       FOREIGN KEY (barcode) REFERENCES products(barcode)
         ON DELETE SET NULL,
@@ -130,7 +131,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.9+5
+      0.0.10+6
   </span>
   
 </footer>
