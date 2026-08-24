@@ -134,13 +134,20 @@ Widget build(BuildContext context, WidgetRef ref) {
             ),
           );
         }
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: prices.length,
-          itemBuilder: (context, index) =&gt; _PriceHistoryTile(
-            price: prices[index],
-            onDelete: () =&gt; _deletePrice(context, ref, prices[index]),
-          ),
+        return Column(
+          children: [
+            _buildChart(ref),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: prices.length,
+                itemBuilder: (context, index) =&gt; _PriceHistoryTile(
+                  price: prices[index],
+                  onDelete: () =&gt; _deletePrice(context, ref, prices[index]),
+                ),
+              ),
+            ),
+          ],
         );
       },
       loading: () =&gt; Center(child: ProgressIndicatorHelper.build()),
