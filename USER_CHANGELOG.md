@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- The product page now shows a full price history chart with your prices
+  over time. Tap a point to see the date, price, and store. The same chart
+  appears at the top of the Price history screen.
+
+- If the app cannot load the price section on the product page, you now see
+  a message with a Retry button instead of the section silently missing.
+
+- The price history list now has a single, clearly visible delete button
+  per entry.
+
 - Fixed the unit price and recipe cost for multi-pack products (for example
   "3 x 150 g"). The price you record now applies to the whole pack, so the
   per-unit price and the recipe cost of a portion are calculated correctly

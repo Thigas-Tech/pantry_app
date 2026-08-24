@@ -68,4 +68,11 @@ void main() {
       expect(isExpiringSoon(dateStr, 3), true);
     });
   });
+
+  group('formatShortDate', () {
+    test('formats as dd/mm/yyyy with zero padding', () {
+      expect(formatShortDate(DateTime(2026, 6, 5)), '05/06/2026');
+      expect(formatShortDate(DateTime(2026, 11, 15)), '15/11/2026');
+    });
+  });
 }

@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/models/price_history_point.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/open_prices_service.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -72,6 +73,43 @@ class PriceRepository {
     String barcode, {
     required int inventoryId,
   }) => _db.getLatestPrice(barcode, inventoryId: inventoryId);
+
+  /// Converts the full price history for [barcode] into chart-ready points.
+  ///
+  /// Each price is converted to [baseCurrency] via [CurrencyService]
+  /// (falling back to the raw value when rates are unavailable), assigned
+  /// its local purchase date (falling back to the recording date), and the
+  /// result is sorted oldest first for a left-to-right time axis.
+  Future<List<PriceHistoryPoint>> priceHistoryPoints(
+    String barcode, {
+    required int inventoryId,
+    required String baseCurrency,
+  }) async {
+    final history = await getPriceHistory(
+      barcode,
+      inventoryId: inventoryId,
+    );
+    final points = <PriceHistoryPoint>[];
+    for (final price in history) {
+      final rawDate = price.datePurchased ?? price.dateAdded;
+      if (rawDate == null) continue;
+      final converted = await convertToBase(
+        price.price,
+        price.currency,
+        baseCurrency,
+      );
+      if (!converted.isFinite) continue;
+      points.add(
+        PriceHistoryPoint(
+          date: DateTime.fromMillisecondsSinceEpoch(rawDate).toLocal(),
+          amount: converted,
+          store: price.store,
+        ),
+      );
+    }
+    points.sort((a, b) => a.date.compareTo(b.date));
+    return points;
+  }
 
   /// Returns the total number of prices on record.
   Future<int> getPriceCount() => _db.getPriceCount();

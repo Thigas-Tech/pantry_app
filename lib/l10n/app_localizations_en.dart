@@ -1478,6 +1478,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get priceHidden => 'Price hidden';
 
   @override
+  String priceChartTooltip(String date, String price) {
+    return '$date - $price';
+  }
+
+  @override
   String get scanFailed => 'Barcode scan failed.';
 
   @override

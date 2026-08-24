@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
@@ -40,7 +39,9 @@ import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/nutrition_table.dart';
 import 'package:pantry_app/widgets/price_entry_sheet.dart';
+import 'package:pantry_app/widgets/price_history_chart.dart';
 import 'package:pantry_app/widgets/price_mask.dart';
+import 'package:pantry_app/widgets/price_section_error.dart';
 import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/product_photo_management.dart';
 import 'package:pantry_app/widgets/product_submission_status.dart';
@@ -482,9 +483,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     return priceAsync.when(
       data: (price) {
-        if (price == null) {
-          return _buildNoPriceData(context, l10n);
-        }
+        if (price == null) return _buildNoPriceData(context, l10n);
         return historyAsync.when(
           data: (history) => _buildPriceData(context, l10n, price, history),
           loading: () => const SizedBox(height: 48),
@@ -492,7 +491,29 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         );
       },
       loading: () => const SizedBox(height: 48),
-      error: (_, _) => const SizedBox.shrink(),
+      error: (_, _) => _buildPriceSectionError(context, l10n),
+    );
+  }
+
+  /// Builds the fallback shown when price data cannot be loaded: a localized
+  /// error row with a retry action instead of silently hiding the section.
+  Widget _buildPriceSectionError(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    return PriceSectionError(
+      onRetry: () {
+        final barcode = _product.barcode;
+        final activeId = ref.read(activeInventoryProvider).value ?? 1;
+        final baseCurrency =
+            ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
+        ref
+          ..invalidate(latestPriceProvider((barcode, activeId)))
+          ..invalidate(priceHistoryProvider((barcode, activeId)))
+          ..invalidate(
+            priceChartPointsProvider((barcode, activeId, baseCurrency)),
+          );
+      },
     );
   }
 
@@ -537,10 +558,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
             ),
           ),
         ],
-        if (recent.length >= 2) ...[
-          const SizedBox(height: 12),
-          _buildTrendChart(context, l10n, recent),
-        ],
+        ..._buildPriceHistoryChart(),
         if (recent.length >= 2) ...[
           const SizedBox(height: 12),
           Text(l10n.recentPrices, style: theme.textTheme.titleSmall),
@@ -567,80 +585,30 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
-  /// Builds a compact line chart of the most recent prices.
-  Widget _buildTrendChart(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<Price> history,
-  ) {
-    final theme = Theme.of(context);
+  /// Builds the full price history chart from chart-ready points.
+  ///
+  /// Renders nothing when fewer than two points exist or when the chart
+  /// data cannot be loaded — the recent-price rows below remain available.
+  List<Widget> _buildPriceHistoryChart() {
+    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
+    final baseCurrency =
+        ref.watch(settingsProvider).value?.baseCurrency ?? 'USD';
+    final chartAsync = ref.watch(
+      priceChartPointsProvider((_product.barcode, activeId, baseCurrency)),
+    );
     final repo = ref.read(priceRepositoryProvider);
-    final spots = <FlSpot>[];
-    for (var i = 0; i < history.length; i++) {
-      spots.add(FlSpot(i.toDouble(), history[i].price));
-    }
-
-    return SizedBox(
-      height: 100,
-      child: LineChart(
-        LineChartData(
-          gridData: const FlGridData(show: false),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 24,
-                getTitlesWidget: (value, _) {
-                  final i = value.toInt();
-                  if (i < 0 || i >= history.length) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 6),
-                    child: Text(
-                      _formatShortDate(history[i]),
-                      style: theme.textTheme.labelSmall,
-                    ),
-                  );
-                },
+    return chartAsync.when(
+      data: (points) => points.length >= 2
+          ? [
+              const SizedBox(height: 12),
+              PriceHistoryChart(
+                points: points,
+                formatAmount: (value) => repo.formatPrice(value, baseCurrency),
               ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 48,
-                maxIncluded: false,
-                getTitlesWidget: (value, _) {
-                  final formatted = repo.formatPrice(
-                    value,
-                    history.first.currency,
-                  );
-                  final short = formatted
-                      .replaceAll(RegExp(r'[,.]\d{2}$'), '')
-                      .replaceAll(RegExp(r'\s+'), '');
-                  return Text(short, style: theme.textTheme.labelSmall);
-                },
-              ),
-            ),
-            topTitles: const AxisTitles(),
-            rightTitles: const AxisTitles(),
-          ),
-          borderData: FlBorderData(show: false),
-          lineTouchData: const LineTouchData(enabled: false),
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: theme.colorScheme.primary,
-              barWidth: 2.5,
-              dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(
-                color: theme.colorScheme.primary.withValues(alpha: 0.12),
-              ),
-            ),
-          ],
-        ),
-      ),
+            ]
+          : const [],
+      loading: () => const [SizedBox(height: 12), SizedBox(height: 48)],
+      error: (_, _) => const [],
     );
   }
 
@@ -704,10 +672,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// Formats the purchase date as dd/mm/yyyy.
   String _formatShortDate(Price price) {
     if (price.datePurchased == null) return '\u2014';
-    final d = DateTime.fromMillisecondsSinceEpoch(price.datePurchased!);
-    return '${d.day.toString().padLeft(2, '0')}/'
-        '${d.month.toString().padLeft(2, '0')}/'
-        '${d.year}';
+    return formatShortDate(
+      DateTime.fromMillisecondsSinceEpoch(price.datePurchased!),
+    );
   }
 
   Widget _buildNoPriceData(BuildContext context, AppLocalizations l10n) {

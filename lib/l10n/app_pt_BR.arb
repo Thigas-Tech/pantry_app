@@ -401,6 +401,18 @@
   "apiSearchWarning": "Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.",
   "dismiss": "Dispensar",
   "priceHidden": "Preco oculto",
+  "priceChartTooltip": "{date} - {price}",
+  "@priceChartTooltip": {
+    "description": "Tooltip no grafico do historico de precos mostrando a data da compra e o preco",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "add": "Adicionar",
   "addAgain": "Adicionar de novo",
   "addPrice": "Preco salvo",
