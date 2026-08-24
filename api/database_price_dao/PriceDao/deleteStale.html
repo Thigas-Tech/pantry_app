@@ -65,8 +65,11 @@
     
 <section class="desc markdown">
   <p>Deletes price rows older than the given <code>retentionDays</code>.</p>
-<p>Only deletes when <code>retentionDays</code> is positive. A value of 0 means
-keep prices forever (no deletion).</p>
+<p>Rows without a purchase date are aged by their creation date
+(<code>Price.dateAdded</code>) so legacy observations are pruned consistently.
+Only deletes when <code>retentionDays</code> is positive. A value of 0 means
+keep prices forever (no deletion). Rows waiting for an Open Prices
+sync are never deleted.</p>
 </section>
 
 
@@ -80,7 +83,9 @@ keep prices forever (no deletion).</p>
       .millisecondsSinceEpoch;
   final deleted = await db.delete(
     &#39;prices&#39;,
-    where: &#39;date_purchased &lt; ? AND sync_status != ?&#39;,
+    where:
+        &#39;COALESCE(date_purchased, date_added) &lt; ?&#39;
+        &#39; AND sync_status != ?&#39;,
     whereArgs: [cutoff, priceSyncPending],
   );
   if (deleted &gt; 0) {
@@ -115,7 +120,7 @@ keep prices forever (no deletion).</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

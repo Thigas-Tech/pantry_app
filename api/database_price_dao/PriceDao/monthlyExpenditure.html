@@ -97,7 +97,7 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
             SELECT id FROM prices p2
             WHERE p2.barcode = p.barcode
               AND p2.inventory_id = p.inventory_id
-            ORDER BY p2.date_purchased DESC, p2.id DESC
+            ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
             LIMIT 1
           )
       )
@@ -148,7 +148,7 @@ purchase date. Returns raw rows {month, total} in base currency.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

@@ -83,6 +83,8 @@
   priceAmount: (map[&#39;price_amount&#39;] as num?)?.toDouble(),
   priceCurrency: map[&#39;price_currency&#39;] as String?,
   priceStore: map[&#39;price_store&#39;] as String?,
+  pricePackageQuantity: (map[&#39;price_package_quantity&#39;] as num?)?.toDouble(),
+  pricePackageUnit: map[&#39;price_package_unit&#39;] as String?,
   expiryDate: map[&#39;expiry_date&#39;] as String?,
   sortOrder: (map[&#39;sort_order&#39;] as num?)?.toDouble() ?? 0,
 );</code></pre>
@@ -113,7 +115,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

@@ -102,7 +102,7 @@ total are rounded to cents. Returns 0.0 when nothing can be priced.</p>
     final rows = await database.rawQuery(
       &#39;SELECT price, currency, package_quantity, package_unit FROM prices&#39;
       &#39; WHERE barcode = ? AND inventory_id = ?&#39;
-      &#39; ORDER BY date_purchased DESC LIMIT 1&#39;,
+      &#39; ORDER BY COALESCE(date_purchased, date_added) DESC, id DESC LIMIT 1&#39;,
       [barcode, inventoryId],
     );
     if (rows.isEmpty) continue;
@@ -166,7 +166,7 @@ total are rounded to cents. Returns 0.0 when nothing can be priced.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

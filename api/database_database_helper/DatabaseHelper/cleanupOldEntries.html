@@ -64,9 +64,13 @@
     </section>
     
 <section class="desc markdown">
-  <p>Removes stale inventory items, orphaned products, and old prices.</p>
+  <p>Removes stale inventory items and orphaned products.</p>
 <p><code>retentionDays</code> applies to inventory items only. Price rows use
 <code>priceRetentionDays</code> (default 0 = keep forever).</p>
+<p>Price history is never deleted because a product is absent from the
+pantry: price observations are the user's own records and must survive
+cache maintenance. Prices are only pruned by the explicit
+<code>priceRetentionDays</code> retention policy.</p>
 </section>
 
 
@@ -96,18 +100,18 @@
       );
       logInfo(&#39;Removed $deletedItems old inventory items&#39;);
 
-      await txn.rawDelete(&#39;&#39;&#39;
-        DELETE FROM prices
-        WHERE NOT EXISTS (
-          SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
-        )
-      &#39;&#39;&#39;);
-
+      &#47;&#47; Only cached (API-sourced) products that nothing references are
+      &#47;&#47; removed. Manual products and products referenced by a price row
+      &#47;&#47; are always kept.
       final deletedProducts = await txn.rawDelete(&#39;&#39;&#39;
         DELETE FROM products
-        WHERE NOT EXISTS (
-          SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
-        )
+        WHERE source != &#39;manual&#39;
+          AND NOT EXISTS (
+            SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM prices WHERE prices.barcode = products.barcode
+          )
       &#39;&#39;&#39;);
       logInfo(&#39;Removed $deletedProducts orphaned products&#39;);
 
@@ -117,7 +121,9 @@
             .millisecondsSinceEpoch;
         final deletedPrices = await txn.delete(
           &#39;prices&#39;,
-          where: &#39;date_purchased &lt; ? AND sync_status != ?&#39;,
+          where:
+              &#39;COALESCE(date_purchased, date_added) &lt; ?&#39;
+              &#39; AND sync_status != ?&#39;,
           whereArgs: [cutoffMillis, priceSyncPending],
         );
         logInfo(&#39;Removed $deletedPrices old price rows&#39;);
@@ -164,7 +170,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

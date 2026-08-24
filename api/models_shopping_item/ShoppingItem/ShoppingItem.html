@@ -66,6 +66,8 @@
 <li><span class="parameter" id="param-priceAmount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">priceAmount</span>, </span></li>
 <li><span class="parameter" id="param-priceCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceCurrency</span>, </span></li>
 <li><span class="parameter" id="param-priceStore"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">priceStore</span>, </span></li>
+<li><span class="parameter" id="param-pricePackageQuantity"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a>?</span> <span class="parameter-name">pricePackageQuantity</span>, </span></li>
+<li><span class="parameter" id="param-pricePackageUnit"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">pricePackageUnit</span>, </span></li>
 <li><span class="parameter" id="param-expiryDate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">expiryDate</span>, </span></li>
 <li><span class="parameter" id="param-sortOrder"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">sortOrder</span>, </span></li>
 </ol>})
@@ -120,6 +122,14 @@ existing product.</p>
   &#47;&#47;&#47; Store where the item was or will be purchased.
   String? priceStore,
 
+  &#47;&#47;&#47; Package size the recorded price applies to (e.g. 12 for a dozen
+  &#47;&#47;&#47; eggs). Carried into the prices table when the item is moved to the
+  &#47;&#47;&#47; pantry so unit prices and recipe scaling keep working.
+  double? pricePackageQuantity,
+
+  &#47;&#47;&#47; Unit for [pricePackageQuantity] (e.g. &#39;pieces&#39;, &#39;g&#39;, &#39;L&#39;).
+  String? pricePackageUnit,
+
   &#47;&#47;&#47; Optional expiry date in ISO 8601 format (YYYY-MM-DD), mirroring
   &#47;&#47;&#47; [InventoryItem.expiryDate]. Captured for market trip items so it can
   &#47;&#47;&#47; be carried into the pantry when the trip is finished.
@@ -155,7 +165,7 @@ existing product.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

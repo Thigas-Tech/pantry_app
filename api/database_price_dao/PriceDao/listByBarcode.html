@@ -68,7 +68,10 @@
     
 <section class="desc markdown">
   <p>Returns all price entries for the given <code>barcode</code> and <code>inventoryId</code>,
-ordered by datePurchased descending.</p>
+ordered newest first.</p>
+<p>Ordering is deterministic: rows without a purchase date fall back to
+their creation date, and equal timestamps resolve by row id descending
+so the most recently recorded observation always wins.</p>
 </section>
 
 
@@ -87,7 +90,7 @@ ordered by datePurchased descending.</p>
       &#39;prices&#39;,
       where: &#39;barcode = ? AND inventory_id = ?&#39;,
       whereArgs: [barcode, inventoryId],
-      orderBy: &#39;date_purchased DESC&#39;,
+      orderBy: &#39;COALESCE(date_purchased, date_added) DESC, id DESC&#39;,
       limit: limit,
       offset: offset,
     );
@@ -124,7 +127,7 @@ ordered by datePurchased descending.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

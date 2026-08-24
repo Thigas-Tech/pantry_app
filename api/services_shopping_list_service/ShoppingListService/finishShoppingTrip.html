@@ -99,6 +99,8 @@ then deleted so the list is clean for the next trip.</p>
     &#39;inventoryId=$inventoryId&#39;,
   );
 
+  await _ensureProductsCached(allItems);
+
   var movedCount = 0;
   await database.transaction((txn) async {
     final result = await _movePurchasedItemsTxn(
@@ -150,7 +152,7 @@ then deleted so the list is clean for the next trip.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>

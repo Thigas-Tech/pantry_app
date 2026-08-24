@@ -83,7 +83,7 @@
       &#39;prices&#39;,
       where: &#39;barcode = ? AND inventory_id = ?&#39;,
       whereArgs: [barcode, inventoryId],
-      orderBy: &#39;date_purchased DESC&#39;,
+      orderBy: &#39;COALESCE(date_purchased, date_added) DESC, id DESC&#39;,
       limit: 1,
     );
     if (result.isEmpty) return null;
@@ -120,7 +120,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.10+6
+      0.0.11+7
   </span>
   
 </footer>
