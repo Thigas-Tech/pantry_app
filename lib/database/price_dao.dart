@@ -12,6 +12,11 @@ class PriceDao {
   const PriceDao();
 
   /// Creates the prices table and its indexes.
+  ///
+  /// The table carries no foreign keys: price observations are the user's
+  /// own records and must survive product cache flushes and pantry
+  /// deletion. This schema must stay in sync with migration v46, which
+  /// rebuilt the table without foreign keys.
   Future<void> createTable(Database db) async {
     await db.execute('''
       CREATE TABLE prices (
@@ -34,9 +39,7 @@ class PriceDao {
         package_quantity REAL,
         package_unit TEXT,
         date_added INTEGER NOT NULL,
-        inventory_id INTEGER NOT NULL DEFAULT 1,
-        FOREIGN KEY (barcode) REFERENCES products(barcode),
-        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
+        inventory_id INTEGER NOT NULL DEFAULT 1
       )
     ''');
     await db.execute('CREATE INDEX idx_prices_barcode ON prices(barcode)');
@@ -131,7 +134,11 @@ class PriceDao {
   }
 
   /// Returns all price entries for the given [barcode] and [inventoryId],
-  /// ordered by datePurchased descending.
+  /// ordered newest first.
+  ///
+  /// Ordering is deterministic: rows without a purchase date fall back to
+  /// their creation date, and equal timestamps resolve by row id descending
+  /// so the most recently recorded observation always wins.
   Future<List<Price>> listByBarcode(
     Database db,
     String barcode, {
@@ -144,7 +151,7 @@ class PriceDao {
         'prices',
         where: 'barcode = ? AND inventory_id = ?',
         whereArgs: [barcode, inventoryId],
-        orderBy: 'date_purchased DESC',
+        orderBy: 'COALESCE(date_purchased, date_added) DESC, id DESC',
         limit: limit,
         offset: offset,
       );
@@ -167,7 +174,7 @@ class PriceDao {
         'prices',
         where: 'barcode = ? AND inventory_id = ?',
         whereArgs: [barcode, inventoryId],
-        orderBy: 'date_purchased DESC',
+        orderBy: 'COALESCE(date_purchased, date_added) DESC, id DESC',
         limit: 1,
       );
       if (result.isEmpty) return null;
@@ -276,7 +283,7 @@ class PriceDao {
         AND p.id = (
           SELECT id FROM prices p2
           WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
-          ORDER BY p2.date_purchased DESC, p2.id DESC
+          ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
           LIMIT 1
         )
     ''',
@@ -316,7 +323,7 @@ class PriceDao {
         AND p.id = (
           SELECT id FROM prices p2
           WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
-          ORDER BY p2.date_purchased DESC, p2.id DESC
+          ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
           LIMIT 1
         )
       GROUP BY p.currency
@@ -352,7 +359,7 @@ class PriceDao {
         AND p.id = (
           SELECT id FROM prices p2
           WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
-          ORDER BY p2.date_purchased DESC, p2.id DESC
+          ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
           LIMIT 1
         )
     ''',
@@ -381,7 +388,7 @@ class PriceDao {
         AND p.id = (
           SELECT id FROM prices p2
           WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
-          ORDER BY p2.date_purchased DESC, p2.id DESC
+          ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
           LIMIT 1
         )
     ''',
@@ -442,8 +449,11 @@ class PriceDao {
 
   /// Deletes price rows older than the given [retentionDays].
   ///
+  /// Rows without a purchase date are aged by their creation date
+  /// ([Price.dateAdded]) so legacy observations are pruned consistently.
   /// Only deletes when [retentionDays] is positive. A value of 0 means
-  /// keep prices forever (no deletion).
+  /// keep prices forever (no deletion). Rows waiting for an Open Prices
+  /// sync are never deleted.
   Future<int> deleteStale(Database db, int retentionDays) async {
     if (retentionDays <= 0) return 0;
     final cutoff = DateTime.now()
@@ -451,7 +461,9 @@ class PriceDao {
         .millisecondsSinceEpoch;
     final deleted = await db.delete(
       'prices',
-      where: 'date_purchased < ? AND sync_status != ?',
+      where:
+          'COALESCE(date_purchased, date_added) < ?'
+          ' AND sync_status != ?',
       whereArgs: [cutoff, priceSyncPending],
     );
     if (deleted > 0) {
@@ -488,7 +500,7 @@ class PriceDao {
               SELECT id FROM prices p2
               WHERE p2.barcode = p.barcode
                 AND p2.inventory_id = p.inventory_id
-              ORDER BY p2.date_purchased DESC, p2.id DESC
+              ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
               LIMIT 1
             )
         )
@@ -542,7 +554,7 @@ class PriceDao {
               SELECT id FROM prices p2
               WHERE p2.barcode = p.barcode
                 AND p2.inventory_id = p.inventory_id
-              ORDER BY p2.date_purchased DESC, p2.id DESC
+              ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
               LIMIT 1
             )
         )
@@ -594,7 +606,7 @@ class PriceDao {
               SELECT id FROM prices p2
               WHERE p2.barcode = p.barcode
                 AND p2.inventory_id = p.inventory_id
-              ORDER BY p2.date_purchased DESC, p2.id DESC
+              ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
               LIMIT 1
             )
         )

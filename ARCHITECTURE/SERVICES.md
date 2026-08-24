@@ -129,7 +129,10 @@ User scans barcode
   API-fetched product rows whose `lastSynced` is older than
   `productCacheMaxAge` (60 days), preserving manual products and surviving
   inventory rows. It runs on startup inside `cleanupOldEntries`; flushed
-  products are re-fetched on the next access or background refresh.
+  products are re-fetched on the next access or background refresh. Price
+  history is unaffected: the `prices` table has no foreign key to
+  `products`, and the move-to-inventory flow re-fetches flushed products
+  before writing their prices.
 - **Background refresh**: `CacheRefreshCoordinator` refreshes inventory
   products when the cache is overdue (5 days), gated by connectivity and
   tracked via `CacheStalenessStore` in SharedPreferences.
@@ -156,6 +159,11 @@ repository.
 - Aggregations (`totalInventoryValue`, `averageItemPrice`,
   `pricedItemCount`) are scoped to an inventory and weight by the held
   quantity in SQL (see `PriceDao`).
+- **Resilience**: the `prices` table carries no foreign keys (migration v46)
+  so history survives product cache flushes and pantry deletion.
+  `cleanupOldEntries` never deletes orphaned prices; only the explicit
+  price-retention setting prunes old rows. Every latest-price lookup orders
+  by `COALESCE(date_purchased, date_added) DESC, id DESC`.
 - Sync helpers: `getPendingSyncPrices()` and `syncToOpenPrices()`, which
   delegates to `OpenPricesService.syncPendingPrices` (currently a local-only
   placeholder -- no HTTP).

@@ -141,12 +141,16 @@ class _MarketTripItemScreenState extends ConsumerState<MarketTripItemScreen> {
           amount: entered.price,
           currency: entered.currency,
           store: entered.store,
+          packageQuantity: entered.packageQuantity,
+          packageUnit: entered.packageUnit,
         );
       } else if (_trackedPrice case final Price tracked) {
         price = TripItemPriceInput(
           amount: tracked.price,
           currency: tracked.currency,
           store: tracked.store,
+          packageQuantity: tracked.packageQuantity,
+          packageUnit: tracked.packageUnit,
         );
       }
       await controller.addScannedProduct(

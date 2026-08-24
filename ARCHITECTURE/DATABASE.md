@@ -64,7 +64,7 @@ The `count()` methods set the precedent with
 ### 2.3 Migration strategy
 
 - `_onCreate` runs when the database file is first created.
-- `_onUpgrade` handles version bumps (currently v1 -> v45).
+- `_onUpgrade` handles version bumps (currently v1 -> v46).
 - The `version` integer in `openDatabase` triggers the upgrade automatically.
 
 Version history:
@@ -113,6 +113,7 @@ Version history:
 | v42 -> v43 | Dropped the `shared_recipe_id` column on `recipes` (shared-recipe cache removed). On SQLite < 3.35 (Android < 13) the drop is skipped and the inert column is retained so the upgrade is never blocked. |
 | v43 -> v44 | Added `idx_inventory_inventory_barcode` on `inventory(inventory_id, barcode)` (price statistics GROUP BY barcode, "from your pantry" suggestions) and `idx_shopping_inventory_purchased_sort` on `shopping_list(inventory_id, is_purchased, sort_order)` (pending-item drag order) |
 | v44 -> v45 | Added `expiry_date TEXT` to `shopping_list` so a market trip can carry expiry dates captured at scan time into the pantry on finish |
+| v45 -> v46 | Rebuilt `prices` without foreign keys (price history survives product cache flushes and pantry deletion), backfilled NULL `date_purchased` from `date_added`, added composite index `(barcode, inventory_id, date_purchased, id)`; added `price_package_quantity` / `price_package_unit` to `shopping_list` so trip-recorded package sizes reach the prices table |
 
 **Migration idempotency**: every migration must tolerate re-execution so the
 replay path used by `oncreate_schema_parity_test.dart` (which rebuilds a

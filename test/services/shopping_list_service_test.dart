@@ -328,5 +328,108 @@ void main() {
       );
       expect(rows, isEmpty);
     });
+
+    test('writes the price row into the trip inventory', () async {
+      await seedPurchasableProduct();
+      await db.createInventory('Work');
+      await db.insertShoppingItem(
+        const ShoppingItem(
+          name: 'Milk',
+          barcode: '123',
+          isPurchased: true,
+          inventoryId: 2,
+          priceAmount: 4.99,
+          priceCurrency: 'USD',
+        ),
+      );
+
+      final result = await service.finishShoppingTrip(inventoryId: 2);
+
+      expect(result.movedCount, 1);
+      final database = await db.database;
+      final rows = await database.query(
+        'prices',
+        where: 'barcode = ?',
+        whereArgs: ['123'],
+      );
+      expect(rows, hasLength(1));
+      expect(rows.first['inventory_id'], 2);
+    });
+
+    test('carries package fields into the price row', () async {
+      await seedPurchasableProduct();
+      await db.insertShoppingItem(
+        const ShoppingItem(
+          name: 'Eggs',
+          barcode: '123',
+          isPurchased: true,
+          inventoryId: 1,
+          priceAmount: 3.50,
+          priceCurrency: 'USD',
+          pricePackageQuantity: 12,
+          pricePackageUnit: 'pieces',
+        ),
+      );
+
+      await service.finishShoppingTrip(inventoryId: 1);
+
+      final database = await db.database;
+      final rows = await database.query(
+        'prices',
+        where: 'barcode = ?',
+        whereArgs: ['123'],
+      );
+      expect(rows, hasLength(1));
+      expect(rows.first['package_quantity'], 12);
+      expect(rows.first['package_unit'], 'pieces');
+    });
+  });
+
+  group('finish pre-caches flushed products', () {
+    test('fetches a missing product so the price row is not lost', () async {
+      registerFallbackValue(const Product(barcode: '', name: ''));
+      final repo = _MockProductRepository();
+      service = ShoppingListService(db, repo);
+      when(() => repo.getProduct('123')).thenAnswer(
+        (_) async => const Product(barcode: '123', name: 'Milk'),
+      );
+      when(() => repo.cacheProduct(any())).thenAnswer((invocation) async {
+        await db.insertProduct(
+          invocation.positionalArguments.first as Product,
+        );
+      });
+
+      await seedPurchasableProduct();
+      await db.insertShoppingItem(
+        const ShoppingItem(
+          name: 'Milk',
+          barcode: '123',
+          isPurchased: true,
+          inventoryId: 1,
+          priceAmount: 4.99,
+          priceCurrency: 'USD',
+        ),
+      );
+      // Simulate the product leaving the two-month cache flush.
+      final database = await db.database;
+      await database.execute('PRAGMA foreign_keys = OFF');
+      await database.delete(
+        'products',
+        where: 'barcode = ?',
+        whereArgs: ['123'],
+      );
+      await database.execute('PRAGMA foreign_keys = ON');
+
+      final result = await service.finishShoppingTrip(inventoryId: 1);
+
+      expect(result.movedCount, 1);
+      expect(await db.getProduct('123'), isNotNull);
+      final rows = await database.query(
+        'prices',
+        where: 'barcode = ?',
+        whereArgs: ['123'],
+      );
+      expect(rows, hasLength(1));
+    });
   });
 }

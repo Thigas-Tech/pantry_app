@@ -18,6 +18,8 @@ class TripItemPriceInput {
     required this.amount,
     required this.currency,
     this.store,
+    this.packageQuantity,
+    this.packageUnit,
   });
 
   /// The price amount.
@@ -28,6 +30,13 @@ class TripItemPriceInput {
 
   /// The store where the item was purchased, if known.
   final String? store;
+
+  /// Package size the recorded price applies to (e.g. 12 for a dozen
+  /// eggs), carried into the prices table when the trip finishes.
+  final double? packageQuantity;
+
+  /// Unit for [packageQuantity] (e.g. 'pieces', 'g', 'L').
+  final String? packageUnit;
 }
 
 /// State of one trip-item add flow, scoped to a single trip inventory.
@@ -148,6 +157,8 @@ class MarketTripItemController extends _$MarketTripItemController {
           priceAmount: price.amount,
           priceCurrency: price.currency,
           priceStore: price.store,
+          pricePackageQuantity: price.packageQuantity,
+          pricePackageUnit: price.packageUnit,
         );
         if (!ref.mounted) return null;
       }

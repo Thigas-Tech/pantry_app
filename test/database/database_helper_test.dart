@@ -541,6 +541,73 @@ void main() {
       final product = await db.getProduct('p2');
       expect(product, isNull);
     });
+
+    test('preserves price history for products not in the pantry', () async {
+      await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
+      await db.insertPrice(const Price(barcode: 'p1', price: 9.99));
+
+      await db.cleanupOldEntries();
+
+      expect(await db.getPriceCountByBarcode('p1'), 1);
+    });
+
+    test('preserves manual products even when not in the pantry', () async {
+      await db.insertProduct(
+        const Product(barcode: 'manual1', name: 'Manual', source: 'manual'),
+      );
+
+      await db.cleanupOldEntries();
+
+      expect(await db.getProduct('manual1'), isNotNull);
+    });
+
+    test('preserves cached products referenced by prices', () async {
+      final freshSync = DateTime.now().millisecondsSinceEpoch;
+      await db.insertProduct(
+        const Product(barcode: 'p1', name: 'P1').copyWith(
+          lastSynced: freshSync,
+        ),
+      );
+      await db.insertPrice(const Price(barcode: 'p1', price: 9.99));
+
+      await db.cleanupOldEntries();
+
+      expect(await db.getProduct('p1'), isNotNull);
+    });
+
+    test('prunes prices older than the configured retention', () async {
+      await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
+      await db.insertPrice(
+        Price(
+          barcode: 'p1',
+          price: 9.99,
+          datePurchased: DateTime.now()
+              .subtract(const Duration(days: 100))
+              .millisecondsSinceEpoch,
+        ),
+      );
+
+      await db.cleanupOldEntries(priceRetentionDays: 60);
+
+      expect(await db.getPriceCountByBarcode('p1'), 0);
+    });
+
+    test('keeps recent prices when retention is configured', () async {
+      await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
+      await db.insertPrice(
+        Price(
+          barcode: 'p1',
+          price: 9.99,
+          datePurchased: DateTime.now()
+              .subtract(const Duration(days: 10))
+              .millisecondsSinceEpoch,
+        ),
+      );
+
+      await db.cleanupOldEntries(priceRetentionDays: 60);
+
+      expect(await db.getPriceCountByBarcode('p1'), 1);
+    });
   });
 
   group('getInventoryWithProduct', () {

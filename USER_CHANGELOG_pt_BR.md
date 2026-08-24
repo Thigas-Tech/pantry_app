@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Corrigido um problema que apagava o historico de precos de produtos que
+  voce nao tinha mais na despensa. Seus precos registrados agora permanecem
+  salvos mesmo depois que voce termina um produto, limpa os dados em cache ou
+  apaga uma despensa. Os precos so sao removidos pela opcao de retencao de
+  precos nas Configuracoes.
+
+- Corrigido um problema em que precos registrados durante uma ida ao mercado
+  eram salvos na despensa errada (ou pareciam desaparecer) quando voce tinha
+  mais de uma despensa. Os precos da ida agora ficam na despensa escolhida
+  para a ida, e o tamanho da embalagem que voce informou e mantido para os
+  calculos de preco por unidade e custo de receitas.
+
+- Corrigida a ordenacao de precos no mesmo dia: quando voce registra mais de
+  um preco para um produto no mesmo dia, o registro mais recente agora e
+  usado de forma confiavel para totais, estimativas e receitas.
+
+- O historico de precos agora esta protegido da limpeza automatica de dados
+  de produtos antigos em cache, e a opcao de retencao de precos nas
+  Configuracoes agora funciona de verdade quando o aplicativo inicia.
+
 ## [0.0.10+6]
 
 - Hortalicas que voce adiciona em uma ida ao mercado ou na despensa agora

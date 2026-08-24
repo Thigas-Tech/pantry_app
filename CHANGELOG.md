@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+### Fixed
+
+- **Price history data loss**: startup cleanup no longer deletes prices for
+  products that are not currently in the pantry — the orphan-price sweep is
+  removed entirely, and the orphan-product sweep now keeps manual products
+  and any product referenced by a price row. Prices are only pruned by the
+  explicit price-retention setting, which is now actually wired into startup
+  cleanup (previously dead) and ages rows by
+  `COALESCE(date_purchased, date_added)`. (lib/database/database_helper.dart,
+  lib/services/app_startup_service.dart)
+- **Migration v46 — prices become cache-independent user data**: the
+  `prices` table is rebuilt without the barcode/inventory foreign keys so
+  price history survives product cache flushes and pantry deletion, and a
+  missing product row no longer blocks new prices. NULL `date_purchased`
+  values are backfilled from `date_added` and the composite index
+  `(barcode, inventory_id, date_purchased, id)` is added. `shopping_list`
+  gains `price_package_quantity` / `price_package_unit`. The fresh-install
+  schema mirrors the rebuilt table. (lib/database/migrations/v46_prices_resilience.dart new,
+  lib/database/price_dao.dart, lib/database/shopping_list_dao.dart,
+  lib/database/database_helper.dart)
+- **Deterministic latest-price ordering**: every latest-price lookup (DAO
+  getLatest/listByBarcode, all correlated latest-price subqueries, and the
+  recipe cost query) now orders by
+  `COALESCE(date_purchased, date_added) DESC, id DESC`, so same-day entries
+  resolve to the most recently recorded observation and NULL purchase dates
+  sort by creation date. (lib/database/price_dao.dart,
+  lib/services/recipe_service.dart)
+- **Trip and move-to-inventory prices landed in the wrong pantry**: the
+  prices row written when finishing a trip or moving purchased items is now
+  scoped to the target inventory (previously always defaulted to Home).
+  Package size/unit recorded during a trip is carried through
+  `TripItemPriceInput` and `ShoppingItem` into the prices table, and the
+  move flow re-fetches products that left the two-month cache flush instead
+  of silently dropping their recorded price. (lib/services/shopping_list_service.dart,
+  lib/providers/market_trip_item_provider.dart,
+  lib/screens/market_trip_item_screen.dart, lib/models/shopping_item.dart)
+
 ## [0.0.10+6] — 2026-08-15
 
 ### Removed

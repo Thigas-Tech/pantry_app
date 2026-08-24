@@ -27,18 +27,18 @@ inventory so each pantry keeps an independent price history.
 
 ### 1.1 `prices` table
 
-Created by migration v12 and extended by v37:
+Created by migration v12, extended by v37, and rebuilt by v46:
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | INTEGER PK AUTOINCREMENT | Row id |
-| `barcode` | TEXT NOT NULL | FK -> products(barcode) |
+| `barcode` | TEXT NOT NULL | Product barcode (no FK — see below) |
 | `price` | REAL NOT NULL | Monetary amount, taxes included |
 | `currency` | TEXT NOT NULL | ISO 4217 code |
 | `store` | TEXT | Free-form or autocompleted store name |
 | `is_discounted` | INTEGER NOT NULL DEFAULT 0 | 0/1 flag |
 | `regular_price` | REAL | Pre-discount price |
-| `date_purchased` | INTEGER | Epoch ms of purchase |
+| `date_purchased` | INTEGER | Epoch ms of purchase (backfilled from `date_added` when null) |
 | `sync_status` | TEXT NOT NULL DEFAULT 'local_only' | see lifecycle below |
 | `open_prices_id` | INTEGER | Remote id after sync |
 | `location_osm_id` / `location_osm_type` | TEXT | OSM location (NODE/WAY/RELATION) |
@@ -47,10 +47,18 @@ Created by migration v12 and extended by v37:
 | `package_quantity` | REAL | Package size, e.g. 12 (eggs), 1 (1 L), 500 (500 g) |
 | `package_unit` | TEXT | 'pieces', 'g', 'kg', 'ml', 'L', ... |
 | `date_added` | INTEGER NOT NULL | Epoch ms when created locally |
-| `inventory_id` | INTEGER NOT NULL DEFAULT 1 | FK -> inventories(id) |
+| `inventory_id` | INTEGER NOT NULL DEFAULT 1 | Scoping pantry (no FK — see below) |
 
 Indexes: `idx_prices_barcode`, `idx_prices_date`, `idx_prices_sync_status`,
-`idx_prices_inventory_id`.
+`idx_prices_inventory_id`, `idx_prices_barcode_inventory_date`
+(barcode, inventory_id, date_purchased, id).
+
+Migration v46 removed the foreign keys on `barcode` and `inventory_id`:
+price observations are the user's own records. They survive product cache
+flushes, pantry deletion, and any cache maintenance, and a missing product
+row never blocks a new price from being recorded. The same migration
+backfilled NULL `date_purchased` values from `date_added` so ordering is
+deterministic.
 
 There is **no proof-photo column**. The original design planned
 `proof_image_path`, but proof capture and upload are not implemented, so the
@@ -265,7 +273,22 @@ Planned path, in order:
 - **Tokens**: prod and pre-prod use different tokens; an empty token silently
   disables all API work.
 - **Inventory scoping**: prices carry `inventory_id`; updates preserve the
-  original inventory, and all aggregations are scoped per inventory.
-- **Retention**: `deleteStale` never deletes `pending` prices.
+  original inventory, and all aggregations are scoped per inventory. Trip
+  and move-to-inventory flows write the price row with the target pantry's
+  id, never a default.
+- **Price history survives cache maintenance**: `cleanupOldEntries` never
+  deletes prices because a product left the pantry. Only the explicit price
+  retention setting prunes prices, and only rows older than the configured
+  window (aged by `COALESCE(date_purchased, date_added)`).
+- **Deterministic latest-price ordering**: every latest-price lookup orders
+  by `COALESCE(date_purchased, date_added) DESC, id DESC`, so same-day
+  observations resolve to the most recently recorded row and rows without a
+  purchase date sort by their creation date.
+- **Trip package sizes**: package size/unit recorded during a market trip is
+  carried on the shopping item (`price_package_quantity` /
+  `price_package_unit`) and copied into the prices table when the trip
+  finishes, so per-unit labels and recipe scaling keep working.
+- **Retention**: `deleteStale` never deletes `pending` prices and treats a
+  retention of zero or less as keep-forever.
 - **Currency**: stats group latest prices by currency and convert to the base
   currency for display; writes always keep the original currency.
