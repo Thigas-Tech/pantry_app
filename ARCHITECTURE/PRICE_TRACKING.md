@@ -136,8 +136,15 @@ size in this order (`_resolvePackageSize`):
 
 1. The price row's own `package_quantity` / `package_unit`.
 2. The product's packaging (`products.quantity` / `products.product_quantity`),
-   parsing multi-pack strings like `"3 x 150 g"` to their per-unit value via
-   `parseQuantity` (`lib/utils/quantity_parser.dart`).
+   resolving multi-pack strings like `"3 x 150 g"` to their TOTAL package
+   size (450 g) via `parsePackageQuantity`
+   (`lib/utils/quantity_parser.dart`) — the size the recorded price applies
+   to. Bonus packs (`"2 x 300 g + 1 x 50 g"`) sum to 650 g.
+
+`ingredientCosts` returns the same per-ingredient scaled cost keyed by
+barcode, using one batched latest-price query
+(`PriceDao.latestPricesByBarcodes`), for the recipe detail per-ingredient
+cost rows.
 
 The inventory row is deliberately **not** a package-size source: its stored
 quantity is the current stock, not the size of the package the price applies
@@ -260,8 +267,13 @@ Planned path, in order:
   is charged (no density is guessed).
 - **Invalid package sizes**: zero, negative, or non-finite quantities (and
   non-finite or non-positive prices) produce null from `PriceCalculator`.
-- **Multi-pack strings**: `"3 x 150 g"` resolves to the per-unit 150 g, not
-  the 450 g total.
+- **Multi-pack strings**: `parsePackageQuantity` resolves `"3 x 150 g"` to
+  the TOTAL 450 g package (what a price observation covers), while
+  `parseQuantity` keeps the per-unit 150 g for non-price contexts. Price
+  entry and recipe scaling both use the total.
+- **Full-price fallback**: when no package size or conversion resolves for
+  an ingredient, the full package price is charged (legacy behavior) and a
+  warning is logged.
 - **Unit-label vs recipe asymmetry**: the per-unit label uses only the price
   row's package columns, while recipe cost falls back to product packaging.
   A price recorded without package data can show in recipe math scaled but

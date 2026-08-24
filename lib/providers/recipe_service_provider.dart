@@ -51,3 +51,29 @@ Future<double> averageRecipeCost(Ref ref, (int, String) args) {
         baseCurrency: baseCurrency,
       );
 }
+
+/// Provides the scaled cost per ingredient for a recipe, keyed by the
+/// ingredient barcode.
+///
+/// Keyed by a (recipeId, inventoryId, baseCurrency) record. The recipe's
+/// own inventory wins over the active one, matching [recipeCost].
+/// Ingredients without a barcode or without a recorded price are absent
+/// from the map.
+@riverpod
+Future<Map<String, double>> recipeIngredientCosts(
+  Ref ref,
+  (int, int, String) args,
+) async {
+  final (recipeId, activeInventoryId, baseCurrency) = args;
+  final db = ref.read(databaseProvider);
+  final recipe = await db.getRecipe(recipeId);
+  final inventoryId = recipe?.inventoryId ?? activeInventoryId;
+  final ingredients = await db.getRecipeIngredients(recipeId);
+  return ref
+      .read(recipeServiceProvider)
+      .ingredientCosts(
+        ingredients,
+        inventoryId: inventoryId,
+        baseCurrency: baseCurrency,
+      );
+}

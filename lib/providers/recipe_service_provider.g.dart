@@ -266,3 +266,124 @@ final class AverageRecipeCostFamily extends $Family
   @override
   String toString() => r'averageRecipeCostProvider';
 }
+
+/// Provides the scaled cost per ingredient for a recipe, keyed by the
+/// ingredient barcode.
+///
+/// Keyed by a (recipeId, inventoryId, baseCurrency) record. The recipe's
+/// own inventory wins over the active one, matching [recipeCost].
+/// Ingredients without a barcode or without a recorded price are absent
+/// from the map.
+
+@ProviderFor(recipeIngredientCosts)
+final recipeIngredientCostsProvider = RecipeIngredientCostsFamily._();
+
+/// Provides the scaled cost per ingredient for a recipe, keyed by the
+/// ingredient barcode.
+///
+/// Keyed by a (recipeId, inventoryId, baseCurrency) record. The recipe's
+/// own inventory wins over the active one, matching [recipeCost].
+/// Ingredients without a barcode or without a recorded price are absent
+/// from the map.
+
+final class RecipeIngredientCostsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, double>>,
+          Map<String, double>,
+          FutureOr<Map<String, double>>
+        >
+    with
+        $FutureModifier<Map<String, double>>,
+        $FutureProvider<Map<String, double>> {
+  /// Provides the scaled cost per ingredient for a recipe, keyed by the
+  /// ingredient barcode.
+  ///
+  /// Keyed by a (recipeId, inventoryId, baseCurrency) record. The recipe's
+  /// own inventory wins over the active one, matching [recipeCost].
+  /// Ingredients without a barcode or without a recorded price are absent
+  /// from the map.
+  RecipeIngredientCostsProvider._({
+    required RecipeIngredientCostsFamily super.from,
+    required (int, int, String) super.argument,
+  }) : super(
+         retry: null,
+         name: r'recipeIngredientCostsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$recipeIngredientCostsHash();
+
+  @override
+  String toString() {
+    return r'recipeIngredientCostsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<String, double>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<String, double>> create(Ref ref) {
+    final argument = this.argument as (int, int, String);
+    return recipeIngredientCosts(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RecipeIngredientCostsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$recipeIngredientCostsHash() =>
+    r'e323e13415b769e774c435ef7d8ea89b3606a587';
+
+/// Provides the scaled cost per ingredient for a recipe, keyed by the
+/// ingredient barcode.
+///
+/// Keyed by a (recipeId, inventoryId, baseCurrency) record. The recipe's
+/// own inventory wins over the active one, matching [recipeCost].
+/// Ingredients without a barcode or without a recorded price are absent
+/// from the map.
+
+final class RecipeIngredientCostsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<Map<String, double>>,
+          (int, int, String)
+        > {
+  RecipeIngredientCostsFamily._()
+    : super(
+        retry: null,
+        name: r'recipeIngredientCostsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provides the scaled cost per ingredient for a recipe, keyed by the
+  /// ingredient barcode.
+  ///
+  /// Keyed by a (recipeId, inventoryId, baseCurrency) record. The recipe's
+  /// own inventory wins over the active one, matching [recipeCost].
+  /// Ingredients without a barcode or without a recorded price are absent
+  /// from the map.
+
+  RecipeIngredientCostsProvider call((int, int, String) args) =>
+      RecipeIngredientCostsProvider._(argument: args, from: this);
+
+  @override
+  String toString() => r'recipeIngredientCostsProvider';
+}

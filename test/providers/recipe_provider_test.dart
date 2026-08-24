@@ -462,29 +462,33 @@ void main() {
       },
     );
 
-    test('uses per-unit value for multi-pack product quantities', () async {
-      await _seedPrices(db, const [
-        Price(barcode: '001', price: 10, datePurchased: 3000),
-      ]);
-      await _insertProduct(
-        db,
-        barcode: '001',
-        quantity: '3 x 150 g',
-        productQuantity: 450,
-      );
-      const ingredients = [
-        RecipeIngredient(
-          recipeId: 1,
-          name: 'Pasta',
+    test(
+      'uses the total package size for multi-pack product quantities',
+      () async {
+        await _seedPrices(db, const [
+          Price(barcode: '001', price: 10, datePurchased: 3000),
+        ]);
+        await _insertProduct(
+          db,
           barcode: '001',
-          quantity: 300,
-          unit: 'g',
-        ),
-      ];
+          quantity: '3 x 150 g',
+          productQuantity: 450,
+        );
+        const ingredients = [
+          RecipeIngredient(
+            recipeId: 1,
+            name: 'Pasta',
+            barcode: '001',
+            quantity: 300,
+            unit: 'g',
+          ),
+        ];
 
-      final cost = await _cost(db, mockDb, ingredients);
-      expect(cost, closeTo(20.0, 0.001));
-    });
+        final cost = await _cost(db, mockDb, ingredients);
+        // 300 g of a 450 g package priced 10 costs 10 * 300 / 450 = 6.67.
+        expect(cost, closeTo(6.67, 0.001));
+      },
+    );
 
     test(
       'charges full price when no package size resolves (inventory stock'

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Fixed the unit price and recipe cost for multi-pack products (for example
+  "3 x 150 g"). The price you record now applies to the whole pack, so the
+  per-unit price and the recipe cost of a portion are calculated correctly
+  instead of using a single item's size.
+
+- Recipe details now show the cost of each ingredient next to its amount
+  (hidden when prices are masked), so you can see exactly how the recipe
+  total is made up.
+
 - Fixed a bug that removed price history for products you no longer had in
   your pantry. Your recorded prices now stay saved even after you finish a
   product, clear your cached product data, or delete a pantry. Prices are

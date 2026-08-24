@@ -3,7 +3,7 @@ import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/utils/product_package_size.dart';
 
 void main() {
-  test('extracts the per-unit size from a multi-pack quantity', () {
+  test('extracts the total package size from a multi-pack quantity', () {
     final size = productPackageSize(
       const Product(
         barcode: '1',
@@ -14,7 +14,7 @@ void main() {
     );
 
     expect(size, isNotNull);
-    expect(size!.quantity, 150);
+    expect(size!.quantity, 450);
     expect(size.unit, 'g');
   });
 
@@ -63,7 +63,7 @@ void main() {
       ),
     );
 
-    expect(size!.quantity, 150);
+    expect(size!.quantity, 450);
     expect(size.unit, 'g');
   });
 

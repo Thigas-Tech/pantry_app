@@ -213,16 +213,23 @@ class RecipeService {
         priceRow: rows.first,
       );
       if (packageSize != null) {
-        cost =
-            await _scaleIngredientCost(
-              database,
-              barcode,
-              inventoryId,
-              price: price,
-              ingredient: ingredient,
-              package: packageSize,
-            ) ??
-            price;
+        final scaled = await _scaleIngredientCost(
+          database,
+          barcode,
+          inventoryId,
+          price: price,
+          ingredient: ingredient,
+          package: packageSize,
+        );
+        if (scaled == null) {
+          logWarning(
+            'Full package price charged for ingredient $barcode '
+            '(${ingredient.quantity} ${ingredient.unit}): '
+            'package size or conversion could not be resolved',
+          );
+        } else {
+          cost = scaled;
+        }
       }
 
       final converted = await currencyService.convert(
@@ -234,6 +241,94 @@ class RecipeService {
     }
 
     return Money.roundToCents(total);
+  }
+
+  /// Returns the scaled cost per grouped ingredient for [ingredients],
+  /// keyed by the ingredient's barcode.
+  ///
+  /// Ingredients sharing a barcode are grouped with summed quantities,
+  /// matching the recipe detail display, and each group's cost is scaled by
+  /// the fraction of the package used with the same resolution and
+  /// conversion rules as [calculateIngredientCost]. Costs are converted to
+  /// [baseCurrency] and rounded to cents. Ingredients without a barcode or
+  /// without a recorded price in [inventoryId] are absent from the result.
+  Future<Map<String, double>> ingredientCosts(
+    List<RecipeIngredient> ingredients, {
+    required int inventoryId,
+    required String baseCurrency,
+  }) async {
+    final grouped = <String, _GroupedIngredient>{};
+    for (final ing in ingredients) {
+      final barcode = ing.barcode;
+      if (barcode == null || barcode.isEmpty) continue;
+      grouped
+              .putIfAbsent(
+                barcode,
+                () => _GroupedIngredient(name: ing.name, unit: ing.unit),
+              )
+              .totalQuantity +=
+          ing.quantity;
+    }
+    if (grouped.isEmpty) return {};
+
+    final database = await _db.database;
+    final normalizedKeys = grouped.keys.map(normalizeProduceBarcode).toList();
+    final latest = await _db.priceDao.latestPricesByBarcodes(
+      database,
+      normalizedKeys,
+      inventoryId: inventoryId,
+    );
+
+    final costs = <String, double>{};
+    for (final entry in grouped.entries) {
+      final rawBarcode = entry.key;
+      final barcode = normalizeProduceBarcode(rawBarcode);
+      final priceRow = latest[barcode];
+      if (priceRow == null) continue;
+
+      var cost = priceRow.price;
+      final packageSize = await _resolvePackageSize(
+        database,
+        barcode,
+        priceRow: {
+          'package_quantity': priceRow.packageQuantity,
+          'package_unit': priceRow.packageUnit,
+        },
+      );
+      if (packageSize != null) {
+        final scaled = await _scaleIngredientCost(
+          database,
+          barcode,
+          inventoryId,
+          price: priceRow.price,
+          ingredient: RecipeIngredient(
+            recipeId: 0,
+            name: entry.value.name,
+            barcode: rawBarcode,
+            quantity: entry.value.totalQuantity,
+            unit: entry.value.unit,
+          ),
+          package: packageSize,
+        );
+        if (scaled == null) {
+          logWarning(
+            'Full package price charged for ingredient $rawBarcode '
+            '(${entry.value.totalQuantity} ${entry.value.unit}): '
+            'package size or conversion could not be resolved',
+          );
+        } else {
+          cost = scaled;
+        }
+      }
+
+      final converted = await _currencyService.convert(
+        cost,
+        priceRow.currency,
+        baseCurrency,
+      );
+      costs[rawBarcode] = Money.roundToCents(converted);
+    }
+    return costs;
   }
 
   /// Scales [ingredient]'s share of [price] against [package].
@@ -330,8 +425,9 @@ class RecipeService {
   /// Checks, in order:
   ///   1. The [priceRow]'s own package_quantity / package_unit columns.
   ///   2. The product's packaging quantity ([Product.quantity] /
-  ///      [Product.productQuantity]), parsing multi-pack strings like
-  ///      "3 x 150 g" to their per-unit value.
+  ///      [Product.productQuantity]), resolving multi-pack strings like
+  ///      "3 x 150 g" to their TOTAL package size (450 g), matching the
+  ///      package a recorded price applies to.
   ///
   /// The inventory row is deliberately not consulted: its stored quantity
   /// is the current stock, not the size of the package the price applies
@@ -357,7 +453,7 @@ class RecipeService {
       limit: 1,
     );
     if (productRows.isNotEmpty) {
-      final parsed = parseQuantity(
+      final parsed = parsePackageQuantity(
         productQuantity: (productRows.first['product_quantity'] as num?)
             ?.toDouble(),
         quantity: productRows.first['quantity'] as String?,
