@@ -2820,6 +2820,12 @@ abstract class AppLocalizations {
   /// **'Price hidden'**
   String get priceHidden;
 
+  /// Tooltip on the price history chart showing the purchase date and the price
+  ///
+  /// In en, this message translates to:
+  /// **'{date} - {price}'**
+  String priceChartTooltip(String date, String price);
+
   /// No description provided for @scanFailed.
   ///
   /// In en, this message translates to:

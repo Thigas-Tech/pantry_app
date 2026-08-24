@@ -1478,6 +1478,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get priceHidden => 'Preco oculto';
 
   @override
+  String priceChartTooltip(String date, String price) {
+    return '$date - $price';
+  }
+
+  @override
   String get scanFailed => 'Falha ao escanear codigo de barras.';
 
   @override
@@ -3709,6 +3714,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get priceHidden => 'Preco oculto';
+
+  @override
+  String priceChartTooltip(String date, String price) {
+    return '$date - $price';
+  }
 
   @override
   String get scanFailed => 'Falha ao escanear codigo de barras.';

@@ -29,7 +29,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -43,6 +42,7 @@ import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/models/price_history_point.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/product_type.dart';
@@ -70,6 +70,7 @@ import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
+import 'package:pantry_app/widgets/price_history_chart.dart';
 import 'package:pantry_app/widgets/product_photo_management.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -1744,6 +1745,21 @@ void main() {
       ),
     ];
 
+    final trendPoints = [
+      PriceHistoryPoint(
+        date: DateTime.fromMillisecondsSinceEpoch(1719619200000),
+        amount: 4,
+      ),
+      PriceHistoryPoint(
+        date: DateTime.fromMillisecondsSinceEpoch(1719705600000),
+        amount: 5,
+      ),
+      PriceHistoryPoint(
+        date: DateTime.fromMillisecondsSinceEpoch(1719792000000),
+        amount: 6.5,
+      ),
+    ];
+
     testWidgets('shows latest price, trend and recent list', (tester) async {
       setLargeScreen(tester);
       await pumpApp(
@@ -1757,6 +1773,9 @@ void main() {
           priceHistoryProvider((barcode, 1)).overrideWith(
             (ref) => trendPrices,
           ),
+          priceChartPointsProvider((barcode, 1, 'USD')).overrideWith(
+            (ref) => trendPoints,
+          ),
         ],
       );
 
@@ -1766,7 +1785,7 @@ void main() {
       expect(find.text('Store A'), findsOneWidget);
       expect(find.text('Store B'), findsOneWidget);
       expect(find.text('View all'), findsOneWidget);
-      expect(find.byType(LineChart), findsOneWidget);
+      expect(find.byType(PriceHistoryChart), findsOneWidget);
     });
 
     testWidgets('single price shows no trend or recent list', (tester) async {
@@ -1782,13 +1801,16 @@ void main() {
           priceHistoryProvider((barcode, 1)).overrideWith(
             (ref) => [trendPrices.first],
           ),
+          priceChartPointsProvider((barcode, 1, 'USD')).overrideWith(
+            (ref) => [trendPoints.first],
+          ),
         ],
       );
 
       expect(find.text(r'$6.50'), findsOneWidget);
       expect(find.text('Recent prices'), findsNothing);
       expect(find.text('Prices are rising'), findsNothing);
-      expect(find.byType(LineChart), findsNothing);
+      expect(find.byType(PriceHistoryChart), findsNothing);
     });
 
     testWidgets('shows empty state when no prices exist', (tester) async {

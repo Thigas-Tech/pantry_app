@@ -347,4 +347,88 @@ void main() {
       expect(summary.count, 2);
     });
   });
+
+  group('priceHistoryPoints', () {
+    setUpAll(() {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    });
+
+    late DatabaseHelper historyDb;
+    late PriceRepository historyRepo;
+
+    setUp(() async {
+      historyDb = DatabaseHelper.withPath(inMemoryDatabasePath);
+      final db = await historyDb.database;
+
+      const productDao = ProductDao();
+      await productDao.insert(
+        db,
+        const Product(barcode: 'h1', name: 'History product'),
+      );
+
+      const priceDao = PriceDao();
+      await priceDao.insert(
+        db,
+        Price(
+          barcode: 'h1',
+          price: 10,
+          datePurchased: DateTime(2026, 6, 15).millisecondsSinceEpoch,
+          store: 'Corner Shop',
+        ),
+      );
+      await priceDao.insert(
+        db,
+        Price(
+          barcode: 'h1',
+          price: 5,
+          datePurchased: DateTime(2026, 6, 10).millisecondsSinceEpoch,
+        ),
+      );
+
+      historyRepo = PriceRepository(
+        historyDb,
+        CurrencyService(),
+        OpenPricesService(
+          databaseHelper: historyDb,
+          apiClient: OpenPricesApiClient(
+            client: http.Client(),
+            baseUrl: 'https://test.prices.api/v1',
+            token: 'test-token',
+            contactEmail: 'test@example.com',
+          ),
+        ),
+      );
+    });
+
+    tearDown(() async {
+      final db = await historyDb.database;
+      await db.close();
+    });
+
+    test('converts history into date-sorted points', () async {
+      final points = await historyRepo.priceHistoryPoints(
+        'h1',
+        inventoryId: 1,
+        baseCurrency: 'USD',
+      );
+
+      expect(points, hasLength(2));
+      // Oldest first for a left-to-right time axis.
+      expect(points.first.amount, 5);
+      expect(points.first.date, DateTime(2026, 6, 10));
+      expect(points.last.amount, 10);
+      expect(points.last.store, 'Corner Shop');
+    });
+
+    test('returns an empty list for a barcode without prices', () async {
+      final points = await historyRepo.priceHistoryPoints(
+        'unknown',
+        inventoryId: 1,
+        baseCurrency: 'USD',
+      );
+
+      expect(points, isEmpty);
+    });
+  });
 }

@@ -4,6 +4,28 @@
 
 ### Fixed
 
+- **Full price history chart in the product detail**: the detail screen's
+  5-point mini chart is replaced by a reusable `PriceHistoryChart`
+  (fl_chart LineChart) plotting the entire history in the user's base
+  currency, with date labels, touch tooltips (date + price + store),
+  single-point dot rendering, price-hiding masking, and a RepaintBoundary.
+  Points come from `PriceRepository.priceHistoryPoints` via the new
+  `priceChartPointsProvider`. The `PriceHistoryScreen` shows the same chart
+  at the top of its list. (lib/widgets/price_history_chart.dart new,
+  lib/models/price_history_point.dart new, lib/services/price_repository.dart,
+  lib/providers/price_provider.dart, lib/screens/product_detail_screen.dart,
+  lib/screens/price_history_screen.dart)
+- **Price section no longer disappears on error**: the product detail price
+  section renders a localized error row with a retry action
+  (`PriceSectionError`) instead of silently collapsing when the price data
+  fails to load. (lib/widgets/price_section_error.dart new,
+  lib/screens/product_detail_screen.dart)
+- **Single delete path on the history screen**: the swipe Dismissible was
+  removed in favor of the visible delete button (accessibility guidance),
+  eliminating the duplicate-delete race. Date formatting is centralized in
+  `formatShortDate`. (lib/screens/price_history_screen.dart,
+  lib/utils/date_helpers.dart)
+
 - **Multi-pack package sizes now resolve to the total package**: the new
   `parsePackageQuantity` resolves "3 x 150 g" to 450 g (not the per-unit
   150 g) so the price a user records for a whole multi-pack scales unit

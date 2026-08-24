@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- A pagina do produto agora mostra um grafico completo do historico de
+  precos ao longo do tempo. Toque em um ponto para ver a data, o preco e a
+  loja. O mesmo grafico aparece no topo da tela de Historico de precos.
+
+- Se o aplicativo nao conseguir carregar a secao de precos na pagina do
+  produto, voce agora ve uma mensagem com um botao Tentar novamente, em vez
+  da secao sumir sem aviso.
+
+- A lista do historico de precos agora tem um unico botao de excluir,
+  claramente visivel, por registro.
+
 - Corrigidos o preco por unidade e o custo de receitas para produtos em
   pacotes multiplos (por exemplo "3 x 150 g"). O preco que voce registra
   agora vale para o pacote inteiro, entao o preco por unidade e o custo de

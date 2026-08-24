@@ -33,3 +33,13 @@ bool isExpiringSoon(String? dateString, int days) {
 /// changed or cleared by the user.
 DateTime defaultProduceExpiry([DateTime? now]) =>
     (now ?? DateTime.now()).add(const Duration(days: 14));
+
+/// Formats [date] as dd/mm/yyyy (e.g. 15/06/2026).
+///
+/// Shared by the price history chart, the history tiles, and the product
+/// detail recent-price rows so the format stays consistent.
+String formatShortDate(DateTime date) {
+  return '${date.day.toString().padLeft(2, '0')}/'
+      '${date.month.toString().padLeft(2, '0')}/'
+      '${date.year}';
+}

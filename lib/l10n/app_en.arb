@@ -769,6 +769,18 @@
   "apiSearchWarning": "Could not fetch all online results. Some products may be missing.",
   "dismiss": "Dismiss",
   "priceHidden": "Price hidden",
+  "priceChartTooltip": "{date} - {price}",
+  "@priceChartTooltip": {
+    "description": "Tooltip on the price history chart showing the purchase date and the price",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
   "scanFailed": "Barcode scan failed.",
   "testNotification": "Send test notification",
   "testScheduledNotification": "Send scheduled test notification (2 min)",

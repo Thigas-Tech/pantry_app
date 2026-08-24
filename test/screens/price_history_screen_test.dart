@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/models/price_history_point.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
+import 'package:pantry_app/widgets/price_history_chart.dart';
 
 import '../helpers/pump_app.dart';
 
@@ -76,6 +78,29 @@ void main() {
     expect(find.text('Store B'), findsOneWidget);
     expect(find.text(r'$10.50'), findsOneWidget);
     expect(find.text(r'$5.00'), findsOneWidget);
+  });
+
+  testWidgets('shows the history chart at the top with two or more prices', (
+    tester,
+  ) async {
+    final points = [
+      PriceHistoryPoint(date: DateTime(2026, 6, 10), amount: 5),
+      PriceHistoryPoint(date: DateTime(2026, 6, 15), amount: 10.5),
+    ];
+    await pumpApp(
+      tester,
+      const PriceHistoryScreen(barcode: barcode, productName: productName),
+      overrides: [
+        priceHistoryProvider((barcode, 1)).overrideWith(
+          (ref) => testPrices,
+        ),
+        priceChartPointsProvider((barcode, 1, 'USD')).overrideWith(
+          (ref) => points,
+        ),
+      ],
+    );
+
+    expect(find.byType(PriceHistoryChart), findsOneWidget);
   });
 
   testWidgets('shows the per-unit price when the price has a package size', (

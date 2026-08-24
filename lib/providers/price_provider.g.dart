@@ -107,6 +107,111 @@ final class PriceHistoryFamily extends $Family
   String toString() => r'priceHistoryProvider';
 }
 
+/// Provides chart-ready price history points for a barcode, converted to
+/// the user's base currency and sorted oldest first.
+///
+/// Keyed by a (barcode, inventoryId, baseCurrency) record.
+
+@ProviderFor(priceChartPoints)
+final priceChartPointsProvider = PriceChartPointsFamily._();
+
+/// Provides chart-ready price history points for a barcode, converted to
+/// the user's base currency and sorted oldest first.
+///
+/// Keyed by a (barcode, inventoryId, baseCurrency) record.
+
+final class PriceChartPointsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<PriceHistoryPoint>>,
+          List<PriceHistoryPoint>,
+          FutureOr<List<PriceHistoryPoint>>
+        >
+    with
+        $FutureModifier<List<PriceHistoryPoint>>,
+        $FutureProvider<List<PriceHistoryPoint>> {
+  /// Provides chart-ready price history points for a barcode, converted to
+  /// the user's base currency and sorted oldest first.
+  ///
+  /// Keyed by a (barcode, inventoryId, baseCurrency) record.
+  PriceChartPointsProvider._({
+    required PriceChartPointsFamily super.from,
+    required (String, int, String) super.argument,
+  }) : super(
+         retry: null,
+         name: r'priceChartPointsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$priceChartPointsHash();
+
+  @override
+  String toString() {
+    return r'priceChartPointsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<PriceHistoryPoint>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<PriceHistoryPoint>> create(Ref ref) {
+    final argument = this.argument as (String, int, String);
+    return priceChartPoints(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PriceChartPointsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$priceChartPointsHash() => r'3f8afeb180d9275bc63b9be0317fd027e2d0a05c';
+
+/// Provides chart-ready price history points for a barcode, converted to
+/// the user's base currency and sorted oldest first.
+///
+/// Keyed by a (barcode, inventoryId, baseCurrency) record.
+
+final class PriceChartPointsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<PriceHistoryPoint>>,
+          (String, int, String)
+        > {
+  PriceChartPointsFamily._()
+    : super(
+        retry: null,
+        name: r'priceChartPointsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provides chart-ready price history points for a barcode, converted to
+  /// the user's base currency and sorted oldest first.
+  ///
+  /// Keyed by a (barcode, inventoryId, baseCurrency) record.
+
+  PriceChartPointsProvider call((String, int, String) args) =>
+      PriceChartPointsProvider._(argument: args, from: this);
+
+  @override
+  String toString() => r'priceChartPointsProvider';
+}
+
 /// Provides the most recent price for a specific barcode in the given
 /// inventory, or null.
 ///

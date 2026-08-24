@@ -102,13 +102,30 @@ retention pruning.
    (`inventoryValueProvider`, `averagePriceProvider`,
    `pricedItemCountProvider`).
 4. Display surfaces: inventory card and tile (flat price plus per-unit
-   label), the `PriceHistoryScreen` (chronological list with sync-status),
-   and the stats screen (total value, average, monthly expenditure, store
-   spending).
+   label), the `PriceHistoryScreen` (line chart at the top plus a
+   chronological list with sync-status), and the stats screen (total value,
+   average, monthly expenditure, store spending). The product detail screen
+   embeds the same full-history chart above its recent-price rows and shows
+   a localized error row with retry when price data cannot be loaded
+   instead of hiding the section.
 
 Privacy hiding (`pricesHiddenProvider`) replaces every monetary value on
 cards, history rows, and per-unit labels with a fixed-width mask via
-`PriceMask`.
+`PriceMask`; the history chart is replaced by a masked placeholder so no
+value leaks through axis labels or tooltips.
+
+### 2.1 Price history chart
+
+`PriceHistoryChart` (`lib/widgets/price_history_chart.dart`) renders the
+full history with fl_chart. Points are produced by
+`PriceRepository.priceHistoryPoints` (each converted to the user's base
+currency and sorted oldest first) through `priceChartPointsProvider`,
+keyed by (barcode, inventoryId, baseCurrency). Observations are spaced
+equally along the X axis with the purchase date as each label; touch shows
+a built-in tooltip (date, price, store) built by `priceChartTooltipText`,
+and a single point renders as a visible dot. The widget is wrapped in a
+RepaintBoundary and keeps no touch state of its own, so scrolling lists
+around it are not invalidated.
 
 ## 3. Unit-aware price math
 

@@ -1,4 +1,5 @@
 import 'package:pantry_app/models/price.dart';
+import 'package:pantry_app/models/price_history_point.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
@@ -16,6 +17,25 @@ Future<List<Price>> priceHistory(Ref ref, (String, int) args) {
   return ref
       .watch(priceRepositoryProvider)
       .getPriceHistory(barcode, inventoryId: inventoryId);
+}
+
+/// Provides chart-ready price history points for a barcode, converted to
+/// the user's base currency and sorted oldest first.
+///
+/// Keyed by a (barcode, inventoryId, baseCurrency) record.
+@riverpod
+Future<List<PriceHistoryPoint>> priceChartPoints(
+  Ref ref,
+  (String, int, String) args,
+) {
+  final (barcode, inventoryId, baseCurrency) = args;
+  return ref
+      .watch(priceRepositoryProvider)
+      .priceHistoryPoints(
+        barcode,
+        inventoryId: inventoryId,
+        baseCurrency: baseCurrency,
+      );
 }
 
 /// Provides the most recent price for a specific barcode in the given
