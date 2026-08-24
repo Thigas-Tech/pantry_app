@@ -117,16 +117,23 @@ total are rounded to cents. Returns 0.0 when nothing can be priced.</p>
       priceRow: rows.first,
     );
     if (packageSize != null) {
-      cost =
-          await _scaleIngredientCost(
-            database,
-            barcode,
-            inventoryId,
-            price: price,
-            ingredient: ingredient,
-            package: packageSize,
-          ) ??
-          price;
+      final scaled = await _scaleIngredientCost(
+        database,
+        barcode,
+        inventoryId,
+        price: price,
+        ingredient: ingredient,
+        package: packageSize,
+      );
+      if (scaled == null) {
+        logWarning(
+          &#39;Full package price charged for ingredient $barcode &#39;
+          &#39;(${ingredient.quantity} ${ingredient.unit}): &#39;
+          &#39;package size or conversion could not be resolved&#39;,
+        );
+      } else {
+        cost = scaled;
+      }
     }
 
     final converted = await currencyService.convert(

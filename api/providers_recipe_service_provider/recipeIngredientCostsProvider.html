@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the productPackageSize function from the product_package_size library, for the Dart programming language.">
-  <title>productPackageSize function - product_package_size library - Dart API</title>
+  <meta name="description" content="API docs for the recipeIngredientCostsProvider property from the recipe_service_provider library, for the Dart programming language.">
+  <title>recipeIngredientCostsProvider property - recipe_service_provider library - Dart API</title>
 
 
   
@@ -25,10 +25,10 @@
   <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
   <ol class="breadcrumbs gt-separated dark hidden-xs">
     <li><a href="../index.html">pantry_app</a></li>
-    <li><a href="../utils_product_package_size/">utils&#47;product_package_size.dart</a></li>
-    <li class="self-crumb">productPackageSize function</li>
+    <li><a href="../providers_recipe_service_provider/">providers&#47;recipe_service_provider.dart</a></li>
+    <li class="self-crumb">recipeIngredientCostsProvider property</li>
   </ol>
-  <div class="self-name">productPackageSize</div>
+  <div class="self-name">recipeIngredientCostsProvider</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,56 +45,42 @@
   <div
       id="dartdoc-main-content"
       class="main-content"
-      data-above-sidebar="utils_product_package_size&#47;utils_product_package_size-library-sidebar.html"
+      data-above-sidebar="providers_recipe_service_provider&#47;providers_recipe_service_provider-library-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-function">productPackageSize</span> function 
+<h1><span class="kind-top-level-property">recipeIngredientCostsProvider</span> top-level property 
  
 </h1></div>
 
-    <section class="multi-line-signature">
-        
-<span class="returntype">(<span class="field">{<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="field-name">quantity</span>, </span><span class="field"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="field-name">unit</span>}</span>)?</span>
-<span class="name ">productPackageSize</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="productPackageSize-param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span></span></li>
-</ol>)
+        <section class="multi-line-signature">
+          
+  <div>
+    <ol class="annotation-list">
+        <li>@ProviderFor.new(recipeIngredientCosts)</li>
+    </ol>
+  </div>
+          <a href="../providers_recipe_service_provider/RecipeIngredientCostsFamily-class.html">RecipeIngredientCostsFamily</a>
+          <span class="name ">recipeIngredientCostsProvider</span>
+          <div class="features"><span class="feature">final</span></div>
 
+        </section>
         
-
-    </section>
-    
 <section class="desc markdown">
-  <p>Parses a <a href="../models_product/Product-class.html">Product</a>'s packaging size for pre-filling a price sheet, or
-null when no size can be derived.</p>
-<p>Uses <a href="../utils_quantity_parser/parsePackageQuantity.html">parsePackageQuantity</a>, which resolves multi-pack strings like
-"3 x 150 g" to the TOTAL package size (450 g) the price applies to, so
-the product detail screen and the market trip offer the same package
-size as recipe cost scaling. When the product has no packaging data
-(many Open Food Facts products only carry a serving size), it falls
-back to <a href="../utils_quantity_parser/parseServingQuantity.html">parseServingQuantity</a> so a unit price can still be computed;
-the package size always wins over the serving size when both are
-present.</p>
+  <p>Provides the scaled cost per ingredient for a recipe, keyed by the
+ingredient barcode.</p>
+<p>Keyed by a (recipeId, inventoryId, baseCurrency) record. The recipe's
+own inventory wins over the active one, matching <a href="../providers_recipe_service_provider/recipeCost.html">recipeCost</a>.
+Ingredients without a barcode or without a recorded price are absent
+from the map.</p>
 </section>
 
-
-    
+        
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">({double quantity, String unit})? productPackageSize(Product product) {
-  final parsed = parsePackageQuantity(
-    productQuantity: product.productQuantity,
-    quantity: product.quantity,
-  );
-  if (parsed != null) {
-    return (quantity: parsed.amount, unit: parsed.unit);
-  }
-  final serving = parseServingQuantity(
-    servingQuantity: product.servingQuantity,
-    servingSize: product.servingSize,
-  );
-  if (serving == null) return null;
-  return (quantity: serving.amount, unit: serving.unit);
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">@ProviderFor(recipeIngredientCosts)
+final recipeIngredientCostsProvider = RecipeIngredientCostsFamily._();</code></pre>
 </section>
+
 
 
   </div> <!-- /.main-content -->
@@ -107,11 +93,11 @@ present.</p>
 </header>
 <ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
     <li><a href="../index.html">pantry_app</a></li>
-    <li><a href="../utils_product_package_size/">product_package_size</a></li>
-    <li class="self-crumb">productPackageSize function</li>
+    <li><a href="../providers_recipe_service_provider/">recipe_service_provider</a></li>
+    <li class="self-crumb">recipeIngredientCostsProvider property</li>
 </ol>
 
-    <h5>product_package_size library</h5>
+    <h5>recipe_service_provider library</h5>
     <div id="dartdoc-sidebar-left-content"></div>
   </div><!--/.sidebar-offcanvas-left-->
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
