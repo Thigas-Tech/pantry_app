@@ -610,6 +610,112 @@ void main() {
     });
   });
 
+  group('PriceDao latestPricesByBarcodes', () {
+    Future<void> seedProducts(List<String> barcodes) async {
+      final db = await dbHelper.database;
+      const productDao = ProductDao();
+      for (final barcode in barcodes) {
+        await productDao.insert(
+          db,
+          Product(barcode: barcode, name: 'Product $barcode'),
+        );
+      }
+    }
+
+    test('returns the latest price per barcode', () async {
+      final db = await dbHelper.database;
+      await seedProducts(['a', 'b', 'c']);
+      await dao.insert(
+        db,
+        const Price(barcode: 'a', price: 1, datePurchased: 100),
+      );
+      await dao.insert(
+        db,
+        const Price(barcode: 'a', price: 2, datePurchased: 200),
+      );
+      await dao.insert(
+        db,
+        const Price(barcode: 'b', price: 5, datePurchased: 300),
+      );
+
+      final latest = await dao.latestPricesByBarcodes(
+        db,
+        ['a', 'b', 'c'],
+        inventoryId: 1,
+      );
+
+      expect(latest, hasLength(2));
+      expect(latest['a']!.price, 2);
+      expect(latest['b']!.price, 5);
+      expect(latest.containsKey('c'), isFalse);
+    });
+
+    test('breaks same-day ties by id descending', () async {
+      final db = await dbHelper.database;
+      await seedProducts(['a']);
+      final sameDay = DateTime(2026, 6, 15).millisecondsSinceEpoch;
+      await dao.insert(
+        db,
+        Price(barcode: 'a', price: 20, datePurchased: sameDay),
+      );
+      await dao.insert(
+        db,
+        Price(barcode: 'a', price: 10, datePurchased: sameDay),
+      );
+
+      final latest = await dao.latestPricesByBarcodes(
+        db,
+        ['a'],
+        inventoryId: 1,
+      );
+
+      expect(latest['a']!.price, 10);
+    });
+
+    test('scopes by inventory', () async {
+      final db = await dbHelper.database;
+      await seedProducts(['a']);
+      await dbHelper.inventoriesDao.create(db, 'Work');
+      await dao.insert(
+        db,
+        const Price(barcode: 'a', price: 1, datePurchased: 100),
+      );
+      await dao.insert(
+        db,
+        const Price(
+          barcode: 'a',
+          price: 9,
+          datePurchased: 200,
+          inventoryId: 2,
+        ),
+      );
+
+      final inv1 = await dao.latestPricesByBarcodes(
+        db,
+        ['a'],
+        inventoryId: 1,
+      );
+      final inv2 = await dao.latestPricesByBarcodes(
+        db,
+        ['a'],
+        inventoryId: 2,
+      );
+
+      expect(inv1['a']!.price, 1);
+      expect(inv2['a']!.price, 9);
+    });
+
+    test('returns an empty map for an empty barcode list', () async {
+      final db = await dbHelper.database;
+      final latest = await dao.latestPricesByBarcodes(
+        db,
+        [],
+        inventoryId: 1,
+      );
+      expect(latest, isEmpty);
+    });
+  });
+
   group('PriceDao countBySyncStatus', () {
     test('counts only rows with the given sync status', () async {
       final db = await dbHelper.database;

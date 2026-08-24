@@ -440,4 +440,89 @@ void main() {
       expect(normalizeUnit(''), isNull);
     });
   });
+
+  group('parsePackageQuantity', () {
+    test('parses a plain quantity string', () {
+      final result = parsePackageQuantity(quantity: '500 ml');
+      expect(result, isNotNull);
+      expect(result!.amount, 500);
+      expect(result.unit, 'ml');
+    });
+
+    test('resolves a multi-pack string to the total package size', () {
+      final result = parsePackageQuantity(quantity: '3 x 150 g');
+      expect(result, isNotNull);
+      expect(result!.amount, 450);
+      expect(result.unit, 'g');
+    });
+
+    test('resolves a multi-pack string with "x" without spaces', () {
+      final result = parsePackageQuantity(quantity: '6x1.5 L');
+      expect(result, isNotNull);
+      expect(result!.amount, 9);
+      expect(result.unit, 'L');
+    });
+
+    test('resolves a decimal multi-pack string', () {
+      final result = parsePackageQuantity(quantity: '2 x 37.5 g');
+      expect(result, isNotNull);
+      expect(result!.amount, 75);
+      expect(result.unit, 'g');
+    });
+
+    test('sums a bonus-pack string with matching units', () {
+      final result = parsePackageQuantity(quantity: '2 x 300 g + 1 x 50 g');
+      expect(result, isNotNull);
+      expect(result!.amount, 650);
+      expect(result.unit, 'g');
+    });
+
+    test('returns null for a bonus pack with mixed units', () {
+      expect(
+        parsePackageQuantity(quantity: '2 x 300 g + 1 x 100 ml'),
+        isNull,
+      );
+    });
+
+    test('falls back to productQuantity when the string is unparseable', () {
+      final result = parsePackageQuantity(
+        quantity: 'not a quantity',
+        productQuantity: 450,
+        productQuantityUnit: 'g',
+      );
+      expect(result, isNotNull);
+      expect(result!.amount, 450);
+      expect(result.unit, 'g');
+    });
+
+    test('returns null when the string is unparseable and no unit exists', () {
+      expect(
+        parsePackageQuantity(quantity: 'not a quantity', productQuantity: 450),
+        isNull,
+      );
+    });
+
+    test('returns null when nothing is parseable', () {
+      expect(parsePackageQuantity(quantity: 'no numbers here'), isNull);
+    });
+
+    test('returns null for a null quantity with no productQuantity', () {
+      expect(parsePackageQuantity(), isNull);
+    });
+
+    test('returns null for a zero productQuantity fallback', () {
+      expect(
+        parsePackageQuantity(quantity: 'nope', productQuantity: 0),
+        isNull,
+      );
+    });
+
+    test('parses a multi-pack with a weight unit and decimal multiplier'
+        ' separately from the per-unit value', () {
+      // Multiplier "6" x per-unit "1.5 L": the total is 9 L, not 1.5 L.
+      final result = parsePackageQuantity(quantity: '6 x 1.5 L');
+      expect(result!.amount, 9);
+      expect(result.unit, 'L');
+    });
+  });
 }

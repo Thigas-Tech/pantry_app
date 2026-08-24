@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Corrigidos o preco por unidade e o custo de receitas para produtos em
+  pacotes multiplos (por exemplo "3 x 150 g"). O preco que voce registra
+  agora vale para o pacote inteiro, entao o preco por unidade e o custo de
+  uma porcao na receita sao calculados corretamente, em vez de usarem o
+  tamanho de um unico item.
+
+- A tela da receita agora mostra o custo de cada ingrediente ao lado da
+  quantidade (oculto quando os precos estao mascarados), para voce ver
+  exatamente como o total da receita e composto.
+
 - Corrigido um problema que apagava o historico de precos de produtos que
   voce nao tinha mais na despensa. Seus precos registrados agora permanecem
   salvos mesmo depois que voce termina um produto, limpa os dados em cache ou

@@ -4,6 +4,27 @@
 
 ### Fixed
 
+- **Multi-pack package sizes now resolve to the total package**: the new
+  `parsePackageQuantity` resolves "3 x 150 g" to 450 g (not the per-unit
+  150 g) so the price a user records for a whole multi-pack scales unit
+  prices and recipe ingredient costs correctly. Bonus packs like
+  "2 x 300 g + 1 x 50 g" sum to 650 g; mixed-unit packs fall back to the
+  product's normalized quantity. Both the price sheet prefill
+  (`productPackageSize`, product detail and market trip) and
+  `RecipeService._resolvePackageSize` now use it. (lib/utils/quantity_parser.dart,
+  lib/utils/product_package_size.dart, lib/services/recipe_service.dart)
+- **Recipe per-ingredient costs**: the recipe detail screen now shows the
+  scaled cost of each priced ingredient (masked by the price-hiding eye).
+  Backed by a new batched latest-price DAO query
+  (`PriceDao.latestPricesByBarcodes`) and `RecipeService.ingredientCosts`,
+  which groups duplicate barcodes by summed quantity and reuses the same
+  scaling and conversion rules as the recipe total.
+  (lib/database/price_dao.dart, lib/services/recipe_service.dart,
+  lib/providers/recipe_service_provider.dart, lib/screens/recipe_detail_screen.dart)
+- **Full-price fallback is now logged**: when an ingredient's package size
+  or unit conversion cannot be resolved and the legacy full-package price
+  is charged, a warning is logged. (lib/services/recipe_service.dart)
+
 - **Price history data loss**: startup cleanup no longer deletes prices for
   products that are not currently in the pantry — the orphan-price sweep is
   removed entirely, and the orphan-product sweep now keeps manual products

@@ -208,6 +208,17 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     final asyncData = ref.watch(
                       recipeIngredientsWithProductsProvider(widget.recipeId),
                     );
+                    final ingredientCosts =
+                        ref
+                            .watch(
+                              recipeIngredientCostsProvider((
+                                widget.recipeId,
+                                activeId,
+                                currencyCode,
+                              )),
+                            )
+                            .value ??
+                        const <String, double>{};
                     return asyncData.when(
                       data: (data) {
                         final grouped = <String, _DisplayIngredient>{};
@@ -240,31 +251,50 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                             ),
                             const SizedBox(height: 8),
                             ...grouped.values.map(
-                              (g) => ListTile(
-                                dense: true,
-                                leading: _buildIngredientImage(
-                                  g.product?.imageUrl,
-                                  g.barcode,
-                                ),
-                                title: Text(
-                                  '${_formatIngredientAmount(
-                                    g.totalQuantity,
-                                    g.unit,
-                                  )} x ${g.name}',
-                                ),
-                                trailing: _recipe!.servings > 0
-                                    ? Text(
-                                        '${l10n.recipePerServing}: '
-                                        '${_formatIngredientAmount(
-                                          g.totalQuantity / _recipe!.servings,
-                                          g.unit,
-                                        )}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall,
-                                      )
-                                    : null,
-                              ),
+                              (g) {
+                                final cost = g.barcode != null
+                                    ? ingredientCosts[g.barcode]
+                                    : null;
+                                return ListTile(
+                                  dense: true,
+                                  leading: _buildIngredientImage(
+                                    g.product?.imageUrl,
+                                    g.barcode,
+                                  ),
+                                  title: Text(
+                                    '${_formatIngredientAmount(
+                                      g.totalQuantity,
+                                      g.unit,
+                                    )} x ${g.name}',
+                                  ),
+                                  subtitle: cost != null
+                                      ? PriceMask(
+                                          formattedPrice:
+                                              '$symbol'
+                                              '${cost.toStringAsFixed(2)}',
+                                          child: Text(
+                                            '$symbol'
+                                            '${cost.toStringAsFixed(2)}',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall,
+                                          ),
+                                        )
+                                      : null,
+                                  trailing: _recipe!.servings > 0
+                                      ? Text(
+                                          '${l10n.recipePerServing}: '
+                                          '${_formatIngredientAmount(
+                                            g.totalQuantity / _recipe!.servings,
+                                            g.unit,
+                                          )}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall,
+                                        )
+                                      : null,
+                                );
+                              },
                             ),
                           ],
                         );

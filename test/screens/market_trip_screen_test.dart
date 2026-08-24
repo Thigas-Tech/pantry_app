@@ -722,7 +722,7 @@ void main() {
           .firstWhere(
             (w) => w.decoration?.labelText == 'Package size',
           );
-      expect(packageField.controller?.text, '150');
+      expect(packageField.controller?.text, '450');
     },
   );
 

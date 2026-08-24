@@ -417,6 +417,38 @@ class PriceDao {
         0;
   }
 
+  /// Returns the most recent price per barcode in [barcodes] for the given
+  /// [inventoryId], keyed by barcode.
+  ///
+  /// Runs one batched query with the deterministic latest-price ordering
+  /// (COALESCE(date_purchased, date_added) DESC, id DESC). Barcodes without
+  /// a recorded price are absent from the result. An empty [barcodes] list
+  /// returns an empty map without touching the database.
+  Future<Map<String, Price>> latestPricesByBarcodes(
+    Database db,
+    List<String> barcodes, {
+    required int inventoryId,
+  }) async {
+    if (barcodes.isEmpty) return {};
+    final placeholders = List.filled(barcodes.length, '?').join(',');
+    final rows = await db.rawQuery(
+      '''
+      SELECT p.* FROM prices p
+      WHERE p.barcode IN ($placeholders) AND p.inventory_id = ?
+        AND p.id = (
+          SELECT id FROM prices p2
+          WHERE p2.barcode = p.barcode AND p2.inventory_id = p.inventory_id
+          ORDER BY COALESCE(p2.date_purchased, p2.date_added) DESC, p2.id DESC
+          LIMIT 1
+        )
+      ''',
+      [...barcodes, inventoryId],
+    );
+    return {
+      for (final row in rows) row['barcode']! as String: fromMap(row),
+    };
+  }
+
   /// Returns prices with the given [syncStatus] for uploading to Open Prices.
   Future<List<Price>> getBySyncStatus(Database db, String syncStatus) async {
     try {
