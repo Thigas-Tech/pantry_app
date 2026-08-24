@@ -534,7 +534,7 @@
   "amoledNudgeDismiss": "Not now",
   "price": "Price",
   "prices": "Prices",
-  "addPrice": "Price saved",
+  "addPrice": "Add price",
   "editPrice": "Edit price",
   "deletePrice": "Delete price",
   "priceAdded": "Price added.",
@@ -769,6 +769,7 @@
   "apiSearchWarning": "Could not fetch all online results. Some products may be missing.",
   "dismiss": "Dismiss",
   "priceHidden": "Price hidden",
+  "priceTrendHint": "Add another price to see the trend",
   "priceChartTooltip": "{date} - {price}",
   "@priceChartTooltip": {
     "description": "Tooltip on the price history chart showing the purchase date and the price",

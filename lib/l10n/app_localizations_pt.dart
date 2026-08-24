@@ -1058,7 +1058,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get prices => 'Precos';
 
   @override
-  String get addPrice => 'Preco salvo';
+  String get addPrice => 'Adicionar preco';
 
   @override
   String get editPrice => 'Editar preco';
@@ -1476,6 +1476,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get priceHidden => 'Preco oculto';
+
+  @override
+  String get priceTrendHint => 'Adicione outro preco para ver a tendencia';
 
   @override
   String priceChartTooltip(String date, String price) {
@@ -3296,7 +3299,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get prices => 'Precos';
 
   @override
-  String get addPrice => 'Preco salvo';
+  String get addPrice => 'Adicionar preco';
 
   @override
   String get editPrice => 'Editar preco';
@@ -3714,6 +3717,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get priceHidden => 'Preco oculto';
+
+  @override
+  String get priceTrendHint => 'Adicione outro preco para ver a tendencia';
 
   @override
   String priceChartTooltip(String date, String price) {

@@ -56,6 +56,9 @@ void main() {
     final chart = tester.widget<LineChart>(find.byType(LineChart));
     expect(chart.data.lineBarsData.single.spots, hasLength(1));
     expect(chart.data.lineBarsData.single.dotData.show, isTrue);
+    // The single point must still render a valid X range around the spot.
+    expect(chart.data.minX, lessThan(0));
+    expect(chart.data.maxX, greaterThan(0));
   });
 
   testWidgets('touch is wired to a built-in tooltip', (tester) async {

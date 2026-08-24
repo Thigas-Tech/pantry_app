@@ -127,6 +127,16 @@ and a single point renders as a visible dot. The widget is wrapped in a
 RepaintBoundary and keeps no touch state of its own, so scrolling lists
 around it are not invalidated.
 
+Screens gate the chart to at least two points: with exactly one recorded
+price they render a localized hint (`priceTrendHint`) prompting for a
+second observation instead. Every price mutation — adding from the product
+detail price section or the history screen app bar, editing the latest
+price, deleting (and undoing a delete) — invalidates
+`priceChartPointsProvider` alongside the history and latest-price
+providers, so the chart always reflects the current data. The entry sheet's
+date picker supports past dates, so historical observations can be recorded
+without the market trip.
+
 ## 3. Unit-aware price math
 
 `PriceCalculator` (`lib/utils/price_calculator.dart`) provides pure, DB-free

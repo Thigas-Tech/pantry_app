@@ -106,6 +106,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// use from [dispose] (where [ref] is unavailable).
   late final ProductImageService _imageService;
 
+  /// Guards the price sheet so a double-tap cannot stack two sheets.
+  bool _priceSheetOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -566,14 +569,21 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ...recent.map((p) => _buildRecentPriceRow(context, l10n, p)),
         ],
         const SizedBox(height: 8),
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            OutlinedButton.icon(
+              onPressed: () => _addPrice(context),
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(l10n.addPrice),
+            ),
             OutlinedButton.icon(
               onPressed: () => _editPrice(context, price),
               icon: const Icon(Icons.edit, size: 18),
               label: Text(l10n.editPrice),
             ),
-            const SizedBox(width: 8),
             TextButton(
               onPressed: () => _openPriceHistory(context),
               child: Text(l10n.viewAllPrices),
@@ -587,8 +597,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
   /// Builds the full price history chart from chart-ready points.
   ///
-  /// Renders nothing when fewer than two points exist or when the chart
-  /// data cannot be loaded — the recent-price rows below remain available.
+  /// Renders the chart when at least two points exist, a hint prompting for
+  /// a second observation when exactly one point exists, and nothing when
+  /// there are no points or the chart data cannot be loaded (the
+  /// recent-price rows below remain available).
   List<Widget> _buildPriceHistoryChart() {
     final activeId = ref.watch(activeInventoryProvider).value ?? 1;
     final baseCurrency =
@@ -598,15 +610,30 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
     final repo = ref.read(priceRepositoryProvider);
     return chartAsync.when(
-      data: (points) => points.length >= 2
-          ? [
-              const SizedBox(height: 12),
-              PriceHistoryChart(
-                points: points,
-                formatAmount: (value) => repo.formatPrice(value, baseCurrency),
+      data: (points) {
+        if (points.length >= 2) {
+          return [
+            const SizedBox(height: 12),
+            PriceHistoryChart(
+              points: points,
+              formatAmount: (value) => repo.formatPrice(value, baseCurrency),
+            ),
+          ];
+        }
+        if (points.length == 1) {
+          final l10n = AppLocalizations.of(context)!;
+          return [
+            const SizedBox(height: 12),
+            Text(
+              l10n.priceTrendHint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ]
-          : const [],
+            ),
+          ];
+        }
+        return const [];
+      },
       loading: () => const [SizedBox(height: 12), SizedBox(height: 48)],
       error: (_, _) => const [],
     );
@@ -701,79 +728,94 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   Future<void> _addPrice(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final package = productPackageSize(_product);
-    final price = await PriceEntrySheet.show(
-      context,
-      barcode: _product.barcode,
-      existingPackageQuantity: package?.quantity,
-      existingPackageUnit: package?.unit,
-    );
-    if (price != null) {
-      try {
-        await ref.read(productRepositoryProvider).cacheProduct(_product);
-        final activeId = await ref.read(activeInventoryProvider.future);
-        final scoped = price.copyWith(inventoryId: activeId);
-        await ref.read(priceRepositoryProvider).addPrice(scoped);
-        if (!context.mounted) return;
-        ref
-          ..invalidate(latestPriceProvider((_product.barcode, activeId)))
-          ..invalidate(
-            priceHistoryProvider((_product.barcode, activeId)),
-          );
-
-        if (price.datePurchased != null &&
-            price.store != null &&
-            price.store!.isNotEmpty) {
-          final repo = ref.read(productRepositoryProvider);
+    if (_priceSheetOpen) return;
+    _priceSheetOpen = true;
+    try {
+      final l10n = AppLocalizations.of(context)!;
+      final package = productPackageSize(_product);
+      final price = await PriceEntrySheet.show(
+        context,
+        barcode: _product.barcode,
+        existingPackageQuantity: package?.quantity,
+        existingPackageUnit: package?.unit,
+      );
+      if (price != null) {
+        try {
+          await ref.read(productRepositoryProvider).cacheProduct(_product);
           final activeId = await ref.read(activeInventoryProvider.future);
-          final existingItems = await repo.getInventoryForBarcode(
-            _product.barcode,
-            inventoryId: activeId,
-          );
-          if (context.mounted && existingItems.isEmpty) {
-            final result = await QuantityAndPantrySheet.show(context);
-            if (result != null && context.mounted) {
-              final item = InventoryItem(
-                barcode: _product.barcode,
-                inventoryId: result.inventoryId,
-                quantity: result.quantity,
-              );
-              await repo.cacheProduct(_product);
-              final newId = await repo.addInventoryItem(item);
-              final savedItem = item.copyWith(id: newId);
-              final notificationService = ref.read(
-                notificationServiceProvider,
-              );
-              await notificationService.scheduleExpiryReminders(
-                savedItem,
-                productName: _product.name,
-                expiringSoonTitle: l10n.expiringSoon,
-                buildExpiringSoonBody: l10n.expiresTomorrow,
-                expiringTodayTitle: l10n.expiringToday,
-                buildExpiringTodayBody: l10n.expiresToday,
-                channelName: l10n.expiryChannelName,
-                channelDescription: l10n.expiryChannelDescription,
-              );
-              await _rescheduleInactivityReminder();
-              if (context.mounted) {
-                SnackbarHelper.showInfo(context, l10n.itemAdded);
+          final scoped = price.copyWith(inventoryId: activeId);
+          await ref.read(priceRepositoryProvider).addPrice(scoped);
+          if (!context.mounted) return;
+          final baseCurrency =
+              ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
+          ref
+            ..invalidate(latestPriceProvider((_product.barcode, activeId)))
+            ..invalidate(
+              priceHistoryProvider((_product.barcode, activeId)),
+            )
+            ..invalidate(
+              priceChartPointsProvider((
+                _product.barcode,
+                activeId,
+                baseCurrency,
+              )),
+            );
+
+          if (price.datePurchased != null &&
+              price.store != null &&
+              price.store!.isNotEmpty) {
+            final repo = ref.read(productRepositoryProvider);
+            final activeId = await ref.read(activeInventoryProvider.future);
+            final existingItems = await repo.getInventoryForBarcode(
+              _product.barcode,
+              inventoryId: activeId,
+            );
+            if (context.mounted && existingItems.isEmpty) {
+              final result = await QuantityAndPantrySheet.show(context);
+              if (result != null && context.mounted) {
+                final item = InventoryItem(
+                  barcode: _product.barcode,
+                  inventoryId: result.inventoryId,
+                  quantity: result.quantity,
+                );
+                await repo.cacheProduct(_product);
+                final newId = await repo.addInventoryItem(item);
+                final savedItem = item.copyWith(id: newId);
+                final notificationService = ref.read(
+                  notificationServiceProvider,
+                );
+                await notificationService.scheduleExpiryReminders(
+                  savedItem,
+                  productName: _product.name,
+                  expiringSoonTitle: l10n.expiringSoon,
+                  buildExpiringSoonBody: l10n.expiresTomorrow,
+                  expiringTodayTitle: l10n.expiringToday,
+                  buildExpiringTodayBody: l10n.expiresToday,
+                  channelName: l10n.expiryChannelName,
+                  channelDescription: l10n.expiryChannelDescription,
+                );
+                await _rescheduleInactivityReminder();
+                if (context.mounted) {
+                  SnackbarHelper.showInfo(context, l10n.itemAdded);
+                }
+              } else if (context.mounted) {
+                SnackbarHelper.showInfo(context, l10n.addToPantrySkipped);
               }
             } else if (context.mounted) {
-              SnackbarHelper.showInfo(context, l10n.addToPantrySkipped);
+              SnackbarHelper.showInfo(context, l10n.priceAdded);
             }
           } else if (context.mounted) {
             SnackbarHelper.showInfo(context, l10n.priceAdded);
           }
-        } else if (context.mounted) {
-          SnackbarHelper.showInfo(context, l10n.priceAdded);
-        }
-      } on Exception catch (e) {
-        logError('Failed to add price: $e');
-        if (context.mounted) {
-          SnackbarHelper.showError(context, l10n.errorGeneric);
+        } on Exception catch (e) {
+          logError('Failed to add price: $e');
+          if (context.mounted) {
+            SnackbarHelper.showError(context, l10n.errorGeneric);
+          }
         }
       }
+    } finally {
+      _priceSheetOpen = false;
     }
   }
 
@@ -790,12 +832,21 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         if (context.mounted) {
           SnackbarHelper.showInfo(context, l10n.priceUpdated);
           final activeId = await ref.read(activeInventoryProvider.future);
+          final baseCurrency =
+              ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
           ref
             ..invalidate(
               latestPriceProvider((_product.barcode, activeId)),
             )
             ..invalidate(
               priceHistoryProvider((_product.barcode, activeId)),
+            )
+            ..invalidate(
+              priceChartPointsProvider((
+                _product.barcode,
+                activeId,
+                baseCurrency,
+              )),
             );
         }
       } on Exception catch (e) {
@@ -813,6 +864,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         builder: (_) => PriceHistoryScreen(
           barcode: _product.barcode,
           productName: _product.name,
+          product: _product,
         ),
       ),
     );

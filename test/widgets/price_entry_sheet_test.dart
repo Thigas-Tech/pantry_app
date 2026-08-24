@@ -266,9 +266,8 @@ void main() {
 
       await openSheet(tester);
 
-      // The addPrice ARB key has a duplicate in the file;
-      // the actual rendered text may vary. Verify the sheet opened.
       expect(find.byType(Autocomplete<String>), findsOneWidget);
+      expect(find.text('Add price'), findsWidgets);
     });
 
     testWidgets('shows correct title for edit mode', (tester) async {
