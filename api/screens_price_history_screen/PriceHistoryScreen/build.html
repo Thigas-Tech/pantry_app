@@ -121,6 +121,7 @@ Widget build(BuildContext context, WidgetRef ref) {
     appBar: AppBar(
       title: Text(&#39;${l10n.priceHistory} — $productName&#39;),
       actions: [
+        _AddPriceAction(barcode: barcode, product: product),
         if (priceTrackingEnabled) const PriceVisibilityToggle(),
       ],
     ),
@@ -136,7 +137,7 @@ Widget build(BuildContext context, WidgetRef ref) {
         }
         return Column(
           children: [
-            _buildChart(ref),
+            _buildChart(context, ref),
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),

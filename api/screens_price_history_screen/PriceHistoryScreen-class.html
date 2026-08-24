@@ -55,11 +55,12 @@
     
 <section class="desc markdown">
   <p>Displays the price history for a single product.</p>
-<p>Shows a line chart of the full history at the top, followed by a
+<p>Shows a line chart of the full history at the top (or a hint prompting
+for a second observation while only one price exists), followed by a
 scrollable list of all recorded prices for the given <a href="../screens_price_history_screen/PriceHistoryScreen/barcode.html">barcode</a>, sorted
 by purchase date descending. Each row shows the date, price (masked if
 privacy hiding is enabled), and sync status, with an explicit delete
-button.</p>
+button. New price observations can be added from the app bar.</p>
 </section>
 
 
@@ -95,7 +96,7 @@ button.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="PriceHistoryScreen.new" class="callable">
-          <span class="name"><a href="../screens_price_history_screen/PriceHistoryScreen/PriceHistoryScreen.html">PriceHistoryScreen</a></span><span class="signature">({<span class="parameter" id="param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="param-productName"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">productName</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../screens_price_history_screen/PriceHistoryScreen/PriceHistoryScreen.html">PriceHistoryScreen</a></span><span class="signature">({<span class="parameter" id="param-barcode"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">barcode</span>, </span><span class="parameter" id="param-productName"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">productName</span>, </span><span class="parameter" id="param-product"><span class="type-annotation"><a href="../models_product/Product-class.html">Product</a>?</span> <span class="parameter-name">product</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../screens_price_history_screen/PriceHistoryScreen-class.html">PriceHistoryScreen</a>.
@@ -142,6 +143,20 @@ button.</p>
 <dd class="inherited">
   Controls how one widget replaces another widget in the tree.
   <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="product" class="property">
+  <span class="name"><a href="../screens_price_history_screen/PriceHistoryScreen/product.html">product</a></span>
+  <span class="signature">&#8594; <a href="../models_product/Product-class.html">Product</a>?</span>
+  
+
+</dt>
+<dd>
+  The product the prices belong to, used to pre-fill the package size
+when adding a new price. Optional so the screen can be opened from
+contexts that only have the barcode.
+  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
