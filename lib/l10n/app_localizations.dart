@@ -2073,7 +2073,7 @@ abstract class AppLocalizations {
   /// No description provided for @addPrice.
   ///
   /// In en, this message translates to:
-  /// **'Price saved'**
+  /// **'Add price'**
   String get addPrice;
 
   /// No description provided for @editPrice.
@@ -2819,6 +2819,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Price hidden'**
   String get priceHidden;
+
+  /// No description provided for @priceTrendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another price to see the trend'**
+  String get priceTrendHint;
 
   /// Tooltip on the price history chart showing the purchase date and the price
   ///

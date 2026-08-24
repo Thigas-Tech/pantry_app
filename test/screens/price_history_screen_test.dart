@@ -2,15 +2,28 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/price_history_point.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
+import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
+import 'package:pantry_app/services/price_repository.dart';
+import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:pantry_app/widgets/price_history_chart.dart';
 
 import '../helpers/pump_app.dart';
 
+class _MockPriceRepository extends Mock implements PriceRepository {}
+
 void main() {
+  setUpAll(() {
+    registerFallbackValue(
+      const Price(barcode: 'fallback', price: 1),
+    );
+  });
+
   const barcode = 'test-barcode';
   const productName = 'Test Product';
   final testPrices = [
@@ -101,6 +114,88 @@ void main() {
     );
 
     expect(find.byType(PriceHistoryChart), findsOneWidget);
+  });
+
+  testWidgets('shows the trend hint with a single price', (tester) async {
+    await pumpApp(
+      tester,
+      const PriceHistoryScreen(barcode: barcode, productName: productName),
+      overrides: [
+        priceHistoryProvider((barcode, 1)).overrideWith(
+          (ref) => [testPrices.first],
+        ),
+        priceChartPointsProvider((barcode, 1, 'USD')).overrideWith(
+          (ref) => [
+            PriceHistoryPoint(date: DateTime(2026, 6, 15), amount: 10.5),
+          ],
+        ),
+      ],
+    );
+
+    expect(find.text('Add another price to see the trend'), findsOneWidget);
+    expect(find.byType(PriceHistoryChart), findsNothing);
+  });
+
+  testWidgets('add action opens the price sheet', (tester) async {
+    await pumpApp(
+      tester,
+      const PriceHistoryScreen(barcode: barcode, productName: productName),
+      overrides: [
+        priceHistoryProvider((barcode, 1)).overrideWith(
+          (ref) => testPrices,
+        ),
+      ],
+    );
+
+    await tester.tap(find.byTooltip('Add price'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PriceEntrySheet), findsOneWidget);
+  });
+
+  testWidgets('add action saves the price into the active inventory', (
+    tester,
+  ) async {
+    final mockPriceRepo = _MockPriceRepository();
+    when(() => mockPriceRepo.addPrice(any())).thenAnswer((_) async => 1);
+    when(
+      () => mockPriceRepo.formatPrice(any(), any()),
+    ).thenAnswer(
+      (invocation) =>
+          '\$${(invocation.positionalArguments[0] as num).toStringAsFixed(2)}',
+    );
+
+    await pumpApp(
+      tester,
+      const PriceHistoryScreen(barcode: barcode, productName: productName),
+      overrides: [
+        priceHistoryProvider((barcode, 1)).overrideWith(
+          (ref) => testPrices,
+        ),
+        priceRepositoryProvider.overrideWithValue(mockPriceRepo),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+      ],
+    );
+
+    await tester.tap(find.byTooltip('Add price'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '7.25');
+    await tester.tap(
+      find
+          .descendant(
+            of: find.byType(PriceEntrySheet),
+            matching: find.text('Add price'),
+          )
+          .last,
+    );
+    await tester.pumpAndSettle();
+
+    verify(
+      () => mockPriceRepo.addPrice(
+        any(that: isA<Price>().having((p) => p.inventoryId, 'inv', 1)),
+      ),
+    ).called(1);
   });
 
   testWidgets('shows the per-unit price when the price has a package size', (

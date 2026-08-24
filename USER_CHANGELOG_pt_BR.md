@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Voce agora pode adicionar um novo preco para um produto diretamente na
+  pagina do produto (o botao "Adicionar preco" continua disponivel depois
+  do primeiro preco) e na tela de historico de precos. Voce pode escolher
+  qualquer data passada, para registrar precos que pagou antes — sem
+  precisar de uma ida ao mercado.
+
+- O grafico do historico de precos agora atualiza na hora quando voce
+  adiciona, edita ou exclui um preco, e enquanto voce tem menos de dois
+  precos ele mostra uma dica: "Adicione outro preco para ver a tendencia".
+
+- Corrigido um rotulo confuso: o botao de adicionar preco dizia "Preco
+  salvo" e agora diz corretamente "Adicionar preco".
+
 - A pagina do produto agora mostra um grafico completo do historico de
   precos ao longo do tempo. Toque em um ponto para ver a data, o preco e a
   loja. O mesmo grafico aparece no topo da tela de Historico de precos.

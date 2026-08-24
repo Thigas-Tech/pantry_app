@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- You can now add a new price for a product directly from the product page
+  (the "Add price" button stays available after the first price) and from
+  the price history screen. You can pick any past date, so you can record
+  prices you paid before — no market trip needed.
+
+- The price history chart now updates right away when you add, edit, or
+  delete a price, and until you have at least two prices it shows a hint:
+  "Add another price to see the trend".
+
+- Fixed a confusing label: the add-price button used to say "Price saved"
+  and now correctly says "Add price".
+
 - The product page now shows a full price history chart with your prices
   over time. Tap a point to see the date, price, and store. The same chart
   appears at the top of the Price history screen.

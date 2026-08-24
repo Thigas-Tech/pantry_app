@@ -4,6 +4,26 @@
 
 ### Fixed
 
+- **Price observations can be added from the product detail and history
+  screens**: the detail price section now keeps an "Add price" button next
+  to "Edit price" (previously it only existed in the empty state, so the
+  market trip was the only way to record more points), and the price
+  history screen gains an app-bar add action with package-size prefill
+  from the product. Both flows reuse `PriceEntrySheet`, whose date picker
+  supports past dates. (lib/screens/product_detail_screen.dart,
+  lib/screens/price_history_screen.dart)
+- **Chart refreshes after every price mutation**: add/edit/delete (and
+  undo) now invalidate `priceChartPointsProvider`, which previously kept
+  the history chart stale. (lib/screens/product_detail_screen.dart,
+  lib/screens/price_history_screen.dart)
+- **Single-price trend hint**: with exactly one recorded price the chart
+  area shows a localized hint ("Add another price to see the trend")
+  instead of nothing. (lib/screens/product_detail_screen.dart,
+  lib/screens/price_history_screen.dart, lib/l10n/app_*.arb)
+- **Mislabeled add-price action**: the `addPrice` string said "Price
+  saved" and was used as a button label and sheet title; it now reads
+  "Add price" (en) / "Adicionar preco" (pt/pt_BR). (lib/l10n/app_*.arb)
+
 - **Full price history chart in the product detail**: the detail screen's
   5-point mini chart is replaced by a reusable `PriceHistoryChart`
   (fl_chart LineChart) plotting the entire history in the user's base

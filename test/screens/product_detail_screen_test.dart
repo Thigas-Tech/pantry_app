@@ -70,6 +70,7 @@ import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
+import 'package:pantry_app/widgets/price_entry_sheet.dart';
 import 'package:pantry_app/widgets/price_history_chart.dart';
 import 'package:pantry_app/widgets/product_photo_management.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
@@ -1785,10 +1786,13 @@ void main() {
       expect(find.text('Store A'), findsOneWidget);
       expect(find.text('Store B'), findsOneWidget);
       expect(find.text('View all'), findsOneWidget);
+      expect(find.text('Add price'), findsOneWidget);
       expect(find.byType(PriceHistoryChart), findsOneWidget);
     });
 
-    testWidgets('single price shows no trend or recent list', (tester) async {
+    testWidgets('single price shows a hint instead of the chart', (
+      tester,
+    ) async {
       setLargeScreen(tester);
       await pumpApp(
         tester,
@@ -1810,6 +1814,7 @@ void main() {
       expect(find.text(r'$6.50'), findsOneWidget);
       expect(find.text('Recent prices'), findsNothing);
       expect(find.text('Prices are rising'), findsNothing);
+      expect(find.text('Add another price to see the trend'), findsOneWidget);
       expect(find.byType(PriceHistoryChart), findsNothing);
     });
 
@@ -1827,7 +1832,7 @@ void main() {
       );
 
       expect(find.text('No prices recorded.'), findsOneWidget);
-      expect(find.text('Price saved'), findsOneWidget);
+      expect(find.text('Add price'), findsOneWidget);
     });
 
     testWidgets('view all link opens the price history screen', (
@@ -1891,11 +1896,18 @@ void main() {
         ],
       );
 
-      await tester.tap(find.text('Price saved'));
+      await tester.tap(find.text('Add price'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField).first, '12.50');
-      await tester.tap(find.text('Price saved').last);
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(PriceEntrySheet),
+              matching: find.text('Add price'),
+            )
+            .last,
+      );
       await tester.pumpAndSettle();
 
       verify(
@@ -1903,6 +1915,71 @@ void main() {
           any(that: isA<Price>().having((p) => p.inventoryId, 'inv', 1)),
         ),
       ).called(1);
+    });
+
+    testWidgets('add price re-reads the chart provider', (tester) async {
+      setLargeScreen(tester);
+      final mockPriceRepo = MockPriceRepository();
+      when(
+        () => mockPriceRepo.addPrice(any()),
+      ).thenAnswer((_) async => 1);
+      when(
+        () => mockPriceRepo.formatPrice(any(), any()),
+      ).thenAnswer(
+        (invocation) =>
+            r'$'
+            '${(invocation.positionalArguments[0] as num).toStringAsFixed(2)}',
+      );
+      when(
+        () => mockRepo.cacheProduct(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockPriceRepo.getLatestPrice(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => trendPrices.first);
+      when(
+        () => mockPriceRepo.getPriceHistory(
+          any(),
+          inventoryId: any(named: 'inventoryId'),
+        ),
+      ).thenAnswer((_) async => trendPrices);
+
+      var chartReads = 0;
+      await pumpApp(
+        tester,
+        const ProductDetailScreen(product: testProduct),
+        overrides: [
+          ...screenOverrides(
+            mockRepo: mockRepo,
+            mockNotif: mockNotif,
+            mockPriceRepo: mockPriceRepo,
+          ),
+          priceChartPointsProvider((barcode, 1, 'USD')).overrideWith((ref) {
+            chartReads++;
+            return trendPoints;
+          }),
+        ],
+      );
+      expect(chartReads, 1);
+
+      await tester.tap(find.text('Add price'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).first, '12.50');
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(PriceEntrySheet),
+              matching: find.text('Add price'),
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
+
+      expect(chartReads, 2);
+      verify(() => mockPriceRepo.addPrice(any())).called(1);
     });
   });
 

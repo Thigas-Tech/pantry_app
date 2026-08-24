@@ -463,6 +463,7 @@
   "apiSearchWarning": "Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.",
   "dismiss": "Dispensar",
   "priceHidden": "Preco oculto",
+  "priceTrendHint": "Adicione outro preco para ver a tendencia",
   "priceChartTooltip": "{date} - {price}",
   "@priceChartTooltip": {
     "description": "Tooltip no grafico do historico de precos mostrando a data da compra e o preco",
@@ -477,7 +478,7 @@
   },
   "add": "Adicionar",
   "addAgain": "Adicionar de novo",
-  "addPrice": "Preco salvo",
+  "addPrice": "Adicionar preco",
   "addShoppingItem": "Adicionar item",
   "addItem": "Adicionar item",
   "productAddedToShoppingList": "{product} adicionado a lista de compras",

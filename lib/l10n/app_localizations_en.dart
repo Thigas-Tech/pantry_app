@@ -1058,7 +1058,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prices => 'Prices';
 
   @override
-  String get addPrice => 'Price saved';
+  String get addPrice => 'Add price';
 
   @override
   String get editPrice => 'Edit price';
@@ -1476,6 +1476,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceHidden => 'Price hidden';
+
+  @override
+  String get priceTrendHint => 'Add another price to see the trend';
 
   @override
   String priceChartTooltip(String date, String price) {
