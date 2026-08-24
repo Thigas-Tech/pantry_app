@@ -72,6 +72,14 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// Store where the item was or will be purchased.
     String? priceStore,
 
+    /// Package size the recorded price applies to (e.g. 12 for a dozen
+    /// eggs). Carried into the prices table when the item is moved to the
+    /// pantry so unit prices and recipe scaling keep working.
+    double? pricePackageQuantity,
+
+    /// Unit for [pricePackageQuantity] (e.g. 'pieces', 'g', 'L').
+    String? pricePackageUnit,
+
     /// Optional expiry date in ISO 8601 format (YYYY-MM-DD), mirroring
     /// [InventoryItem.expiryDate]. Captured for market trip items so it can
     /// be carried into the pantry when the trip is finished.

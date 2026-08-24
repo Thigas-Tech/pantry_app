@@ -114,7 +114,7 @@ class DatabaseHelper {
   ///
   /// Must match the highest (and last) migration declared
   /// in [allMigrations].
-  static const int databaseVersion = 45;
+  static const int databaseVersion = 46;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
@@ -490,10 +490,15 @@ class DatabaseHelper {
     return productDao.clear(db);
   }
 
-  /// Removes stale inventory items, orphaned products, and old prices.
+  /// Removes stale inventory items and orphaned products.
   ///
   /// [retentionDays] applies to inventory items only. Price rows use
   /// [priceRetentionDays] (default 0 = keep forever).
+  ///
+  /// Price history is never deleted because a product is absent from the
+  /// pantry: price observations are the user's own records and must survive
+  /// cache maintenance. Prices are only pruned by the explicit
+  /// [priceRetentionDays] retention policy.
   Future<void> cleanupOldEntries({
     int retentionDays = 60,
     int priceRetentionDays = 0,
@@ -517,18 +522,18 @@ class DatabaseHelper {
         );
         logInfo('Removed $deletedItems old inventory items');
 
-        await txn.rawDelete('''
-          DELETE FROM prices
-          WHERE NOT EXISTS (
-            SELECT 1 FROM inventory WHERE inventory.barcode = prices.barcode
-          )
-        ''');
-
+        // Only cached (API-sourced) products that nothing references are
+        // removed. Manual products and products referenced by a price row
+        // are always kept.
         final deletedProducts = await txn.rawDelete('''
           DELETE FROM products
-          WHERE NOT EXISTS (
-            SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
-          )
+          WHERE source != 'manual'
+            AND NOT EXISTS (
+              SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM prices WHERE prices.barcode = products.barcode
+            )
         ''');
         logInfo('Removed $deletedProducts orphaned products');
 
@@ -538,7 +543,9 @@ class DatabaseHelper {
               .millisecondsSinceEpoch;
           final deletedPrices = await txn.delete(
             'prices',
-            where: 'date_purchased < ? AND sync_status != ?',
+            where:
+                'COALESCE(date_purchased, date_added) < ?'
+                ' AND sync_status != ?',
             whereArgs: [cutoffMillis, priceSyncPending],
           );
           logInfo('Removed $deletedPrices old price rows');
@@ -854,6 +861,8 @@ class DatabaseHelper {
     double? priceAmount,
     String? priceCurrency,
     String? priceStore,
+    double? pricePackageQuantity,
+    String? pricePackageUnit,
   }) async {
     final db = await database;
     return shoppingListDao.updatePriceFields(
@@ -862,6 +871,8 @@ class DatabaseHelper {
       priceAmount: priceAmount,
       priceCurrency: priceCurrency,
       priceStore: priceStore,
+      pricePackageQuantity: pricePackageQuantity,
+      pricePackageUnit: pricePackageUnit,
     );
   }
 

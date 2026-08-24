@@ -152,17 +152,25 @@ class ShoppingListService {
 
   /// Updates only the price fields for the shopping item with the given
   /// [id].
+  ///
+  /// [pricePackageQuantity] and [pricePackageUnit] describe the package the
+  /// recorded price applies to; they are carried into the prices table when
+  /// the item is later moved into the pantry.
   Future<void> updateShoppingItemPrice(
     int id, {
     double? priceAmount,
     String? priceCurrency,
     String? priceStore,
+    double? pricePackageQuantity,
+    String? pricePackageUnit,
   }) async {
     await _db.updateShoppingItemPriceFields(
       id,
       priceAmount: priceAmount,
       priceCurrency: priceCurrency,
       priceStore: priceStore,
+      pricePackageQuantity: pricePackageQuantity,
+      pricePackageUnit: pricePackageUnit,
     );
   }
 
@@ -212,12 +220,14 @@ class ShoppingListService {
   /// Moves purchased items (with barcodes) to the active inventory.
   ///
   /// For each purchased item with a barcode, the product is ensured to
-  /// exist in the cache, and an inventory item is created (or merged if the
-  /// same batch — same barcode, unit, location, and no expiry — already
-  /// exists in the target inventory). Price data on the shopping item is
-  /// saved to the prices table. The shopping item is then deleted.
+  /// exist in the cache (re-fetched when the two-month cache flush removed
+  /// it), and an inventory item is created (or merged if the same batch —
+  /// same barcode, unit, location, and no expiry — already exists in the
+  /// target inventory). Price data on the shopping item is saved to the
+  /// prices table, scoped to the target inventory, carrying the package
+  /// size when recorded. The shopping item is then deleted.
   ///
-  /// Items without a barcode or with no matching product in the cache are
+  /// Items without a barcode or whose product cannot be found anywhere are
   /// skipped.
   ///
   /// Returns a [MoveToInventoryResult] with counts of moved and skipped
@@ -234,6 +244,8 @@ class ShoppingListService {
       'Move purchased to inventory — total=${allPurchased.length} '
       'inventoryId=$inventoryId',
     );
+
+    await _ensureProductsCached(allPurchased);
 
     var movedCount = 0;
     var skippedCount = 0;
@@ -287,6 +299,8 @@ class ShoppingListService {
       'inventoryId=$inventoryId',
     );
 
+    await _ensureProductsCached(allItems);
+
     var movedCount = 0;
     await database.transaction((txn) async {
       final result = await _movePurchasedItemsTxn(
@@ -310,6 +324,39 @@ class ShoppingListService {
       movedCount: movedCount,
       cleanedCount: allItems.length - movedCount,
     );
+  }
+
+  /// Re-fetches products that left the local cache so the move transaction
+  /// can resolve them.
+  ///
+  /// The two-month cache flush removes API-fetched product rows. Without
+  /// this step, an item whose product was flushed would be silently skipped
+  /// by the move, losing its recorded price. Items whose product cannot be
+  /// found are left untouched and keep the existing skip behavior.
+  Future<void> _ensureProductsCached(List<ShoppingItem> items) async {
+    final barcodes = items
+        .map((i) => i.barcode)
+        .where((b) => b != null && b.isNotEmpty)
+        .cast<String>()
+        .toSet();
+    if (barcodes.isEmpty) return;
+
+    final cached = await _db.getProductsByBarcodes(barcodes.toList());
+    final cachedBarcodes = cached.map((p) => p.barcode).toSet();
+    final missing = barcodes.difference(cachedBarcodes);
+    for (final barcode in missing) {
+      try {
+        logInfo(
+          'Product $barcode not in cache — fetching before move',
+        );
+        final fetched = await _productRepository.getProduct(barcode);
+        await _productRepository.cacheProduct(fetched);
+      } on ProductNotFoundException {
+        logWarning('Product $barcode not found anywhere — item will skip');
+      } on FetchFailedException {
+        logWarning('Could not fetch product $barcode — item will skip');
+      }
+    }
   }
 
   /// Moves a set of items into the inventory inside [txn].
@@ -406,6 +453,9 @@ class ShoppingListService {
           'date_added': DateTime.now().millisecondsSinceEpoch,
           'sync_status': 'local_only',
           'is_discounted': 0,
+          'inventory_id': inventoryId,
+          'package_quantity': item.pricePackageQuantity,
+          'package_unit': item.pricePackageUnit,
         });
       }
 

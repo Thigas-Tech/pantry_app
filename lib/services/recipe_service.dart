@@ -198,7 +198,7 @@ class RecipeService {
       final rows = await database.rawQuery(
         'SELECT price, currency, package_quantity, package_unit FROM prices'
         ' WHERE barcode = ? AND inventory_id = ?'
-        ' ORDER BY date_purchased DESC LIMIT 1',
+        ' ORDER BY COALESCE(date_purchased, date_added) DESC, id DESC LIMIT 1',
         [barcode, inventoryId],
       );
       if (rows.isEmpty) continue;

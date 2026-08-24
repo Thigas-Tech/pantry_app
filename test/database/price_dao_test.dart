@@ -641,4 +641,128 @@ void main() {
       expect(count, 0);
     });
   });
+
+  group('PriceDao deterministic latest ordering', () {
+    final sameDay = DateTime(2026, 6, 15).millisecondsSinceEpoch;
+
+    test('getLatest breaks same-day ties by id descending', () async {
+      final db = await dbHelper.database;
+      // The higher id (recorded last) must win even when its price is lower.
+      await dao.insert(
+        db,
+        Price(barcode: '123', price: 20, datePurchased: sameDay),
+      );
+      await dao.insert(
+        db,
+        Price(barcode: '123', price: 10, datePurchased: sameDay),
+      );
+
+      final latest = await dao.getLatest(db, '123', inventoryId: 1);
+      expect(latest!.price, 10);
+    });
+
+    test('listByBarcode breaks same-day ties by id descending', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        Price(barcode: '123', price: 20, datePurchased: sameDay),
+      );
+      await dao.insert(
+        db,
+        Price(barcode: '123', price: 10, datePurchased: sameDay),
+      );
+
+      final list = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(list, hasLength(2));
+      expect(list.first.price, 10);
+      expect(list.last.price, 20);
+    });
+
+    test('getLatest ranks a NULL-date row by its date_added', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        const Price(barcode: '123', price: 10, datePurchased: 100),
+      );
+      await dao.insert(
+        db,
+        Price(barcode: '123', price: 20, dateAdded: sameDay),
+      );
+
+      final latest = await dao.getLatest(db, '123', inventoryId: 1);
+      expect(latest!.price, 20);
+    });
+
+    test('listByBarcode orders NULL-date rows by date_added', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        const Price(barcode: '123', price: 10, datePurchased: 100),
+      );
+      await dao.insert(
+        db,
+        Price(barcode: '123', price: 20, dateAdded: sameDay),
+      );
+
+      final list = await dao.listByBarcode(db, '123', inventoryId: 1);
+      expect(list.first.price, 20);
+    });
+  });
+
+  group('PriceDao deleteStale resilience', () {
+    test('prunes NULL-date rows by their date_added age', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        Price(
+          barcode: '123',
+          price: 10,
+          dateAdded: DateTime.now()
+              .subtract(const Duration(days: 40))
+              .millisecondsSinceEpoch,
+        ),
+      );
+
+      final deleted = await dao.deleteStale(db, 30);
+      expect(deleted, 1);
+      expect(await dao.count(db), 0);
+    });
+
+    test('never deletes pending sync rows', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        Price(
+          barcode: '123',
+          price: 10,
+          syncStatus: priceSyncPending,
+          datePurchased: DateTime.now()
+              .subtract(const Duration(days: 40))
+              .millisecondsSinceEpoch,
+        ),
+      );
+
+      final deleted = await dao.deleteStale(db, 30);
+      expect(deleted, 0);
+      expect(await dao.count(db), 1);
+    });
+
+    test('retention of zero or less is a no-op', () async {
+      final db = await dbHelper.database;
+      await dao.insert(
+        db,
+        Price(
+          barcode: '123',
+          price: 10,
+          datePurchased: DateTime.now()
+              .subtract(const Duration(days: 40))
+              .millisecondsSinceEpoch,
+        ),
+      );
+
+      expect(await dao.deleteStale(db, 0), 0);
+      expect(await dao.deleteStale(db, -1), 0);
+      expect(await dao.count(db), 1);
+    });
+  });
 }

@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Fixed a bug that removed price history for products you no longer had in
+  your pantry. Your recorded prices now stay saved even after you finish a
+  product, clear your cached product data, or delete a pantry. Prices are
+  only removed by the optional price-retention setting in Settings.
+
+- Fixed a bug where prices you recorded during a market trip were saved to
+  the wrong pantry (or seemed to disappear) when you had more than one
+  pantry. Trip prices now stay with the pantry you chose for the trip, and
+  the package size you entered is kept for unit-price and recipe cost
+  calculations.
+
+- Fixed the same-price-day ordering issue: when you record more than one
+  price for a product on the same day, the most recently recorded one is now
+  reliably used for totals, estimates, and recipes.
+
+- Price history is now protected from the automatic cleanup of old cached
+  product data, and the price-retention option in Settings now actually
+  applies when the app starts.
+
 ## [0.0.10+6]
 
 - Produce you add in a market trip or to your pantry now defaults to a grams

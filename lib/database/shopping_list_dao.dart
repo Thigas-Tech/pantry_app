@@ -27,6 +27,8 @@ class ShoppingListDao {
         price_amount REAL,
         price_currency TEXT,
         price_store TEXT,
+        price_package_quantity REAL,
+        price_package_unit TEXT,
         price_photo_path TEXT,
         expiry_date TEXT,
         sort_order REAL NOT NULL DEFAULT 0,
@@ -60,6 +62,8 @@ class ShoppingListDao {
     'price_amount': item.priceAmount,
     'price_currency': item.priceCurrency,
     'price_store': item.priceStore,
+    'price_package_quantity': item.pricePackageQuantity,
+    'price_package_unit': item.pricePackageUnit,
     'expiry_date': item.expiryDate,
     'sort_order': item.sortOrder,
   };
@@ -78,6 +82,8 @@ class ShoppingListDao {
     priceAmount: (map['price_amount'] as num?)?.toDouble(),
     priceCurrency: map['price_currency'] as String?,
     priceStore: map['price_store'] as String?,
+    pricePackageQuantity: (map['price_package_quantity'] as num?)?.toDouble(),
+    pricePackageUnit: map['price_package_unit'] as String?,
     expiryDate: map['expiry_date'] as String?,
     sortOrder: (map['sort_order'] as num?)?.toDouble() ?? 0,
   );
@@ -272,6 +278,8 @@ class ShoppingListDao {
     double? priceAmount,
     String? priceCurrency,
     String? priceStore,
+    double? pricePackageQuantity,
+    String? pricePackageUnit,
   }) async {
     logInfo('Updating price fields for shopping item $id');
     try {
@@ -281,6 +289,8 @@ class ShoppingListDao {
           'price_amount': priceAmount,
           'price_currency': priceCurrency,
           'price_store': priceStore,
+          'price_package_quantity': pricePackageQuantity,
+          'price_package_unit': pricePackageUnit,
         },
         where: 'id = ?',
         whereArgs: [id],

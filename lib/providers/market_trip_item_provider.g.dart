@@ -84,7 +84,7 @@ final class MarketTripItemControllerProvider
 }
 
 String _$marketTripItemControllerHash() =>
-    r'a745116dd05ab2c8c16fcf39900060d18862b60d';
+    r'04f66f3515e1f2946f4591f9eb9857f7d84ca01f';
 
 /// Orchestrates adding a scanned (or produce-searched) product to a market
 /// trip as purchased, applying an optional price and expiry in one unit of
