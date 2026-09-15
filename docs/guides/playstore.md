@@ -5,8 +5,8 @@ Store via GitHub Actions CI/CD.
 
 ## Overview
 
-When a GitHub release is published (the `build.yml` publish job creates one
-on a version bump, or you create one manually), the
+When a GitHub release or pre-release is published (the `build.yml` publish
+job creates a pre-release on a version bump, or you create one manually), the
 `.github/workflows/deploy-to-playstore.yml` workflow:
 
 1. Runs `dart analyze` and `flutter test`.

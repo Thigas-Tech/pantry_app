@@ -3,7 +3,7 @@ name: Deploy to Play Store
 on:
   workflow_dispatch:
   release:
-    types: [published]
+    types: [released, prereleased]
 
 permissions:
   contents: read
@@ -85,7 +85,7 @@ jobs:
           track: internal
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-artifacts
           path: |

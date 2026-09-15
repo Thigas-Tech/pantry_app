@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.0.13+9] — 2026-09-15
+
+### Fixed
+
+- **Play Store deployment now triggers for pre-releases**: the workflow
+  listened to `release: published` only, so the pre-releases auto-created by
+  the `build.yml` publish job never reached the Play internal track (only
+  manually created non-prereleases did). It now listens to `released` and
+  `prereleased`, and the deployment docs were updated.
+  (.github/workflows/deploy-to-playstore.yml, docs/guides/playstore.md,
+  docs/architecture/PERFORMANCE.md)
+
+### Changed
+
+- **Artifact actions moved to Node 24 runtimes**: `actions/upload-artifact`
+  v4 to v7 and `actions/download-artifact` v4 to v8, clearing the Node 20
+  deprecation annotations. All inputs used by the workflows are supported.
+  (.github/workflows/)
+
 ## [0.0.12+8] — 2026-09-15
 
 ### Removed
