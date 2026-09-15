@@ -125,7 +125,7 @@ Returns an empty map on failure.</p>
     return rates;
   } on Exception catch (e) {
     logWarning(&#39;Failed to fetch exchange rates: $e&#39;);
-    return _tryFallbackCache(normalized);
+    return await _tryFallbackCache(normalized);
   }
 }</code></pre>
 </section>
@@ -155,7 +155,7 @@ Returns an empty map on failure.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

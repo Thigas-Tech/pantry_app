@@ -72,7 +72,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteRecipeHistory(int historyId) async {
   final db = await database;
-  return recipeHistoryDao.deleteById(db, historyId);
+  return await recipeHistoryDao.deleteById(db, historyId);
 }</code></pre>
 </section>
 
@@ -101,7 +101,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

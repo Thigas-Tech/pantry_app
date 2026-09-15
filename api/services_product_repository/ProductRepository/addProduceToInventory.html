@@ -111,7 +111,7 @@ cache, the USDA / fallback lookup is skipped entirely.</p>
     inventoryId: inventoryId,
   );
 
-  return _db.insertOrMergeInventoryItem(item);
+  return await _db.insertOrMergeInventoryItem(item);
 }</code></pre>
 </section>
 
@@ -140,7 +140,7 @@ cache, the USDA / fallback lookup is skipped entirely.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

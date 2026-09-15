@@ -85,7 +85,7 @@ with the given <code>id</code>.</p>
   String? pricePackageUnit,
 }) async {
   final db = await database;
-  return shoppingListDao.updatePriceFields(
+  return await shoppingListDao.updatePriceFields(
     db,
     id,
     priceAmount: priceAmount,
@@ -122,7 +122,7 @@ with the given <code>id</code>.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

@@ -113,7 +113,7 @@ deterministic tests and defaults to <a href="https://api.flutter.dev/flutter/dar
       &#39;&#39;&#39;,
         [cutoff],
       );
-      return txn.delete(
+      return await txn.delete(
         &#39;products&#39;,
         where: &quot;source = &#39;api&#39; AND (last_synced IS NULL OR last_synced &lt; ?)&quot;,
         whereArgs: [cutoff],
@@ -153,7 +153,7 @@ deterministic tests and defaults to <a href="https://api.flutter.dev/flutter/dar
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

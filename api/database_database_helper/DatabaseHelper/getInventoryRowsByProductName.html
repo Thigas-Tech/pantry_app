@@ -87,7 +87,7 @@ as a wildcard (mirrors <a href="../../database_product_dao/ProductDao/search.htm
   final db = await database;
   final normalized = name.trim().toLowerCase();
   final escaped = normalized.replaceAll(&#39;%&#39;, r&#39;\%&#39;).replaceAll(&#39;_&#39;, r&#39;\_&#39;);
-  return db.rawQuery(
+  return await db.rawQuery(
     &#39;SELECT i.* FROM inventory i&#39;
     &#39; INNER JOIN products p ON p.barcode = i.barcode&#39;
     r&quot; WHERE LOWER(p.name) LIKE ? ESCAPE &#39;\&#39; AND i.inventory_id = ?&quot;
@@ -123,7 +123,7 @@ as a wildcard (mirrors <a href="../../database_product_dao/ProductDao/search.htm
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

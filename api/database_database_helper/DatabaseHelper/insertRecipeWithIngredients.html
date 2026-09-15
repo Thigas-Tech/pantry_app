@@ -87,7 +87,7 @@ entire transaction is rolled back.</p>
       : stamped;
   final recipeMap = recipeDao.toMap(finalRecipe)..remove(&#39;id&#39;);
 
-  return db.transaction&lt;int&gt;((txn) async {
+  return await db.transaction&lt;int&gt;((txn) async {
     final recipeId = await txn.insert(&#39;recipes&#39;, recipeMap);
     for (final ingredient in ingredients) {
       final ingMap = recipeIngredientDao.toMap(
@@ -125,7 +125,7 @@ entire transaction is rolled back.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

@@ -72,7 +72,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;RecipeHistoryEntry&gt;&gt; getRecipeHistory(int recipeId) async {
   final db = await database;
-  return recipeHistoryDao.getByRecipeId(db, recipeId);
+  return await recipeHistoryDao.getByRecipeId(db, recipeId);
 }</code></pre>
 </section>
 
@@ -101,7 +101,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

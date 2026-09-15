@@ -76,7 +76,11 @@
   required String? expiryDate,
 }) async {
   final db = await database;
-  return shoppingListDao.updateExpiryFields(db, id, expiryDate: expiryDate);
+  return await shoppingListDao.updateExpiryFields(
+    db,
+    id,
+    expiryDate: expiryDate,
+  );
 }</code></pre>
 </section>
 
@@ -105,7 +109,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

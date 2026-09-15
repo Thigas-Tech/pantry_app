@@ -85,9 +85,9 @@ picker.</p>
       );
     }
     if (_supportsInAppCamera) {
-      return _captureFromInAppCamera();
+      return await _captureFromInAppCamera();
     }
-    return _pickImage(ImageSource.camera);
+    return await _pickImage(ImageSource.camera);
   }
   if (_isGalleryPermissionRequired()) {
     final status = await _galleryPermissionCheck();
@@ -131,7 +131,7 @@ picker.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

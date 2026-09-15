@@ -77,7 +77,7 @@ limited to the most recent <code>limit</code> entries.</p>
   int limit = 20,
 }) async {
   final db = await database;
-  return inventoryDao.distinctProductsFromInventory(
+  return await inventoryDao.distinctProductsFromInventory(
     db,
     inventoryId: inventoryId,
     limit: limit,
@@ -110,7 +110,7 @@ limited to the most recent <code>limit</code> entries.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

@@ -74,7 +74,7 @@
   int limit = ScanHistoryDao.defaultKeepCount,
 }) async {
   final db = await database;
-  return scanHistoryDao.getRecent(db, limit: limit);
+  return await scanHistoryDao.getRecent(db, limit: limit);
 }</code></pre>
 </section>
 
@@ -103,7 +103,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

@@ -79,7 +79,7 @@ loaded.</p>
     return await rootBundle.loadString(path);
   } on Object catch (e) {
     logWarning(&#39;Failed to load changelog for $locale, falling back: $e&#39;);
-    return rootBundle.loadString(&#39;USER_CHANGELOG.md&#39;);
+    return await rootBundle.loadString(&#39;USER_CHANGELOG.md&#39;);
   }
 }</code></pre>
 </section>
@@ -108,7 +108,7 @@ loaded.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

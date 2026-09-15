@@ -77,7 +77,11 @@ ordered by expiry date (oldest first).</p>
   required int inventoryId,
 }) async {
   final db = await database;
-  return inventoryDao.listByBarcode(db, barcode, inventoryId: inventoryId);
+  return await inventoryDao.listByBarcode(
+    db,
+    barcode,
+    inventoryId: inventoryId,
+  );
 }</code></pre>
 </section>
 
@@ -106,7 +110,7 @@ ordered by expiry date (oldest first).</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

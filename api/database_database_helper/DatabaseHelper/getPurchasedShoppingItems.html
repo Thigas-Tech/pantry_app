@@ -74,7 +74,7 @@
   int? inventoryId,
 }) async {
   final db = await database;
-  return shoppingListDao.listPurchased(db, inventoryId: inventoryId);
+  return await shoppingListDao.listPurchased(db, inventoryId: inventoryId);
 }</code></pre>
 </section>
 
@@ -103,7 +103,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

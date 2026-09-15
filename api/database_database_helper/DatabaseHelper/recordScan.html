@@ -75,7 +75,7 @@ Both operations run inside a single transaction.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; recordScan(ScanHistoryEntry entry) async {
   final db = await database;
-  return db.transaction&lt;int&gt;((txn) async {
+  return await db.transaction&lt;int&gt;((txn) async {
     final id = await scanHistoryDao.insert(txn, entry);
     await scanHistoryDao.deleteOld(txn);
     return id;
@@ -108,7 +108,7 @@ Both operations run inside a single transaction.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

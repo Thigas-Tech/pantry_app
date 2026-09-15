@@ -72,7 +72,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; insertRecipeHistory(RecipeHistoryEntry entry) async {
   final db = await database;
-  return recipeHistoryDao.insert(db, entry);
+  return await recipeHistoryDao.insert(db, entry);
 }</code></pre>
 </section>
 
@@ -101,7 +101,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

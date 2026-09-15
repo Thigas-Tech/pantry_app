@@ -72,7 +72,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;Price?&gt; getPriceById(int id) async {
   final db = await database;
-  return priceDao.getById(db, id);
+  return await priceDao.getById(db, id);
 }</code></pre>
 </section>
 
@@ -101,7 +101,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

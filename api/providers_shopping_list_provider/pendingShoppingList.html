@@ -80,7 +80,7 @@ active inventory.</p>
 Future&lt;List&lt;ShoppingItem&gt;&gt; pendingShoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final inventoryId = await ref.watch(activeInventoryProvider.future);
-  return db.getPendingShoppingItems(inventoryId: inventoryId);
+  return await db.getPendingShoppingItems(inventoryId: inventoryId);
 }</code></pre>
 </section>
 
@@ -108,7 +108,7 @@ Future&lt;List&lt;ShoppingItem&gt;&gt; pendingShoppingList(Ref ref) async {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

@@ -263,7 +263,7 @@ On transient failure the barcode is queued for background retry.</p>
     logError(
       &#39;Submission failed for ${product.barcode}: ${redactSensitive(&#39;$e&#39;)}&#39;,
     );
-    return _finishFailed(
+    return await _finishFailed(
       product,
       onProgress,
       SubmissionErrorCategory.network,
@@ -299,7 +299,7 @@ On transient failure the barcode is queued for background retry.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

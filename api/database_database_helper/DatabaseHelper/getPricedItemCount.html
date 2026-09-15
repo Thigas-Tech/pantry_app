@@ -73,7 +73,7 @@ price.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; getPricedItemCount(int inventoryId) async {
   final db = await database;
-  return priceDao.pricedItemCount(db, inventoryId);
+  return await priceDao.pricedItemCount(db, inventoryId);
 }</code></pre>
 </section>
 
@@ -102,7 +102,7 @@ price.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

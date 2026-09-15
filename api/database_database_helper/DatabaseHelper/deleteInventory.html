@@ -72,7 +72,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; deleteInventory(int id) async {
   final db = await database;
-  return inventoriesDao.delete(db, id);
+  return await inventoriesDao.delete(db, id);
 }</code></pre>
 </section>
 
@@ -101,7 +101,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

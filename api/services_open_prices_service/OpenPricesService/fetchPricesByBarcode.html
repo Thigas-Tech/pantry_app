@@ -76,7 +76,7 @@ token is configured.</p>
   if (!_api.hasToken) {
     return const FetchPricesResult(prices: [], total: 0);
   }
-  return _api.fetchPricesByBarcode(barcode);
+  return await _api.fetchPricesByBarcode(barcode);
 }</code></pre>
 </section>
 
@@ -105,7 +105,7 @@ token is configured.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

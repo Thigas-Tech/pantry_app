@@ -82,7 +82,7 @@ the user switches pantries.</p>
 Future&lt;List&lt;Recipe&gt;&gt; allRecipes(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final activeId = await ref.watch(activeInventoryProvider.future);
-  return db.getAllRecipes(activeId);
+  return await db.getAllRecipes(activeId);
 }</code></pre>
 </section>
 
@@ -110,7 +110,7 @@ Future&lt;List&lt;Recipe&gt;&gt; allRecipes(Ref ref) async {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

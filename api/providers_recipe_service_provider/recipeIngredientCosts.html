@@ -91,7 +91,7 @@ Future&lt;Map&lt;String, double&gt;&gt; recipeIngredientCosts(
   final recipe = await db.getRecipe(recipeId);
   final inventoryId = recipe?.inventoryId ?? activeInventoryId;
   final ingredients = await db.getRecipeIngredients(recipeId);
-  return ref
+  return await ref
       .read(recipeServiceProvider)
       .ingredientCosts(
         ingredients,
@@ -125,7 +125,7 @@ Future&lt;Map&lt;String, double&gt;&gt; recipeIngredientCosts(
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

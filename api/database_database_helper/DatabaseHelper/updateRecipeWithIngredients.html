@@ -92,7 +92,7 @@ If any step fails the entire transaction is rolled back.</p>
   );
   final recipeMap = recipeDao.toMap(updated);
 
-  return db.transaction((txn) async {
+  return await db.transaction((txn) async {
     await txn.update(
       &#39;recipes&#39;,
       recipeMap,
@@ -139,7 +139,7 @@ If any step fails the entire transaction is rolled back.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

@@ -74,7 +74,7 @@
   int sinceMillis,
 ) async {
   final db = await database;
-  return recipeHistoryDao.getRecent(db, sinceMillis);
+  return await recipeHistoryDao.getRecent(db, sinceMillis);
 }</code></pre>
 </section>
 
@@ -103,7 +103,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>

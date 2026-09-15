@@ -78,7 +78,7 @@ Concurrent calls for the same <code>barcode</code> share one download.</p>
   if (imageUrl == null || imageUrl.isEmpty) return null;
 
   final inFlight = _inFlight[barcode];
-  if (inFlight != null) return inFlight;
+  if (inFlight != null) return await inFlight;
 
   final future = _cacheImageImpl(imageUrl, barcode);
   _inFlight[barcode] = future;
@@ -115,7 +115,7 @@ Concurrent calls for the same <code>barcode</code> share one download.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.16+12
+      0.0.17+13
   </span>
   
 </footer>
