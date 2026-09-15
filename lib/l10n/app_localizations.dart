@@ -4295,6 +4295,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Units: {system}'**
   String unitSystemChanged(String system);
+
+  /// No description provided for @debugSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer'**
+  String get debugSection;
+
+  /// No description provided for @resetDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset database'**
+  String get resetDatabase;
+
+  /// No description provided for @resetDatabaseSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletes all local data and recreates the default pantry'**
+  String get resetDatabaseSubtitle;
+
+  /// No description provided for @resetDatabaseConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset database?'**
+  String get resetDatabaseConfirmTitle;
+
+  /// No description provided for @resetDatabaseConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All pantries, inventory, prices, recipes, and history will be permanently deleted. This cannot be undone.'**
+  String get resetDatabaseConfirmBody;
+
+  /// No description provided for @resetDatabaseConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetDatabaseConfirmAction;
+
+  /// No description provided for @resetDatabaseDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Database reset'**
+  String get resetDatabaseDone;
+
+  /// No description provided for @resetDatabaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reset the database'**
+  String get resetDatabaseFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

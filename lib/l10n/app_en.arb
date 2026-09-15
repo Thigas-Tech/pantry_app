@@ -1051,5 +1051,13 @@
         "example": "Imperial"
       }
     }
-  }
+  },
+  "debugSection": "Developer",
+  "resetDatabase": "Reset database",
+  "resetDatabaseSubtitle": "Deletes all local data and recreates the default pantry",
+  "resetDatabaseConfirmTitle": "Reset database?",
+  "resetDatabaseConfirmBody": "All pantries, inventory, prices, recipes, and history will be permanently deleted. This cannot be undone.",
+  "resetDatabaseConfirmAction": "Reset",
+  "resetDatabaseDone": "Database reset",
+  "resetDatabaseFailed": "Could not reset the database"
 }

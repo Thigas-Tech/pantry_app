@@ -1051,5 +1051,13 @@
         "example": "Imperial"
       }
     }
-  }
+  },
+  "debugSection": "Desenvolvedor",
+  "resetDatabase": "Redefinir banco de dados",
+  "resetDatabaseSubtitle": "Apaga todos os dados locais e recria a despensa padrao",
+  "resetDatabaseConfirmTitle": "Redefinir banco de dados?",
+  "resetDatabaseConfirmBody": "Todas as despensas, o inventario, os precos, as receitas e o historico serao apagados permanentemente. Esta acao nao pode ser desfeita.",
+  "resetDatabaseConfirmAction": "Redefinir",
+  "resetDatabaseDone": "Banco de dados redefinido",
+  "resetDatabaseFailed": "Nao foi possivel redefinir o banco de dados"
 }
