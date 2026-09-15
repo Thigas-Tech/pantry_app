@@ -112,9 +112,11 @@ class DatabaseHelper {
 
   /// The current database schema version.
   ///
-  /// Must match the highest (and last) migration declared
-  /// in [allMigrations].
-  static const int databaseVersion = 46;
+  /// Must match the highest (and last) migration declared in
+  /// [allMigrations]. The schema was restarted at version 1 with the frozen
+  /// baseline migration; installs with a higher user_version are wiped by
+  /// [onDatabaseDowngradeDelete] and rebuilt from the baseline.
+  static const int databaseVersion = 1;
 
   /// The lazily‑opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
@@ -188,147 +190,53 @@ class DatabaseHelper {
 
   Future<void> _onCreate(Database db, int version) async {
     logInfo('Creating database schema (version $version)');
-
-    await db.execute('''
-      CREATE TABLE products (
-        barcode TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        brand TEXT,
-        image_url TEXT,
-        category TEXT,
-        ingredients TEXT,
-        serving_size TEXT,
-        serving_quantity REAL,
-        quantity TEXT,
-        product_quantity REAL,
-        energy_kcal REAL,
-        protein_g REAL,
-        carbs_g REAL,
-        fat_g REAL,
-        fiber_g REAL,
-        salt_g REAL,
-        additional_nutrients TEXT,
-        last_synced INTEGER,
-        nutriscore_grade TEXT,
-        nutriscore_not_applicable_category TEXT,
-        source TEXT NOT NULL DEFAULT 'api',
-        nutrition_image_path TEXT,
-        ingredients_image_path TEXT,
-        product_image_path TEXT,
-        submission_status TEXT NOT NULL DEFAULT 'not_submitted',
-        off_nutrition_image_url TEXT,
-        off_ingredients_image_url TEXT,
-        off_product_image_url TEXT,
-        categories_hierarchy TEXT,
-        language_code TEXT NOT NULL DEFAULT 'en',
-        search_text TEXT,
-        plu_code TEXT,
-        product_type TEXT NOT NULL DEFAULT 'barcoded'
-      )
-    ''');
-
-    await inventoriesDao.createTable(db);
-
-    await db.execute('''
-      CREATE TABLE inventory (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        barcode TEXT NOT NULL,
-        quantity REAL DEFAULT 1,
-        unit TEXT DEFAULT 'pieces',
-        expiry_date TEXT,
-        location TEXT DEFAULT 'pantry',
-        notes TEXT,
-        date_added INTEGER,
-        inventory_id INTEGER NOT NULL,
-        serving_weight_g REAL,
-        FOREIGN KEY(barcode) REFERENCES products(barcode),
-        FOREIGN KEY(inventory_id) REFERENCES inventories(id)
-      )
-    ''');
-
-    await db.execute('CREATE INDEX idx_search_text ON products(search_text)');
-    await db.execute('CREATE INDEX idx_expiry ON inventory(expiry_date)');
-    await db.execute(
-      'CREATE INDEX idx_inventory_id ON inventory(inventory_id)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_inventory_date_added ON inventory(date_added)',
-    );
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_inventory_barcode_inventory_id '
-      'ON inventory(barcode, inventory_id)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_inventory_inventory_expiry'
-      ' ON inventory(inventory_id, expiry_date)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_inventory_inventory_barcode'
-      ' ON inventory(inventory_id, barcode)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_products_source ON products(source)',
-    );
-
-    await productSubmissionQueueDao.createTable(db);
-
-    await priceDao.createTable(db);
-
-    await db.execute(
-      'CREATE INDEX idx_prices_barcode_inventory_date'
-      ' ON prices(barcode, inventory_id, date_purchased)',
-    );
-
-    await _createShoppingListTable(db);
-
-    await db.execute(
-      'CREATE INDEX idx_shopping_list_inventory_purchased_date'
-      ' ON shopping_list(inventory_id, is_purchased, date_added)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_shopping_inventory_purchased_sort'
-      ' ON shopping_list(inventory_id, is_purchased, sort_order)',
-    );
-
-    await _createStoresTable(db);
-
-    await recipeDao.createTable(db);
-
-    for (final col in ['name', 'created_at', 'updated_at']) {
-      await db.execute(
-        'CREATE INDEX IF NOT EXISTS idx_recipes_$col'
-        ' ON recipes($col)',
-      );
-    }
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_recipes_inventory_updated'
-      ' ON recipes(inventory_id, updated_at)',
-    );
-
-    await recipeIngredientDao.createTable(db);
-
-    await recipeHistoryDao.createTable(db);
-
-    await scanHistoryDao.createTable(db);
-
-    await inventoriesDao.seedDefault(db);
-
+    await MigrationRunner(allMigrations()).run(db, 0, version);
     logInfo('Database schema created successfully');
   }
 
-  Future<void> _createShoppingListTable(Database db) async {
-    await shoppingListDao.createTable(db);
+  /// Drops and recreates the schema in a single transaction.
+  ///
+  /// Reverts every migration down to version 0 and reapplies them up to
+  /// [databaseVersion]. The transaction guarantees that a failure leaves the
+  /// database in its previous state instead of a half-rebuilt one.
+  ///
+  /// All data is deleted, including pantries, inventory, prices, recipes,
+  /// and history. Callers must surface this as a destructive action.
+  Future<void> resetDatabase() async {
+    final db = await database;
+    logInfo('Resetting database to version $databaseVersion');
+    await db.transaction((txn) async {
+      await MigrationRunner(allMigrations()).runDown(txn, databaseVersion, 0);
+      await MigrationRunner(allMigrations()).run(txn, 0, databaseVersion);
+    });
+    logInfo('Database reset completed');
   }
 
-  Future<void> _createStoresTable(Database db) async {
-    await storeDao.createTable(db);
+  /// Closes the open database and clears the cached future.
+  ///
+  /// Intended for tests and the debug reset flow. Production code never
+  /// closes the singleton connection.
+  Future<void> closeDatabase() async {
+    final future = _databaseFuture;
+    _databaseFuture = null;
+    if (future != null) {
+      final db = await future;
+      await db.close();
+      logInfo('Database connection closed');
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     logInfo('Database upgrade: $oldVersion → $newVersion');
+    if (oldVersion < 1) {
+      // A file with user_version 0 predates versioning or was created
+      // outside this helper; drop any known tables and rebuild from the
+      // baseline to avoid CREATE TABLE conflicts.
+      await MigrationRunner(allMigrations()).runDown(db, newVersion, 0);
+    }
     await MigrationRunner(allMigrations()).run(
       db,
-      oldVersion,
+      oldVersion < 1 ? 0 : oldVersion,
       newVersion,
     );
     logInfo('Database upgrade completed successfully');

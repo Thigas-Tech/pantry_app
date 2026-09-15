@@ -19,23 +19,6 @@ class ProductSubmissionQueueDao {
   final DateTime Function() _now;
 
   /// Creates the product_submission_queue table.
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE product_submission_queue (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        barcode TEXT NOT NULL UNIQUE,
-        retry_count INTEGER NOT NULL DEFAULT 0,
-        max_retries INTEGER NOT NULL DEFAULT 5,
-        next_retry_at INTEGER,
-        created_at INTEGER NOT NULL
-      )
-    ''');
-    await db.execute(
-      'CREATE INDEX idx_submission_queue_retry'
-      ' ON product_submission_queue(next_retry_at)',
-    );
-  }
-
   /// Queues a barcode for submission. If the barcode is already queued,
   /// this is a no-op due to the UNIQUE constraint.
   Future<void> insert(Database db, String barcode) async {

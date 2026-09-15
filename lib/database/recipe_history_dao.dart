@@ -12,26 +12,6 @@ class RecipeHistoryDao {
   const RecipeHistoryDao();
 
   /// Creates the recipe_history table.
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS recipe_history (
-        id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-        recipe_id          INTEGER NOT NULL,
-        made_at            INTEGER NOT NULL,
-        cost_at_time       REAL DEFAULT 0,
-        ingredient_snapshot TEXT
-      )
-    ''');
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_recipe_history_recipe'
-      ' ON recipe_history(recipe_id)',
-    );
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_recipe_history_made_at'
-      ' ON recipe_history(made_at)',
-    );
-  }
-
   /// Converts a [RecipeHistoryEntry] to a map for database insertion.
   Map<String, dynamic> toMap(RecipeHistoryEntry entry) => {
     if (entry.id != null) 'id': entry.id,

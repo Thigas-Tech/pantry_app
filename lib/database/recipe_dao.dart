@@ -15,28 +15,6 @@ class RecipeDao {
   const RecipeDao();
 
   /// Creates the recipes table.
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS recipes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        instructions TEXT NOT NULL DEFAULT '',
-        servings INTEGER NOT NULL DEFAULT 0,
-        image_path TEXT NOT NULL DEFAULT '',
-        search_text TEXT,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL,
-        inventory_id INTEGER NOT NULL DEFAULT 1,
-        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
-          ON DELETE CASCADE
-      )
-    ''');
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_recipes_inventory_id'
-      ' ON recipes(inventory_id)',
-    );
-  }
-
   /// Converts a [Recipe] to a map for database insertion.
   ///
   /// Emits the derived search_text column via [buildRecipeSearchText] so

@@ -12,24 +12,6 @@ class RecipeIngredientDao {
   const RecipeIngredientDao();
 
   /// Creates the recipe_ingredients table.
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS recipe_ingredients (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        recipe_id INTEGER NOT NULL,
-        barcode TEXT,
-        name TEXT NOT NULL,
-        quantity REAL NOT NULL DEFAULT 1.0,
-        unit TEXT NOT NULL DEFAULT 'pieces',
-        FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
-      )
-    ''');
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_recipe_id'
-      ' ON recipe_ingredients(recipe_id)',
-    );
-  }
-
   /// Converts a [RecipeIngredient] to a map for database insertion.
   Map<String, dynamic> toMap(RecipeIngredient item) => {
     if (item.id != null) 'id': item.id,
