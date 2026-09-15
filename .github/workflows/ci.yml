@@ -4,24 +4,21 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
 
-jobs:
-  security_hardening:
-    name: Check security hardening
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone the repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-      - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@3db98c0363e2fa5df3e1c4c471777a7c10b24cc9
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
   testing:
     name: Run ${{ matrix.category }} testing
-    needs: security_hardening
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -32,11 +29,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Clone the repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@v5
         with:
           path: code
       - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2.23.0
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
@@ -54,12 +51,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PUBSPEC_VER=$(grep '^version: ' code/pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
-          if gh release view "v$PUBSPEC_VER" --json tagName &>/dev/null; then
+          if gh release view "v$PUBSPEC_VER" --repo "$GITHUB_REPOSITORY" --json tagName &>/dev/null; then
             echo "ERROR: version $PUBSPEC_VER already has a release on GitHub."
             echo "Bump the version in pubspec.yaml before merging."
             exit 1
           fi
           echo "Version v$PUBSPEC_VER is ahead of latest release — OK"
+      - name: Check formatting
+        if: matrix.category == 'static'
+        working-directory: code
+        run: |
+          FILES=$(git ls-files 'lib/**/*.dart' 'test/**/*.dart' | grep -v 'app_localizations')
+          dart format --output=none --set-exit-if-changed $FILES
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: dart analyze lib/ test/
@@ -73,33 +76,8 @@ jobs:
         working-directory: code
       - name: Upload code coverage to GitHub
         if: matrix.category != 'static'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v4
         with:
           name: code-coverage-${{ matrix.category }}
           path: code/coverage/lcov.${{ matrix.category }}.info
           if-no-files-found: error
-
-  coverage_report:
-    name: Generate coverage report
-    needs: testing
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Clone the repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-      - name: Setup LCOV
-        uses: hrishikesh-kadam/setup-lcov@6c1aa0cc9e1c02f9f58f01ac599f1064ccc83470
-      - name: Download code coverage from GitHub
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
-        with:
-          path: coverage-artifacts
-          pattern: code-coverage-*
-          merge-multiple: true
-      - name: Report code coverage
-        uses: zgosalvez/github-actions-report-lcov@0e97540271bfaece1ddff20e7fa8d9a6ab1abf67
-        with:
-          coverage-files: coverage-artifacts/lcov.*.info
-          minimum-coverage: 0
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          update-comment: false

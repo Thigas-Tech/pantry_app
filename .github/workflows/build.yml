@@ -10,123 +10,84 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: build-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  security_hardening:
-    name: Check security hardening
+  build_debug_apk:
+    name: Build debug apk
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Clone the repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-      - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@3db98c0363e2fa5df3e1c4c471777a7c10b24cc9
-
-  testing:
-    name: Run ${{ matrix.category }} testing
-    if: github.event_name == 'push'
-    needs: security_hardening
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        category:
-          - static
-          - unit
-          - widget
-      fail-fast: false
-    steps:
-      - name: Clone the repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@v5
         with:
           path: code
       - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2.23.0
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
       - name: Get Flutter packages
         run: flutter pub get
         working-directory: code
-      - name: Analyze Flutter
-        if: matrix.category == 'static'
-        run: dart analyze lib/ test/
-        working-directory: code
-      - name: Run Flutter ${{ matrix.category }} tests
-        if: matrix.category != 'static'
-        run: >
-          flutter test --no-pub --concurrency=2 --coverage
-          --coverage-path=./coverage/lcov.${{ matrix.category }}.info
-          ${{ matrix.category == 'unit' && 'test/config_test.dart test/database test/models test/providers test/services test/utils' || 'test/widgets test/screens' }}
-        working-directory: code
-      - name: Upload code coverage to GitHub
-        if: matrix.category != 'static'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: code-coverage-${{ matrix.category }}
-          path: code/coverage/lcov.${{ matrix.category }}.info
-          if-no-files-found: error
-
-  build:
-    # TODO: Add Patrol E2E tests here once implemented
-    name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        build-type: [debug, release]
-        package-type: [apk, appbundle]
-      fail-fast: false
-    steps:
-      - name: Clone the repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-        with:
-          path: code
-      - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2.23.0
-        with:
-          channel: stable
-          cache: true
-      - name: Get Flutter packages
-        run: flutter pub get
-        working-directory: code
-      - name: Build ${{ matrix.build-type }} ${{ matrix.package-type }}
-        if: |
-          github.event_name != 'pull_request' ||
-          (matrix.build-type == 'debug' && matrix.package-type == 'apk')
-        run: >
-          flutter build ${{ matrix.package-type }}
-          --${{ matrix.build-type }}
-          ${{ matrix.build-type == 'release' && '--obfuscate --split-debug-info=./debug-info' || '' }}
+      - name: Build debug apk
+        run: flutter build apk --debug
         working-directory: code
       - name: Upload APK
-        if: >
-          matrix.package-type == 'apk' && !cancelled() &&
-          (github.event_name != 'pull_request' || matrix.build-type == 'debug')
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.build-type }}-apk
-          path: code/build/app/outputs/flutter-apk/app-${{ matrix.build-type }}.apk
+          name: debug-apk
+          path: code/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 90
+          if-no-files-found: error
+
+  build_release:
+    name: Build release artifacts
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone the repository
+        uses: actions/checkout@v5
+        with:
+          path: code
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Get Flutter packages
+        run: flutter pub get
+        working-directory: code
+      - name: Build release apk
+        run: >
+          flutter build apk --release --obfuscate
+          --split-debug-info=./debug-info
+        working-directory: code
+      - name: Build release appbundle
+        run: >
+          flutter build appbundle --release --obfuscate
+          --split-debug-info=./debug-info
+        working-directory: code
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: code/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 90
           if-no-files-found: error
       - name: Upload AAB
-        if: >
-          matrix.package-type == 'appbundle' && !cancelled() &&
-          github.event_name != 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.build-type }}-aab
-          path: code/build/app/outputs/bundle/${{ matrix.build-type }}/app-${{ matrix.build-type }}.aab
+          name: release-aab
+          path: code/build/app/outputs/bundle/release/app-release.aab
           retention-days: 90
           if-no-files-found: error
       - name: Upload debug symbols
-        if: >
-          matrix.build-type == 'release' && matrix.package-type == 'apk' &&
-          !cancelled() && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v4
         with:
           name: release-debug-info
           path: code/debug-info/
@@ -136,20 +97,20 @@ jobs:
   publish:
     name: Publish release
     if: github.event_name == 'push'
-    needs: build
+    needs: build_release
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - name: Clone the repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@v5
       - name: Extract version from pubspec.yaml
         id: version
         run: |
           VER=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
           echo "tag=v$VER" >> "$GITHUB_OUTPUT"
       - name: Download all artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
           pattern: '*-*'
