@@ -15,25 +15,24 @@ Run BEFORE every local commit. Fix ALL issues:
 ## Pre-merge gate (run BEFORE creating a PR or converting draft to ready)
 
   1. Push: git push -u origin <branch>
-  3. Open a draft PR to trigger GitHub Actions.
-  4. Verify ALL CI checks pass:
-     - CI / Run static testing       (lint + formatting)
+  2. Open a draft PR to trigger GitHub Actions.
+  3. Verify ALL CI checks pass:
+     - CI / Run static testing       (format + lint)
      - CI / Run unit testing
      - CI / Run widget testing
      - Build / Build debug apk       (from build.yml on PR)
-  5. Convert draft PR -> Ready for Review.
-   6. Merge via GitHub UI (Squash and merge).
-      BEFORE clicking merge, paste `Fixes #<issue>` lines into the
-      **commit message** (not just PR body). Use one line per issue
-      with a separate `Fixes` keyword (e.g. `Fixes #1\nFixes #2`).
-      Comma-separated lists like `Fixes #1, #2` do NOT auto-close.
-      GitHub only auto-closes from squash merge commit messages,
-      not PR bodies.
-   7. Delete remote branch; git checkout main && git pull
+  4. Convert draft PR -> Ready for Review.
+  5. Merge via GitHub UI (Squash and merge).
+     BEFORE clicking merge, paste `Fixes #<issue>` lines into the
+     **commit message** (not just PR body). Use one line per issue
+     with a separate `Fixes` keyword (e.g. `Fixes #1\nFixes #2`).
+     Comma-separated lists like `Fixes #1, #2` do NOT auto-close.
+     GitHub only auto-closes from squash merge commit messages,
+     not PR bodies.
+  6. Delete remote branch; git checkout main && git pull
 
   Notes:
-    - Feedback -> GitHub requires FEEDBACK_TOKEN in .env
-    - Reference test product data in docs/superpowers/agents/off_test_products.*
+    - Reference test product data in docs/reference/off_test_products.*
 
 ## Post-commit gate
 
@@ -59,7 +58,7 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 1. Follow every rule. No exceptions.
 2. Check [TODO.md] before starting new work.
 3. /// doc comments on every public class, constructor, field, and method.
-   These feed the public GitHub Wiki (see docs/superpowers/agents/wiki.md). Write them
+   These feed the public GitHub Wiki (see docs/guides/wiki.md). Write them
    as proper sentences — they are the user-facing API documentation.
 4. Tests for ALL new code. Use mocktail. Place in test/ subdirectory.
 5. After freezed or l10n changes: dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n
@@ -70,17 +69,15 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 10. Audit every plan for pitfalls before writing code.
 11. No backticks in doc comments. Ever. Use [square brackets] for cross-references. If comment_references fires, add the import — never switch to backticks. For constructor params (not referenceable), use the type: [http.Client]. Double-check every doc comment before committing.
 12. Never ! on SQL aggregate results. Use ?? fallback instead.
-13. Keep all markdown files ([README.md], [ARCHITECTURE/INDEX.md], [CHANGELOG.md],
-    [TODO.md], `docs/superpowers/agents/*.md`) and `///` doc comments in sync with the
-    codebase. After every feature, fix, or refactor, audit the affected docs
-    in the same PR. When asked to find stale information, first consult
-    `docs/superpowers/agents/stale_info_checklist.md`.
+13. Keep all markdown files ([README.md], [docs/INDEX.md], [CHANGELOG.md],
+    [TODO.md], `docs/architecture/*.md`, `docs/guides/*.md`) and `///` doc
+    comments in sync with the codebase. After every feature, fix, or refactor,
+    audit the affected docs in the same PR. When asked to find stale
+    information, first consult `docs/guides/stale_info_checklist.md`.
 14. Never overwrite .env. It is gitignored and contains credentials.
     - Never echo/redirect into .env from scripts or ad-hoc commands.
     - If .env is missing or empty, copy .env.example and fill in real values.
-    - FEEDBACK_TOKEN is a GitHub PAT with repo scope. Create at
-      https://github.com/settings/tokens (classic) or
-      https://github.com/settings/tokens?type=beta (fine-grained).
+
 
 ## Development workflow
 
@@ -116,7 +113,7 @@ Read these when implementing specific features:
 - Gestures & touch behaviors -> ~/.config/opencode/instructions/flutter_gestures.md
 - OFF API / SDK -> ~/.config/opencode/instructions/off_refs.md
 - Platform docs -> ~/.config/opencode/instructions/platform_refs.md
-- Project architecture -> ARCHITECTURE/INDEX.md
+- Project architecture -> docs/INDEX.md
 - API docs (generated) -> doc/api/ (run `dart doc .` first if missing)
-- Project-specific guides and testing procedures -> docs/superpowers/agents/ directory
+- Project-specific guides and testing procedures -> docs/guides/ directory
   (read the relevant file for each task)

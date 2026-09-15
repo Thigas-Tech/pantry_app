@@ -5,8 +5,9 @@ Store via GitHub Actions CI/CD.
 
 ## Overview
 
-When a tag matching `v*.*.*` (e.g. `v0.0.5`) is pushed to the repository,
-the `.github/workflows/deploy-to-playstore.yml` workflow:
+When a GitHub release is published (the `build.yml` publish job creates one
+on a version bump, or you create one manually), the
+`.github/workflows/deploy-to-playstore.yml` workflow:
 
 1. Runs `dart analyze` and `flutter test`.
 2. Injects the `.env` file from GitHub Secrets.

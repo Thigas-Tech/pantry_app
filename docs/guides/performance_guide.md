@@ -63,13 +63,8 @@ offscreen buffers that stress the GPU:
 - **DevTools CPU Profiler**: `Ctrl+Shift+P` > `Flutter: Open CPU Profiler`.
   Record a session and examine the Flame Chart for long UI-thread operations
   (orange bars = blocked UI thread).
-- **Flashlight**: `dart run flashlight measure --duration 30` — measures
-  battery drain, CPU, GPU, and memory usage during automated test scenarios.
-  Generates detailed reports for before/after comparison. Ideal for CI
-  regression detection. Reference: [github.com/bamlab/flashlight](https://github.com/bamlab/flashlight).
-- **Perfetto**: `flutter drive --profile --trace-startup` — generates a
-  Perfetto trace file. Open in `ui.perfetto.dev` or use the `perfetto` CLI
-  to analyze frame timing, jank, and CPU scheduling patterns.
+- **Physical low-end device**: always profile release or profile builds on a
+  real device — debug builds and simulators are misleading.
 
 ## Per-plan performance audit checklist
 
