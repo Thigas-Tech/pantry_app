@@ -12,9 +12,14 @@
 
 **In-memory database isolation**: `sqflite_common_ffi` caches open databases
 by path, so opening `inMemoryDatabasePath` twice returns the same database
-instance. Tests that open only one database at a time may use
-`inMemoryDatabasePath` provided they close it in `tearDown`; tests that hold
-two databases open concurrently (e.g. the on-create vs replay comparison in
-`oncreate_schema_parity_test.dart` or the v45 upgrade test) MUST use a unique
-path per instance (`_uniqueDbPath()` building on `inMemoryDatabasePath`),
-mirroring those tests.
+instance. Tests that hold two databases open concurrently MUST use a unique
+path per instance; `test/helpers/test_database.dart` provides
+`uniqueTestDbPath()` and `openTestDatabase()`, which also applies the
+baseline schema.
+
+**Schema tests**: `baseline_schema_test.dart` freezes the expected tables,
+columns, indexes, foreign keys, and the seeded default pantry.
+`migration_round_trip_test.dart` verifies that `down` clears the schema,
+`up` rebuilds it identically, and `resetDatabase()` reseeds the default
+pantry. `downgrade_wipe_test.dart` verifies that a database reporting a
+higher `user_version` is wiped and rebuilt from the baseline.

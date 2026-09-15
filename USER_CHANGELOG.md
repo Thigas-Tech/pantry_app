@@ -1,5 +1,12 @@
 # User Changelog
 
+## [0.0.16+12]
+
+- This pre-release build starts a brand-new local database. If you had
+  saved data from an earlier build, it is cleared once when you update:
+  pantries, inventory, prices, recipes, and the shopping list are reset.
+  Debug builds also gain a Developer > Reset database action in Settings.
+
 ## [0.0.12+8]
 
 - You can now add a new price for a product directly from the product page

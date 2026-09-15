@@ -77,6 +77,11 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
 14. Never overwrite .env. It is gitignored and contains credentials.
     - Never echo/redirect into .env from scripts or ad-hoc commands.
     - If .env is missing or empty, copy .env.example and fill in real values.
+15. Migrations: the v1 baseline in
+    lib/database/migrations/v1_baseline_schema.dart is frozen. Every schema
+    change is a new numbered migration with up and down, bump
+    DatabaseHelper.databaseVersion to match, and update the frozen schema
+    tests in test/database/baseline_schema_test.dart.
 
 
 ## Development workflow

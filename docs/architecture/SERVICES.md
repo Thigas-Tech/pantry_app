@@ -159,8 +159,8 @@ repository.
 - Aggregations (`totalInventoryValue`, `averageItemPrice`,
   `pricedItemCount`) are scoped to an inventory and weight by the held
   quantity in SQL (see `PriceDao`).
-- **Resilience**: the `prices` table carries no foreign keys (migration v46)
-  so history survives product cache flushes and pantry deletion.
+- **Resilience**: the `prices` table carries no foreign keys by design, so
+  history survives product cache flushes and pantry deletion.
   `cleanupOldEntries` never deletes orphaned prices; only the explicit
   price-retention setting prunes old rows. Every latest-price lookup orders
   by `COALESCE(date_purchased, date_added) DESC, id DESC`.

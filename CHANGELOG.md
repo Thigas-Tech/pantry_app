@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.0.16+12] — 2026-09-15
+
+### Changed
+
+- **Database schema restarted at version 1 with a single frozen baseline
+  migration**: the v1-v46 migration chain was replaced by
+  lib/database/migrations/v1_baseline_schema.dart, which creates all eleven
+  tables, twenty-nine indexes, and the default pantry in one step. The
+  Migration interface gained a down method and MigrationRunner gained
+  runDown. Both onCreate and onUpgrade delegate to the baseline; the
+  onUpgrade path defensively drops known tables when a file reports
+  user_version 0. (lib/database/migrations/, lib/database/database_helper.dart)
+- **Table DDL moved out of the DAOs**: the nine DAO createTable methods
+  were deleted; the baseline migration is the single source of truth for
+  the schema.
+- **Database reset**: DatabaseHelper.resetDatabase() reverts and reapplies
+  the schema inside one transaction, and closeDatabase() clears the cached
+  connection. Debug builds expose a Developer > Reset database action in
+  Settings that confirms first, cancels scheduled notifications, and
+  invalidates the database-backed providers.
+  (lib/database/database_helper.dart, lib/screens/settings_screen.dart,
+  lib/l10n/app_*.arb)
+
+### Removed
+
+- **Legacy migration scaffolding**: the v2-v46 migration sources, the
+  column_existence helpers, the onCreate parity test, and the per-version
+  migration tests were removed. New schema tests cover the frozen baseline,
+  the up/down round trip, and the downgrade wipe.
+  (lib/database/migrations/, test/database/)
+
+### Notes
+
+- **One-time data reset for existing pre-release installs**: a database
+  created before this version reports user_version 46, so it is deleted
+  and rebuilt from the baseline on first launch. Pantries, inventory,
+  prices, recipes, and history are discarded once.
+
 ## [0.0.15+11] — 2026-09-15
 
 ### Changed
