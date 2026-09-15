@@ -6,7 +6,6 @@ import 'package:pantry_app/providers/inventory_for_barcode_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/services/product_repository.dart';
 
-
 class _MockProductRepository extends Mock implements ProductRepository {
   _MockProductRepository() {
     when(

@@ -4,7 +4,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/services/image_cache_service.dart';
 
-
 class _MockImageCacheService extends Mock implements ImageCacheService {}
 
 void main() {

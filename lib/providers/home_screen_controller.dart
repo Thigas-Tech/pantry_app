@@ -117,10 +117,10 @@ class HomeScreenController extends _$HomeScreenController {
       await repo.refreshInventoryProducts(activeId);
       await repo.setLastRefreshTime();
       afterFrame(() {
-      afterFrame(() {
-        if (ref.mounted) ref.invalidate(pantryProvider);
+        afterFrame(() {
+          if (ref.mounted) ref.invalidate(pantryProvider);
+        });
       });
-    });
     } on Exception catch (e) {
       logWarning('Overdue cache refresh failed: $e');
     }

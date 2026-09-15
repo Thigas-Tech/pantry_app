@@ -16,7 +16,7 @@ Future<List<ShoppingItem>> shoppingList(Ref ref) async {
   return db.getShoppingList(inventoryId: inventoryId);
 }
 
-/// Provides all shopping list items for a specific [inventoryId].
+/// Provides all shopping list items for a specific inventoryId.
 ///
 /// Unlike [shoppingList] (which follows the active inventory), this family
 /// is keyed by an explicit inventory so the market trip can operate on a
@@ -67,12 +67,12 @@ void invalidateShoppingList(WidgetRef ref) {
     ..invalidate(pendingShoppingCountProvider);
 }
 
-/// Invalidates the shopping list providers for a specific [inventoryId].
+/// Invalidates the shopping list providers for a specific inventoryId.
 ///
 /// Invalidates [shoppingListByInventoryProvider] (used by the market trip,
 /// which is scoped to a chosen pantry rather than the active one) in
 /// addition to the active-inventory providers via [invalidateShoppingList].
-/// Call this after every mutation that targets [inventoryId].
+/// Call this after every mutation that targets inventoryId.
 void invalidateShoppingListForInventory(WidgetRef ref, int inventoryId) {
   invalidateShoppingList(ref);
   ref.invalidate(shoppingListByInventoryProvider(inventoryId));
