@@ -38,10 +38,6 @@ void main() {
     'RETURNING clause': RegExp(r'\bRETURNING\b'),
   };
 
-  final allowlistedPaths = <String>{
-    'lib/database/migrations/v43_remove_recipe_shared_id.dart',
-  };
-
   test(
     'production code uses only SQLite 3.9.2-compatible SQL syntax',
     () {
@@ -57,7 +53,6 @@ void main() {
 
       final violations = <String>[];
       for (final file in dartFiles) {
-        if (allowlistedPaths.contains(file.path)) continue;
         final content = file.readAsStringSync();
         for (final entry in bannedPatterns.entries) {
           for (final match in entry.value.allMatches(content)) {

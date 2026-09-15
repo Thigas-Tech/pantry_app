@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/store_dao.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
   setUpAll(() {
     sqfliteFfiInit();
@@ -13,8 +15,7 @@ void main() {
 
   setUp(() async {
     dao = const StoreDao();
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await dao.createTable(db);
+    db = await openTestDatabase();
   });
 
   tearDown(() async {
@@ -22,7 +23,7 @@ void main() {
   });
 
   group('StoreDao', () {
-    test('createTable creates the table', () async {
+    test('insert works with the baseline schema', () async {
       final id = await dao.insert(db, 'Test Store');
       expect(id, isNonNegative);
     });

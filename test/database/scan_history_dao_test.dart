@@ -3,6 +3,8 @@ import 'package:pantry_app/database/scan_history_dao.dart';
 import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
   setUpAll(() {
     sqfliteFfiInit();
@@ -14,8 +16,7 @@ void main() {
 
   setUp(() async {
     dao = const ScanHistoryDao();
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await dao.createTable(db);
+    db = await openTestDatabase();
   });
 
   tearDown(() async {
@@ -29,18 +30,6 @@ void main() {
         scannedAt: scannedAt,
         imageUrl: scannedAt.isEven ? 'https://example.com/img.jpg' : null,
       );
-
-  group('createTable', () {
-    test('is idempotent when run twice', () async {
-      await dao.createTable(db);
-      await dao.createTable(db);
-      final rows = await db.rawQuery(
-        'SELECT name FROM sqlite_master'
-        " WHERE type='table' AND name='scan_history'",
-      );
-      expect(rows, hasLength(1));
-    });
-  });
 
   group('insert', () {
     test('returns a non-negative id', () async {

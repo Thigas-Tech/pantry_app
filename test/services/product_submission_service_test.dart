@@ -14,6 +14,8 @@ import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class MockOffAdapter extends Mock implements OffAdapter {}
@@ -71,8 +73,7 @@ void main() {
     );
 
     // Create a real in-memory database for queue DAO operations.
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await ProductSubmissionQueueDao().createTable(db);
+    db = await openTestDatabase();
 
     // Stub the database getter so _queueForRetry uses the real DB.
     when(() => mockDb.database).thenAnswer((_) async => db);

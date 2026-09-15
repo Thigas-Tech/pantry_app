@@ -3,6 +3,8 @@ import 'package:pantry_app/database/recipe_history_dao.dart';
 import 'package:pantry_app/models/recipe_history_entry.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
   setUpAll(() {
     sqfliteFfiInit();
@@ -14,8 +16,7 @@ void main() {
 
   setUp(() async {
     dao = const RecipeHistoryDao();
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await dao.createTable(db);
+    db = await openTestDatabase();
   });
 
   tearDown(() async {

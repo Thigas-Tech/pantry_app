@@ -3,6 +3,8 @@ import 'package:pantry_app/database/recipe_ingredient_dao.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
   setUpAll(() {
     sqfliteFfiInit();
@@ -23,19 +25,8 @@ void main() {
 
   setUp(() async {
     dao = const RecipeIngredientDao();
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
+    db = await openTestDatabase();
     await db.execute('PRAGMA foreign_keys = ON');
-    // Create the parent recipes table for FK constraints.
-    await db.execute('''
-      CREATE TABLE recipes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        instructions TEXT NOT NULL DEFAULT '',
-        created_at INTEGER NOT NULL DEFAULT 0,
-        updated_at INTEGER NOT NULL DEFAULT 0
-      )
-    ''');
-    await dao.createTable(db);
     await seedDefaultRecipe();
   });
 
@@ -44,7 +35,7 @@ void main() {
   });
 
   group('RecipeIngredientDao', () {
-    test('createTable creates the table', () async {
+    test('insert works with the baseline schema', () async {
       final id = await dao.insert(
         db,
         const RecipeIngredient(recipeId: 1, name: 'Chicken'),
