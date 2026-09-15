@@ -101,7 +101,7 @@ Workflows live in `.github/workflows/`:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
-| `ci.yml` | Pull request to `main`, push to `main` | Format check, `dart analyze`, version gate, unit + widget tests, coverage artifacts |
+| `ci.yml` | Pull request to `main`, push to `main` | Format check, `dart analyze`, version gate (only for app-affecting changes), unit + widget tests, coverage artifacts |
 | `build.yml` | Pull request to `main`, push to `main` | Debug APK on pull requests; release APK + AAB + debug symbols on `main`, then creates a GitHub release via `gh release create` (publish job) |
 | `deploy-to-playstore.yml` | Called by `build.yml` on a version bump; manual release publication | Signed release AAB + APK, upload to Play Console internal track via `r0adkll/upload-google-play`. Runs only when the publish job actually created a new release |
 | `wiki.yml` | Push to `main` | Generates `dart doc` API docs and deploys them to the `gh-pages` branch |
@@ -111,6 +111,11 @@ Workflows live in `.github/workflows/`:
 
 All workflows use floating major action tags (for example
 `actions/checkout@v5`). Runner: `ubuntu-latest`.
+
+> **Note:** Node deprecation warnings (`punycode`, `url.parse()`, `Buffer()`)
+> originate inside the current releases of `actions/upload-artifact@v7`,
+> `actions/download-artifact@v8`, and `r0adkll/upload-google-play@v1.1.5`.
+> They are upstream issues and do not affect the build.
 
 ### 11.10 Performance measurement
 
