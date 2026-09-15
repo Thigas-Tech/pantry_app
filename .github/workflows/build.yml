@@ -38,7 +38,7 @@ jobs:
         run: flutter build apk --debug
         working-directory: code
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-apk
           path: code/build/app/outputs/flutter-apk/app-debug.apk
@@ -73,21 +73,21 @@ jobs:
           --split-debug-info=./debug-info
         working-directory: code
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-apk
           path: code/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 90
           if-no-files-found: error
       - name: Upload AAB
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-aab
           path: code/build/app/outputs/bundle/release/app-release.aab
           retention-days: 90
           if-no-files-found: error
       - name: Upload debug symbols
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-debug-info
           path: code/debug-info/
@@ -110,7 +110,7 @@ jobs:
           VER=$(grep '^version: ' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
           echo "tag=v$VER" >> "$GITHUB_OUTPUT"
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
           pattern: '*-*'
