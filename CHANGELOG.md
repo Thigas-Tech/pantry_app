@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.15+11] — 2026-09-15
+
+### Changed
+
+- **Play upload uses the current tracks input**: replaced the deprecated
+  `track` input of `r0adkll/upload-google-play` with `tracks`, clearing the
+  deprecation warning emitted on the first automatic upload.
+  (.github/workflows/deploy-to-playstore.yml)
+
 ## [0.0.14+10] — 2026-09-15
 
 ### Fixed
