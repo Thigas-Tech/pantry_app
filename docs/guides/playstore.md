@@ -5,9 +5,14 @@ Store via GitHub Actions CI/CD.
 
 ## Overview
 
-When a GitHub release or pre-release is published (the `build.yml` publish
-job creates a pre-release on a version bump, or you create one manually), the
-`.github/workflows/deploy-to-playstore.yml` workflow:
+When a new version is merged to `main`, the `build.yml` publish job creates
+a pre-release and then calls `.github/workflows/deploy-to-playstore.yml`
+directly (as a reusable workflow). Publishing a release manually in the
+GitHub UI also triggers it through the `released`/`prereleased` events.
+The direct call exists because releases created with the default
+`GITHUB_TOKEN` do not trigger new workflow runs.
+
+The `.github/workflows/deploy-to-playstore.yml` workflow:
 
 1. Runs `dart analyze` and `flutter test`.
 2. Injects the `.env` file from GitHub Secrets.

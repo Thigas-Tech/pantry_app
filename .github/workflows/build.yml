@@ -101,6 +101,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      release_created: ${{ steps.check_release.outputs.exists == 'false' }}
     steps:
       - name: Clone the repository
         uses: actions/checkout@v5
@@ -136,3 +138,12 @@ jobs:
             --target "${{ github.sha }}" \
             --prerelease \
             artifacts/*
+
+  deploy_playstore:
+    name: Deploy to Play Store
+    needs: publish
+    if: needs.publish.outputs.release_created == 'true'
+    uses: ./.github/workflows/deploy-to-playstore.yml
+    secrets: inherit
+    permissions:
+      contents: read
