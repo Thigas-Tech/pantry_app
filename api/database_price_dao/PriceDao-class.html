@@ -166,19 +166,6 @@ each distinct product in the given inventory.
 
 </dd>
 
-        <dt id="createTable" class="callable">
-  <span class="name"><a href="../database_price_dao/PriceDao/createTable.html">createTable</a></span><span class="signature">(<wbr><span class="parameter" id="createTable-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Creates the prices table and its indexes.
-  
-
-</dd>
-
         <dt id="delete" class="callable">
   <span class="name"><a href="../database_price_dao/PriceDao/delete.html">delete</a></span><span class="signature">(<wbr><span class="parameter" id="delete-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="delete-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -404,7 +391,7 @@ have at least one price.
 
 </dt>
 <dd>
-  Converts a <a href="../models_price/Price-class.html">Price</a> to a map for database insertion.
+  Creates the prices table and its indexes.
   
 
 </dd>
@@ -516,7 +503,7 @@ quantity. Each row contains currency and subtotal columns.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

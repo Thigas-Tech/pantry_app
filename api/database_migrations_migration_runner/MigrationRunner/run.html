@@ -55,7 +55,7 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../database_migrations_migration_runner/MigrationResult-class.html">MigrationResult</a></span>&gt;</span></span>
-<span class="name ">run</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="run-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span></li>
+<span class="name ">run</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="run-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span>, </span></li>
 <li><span class="parameter" id="run-param-oldVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">oldVersion</span>, </span></li>
 <li><span class="parameter" id="run-param-newVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">newVersion</span></span></li>
 </ol>)
@@ -67,9 +67,9 @@
 <section class="desc markdown">
   <p>Runs every migration whose version is &lt;= <code>newVersion</code> and &gt; <code>oldVersion</code>.</p>
 <p>The upgrade window: migrations with a version greater than <code>oldVersion</code>
-and less than or equal to <code>newVersion</code> are applied.</p>
-<p>Throws the first failing migration's exception after logging it, so
-sqflite rolls back the whole upgrade and retries on the next launch.
+and less than or equal to <code>newVersion</code> are applied, in ascending order.</p>
+<p>Throws the first failing migration's exception after logging it, so the
+surrounding transaction rolls back and retries on the next launch.
 Returns a <a href="../../database_migrations_migration_runner/MigrationResult-class.html">MigrationResult</a> describing the outcome on success.</p>
 </section>
 
@@ -78,7 +78,7 @@ Returns a <a href="../../database_migrations_migration_runner/MigrationResult-cl
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;MigrationResult&gt; run(
-  Database db,
+  DatabaseExecutor db,
   int oldVersion,
   int newVersion,
 ) async {
@@ -131,7 +131,7 @@ Returns a <a href="../../database_migrations_migration_runner/MigrationResult-cl
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

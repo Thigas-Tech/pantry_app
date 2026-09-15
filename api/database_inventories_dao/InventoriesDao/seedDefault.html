@@ -55,7 +55,7 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
-<span class="name ">seedDefault</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="seedDefault-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span></li>
+<span class="name ">seedDefault</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="seedDefault-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span></span></li>
 </ol>)
 
       
@@ -70,7 +70,7 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; seedDefault(Database db) {
+  <pre class="language-dart"><code class="language-dart">Future&lt;int&gt; seedDefault(DatabaseExecutor db) {
   logInfo(&#39;Creating default &quot;Home&quot; inventory&#39;);
   return db.insert(&#39;inventories&#39;, {
     &#39;name&#39;: &#39;Home&#39;,
@@ -104,7 +104,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

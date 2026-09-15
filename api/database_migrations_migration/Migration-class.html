@@ -56,9 +56,10 @@
     
 <section class="desc markdown">
   <p>A single database migration step.</p>
-<p>Subclasses define a <a href="../database_migrations_migration/Migration/version.html">version</a> number and the schema changes to apply
-in <a href="../database_migrations_migration/Migration/up.html">up</a>. The <a href="../database_migrations_migration_runner/MigrationRunner-class.html">MigrationRunner</a> applies migrations whose version falls
-within the upgrade window, in ascending order.</p>
+<p>Subclasses define a <a href="../database_migrations_migration/Migration/version.html">version</a> number, the schema changes to apply in
+<a href="../database_migrations_migration/Migration/up.html">up</a>, and their inverse in <a href="../database_migrations_migration/Migration/down.html">down</a>. The migration runner applies <a href="../database_migrations_migration/Migration/up.html">up</a>
+in ascending version order during creation and upgrades, and <a href="../database_migrations_migration/Migration/down.html">down</a> in
+descending order during a rollback or a full database reset.</p>
 </section>
 
 
@@ -71,49 +72,7 @@ within the upgrade window, in ascending order.</p>
 
           <dt>Implementers</dt>
           <dd><ul class="comma-separated clazz-relationships">
-              <li><a href="../database_migrations_v1_initial_schema/MigrationV1-class.html">MigrationV1</a></li>
-              <li><a href="../database_migrations_v2_inventories/MigrationV2-class.html">MigrationV2</a></li>
-              <li><a href="../database_migrations_v3_normalize_units/MigrationV3-class.html">MigrationV3</a></li>
-              <li><a href="../database_migrations_v4_nutriscore_grade/MigrationV4-class.html">MigrationV4</a></li>
-              <li><a href="../database_migrations_v5_nutriscore_not_applicable/MigrationV5-class.html">MigrationV5</a></li>
-              <li><a href="../database_migrations_v6_source_column/MigrationV6-class.html">MigrationV6</a></li>
-              <li><a href="../database_migrations_v7_image_paths/MigrationV7-class.html">MigrationV7</a></li>
-              <li><a href="../database_migrations_v8_submission_status/MigrationV8-class.html">MigrationV8</a></li>
-              <li><a href="../database_migrations_v9_off_image_urls/MigrationV9-class.html">MigrationV9</a></li>
-              <li><a href="../database_migrations_v10_categories_hierarchy/MigrationV10-class.html">MigrationV10</a></li>
-              <li><a href="../database_migrations_v12_prices_table/MigrationV12-class.html">MigrationV12</a></li>
-              <li><a href="../database_migrations_v13_shopping_list_table/MigrationV13-class.html">MigrationV13</a></li>
-              <li><a href="../database_migrations_v14_inventory_date_added_index/MigrationV14-class.html">MigrationV14</a></li>
-              <li><a href="../database_migrations_v15_language_code/MigrationV15-class.html">MigrationV15</a></li>
-              <li><a href="../database_migrations_v16_product_submission_queue/MigrationV16-class.html">MigrationV16</a></li>
-              <li><a href="../database_migrations_v17_search_text/MigrationV17-class.html">MigrationV17</a></li>
-              <li><a href="../database_migrations_v18_shopping_list_price_fields/MigrationV18-class.html">MigrationV18</a></li>
-              <li><a href="../database_migrations_v19_stores_table/MigrationV19-class.html">MigrationV19</a></li>
-              <li><a href="../database_migrations_v20_backfill_inventory_id/MigrationV20-class.html">MigrationV20</a></li>
-              <li><a href="../database_migrations_v21_plu_and_product_type/MigrationV21-class.html">MigrationV21</a></li>
-              <li><a href="../database_migrations_v22_serving_weight_g/MigrationV22-class.html">MigrationV22</a></li>
-              <li><a href="../database_migrations_v23_backfill_produce_category/MigrationV23-class.html">MigrationV23</a></li>
-              <li><a href="../database_migrations_v25_recipes/MigrationV25-class.html">MigrationV25</a></li>
-              <li><a href="../database_migrations_v26_recipe_history/MigrationV26-class.html">MigrationV26</a></li>
-              <li><a href="../database_migrations_v27_skipped/MigrationV27-class.html">MigrationV27</a></li>
-              <li><a href="../database_migrations_v28_normalize_produce_barcodes/MigrationV28-class.html">MigrationV28</a></li>
-              <li><a href="../database_migrations_v29_inventory_unique_index/MigrationV29-class.html">MigrationV29</a></li>
-              <li><a href="../database_migrations_v30_recipe_indexes_and_search/MigrationV30-class.html">MigrationV30</a></li>
-              <li><a href="../database_migrations_v31_serving_quantity/MigrationV31-class.html">MigrationV31</a></li>
-              <li><a href="../database_migrations_v32_scan_history/MigrationV32-class.html">MigrationV32</a></li>
-              <li><a href="../database_migrations_v33_recipes_inventory/MigrationV33-class.html">MigrationV33</a></li>
-              <li><a href="../database_migrations_v34_prices_inventory/MigrationV34-class.html">MigrationV34</a></li>
-              <li><a href="../database_migrations_v35_additional_nutrients/MigrationV35-class.html">MigrationV35</a></li>
-              <li><a href="../database_migrations_v36_nonunique_inventory_index/MigrationV36-class.html">MigrationV36</a></li>
-              <li><a href="../database_migrations_v37_prices_package/MigrationV37-class.html">MigrationV37</a></li>
-              <li><a href="../database_migrations_v38_index_optimizations/MigrationV38-class.html">MigrationV38</a></li>
-              <li><a href="../database_migrations_v39_inventory_shopping_indexes/MigrationV39-class.html">MigrationV39</a></li>
-              <li><a href="../database_migrations_v41_shopping_sort_order/MigrationV41-class.html">MigrationV41</a></li>
-              <li><a href="../database_migrations_v42_remove_firebase_cache_meta/MigrationV42-class.html">MigrationV42</a></li>
-              <li><a href="../database_migrations_v43_remove_recipe_shared_id/MigrationV43-class.html">MigrationV43</a></li>
-              <li><a href="../database_migrations_v44_query_performance_indexes/MigrationV44-class.html">MigrationV44</a></li>
-              <li><a href="../database_migrations_v45_shopping_expiry/MigrationV45-class.html">MigrationV45</a></li>
-              <li><a href="../database_migrations_v46_prices_resilience/MigrationV46-class.html">MigrationV46</a></li>
+              <li><a href="../database_migrations_v1_baseline_schema/MigrationV1-class.html">MigrationV1</a></li>
           </ul></dd>
 
         
@@ -131,7 +90,8 @@ within the upgrade window, in ascending order.</p>
           <span class="name"><a href="../database_migrations_migration/Migration/Migration.html">Migration</a></span><span class="signature">()</span>
         </dt>
         <dd>
-          
+          Creates a migration.
+            <div class="constructor-modifier features">const</div>
         </dd>
     </dl>
   </section>
@@ -186,6 +146,19 @@ within the upgrade window, in ascending order.</p>
       id="instance-methods">
     <h2>Methods</h2>
     <dl class="callables">
+        <dt id="down" class="callable">
+  <span class="name"><a href="../database_migrations_migration/Migration/down.html">down</a></span><span class="signature">(<wbr><span class="parameter" id="down-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Reverts the schema changes made by <a href="../database_migrations_migration/Migration/up.html">up</a>.
+  
+
+</dd>
+
         <dt id="noSuchMethod" class="callable inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></span><span class="signature">(<wbr><span class="parameter" id="noSuchMethod-param-invocation"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Invocation-class.html">Invocation</a></span> <span class="parameter-name">invocation</span></span>)
     <span class="returntype parameter">&#8594; dynamic</span>
@@ -213,7 +186,7 @@ within the upgrade window, in ascending order.</p>
 </dd>
 
         <dt id="up" class="callable">
-  <span class="name"><a href="../database_migrations_migration/Migration/up.html">up</a></span><span class="signature">(<wbr><span class="parameter" id="up-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
+  <span class="name"><a href="../database_migrations_migration/Migration/up.html">up</a></span><span class="signature">(<wbr><span class="parameter" id="up-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
   </span>
   
@@ -275,7 +248,7 @@ within the upgrade window, in ascending order.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

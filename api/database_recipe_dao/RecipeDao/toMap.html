@@ -63,7 +63,8 @@
     </section>
     
 <section class="desc markdown">
-  <p>Converts a <a href="../../models_recipe/Recipe-class.html">Recipe</a> to a map for database insertion.</p>
+  <p>Creates the recipes table.
+Converts a <a href="../../models_recipe/Recipe-class.html">Recipe</a> to a map for database insertion.</p>
 <p>Emits the derived search_text column via <a href="../../utils_search_utils/buildRecipeSearchText.html">buildRecipeSearchText</a> so
 every write path (DAO insert/update and the DatabaseHelper
 transaction helpers, which all funnel through this map) keeps the
@@ -113,7 +114,7 @@ instructions.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

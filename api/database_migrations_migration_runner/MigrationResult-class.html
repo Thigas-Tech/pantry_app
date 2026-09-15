@@ -54,7 +54,7 @@
 
     
 <section class="desc markdown">
-  <p>The outcome of a <a href="../database_migrations_migration_runner/MigrationRunner/run.html">MigrationRunner.run</a> call.</p>
+  <p>The outcome of a <a href="../database_migrations_migration_runner/MigrationRunner-class.html">MigrationRunner</a> run.</p>
 </section>
 
 
@@ -102,6 +102,18 @@
 
 </dd>
 
+        <dt id="nothingToRollback" class="property">
+  <span class="name"><a href="../database_migrations_migration_runner/MigrationResult/nothingToRollback.html">nothingToRollback</a></span>
+  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
+  
+
+</dt>
+<dd>
+  True when no migrations were reverted during a rollback.
+  <div class="features"><span class="feature">no setter</span></div>
+
+</dd>
+
         <dt id="nothingToUpgrade" class="property">
   <span class="name"><a href="../database_migrations_migration_runner/MigrationResult/nothingToUpgrade.html">nothingToUpgrade</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
@@ -109,7 +121,7 @@
 
 </dt>
 <dd>
-  True when none of the migrations ran.
+  True when no migrations were applied during an upgrade.
   <div class="features"><span class="feature">no setter</span></div>
 
 </dd>
@@ -223,7 +235,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

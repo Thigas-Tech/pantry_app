@@ -54,13 +54,13 @@
 
     
 <section class="desc markdown">
-  <p>Runs a list of <a href="../database_migrations_migration/Migration-class.html">Migration</a>s in order during database upgrade.</p>
+  <p>Runs migrations in order during database creation, upgrade, or rollback.</p>
 <p>The runner:</p>
 <ul>
-<li>Only runs migrations with a version in the upgrade window</li>
+<li>Only runs migrations with a version in the requested window</li>
 <li>Logs each migration's elapsed time</li>
-<li>Aborts on the first failure so the upgrade transaction rolls back
-and the database version stays unchanged (retried on next launch)</li>
+<li>Aborts on the first failure so the surrounding transaction rolls back
+and the database stays unchanged (retried on the next launch)</li>
 </ul>
 </section>
 
@@ -144,7 +144,7 @@ and the database version stays unchanged (retried on next launch)</li>
 </dd>
 
         <dt id="run" class="callable">
-  <span class="name"><a href="../database_migrations_migration_runner/MigrationRunner/run.html">run</a></span><span class="signature">(<wbr><span class="parameter" id="run-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="run-param-oldVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">oldVersion</span>, </span><span class="parameter" id="run-param-newVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">newVersion</span></span>)
+  <span class="name"><a href="../database_migrations_migration_runner/MigrationRunner/run.html">run</a></span><span class="signature">(<wbr><span class="parameter" id="run-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="run-param-oldVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">oldVersion</span>, </span><span class="parameter" id="run-param-newVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">newVersion</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../database_migrations_migration_runner/MigrationResult-class.html">MigrationResult</a></span>&gt;</span></span>
   </span>
   
@@ -152,6 +152,19 @@ and the database version stays unchanged (retried on next launch)</li>
 </dt>
 <dd>
   Runs every migration whose version is &lt;= <code>newVersion</code> and &gt; <code>oldVersion</code>.
+  
+
+</dd>
+
+        <dt id="runDown" class="callable">
+  <span class="name"><a href="../database_migrations_migration_runner/MigrationRunner/runDown.html">runDown</a></span><span class="signature">(<wbr><span class="parameter" id="runDown-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="runDown-param-fromVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">fromVersion</span>, </span><span class="parameter" id="runDown-param-toVersion"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">toVersion</span></span>)
+    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../database_migrations_migration_runner/MigrationResult-class.html">MigrationResult</a></span>&gt;</span></span>
+  </span>
+  
+
+</dt>
+<dd>
+  Runs every migration whose version is &lt;= <code>fromVersion</code> and
   
 
 </dd>
@@ -219,7 +232,7 @@ and the database version stays unchanged (retried on next launch)</li>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

@@ -646,6 +646,19 @@ Widget build(BuildContext context, WidgetRef ref) {
             ),
           ],
         ),
+        if (kDebugMode)
+          ExpansionTile(
+            leading: const Icon(Icons.build_outlined),
+            title: Text(l10n.debugSection),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.delete_forever_outlined),
+                title: Text(l10n.resetDatabase),
+                subtitle: Text(l10n.resetDatabaseSubtitle),
+                onTap: () =&gt; _resetDatabase(context, ref),
+              ),
+            ],
+          ),
       ],
     ),
   );
@@ -677,7 +690,7 @@ Widget build(BuildContext context, WidgetRef ref) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

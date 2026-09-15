@@ -63,14 +63,16 @@
       
 <section class="desc markdown">
   <p>The current database schema version.</p>
-<p>Must match the highest (and last) migration declared
-in <a href="../../database_migrations_all_migrations/allMigrations.html">allMigrations</a>.</p>
+<p>Must match the highest (and last) migration declared in
+<a href="../../database_migrations_all_migrations/allMigrations.html">allMigrations</a>. The schema was restarted at version 1 with the frozen
+baseline migration; installs with a higher user_version are wiped by
+<a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/onDatabaseDowngradeDelete-constant.html">onDatabaseDowngradeDelete</a> and rebuilt from the baseline.</p>
 </section>
 
       
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">static const int databaseVersion = 46;</code></pre>
+  <pre class="language-dart"><code class="language-dart">static const int databaseVersion = 1;</code></pre>
 </section>
 
 
@@ -99,7 +101,7 @@ in <a href="../../database_migrations_all_migrations/allMigrations.html">allMigr
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

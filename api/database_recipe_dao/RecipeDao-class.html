@@ -126,19 +126,6 @@ independently of <a href="../database_database_helper/DatabaseHelper-class.html"
 
 </dd>
 
-        <dt id="createTable" class="callable">
-  <span class="name"><a href="../database_recipe_dao/RecipeDao/createTable.html">createTable</a></span><span class="signature">(<wbr><span class="parameter" id="createTable-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Creates the recipes table.
-  
-
-</dd>
-
         <dt id="delete" class="callable">
   <span class="name"><a href="../database_recipe_dao/RecipeDao/delete.html">delete</a></span><span class="signature">(<wbr><span class="parameter" id="delete-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span>, </span><span class="parameter" id="delete-param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">id</span></span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -226,7 +213,8 @@ ordered by updated_at descending.
 
 </dt>
 <dd>
-  Converts a <a href="../models_recipe/Recipe-class.html">Recipe</a> to a map for database insertion.
+  Creates the recipes table.
+Converts a <a href="../models_recipe/Recipe-class.html">Recipe</a> to a map for database insertion.
   
 
 </dd>
@@ -307,7 +295,7 @@ ordered by updated_at descending.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

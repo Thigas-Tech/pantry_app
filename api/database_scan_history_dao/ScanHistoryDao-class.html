@@ -127,19 +127,6 @@ inside transactions.</p>
 
 </dd>
 
-        <dt id="createTable" class="callable">
-  <span class="name"><a href="../database_scan_history_dao/ScanHistoryDao/createTable.html">createTable</a></span><span class="signature">(<wbr><span class="parameter" id="createTable-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span></span>)
-    <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-  </span>
-  
-
-</dt>
-<dd>
-  Creates the scan_history table.
-  
-
-</dd>
-
         <dt id="deleteOld" class="callable">
   <span class="name"><a href="../database_scan_history_dao/ScanHistoryDao/deleteOld.html">deleteOld</a></span><span class="signature">(<wbr><span class="parameter" id="deleteOld-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span>, {</span><span class="parameter" id="deleteOld-param-keepCount"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">keepCount</span> = <span class="default-value">ScanHistoryDao.defaultKeepCount</span></span>})
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span>&gt;</span></span>
@@ -213,7 +200,8 @@ inside transactions.</p>
 
 </dt>
 <dd>
-  Converts a <a href="../models_scan_history_entry/ScanHistoryEntry-class.html">ScanHistoryEntry</a> to a map for database insertion.
+  Creates the scan_history table.
+Converts a <a href="../models_scan_history_entry/ScanHistoryEntry-class.html">ScanHistoryEntry</a> to a map for database insertion.
   
 
 </dd>
@@ -298,7 +286,7 @@ inside transactions.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>

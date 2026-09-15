@@ -55,7 +55,7 @@
     <section class="multi-line-signature">
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
-<span class="name ">up</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="up-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/Database-class.html">Database</a></span> <span class="parameter-name">db</span></span></li>
+<span class="name ">up</span>(<wbr><ol class="parameter-list single-line"> <li><span class="parameter" id="up-param-db"><span class="type-annotation"><a href="https://pub.dev/documentation/sqflite_common/2.5.11/sqlite_api/DatabaseExecutor-class.html">DatabaseExecutor</a></span> <span class="parameter-name">db</span></span></li>
 </ol>)
 
       
@@ -64,15 +64,15 @@
     
 <section class="desc markdown">
   <p>Applies the schema changes for this migration.</p>
-<p>Called inside the onUpgrade callback. Should be resilient to
-re-execution (idempotent) whenever possible.</p>
+<p>Called inside a creation or upgrade transaction. Must be resilient to
+re-execution whenever possible.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; up(Database db);</code></pre>
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; up(DatabaseExecutor db);</code></pre>
 </section>
 
 
@@ -100,7 +100,7 @@ re-execution (idempotent) whenever possible.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.15+11
+      0.0.16+12
   </span>
   
 </footer>
