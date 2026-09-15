@@ -1,5 +1,13 @@
 # Registro de alteracoes do usuario
 
+## [0.0.16+12]
+
+- Esta compilacao de pre-lancamento comeca um banco de dados local novo.
+  Se voce tinha dados salvos de uma compilacao anterior, eles sao apagados
+  uma vez ao atualizar: despensas, inventario, precos, receitas e lista de
+  compras sao reiniciados. Compilacoes de depuracao tambem ganham a acao
+  Desenvolvedor > Redefinir banco de dados nas Configuracoes.
+
 ## [0.0.12+8]
 
 - Voce agora pode adicionar um novo preco para um produto diretamente na

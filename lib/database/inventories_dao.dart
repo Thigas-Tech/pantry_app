@@ -105,19 +105,8 @@ class InventoriesDao {
     );
   }
 
-  /// Creates the schema for the inventories table.
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE inventories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        created_at INTEGER NOT NULL
-      )
-    ''');
-  }
-
   /// Seeds the default "Home" inventory.
-  Future<int> seedDefault(Database db) {
+  Future<int> seedDefault(DatabaseExecutor db) {
     logInfo('Creating default "Home" inventory');
     return db.insert('inventories', {
       'name': 'Home',

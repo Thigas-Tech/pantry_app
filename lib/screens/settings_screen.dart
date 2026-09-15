@@ -1,18 +1,27 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
+import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
+import 'package:pantry_app/providers/inventory_for_barcode_provider.dart';
+import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
+import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
+import 'package:pantry_app/providers/recipe_provider.dart';
+import 'package:pantry_app/providers/scan_history_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
+import 'package:pantry_app/providers/shopping_list_provider.dart';
+import 'package:pantry_app/providers/stats_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/providers/ui_flags_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
@@ -568,9 +577,90 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
+          if (kDebugMode)
+            ExpansionTile(
+              leading: const Icon(Icons.build_outlined),
+              title: Text(l10n.debugSection),
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.delete_forever_outlined),
+                  title: Text(l10n.resetDatabase),
+                  subtitle: Text(l10n.resetDatabaseSubtitle),
+                  onTap: () => _resetDatabase(context, ref),
+                ),
+              ],
+            ),
         ],
       ),
     );
+  }
+
+  /// Confirms and performs a full database reset (debug builds only).
+  ///
+  /// Cancels all scheduled notifications and invalidates the database-backed
+  /// providers so no stale data survives the wipe.
+  Future<void> _resetDatabase(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.resetDatabaseConfirmTitle),
+        content: Text(l10n.resetDatabaseConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.resetDatabaseConfirmAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      final db = ref.read(databaseProvider);
+      await db.resetDatabase();
+      await ref.read(notificationServiceProvider).cancelAllReminders();
+      ref
+        ..invalidate(activeInventoryProvider)
+        ..invalidate(pantryProvider)
+        ..invalidate(inventoryListProvider)
+        ..invalidate(inventoryCountProvider)
+        ..invalidate(totalInventoryCountProvider)
+        ..invalidate(averageNutriscoreProvider)
+        ..invalidate(statsProvider)
+        ..invalidate(priceHistoryProvider)
+        ..invalidate(priceChartPointsProvider)
+        ..invalidate(latestPriceProvider)
+        ..invalidate(inventoryValueProvider)
+        ..invalidate(averagePriceProvider)
+        ..invalidate(allRecipesProvider)
+        ..invalidate(allRecipeIngredientsProvider)
+        ..invalidate(recipeIngredientsWithProductsProvider)
+        ..invalidate(shoppingListProvider)
+        ..invalidate(shoppingListByInventoryProvider)
+        ..invalidate(pendingShoppingListProvider)
+        ..invalidate(purchasedShoppingListProvider)
+        ..invalidate(pendingShoppingCountProvider)
+        ..invalidate(inventoryProductsProvider)
+        ..invalidate(scanHistoryProvider)
+        ..invalidate(storesProvider)
+        ..invalidate(productRepositoryProvider)
+        ..invalidate(productByBarcodeProvider)
+        ..invalidate(inventoryForBarcodeProvider);
+      logInfo('Debug database reset completed');
+      if (context.mounted) {
+        SnackbarHelper.showInfo(context, l10n.resetDatabaseDone);
+      }
+    } on Exception catch (e) {
+      logError('Debug database reset failed: $e');
+      if (context.mounted) {
+        SnackbarHelper.showError(context, l10n.resetDatabaseFailed);
+      }
+    }
   }
 
   Widget _contextOverrideTile(

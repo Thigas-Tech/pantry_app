@@ -2243,4 +2243,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String unitSystemChanged(String system) {
     return 'Units: $system';
   }
+
+  @override
+  String get debugSection => 'Developer';
+
+  @override
+  String get resetDatabase => 'Reset database';
+
+  @override
+  String get resetDatabaseSubtitle => 'Deletes all local data and recreates the default pantry';
+
+  @override
+  String get resetDatabaseConfirmTitle => 'Reset database?';
+
+  @override
+  String get resetDatabaseConfirmBody => 'All pantries, inventory, prices, recipes, and history will be permanently deleted. This cannot be undone.';
+
+  @override
+  String get resetDatabaseConfirmAction => 'Reset';
+
+  @override
+  String get resetDatabaseDone => 'Database reset';
+
+  @override
+  String get resetDatabaseFailed => 'Could not reset the database';
 }

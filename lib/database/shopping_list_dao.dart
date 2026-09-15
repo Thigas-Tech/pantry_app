@@ -12,43 +12,6 @@ class ShoppingListDao {
   const ShoppingListDao();
 
   /// Creates the shopping_list table.
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE shopping_list (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        barcode TEXT,
-        name TEXT NOT NULL,
-        quantity REAL NOT NULL DEFAULT 1.0,
-        unit TEXT NOT NULL DEFAULT 'pieces',
-        is_purchased INTEGER NOT NULL DEFAULT 0,
-        inventory_id INTEGER,
-        date_added INTEGER NOT NULL,
-        date_purchased INTEGER,
-        price_amount REAL,
-        price_currency TEXT,
-        price_store TEXT,
-        price_package_quantity REAL,
-        price_package_unit TEXT,
-        price_photo_path TEXT,
-        expiry_date TEXT,
-        sort_order REAL NOT NULL DEFAULT 0,
-        FOREIGN KEY (barcode) REFERENCES products(barcode)
-          ON DELETE SET NULL,
-        FOREIGN KEY (inventory_id) REFERENCES inventories(id)
-          ON DELETE SET NULL
-      )
-    ''');
-    await db.execute(
-      'CREATE INDEX idx_shopping_barcode ON shopping_list(barcode)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_shopping_purchased ON shopping_list(is_purchased)',
-    );
-    await db.execute(
-      'CREATE INDEX idx_shopping_inventory_id ON shopping_list(inventory_id)',
-    );
-  }
-
   /// Converts a [ShoppingItem] to a map for database insertion.
   Map<String, dynamic> toMap(ShoppingItem item) => {
     'barcode': item.barcode,

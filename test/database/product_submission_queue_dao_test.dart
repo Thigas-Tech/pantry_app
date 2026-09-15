@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/product_submission_queue_dao.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
   setUpAll(() {
     sqfliteFfiInit();
@@ -27,8 +29,7 @@ void main() {
   setUp(() async {
     currentTime = DateTime(2026, 1, 1, 12);
     dao = ProductSubmissionQueueDao(now: fakeNow);
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await dao.createTable(db);
+    db = await openTestDatabase();
   });
 
   tearDown(() async {
@@ -166,7 +167,7 @@ void main() {
       final path = '${dir.path}/queue.db';
 
       final first = await databaseFactory.openDatabase(path);
-      await dao.createTable(first);
+      await applySchema(first);
       await dao.insert(first, '123');
       await first.close();
 

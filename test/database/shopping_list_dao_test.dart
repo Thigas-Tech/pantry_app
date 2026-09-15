@@ -3,6 +3,8 @@ import 'package:pantry_app/database/shopping_list_dao.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
   setUpAll(() {
     sqfliteFfiInit();
@@ -14,8 +16,7 @@ void main() {
 
   setUp(() async {
     dao = const ShoppingListDao();
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await dao.createTable(db);
+    db = await openTestDatabase();
   });
 
   tearDown(() async {
@@ -23,7 +24,7 @@ void main() {
   });
 
   group('ShoppingListDao', () {
-    test('createTable creates the table', () async {
+    test('insert works with the baseline schema', () async {
       final id = await dao.insert(
         db,
         const ShoppingItem(name: 'Milk', quantity: 2),

@@ -4,6 +4,8 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
   setUpAll(() {
     sqfliteFfiInit();
@@ -15,8 +17,7 @@ void main() {
 
   setUp(() async {
     dao = const RecipeDao();
-    db = await databaseFactory.openDatabase(inMemoryDatabasePath);
-    await dao.createTable(db);
+    db = await openTestDatabase();
   });
 
   tearDown(() async {
@@ -209,7 +210,7 @@ void main() {
   });
 
   group('RecipeDao inventory scoping', () {
-    test('createTable includes inventory_id column', () async {
+    test('recipes table includes inventory_id column', () async {
       final cols = await db.rawQuery("PRAGMA table_info('recipes')");
       expect(cols.map((c) => c['name']), contains('inventory_id'));
     });

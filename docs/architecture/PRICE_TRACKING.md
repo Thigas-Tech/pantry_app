@@ -27,7 +27,8 @@ inventory so each pantry keeps an independent price history.
 
 ### 1.1 `prices` table
 
-Created by migration v12, extended by v37, and rebuilt by v46:
+Defined by the frozen v1 baseline schema (previously built up through
+migrations v12, v37, and v46):
 
 | Column | Type | Notes |
 |---|---|---|
@@ -53,11 +54,11 @@ Indexes: `idx_prices_barcode`, `idx_prices_date`, `idx_prices_sync_status`,
 `idx_prices_inventory_id`, `idx_prices_barcode_inventory_date`
 (barcode, inventory_id, date_purchased, id).
 
-Migration v46 removed the foreign keys on `barcode` and `inventory_id`:
-price observations are the user's own records. They survive product cache
-flushes, pantry deletion, and any cache maintenance, and a missing product
-row never blocks a new price from being recorded. The same migration
-backfilled NULL `date_purchased` values from `date_added` so ordering is
+The `prices` table carries no foreign keys on `barcode` and
+`inventory_id`: price observations are the user's own records. They survive
+product cache flushes, pantry deletion, and any cache maintenance, and a
+missing product row never blocks a new price from being recorded. NULL
+`date_purchased` values are treated as `date_added` for ordering so ordering is
 deterministic.
 
 There is **no proof-photo column**. The original design planned

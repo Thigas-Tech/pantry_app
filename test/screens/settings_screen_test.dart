@@ -21,6 +21,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:pantry_app/database/database_helper.dart';
+import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
@@ -29,6 +31,9 @@ import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 import '../services/mock_notification_service.dart';
+
+/// A mock [DatabaseHelper] for the debug reset flow.
+class MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 // ---------- Fakes -----------------------------------------------------------
 
@@ -622,5 +627,104 @@ void main() {
     await tester.tap(switchFinder);
     await tester.pumpAndSettle();
     verify(mockNotif.cancelWeeklyRecipeSuggestion).called(1);
+  });
+
+  testWidgets('shows the debug developer section with a reset tile', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+      ],
+    );
+
+    await tester.dragUntilVisible(
+      find.text('Developer'),
+      find.byType(ListView),
+      const Offset(0, -400),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Developer'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Developer'), findsOneWidget);
+    expect(find.text('Reset database'), findsOneWidget);
+  });
+
+  testWidgets('reset database confirms and wipes on confirmation', (
+    tester,
+  ) async {
+    final mockDb = MockDatabaseHelper();
+    when(mockDb.resetDatabase).thenAnswer((_) async {});
+    final mockNotif = MockNotificationService();
+    when(mockNotif.cancelAllReminders).thenAnswer((_) async {});
+
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        databaseProvider.overrideWithValue(mockDb),
+        notificationServiceProvider.overrideWithValue(mockNotif),
+      ],
+    );
+
+    await tester.dragUntilVisible(
+      find.text('Developer'),
+      find.byType(ListView),
+      const Offset(0, -400),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Developer'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Reset database'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset database'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reset database?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Reset'));
+    await tester.pumpAndSettle();
+
+    verify(mockDb.resetDatabase).called(1);
+    verify(mockNotif.cancelAllReminders).called(1);
+    expect(find.text('Database reset'), findsOneWidget);
+  });
+
+  testWidgets('cancelling the reset dialog does not wipe', (tester) async {
+    final mockDb = MockDatabaseHelper();
+    when(mockDb.resetDatabase).thenAnswer((_) async {});
+
+    await pumpApp(
+      tester,
+      const SettingsScreen(),
+      overrides: [
+        themeModeProvider.overrideWith(FakeThemeModeNotifier.new),
+        settingsProvider.overrideWith(FakeSettingsNotifier.new),
+        databaseProvider.overrideWithValue(mockDb),
+      ],
+    );
+
+    await tester.dragUntilVisible(
+      find.text('Developer'),
+      find.byType(ListView),
+      const Offset(0, -400),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Developer'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Reset database'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset database'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    verifyNever(mockDb.resetDatabase);
   });
 }

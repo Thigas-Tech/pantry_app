@@ -19,7 +19,7 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | Location | Staleness trigger |
 |---|---|
 | `docs/architecture/OVERVIEW.md` — architecture diagram | Any layer added, removed, or renamed |
-| `docs/architecture/DATABASE.md` — schema version & migration table | Schema bumped in `_onUpgrade` or new migration added |
+| `docs/architecture/DATABASE.md` — schema version & migration policy | Database version bumped or a migration added |
 | `docs/architecture/SERVICES.md` — each service subsection | Service added, removed, or rewritten |
 | `docs/architecture/PROVIDERS.md` — provider table | Provider added, removed, or renamed |
 | `docs/architecture/UI_STRUCTURE.md` — screen/widget tree | Screen widget tree changes |

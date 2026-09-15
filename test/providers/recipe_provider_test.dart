@@ -179,7 +179,9 @@ Future<void> _pumpWithRealIo(
 /// the package-size resolver in
 /// [RecipeService.calculateIngredientCost] can be exercised.
 Future<void> _seedPrices(Database db, List<Price> prices) async {
-  await MigrationRunner(allMigrations()).run(db, 0, 37);
+  await MigrationRunner(
+    allMigrations(),
+  ).run(db, 0, DatabaseHelper.databaseVersion);
   for (final price in prices) {
     await const PriceDao().insert(db, price);
   }
@@ -800,7 +802,9 @@ void main() {
       ' not the active inventory',
       (tester) async {
         await tester.runAsync(() async {
-          await MigrationRunner(allMigrations()).run(db, 0, 37);
+          await MigrationRunner(
+            allMigrations(),
+          ).run(db, 0, DatabaseHelper.databaseVersion);
           await const PriceDao().insert(
             db,
             const Price(

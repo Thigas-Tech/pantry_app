@@ -19,26 +19,6 @@ class ScanHistoryDao {
   static const int defaultKeepCount = 50;
 
   /// Creates the scan_history table.
-  Future<void> createTable(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS scan_history (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        barcode     TEXT NOT NULL,
-        name        TEXT NOT NULL,
-        scanned_at  INTEGER NOT NULL,
-        image_url   TEXT
-      )
-    ''');
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_scan_history_scanned_at'
-      ' ON scan_history(scanned_at)',
-    );
-    await db.execute(
-      'CREATE INDEX IF NOT EXISTS idx_scan_history_barcode'
-      ' ON scan_history(barcode)',
-    );
-  }
-
   /// Converts a [ScanHistoryEntry] to a map for database insertion.
   Map<String, dynamic> toMap(ScanHistoryEntry entry) => {
     if (entry.id != null) 'id': entry.id,

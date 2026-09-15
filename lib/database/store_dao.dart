@@ -13,15 +13,6 @@ class StoreDao {
   const StoreDao();
 
   /// Creates the stores table.
-  Future<void> createTable(Database db) async {
-    await db.execute('''
-      CREATE TABLE stores (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE
-      )
-    ''');
-  }
-
   /// Converts a [Store] to a map for database insertion.
   Map<String, dynamic> toMap(Store store) => {
     'id': store.id,

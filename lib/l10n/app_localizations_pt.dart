@@ -2243,6 +2243,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String unitSystemChanged(String system) {
     return 'Unidades: $system';
   }
+
+  @override
+  String get debugSection => 'Desenvolvedor';
+
+  @override
+  String get resetDatabase => 'Redefinir banco de dados';
+
+  @override
+  String get resetDatabaseSubtitle => 'Apaga todos os dados locais e recria a despensa padrao';
+
+  @override
+  String get resetDatabaseConfirmTitle => 'Redefinir banco de dados?';
+
+  @override
+  String get resetDatabaseConfirmBody => 'Todas as despensas, o inventario, os precos, as receitas e o historico serao apagados permanentemente. Esta acao nao pode ser desfeita.';
+
+  @override
+  String get resetDatabaseConfirmAction => 'Redefinir';
+
+  @override
+  String get resetDatabaseDone => 'Banco de dados redefinido';
+
+  @override
+  String get resetDatabaseFailed => 'Nao foi possivel redefinir o banco de dados';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -4484,4 +4508,28 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String unitSystemChanged(String system) {
     return 'Unidades: $system';
   }
+
+  @override
+  String get debugSection => 'Desenvolvedor';
+
+  @override
+  String get resetDatabase => 'Redefinir banco de dados';
+
+  @override
+  String get resetDatabaseSubtitle => 'Apaga todos os dados locais e recria a despensa padrao';
+
+  @override
+  String get resetDatabaseConfirmTitle => 'Redefinir banco de dados?';
+
+  @override
+  String get resetDatabaseConfirmBody => 'Todas as despensas, o inventario, os precos, as receitas e o historico serao apagados permanentemente. Esta acao nao pode ser desfeita.';
+
+  @override
+  String get resetDatabaseConfirmAction => 'Redefinir';
+
+  @override
+  String get resetDatabaseDone => 'Banco de dados redefinido';
+
+  @override
+  String get resetDatabaseFailed => 'Nao foi possivel redefinir o banco de dados';
 }
