@@ -124,7 +124,7 @@ class ProductRepository {
       return remote;
     } on ProductNotFoundException {
       logWarning('Product $barcode not found in primary API');
-      return _fallbackOrThrow(barcode, lang);
+      return await _fallbackOrThrow(barcode, lang);
     } on Exception catch (e) {
       logError('Network error for $barcode: $e');
       throw FetchFailedException(
@@ -179,7 +179,7 @@ class ProductRepository {
       return await _api.getByBarcode(barcode, languageCode: lang);
     } on ProductNotFoundException {
       logWarning('Product $barcode not found in primary API');
-      return _fallbackOrThrow(barcode, lang);
+      return await _fallbackOrThrow(barcode, lang);
     } on Exception catch (e) {
       logError('Network error for $barcode: $e');
       throw FetchFailedException(
@@ -368,7 +368,7 @@ class ProductRepository {
       inventoryId: inventoryId,
     );
 
-    return _db.insertOrMergeInventoryItem(item);
+    return await _db.insertOrMergeInventoryItem(item);
   }
 
   /// Resolves a [Product] for [produceName] with the given [barcode].

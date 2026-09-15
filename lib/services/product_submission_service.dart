@@ -236,7 +236,7 @@ class ProductSubmissionService {
       logError(
         'Submission failed for ${product.barcode}: ${redactSensitive('$e')}',
       );
-      return _finishFailed(
+      return await _finishFailed(
         product,
         onProgress,
         SubmissionErrorCategory.network,

@@ -29,6 +29,6 @@ Future<String> loadLocalizedChangelog(Locale locale) async {
     return await rootBundle.loadString(path);
   } on Object catch (e) {
     logWarning('Failed to load changelog for $locale, falling back: $e');
-    return rootBundle.loadString('USER_CHANGELOG.md');
+    return await rootBundle.loadString('USER_CHANGELOG.md');
   }
 }

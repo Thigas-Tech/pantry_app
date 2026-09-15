@@ -63,7 +63,7 @@ class OpenPricesService {
     if (!_api.hasToken) {
       return const FetchPricesResult(prices: [], total: 0);
     }
-    return _api.fetchPricesByBarcode(barcode);
+    return await _api.fetchPricesByBarcode(barcode);
   }
 
   /// Syncs all pending prices to Open Prices.

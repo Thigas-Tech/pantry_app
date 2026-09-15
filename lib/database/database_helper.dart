@@ -251,31 +251,31 @@ class DatabaseHelper {
   /// Inserts a product into the local cache (upsert).
   Future<void> insertProduct(Product product) async {
     final db = await database;
-    return productDao.insert(db, product);
+    return await productDao.insert(db, product);
   }
 
   /// Looks up a single product by its barcode.
   Future<Product?> getProduct(String barcode) async {
     final db = await database;
-    return productDao.get(db, barcode);
+    return await productDao.get(db, barcode);
   }
 
   /// Returns all cached products whose barcode is in [barcodes].
   Future<List<Product>> getProductsByBarcodes(List<String> barcodes) async {
     final db = await database;
-    return productDao.getByBarcodes(db, barcodes);
+    return await productDao.getByBarcodes(db, barcodes);
   }
 
   /// Returns the total number of cached product records.
   Future<int> getProductCount() async {
     final db = await database;
-    return productDao.count(db);
+    return await productDao.count(db);
   }
 
   /// Returns all cached products.
   Future<List<Product>> getAllProducts() async {
     final db = await database;
-    return productDao.all(db);
+    return await productDao.all(db);
   }
 
   /// Searches the products table by name or barcode.
@@ -283,7 +283,7 @@ class DatabaseHelper {
   /// Delegates to [ProductDao.search] with a case‑insensitive LIKE query.
   Future<List<Product>> searchProducts(String query) async {
     final db = await database;
-    return productDao.search(db, query);
+    return await productDao.search(db, query);
   }
 
   /// Returns only products fetched from the Open Food Facts API.
@@ -292,7 +292,7 @@ class DatabaseHelper {
   /// (source = 'manual') are excluded.
   Future<List<Product>> getCachedProducts() async {
     final db = await database;
-    return productDao.getBySource(db, 'api');
+    return await productDao.getBySource(db, 'api');
   }
 
   /// Deletes all API‑fetched products from the local cache.
@@ -375,7 +375,7 @@ class DatabaseHelper {
         ''',
           [cutoff],
         );
-        return txn.delete(
+        return await txn.delete(
           'products',
           where: "source = 'api' AND (last_synced IS NULL OR last_synced < ?)",
           whereArgs: [cutoff],
@@ -395,7 +395,7 @@ class DatabaseHelper {
   /// should call [clearCachedProducts] instead.
   Future<void> clearAllProducts() async {
     final db = await database;
-    return productDao.clear(db);
+    return await productDao.clear(db);
   }
 
   /// Removes stale inventory items and orphaned products.
@@ -479,25 +479,25 @@ class DatabaseHelper {
   /// Creates a new inventory (pantry) with the given [name].
   Future<int> createInventory(String name) async {
     final db = await database;
-    return inventoriesDao.create(db, name);
+    return await inventoriesDao.create(db, name);
   }
 
   /// Returns all inventories, ordered by creation time.
   Future<List<Map<String, dynamic>>> getInventories() async {
     final db = await database;
-    return inventoriesDao.list(db);
+    return await inventoriesDao.list(db);
   }
 
   /// Deletes the inventory with the given [id] and all its items.
   Future<void> deleteInventory(int id) async {
     final db = await database;
-    return inventoriesDao.delete(db, id);
+    return await inventoriesDao.delete(db, id);
   }
 
   /// Renames the inventory with the given [id].
   Future<void> renameInventory(int id, String newName) async {
     final db = await database;
-    return inventoriesDao.rename(db, id, newName);
+    return await inventoriesDao.rename(db, id, newName);
   }
 
   // ---- Inventory items (delegating to InventoryDao) ---------
@@ -505,14 +505,14 @@ class DatabaseHelper {
   /// Inserts a new inventory item.
   Future<int> insertInventoryItem(InventoryItem item) async {
     final db = await database;
-    return inventoryDao.insert(db, item);
+    return await inventoryDao.insert(db, item);
   }
 
   /// Inserts an inventory item, merging quantities with an existing item
   /// that has the same barcode and inventoryId.
   Future<int> insertOrMergeInventoryItem(InventoryItem item) async {
     final db = await database;
-    return inventoryDao.insertOrMergeByBarcode(db, item);
+    return await inventoryDao.insertOrMergeByBarcode(db, item);
   }
 
   /// Retrieves all inventory items for a specific [inventoryId],
@@ -522,7 +522,11 @@ class DatabaseHelper {
     String? location,
   }) async {
     final db = await database;
-    return inventoryDao.list(db, inventoryId: inventoryId, location: location);
+    return await inventoryDao.list(
+      db,
+      inventoryId: inventoryId,
+      location: location,
+    );
   }
 
   /// Returns all inventory entries for a specific barcode and [inventoryId],
@@ -532,7 +536,11 @@ class DatabaseHelper {
     required int inventoryId,
   }) async {
     final db = await database;
-    return inventoryDao.listByBarcode(db, barcode, inventoryId: inventoryId);
+    return await inventoryDao.listByBarcode(
+      db,
+      barcode,
+      inventoryId: inventoryId,
+    );
   }
 
   /// Returns the set of barcodes from [barcodes] that have at least one
@@ -567,7 +575,7 @@ class DatabaseHelper {
     int limit = 20,
   }) async {
     final db = await database;
-    return inventoryDao.distinctProductsFromInventory(
+    return await inventoryDao.distinctProductsFromInventory(
       db,
       inventoryId: inventoryId,
       limit: limit,
@@ -577,19 +585,19 @@ class DatabaseHelper {
   /// Updates an existing inventory item.
   Future<int> updateInventoryItem(InventoryItem item) async {
     final db = await database;
-    return inventoryDao.update(db, item);
+    return await inventoryDao.update(db, item);
   }
 
   /// Deletes an inventory item by its ID.
   Future<int> deleteInventoryItem(int id) async {
     final db = await database;
-    return inventoryDao.delete(db, id);
+    return await inventoryDao.delete(db, id);
   }
 
   /// Deletes multiple inventory items in one batch by their IDs.
   Future<int> deleteInventoryItems(List<int> ids) async {
     final db = await database;
-    return inventoryDao.deleteMany(db, ids);
+    return await inventoryDao.deleteMany(db, ids);
   }
 
   /// Moves multiple inventory items to a different inventory (pantry).
@@ -598,7 +606,11 @@ class DatabaseHelper {
     int targetInventoryId,
   ) async {
     final db = await database;
-    return inventoryDao.moveItemsToInventory(db, itemIds, targetInventoryId);
+    return await inventoryDao.moveItemsToInventory(
+      db,
+      itemIds,
+      targetInventoryId,
+    );
   }
 
   /// Retrieves all inventory rows joined with product metadata.
@@ -606,7 +618,7 @@ class DatabaseHelper {
     required int inventoryId,
   }) async {
     final db = await database;
-    return inventoryDao.listWithProduct(db, inventoryId: inventoryId);
+    return await inventoryDao.listWithProduct(db, inventoryId: inventoryId);
   }
 
   /// Returns the most recent [InventoryItem.dateAdded] epoch across all items.
@@ -614,13 +626,13 @@ class DatabaseHelper {
   /// Returns null if the inventory table is empty.
   Future<int?> getLastAddDate() async {
     final db = await database;
-    return inventoryDao.getLastAddDate(db);
+    return await inventoryDao.getLastAddDate(db);
   }
 
   /// Returns the total number of rows in the inventory table.
   Future<int> getInventoryCount({int? inventoryId}) async {
     final db = await database;
-    return inventoryDao.count(db, inventoryId: inventoryId);
+    return await inventoryDao.count(db, inventoryId: inventoryId);
   }
 
   // ---- Prices (delegating to PriceDao) ------------------------
@@ -628,13 +640,13 @@ class DatabaseHelper {
   /// Inserts a price observation. Returns the new row ID.
   Future<int> insertPrice(Price price) async {
     final db = await database;
-    return priceDao.insert(db, price);
+    return await priceDao.insert(db, price);
   }
 
   /// Returns the price with the given [id], or null if not found.
   Future<Price?> getPriceById(int id) async {
     final db = await database;
-    return priceDao.getById(db, id);
+    return await priceDao.getById(db, id);
   }
 
   /// Returns all price entries for the given [barcode] and [inventoryId],
@@ -646,7 +658,7 @@ class DatabaseHelper {
     int? offset,
   }) async {
     final db = await database;
-    return priceDao.listByBarcode(
+    return await priceDao.listByBarcode(
       db,
       barcode,
       inventoryId: inventoryId,
@@ -662,64 +674,64 @@ class DatabaseHelper {
     required int inventoryId,
   }) async {
     final db = await database;
-    return priceDao.getLatest(db, barcode, inventoryId: inventoryId);
+    return await priceDao.getLatest(db, barcode, inventoryId: inventoryId);
   }
 
   /// Updates an existing price row.
   Future<int> updatePrice(Price price) async {
     final db = await database;
-    return priceDao.update(db, price);
+    return await priceDao.update(db, price);
   }
 
   /// Deletes the price with the given [id].
   Future<int> deletePrice(int id) async {
     final db = await database;
-    return priceDao.delete(db, id);
+    return await priceDao.delete(db, id);
   }
 
   /// Returns the total number of prices for the given [barcode].
   Future<int> getPriceCountByBarcode(String barcode) async {
     final db = await database;
-    return priceDao.countByBarcode(db, barcode);
+    return await priceDao.countByBarcode(db, barcode);
   }
 
   /// Returns the total number of prices on record.
   Future<int> getPriceCount() async {
     final db = await database;
-    return priceDao.count(db);
+    return await priceDao.count(db);
   }
 
   /// Returns the sum of the most recent price per distinct product in the
   /// given inventory.
   Future<double?> getTotalInventoryValue(int inventoryId) async {
     final db = await database;
-    return priceDao.totalInventoryValue(db, inventoryId);
+    return await priceDao.totalInventoryValue(db, inventoryId);
   }
 
   /// Returns the average of the most recent price per distinct product in
   /// the given inventory.
   Future<double?> getAverageItemPrice(int inventoryId) async {
     final db = await database;
-    return priceDao.averageItemPrice(db, inventoryId);
+    return await priceDao.averageItemPrice(db, inventoryId);
   }
 
   /// Returns the count of distinct inventory items that have at least one
   /// price.
   Future<int> getPricedItemCount(int inventoryId) async {
     final db = await database;
-    return priceDao.pricedItemCount(db, inventoryId);
+    return await priceDao.pricedItemCount(db, inventoryId);
   }
 
   /// Returns prices with the given [syncStatus] for Open Prices sync.
   Future<List<Price>> getPricesBySyncStatus(String syncStatus) async {
     final db = await database;
-    return priceDao.getBySyncStatus(db, syncStatus);
+    return await priceDao.getBySyncStatus(db, syncStatus);
   }
 
   /// Counts prices with the given [syncStatus] without loading the rows.
   Future<int> countPricesBySyncStatus(String syncStatus) async {
     final db = await database;
-    return priceDao.countBySyncStatus(db, syncStatus);
+    return await priceDao.countBySyncStatus(db, syncStatus);
   }
 
   // ---- Shopping list (delegating to ShoppingListDao) ------------
@@ -727,19 +739,19 @@ class DatabaseHelper {
   /// Inserts a shopping list item. Returns the new row ID.
   Future<int> insertShoppingItem(ShoppingItem item) async {
     final db = await database;
-    return shoppingListDao.insert(db, item);
+    return await shoppingListDao.insert(db, item);
   }
 
   /// Returns all shopping list items, ordered by dateAdded desc.
   Future<List<ShoppingItem>> getShoppingList({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.listAll(db, inventoryId: inventoryId);
+    return await shoppingListDao.listAll(db, inventoryId: inventoryId);
   }
 
   /// Returns only pending (not purchased) items.
   Future<List<ShoppingItem>> getPendingShoppingItems({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.listPending(db, inventoryId: inventoryId);
+    return await shoppingListDao.listPending(db, inventoryId: inventoryId);
   }
 
   /// Returns only purchased items.
@@ -747,19 +759,19 @@ class DatabaseHelper {
     int? inventoryId,
   }) async {
     final db = await database;
-    return shoppingListDao.listPurchased(db, inventoryId: inventoryId);
+    return await shoppingListDao.listPurchased(db, inventoryId: inventoryId);
   }
 
   /// Updates a shopping list item.
   Future<int> updateShoppingItem(ShoppingItem item) async {
     final db = await database;
-    return shoppingListDao.update(db, item);
+    return await shoppingListDao.update(db, item);
   }
 
   /// Reorders pending shopping items to match the given [itemIds] order.
   Future<void> reorderShoppingItems(List<int> itemIds) async {
     final db = await database;
-    return shoppingListDao.reorder(db, itemIds);
+    return await shoppingListDao.reorder(db, itemIds);
   }
 
   /// Updates only the price-related columns for the shopping item
@@ -773,7 +785,7 @@ class DatabaseHelper {
     String? pricePackageUnit,
   }) async {
     final db = await database;
-    return shoppingListDao.updatePriceFields(
+    return await shoppingListDao.updatePriceFields(
       db,
       id,
       priceAmount: priceAmount,
@@ -790,19 +802,23 @@ class DatabaseHelper {
     required String? expiryDate,
   }) async {
     final db = await database;
-    return shoppingListDao.updateExpiryFields(db, id, expiryDate: expiryDate);
+    return await shoppingListDao.updateExpiryFields(
+      db,
+      id,
+      expiryDate: expiryDate,
+    );
   }
 
   /// Deletes a shopping list item by [id].
   Future<int> deleteShoppingItem(int id) async {
     final db = await database;
-    return shoppingListDao.delete(db, id);
+    return await shoppingListDao.delete(db, id);
   }
 
   /// Toggles the purchased state for the item with the given [id].
   Future<void> toggleShoppingItemPurchased(int id) async {
     final db = await database;
-    return shoppingListDao.togglePurchased(db, id);
+    return await shoppingListDao.togglePurchased(db, id);
   }
 
   /// Deletes all purchased shopping list items, optionally scoped to an
@@ -812,7 +828,7 @@ class DatabaseHelper {
   /// that inventory are deleted.
   Future<int> clearPurchasedShoppingItems({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.clearPurchased(db, inventoryId: inventoryId);
+    return await shoppingListDao.clearPurchased(db, inventoryId: inventoryId);
   }
 
   /// Marks items matching the given [barcode] as purchased, optionally
@@ -822,7 +838,7 @@ class DatabaseHelper {
     int? inventoryId,
   }) async {
     final db = await database;
-    return shoppingListDao.markPurchasedByBarcode(
+    return await shoppingListDao.markPurchasedByBarcode(
       db,
       barcode,
       inventoryId: inventoryId,
@@ -832,13 +848,13 @@ class DatabaseHelper {
   /// Returns the count of pending (not purchased) shopping list items.
   Future<int> getPendingShoppingCount({int? inventoryId}) async {
     final db = await database;
-    return shoppingListDao.pendingCount(db, inventoryId: inventoryId);
+    return await shoppingListDao.pendingCount(db, inventoryId: inventoryId);
   }
 
   /// Returns all saved stores, ordered alphabetically.
   Future<List<Store>> getAllStores() async {
     final db = await database;
-    return storeDao.getAll(db);
+    return await storeDao.getAll(db);
   }
 
   // ---- Recipe (delegating to RecipeDao + RecipeIngredientDao) -------
@@ -846,56 +862,56 @@ class DatabaseHelper {
   /// Inserts a new recipe and returns its row ID.
   Future<int> insertRecipe(Recipe recipe) async {
     final db = await database;
-    return recipeDao.insert(db, recipe);
+    return await recipeDao.insert(db, recipe);
   }
 
   /// Returns the recipe with the given [id], or null.
   Future<Recipe?> getRecipe(int id) async {
     final db = await database;
-    return recipeDao.get(db, id);
+    return await recipeDao.get(db, id);
   }
 
   /// Returns all recipes for the given [inventoryId],
   /// ordered by updated_at descending.
   Future<List<Recipe>> getAllRecipes(int inventoryId) async {
     final db = await database;
-    return recipeDao.listAll(db, inventoryId);
+    return await recipeDao.listAll(db, inventoryId);
   }
 
   /// Updates an existing recipe. Returns rows affected.
   Future<int> updateRecipe(Recipe recipe) async {
     final db = await database;
-    return recipeDao.update(db, recipe);
+    return await recipeDao.update(db, recipe);
   }
 
   /// Deletes the recipe with the given [id]. Returns rows deleted.
   Future<int> deleteRecipe(int id) async {
     final db = await database;
-    return recipeDao.delete(db, id);
+    return await recipeDao.delete(db, id);
   }
 
   /// Returns the total number of recipes.
   Future<int> getRecipeCount() async {
     final db = await database;
-    return recipeDao.count(db);
+    return await recipeDao.count(db);
   }
 
   /// Inserts a recipe ingredient and returns its row ID.
   Future<int> insertRecipeIngredient(RecipeIngredient ingredient) async {
     final db = await database;
-    return recipeIngredientDao.insert(db, ingredient);
+    return await recipeIngredientDao.insert(db, ingredient);
   }
 
   /// Returns all ingredients for the given [recipeId].
   Future<List<RecipeIngredient>> getRecipeIngredients(int recipeId) async {
     final db = await database;
-    return recipeIngredientDao.listByRecipeId(db, recipeId);
+    return await recipeIngredientDao.listByRecipeId(db, recipeId);
   }
 
   /// Deletes all ingredients for the given [recipeId]. Returns rows deleted.
   Future<int> deleteRecipeIngredients(int recipeId) async {
     final db = await database;
-    return recipeIngredientDao.deleteByRecipeId(db, recipeId);
+    return await recipeIngredientDao.deleteByRecipeId(db, recipeId);
   }
 
   /// Inserts a recipe and its ingredients in a single transaction.
@@ -916,7 +932,7 @@ class DatabaseHelper {
         : stamped;
     final recipeMap = recipeDao.toMap(finalRecipe)..remove('id');
 
-    return db.transaction<int>((txn) async {
+    return await db.transaction<int>((txn) async {
       final recipeId = await txn.insert('recipes', recipeMap);
       for (final ingredient in ingredients) {
         final ingMap = recipeIngredientDao.toMap(
@@ -951,7 +967,7 @@ class DatabaseHelper {
     );
     final recipeMap = recipeDao.toMap(updated);
 
-    return db.transaction((txn) async {
+    return await db.transaction((txn) async {
       await txn.update(
         'recipes',
         recipeMap,
@@ -977,13 +993,13 @@ class DatabaseHelper {
   /// Inserts a recipe history entry and returns its row ID.
   Future<int> insertRecipeHistory(RecipeHistoryEntry entry) async {
     final db = await database;
-    return recipeHistoryDao.insert(db, entry);
+    return await recipeHistoryDao.insert(db, entry);
   }
 
   /// Returns all history entries for the given [recipeId], newest first.
   Future<List<RecipeHistoryEntry>> getRecipeHistory(int recipeId) async {
     final db = await database;
-    return recipeHistoryDao.getByRecipeId(db, recipeId);
+    return await recipeHistoryDao.getByRecipeId(db, recipeId);
   }
 
   /// Returns all history entries made at or after [sinceMillis].
@@ -991,13 +1007,13 @@ class DatabaseHelper {
     int sinceMillis,
   ) async {
     final db = await database;
-    return recipeHistoryDao.getRecent(db, sinceMillis);
+    return await recipeHistoryDao.getRecent(db, sinceMillis);
   }
 
   /// Deletes the history entry with the given [historyId].
   Future<void> deleteRecipeHistory(int historyId) async {
     final db = await database;
-    return recipeHistoryDao.deleteById(db, historyId);
+    return await recipeHistoryDao.deleteById(db, historyId);
   }
 
   // ---- Scan history (delegating to ScanHistoryDao) -------
@@ -1009,7 +1025,7 @@ class DatabaseHelper {
   /// Both operations run inside a single transaction.
   Future<int> recordScan(ScanHistoryEntry entry) async {
     final db = await database;
-    return db.transaction<int>((txn) async {
+    return await db.transaction<int>((txn) async {
       final id = await scanHistoryDao.insert(txn, entry);
       await scanHistoryDao.deleteOld(txn);
       return id;
@@ -1021,7 +1037,7 @@ class DatabaseHelper {
     int limit = ScanHistoryDao.defaultKeepCount,
   }) async {
     final db = await database;
-    return scanHistoryDao.getRecent(db, limit: limit);
+    return await scanHistoryDao.getRecent(db, limit: limit);
   }
 
   /// Deletes every row from the scan_history table.
@@ -1029,7 +1045,7 @@ class DatabaseHelper {
   /// Returns the number of rows removed.
   Future<int> clearScanHistory() async {
     final db = await database;
-    return scanHistoryDao.clear(db);
+    return await scanHistoryDao.clear(db);
   }
 
   // ---- FEFO inventory query -------
@@ -1041,7 +1057,7 @@ class DatabaseHelper {
     required int inventoryId,
   }) async {
     final db = await database;
-    return db.rawQuery(
+    return await db.rawQuery(
       'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'
       ' ORDER BY (expiry_date IS NULL), expiry_date ASC',
       [barcode, inventoryId],
@@ -1065,7 +1081,7 @@ class DatabaseHelper {
     final db = await database;
     final normalized = name.trim().toLowerCase();
     final escaped = normalized.replaceAll('%', r'\%').replaceAll('_', r'\_');
-    return db.rawQuery(
+    return await db.rawQuery(
       'SELECT i.* FROM inventory i'
       ' INNER JOIN products p ON p.barcode = i.barcode'
       r" WHERE LOWER(p.name) LIKE ? ESCAPE '\' AND i.inventory_id = ?"

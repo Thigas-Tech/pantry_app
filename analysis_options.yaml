@@ -11,6 +11,13 @@ linter:
     # ----- Disabled (not applicable to Flutter apps) -----
     avoid_slow_async_io: false
 
+    # ----- Disabled (deprecated, conflicts with async_return_with_no_await) --
+    # The Dart lint docs mark unnecessary_await_in_return as deprecated and
+    # instruct projects to remove it. It contradicts the stable
+    # async_return_with_no_await rule (Dart 3.13), which requires
+    # [return await future] inside async bodies to preserve stack traces.
+    unnecessary_await_in_return: false
+
     # ----- Disabled (very_good_analysis style rules — too much churn) -----
     always_specify_types: false
     always_put_control_body_on_new_line: false

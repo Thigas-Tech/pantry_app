@@ -24,7 +24,7 @@ part 'recipe_provider.g.dart';
 Future<List<Recipe>> allRecipes(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final activeId = await ref.watch(activeInventoryProvider.future);
-  return db.getAllRecipes(activeId);
+  return await db.getAllRecipes(activeId);
 }
 
 /// Provides ingredients for a specific recipe.

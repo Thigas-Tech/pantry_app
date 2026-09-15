@@ -108,9 +108,9 @@ class ProductPhotoPicker {
         );
       }
       if (_supportsInAppCamera) {
-        return _captureFromInAppCamera();
+        return await _captureFromInAppCamera();
       }
-      return _pickImage(ImageSource.camera);
+      return await _pickImage(ImageSource.camera);
     }
     if (_isGalleryPermissionRequired()) {
       final status = await _galleryPermissionCheck();

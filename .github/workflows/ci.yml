@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -46,10 +47,19 @@ jobs:
           echo "OFF_PASSWORD=ci" >> code/.env
           echo "CONTACT_EMAIL=ci@pantry-app.dev" >> code/.env
       - name: Check version ahead of latest release
-        if: matrix.category == 'static'
+        if: matrix.category == 'static' && github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          FILES=$(gh api \
+            "repos/$GITHUB_REPOSITORY/pulls/${{ github.event.number }}/files" \
+            --paginate --jq '.[].filename')
+          APP_CHANGED=$(printf '%s\n' "$FILES" \
+            | grep -vE '^docs/|^\.github/|^LICENSE$|^\.env\.example$|\.md$' || true)
+          if [ -z "$APP_CHANGED" ]; then
+            echo "Docs/CI-only change — version bump not required."
+            exit 0
+          fi
           PUBSPEC_VER=$(grep '^version: ' code/pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
           if gh release view "v$PUBSPEC_VER" --repo "$GITHUB_REPOSITORY" --json tagName &>/dev/null; then
             echo "ERROR: version $PUBSPEC_VER already has a release on GitHub."

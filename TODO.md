@@ -25,6 +25,13 @@ monetization and paid-infrastructure work.
   release build; if it persists, investigate `_runDatabaseCleanup` and
   `main.dart` init ordering.
 
+- [ ] **Full dependency refresh blocked by dartdoc** — `flutter pub upgrade`
+  drifts 67 packages (including runtime plugins) and makes `dart doc` crash
+  inside dartdoc 9.0.6 (`_stripDocImports` RangeError on `@docImport`
+  comments from upgraded packages such as sqlite3 3.6.0, platform 3.2.0,
+  and hooks 2.2.0). Revisit when dartdoc fixes the bug or a safe workaround
+  exists. The `lint` package alone was upgraded to clear the analyzer debt.
+
 ## Code health & performance
 
 - [ ] **Thread strategy audit** — identify heavy work that blocks the UI

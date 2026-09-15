@@ -87,7 +87,7 @@ class ImageCacheService {
     if (imageUrl == null || imageUrl.isEmpty) return null;
 
     final inFlight = _inFlight[barcode];
-    if (inFlight != null) return inFlight;
+    if (inFlight != null) return await inFlight;
 
     final future = _cacheImageImpl(imageUrl, barcode);
     _inFlight[barcode] = future;

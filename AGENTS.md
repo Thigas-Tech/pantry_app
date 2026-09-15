@@ -41,7 +41,7 @@ Run AFTER every commit:
   lcov --remove coverage/lcov.info \
     '*.g.dart' '*.freezed.dart' '*.gr.dart' '*.config.dart' \
     '*app_localizations*.dart' 'test/*' \
-    -o coverage/lcov_cleaned.info --ignore-errors unused
+    -o coverage/lcov_cleaned.info --ignore-errors unused,empty
   genhtml coverage/lcov_cleaned.info \
     -o coverage/html --ignore-errors source --num-spaces 2 --branch-coverage
   lcov --summary coverage/lcov_cleaned.info
@@ -98,6 +98,10 @@ Fallback handling: see ~/.config/opencode/instructions/flutter_coverage_report.m
   workflow recreates .env from GitHub secrets for the same flag.
 - Never commit directly to main.
 - After merge: git checkout main && git pull
+- Version bump: PRs that change app-affecting files (anything outside
+  docs/, .github/, *.md, LICENSE, and .env.example) must bump the version
+  in pubspec.yaml; the CI version gate enforces it. Docs/CI-only PRs skip
+  the bump and produce no release or Play upload.
 
 ## Code style
 
