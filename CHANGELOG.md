@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.0.17+13] — 2026-09-15
+
+### Fixed
+
+- **Coverage gate flags**: the post-commit `lcov --remove` step now passes
+  `--ignore-errors unused,empty`. lcov 2.5 aborts with an "(empty) function
+  coverage" error otherwise and silently leaves a stale cleaned report.
+  (AGENTS.md)
+
+### Changed
+
+- **Path-aware version gate**: the CI version check now requires a bump only
+  when a pull request changes app-affecting files (anything outside docs/,
+  .github/, *.md, LICENSE, and .env.example). Docs and CI-only PRs no longer
+  publish a release or upload to Play. (ci.yml, AGENTS.md,
+  docs/architecture/PERFORMANCE.md)
+- **Lint upgrade and analyzer cleanup**: the `lint` dev dependency was
+  upgraded from 2.8.0 to 2.14.0, which enables the stable
+  async_return_with_no_await rule. All 91 flagged sites now use
+  `return await`, and the deprecated unnecessary_await_in_return rule is
+  disabled in analysis_options.yaml, as the Dart lint documentation
+  instructs. A full `flutter pub upgrade` was audited and rejected for now:
+  it moves 67 packages and makes `dart doc` crash inside dartdoc 9.0.6.
+  (pubspec.lock, lib/, test/, analysis_options.yaml, TODO.md)
+- **Uploads documentation**: docs/architecture/PERFORMANCE.md notes that the
+  remaining Node deprecation warnings originate inside the current upstream
+  action releases.
+
 ## [0.0.16+12] — 2026-09-15
 
 ### Changed
