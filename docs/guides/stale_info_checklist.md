@@ -14,28 +14,25 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | Project structure tree (lines 94-111) | File created or deleted under `lib/` |
 | Build commands (lines 78-90) | Flags changed or new build variants added |
 
-## 2. `ARCHITECTURE/INDEX.md`
+## 2. `docs/INDEX.md`
 
 | Location | Staleness trigger |
 |---|---|
-| `ARCHITECTURE/OVERVIEW.md` — architecture diagram | Any layer added, removed, or renamed |
-| `ARCHITECTURE/DATABASE.md` — schema version & migration table | Schema bumped in `_onUpgrade` or new migration added |
-| `ARCHITECTURE/SERVICES.md` — each service subsection | Service added, removed, or rewritten |
-| `ARCHITECTURE/PROVIDERS.md` — provider table | Provider added, removed, or renamed |
-| `ARCHITECTURE/UI_STRUCTURE.md` — screen/widget tree | Screen widget tree changes |
-| `ARCHITECTURE/PERFORMANCE.md` — CI/CD pipeline table (section 11.8) | Workflow added, renamed, or trigger changed |
-| `ARCHITECTURE/INDEX.md` — design decisions | New pattern adopted or old one abandoned |
-| `ARCHITECTURE/PRICE_TRACKING.md` — local data model / sync / proof sections | Schema version bumped, Open Prices sync stops being a local placeholder, proof upload implemented, price entry gains package-size fields |
-| `docs/superpowers/agents/monetization.md` | Any monetization features implemented or deferred |
+| `docs/architecture/OVERVIEW.md` — architecture diagram | Any layer added, removed, or renamed |
+| `docs/architecture/DATABASE.md` — schema version & migration table | Schema bumped in `_onUpgrade` or new migration added |
+| `docs/architecture/SERVICES.md` — each service subsection | Service added, removed, or rewritten |
+| `docs/architecture/PROVIDERS.md` — provider table | Provider added, removed, or renamed |
+| `docs/architecture/UI_STRUCTURE.md` — screen/widget tree | Screen widget tree changes |
+| `docs/architecture/PERFORMANCE.md` — CI/CD pipeline table (section 11.9) | Workflow added, renamed, or trigger changed |
+| `docs/architecture/PRICE_TRACKING.md` — local data model / sync / proof sections | Schema version bumped, Open Prices sync stops being a local placeholder, proof upload implemented, price entry gains package-size fields |
+| `docs/guides/monetization.md` | Any monetization features implemented or deferred |
 
 ## 3. `TODO.md`
 
 | Location | Staleness trigger |
 |---|---|
-| Any `[ ]` checkbox | Feature implemented (mark `[x]`) |
-| Any `[x]` checkbox | Implementation details change |
-| Play Console block (top) | Document verification complete |
-| "Deploy workflow" items | Workflow file created or enabled |
+| Any `[ ]` item | Work shipped (remove the item once released) |
+| Feature state described | Feature removed or deferred |
 | DB version references | Schema version bumped |
 
 ## 4. `CHANGELOG.md`
@@ -64,14 +61,14 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | Provider doc comments | Provider type changed (e.g. `Provider` -> `FutureProvider`) |
 | Screen doc comments | Widget tree or navigation flow changed |
 
-## 7. `docs/superpowers/agents/*.md` and `docs/superpowers/plans/*.md`
+## 7. `docs/guides/*.md` and `docs/reference/*.md`
 
 | File | Staleness trigger |
 |---|---|
-| `playstore.md` | CI/CD deploy workflow changed |
-| `play_console_later.md` | Play Console verification complete |
+| `docs/guides/playstore.md` | CI/CD deploy workflow changed |
+| `docs/guides/wiki.md` | Wiki CI workflow changed |
+| `docs/guides/performance_guide.md` | Performance tooling or thresholds change |
 | `FEATURE_FREEZE.md` | Feature freeze checkbox added or removed |
-| `wiki.md` | Wiki CI workflow changed |
 
 ---
 
@@ -80,7 +77,7 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 These patterns reappear frequently. Search for them when auditing:
 
 - **Removed feature mentioned as current**: CSV import/export, Dio, `exportData()`
-- **Price tracking described as fully synced**: Open Prices sync currently marks prices `synced` locally without HTTP, there is no `proof_image_path` column, and `submitPrice` does not send `price_per` yet (see `ARCHITECTURE/PRICE_TRACKING.md`)
+- **Price tracking described as fully synced**: Open Prices sync currently marks prices `synced` locally without HTTP, there is no `proof_image_path` column, and `submitPrice` does not send `price_per` yet (see `docs/architecture/PRICE_TRACKING.md`)
 - **Non-existent provider listed**: `adServiceProvider`, `donationServiceProvider`, `firebaseServiceProvider`, `cloudBackupServiceProvider`, `backupStatusProvider`, `isProProvider`, `isAdFreeProvider`, `firebaseCacheProvider`, `authServiceProvider`, `authStateProvider` (all Firebase and auth providers were removed with Firebase)
 - **Implemented feature marked `[ ]`**: Check `TODO.md` against actual source files
 - **Contradictory `[Unreleased]` entries**: Earlier changelog sections may describe the true current state
@@ -88,5 +85,6 @@ These patterns reappear frequently. Search for them when auditing:
 - **Wrong concurrency flag**: `--concurrency=8` vs `--concurrency=2`
 - **Wrong artifact retention**: 7 days vs 90 days
 - **Deploy workflow described as active**: Tag trigger may be commented out
-- **ARCHITECTURE.md referenced as flat file**: Was restructured to `ARCHITECTURE/INDEX.md` directory. Search for bare `ARCHITECTURE.md` references across all `.md` files
-- **Bottom sheet without system nav bar padding**: Search for `showModalBottomSheet` in `lib/widgets/` and verify each one has `MediaQuery.of(context).padding.bottom` or equivalent. See `docs/superpowers/agents/bottom_sheet_safe_area.md` for the pattern.
+- **Docs referenced at old paths**: `ARCHITECTURE/` and `docs/superpowers/` were merged into `docs/`. Search for stale `ARCHITECTURE/` and `docs/superpowers/` references across all `.md` files (except historical `CHANGELOG.md` entries)
+- **Removed CI workflows described as active**: `patrol-e2e.yml`, `flashlight.yml`, `perfetto.yml`, `auto-moderate.yml`, `pr-labeler.yml`, and `opencode.yml` no longer exist. Only `ci.yml`, `build.yml`, `deploy-to-playstore.yml`, and `wiki.yml` remain
+- **Bottom sheet without system nav bar padding**: Search for `showModalBottomSheet` in `lib/widgets/` and verify each one has `MediaQuery.of(context).padding.bottom` or equivalent. See `docs/guides/bottom_sheet_safe_area.md` for the pattern.

@@ -388,9 +388,10 @@ void main() {
         await productDao.insert(db, Product(barcode: barcode, name: barcode));
         await dao.insert(db, InventoryItem(barcode: barcode));
       }
-      final ids = (await dao.list(db, inventoryId: 1))
-          .map((i) => i.id!)
-          .toList();
+      final ids = (await dao.list(
+        db,
+        inventoryId: 1,
+      )).map((i) => i.id!).toList();
 
       final deleted = await dao.deleteMany(db, ids);
 

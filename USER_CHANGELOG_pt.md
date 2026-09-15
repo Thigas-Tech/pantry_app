@@ -1,6 +1,6 @@
 # Registro de alteracoes do usuario
 
-## Unreleased
+## [0.0.12+8]
 
 - Voce agora pode adicionar um novo preco para um produto diretamente na
   pagina do produto (o botao "Adicionar preco" continua disponivel depois
@@ -208,7 +208,6 @@
 - O app nao mostra mais brevemente a despensa, o tema ou as configuracoes
   erradas logo apos a abertura: os valores salvos agora sao carregados
   antes do primeiro quadro ser renderizado.
-## Unreleased
 
 - As mensagens de erro agora mostram uma mensagem generica e amigavel em
   vez de detalhes tecnicos brutos, enquanto o app ainda registra o erro

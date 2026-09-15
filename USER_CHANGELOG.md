@@ -1,6 +1,6 @@
 # User Changelog
 
-## Unreleased
+## [0.0.12+8]
 
 - You can now add a new price for a product directly from the product page
   (the "Add price" button stays available after the first price) and from
@@ -187,7 +187,6 @@
 - The app no longer briefly shows the wrong pantry, theme, or settings
   right after launch: persisted values now load before the first frame
   renders.
-## Unreleased
 
 - Error messages now show a friendly, generic message instead of raw
   technical error details, while the app still records the full error for

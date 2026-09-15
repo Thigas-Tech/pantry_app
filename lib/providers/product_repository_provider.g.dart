@@ -153,7 +153,7 @@ final class ProductRepositoryProvider
 
 String _$productRepositoryHash() => r'3fd599e9c90dabd5b12c1fb87c48952af437894c';
 
-/// Provides the cached [Product] for a [barcode], or null.
+/// Provides the cached [Product] for a barcode, or null.
 ///
 /// Reads only from the local cache (never the network) so list tiles can
 /// resolve product metadata — such as the image URL — cheaply while
@@ -162,7 +162,7 @@ String _$productRepositoryHash() => r'3fd599e9c90dabd5b12c1fb87c48952af437894c';
 @ProviderFor(productByBarcode)
 final productByBarcodeProvider = ProductByBarcodeFamily._();
 
-/// Provides the cached [Product] for a [barcode], or null.
+/// Provides the cached [Product] for a barcode, or null.
 ///
 /// Reads only from the local cache (never the network) so list tiles can
 /// resolve product metadata — such as the image URL — cheaply while
@@ -172,7 +172,7 @@ final class ProductByBarcodeProvider
     extends
         $FunctionalProvider<AsyncValue<Product?>, Product?, FutureOr<Product?>>
     with $FutureModifier<Product?>, $FutureProvider<Product?> {
-  /// Provides the cached [Product] for a [barcode], or null.
+  /// Provides the cached [Product] for a barcode, or null.
   ///
   /// Reads only from the local cache (never the network) so list tiles can
   /// resolve product metadata — such as the image URL — cheaply while
@@ -222,7 +222,7 @@ final class ProductByBarcodeProvider
 
 String _$productByBarcodeHash() => r'97b451e75730d7de9def067eacb67c57eb79d9d1';
 
-/// Provides the cached [Product] for a [barcode], or null.
+/// Provides the cached [Product] for a barcode, or null.
 ///
 /// Reads only from the local cache (never the network) so list tiles can
 /// resolve product metadata — such as the image URL — cheaply while
@@ -239,7 +239,7 @@ final class ProductByBarcodeFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provides the cached [Product] for a [barcode], or null.
+  /// Provides the cached [Product] for a barcode, or null.
   ///
   /// Reads only from the local cache (never the network) so list tiles can
   /// resolve product metadata — such as the image URL — cheaply while

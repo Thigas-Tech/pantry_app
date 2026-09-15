@@ -100,31 +100,22 @@ The project uses GitHub Actions for continuous integration and delivery.
 Workflows live in `.github/workflows/`:
 
 | Workflow | Trigger | Purpose |
-|---|---|---|---|---|
-| `ci.yml` | Pull request to `main` | Format check, `dart analyze`, unit + widget tests, coverage report with PR comment |
-| `build.yml` | Push to `main` | Re-runs all checks, injects `.env` from secrets, builds debug APK + AAB + release APK + AAB, uploads artifacts (90-day retention), and creates a GitHub release via `gh release create` (publish job) |
-| `patrol-e2e.yml` | Weekly (Sun 03:00 UTC) | Patrol integration test suite on Android emulator |
-| `flashlight.yml` | Weekly (Sun 04:00 UTC) | Flashlight battery/CPU/GPU profiling on emulator |
-| `perfetto.yml` | Weekly (Sun 05:00 UTC) | Perfetto startup trace collection and frame-timing analysis |
-| `deploy-to-playstore.yml` | Release published | Signed release AAB + APK, upload to Play Console internal track via `r0adkll/upload-google-play`. Triggered by `build.yml` publish job or manual release creation. |
+|---|---|---|
+| `ci.yml` | Pull request to `main`, push to `main` | Format check, `dart analyze`, version gate, unit + widget tests, coverage artifacts |
+| `build.yml` | Pull request to `main`, push to `main` | Debug APK on pull requests; release APK + AAB + debug symbols on `main`, then creates a GitHub release via `gh release create` (publish job) |
+| `deploy-to-playstore.yml` | Release published | Signed release AAB + APK, upload to Play Console internal track via `r0adkll/upload-google-play`. Triggered by `build.yml` publish job or manual release creation |
+| `wiki.yml` | Push to `main` | Generates `dart doc` API docs and deploys them to the `gh-pages` branch |
 
 > **Note:** The `publish` job in `build.yml` creates a GitHub release using
 > `gh release create` with artifacts attached.
 
-All workflows use SHA-pinned actions for supply-chain security. Dependabot
-updates GitHub Action versions monthly. Runner: `ubuntu-latest` for QA and
-build, `macos-latest` for emulator-based workloads (E2E, Flashlight, Perfetto).
+All workflows use floating major action tags (for example
+`actions/checkout@v5`). Runner: `ubuntu-latest`.
 
 ### 11.10 Performance measurement
 
-The CI pipeline integrates automated performance profiling:
-- **Flashlight** — weekly automated battery, CPU, GPU profiling on emulator.
-  Reports stored as artifacts; baseline comparison planned for PR gating.
-- **Perfetto** — weekly startup and frame timing traces. Open in `ui.perfetto.dev`
-  or parse with `perfetto` CLI for jank metrics.
 - **Dart DevTools** — manual profiling during development: Performance page
   (widget rebuilds, oversized images) and CPU Profiler (Flame Chart for
   UI-thread blocking).
-
-Reference: Flutter Heroes 2025 performance talk by Alexandre Moureaux (BAM)
-— [github.com/bamlab/flashlight](https://github.com/bamlab/flashlight).
+- **Profile mode on a physical low-end device** — `flutter run --profile`;
+  debug builds and simulators are misleading.

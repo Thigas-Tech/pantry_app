@@ -24,7 +24,8 @@ free-tier screens. Pro subscribers see no ads.
 
 ### Architecture
 
-See ARCHITECTURE/SERVICES.md for the full service architecture. Summary:
+See [SERVICES.md](../architecture/SERVICES.md) for the full service architecture.
+Summary:
 
 - Package: `google_mobile_ads`
 - Provider: planned `AdService` Riverpod provider
@@ -161,4 +162,4 @@ similar); Firebase was removed from the project.
 - [UMP SDK GDPR guide](https://developers.google.com/admob/flutter/privacy/gdpr)
 - [in_app_purchase](https://pub.dev/packages/in_app_purchase)
 - [Play Billing subscriptions](https://developer.android.com/google/play/billing/subscriptions)
-- [ARCHITECTURE/SERVICES.md](../../ARCHITECTURE/SERVICES.md)
+- [SERVICES.md](../architecture/SERVICES.md)

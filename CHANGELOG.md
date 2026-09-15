@@ -1,6 +1,43 @@
 # Changelog
 
-## Unreleased
+## [0.0.12+8] — 2026-09-15
+
+### Removed
+
+- **Patrol and integration-test scaffolding removed**: the `patrol-e2e.yml`
+  workflow, the `integration_test` dev dependency, and the generated iOS
+  `IntegrationTestPlugin` registration are gone. No integration tests
+  existed in the repository. (pubspec.yaml,
+  ios/Runner/GeneratedPluginRegistrant.m)
+- **Automation workflows removed**: `flashlight.yml`, `perfetto.yml`,
+  `auto-moderate.yml`, `pr-labeler.yml`, and `opencode.yml` are deleted,
+  together with the dead `.github/release-drafter.yml` and
+  `.github/pr-labeler.yml` configs and the stale
+  `.github/ISSUE_TEMPLATE/config.yml`. (.github/)
+- **Dependency automation removed**: `.github/dependabot.yml` is deleted.
+  Workflow actions use floating major tags instead of SHA pins, and the
+  duplicated `security_hardening` jobs are removed. (.github/workflows/)
+
+### Changed
+
+- **CI/CD reduced to four workflows**: `ci.yml` (format check, `dart
+  analyze`, version gate, unit and widget tests with coverage artifacts, on
+  pull requests and pushes to `main`), `build.yml` (debug APK on pull
+  requests; release APK + AAB + debug symbols and prerelease publishing on
+  `main`), `deploy-to-playstore.yml`, and `wiki.yml`. The coverage
+  PR-comment job is removed. Job names used by the pre-merge gate are
+  unchanged. (.github/workflows/)
+- **Version gate fixed**: the "version ahead of latest release" check now
+  passes `--repo` explicitly, so it no longer silently succeeds when run
+  outside the checkout directory. (ci.yml)
+- **Documentation consolidated under `docs/`**: `ARCHITECTURE/` and
+  `docs/superpowers/` are merged into `docs/architecture/`,
+  `docs/guides/`, and `docs/reference/`, with `docs/INDEX.md` as the single
+  entry point. Historical plan and spec files were removed.
+  (README.md, AGENTS.md, docs/)
+- **TODO.md pruned to open items only**: completed entries were dropped
+  (history remains in this changelog) and removed workflows are no longer
+  listed. (TODO.md)
 
 ### Fixed
 

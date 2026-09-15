@@ -54,7 +54,7 @@ final class ShoppingListProvider
 
 String _$shoppingListHash() => r'9f797101de088ce7685e8f387fce1c58e53eaf5f';
 
-/// Provides all shopping list items for a specific [inventoryId].
+/// Provides all shopping list items for a specific inventoryId.
 ///
 /// Unlike [shoppingList] (which follows the active inventory), this family
 /// is keyed by an explicit inventory so the market trip can operate on a
@@ -63,7 +63,7 @@ String _$shoppingListHash() => r'9f797101de088ce7685e8f387fce1c58e53eaf5f';
 @ProviderFor(shoppingListByInventory)
 final shoppingListByInventoryProvider = ShoppingListByInventoryFamily._();
 
-/// Provides all shopping list items for a specific [inventoryId].
+/// Provides all shopping list items for a specific inventoryId.
 ///
 /// Unlike [shoppingList] (which follows the active inventory), this family
 /// is keyed by an explicit inventory so the market trip can operate on a
@@ -79,7 +79,7 @@ final class ShoppingListByInventoryProvider
     with
         $FutureModifier<List<ShoppingItem>>,
         $FutureProvider<List<ShoppingItem>> {
-  /// Provides all shopping list items for a specific [inventoryId].
+  /// Provides all shopping list items for a specific inventoryId.
   ///
   /// Unlike [shoppingList] (which follows the active inventory), this family
   /// is keyed by an explicit inventory so the market trip can operate on a
@@ -132,7 +132,7 @@ final class ShoppingListByInventoryProvider
 String _$shoppingListByInventoryHash() =>
     r'720682fcab901e5f486829521f44cc637536e6b9';
 
-/// Provides all shopping list items for a specific [inventoryId].
+/// Provides all shopping list items for a specific inventoryId.
 ///
 /// Unlike [shoppingList] (which follows the active inventory), this family
 /// is keyed by an explicit inventory so the market trip can operate on a
@@ -149,7 +149,7 @@ final class ShoppingListByInventoryFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Provides all shopping list items for a specific [inventoryId].
+  /// Provides all shopping list items for a specific inventoryId.
   ///
   /// Unlike [shoppingList] (which follows the active inventory), this family
   /// is keyed by an explicit inventory so the market trip can operate on a

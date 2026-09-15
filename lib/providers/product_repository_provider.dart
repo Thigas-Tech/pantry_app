@@ -55,7 +55,7 @@ ProductRepository productRepository(Ref ref) {
   );
 }
 
-/// Provides the cached [Product] for a [barcode], or null.
+/// Provides the cached [Product] for a barcode, or null.
 ///
 /// Reads only from the local cache (never the network) so list tiles can
 /// resolve product metadata — such as the image URL — cheaply while
