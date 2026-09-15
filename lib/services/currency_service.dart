@@ -97,7 +97,7 @@ class CurrencyService {
       return rates;
     } on Exception catch (e) {
       logWarning('Failed to fetch exchange rates: $e');
-      return _tryFallbackCache(normalized);
+      return await _tryFallbackCache(normalized);
     }
   }
 

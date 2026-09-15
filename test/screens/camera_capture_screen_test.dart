@@ -66,9 +66,9 @@ void main() {
     );
   }
 
-  /// Pumps a host that pushes [screen] and returns the future that resolves to
-  /// the result popped from the route.
-  Future<Future<Object?>> openScreen(
+  /// Pumps a host that pushes [screen] and returns the completer whose future
+  /// resolves to the result popped from the route.
+  Future<Completer<Object?>> openScreen(
     WidgetTester tester,
     CameraCaptureScreen screen,
   ) async {
@@ -99,7 +99,7 @@ void main() {
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    return popped.future;
+    return popped;
   }
 
   testWidgets('shows a progress indicator while the camera initializes', (
@@ -159,7 +159,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.photo_camera));
     await tester.pumpAndSettle();
 
-    final result = await popped;
+    final result = await popped.future;
     expect(result, isA<CameraCaptured>());
     expect((result! as CameraCaptured).file.path, capturedFile.path);
   });
@@ -176,7 +176,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.close));
     await tester.pumpAndSettle();
 
-    expect(await popped, isA<CameraCaptureCancelled>());
+    expect(await popped.future, isA<CameraCaptureCancelled>());
   });
 
   testWidgets('shows an error state and pops unavailable on init failure', (
@@ -200,7 +200,7 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
 
-    expect(await popped, isA<CameraCaptureUnavailable>());
+    expect(await popped.future, isA<CameraCaptureUnavailable>());
   });
 
   testWidgets('does not capture twice while a capture is in flight', (
@@ -228,7 +228,7 @@ void main() {
 
     completer.complete(XFile('/tmp/captured_raw.jpg'));
     await tester.pumpAndSettle();
-    expect(await popped, isA<CameraCaptured>());
+    expect(await popped.future, isA<CameraCaptured>());
   });
 
   testWidgets('releases the camera on pause and restarts on resume', (
@@ -268,6 +268,6 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(controller.dispose).called(1);
-    expect(await popped, isA<CameraCaptureCancelled>());
+    expect(await popped.future, isA<CameraCaptureCancelled>());
   });
 }

@@ -13,7 +13,7 @@ part 'shopping_list_provider.g.dart';
 Future<List<ShoppingItem>> shoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final inventoryId = await ref.watch(activeInventoryProvider.future);
-  return db.getShoppingList(inventoryId: inventoryId);
+  return await db.getShoppingList(inventoryId: inventoryId);
 }
 
 /// Provides all shopping list items for a specific inventoryId.
@@ -36,7 +36,7 @@ Future<List<ShoppingItem>> shoppingListByInventory(
 Future<List<ShoppingItem>> pendingShoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final inventoryId = await ref.watch(activeInventoryProvider.future);
-  return db.getPendingShoppingItems(inventoryId: inventoryId);
+  return await db.getPendingShoppingItems(inventoryId: inventoryId);
 }
 
 /// Provides only purchased shopping list items, scoped to the active inventory.
@@ -44,7 +44,7 @@ Future<List<ShoppingItem>> pendingShoppingList(Ref ref) async {
 Future<List<ShoppingItem>> purchasedShoppingList(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final inventoryId = await ref.watch(activeInventoryProvider.future);
-  return db.getPurchasedShoppingItems(inventoryId: inventoryId);
+  return await db.getPurchasedShoppingItems(inventoryId: inventoryId);
 }
 
 /// Provides the count of pending (not purchased) items, scoped to the active
@@ -53,7 +53,7 @@ Future<List<ShoppingItem>> purchasedShoppingList(Ref ref) async {
 Future<int> pendingShoppingCount(Ref ref) async {
   final db = ref.watch(databaseProvider);
   final inventoryId = await ref.watch(activeInventoryProvider.future);
-  return db.getPendingShoppingCount(inventoryId: inventoryId);
+  return await db.getPendingShoppingCount(inventoryId: inventoryId);
 }
 
 /// Invalidates all shopping list providers.

@@ -158,7 +158,7 @@ class RecipeService {
     final inventoryId = recipe?.inventoryId ?? activeInventoryId;
     final database = await _db.database;
 
-    return calculateIngredientCost(
+    return await calculateIngredientCost(
       database,
       ingredients,
       inventoryId: inventoryId,
@@ -619,7 +619,7 @@ class RecipeService {
           ing.quantity;
     }
 
-    return database.transaction<CookResult>((txn) async {
+    return await database.transaction<CookResult>((txn) async {
       for (final entry in grouped.entries) {
         final barcode = normalizeProduceBarcode(entry.key);
         var remaining = entry.value.totalQuantity;

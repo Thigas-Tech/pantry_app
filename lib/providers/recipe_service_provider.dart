@@ -69,7 +69,7 @@ Future<Map<String, double>> recipeIngredientCosts(
   final recipe = await db.getRecipe(recipeId);
   final inventoryId = recipe?.inventoryId ?? activeInventoryId;
   final ingredients = await db.getRecipeIngredients(recipeId);
-  return ref
+  return await ref
       .read(recipeServiceProvider)
       .ingredientCosts(
         ingredients,
