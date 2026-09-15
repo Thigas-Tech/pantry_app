@@ -103,7 +103,7 @@ Workflows live in `.github/workflows/`:
 |---|---|---|
 | `ci.yml` | Pull request to `main`, push to `main` | Format check, `dart analyze`, version gate, unit + widget tests, coverage artifacts |
 | `build.yml` | Pull request to `main`, push to `main` | Debug APK on pull requests; release APK + AAB + debug symbols on `main`, then creates a GitHub release via `gh release create` (publish job) |
-| `deploy-to-playstore.yml` | Release or pre-release published | Signed release AAB + APK, upload to Play Console internal track via `r0adkll/upload-google-play`. Triggered by the `build.yml` publish job or a manual release |
+| `deploy-to-playstore.yml` | Called by `build.yml` on a version bump; manual release publication | Signed release AAB + APK, upload to Play Console internal track via `r0adkll/upload-google-play`. Runs only when the publish job actually created a new release |
 | `wiki.yml` | Push to `main` | Generates `dart doc` API docs and deploys them to the `gh-pages` branch |
 
 > **Note:** The `publish` job in `build.yml` creates a GitHub release using

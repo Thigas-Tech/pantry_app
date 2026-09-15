@@ -2,6 +2,7 @@ name: Deploy to Play Store
 
 on:
   workflow_dispatch:
+  workflow_call:
   release:
     types: [released, prereleased]
 

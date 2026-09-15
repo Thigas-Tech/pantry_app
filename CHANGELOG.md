@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.0.14+10] — 2026-09-15
+
+### Fixed
+
+- **Play Store deployment now actually runs on auto-releases**: releases
+  created by the `build.yml` publish job use the default `GITHUB_TOKEN`, and
+  GitHub does not trigger workflow runs for events created with that token,
+  so no `release` event ever fired for the auto-created pre-releases. The
+  publish job now calls `deploy-to-playstore.yml` directly as a reusable
+  workflow, gated on a new release actually having been created. Manual
+  release publications still trigger the workflow through the
+  `released`/`prereleased` events.
+  (.github/workflows/build.yml, .github/workflows/deploy-to-playstore.yml,
+  docs/guides/playstore.md, docs/architecture/PERFORMANCE.md)
+
 ## [0.0.13+9] — 2026-09-15
 
 ### Fixed
