@@ -89,7 +89,7 @@ class NutriScoreBadge extends StatelessWidget {
     return nutriscoreColorForGrade(grade);
   }
 
-  /// Returns true if [grade] is 'not-applicable' (case‑insensitive).
+  /// Returns true if [grade] is 'not-applicable' (case-insensitive).
   static bool _isNotApplicable(String? grade) {
     return nutriscoreIsNotApplicable(grade);
   }
@@ -97,7 +97,7 @@ class NutriScoreBadge extends StatelessWidget {
   /// Converts a Nutri-Score grade to a numeric value for averaging.
   ///
   /// 'a' = 5, 'b' = 4, …, 'e' = 1. Returns null for invalid or
-  /// not‑applicable grades.
+  /// not-applicable grades.
   static int? toNumeric(String? grade) {
     return nutriscoreGradeToNumeric(grade);
   }

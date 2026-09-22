@@ -17,11 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 /// Tests run against sqflite_common_ffi, which bundles a modern sqlite3,
 /// so they cannot catch version-gated SQL on their own. This test scans
 /// the production source tree and fails if such syntax is reintroduced.
-///
-/// The allowlisted file may still use the syntax: v43 deliberately
-/// uses DROP COLUMN inside a try/catch because the statement is rejected on
-/// SQLite < 3.35 (the column is retained there rather than blocking the
-/// upgrade).
 void main() {
   final bannedPatterns = <String, RegExp>{
     'NULLS LAST': RegExp(r'NULLS\s+LAST'),

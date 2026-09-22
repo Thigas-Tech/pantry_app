@@ -18,7 +18,6 @@ class ScanHistoryDao {
   /// never grows without bound.
   static const int defaultKeepCount = 50;
 
-  /// Creates the scan_history table.
   /// Converts a [ScanHistoryEntry] to a map for database insertion.
   Map<String, dynamic> toMap(ScanHistoryEntry entry) => {
     if (entry.id != null) 'id': entry.id,

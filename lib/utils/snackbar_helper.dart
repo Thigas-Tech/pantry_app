@@ -5,7 +5,7 @@ import 'package:pantry_app/utils/logger.dart';
 /// A thin wrapper around [ScaffoldMessenger] that shows styled snackbars.
 ///
 /// Every method displays a floating snackbar with rounded corners, a leading
-/// icon that matches the severity level, and a **short auto‑dismiss duration**.
+/// icon that matches the severity level, and a **short auto-dismiss duration**.
 /// Info, warning, and error snackbars disappear after 3 seconds **without any
 /// user interaction**. The undo snackbar stays for 5 seconds to give the user
 /// time to tap the undo action, and then dismisses automatically.

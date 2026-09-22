@@ -18,7 +18,7 @@ part of 'active_inventory_provider.dart';
 /// available inventory or, when no inventories exist, reseeds the default
 /// "Home" inventory.
 ///
-/// Defaults to 1 (the built‑in "Home" inventory created during migration)
+/// Defaults to 1 (the built-in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
 
 @ProviderFor(ActiveInventoryNotifier)
@@ -34,7 +34,7 @@ final activeInventoryProvider = ActiveInventoryNotifierProvider._();
 /// available inventory or, when no inventories exist, reseeds the default
 /// "Home" inventory.
 ///
-/// Defaults to 1 (the built‑in "Home" inventory created during migration)
+/// Defaults to 1 (the built-in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
 final class ActiveInventoryNotifierProvider
     extends $AsyncNotifierProvider<ActiveInventoryNotifier, int> {
@@ -48,7 +48,7 @@ final class ActiveInventoryNotifierProvider
   /// available inventory or, when no inventories exist, reseeds the default
   /// "Home" inventory.
   ///
-  /// Defaults to 1 (the built‑in "Home" inventory created during migration)
+  /// Defaults to 1 (the built-in "Home" inventory created during migration)
   /// on the very first run or when no persisted value is found.
   ActiveInventoryNotifierProvider._()
     : super(
@@ -82,7 +82,7 @@ String _$activeInventoryNotifierHash() =>
 /// available inventory or, when no inventories exist, reseeds the default
 /// "Home" inventory.
 ///
-/// Defaults to 1 (the built‑in "Home" inventory created during migration)
+/// Defaults to 1 (the built-in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
 
 abstract class _$ActiveInventoryNotifier extends $AsyncNotifier<int> {

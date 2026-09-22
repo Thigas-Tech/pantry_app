@@ -67,7 +67,7 @@ const String productSubmissionPartiallyCompleted = 'partially_completed';
 ///   — the official Open Food Facts API client used to fetch and submit
 ///   product data.
 /// - [freezed](https://pub.dev/packages/freezed)
-///   — the code‑generation package that provides immutability, [copyWith],
+///   — the code-generation package that provides immutability, [copyWith],
 ///   ==, [hashCode], and JSON serialisation.
 @freezed
 abstract class Product with _$Product {

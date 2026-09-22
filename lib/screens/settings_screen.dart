@@ -33,7 +33,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 /// A screen where the user can adjust application preferences.
 ///
-/// Includes theme, notifications, data retention, and expiring‑soon
+/// Includes theme, notifications, data retention, and expiring-soon
 /// threshold settings, as well as a link to manage inventories.
 class SettingsScreen extends ConsumerWidget {
   /// Creates a [SettingsScreen] widget.

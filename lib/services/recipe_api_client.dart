@@ -8,9 +8,9 @@ import 'package:pantry_app/utils/logger.dart';
 /// HTTP client for the TheMealDB recipe API.
 ///
 /// TheMealDB is free and requires no API key for the free tier
-/// (`/api/json/v1/1`). The [filterByIngredients] endpoint returns meals
-/// that contain at least one of the given ingredients, which is exactly
-/// what the pantry recipe-suggestion feature needs.
+/// (the /api/json/v1/1 endpoint). The [filterByIngredients] endpoint
+/// returns meals that contain at least one of the given ingredients, which
+/// is exactly what the pantry recipe-suggestion feature needs.
 ///
 /// See https://www.themealdb.com/api.php for the API documentation.
 class RecipeApiClient {

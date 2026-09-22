@@ -27,8 +27,7 @@ inventory so each pantry keeps an independent price history.
 
 ### 1.1 `prices` table
 
-Defined by the frozen v1 baseline schema (previously built up through
-migrations v12, v37, and v46):
+Defined by the frozen v1 baseline schema:
 
 | Column | Type | Notes |
 |---|---|---|
@@ -68,9 +67,9 @@ column was never added (see section 5).
 ### 1.2 `Price` model
 
 `Price` (`lib/models/price.dart`) is a freezed, immutable model carrying every
-column above. `packageQuantity` and `packageUnit` are optional: rows written
-before v37 (or entered before package capture exists) have `NULL` and are
-treated as legacy unscaled prices.
+column above. `packageQuantity` and `packageUnit` are optional: rows
+entered without package data have `NULL` and are treated as legacy
+unscaled prices.
 
 ### 1.3 Sync-status lifecycle
 

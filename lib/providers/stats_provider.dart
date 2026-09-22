@@ -219,11 +219,11 @@ Future<PantryStats> stats(Ref ref) async {
 /// Returns a broad parent category from OFF hierarchy data.
 ///
 /// Prefers tags in the user's language code (e.g. 'pt', 'fr') over
-/// English (en:) so that users get locale‑appropriate names when OFF data
-/// includes them. For each language group, picks the second‑to‑last entry
+/// English (en:) so that users get locale-appropriate names when OFF data
+/// includes them. For each language group, picks the second-to-last entry
 /// (e.g. en:eggs from en:products, en:eggs-and-their-products,
 /// en:eggs, en:chicken-eggs). When no hierarchy is available, falls back
-/// to the first non‑language‑tagged word of [rawCategory]. Returns null
+/// to the first non-language-tagged word of [rawCategory]. Returns null
 /// when both inputs are unavailable.
 String? parentCategory(
   String? rawCategory,

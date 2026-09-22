@@ -1,8 +1,8 @@
 /// Tests for the onboarding completion flag provider.
 ///
 /// Verifies that the flag can be set, read, and persisted via
-/// [SharedPreferences]. It starts at `false` for a fresh install and
-/// is never cleared once set to `true`.
+/// [SharedPreferences]. It starts at false for a fresh install and
+/// is never cleared once set to true.
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';

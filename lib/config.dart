@@ -3,11 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 /// Application configuration.
 ///
 /// Credentials are read from a .env file loaded by [DotEnv] for local
-/// development, or injected at build time via `--dart-define-from-file=.env`
-/// for device and release builds (the CI release workflow recreates .env from
-/// GitHub secrets). The .env file is **never** committed to version control
-/// and **never** shipped as a plaintext Flutter asset; injected values are
-/// compiled into the binary instead.
+/// development, or injected at build time via the --dart-define-from-file
+/// flag for device and release builds (the CI release workflow recreates
+/// the file from GitHub secrets). The .env file is **never** committed to
+/// version control and **never** shipped as a plaintext Flutter asset;
+/// injected values are compiled into the binary instead.
 ///
 /// ## Credential model
 ///
@@ -27,7 +27,7 @@ class AppConfig {
 
   /// The Open Food Facts user ID used for product submissions.
   ///
-  /// Read from the `OFF_USER_ID` dart-define at build time, falling back to
+  /// Read from the OFF_USER_ID dart-define at build time, falling back to
   /// .env for local development. Leave empty to disable submissions.
   static String get offUserId {
     const fromEnv = String.fromEnvironment('OFF_USER_ID');
@@ -37,7 +37,7 @@ class AppConfig {
 
   /// The Open Food Facts password used for product submissions.
   ///
-  /// Read from the `OFF_PASSWORD` dart-define at build time, falling back to
+  /// Read from the OFF_PASSWORD dart-define at build time, falling back to
   /// .env for local development. Must be set alongside [offUserId].
   static String get offPassword {
     const fromEnv = String.fromEnvironment('OFF_PASSWORD');
@@ -45,7 +45,7 @@ class AppConfig {
     return dotenv.env['OFF_PASSWORD'] ?? '';
   }
 
-  /// A contact email address included in the User‑Agent header sent to
+  /// A contact email address included in the User-Agent header sent to
   /// Open Food Facts (required by their API terms).
   static String get contactEmail {
     const fromEnv = String.fromEnvironment('CONTACT_EMAIL');
@@ -77,7 +77,7 @@ class AppConfig {
   /// The USDA FoodData Central API key.
   ///
   /// Register for free at https://fdc.nal.usda.gov/api-key-signup.html.
-  /// Read from the `USDA_API_KEY` dart-define at build time, falling back to
+  /// Read from the USDA_API_KEY dart-define at build time, falling back to
   /// .env for local development. Leave empty to disable USDA produce
   /// searches and serving-size enrichment.
   static String get usdaApiKey {

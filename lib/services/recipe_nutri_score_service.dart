@@ -6,8 +6,7 @@ import 'package:pantry_app/utils/nutriscore.dart';
 ///
 /// Uses a weighted average of each ingredient's individual Nutri-Score grade
 /// (from the OFF data), weighted by ingredient quantity. Ingredients without
-/// a barcode or without a known Nutri-Score grade contribute nothing and
-/// reduce the confidence of the result.
+/// a barcode or without a known Nutri-Score grade are skipped.
 class RecipeNutriScoreService {
   /// Computes a Nutri-Score grade for a recipe.
   ///

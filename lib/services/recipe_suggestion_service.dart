@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Given the user's inventory ingredient names, queries the recipe API,
 /// excludes the last-suggested recipe (so the same meal is not offered
 /// twice in a row), and picks one at random. The chosen recipe id is
-/// persisted in [SharedPreferences] as `lastSuggestedRecipe`.
+/// persisted in [SharedPreferences] under [lastSuggestedKey].
 class RecipeSuggestionService {
   /// Creates a [RecipeSuggestionService].
   ///

@@ -17,7 +17,7 @@ part 'active_inventory_provider.g.dart';
 /// available inventory or, when no inventories exist, reseeds the default
 /// "Home" inventory.
 ///
-/// Defaults to 1 (the built‑in "Home" inventory created during migration)
+/// Defaults to 1 (the built-in "Home" inventory created during migration)
 /// on the very first run or when no persisted value is found.
 @Riverpod(keepAlive: true)
 class ActiveInventoryNotifier extends _$ActiveInventoryNotifier {

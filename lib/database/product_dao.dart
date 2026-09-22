@@ -280,7 +280,7 @@ class ProductDao {
 
   /// Returns products with the given [source] value.
   ///
-  /// Used to retrieve only API‑fetched products for cache refresh.
+  /// Used to retrieve only API-fetched products for cache refresh.
   Future<List<Product>> getBySource(Database db, String source) async {
     final result = await db.query(
       'products',
@@ -293,7 +293,7 @@ class ProductDao {
   /// Deletes products with the given [source] value.
   ///
   /// Called by [DatabaseHelper.clearCachedProducts] to remove only
-  /// API‑fetched products while preserving user‑entered records.
+  /// API-fetched products while preserving user-entered records.
   Future<void> deleteBySource(Database db, String source) async {
     final count = await db.delete(
       'products',

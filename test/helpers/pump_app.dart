@@ -96,7 +96,7 @@ MockProductRepository createMockProductRepository() {
   return repo;
 }
 
-/// Pumps [child] into a test‑friendly app shell.
+/// Pumps [child] into a test-friendly app shell.
 ///
 /// - ProviderScope with a default stub for [ImageCacheService] (avoids
 ///   type errors in InventoryCard's FutureBuilder).

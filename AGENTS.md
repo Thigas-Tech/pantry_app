@@ -8,6 +8,10 @@ Run BEFORE every local commit. Fix ALL issues:
   flutter test --concurrency=2
   flutter build apk --debug
   dart doc .
+  # No backticks in /// doc comments (must print nothing). Mirrors the CI
+  # "Check doc comments for backticks" step in .github/workflows/ci.yml.
+  grep -rnE '///.*`' lib test --include='*.dart' \
+    | grep -vE '\.g\.dart|\.freezed\.dart|app_localizations'
   # If FEATURE_FREEZE.md is checked, verify only fixes + polish are included.
   grep -q '[x] feature_freeze' FEATURE_FREEZE.md && \
     echo "FEATURE FREEZE ACTIVE — only bug fixes and polish allowed" || true

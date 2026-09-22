@@ -8,7 +8,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 /// LEFT JOIN fix that prevents inventory items from disappearing after
 /// a cache flush.
 ///
-/// Every test runs against a fresh in‑memory database at schema version 8.
+/// Every test runs against a fresh in-memory database at schema version 8.
 void main() {
   setUpAll(() {
     sqfliteFfiInit();

@@ -209,8 +209,8 @@ repository.
 
 - `ShoppingListDao` -- all shopping list CRUD scoped to the active inventory.
   Items can have optional barcode links to products, quantities, units, and
-  price fields. Pending items are ordered by a `sort_order` column
-  (migration v41) so manual drag-to-reorder persists; `reorder` assigns
+  price fields. Pending items are ordered by a `sort_order` column (frozen
+  v1 baseline) so manual drag-to-reorder persists; `reorder` assigns
   sequential order values inside a transaction.
 - `ShoppingListService` -- owns shopping list business logic:
   `addShoppingItem`, `toggleShoppingItem`, `deleteShoppingItem`,

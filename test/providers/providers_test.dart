@@ -43,7 +43,7 @@ void main() {
 
   group('databaseProvider', () {
     test('returns a DatabaseHelper instance', () {
-      /// The provider should be overridable and return a non‑null instance.
+      /// The provider should be overridable and return a non-null instance.
       final db = container.read(databaseProvider);
       expect(db, isNotNull);
     });

@@ -3,7 +3,7 @@ import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_type.dart';
 
-/// A read‑only view that joins an [InventoryItem] with its corresponding
+/// A read-only view that joins an [InventoryItem] with its corresponding
 /// [Product] metadata and inventory details.
 ///
 /// This class is **not** persisted directly. Instead, it is built on the fly
@@ -18,7 +18,7 @@ import 'package:pantry_app/models/product_type.dart';
 ///
 /// The first nine fields mirror those of [InventoryItem]. The last four
 /// ([productName], [productImageUrl], [productCategory], and [inventoryName])
-/// are pulled from the joined tables and provide human‑readable labels,
+/// are pulled from the joined tables and provide human-readable labels,
 /// images, categories, and inventory names.
 ///
 /// ## Immutability
@@ -47,13 +47,13 @@ class InventoryWithProduct {
     /// The ID of the inventory this item belongs to.
     required this.inventoryId,
 
-    /// The auto‑generated primary key of the inventory row.
+    /// The auto-generated primary key of the inventory row.
     this.id,
 
     /// The expiry date in ISO 8601 format (YYYY-MM-DD), or null.
     this.expiryDate,
 
-    /// Free‑form notes the user may have added.
+    /// Free-form notes the user may have added.
     this.notes,
 
     /// Epoch timestamp (milliseconds) when the item was first added.
@@ -131,10 +131,10 @@ class InventoryWithProduct {
     );
   }
 
-  /// The auto‑generated inventory row ID.
+  /// The auto-generated inventory row ID.
   final int? id;
 
-  /// The product barcode (e.g. EAN‑13).
+  /// The product barcode (e.g. EAN-13).
   final String barcode;
 
   /// The quantity of this item, expressed in [unit].
@@ -149,7 +149,7 @@ class InventoryWithProduct {
   /// The storage location (e.g. 'pantry', 'fridge', 'freezer').
   final String location;
 
-  /// User‑provided notes about this item.
+  /// User-provided notes about this item.
   final String? notes;
 
   /// Epoch timestamp of when this item was first added to inventory.

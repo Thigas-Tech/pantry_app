@@ -52,7 +52,7 @@ final class ShoppingListProvider
   }
 }
 
-String _$shoppingListHash() => r'9f797101de088ce7685e8f387fce1c58e53eaf5f';
+String _$shoppingListHash() => r'c41f92c5c23a37aa6d6ea0b5a7594b25222958ab';
 
 /// Provides all shopping list items for a specific inventoryId.
 ///
@@ -210,7 +210,7 @@ final class PendingShoppingListProvider
 }
 
 String _$pendingShoppingListHash() =>
-    r'02b30da1359fef113dce41ff83cb1683e4a16eab';
+    r'12dc82b615d8dcc1cd18b5e5e6b57c6792330c48';
 
 /// Provides only purchased shopping list items, scoped to the active inventory.
 
@@ -257,7 +257,7 @@ final class PurchasedShoppingListProvider
 }
 
 String _$purchasedShoppingListHash() =>
-    r'304a7c6c5ef9c321d802d3fccf20f095c9862ea9';
+    r'22884860cc410d9070989a480bcc740d41ae1156';
 
 /// Provides the count of pending (not purchased) items, scoped to the active
 /// inventory.
@@ -299,7 +299,7 @@ final class PendingShoppingCountProvider
 }
 
 String _$pendingShoppingCountHash() =>
-    r'46ac86d11d5494262e660d413dbe52b608edeafc';
+    r'74327b6a08f3e957e9b8270111170d4780ec6a0c';
 
 /// Provides distinct product barcodes and names from the active inventory
 /// for the "From your pantry" suggestions in the add-to-shopping-list sheet.

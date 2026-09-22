@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.18+14] — 2026-09-22
+
+### Changed
+
+- **Documentation hygiene**: removed backtick violations from doc comments
+  across lib/ and test/, replaced stale references to the pre-baseline
+  migration numbering (v30, v41, v43, v46), removed leftover "Creates the
+  X table" doc lines from the DAOs, corrected doc comments that described
+  removed or never-shipped behavior, added missing per-field docs to
+  PantryStats, documented the sealed base constructors, and normalized
+  non-breaking hyphens in doc comments. A new CI step and pre-commit gate
+  check fail on backticks in doc comments to prevent regressions.
+  (lib/, test/, docs/, .github/workflows/ci.yml, AGENTS.md)
+
 ## [0.0.17+13] — 2026-09-15
 
 ### Fixed
