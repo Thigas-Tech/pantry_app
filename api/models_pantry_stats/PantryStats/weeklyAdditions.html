@@ -66,11 +66,17 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Weekly addition counts for the active pantry, newest week first
+(up to eight weeks).</p>
+</section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List&lt;WeeklyCount&gt; get weeklyAdditions;</code></pre>
+  <pre class="language-dart"><code class="language-dart">int get addedThisMonth;&#47;&#47;&#47; Weekly addition counts for the active pantry, newest week first
+&#47;&#47;&#47; (up to eight weeks).
+List&lt;WeeklyCount&gt; get weeklyAdditions;</code></pre>
 </section>
 
   </section>
@@ -100,7 +106,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

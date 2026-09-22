@@ -66,12 +66,12 @@
   <p>Returns the two-letter language code that should be sent to the Open
 Food Facts API for the given device locale.</p>
 <p>Open Food Facts serves product data in many languages, so the device
-language is passed through as-is (<code>fr</code> stays <code>fr</code>, <code>es</code> stays <code>es</code>).
+language is passed through as-is (fr stays fr, es stays es).
 Two normalizations are applied:</p>
 <ul>
-<li><code>pt_BR</code> maps to <code>pt</code>, because Open Food Facts has no Brazilian
-Portuguese variant and only understands the <code>pt</code> tag.</li>
-<li>An empty or <code>und</code> language code maps to <code>en</code> as a safe fallback.</li>
+<li>pt_BR maps to pt, because Open Food Facts has no Brazilian
+Portuguese variant and only understands the pt tag.</li>
+<li>An empty or und language code maps to en as a safe fallback.</li>
 </ul>
 </section>
 
@@ -111,7 +111,7 @@ Portuguese variant and only understands the <code>pt</code> tag.</li>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

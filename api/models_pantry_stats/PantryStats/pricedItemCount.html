@@ -66,11 +66,17 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Number of items with at least one recorded price in the active
+pantry.</p>
+</section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List&lt;WeeklyCount&gt; get weeklyAdditions; Map&lt;String, int&gt; get itemsByLocation; List&lt;CategoryCount&gt; get categoriesTop; Map&lt;String, int&gt; get nutriscoreDistribution; Map&lt;String, int&gt; get itemsBySource; PhotoStats get localPhotos; PhotoStats get offPhotos; double get totalValue; double get averagePrice; int get pricedItemCount;</code></pre>
+  <pre class="language-dart"><code class="language-dart">double get averagePrice;&#47;&#47;&#47; Number of items with at least one recorded price in the active
+&#47;&#47;&#47; pantry.
+int get pricedItemCount;</code></pre>
 </section>
 
   </section>
@@ -100,7 +106,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

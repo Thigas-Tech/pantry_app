@@ -54,10 +54,10 @@
 
     
 <section class="desc markdown">
-  <p>The central data access point that implements the offline‑first pattern.</p>
+  <p>The central data access point that implements the offline-first pattern.</p>
 <p><a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a> coordinates between the local SQLite cache
 (<a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a>) and the remote API (<a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a>).</p>
-<h2 id="offlinefirst-strategy">Offline‑first strategy</h2>
+<h2 id="offline-first-strategy">Offline-first strategy</h2>
 <p>For every product lookup:</p>
 <ol>
 <li><strong>Check local cache</strong> – if the product exists in SQLite, return it
@@ -74,7 +74,7 @@ named inventories (pantries) themselves. All item operations are scoped
 to a specific inventory via its <code>InventoryItem.inventoryId</code>.</p>
 <h2 id="fallback-api">Fallback API</h2>
 <p>The constructor accepts an optional fallback <a href="../services_off_adapter/OffAdapter-class.html">OffAdapter</a>. This is
-currently unused but could be re‑enabled in the future if a second API
+currently unused but could be re-enabled in the future if a second API
 is desired.</p>
 </section>
 
@@ -166,7 +166,7 @@ null when none was provided.
 
 </dt>
 <dd>
-  Inserts a new inventory item and returns its auto‑generated ID.
+  Inserts a new inventory item and returns its auto-generated ID.
   
 
 </dd>
@@ -327,7 +327,7 @@ or globally if null.
 
 </dt>
 <dd>
-  Returns the stored last‑refresh timestamp, or null if no refresh has
+  Returns the stored last-refresh timestamp, or null if no refresh has
 ever been recorded.
   
 
@@ -422,7 +422,7 @@ lookup, fetching only the misses from the remote API.
 
 </dt>
 <dd>
-  Re‑fetches all products referenced by inventory items in <code>inventoryId</code>.
+  Re-fetches all products referenced by inventory items in <code>inventoryId</code>.
   
 
 </dd>
@@ -435,7 +435,7 @@ lookup, fetching only the misses from the remote API.
 
 </dt>
 <dd>
-  Fires‑off <a href="../services_product_repository/ProductRepository/refreshInventoryProducts.html">refreshInventoryProducts</a> without awaiting the result.
+  Fires-off <a href="../services_product_repository/ProductRepository/refreshInventoryProducts.html">refreshInventoryProducts</a> without awaiting the result.
   
 
 </dd>
@@ -569,7 +569,7 @@ local cache, and caches the merged result.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

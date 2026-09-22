@@ -63,21 +63,13 @@
     </section>
     
 <section class="desc markdown">
-  <p>Finishes a market trip by moving purchased items to the inventory and
-removing any purchased items that could not be moved.</p>
-<p>First moves every purchased item with a barcode and a cached product
-into the inventory (see <a href="../../services_shopping_list_service/ShoppingListService/movePurchasedToInventory.html">movePurchasedToInventory</a>). Any remaining
-purchased items in the inventory (for example free-text items without
-a barcode) are then deleted so the list is clean for the next trip.</p>
-<p>Runs inside a single SQLite transaction — all-or-nothing. Returns a
-<a href="../../services_shopping_list_service/FinishShoppingTripResult-class.html">FinishShoppingTripResult</a> with the moved and cleaned counts.
-Finishes a market trip by moving the trip's items into the inventory and
-removing anything that could not be moved.</p>
-<p>Moves every item in the trip inventory (both pending and purchased) that
-has a barcode and a cached product into the inventory (see
-<a href="../../services_shopping_list_service/ShoppingListService/movePurchasedToInventory.html">movePurchasedToInventory</a>). Any remaining items — for example free-text
-entries without a barcode, or products that are not in the cache — are
-then deleted so the list is clean for the next trip.</p>
+  <p>Finishes a market trip by moving the trip's items into the inventory
+and removing anything that could not be moved.</p>
+<p>Moves every item in the trip inventory (both pending and purchased)
+that has a barcode and a cached product into the inventory (see
+<a href="../../services_shopping_list_service/ShoppingListService/movePurchasedToInventory.html">movePurchasedToInventory</a>). Any remaining items — for example
+free-text entries without a barcode, or products that are not in the
+cache — are then deleted so the list is clean for the next trip.</p>
 <p>Runs inside a single SQLite transaction — all-or-nothing. Returns a
 <a href="../../services_shopping_list_service/FinishShoppingTripResult-class.html">FinishShoppingTripResult</a> with the moved and cleaned counts.</p>
 </section>
@@ -152,7 +144,7 @@ then deleted so the list is clean for the next trip.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

@@ -54,7 +54,7 @@
 
     
 <section class="desc markdown">
-  <p>A read‑only view that joins an <a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a> with its corresponding
+  <p>A read-only view that joins an <a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a> with its corresponding
 <a href="../models_product/Product-class.html">Product</a> metadata and inventory details.</p>
 <p>This class is <strong>not</strong> persisted directly. Instead, it is built on the fly
 by <a href="../database_database_helper/DatabaseHelper/getInventoryWithProduct.html">DatabaseHelper.getInventoryWithProduct</a> using a LEFT JOIN on
@@ -66,7 +66,7 @@ queries.</p>
 <h2 id="fields">Fields</h2>
 <p>The first nine fields mirror those of <a href="../models_inventory_item/InventoryItem-class.html">InventoryItem</a>. The last four
 (<a href="../models_inventory_with_product/InventoryWithProduct/productName.html">productName</a>, <a href="../models_inventory_with_product/InventoryWithProduct/productImageUrl.html">productImageUrl</a>, <a href="../models_inventory_with_product/InventoryWithProduct/productCategory.html">productCategory</a>, and <a href="../models_inventory_with_product/InventoryWithProduct/inventoryName.html">inventoryName</a>)
-are pulled from the joined tables and provide human‑readable labels,
+are pulled from the joined tables and provide human-readable labels,
 images, categories, and inventory names.</p>
 <h2 id="immutability">Immutability</h2>
 <p>This class is fully immutable – all fields are final. To modify data,
@@ -108,7 +108,7 @@ update the underlying <a href="../models_inventory_item/InventoryItem-class.html
 
 </dt>
 <dd>
-  The product barcode (e.g. EAN‑13).
+  The product barcode (e.g. EAN-13).
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -156,7 +156,7 @@ update the underlying <a href="../models_inventory_item/InventoryItem-class.html
 
 </dt>
 <dd>
-  The auto‑generated inventory row ID.
+  The auto-generated inventory row ID.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -204,7 +204,7 @@ update the underlying <a href="../models_inventory_item/InventoryItem-class.html
 
 </dt>
 <dd>
-  User‑provided notes about this item.
+  User-provided notes about this item.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -416,7 +416,7 @@ if unavailable.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

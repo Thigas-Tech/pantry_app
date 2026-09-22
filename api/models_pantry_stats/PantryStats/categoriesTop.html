@@ -66,11 +66,17 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Top product categories by item count, parent-level names localized
+to the user's language.</p>
+</section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List&lt;WeeklyCount&gt; get weeklyAdditions; Map&lt;String, int&gt; get itemsByLocation; List&lt;CategoryCount&gt; get categoriesTop;</code></pre>
+  <pre class="language-dart"><code class="language-dart">Map&lt;String, int&gt; get itemsByLocation;&#47;&#47;&#47; Top product categories by item count, parent-level names localized
+&#47;&#47;&#47; to the user&#39;s language.
+List&lt;CategoryCount&gt; get categoriesTop;</code></pre>
 </section>
 
   </section>
@@ -100,7 +106,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

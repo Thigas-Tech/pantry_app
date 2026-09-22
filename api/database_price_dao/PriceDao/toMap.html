@@ -63,12 +63,10 @@
     </section>
     
 <section class="desc markdown">
-  <p>Creates the prices table and its indexes.</p>
-<p>The table carries no foreign keys: price observations are the user's
-own records and must survive product cache flushes and pantry
-deletion. This schema must stay in sync with migration v46, which
-rebuilt the table without foreign keys.
-Converts a <a href="../../models_price/Price-class.html">Price</a> to a map for database insertion.</p>
+  <p>Converts a <a href="../../models_price/Price-class.html">Price</a> to a map for database insertion.</p>
+<p>The prices table carries no foreign keys: price observations are the
+user's own records and must survive product cache flushes and pantry
+deletion.</p>
 </section>
 
 
@@ -123,7 +121,7 @@ Converts a <a href="../../models_price/Price-class.html">Price</a> to a map for 
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

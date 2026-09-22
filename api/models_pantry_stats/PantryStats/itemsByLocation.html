@@ -66,11 +66,17 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Count of items per storage location (pantry, fridge, freezer,
+custom) in the active pantry.</p>
+</section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List&lt;WeeklyCount&gt; get weeklyAdditions; Map&lt;String, int&gt; get itemsByLocation;</code></pre>
+  <pre class="language-dart"><code class="language-dart">List&lt;WeeklyCount&gt; get weeklyAdditions;&#47;&#47;&#47; Count of items per storage location (pantry, fridge, freezer,
+&#47;&#47;&#47; custom) in the active pantry.
+Map&lt;String, int&gt; get itemsByLocation;</code></pre>
 </section>
 
   </section>
@@ -100,7 +106,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

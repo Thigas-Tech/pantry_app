@@ -56,11 +56,11 @@
 <section class="desc markdown">
   <p>Application configuration.</p>
 <p>Credentials are read from a .env file loaded by <a href="https://pub.dev/documentation/flutter_dotenv/6.0.1/flutterdotenv/DotEnv-class.html">DotEnv</a> for local
-development, or injected at build time via <code>--dart-define-from-file=.env</code>
-for device and release builds (the CI release workflow recreates .env from
-GitHub secrets). The .env file is <strong>never</strong> committed to version control
-and <strong>never</strong> shipped as a plaintext Flutter asset; injected values are
-compiled into the binary instead.</p>
+development, or injected at build time via the --dart-define-from-file
+flag for device and release builds (the CI release workflow recreates
+the file from GitHub secrets). The .env file is <strong>never</strong> committed to
+version control and <strong>never</strong> shipped as a plaintext Flutter asset;
+injected values are compiled into the binary instead.</p>
 <h2 id="credential-model">Credential model</h2>
 <ul>
 <li>The USDA FoodData Central key is a public client key (sent in every
@@ -178,7 +178,7 @@ without the flags degrades gracefully instead of failing.</li>
 
 </dt>
 <dd>
-  A contact email address included in the User‑Agent header sent to
+  A contact email address included in the User-Agent header sent to
 Open Food Facts (required by their API terms).
   <div class="features"><span class="feature">no setter</span></div>
 
@@ -285,7 +285,7 @@ production server (false).
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

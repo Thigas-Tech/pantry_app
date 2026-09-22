@@ -66,11 +66,17 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Items expiring within the configured expiring-soon window in the
+active pantry.</p>
+</section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount;</code></pre>
+  <pre class="language-dart"><code class="language-dart">int get expiredCount;&#47;&#47;&#47; Items expiring within the configured expiring-soon window in the
+&#47;&#47;&#47; active pantry.
+int get expiringSoonCount;</code></pre>
 </section>
 
   </section>
@@ -100,7 +106,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

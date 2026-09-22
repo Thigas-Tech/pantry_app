@@ -62,9 +62,9 @@
     </section>
     
 <section class="desc markdown">
-  <p>Deletes all API‑fetched products from the local cache.</p>
+  <p>Deletes all API-fetched products from the local cache.</p>
 <p>Products with <code>Product.source</code> 'manual' are kept. Used during app
-update and manual cache flush so that user‑entered data is never lost.</p>
+update and manual cache flush so that user-entered data is never lost.</p>
 <p>Foreign key enforcement is temporarily disabled because inventory rows
 and prices legitimately survive cache flushes (they are LEFT JOINed).
 Shopping list items have ON DELETE SET NULL which also requires FK
@@ -126,7 +126,7 @@ transaction that makes the deletion atomic.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

@@ -57,8 +57,7 @@
   <p>Computes a Nutri-Score grade for a recipe based on its ingredients.</p>
 <p>Uses a weighted average of each ingredient's individual Nutri-Score grade
 (from the OFF data), weighted by ingredient quantity. Ingredients without
-a barcode or without a known Nutri-Score grade contribute nothing and
-reduce the confidence of the result.</p>
+a barcode or without a known Nutri-Score grade are skipped.</p>
 </section>
 
 
@@ -203,7 +202,7 @@ reduce the confidence of the result.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

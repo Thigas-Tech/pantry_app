@@ -66,11 +66,17 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Total items added within the recent weekly-addition window
+(same value as <code>addedThisWeek</code>).</p>
+</section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth;</code></pre>
+  <pre class="language-dart"><code class="language-dart">int get addedThisWeek;&#47;&#47;&#47; Total items added within the recent weekly-addition window
+&#47;&#47;&#47; (same value as [addedThisWeek]).
+int get addedThisMonth;</code></pre>
 </section>
 
   </section>
@@ -100,7 +106,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>

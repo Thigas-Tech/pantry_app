@@ -66,11 +66,15 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Count of cached products per Nutri-Score grade.</p>
+</section>
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List&lt;WeeklyCount&gt; get weeklyAdditions; Map&lt;String, int&gt; get itemsByLocation; List&lt;CategoryCount&gt; get categoriesTop; Map&lt;String, int&gt; get nutriscoreDistribution;</code></pre>
+  <pre class="language-dart"><code class="language-dart">List&lt;CategoryCount&gt; get categoriesTop;&#47;&#47;&#47; Count of cached products per Nutri-Score grade.
+Map&lt;String, int&gt; get nutriscoreDistribution;</code></pre>
 </section>
 
   </section>
@@ -100,7 +104,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.17+13
+      0.0.18+14
   </span>
   
 </footer>
