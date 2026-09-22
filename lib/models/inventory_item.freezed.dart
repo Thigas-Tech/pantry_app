@@ -15,11 +15,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$InventoryItem {
 
-/// The barcode of the product (e.g. EAN‑13, UPC).
+/// The barcode of the product (e.g. EAN-13, UPC).
 ///
 /// This is a foreign key referencing [Product.barcode] and must match an
 /// existing product in the products table (or be added to it).
- String get barcode;/// The auto‑generated primary key from the database.
+ String get barcode;/// The auto-generated primary key from the database.
 ///
 /// Set to null for items that have not yet been inserted. After
 /// [DatabaseHelper.insertInventoryItem] returns, the generated ID is
@@ -45,7 +45,7 @@ mixin _$InventoryItem {
 ///
 /// Common values: 'pantry', 'fridge', 'freezer'.
 /// Defaults to 'pantry'.
- String get location;/// Optional free‑form notes about this item.
+ String get location;/// Optional free-form notes about this item.
  String? get notes;/// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was first added.
 ///
@@ -266,12 +266,12 @@ class _InventoryItem implements InventoryItem {
   const _InventoryItem({required this.barcode, this.id, this.quantity = 1, this.unit = 'pieces', @JsonKey(name: 'expiry_date') this.expiryDate, this.location = 'pantry', this.notes, @JsonKey(name: 'date_added') this.dateAdded, @JsonKey(name: 'inventory_id') this.inventoryId = 1, @JsonKey(name: 'serving_weight_g') this.servingWeightG});
   factory _InventoryItem.fromJson(Map<String, dynamic> json) => _$InventoryItemFromJson(json);
 
-/// The barcode of the product (e.g. EAN‑13, UPC).
+/// The barcode of the product (e.g. EAN-13, UPC).
 ///
 /// This is a foreign key referencing [Product.barcode] and must match an
 /// existing product in the products table (or be added to it).
 @override final  String barcode;
-/// The auto‑generated primary key from the database.
+/// The auto-generated primary key from the database.
 ///
 /// Set to null for items that have not yet been inserted. After
 /// [DatabaseHelper.insertInventoryItem] returns, the generated ID is
@@ -302,7 +302,7 @@ class _InventoryItem implements InventoryItem {
 /// Common values: 'pantry', 'fridge', 'freezer'.
 /// Defaults to 'pantry'.
 @override@JsonKey() final  String location;
-/// Optional free‑form notes about this item.
+/// Optional free-form notes about this item.
 @override final  String? notes;
 /// Epoch timestamp (milliseconds since Unix epoch) of when the item
 /// was first added.

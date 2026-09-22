@@ -2,6 +2,7 @@ import 'dart:io';
 
 /// The outcome of the in-app camera capture screen.
 sealed class CameraCaptureResult {
+  /// Base constructor shared by every [CameraCaptureResult] variant.
   const CameraCaptureResult();
 }
 

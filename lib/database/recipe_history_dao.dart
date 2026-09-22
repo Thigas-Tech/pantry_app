@@ -11,7 +11,6 @@ class RecipeHistoryDao {
   /// Creates a [RecipeHistoryDao].
   const RecipeHistoryDao();
 
-  /// Creates the recipe_history table.
   /// Converts a [RecipeHistoryEntry] to a map for database insertion.
   Map<String, dynamic> toMap(RecipeHistoryEntry entry) => {
     if (entry.id != null) 'id': entry.id,

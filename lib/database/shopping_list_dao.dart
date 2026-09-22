@@ -11,7 +11,6 @@ class ShoppingListDao {
   /// Creates a [ShoppingListDao].
   const ShoppingListDao();
 
-  /// Creates the shopping_list table.
   /// Converts a [ShoppingItem] to a map for database insertion.
   Map<String, dynamic> toMap(ShoppingItem item) => {
     'barcode': item.barcode,
@@ -383,7 +382,7 @@ class ShoppingListDao {
   ///
   /// When [inventoryId] is non-null, only purchased items belonging to
   /// that inventory are deleted. When null, all purchased items across
-  /// all inventories are cleared (backward‑compatible default).
+  /// all inventories are cleared (backward-compatible default).
   /// Returns the number of rows deleted.
   Future<int> clearPurchased(Database db, {int? inventoryId}) async {
     logInfo('Clearing purchased shopping items');

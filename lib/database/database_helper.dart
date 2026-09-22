@@ -33,7 +33,7 @@ import 'package:sqflite/sqflite.dart';
 /// database operations use the same connection.
 ///
 /// For **testing** a separate instance can be created with the named
-/// constructor [DatabaseHelper.withPath], which opens an in‑memory database
+/// constructor [DatabaseHelper.withPath], which opens an in-memory database
 /// or a temporary file.
 ///
 /// ## Schema overview
@@ -62,7 +62,7 @@ import 'package:sqflite/sqflite.dart';
 /// - [sqflite](https://pub.dev/packages/sqflite) — the SQLite plugin
 ///   used for local storage.
 /// - [path_provider](https://pub.dev/packages/path_provider)
-///   — platform‑specific directory resolution.
+///   — platform-specific directory resolution.
 class DatabaseHelper {
   /// Returns the single [DatabaseHelper] instance.
   factory DatabaseHelper() => _instance;
@@ -118,7 +118,7 @@ class DatabaseHelper {
   /// [onDatabaseDowngradeDelete] and rebuilt from the baseline.
   static const int databaseVersion = 1;
 
-  /// The lazily‑opened database instance, with in-flight dedup so several
+  /// The lazily-opened database instance, with in-flight dedup so several
   /// concurrent first accesses share a single open.
   Future<Database> get database {
     return _databaseFuture ??= _initDatabase();
@@ -280,7 +280,7 @@ class DatabaseHelper {
 
   /// Searches the products table by name or barcode.
   ///
-  /// Delegates to [ProductDao.search] with a case‑insensitive LIKE query.
+  /// Delegates to [ProductDao.search] with a case-insensitive LIKE query.
   Future<List<Product>> searchProducts(String query) async {
     final db = await database;
     return await productDao.search(db, query);
@@ -288,17 +288,17 @@ class DatabaseHelper {
 
   /// Returns only products fetched from the Open Food Facts API.
   ///
-  /// These are safe to flush and re‑fetch. Products entered manually
+  /// These are safe to flush and re-fetch. Products entered manually
   /// (source = 'manual') are excluded.
   Future<List<Product>> getCachedProducts() async {
     final db = await database;
     return await productDao.getBySource(db, 'api');
   }
 
-  /// Deletes all API‑fetched products from the local cache.
+  /// Deletes all API-fetched products from the local cache.
   ///
   /// Products with [Product.source] 'manual' are kept. Used during app
-  /// update and manual cache flush so that user‑entered data is never lost.
+  /// update and manual cache flush so that user-entered data is never lost.
   ///
   /// Foreign key enforcement is temporarily disabled because inventory rows
   /// and prices legitimately survive cache flushes (they are LEFT JOINed).

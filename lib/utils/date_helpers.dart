@@ -1,4 +1,4 @@
-/// Parses an ISO‑8601 date string (e.g. '2026-07-15') to a [DateTime].
+/// Parses an ISO-8601 date string (e.g. '2026-07-15') to a [DateTime].
 ///
 /// Returns null if the string is null, empty, or cannot be parsed.
 DateTime? parseExpiryDate(String? dateString) {

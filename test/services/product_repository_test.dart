@@ -94,7 +94,7 @@ void main() {
       'throws ProductNotFoundException when API returns not found '
       '(no fallback)',
       () {
-        /// Without a fallback API, a not‑found error is rethrown directly.
+        /// Without a fallback API, a not-found error is rethrown directly.
         final repoNoFallback = ProductRepository(
           mockDb,
           mockApi,
@@ -117,7 +117,7 @@ void main() {
     test(
       'uses fallback API when primary throws ProductNotFoundException',
       () async {
-        /// When the primary API fails with a not‑found error, the fallback
+        /// When the primary API fails with a not-found error, the fallback
         /// is tried and its result is cached.
         when(
           () => mockDb.getProduct(testBarcode),
@@ -142,7 +142,7 @@ void main() {
     test(
       'throws ProductNotFoundException when both APIs fail with not found',
       () {
-        /// When both primary and fallback return not‑found, the exception
+        /// When both primary and fallback return not-found, the exception
         /// is rethrown.
         when(
           () => mockDb.getProduct(testBarcode),
@@ -162,7 +162,7 @@ void main() {
     );
 
     test('throws FetchFailedException on generic API error', () {
-      /// Non‑not‑found exceptions from the primary API are wrapped in a
+      /// Non-not-found exceptions from the primary API are wrapped in a
       /// [FetchFailedException].
       when(() => mockDb.getProduct(testBarcode)).thenAnswer((_) async => null);
       when(

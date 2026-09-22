@@ -11,13 +11,11 @@ class PriceDao {
   /// Creates a [PriceDao].
   const PriceDao();
 
-  /// Creates the prices table and its indexes.
-  ///
-  /// The table carries no foreign keys: price observations are the user's
-  /// own records and must survive product cache flushes and pantry
-  /// deletion. This schema must stay in sync with migration v46, which
-  /// rebuilt the table without foreign keys.
   /// Converts a [Price] to a map for database insertion.
+  ///
+  /// The prices table carries no foreign keys: price observations are the
+  /// user's own records and must survive product cache flushes and pantry
+  /// deletion.
   Map<String, dynamic> toMap(Price p) => {
     'barcode': p.barcode,
     'price': p.price,

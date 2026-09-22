@@ -2,6 +2,7 @@ import 'dart:io';
 
 /// The outcome of attempting to pick a product photo.
 sealed class PhotoPickResult {
+  /// Base constructor shared by every [PhotoPickResult] variant.
   const PhotoPickResult();
 }
 

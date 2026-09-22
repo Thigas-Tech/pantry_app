@@ -11,7 +11,6 @@ class RecipeIngredientDao {
   /// Creates a [RecipeIngredientDao].
   const RecipeIngredientDao();
 
-  /// Creates the recipe_ingredients table.
   /// Converts a [RecipeIngredient] to a map for database insertion.
   Map<String, dynamic> toMap(RecipeIngredient item) => {
     if (item.id != null) 'id': item.id,

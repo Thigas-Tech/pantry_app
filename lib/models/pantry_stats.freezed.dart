@@ -14,7 +14,44 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PantryStats {
 
- int get totalProducts; int get totalItems; double get averageNutriscoreNumeric; int get expiredCount; int get expiringSoonCount; int get goodCount; int get addedThisWeek; int get addedThisMonth; List<WeeklyCount> get weeklyAdditions; Map<String, int> get itemsByLocation; List<CategoryCount> get categoriesTop; Map<String, int> get nutriscoreDistribution; Map<String, int> get itemsBySource; PhotoStats get localPhotos; PhotoStats get offPhotos; double get totalValue; double get averagePrice; int get pricedItemCount; List<MonthlySpending> get monthlySpending; List<StoreSpending> get storeSpending; List<StoreNutriscore> get nutriscoreByStore; int get mealsCooked; double get totalRecipeCost; double get averageRecipeNutriScore; String get mostCookedRecipe;
+/// Number of products cached in the local database.
+ int get totalProducts;/// Number of inventory items in the active pantry.
+ int get totalItems;/// Average numeric Nutri-Score of cached products
+/// (5 = A, 4 = B, ... 1 = E).
+ double get averageNutriscoreNumeric;/// Items already past their expiry date in the active pantry.
+ int get expiredCount;/// Items expiring within the configured expiring-soon window in the
+/// active pantry.
+ int get expiringSoonCount;/// Items with a healthy expiry date in the active pantry.
+ int get goodCount;/// Sum of counts in [weeklyAdditions] for the active pantry.
+ int get addedThisWeek;/// Total items added within the recent weekly-addition window
+/// (same value as [addedThisWeek]).
+ int get addedThisMonth;/// Weekly addition counts for the active pantry, newest week first
+/// (up to eight weeks).
+ List<WeeklyCount> get weeklyAdditions;/// Count of items per storage location (pantry, fridge, freezer,
+/// custom) in the active pantry.
+ Map<String, int> get itemsByLocation;/// Top product categories by item count, parent-level names localized
+/// to the user's language.
+ List<CategoryCount> get categoriesTop;/// Count of cached products per Nutri-Score grade.
+ Map<String, int> get nutriscoreDistribution;/// Count of cached products per source (API-fetched vs manual).
+ Map<String, int> get itemsBySource;/// Photo-completeness counts for locally captured product photos.
+ PhotoStats get localPhotos;/// Photo-completeness counts for OFF product photos.
+ PhotoStats get offPhotos;/// Total estimated value of priced items in the active pantry, in the
+/// base currency.
+ double get totalValue;/// Average price of priced items in the active pantry, in the base
+/// currency.
+ double get averagePrice;/// Number of items with at least one recorded price in the active
+/// pantry.
+ int get pricedItemCount;/// Monthly expenditure in the base currency for the active pantry,
+/// recent months first.
+ List<MonthlySpending> get monthlySpending;/// Spending and item counts grouped by store for the active pantry.
+ List<StoreSpending> get storeSpending;/// Average Nutri-Score per store for the active pantry.
+ List<StoreNutriscore> get nutriscoreByStore;/// Number of recipes cooked in the last 30 days.
+ int get mealsCooked;/// Total cost of recipes cooked in the last 30 days, in the base
+/// currency.
+ double get totalRecipeCost;/// Average numeric Nutri-Score across saved recipes; not yet populated
+/// by the stats aggregation.
+ double get averageRecipeNutriScore;/// Name of the most-cooked recipe, or empty when none has been cooked.
+ String get mostCookedRecipe;
 /// Create a copy of PantryStats
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -251,78 +288,127 @@ class _PantryStats implements PantryStats {
   const _PantryStats({required this.totalProducts, required this.totalItems, required this.averageNutriscoreNumeric, required this.expiredCount, required this.expiringSoonCount, required this.goodCount, required this.addedThisWeek, required this.addedThisMonth, required final  List<WeeklyCount> weeklyAdditions, required final  Map<String, int> itemsByLocation, required final  List<CategoryCount> categoriesTop, required final  Map<String, int> nutriscoreDistribution, required final  Map<String, int> itemsBySource, required this.localPhotos, required this.offPhotos, this.totalValue = 0, this.averagePrice = 0, this.pricedItemCount = 0, final  List<MonthlySpending> monthlySpending = const [], final  List<StoreSpending> storeSpending = const [], final  List<StoreNutriscore> nutriscoreByStore = const [], this.mealsCooked = 0, this.totalRecipeCost = 0, this.averageRecipeNutriScore = 0, this.mostCookedRecipe = ''}): _weeklyAdditions = weeklyAdditions,_itemsByLocation = itemsByLocation,_categoriesTop = categoriesTop,_nutriscoreDistribution = nutriscoreDistribution,_itemsBySource = itemsBySource,_monthlySpending = monthlySpending,_storeSpending = storeSpending,_nutriscoreByStore = nutriscoreByStore;
   
 
+/// Number of products cached in the local database.
 @override final  int totalProducts;
+/// Number of inventory items in the active pantry.
 @override final  int totalItems;
+/// Average numeric Nutri-Score of cached products
+/// (5 = A, 4 = B, ... 1 = E).
 @override final  double averageNutriscoreNumeric;
+/// Items already past their expiry date in the active pantry.
 @override final  int expiredCount;
+/// Items expiring within the configured expiring-soon window in the
+/// active pantry.
 @override final  int expiringSoonCount;
+/// Items with a healthy expiry date in the active pantry.
 @override final  int goodCount;
+/// Sum of counts in [weeklyAdditions] for the active pantry.
 @override final  int addedThisWeek;
+/// Total items added within the recent weekly-addition window
+/// (same value as [addedThisWeek]).
 @override final  int addedThisMonth;
+/// Weekly addition counts for the active pantry, newest week first
+/// (up to eight weeks).
  final  List<WeeklyCount> _weeklyAdditions;
+/// Weekly addition counts for the active pantry, newest week first
+/// (up to eight weeks).
 @override List<WeeklyCount> get weeklyAdditions {
   if (_weeklyAdditions is EqualUnmodifiableListView) return _weeklyAdditions;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_weeklyAdditions);
 }
 
+/// Count of items per storage location (pantry, fridge, freezer,
+/// custom) in the active pantry.
  final  Map<String, int> _itemsByLocation;
+/// Count of items per storage location (pantry, fridge, freezer,
+/// custom) in the active pantry.
 @override Map<String, int> get itemsByLocation {
   if (_itemsByLocation is EqualUnmodifiableMapView) return _itemsByLocation;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_itemsByLocation);
 }
 
+/// Top product categories by item count, parent-level names localized
+/// to the user's language.
  final  List<CategoryCount> _categoriesTop;
+/// Top product categories by item count, parent-level names localized
+/// to the user's language.
 @override List<CategoryCount> get categoriesTop {
   if (_categoriesTop is EqualUnmodifiableListView) return _categoriesTop;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_categoriesTop);
 }
 
+/// Count of cached products per Nutri-Score grade.
  final  Map<String, int> _nutriscoreDistribution;
+/// Count of cached products per Nutri-Score grade.
 @override Map<String, int> get nutriscoreDistribution {
   if (_nutriscoreDistribution is EqualUnmodifiableMapView) return _nutriscoreDistribution;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_nutriscoreDistribution);
 }
 
+/// Count of cached products per source (API-fetched vs manual).
  final  Map<String, int> _itemsBySource;
+/// Count of cached products per source (API-fetched vs manual).
 @override Map<String, int> get itemsBySource {
   if (_itemsBySource is EqualUnmodifiableMapView) return _itemsBySource;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_itemsBySource);
 }
 
+/// Photo-completeness counts for locally captured product photos.
 @override final  PhotoStats localPhotos;
+/// Photo-completeness counts for OFF product photos.
 @override final  PhotoStats offPhotos;
+/// Total estimated value of priced items in the active pantry, in the
+/// base currency.
 @override@JsonKey() final  double totalValue;
+/// Average price of priced items in the active pantry, in the base
+/// currency.
 @override@JsonKey() final  double averagePrice;
+/// Number of items with at least one recorded price in the active
+/// pantry.
 @override@JsonKey() final  int pricedItemCount;
+/// Monthly expenditure in the base currency for the active pantry,
+/// recent months first.
  final  List<MonthlySpending> _monthlySpending;
+/// Monthly expenditure in the base currency for the active pantry,
+/// recent months first.
 @override@JsonKey() List<MonthlySpending> get monthlySpending {
   if (_monthlySpending is EqualUnmodifiableListView) return _monthlySpending;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_monthlySpending);
 }
 
+/// Spending and item counts grouped by store for the active pantry.
  final  List<StoreSpending> _storeSpending;
+/// Spending and item counts grouped by store for the active pantry.
 @override@JsonKey() List<StoreSpending> get storeSpending {
   if (_storeSpending is EqualUnmodifiableListView) return _storeSpending;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_storeSpending);
 }
 
+/// Average Nutri-Score per store for the active pantry.
  final  List<StoreNutriscore> _nutriscoreByStore;
+/// Average Nutri-Score per store for the active pantry.
 @override@JsonKey() List<StoreNutriscore> get nutriscoreByStore {
   if (_nutriscoreByStore is EqualUnmodifiableListView) return _nutriscoreByStore;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_nutriscoreByStore);
 }
 
+/// Number of recipes cooked in the last 30 days.
 @override@JsonKey() final  int mealsCooked;
+/// Total cost of recipes cooked in the last 30 days, in the base
+/// currency.
 @override@JsonKey() final  double totalRecipeCost;
+/// Average numeric Nutri-Score across saved recipes; not yet populated
+/// by the stats aggregation.
 @override@JsonKey() final  double averageRecipeNutriScore;
+/// Name of the most-cooked recipe, or empty when none has been cooked.
 @override@JsonKey() final  String mostCookedRecipe;
 
 /// Create a copy of PantryStats
@@ -427,7 +513,9 @@ $PhotoStatsCopyWith<$Res> get offPhotos {
 /// @nodoc
 mixin _$WeeklyCount {
 
- String get weekLabel; int get count;
+/// ISO year-week label (strftime %Y-%W format).
+ String get weekLabel;/// Number of items added in that week.
+ int get count;
 /// Create a copy of WeeklyCount
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -623,7 +711,9 @@ class _WeeklyCount implements WeeklyCount {
   const _WeeklyCount({required this.weekLabel, required this.count});
   
 
+/// ISO year-week label (strftime %Y-%W format).
 @override final  String weekLabel;
+/// Number of items added in that week.
 @override final  int count;
 
 /// Create a copy of WeeklyCount
@@ -687,7 +777,9 @@ as int,
 /// @nodoc
 mixin _$CategoryCount {
 
- String get category; int get count;
+/// Parent-level category name, localized to the user's language.
+ String get category;/// Number of items in that category.
+ int get count;
 /// Create a copy of CategoryCount
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -883,7 +975,9 @@ class _CategoryCount implements CategoryCount {
   const _CategoryCount({required this.category, required this.count});
   
 
+/// Parent-level category name, localized to the user's language.
 @override final  String category;
+/// Number of items in that category.
 @override final  int count;
 
 /// Create a copy of CategoryCount
@@ -947,7 +1041,11 @@ as int,
 /// @nodoc
 mixin _$PhotoStats {
 
- int get total; int get withNutrition; int get withIngredients; int get withProduct;
+/// Total cached products counted.
+ int get total;/// Products with a nutrition photo attached.
+ int get withNutrition;/// Products with an ingredients photo attached.
+ int get withIngredients;/// Products with a product photo attached.
+ int get withProduct;
 /// Create a copy of PhotoStats
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1145,9 +1243,13 @@ class _PhotoStats implements PhotoStats {
   const _PhotoStats({required this.total, required this.withNutrition, required this.withIngredients, required this.withProduct});
   
 
+/// Total cached products counted.
 @override final  int total;
+/// Products with a nutrition photo attached.
 @override final  int withNutrition;
+/// Products with an ingredients photo attached.
 @override final  int withIngredients;
+/// Products with a product photo attached.
 @override final  int withProduct;
 
 /// Create a copy of PhotoStats

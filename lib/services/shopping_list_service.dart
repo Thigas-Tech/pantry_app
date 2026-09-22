@@ -265,24 +265,14 @@ class ShoppingListService {
     );
   }
 
-  /// Finishes a market trip by moving purchased items to the inventory and
-  /// removing any purchased items that could not be moved.
+  /// Finishes a market trip by moving the trip's items into the inventory
+  /// and removing anything that could not be moved.
   ///
-  /// First moves every purchased item with a barcode and a cached product
-  /// into the inventory (see [movePurchasedToInventory]). Any remaining
-  /// purchased items in the inventory (for example free-text items without
-  /// a barcode) are then deleted so the list is clean for the next trip.
-  ///
-  /// Runs inside a single SQLite transaction — all-or-nothing. Returns a
-  /// [FinishShoppingTripResult] with the moved and cleaned counts.
-  /// Finishes a market trip by moving the trip's items into the inventory and
-  /// removing anything that could not be moved.
-  ///
-  /// Moves every item in the trip inventory (both pending and purchased) that
-  /// has a barcode and a cached product into the inventory (see
-  /// [movePurchasedToInventory]). Any remaining items — for example free-text
-  /// entries without a barcode, or products that are not in the cache — are
-  /// then deleted so the list is clean for the next trip.
+  /// Moves every item in the trip inventory (both pending and purchased)
+  /// that has a barcode and a cached product into the inventory (see
+  /// [movePurchasedToInventory]). Any remaining items — for example
+  /// free-text entries without a barcode, or products that are not in the
+  /// cache — are then deleted so the list is clean for the next trip.
   ///
   /// Runs inside a single SQLite transaction — all-or-nothing. Returns a
   /// [FinishShoppingTripResult] with the moved and cleaned counts.

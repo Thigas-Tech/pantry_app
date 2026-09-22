@@ -12,12 +12,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Guards against duplicate singleton service construction in providers.
 ///
 /// [UsdaApiClient] and [CurrencyService] must be created exactly once each,
-/// inside their owning provider files (`usda_provider.dart` and
-/// `currency_service_provider.dart`). Other layers must consume them via
-/// `usdaApiClientProvider` / `currencyServiceProvider` so tests can override
+/// inside their owning provider files (usda_provider.dart and
+/// currency_service_provider.dart). Other layers must consume them via
+/// usdaApiClientProvider / currencyServiceProvider so tests can override
 /// a single instance and no client instances are silently duplicated.
 ///
-/// The scan mirrors `test/database/sqlite_compatibility_test.dart`: it
+/// The scan mirrors test/database/sqlite_compatibility_test.dart: it
 /// checks the production source tree and fails if a direct constructor call
 /// is reintroduced outside the allowlist.
 void main() {

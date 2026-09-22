@@ -82,7 +82,8 @@ is a new numbered migration implementing `up` and `down`.
 drifts.
 
 **Version restart and data loss**: the schema was restarted at version 1
-after v46. Installs created before the restart report a higher
+from the previous numbered migration chain. Installs created before the
+restart report a higher
 `user_version`, so sqflite invokes `onDatabaseDowngradeDelete`, which
 deletes the database file (including the WAL and shared-memory sidecars)
 and recreates it from the baseline. This is intentional for the
@@ -120,8 +121,7 @@ like `ROW_NUMBER() OVER` (3.25+), no `ALTER TABLE DROP COLUMN` /
 `RENAME COLUMN` (3.35+/3.25+), no UPSERT `ON CONFLICT DO UPDATE`
 (3.24+), and no `RETURNING` (3.35+).
 `test/database/sqlite_compatibility_test.dart` scans `lib/` and fails if any
-of these constructs are reintroduced (v43 is allowlisted because its
-`DROP COLUMN` is guarded to skip on old engines). FEFO ordering
+of these constructs are reintroduced. FEFO ordering
 uses the portable `ORDER BY (expiry_date IS NULL), expiry_date ASC`, and
 "latest price per barcode" uses a correlated subquery
 (`ORDER BY date_purchased DESC, id DESC LIMIT 1`).

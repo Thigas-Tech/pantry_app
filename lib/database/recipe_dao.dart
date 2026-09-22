@@ -14,7 +14,6 @@ class RecipeDao {
   /// Creates a [RecipeDao].
   const RecipeDao();
 
-  /// Creates the recipes table.
   /// Converts a [Recipe] to a map for database insertion.
   ///
   /// Emits the derived search_text column via [buildRecipeSearchText] so

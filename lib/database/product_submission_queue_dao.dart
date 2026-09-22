@@ -18,7 +18,6 @@ class ProductSubmissionQueueDao {
 
   final DateTime Function() _now;
 
-  /// Creates the product_submission_queue table.
   /// Queues a barcode for submission. If the barcode is already queued,
   /// this is a no-op due to the UNIQUE constraint.
   Future<void> insert(Database db, String barcode) async {

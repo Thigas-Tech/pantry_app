@@ -348,7 +348,7 @@ final class RecipeIngredientCostsProvider
 }
 
 String _$recipeIngredientCostsHash() =>
-    r'e323e13415b769e774c435ef7d8ea89b3606a587';
+    r'1c2ae74156ed15f063fc47c212b1751dfb925a80';
 
 /// Provides the scaled cost per ingredient for a recipe, keyed by the
 /// ingredient barcode.

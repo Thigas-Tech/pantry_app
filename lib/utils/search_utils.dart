@@ -36,8 +36,8 @@ String buildSearchText(Product product) {
 /// Concatenates the recipe name and instructions, then applies
 /// [normalizeForSearch] so the stored column matches the same
 /// normalization applied to user queries. The composition (name followed
-/// by instructions) intentionally mirrors the v30 migration backfill so
-/// backfilled rows and rows written afterwards are consistent.
+/// by instructions) is the single derivation used on every write path, so
+/// all rows stay consistent.
 String buildRecipeSearchText(Recipe recipe) {
   return normalizeForSearch('${recipe.name} ${recipe.instructions}');
 }

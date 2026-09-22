@@ -16,12 +16,12 @@ import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/off_language.dart';
 
-/// The central data access point that implements the offline‑first pattern.
+/// The central data access point that implements the offline-first pattern.
 ///
 /// [ProductRepository] coordinates between the local SQLite cache
 /// ([DatabaseHelper]) and the remote API ([OffAdapter]).
 ///
-/// ## Offline‑first strategy
+/// ## Offline-first strategy
 ///
 /// For every product lookup:
 /// 1. **Check local cache** – if the product exists in SQLite, return it
@@ -41,7 +41,7 @@ import 'package:pantry_app/utils/off_language.dart';
 /// ## Fallback API
 ///
 /// The constructor accepts an optional fallback [OffAdapter]. This is
-/// currently unused but could be re‑enabled in the future if a second API
+/// currently unused but could be re-enabled in the future if a second API
 /// is desired.
 class ProductRepository {
   /// Creates a [ProductRepository] with the given [DatabaseHelper] and
@@ -285,7 +285,7 @@ class ProductRepository {
     return _db.getInventoryItemsByBarcode(barcode, inventoryId: inventoryId);
   }
 
-  /// Inserts a new inventory item and returns its auto‑generated ID.
+  /// Inserts a new inventory item and returns its auto-generated ID.
   Future<int> addInventoryItem(InventoryItem item) {
     logInfo(
       '''Adding inventory item: ${item.barcode} — qty: ${item.quantity} ${item.unit}, loc: ${item.location} (inventory ${item.inventoryId})''',
@@ -481,7 +481,7 @@ class ProductRepository {
   /// existing cached product for the same barcode.
   ///
   /// Used when the user manually creates a product (e.g., via the
-  /// add‑product screen) or when the product is submitted to Open Food Facts
+  /// add-product screen) or when the product is submitted to Open Food Facts
   /// and should be cached immediately.
   ///
   /// ## Merge strategy
@@ -507,13 +507,13 @@ class ProductRepository {
     await _db.insertProduct(toInsert);
   }
 
-  /// Re‑fetches all products referenced by inventory items in [inventoryId].
+  /// Re-fetches all products referenced by inventory items in [inventoryId].
   ///
   /// The method runs **two passes**. The first pass iterates every barcode
   /// sequentially with a **500 ms delay** between calls. A second pass retries
   /// only the barcodes that failed on the first pass (timeout, 5xx, 429, or
-  /// any other [Exception]), again with 500 ms spacing. This two‑pass strategy
-  /// absorbs transient rate‑limiting or server hiccups without blocking the
+  /// any other [Exception]), again with 500 ms spacing. This two-pass strategy
+  /// absorbs transient rate-limiting or server hiccups without blocking the
   /// UI for longer than necessary.
   ///
   /// Each individual API call may fail transiently; the two-pass
@@ -527,8 +527,8 @@ class ProductRepository {
   /// ## Returns
   ///
   /// The number of successfully refreshed products. Individual failures are
-  /// silently skipped — this is a best‑effort operation suitable for
-  /// pull‑to‑refresh and post‑flush recovery.
+  /// silently skipped — this is a best-effort operation suitable for
+  /// pull-to-refresh and post-flush recovery.
   Future<int> refreshInventoryProducts(int inventoryId) async {
     final items = await _db.getInventoryItems(inventoryId: inventoryId);
     final allBarcodes = items.map((e) => e.barcode).toSet();
@@ -563,10 +563,10 @@ class ProductRepository {
     return refreshed;
   }
 
-  /// Fires‑off [refreshInventoryProducts] without awaiting the result.
+  /// Fires-off [refreshInventoryProducts] without awaiting the result.
   ///
   /// Use this for background refreshes where the caller does not need to
-  /// know when the operation completes (e.g., on‑startup cache refresh).
+  /// know when the operation completes (e.g., on-startup cache refresh).
   void refreshInventoryProductsBackground(int inventoryId) {
     unawaited(refreshInventoryProducts(inventoryId));
   }
@@ -615,7 +615,7 @@ class ProductRepository {
     logInfo('Last refresh time updated');
   }
 
-  /// Returns the stored last‑refresh timestamp, or null if no refresh has
+  /// Returns the stored last-refresh timestamp, or null if no refresh has
   /// ever been recorded.
   Future<DateTime?> getLastRefreshTime() => _stalenessStore.lastRefresh();
 

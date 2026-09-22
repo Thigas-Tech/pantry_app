@@ -997,7 +997,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     return l10n.notAvailable;
   }
 
-  /// Builds a simple label‑value row used for non‑nutrition product information
+  /// Builds a simple label-value row used for non-nutrition product information
   Widget _infoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

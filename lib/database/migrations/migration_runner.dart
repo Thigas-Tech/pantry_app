@@ -121,6 +121,7 @@ class MigrationResult {
 
 /// Status of a single migration.
 sealed class MigrationStatus {
+  /// Base constructor shared by every [MigrationStatus] variant.
   const MigrationStatus();
 }
 

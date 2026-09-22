@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 
-/// Tests for the [InventoryWithProduct] read‑only view.
+/// Tests for the [InventoryWithProduct] read-only view.
 ///
 /// Covers construction from the raw database row map and the application
 /// of default values for missing columns.

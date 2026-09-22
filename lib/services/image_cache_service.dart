@@ -129,8 +129,8 @@ class ImageCacheService {
   /// Replaces characters that are unsafe in a file name with underscores.
   ///
   /// Barcodes originate from OFF/USDA records and camera scans, so a
-  /// malicious value such as `../../evil` must not escape the cache
-  /// directory. Keeps alphanumerics, underscore and hyphen.
+  /// malicious path-traversal value must not escape the cache directory.
+  /// Keeps alphanumerics, underscore and hyphen.
   String _sanitizeBarcode(String barcode) {
     return barcode.replaceAll(RegExp('[^A-Za-z0-9_-]'), '_');
   }

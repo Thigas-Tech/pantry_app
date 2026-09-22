@@ -73,6 +73,19 @@ jobs:
         run: |
           FILES=$(git ls-files 'lib/**/*.dart' 'test/**/*.dart' | grep -v 'app_localizations')
           dart format --output=none --set-exit-if-changed $FILES
+      - name: Check doc comments for backticks
+        if: matrix.category == 'static'
+        working-directory: code
+        run: |
+          HITS=$(grep -rnE '///.*`' lib test --include='*.dart' \
+            | grep -vE '\.g\.dart|\.freezed\.dart|app_localizations' || true)
+          if [ -n "$HITS" ]; then
+            echo "Backticks found in doc comments. Use [square brackets]"
+            echo "for cross-references or plain text instead."
+            echo "$HITS"
+            exit 1
+          fi
+          echo "No backticks in doc comments — OK"
       - name: Analyze Flutter
         if: matrix.category == 'static'
         run: dart analyze lib/ test/

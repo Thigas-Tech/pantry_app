@@ -304,7 +304,7 @@ void main() {
       overrides: screenOverrides(inventories: inventories, mockRepo: mockRepo),
     );
 
-    // Long‑press on 'Home'
+    // Long-press on 'Home'
     await tester.longPress(find.text('Home'));
     await tester.pumpAndSettle();
 

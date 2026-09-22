@@ -12,7 +12,6 @@ class StoreDao {
   /// Creates a [StoreDao].
   const StoreDao();
 
-  /// Creates the stores table.
   /// Converts a [Store] to a map for database insertion.
   Map<String, dynamic> toMap(Store store) => {
     'id': store.id,

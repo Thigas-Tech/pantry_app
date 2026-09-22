@@ -183,7 +183,7 @@ void main() {
 
     group('getByBarcode', () {
       /// Verifies [getByBarcode] returns a [Product] on a successful
-      /// API response with a non‑null product.
+      /// API response with a non-null product.
       test('returns Product on successful fetch', () async {
         final adapter = OffAdapter(
           useStaging: false,
@@ -878,7 +878,7 @@ void main() {
       });
 
       /// Verifies [submitProduct] reports [OffWriteError.serverRejected]
-      /// when the server returns a non‑success status.
+      /// when the server returns a non-success status.
       test('reports serverRejected on non-ok status', () async {
         dotenv.loadFromString(
           isOptional: true,
@@ -1124,7 +1124,7 @@ void main() {
       );
 
       /// Verifies [uploadProductImage] reports [OffWriteError.serverRejected]
-      /// when the server returns a non‑success status.
+      /// when the server returns a non-success status.
       test('reports serverRejected on non-ok status', () async {
         dotenv.loadFromString(
           isOptional: true,

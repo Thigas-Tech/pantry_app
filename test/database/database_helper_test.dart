@@ -11,7 +11,7 @@ import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-/// Tests for [DatabaseHelper] using an in‑memory SQLite database.
+/// Tests for [DatabaseHelper] using an in-memory SQLite database.
 ///
 /// Each test runs against a fresh database created with
 /// [DatabaseHelper.withPath], which applies the baseline migration.
