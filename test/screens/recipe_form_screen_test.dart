@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
@@ -312,56 +311,6 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('1.0'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'pre-fills USDA gram weight for produce items',
-      (tester) async {
-        when(
-          () => mockDb.getDistinctProductsFromInventory(
-            inventoryId: any(named: 'inventoryId'),
-          ),
-        ).thenAnswer(
-          (_) async => [
-            {'name': 'Apple', 'barcode': 'produce-fuji-apple'},
-          ],
-        );
-        when(
-          () => mockRepo.getProductFromCache('produce-fuji-apple'),
-        ).thenAnswer(
-          (_) async => const Product(
-            barcode: 'produce-fuji-apple',
-            name: 'Apple',
-            productType: ProductType.produce,
-            usdaServingAmount: 1,
-            usdaServingUnit: 'medium',
-            usdaGramWeight: 182,
-          ),
-        );
-
-        await pumpApp(
-          tester,
-          const RecipeFormScreen(),
-          overrides: [
-            databaseProvider.overrideWithValue(mockDb),
-            activeInventoryProvider.overrideWith(
-              FakeActiveInventoryNotifier.new,
-            ),
-            productRepositoryProvider.overrideWithValue(mockRepo),
-          ],
-        );
-
-        await tester.tap(find.text('From your pantry'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.byType(CheckboxListTile));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Add selected'));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
-        expect(find.text('182.0'), findsOneWidget);
-        expect(find.text('1.0'), findsNothing);
       },
     );
 

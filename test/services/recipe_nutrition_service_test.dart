@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/recipe_nutrition.dart';
 import 'package:pantry_app/services/recipe_nutrition_service.dart';
@@ -184,56 +183,6 @@ void main() {
       // 100 ml of olive oil = 91 g at density 0.91 g/ml.
       expect(result.totalWeightG, closeTo(91, 0.01));
       expect(result.totalEnergyKcal, closeTo(91 / 100 * 884, 0.01));
-    });
-
-    test('aggregate includes produce pieces via USDA gram weight', () {
-      const apple = Product(
-        barcode: 'plu-1',
-        name: 'Apple',
-        energyKcal: 52,
-        proteinG: 0.3,
-        carbsG: 14,
-        fatG: 0.2,
-        fiberG: 2.4,
-        saltG: 0,
-        usdaGramWeight: 182,
-      );
-      final ingredients = [
-        const RecipeIngredient(
-          recipeId: 1,
-          name: 'Apple',
-          barcode: 'plu-1',
-        ),
-      ];
-      final result = service.aggregate(ingredients, {'plu-1': apple});
-      // 1 apple = 182 g.
-      expect(result.totalWeightG, closeTo(182, 0.01));
-      expect(result.totalEnergyKcal, closeTo(182 / 100 * 52, 0.01));
-    });
-
-    test('aggregate includes produce pieces via serving-weight presets', () {
-      const onion = Product(
-        barcode: 'produce-onion',
-        name: 'Onion',
-        energyKcal: 40,
-        proteinG: 1.1,
-        carbsG: 9,
-        fatG: 0.1,
-        fiberG: 1.7,
-        saltG: 0,
-        productType: ProductType.produce,
-      );
-      final ingredients = [
-        const RecipeIngredient(
-          recipeId: 1,
-          name: 'Onion',
-          barcode: 'produce-onion',
-        ),
-      ];
-      final result = service.aggregate(ingredients, {'produce-onion': onion});
-      // Presets: medium onion = 150 g.
-      expect(result.totalWeightG, closeTo(150, 0.01));
-      expect(result.totalEnergyKcal, closeTo(150 / 100 * 40, 0.01));
     });
 
     test('aggregate per-serving normalization', () {

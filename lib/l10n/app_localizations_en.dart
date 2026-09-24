@@ -57,9 +57,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryLabel => 'Categories';
 
   @override
-  String get servingSize => 'Serving size';
-
-  @override
   String get energy => 'Energy';
 
   @override
@@ -1391,16 +1388,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noExpiry => 'No expiry';
 
   @override
-  String get addProduce => 'Add produce';
-
-  @override
   String get noProduceFinish => 'No, finish trip';
-
-  @override
-  String get produceSearchHint => 'Search produce without barcodes';
-
-  @override
-  String get produceNotFound => 'No produce found. Try a different name.';
 
   @override
   String get addToTrip => 'Add to trip';
@@ -1547,21 +1535,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unitPlural => 'units';
-
-  @override
-  String get weightModeLabel => 'Weight (g)';
-
-  @override
-  String get unitModeLabel => 'Unit';
-
-  @override
-  String get servingSmall => 'Small';
-
-  @override
-  String get servingMedium => 'Medium';
-
-  @override
-  String get servingLarge => 'Large';
 
   @override
   String get unitGrams => 'g';
@@ -1852,15 +1825,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryStarches => 'Starches';
 
   @override
-  String get pluEntryTooltip => 'Enter PLU code (produce)';
-
-  @override
-  String get enterPluCode => 'Enter PLU Code';
-
-  @override
-  String get pluCodeNotFound => 'PLU code not recognized';
-
-  @override
   String get digitLabel => 'Digit';
 
   @override
@@ -1892,30 +1856,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get averageScore => 'Avg. score';
-
-  @override
-  String get produceApple => 'Apple';
-
-  @override
-  String get produceBanana => 'Banana';
-
-  @override
-  String get produceOrange => 'Orange';
-
-  @override
-  String get produceTomato => 'Tomato';
-
-  @override
-  String get producePotato => 'Potato';
-
-  @override
-  String get produceCarrot => 'Carrot';
-
-  @override
-  String get produceOnion => 'Onion';
-
-  @override
-  String get produceLettuce => 'Lettuce';
 
   @override
   String get exactAlarmsDeniedHint => 'Scheduled test notifications may be delayed because exact alarms are not granted. Grant it in Settings > Notifications > Schedule exact alarms.';
@@ -2126,33 +2066,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPage2Cta => 'Open Search';
 
   @override
-  String get onboardingPage3Title => 'Fresh Produce';
-
-  @override
-  String get onboardingPage3Desc => 'Add common fruits and vegetables with a single tap. Perfect for bananas, apples, tomatoes, and more.';
-
-  @override
-  String get onboardingPage3Cta => 'Add Produce';
-
-  @override
-  String get onboardingPage4Title => 'Configure Your Pantry';
-
-  @override
-  String get onboardingPage4Desc => 'Set up price tracking, currency, and data preferences to get the most out of Pantry.';
-
-  @override
-  String get onboardingPage4Cta => 'Set Up';
-
-  @override
-  String get onboardingPage5Title => 'Track Everything';
-
-  @override
-  String get onboardingPage5Desc => 'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.';
-
-  @override
-  String get onboardingPage5Cta => 'Get Started';
-
-  @override
   String get onboardingSkip => 'Skip';
 
   @override
@@ -2163,9 +2076,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchSourceOff => 'Packaged Products';
-
-  @override
-  String get searchSourceUsda => 'Fresh Produce';
 
   @override
   String get searchSourceInventory => 'My Pantry';
@@ -2267,4 +2177,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetDatabaseFailed => 'Could not reset the database';
+
+  @override
+  String get onboardingPage3Title => 'Configure Your Pantry';
+
+  @override
+  String get onboardingPage3Desc => 'Set up price tracking, currency, and data preferences to get the most out of Pantry.';
+
+  @override
+  String get onboardingPage3Cta => 'Set Up';
+
+  @override
+  String get onboardingPage4Title => 'Track Everything';
+
+  @override
+  String get onboardingPage4Desc => 'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.';
+
+  @override
+  String get onboardingPage4Cta => 'Get Started';
+
+  @override
+  String get servingSize => 'Serving size';
 }

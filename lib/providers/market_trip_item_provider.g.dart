@@ -8,7 +8,7 @@ part of 'market_trip_item_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Orchestrates adding a scanned (or produce-searched) product to a market
+/// Orchestrates adding a scanned product to a market
 /// trip as purchased, applying an optional price and expiry in one unit of
 /// work.
 ///
@@ -20,7 +20,7 @@ part of 'market_trip_item_provider.dart';
 @ProviderFor(MarketTripItemController)
 final marketTripItemControllerProvider = MarketTripItemControllerFamily._();
 
-/// Orchestrates adding a scanned (or produce-searched) product to a market
+/// Orchestrates adding a scanned product to a market
 /// trip as purchased, applying an optional price and expiry in one unit of
 /// work.
 ///
@@ -30,7 +30,7 @@ final marketTripItemControllerProvider = MarketTripItemControllerFamily._();
 /// trip inventory are invalidated after every mutation.
 final class MarketTripItemControllerProvider
     extends $NotifierProvider<MarketTripItemController, MarketTripItemState> {
-  /// Orchestrates adding a scanned (or produce-searched) product to a market
+  /// Orchestrates adding a scanned product to a market
   /// trip as purchased, applying an optional price and expiry in one unit of
   /// work.
   ///
@@ -84,9 +84,9 @@ final class MarketTripItemControllerProvider
 }
 
 String _$marketTripItemControllerHash() =>
-    r'168f8f7a9efbe25bd4a25d3aea520282f69bacb9';
+    r'1e9458515b8a6f095c7a3d9d7ae3f2c7bba85e84';
 
-/// Orchestrates adding a scanned (or produce-searched) product to a market
+/// Orchestrates adding a scanned product to a market
 /// trip as purchased, applying an optional price and expiry in one unit of
 /// work.
 ///
@@ -113,7 +113,7 @@ final class MarketTripItemControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Orchestrates adding a scanned (or produce-searched) product to a market
+  /// Orchestrates adding a scanned product to a market
   /// trip as purchased, applying an optional price and expiry in one unit of
   /// work.
   ///
@@ -129,7 +129,7 @@ final class MarketTripItemControllerFamily extends $Family
   String toString() => r'marketTripItemControllerProvider';
 }
 
-/// Orchestrates adding a scanned (or produce-searched) product to a market
+/// Orchestrates adding a scanned product to a market
 /// trip as purchased, applying an optional price and expiry in one unit of
 /// work.
 ///

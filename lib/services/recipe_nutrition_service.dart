@@ -1,10 +1,8 @@
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/recipe_nutrition.dart';
 import 'package:pantry_app/utils/density_table.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/serving_weight.dart';
 
 /// Converts ingredient quantities to grams.
 ///
@@ -47,8 +45,8 @@ double _convertToGrams(
 ///
 /// Ingredients without a barcode or whose product is not in the products map
 /// are skipped (they contribute zero nutrients). Piece-based ingredients are
-/// converted using the product's USDA gram weight or the produce serving
-/// presets; when neither is known they are skipped.
+/// converted only when a per-piece weight is known; otherwise they are
+/// skipped.
 class RecipeNutritionService {
   /// Aggregates all ingredients into a [RecipeNutrition] summary.
   ///
@@ -74,13 +72,9 @@ class RecipeNutritionService {
       final product = productsByBarcode[ingredient.barcode];
       if (product == null) continue;
 
-      final perPieceWeightG = ingredient.unit == 'pieces'
-          ? _resolvePerPieceWeight(product, ingredient.name)
-          : null;
       final grams = _convertToGrams(
         ingredient.quantity,
         ingredient.unit,
-        perPieceWeightG: perPieceWeightG,
         ingredientName: ingredient.name,
       );
       if (grams <= 0) continue;
@@ -113,18 +107,5 @@ class RecipeNutritionService {
     );
 
     return nutrition;
-  }
-
-  /// Resolves the grams per piece for [name], preferring the product's USDA
-  /// gram weight.
-  ///
-  /// The produce serving presets are only consulted for produce-type
-  /// products so a barcoded item like "Egg" is never matched against a
-  /// loose preset key (e.g. "eggplant").
-  double? _resolvePerPieceWeight(Product product, String name) {
-    final usda = product.usdaGramWeight;
-    if (usda != null && usda > 0) return usda;
-    if (product.productType != ProductType.produce) return null;
-    return ServingWeightResolver.resolve(produceName: name);
   }
 }

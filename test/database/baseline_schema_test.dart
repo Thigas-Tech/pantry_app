@@ -43,8 +43,6 @@ const Map<String, List<String>> _expectedColumns = {
     'categories_hierarchy',
     'language_code',
     'search_text',
-    'plu_code',
-    'product_type',
   ],
   'inventories': ['id', 'name', 'created_at'],
   'inventory': [

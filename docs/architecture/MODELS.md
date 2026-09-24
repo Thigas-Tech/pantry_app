@@ -14,5 +14,3 @@ for JSON deserialization from the Open Food Facts API, except where noted.
 | `ShoppingItem` | freezed | Shopping list entry with price fields and photo support |
 | `PantryStats` | freezed | Aggregated statistics for the stats screen |
 | `Store` | freezed | Saved store name for autocomplete |
-| `ProductType` | enum | Barcoded, produce, or custom |
-| `ProductSubmissionQueueEntry` | freezed | Offline queue item for OFF product submissions |

@@ -1,5 +1,14 @@
 # User Changelog
 
+## [0.0.19+15]
+
+- Removed the produce features: the scanner no longer accepts PLU codes,
+  the shopping trip no longer has an add-produce step, and product search
+  no longer offers a produce source. Scanned and searched items are now
+  barcode-based only.
+- Recipe cost and shortage estimates for loose ingredients now use only
+  the per-item weight you entered when adding the item.
+
 ## [0.0.16+12]
 
 - This pre-release build starts a brand-new local database. If you had

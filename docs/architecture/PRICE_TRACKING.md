@@ -178,9 +178,8 @@ quantity is the current stock, not the size of the package the price applies
 to, so using it would distort the scaled cost.
 
 When the ingredient and package units are incompatible (e.g. a piece-counted
-produce item against a gram package), a per-piece serving weight is resolved
-via `ServingWeightResolver` (`lib/utils/serving_weight.dart`): the inventory
-row's `serving_weight_g`, then `ProduceServingPresets`. The resolved weight
+item against a gram package), the user-set per-piece serving weight is
+resolved from the inventory row's `serving_weight_g`. The resolved weight
 converts the ingredient into the package's measurement group before scaling.
 When no package size or conversion resolves, the full package price is
 charged (legacy behavior). Cook-history scoring uses the same path.
@@ -289,8 +288,8 @@ Planned path, in order:
 
 - **Legacy prices (no package fields)**: served unscaled at full price; unit
   labels hidden. They are not explicitly flagged today.
-- **Incompatible units**: grams vs pieces is converted using a per-piece
-  serving weight for produce when available; otherwise the full package price
+- **Incompatible units**: grams vs pieces is converted using the user-set
+  per-piece serving weight when available; otherwise the full package price
   is charged (no density is guessed).
 - **Invalid package sizes**: zero, negative, or non-finite quantities (and
   non-finite or non-positive prices) produce null from `PriceCalculator`.

@@ -20,7 +20,6 @@ void main() {
             value: value,
             onChanged: onChanged ?? (_) {},
             offLabel: 'Open Food Facts',
-            usdaLabel: 'USDA',
             inventoryLabel: 'My Pantry',
           ),
         ),
@@ -35,12 +34,11 @@ void main() {
       expect(find.text('Open Food Facts'), findsOneWidget);
     });
 
-    testWidgets('shows a dropdown with all three sources', (tester) async {
+    testWidgets('shows a dropdown with both sources', (tester) async {
       await pumpSelector(tester);
       await tester.tap(find.byType(DropdownButton<SearchSource>));
       await tester.pumpAndSettle();
       expect(find.text('Open Food Facts'), findsWidgets);
-      expect(find.text('USDA'), findsWidgets);
       expect(find.text('My Pantry'), findsWidgets);
     });
 
@@ -49,9 +47,9 @@ void main() {
       await pumpSelector(tester, onChanged: (v) => selected = v);
       await tester.tap(find.byType(DropdownButton<SearchSource>));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('USDA').last);
+      await tester.tap(find.text('My Pantry').last);
       await tester.pumpAndSettle();
-      expect(selected, SearchSource.usda);
+      expect(selected, SearchSource.inventory);
     });
   });
 }

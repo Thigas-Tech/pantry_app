@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/search_filter.dart';
 import 'package:pantry_app/models/search_result.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -10,7 +9,6 @@ import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/search_utils.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -224,10 +222,6 @@ class SearchPanelController extends _$SearchPanelController {
           final r = await _searchOff(query, languageCode, capturedRequestId);
           results = r.results;
           apiHadResults = r.apiHadResults;
-        case SearchSource.usda:
-          final r = await _searchUsda(query, capturedRequestId);
-          results = r;
-          apiHadResults = r.isNotEmpty;
         case SearchSource.inventory:
           final r = await _searchInventory(query, capturedRequestId);
           results = r;
@@ -368,37 +362,6 @@ class SearchPanelController extends _$SearchPanelController {
     return (results: results, apiHadResults: apiHadResults);
   }
 
-  Future<List<SearchResult>> _searchUsda(
-    String query,
-    int capturedRequestId,
-  ) async {
-    if (query.length < 2) return const <SearchResult>[];
-
-    final normalizedQuery = normalizeForSearch(query.trim());
-    final hasConnection = await ref.read(hasConnectionProvider.future);
-    if (!ref.mounted) return const <SearchResult>[];
-    if (!hasConnection) {
-      notifyOffline();
-      return const <SearchResult>[];
-    }
-
-    try {
-      final usda = ref.read(usdaApiClientProvider);
-      final products = await usda.searchFood(normalizedQuery);
-      if (capturedRequestId != _requestId || !ref.mounted) {
-        return const <SearchResult>[];
-      }
-
-      return [
-        for (final p in products)
-          SearchResult(product: p, source: ResultSource.api),
-      ];
-    } on Exception catch (e) {
-      logWarning('USDA search failed: $e');
-      return const <SearchResult>[];
-    }
-  }
-
   Future<List<SearchResult>> _searchInventory(
     String query,
     int capturedRequestId,
@@ -420,7 +383,6 @@ class SearchPanelController extends _$SearchPanelController {
             product: Product(
               barcode: item.barcode,
               name: item.productName ?? item.barcode,
-              productType: item.productType ?? ProductType.custom,
             ),
             source: ResultSource.local,
           ),
@@ -439,7 +401,6 @@ class SearchPanelController extends _$SearchPanelController {
           product: Product(
             barcode: item.barcode,
             name: item.productName ?? item.barcode,
-            productType: item.productType ?? ProductType.custom,
           ),
           source: ResultSource.local,
         ),

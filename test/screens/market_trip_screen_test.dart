@@ -9,7 +9,6 @@ import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -24,15 +23,12 @@ import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/market_trip_item_screen.dart';
 import 'package:pantry_app/screens/market_trip_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/price_repository.dart';
 import 'package:pantry_app/services/shopping_list_service.dart';
-import 'package:pantry_app/services/usda_api_client.dart';
-import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/widgets/quantity_and_pantry_sheet.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 
@@ -43,8 +39,6 @@ class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
 class _MockShoppingListService extends Mock implements ShoppingListService {}
 
 class _MockPriceRepository extends Mock implements PriceRepository {}
-
-class _MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
 class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
@@ -118,7 +112,6 @@ void main() {
       _MockShoppingListService service,
       _FakeScannerCamera scanner,
       MockProductRepository productRepo,
-      _MockUsdaApiClient usda,
     })
   >
   pumpTrip(
@@ -149,8 +142,6 @@ void main() {
     when(
       () => db.getShoppingList(inventoryId: any(named: 'inventoryId')),
     ).thenAnswer((_) async => items);
-    final usda = _MockUsdaApiClient();
-    when(() => usda.searchFood(any())).thenAnswer((_) async => []);
     final scanner = _FakeScannerCamera();
     await pumpApp(
       tester,
@@ -176,7 +167,6 @@ void main() {
         latestPriceProvider(('1', 1)).overrideWith((ref) => trackedPrice),
         if (pantryCounter != null)
           pantryProvider.overrideWith(() => _FakePantry(pantryCounter)),
-        usdaApiClientProvider.overrideWithValue(usda),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         storesProvider.overrideWith((ref) => const <Store>[]),
       ],
@@ -188,7 +178,6 @@ void main() {
       service: effectiveService,
       scanner: scanner,
       productRepo: productRepo,
-      usda: usda,
     );
   }
 
@@ -311,7 +300,6 @@ void main() {
     await tester.tap(find.text('Finish trip'));
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Add produce'), findsOneWidget);
     expect(find.text('No, finish trip'), findsOneWidget);
 
     await tester.ensureVisible(find.text('No, finish trip'));
@@ -544,77 +532,6 @@ void main() {
     expect(find.byType(MarketTripItemScreen), findsNothing);
   });
 
-  testWidgets('produce confirmation pre-fills a 14-day expiry', (tester) async {
-    final setup = await pumpTrip(tester, inventories: [inventory1]);
-    stubInsertPath(setup.db, setup.service);
-    when(() => setup.service.updateShoppingItemExpiry(any(), any())).thenAnswer(
-      (_) async {},
-    );
-
-    await openConfirmation(
-      tester,
-      setup.scanner,
-      product: const Product(
-        barcode: 'plu-1',
-        name: 'Tomato',
-        productType: ProductType.produce,
-      ),
-    );
-
-    final defaultExpiry = defaultProduceExpiry().toIso8601String().substring(
-      0,
-      10,
-    );
-    expect(find.text(defaultExpiry), findsOneWidget);
-
-    await tester.tap(find.text('Add to trip'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    verify(
-      () => setup.service.updateShoppingItemExpiry(1, defaultExpiry),
-    ).called(1);
-  });
-
-  testWidgets('produce expiry can be cleared before confirming', (
-    tester,
-  ) async {
-    final setup = await pumpTrip(tester, inventories: [inventory1]);
-    stubInsertPath(setup.db, setup.service);
-    when(() => setup.service.updateShoppingItemExpiry(any(), any())).thenAnswer(
-      (_) async {},
-    );
-
-    await openConfirmation(
-      tester,
-      setup.scanner,
-      product: const Product(
-        barcode: 'plu-1',
-        name: 'Tomato',
-        productType: ProductType.produce,
-      ),
-    );
-
-    // The pre-filled date shows; clearing it leaves the item without one.
-    final defaultExpiry = defaultProduceExpiry().toIso8601String().substring(
-      0,
-      10,
-    );
-    expect(find.text(defaultExpiry), findsOneWidget);
-    await tester.tap(find.byTooltip('No expiry'));
-    await tester.pump();
-    expect(find.text(defaultExpiry), findsNothing);
-    expect(find.text('No expiry'), findsOneWidget);
-
-    await tester.tap(find.text('Add to trip'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    verifyNever(() => setup.service.updateShoppingItemExpiry(any(), any()));
-  });
-
   testWidgets('cancelling the confirmation does not add the product', (
     tester,
   ) async {
@@ -839,128 +756,4 @@ void main() {
       expect(setup.scanner.state.scanResolution, isNull);
     },
   );
-
-  testWidgets('produce is confirmed for price and expiry before adding', (
-    tester,
-  ) async {
-    final setup = await pumpTrip(tester, inventories: [inventory1]);
-    stubInsertPath(setup.db, setup.service);
-    when(() => setup.productRepo.cacheProduct(any())).thenAnswer(
-      (_) async {},
-    );
-    when(() => setup.usda.searchFood('tomato')).thenAnswer(
-      (_) async => const [Product(barcode: 'plu-1', name: 'Tomato')],
-    );
-
-    await tester.tap(find.text('Finish trip'));
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.ensureVisible(find.text('Add produce'));
-    await tester.pump(const Duration(milliseconds: 400));
-    await tester.tap(find.text('Add produce'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-
-    await tester.enterText(find.byType(TextField).last, 'tomato');
-    await tester.pump(const Duration(milliseconds: 900));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    await tester.tap(find.text('Tomato'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-
-    // Produce opens the same single confirmation and is not added yet.
-    expect(find.byType(MarketTripItemScreen), findsOneWidget);
-    verifyNever(
-      () => setup.service.addShoppingItem(
-        any(),
-        activeInventoryId: any(named: 'activeInventoryId'),
-      ),
-    );
-    await tester.tap(find.text('Add to trip'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    final captured = verify(
-      () => setup.service.addShoppingItem(
-        captureAny(),
-        activeInventoryId: any(named: 'activeInventoryId'),
-      ),
-    ).captured;
-    final item = captured.single as ShoppingItem;
-    expect(item.barcode, 'plu-1');
-    expect(item.isPurchased, isTrue);
-  });
-
-  testWidgets('trip shows a produce-add button before finishing', (
-    tester,
-  ) async {
-    await pumpTrip(tester, inventories: [inventory1]);
-
-    expect(find.byTooltip('Add produce'), findsOneWidget);
-    expect(find.byIcon(Icons.eco_outlined), findsOneWidget);
-  });
-
-  testWidgets(
-    'the produce button opens the search sheet and confirms the result',
-    (tester) async {
-      final setup = await pumpTrip(tester, inventories: [inventory1]);
-      stubInsertPath(setup.db, setup.service);
-      when(() => setup.productRepo.cacheProduct(any())).thenAnswer(
-        (_) async {},
-      );
-      when(() => setup.usda.searchFood('tomato')).thenAnswer(
-        (_) async => const [Product(barcode: 'plu-1', name: 'Tomato')],
-      );
-
-      await tester.tap(find.byTooltip('Add produce'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      expect(find.byType(SearchBar), findsOneWidget);
-      await tester.enterText(find.byType(TextField).last, 'tomato');
-      await tester.pump(const Duration(milliseconds: 900));
-      await tester.pump(const Duration(milliseconds: 300));
-
-      await tester.tap(find.text('Tomato'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      // Produce goes through the same single confirmation.
-      expect(find.byType(MarketTripItemScreen), findsOneWidget);
-      await tester.tap(find.text('Add to trip'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      final captured = verify(
-        () => setup.service.addShoppingItem(
-          captureAny(),
-          activeInventoryId: any(named: 'activeInventoryId'),
-        ),
-      ).captured;
-      final item = captured.single as ShoppingItem;
-      expect(item.barcode, 'plu-1');
-      expect(item.isPurchased, isTrue);
-    },
-  );
-
-  testWidgets('a scan while the produce sheet is open is ignored', (
-    tester,
-  ) async {
-    final setup = await pumpTrip(tester, inventories: [inventory1]);
-
-    await tester.tap(find.byTooltip('Add produce'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(find.byType(SearchBar), findsOneWidget);
-
-    setup.scanner.resolve(const Product(barcode: '2', name: 'Bread'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-
-    // No confirmation is pushed over the open produce sheet.
-    expect(find.byType(MarketTripItemScreen), findsNothing);
-    expect(find.byType(SearchBar), findsOneWidget);
-  });
 }

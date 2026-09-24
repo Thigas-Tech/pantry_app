@@ -26,7 +26,7 @@ Each table has a dedicated Data Access Object:
 |---|---|
 | `ProductDao` | Upsert / lookup products, count, source-aware queries |
 | `InventoryDao` | CRUD items, joined queries |
-| `InventoriesDao` | CRUD named pantries, migrations |
+| `InventoriesDao` | CRUD named pantries |
 | `ProductSubmissionQueueDao` | CRUD offline submission queue |
 | `PriceDao` | CRUD prices, quantity-scaled aggregation queries (total value, average, monthly/store spending) |
 | `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
@@ -75,8 +75,10 @@ Both `_onCreate` and `_onUpgrade` delegate to
 known tables when the file reports `user_version` 0 (a database created
 outside this helper), then rebuilds from the baseline.
 
-The baseline is frozen: it must never be edited. Every later schema change
-is a new numbered migration implementing `up` and `down`.
+The baseline was amended once while the app was still pre-release (the
+removed produce feature's `plu_code` and `product_type` columns were
+dropped). From here on the baseline is frozen: every later schema change is
+a new numbered migration implementing `up` and `down`.
 `DatabaseHelper.databaseVersion` must match the highest declared migration;
 `test/database/baseline_schema_test.dart` fails if the frozen schema
 drifts.

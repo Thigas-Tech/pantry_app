@@ -45,7 +45,6 @@ import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/price_history_point.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/submission_progress.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -102,25 +101,6 @@ const testProduct = Product(
 const minimalProduct = Product(
   barcode: '1111111111111',
   name: 'Bare Bones',
-);
-
-/// A produce product with no serving size (simulates quick-add produce).
-const produceProductNoServing = Product(
-  barcode: 'produce-Apple',
-  name: 'Apple',
-  productType: ProductType.produce,
-  energyKcal: 52,
-  proteinG: 0.3,
-  carbsG: 13.8,
-  fatG: 0.2,
-  fiberG: 2.4,
-);
-
-/// A produce product whose name has no serving preset.
-const unknownProduce = Product(
-  barcode: 'produce-XYZ',
-  name: 'Unknown Fruit',
-  productType: ProductType.produce,
 );
 
 /// A product where Nutri-Score is not applicable (e.g. food additives).
@@ -512,32 +492,6 @@ void main() {
     expect(find.textContaining('Dairy'), findsOneWidget);
     expect(find.textContaining('250ml'), findsOneWidget);
   });
-
-  testWidgets('shows preset serving size for produce without servingSize', (
-    tester,
-  ) async {
-    setLargeScreen(tester);
-    await pumpApp(
-      tester,
-      const ProductDetailScreen(product: produceProductNoServing),
-      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
-    );
-    // Apple's Medium preset is 182 g -> "1 medium (182 g)"
-    expect(find.textContaining('182'), findsOneWidget);
-  });
-
-  testWidgets('shows 100 g for unknown produce without servingSize', (
-    tester,
-  ) async {
-    setLargeScreen(tester);
-    await pumpApp(
-      tester,
-      const ProductDetailScreen(product: unknownProduce),
-      overrides: screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
-    );
-    expect(find.text('100 g'), findsOneWidget);
-  });
-
   testWidgets('shows N/A for non-produce with null servingSize', (
     tester,
   ) async {

@@ -14,7 +14,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/search_filter.dart';
 
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -23,11 +22,9 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/services/off_adapter.dart';
-import 'package:pantry_app/services/usda_api_client.dart';
 import '../helpers/pump_app.dart';
 
 class MockDatabaseHelper extends Mock implements DatabaseHelper {
@@ -40,8 +37,6 @@ class MockDatabaseHelper extends Mock implements DatabaseHelper {
 }
 
 class MockOffAdapter extends Mock implements OffAdapter {}
-
-class MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
 /// A helper widget that watches [pantryProvider] and counts
 /// rebuilds so test assertions can detect when the provider is invalidated.
@@ -65,7 +60,6 @@ class _ProviderWatcher extends ConsumerWidget {
 void main() {
   late MockDatabaseHelper mockDb;
   late MockOffAdapter mockApi;
-  late MockUsdaApiClient mockUsda;
 
   const localProduct = Product(
     barcode: '001',
@@ -77,12 +71,6 @@ void main() {
     name: 'API Bread',
     brand: 'Brand B',
   );
-  const produceProduct = Product(
-    barcode: 'produce-Carrot',
-    name: 'Carrot',
-    productType: ProductType.produce,
-    source: 'manual',
-  );
 
   setUpAll(() {
     registerFallbackValue(const InventoryItem(barcode: 'fallback'));
@@ -92,7 +80,6 @@ void main() {
   setUp(() {
     mockDb = MockDatabaseHelper();
     mockApi = MockOffAdapter();
-    mockUsda = MockUsdaApiClient();
 
     when(() => mockDb.searchProducts(any())).thenAnswer((_) async => []);
     when(
@@ -114,7 +101,6 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         apiServiceProvider.overrideWithValue(mockApi),
-        usdaApiClientProvider.overrideWithValue(mockUsda),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         activeInventoryProvider.overrideWith(
           FakeActiveInventoryNotifier.new,
@@ -456,101 +442,6 @@ void main() {
     });
   });
 
-  group('produce icon', () {
-    testWidgets('shows leaf avatar for produce item without image', (
-      tester,
-    ) async {
-      when(
-        () => mockDb.searchProducts('carrot'),
-      ).thenAnswer((_) async => [produceProduct]);
-      when(
-        () => mockApi.searchProducts(
-          'carrot',
-          pageSize: any(named: 'pageSize'),
-        ),
-      ).thenAnswer((_) async => []);
-
-      await pumpSearchScreen(tester);
-
-      await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pump();
-
-      expect(find.text('Carrot'), findsOneWidget);
-      // Should show leaf icon instead of barcode text "pro".
-      // 2 leaf icons: one in avatar, one in trailing position.
-      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
-    });
-
-    testWidgets('trailing: leaf over cloud for local produce item', (
-      tester,
-    ) async {
-      when(
-        () => mockDb.searchProducts('carrot'),
-      ).thenAnswer((_) async => [produceProduct]);
-      when(
-        () => mockApi.searchProducts(
-          'carrot',
-          pageSize: any(named: 'pageSize'),
-        ),
-      ).thenAnswer((_) async => []);
-
-      await pumpSearchScreen(tester);
-
-      await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pump();
-
-      // Produce items show leaf (avatar + trailing), never cloud.
-      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
-      expect(find.byIcon(Icons.cloud_outlined), findsNothing);
-    });
-
-    testWidgets('trailing: leaf over cloud for API produce item', (
-      tester,
-    ) async {
-      when(() => mockDb.searchProducts('carrot')).thenAnswer((_) async => []);
-      when(
-        () => mockApi.searchProducts(
-          'carrot',
-          pageSize: any(named: 'pageSize'),
-        ),
-      ).thenAnswer((_) async => [produceProduct]);
-
-      await pumpSearchScreen(tester);
-
-      await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pump();
-
-      // Produce items override cloud with leaf (avatar + trailing).
-      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
-      expect(find.byIcon(Icons.cloud_outlined), findsNothing);
-    });
-
-    testWidgets('non-produce API product still shows cloud icon', (
-      tester,
-    ) async {
-      when(() => mockDb.searchProducts('bread')).thenAnswer((_) async => []);
-      when(
-        () => mockApi.searchProducts(
-          'bread',
-          pageSize: any(named: 'pageSize'),
-        ),
-      ).thenAnswer((_) async => [apiProduct]);
-
-      await pumpSearchScreen(tester);
-
-      await tester.enterText(find.byType(SearchBar), 'bread');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pump();
-
-      // Non-produce API items still show cloud.
-      expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.eco_outlined), findsNothing);
-    });
-  });
-
   group('add to inventory', () {
     testWidgets(
       'swipe-to-add calls repo.cacheProduct and repo.addOrMergeInventoryItem',
@@ -728,12 +619,10 @@ void main() {
         () => mockDb.searchProducts('milk'),
       ).thenAnswer((_) async => [localProduct]);
       when(
-        () => mockApi.searchProducts(
-          'milk',
-          pageSize: any(named: 'pageSize'),
+        () => mockDb.getInventoryWithProduct(
+          inventoryId: any(named: 'inventoryId'),
         ),
       ).thenAnswer((_) async => []);
-      when(() => mockUsda.searchFood(any())).thenAnswer((_) async => []);
 
       await pumpSearchScreen(tester);
 
@@ -743,15 +632,16 @@ void main() {
 
       expect(find.text('Local Milk'), findsOneWidget);
 
-      // Open the source dropdown and select USDA
+      // Open the source dropdown and select the pantry source.
       await tester.tap(find.byType(DropdownButton<SearchSource>));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Fresh Produce').last);
+      await tester.tap(find.text('My Pantry').last);
       await tester.pumpAndSettle();
 
-      // OFF results are cleared, USDA source returns nothing
+      // The pantry source returns nothing for this query.
       expect(find.text('Local Milk'), findsNothing);
     });
+
   });
 
   group('inPantry filter chip', () {

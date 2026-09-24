@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -446,47 +445,7 @@ void main() {
         expect(find.text('Milk'), findsOneWidget);
         expect(find.byType(Image), findsAtLeast(1));
       },
-    );
-
-    testWidgets(
-      'shows leaf avatar for produce pantry item without image_url',
-      (tester) async {
-        when(
-          () => mockDb.getDistinctProductsFromInventory(
-            inventoryId: any(named: 'inventoryId'),
-          ),
-        ).thenAnswer(
-          (_) async => [
-            {
-              'barcode': 'produce-Apple',
-              'name': 'Apple',
-              'image_url': null,
-              'product_type': 'produce',
-            },
-          ],
-        );
-
-        await pumpApp(
-          tester,
-          Builder(
-            builder: (context) => ElevatedButton(
-              onPressed: () => AddToShoppingListSheet.show(context),
-              child: const Text('Open'),
-            ),
-          ),
-          overrides: sheetOverrides(),
-        );
-
-        await tester.tap(find.text('Open'));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Apple'), findsOneWidget);
-        expect(find.byIcon(Icons.eco_outlined), findsAtLeast(1));
-        expect(find.byIcon(Icons.kitchen_outlined), findsOneWidget);
-      },
-    );
-
-    testWidgets(
+    );    testWidgets(
       'handles pantry item with empty image_url string',
       (tester) async {
         when(
@@ -762,45 +721,6 @@ void main() {
     });
   });
 
-  group('produce icon', () {
-    testWidgets('shows leaf avatar for produce item in search results', (
-      tester,
-    ) async {
-      when(() => mockDb.searchProducts('carrot')).thenAnswer(
-        (_) async => [
-          const Product(
-            barcode: 'produce-Carrot',
-            name: 'Carrot',
-            productType: ProductType.produce,
-            source: 'manual',
-          ),
-        ],
-      );
-
-      await pumpApp(
-        tester,
-        Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () => AddToShoppingListSheet.show(context),
-            child: const Text('Open'),
-          ),
-        ),
-        overrides: sheetOverrides(),
-      );
-
-      await tester.tap(find.text('Open'));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(SearchBar), 'carrot');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Carrot'), findsOneWidget);
-      // Leaf icons: avatar + trailing.
-      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
-      expect(find.byIcon(Icons.cloud_outlined), findsNothing);
-    });
-
     testWidgets('shows cloud icon for non-produce API item', (
       tester,
     ) async {
@@ -920,5 +840,4 @@ void main() {
 
       verify(() => mockDb.searchProducts('milk')).called(1);
     });
-  });
 }

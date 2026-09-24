@@ -129,9 +129,6 @@ lib/
     currency_service.dart      # Exchange rate conversion
     open_prices_api_client.dart  # Open Prices API HTTP client
     open_prices_service.dart     # Open Prices sync coordinator
-    plu_service.dart             # PLU code lookup for produce
-    usda_api_client.dart         # USDA produce nutrition data
-    produce_*.dart               # Produce barcode/nutrition mapping helpers
     product_submission_service.dart  # OFF offline submission queue
     product_image_service.dart, product_image_compressor.dart  # Product photos
     product_photo_picker.dart, product_photo_cropper.dart      # Photo capture

@@ -73,14 +73,14 @@ to enforce the convention mechanically.
 | `cacheStalenessStoreProvider` | `Provider` | SharedPreferences-backed last-refresh timestamp store |
 | `inventoryProductsProvider` | `FutureProvider` | Distinct products from active inventory |
 | `searchPanelControllerProvider` | `NotifierProvider.family` | Async search state for SearchPanel (debounced query, source, in-pantry filter) |
-| `marketTripItemControllerProvider` | `NotifierProvider.family` | Adds a scanned/produce item to a market trip as purchased, applying optional price + expiry (autoDispose, keyed by trip inventory id) |
+| `marketTripItemControllerProvider` | `NotifierProvider.family` | Adds a scanned item to a market trip as purchased, applying optional price + expiry (autoDispose, keyed by trip inventory id) |
 | `mobileScannerControllerProvider` | `Provider` | Auto-disposed `MobileScannerController` for the scanner camera |
 | `scannerCameraProvider` | `NotifierProvider` | Scanner camera lifecycle + scan resolution |
 
 ### 4.1 Market trip item controller
 
 `marketTripItemControllerProvider(tripId)` owns the single unit of work that
-adds a scanned (or produce-searched) product to a trip: it marks a pending
+adds a scanned product to a trip: it marks a pending
 row purchased, or merges into an existing purchased row by quantity, or
 inserts a new purchased row, then writes an optional price and expiry and
 invalidates the shopping list providers. The confirm screen keeps the

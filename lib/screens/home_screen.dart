@@ -308,13 +308,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   ),
                                 ),
                               ),
-                              onAddProduce: () => unawaited(
-                                Navigator.of(context).push<void>(
-                                  MaterialPageRoute(
-                                    builder: (_) => const SearchScreen(),
-                                  ),
-                                ),
-                              ),
                               onGetStarted: () => ref
                                   .read(onboardingProvider.notifier)
                                   .markComplete(),

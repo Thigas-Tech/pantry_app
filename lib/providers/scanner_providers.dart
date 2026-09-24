@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/scan_history_entry.dart';
-import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/scan_history_provider.dart';
 import 'package:pantry_app/services/exceptions.dart';
@@ -311,58 +309,6 @@ class ScannerCamera extends _$ScannerCamera {
       state = state.copyWith(scanResolution: const ScanFailed('TIMEOUT'));
     } on Exception catch (e) {
       logError('Barcode resolution failed: $e');
-      state = state.copyWith(scanResolution: ScanFailed(e.toString()));
-    }
-  }
-
-  /// Resolves a PLU code by searching the OFF API.
-  ///
-  /// Sets [ScanResolved] with an enriched produce product on success, or
-  /// [ScanFailed] with 'PLU_NOT_FOUND' when the OFF search returns no
-  /// results.
-  ///
-  /// If resolution takes longer than [timeout], a [TimeoutException] is
-  /// caught and [ScanFailed] with message 'TIMEOUT' is emitted.
-  Future<void> resolvePlu({
-    required String pluCode,
-    required String produceName,
-    required String languageCode,
-    Duration timeout = const Duration(seconds: 15),
-  }) async {
-    if (state.scanResolution != null) return;
-    logInfo('Resolving PLU: $pluCode ($produceName)');
-    state = state.copyWith(scanResolution: const ScanResolving());
-    try {
-      final api = ref.read(apiServiceProvider);
-      final results = await api
-          .searchProducts(
-            produceName,
-            languageCode: languageCode,
-          )
-          .timeout(timeout);
-      if (results.isNotEmpty) {
-        final best = results.firstWhere(
-          (p) => p.name.toLowerCase().contains(produceName.toLowerCase()),
-          orElse: () => results.first,
-        );
-        final enriched = best.copyWith(
-          productType: ProductType.produce,
-          pluCode: pluCode,
-        );
-        logInfo('PLU resolved: ${enriched.name} (${enriched.barcode})');
-        state = state.copyWith(scanResolution: ScanResolved(enriched));
-        await _recordScan(enriched);
-      } else {
-        logInfo('No OFF results found for PLU: $pluCode ($produceName)');
-        state = state.copyWith(
-          scanResolution: const ScanFailed('PLU_NOT_FOUND'),
-        );
-      }
-    } on TimeoutException {
-      logWarning('PLU resolution timed out: $pluCode ($produceName)');
-      state = state.copyWith(scanResolution: const ScanFailed('TIMEOUT'));
-    } on Exception catch (e) {
-      logError('PLU resolution failed: $e');
       state = state.copyWith(scanResolution: ScanFailed(e.toString()));
     }
   }

@@ -19,7 +19,6 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/onboarding_provider.dart'
     show OnboardingNotifier, onboardingProvider;
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/market_trip_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
@@ -27,7 +26,6 @@ import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/scanner_screen.dart';
 import 'package:pantry_app/screens/search_screen.dart';
 import 'package:pantry_app/services/off_adapter.dart';
-import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
@@ -44,8 +42,6 @@ class _MockDatabaseHelper extends Mock implements DatabaseHelper {
 }
 
 class _MockOffAdapter extends Mock implements OffAdapter {}
-
-class _MockUsdaApiClient extends Mock implements UsdaApiClient {}
 
 class FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   int _lastSetValue = 1;
@@ -80,7 +76,6 @@ Map<String, dynamic> itemToRow(InventoryWithProduct item) {
     'nutriscore_not_applicable_category': item.nutriscoreNotApplicableCategory,
     'product_category': item.productCategory,
     'product_search_text': item.productSearchText,
-    'product_type': item.productType?.name,
   };
 }
 
@@ -564,8 +559,7 @@ void main() {
         ),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         apiServiceProvider.overrideWithValue(mockApi),
-        usdaApiClientProvider.overrideWithValue(_MockUsdaApiClient()),
-      ],
+              ],
     );
 
     await tester.tap(find.byIcon(Icons.search));
@@ -619,8 +613,7 @@ void main() {
           ),
           hasConnectionProvider.overrideWith((ref) => Future.value(true)),
           apiServiceProvider.overrideWithValue(mockApi),
-          usdaApiClientProvider.overrideWithValue(_MockUsdaApiClient()),
-        ],
+                  ],
       );
 
       await tester.tap(find.byIcon(Icons.search));
@@ -677,8 +670,7 @@ void main() {
         ),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         apiServiceProvider.overrideWithValue(mockApi),
-        usdaApiClientProvider.overrideWithValue(_MockUsdaApiClient()),
-      ],
+              ],
     );
 
     await tester.tap(find.byIcon(Icons.search));

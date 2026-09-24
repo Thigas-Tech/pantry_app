@@ -11,7 +11,6 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
-import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
@@ -26,7 +25,6 @@ import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/shopping_price.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
-import 'package:pantry_app/widgets/produce_search_sheet.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 import 'package:pantry_app/widgets/shopping_item_tile.dart';
 
@@ -34,8 +32,7 @@ import 'package:pantry_app/widgets/shopping_item_tile.dart';
 ///
 /// The user picks the target pantry (when more than one exists), scans items
 /// in sequence with the embedded camera, optionally confirms estimated
-/// prices, adds non-barcoded produce at the end, and finishes the trip to
-/// move purchased items into the pantry.
+/// prices, and finishes the trip to move purchased items into the pantry.
 ///
 /// The trip operates on the same shopping list data as the shopping list
 /// tab, scoped to the chosen inventory via the per-inventory shopping list
@@ -232,12 +229,6 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.eco_outlined),
-                title: Text(l10n.addProduce),
-                subtitle: Text(l10n.produceSearchHint),
-                onTap: () => Navigator.pop(ctx, 'produce'),
-              ),
-              ListTile(
                 leading: const Icon(Icons.done_all),
                 title: Text(l10n.noProduceFinish),
                 onTap: () => Navigator.pop(ctx, 'finish'),
@@ -248,9 +239,7 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
       );
 
       if (!mounted) return;
-      if (action == 'produce') {
-        await _addProduce(tripId);
-      } else if (action == 'finish') {
+      if (action == 'finish') {
         final confirm = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
@@ -275,38 +264,6 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
       } else {
         finish = true;
       }
-    }
-  }
-
-  Future<void> _addProduce(int tripId) async {
-    // Guard the whole flow (the search sheet and the confirmation) so a scan
-    // resolution cannot push a screen over the open produce sheet.
-    if (_confirmationOpen) return;
-    _confirmationOpen = true;
-    try {
-      final product = await ProduceSearchSheet.show(context);
-      if (product == null || !mounted) return;
-
-      // Cache the product first so the "plu-" barcode survives insertion and
-      // the item can later be moved to inventory by barcode lookup.
-      try {
-        await ref.read(productRepositoryProvider).cacheProduct(product);
-      } on Exception catch (e) {
-        logWarning('Failed to cache produce ${product.name}: $e');
-      }
-
-      // Produce goes through the same single price/expiry confirmation as a
-      // scanned item, so the trip is consistent.
-      final confirmed = await _runConfirm(product, tripId);
-      if (confirmed == true && mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        SnackbarHelper.showInfo(
-          context,
-          l10n.productAddedToShoppingList(product.name),
-        );
-      }
-    } finally {
-      _confirmationOpen = false;
     }
   }
 
@@ -424,7 +381,6 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
               inventoryId: tripId,
               onScanStateChanged: _onScanStateChanged,
               onManualAdd: () => unawaited(_openManualAdd(tripId)),
-              onAddProduce: () => unawaited(_addProduce(tripId)),
               buildTotal: _buildTotal,
             ),
     );
@@ -437,7 +393,6 @@ class _TripBody extends ConsumerWidget {
     required this.inventoryId,
     required this.onScanStateChanged,
     required this.onManualAdd,
-    required this.onAddProduce,
     required this.buildTotal,
   });
 
@@ -445,7 +400,6 @@ class _TripBody extends ConsumerWidget {
   final void Function(ScannerCameraState?, ScannerCameraState)
   onScanStateChanged;
   final VoidCallback onManualAdd;
-  final VoidCallback onAddProduce;
   final Widget Function(BuildContext, List<ShoppingItem>) buildTotal;
 
   @override
@@ -464,7 +418,6 @@ class _TripBody extends ConsumerWidget {
             borderRadius: BorderRadius.circular(16),
             child: ScannerCameraView(
               onSwitchToManual: onManualAdd,
-              onSwitchToPlu: onManualAdd,
               embedded: true,
             ),
           ),
@@ -485,11 +438,6 @@ class _TripBody extends ConsumerWidget {
                 icon: const Icon(Icons.add),
                 tooltip: l10n.addItem,
                 onPressed: onManualAdd,
-              ),
-              IconButton(
-                icon: const Icon(Icons.eco_outlined),
-                tooltip: l10n.addProduce,
-                onPressed: onAddProduce,
               ),
             ],
           ),

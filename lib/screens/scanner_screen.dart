@@ -9,31 +9,22 @@ import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
-import 'package:pantry_app/services/plu_service.dart';
 import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/off_language.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 
-/// A unified input screen for barcodes and produce PLU codes.
+/// A unified input screen for barcodes.
 ///
-/// Offers three modes:
+/// Offers two modes:
 /// - Camera scanner via [ScannerCameraView] for barcodes.
 /// - Manual barcode text entry.
-/// - PLU code entry via numeric keypad for produce without barcodes.
 ///
-/// Automatically navigates to [ProductDetailScreen] when a barcode or PLU
-/// code is successfully resolved via [scannerCameraProvider].
+/// Automatically navigates to [ProductDetailScreen] when a barcode is
+/// successfully resolved via [scannerCameraProvider].
 class ScannerScreen extends ConsumerStatefulWidget {
   /// Creates a [ScannerScreen] widget.
-  ///
-  /// [pluService] can be injected for testing. When omitted, a default
-  /// [PluService] instance is used.
-  const ScannerScreen({this.pluService, super.key});
-
-  /// The PLU code-to-name lookup service.
-  final PluService? pluService;
+  const ScannerScreen({super.key});
 
   @override
   ConsumerState<ScannerScreen> createState() => _ScannerScreenState();
@@ -41,9 +32,6 @@ class ScannerScreen extends ConsumerStatefulWidget {
 
 class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   bool _showManualEntry = false;
-  bool _showPluEntry = false;
-
-  PluService get _pluService => widget.pluService ?? const PluService();
 
   void _onScanStateChanged(
     ScannerCameraState? prev,
@@ -126,21 +114,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     );
   }
 
-  void _submitPlu(String pluCode, String produceName) {
-    logInfo('PLU submitted: $pluCode — $produceName');
-    final locale = Localizations.localeOf(context);
-    final languageCode = offLanguageFromLocale(locale);
-    unawaited(
-      ref
-          .read(scannerCameraProvider.notifier)
-          .resolvePlu(
-            pluCode: pluCode,
-            produceName: produceName,
-            languageCode: languageCode,
-          ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen(scannerCameraProvider, _onScanStateChanged);
@@ -180,20 +153,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   }
 
   Widget _buildCurrentMode() {
-    if (_showPluEntry) {
-      return _PluEntryView(
-        pluService: _pluService,
-        onSwitchToCamera: () {
-          logInfo('Switched to camera scanner from PLU');
-          unawaited(ref.read(scannerCameraProvider.notifier).retryScanner());
-          setState(() {
-            _showPluEntry = false;
-            _showManualEntry = false;
-          });
-        },
-        onSubmitPlu: _submitPlu,
-      );
-    }
     if (_showManualEntry) {
       return _ManualEntryView(
         onSwitchToCamera: () {
@@ -209,11 +168,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
         logInfo('Switched to manual entry');
         unawaited(ref.read(scannerCameraProvider.notifier).stopCamera());
         setState(() => _showManualEntry = true);
-      },
-      onSwitchToPlu: () {
-        logInfo('Switched to PLU entry');
-        unawaited(ref.read(scannerCameraProvider.notifier).stopCamera());
-        setState(() => _showPluEntry = true);
       },
     );
   }
@@ -304,196 +258,6 @@ class _ManualEntryViewState extends State<_ManualEntryView> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ---------- PLU entry ----------
-
-/// A widget for entering PLU (Price Look-Up) codes for produce.
-class _PluEntryView extends StatefulWidget {
-  const _PluEntryView({
-    required this.pluService,
-    required this.onSwitchToCamera,
-    required this.onSubmitPlu,
-  });
-
-  final PluService pluService;
-  final VoidCallback onSwitchToCamera;
-  final void Function(String pluCode, String produceName) onSubmitPlu;
-
-  @override
-  State<_PluEntryView> createState() => _PluEntryViewState();
-}
-
-class _PluEntryViewState extends State<_PluEntryView> {
-  String _code = '';
-  PluEntry? _matchedEntry;
-
-  void _onDigit(String digit) {
-    if (_code.length >= 5) return;
-    setState(() {
-      _code += digit;
-      _matchedEntry = widget.pluService.lookup(_code);
-    });
-  }
-
-  void _onDelete() {
-    if (_code.isEmpty) return;
-    setState(() {
-      _code = _code.substring(0, _code.length - 1);
-      _matchedEntry = widget.pluService.lookup(_code.isEmpty ? '' : _code);
-    });
-  }
-
-  void _onConfirm() {
-    if (_matchedEntry == null) return;
-    logInfo('PLU confirmed: ${_matchedEntry!.code} -- ${_matchedEntry!.name}');
-    unawaited(HapticFeedback.mediumImpact());
-    widget.onSubmitPlu(_matchedEntry!.code, _matchedEntry!.name);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.enterPluCode),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.camera_alt),
-            tooltip: l10n.cameraTooltip,
-            onPressed: widget.onSwitchToCamera,
-          ),
-        ],
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              _code.isEmpty ? '----' : _code.padRight(5, '_'),
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.w300,
-                letterSpacing: 12,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 32,
-            child: _matchedEntry != null
-                ? Text(
-                    _matchedEntry!.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  )
-                : _code.length >= 4
-                ? Text(
-                    l10n.pluCodeNotFound,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  )
-                : null,
-          ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _key('1', l10n),
-                    _key('2', l10n),
-                    _key('3', l10n),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _key('4', l10n),
-                    _key('5', l10n),
-                    _key('6', l10n),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _key('7', l10n),
-                    _key('8', l10n),
-                    _key('9', l10n),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _deleteKey(l10n),
-                    _key('0', l10n),
-                    _confirmKey(),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _key(String digit, AppLocalizations l10n) {
-    return SizedBox(
-      width: 72,
-      height: 64,
-      child: ElevatedButton(
-        onPressed: () => _onDigit(digit),
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: Text(
-          digit,
-          style: const TextStyle(fontSize: 24),
-          semanticsLabel: '${l10n.digitLabel} $digit',
-        ),
-      ),
-    );
-  }
-
-  Widget _deleteKey(AppLocalizations l10n) {
-    return SizedBox(
-      width: 72,
-      height: 64,
-      child: IconButton(
-        onPressed: _code.isNotEmpty ? _onDelete : null,
-        icon: const Icon(Icons.backspace_outlined),
-        tooltip: l10n.deleteDigit,
-      ),
-    );
-  }
-
-  Widget _confirmKey() {
-    return SizedBox(
-      width: 72,
-      height: 64,
-      child: FilledButton(
-        onPressed: _matchedEntry != null ? _onConfirm : null,
-        style: FilledButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: const Icon(Icons.check),
       ),
     );
   }

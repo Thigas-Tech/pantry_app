@@ -42,11 +42,11 @@ AddProductScreen (manual entry when offline or barcode not found)
 SearchScreen
 ├── SearchPanel (composition root, owns SearchPanelController via Riverpod)
 │   ├── SearchQueryBar (search input, 300ms debounce timer, clear button)
-│   ├── SearchSourceSelector (dropdown: Packaged / Fresh Produce / My Pantry)
+│   ├── SearchSourceSelector (dropdown: Packaged / My Pantry)
 │   ├── FilterChip (inPantry filter, shown when results exist)
 │   └── SearchResultsList (result tiles + swipe-to-add rows)
 ├── SearchPanelController (async search state, debounce, request guard)
-├── ResultTile (product image or CircleAvatar fallback, leaf icon for produce)
+├── ResultTile (product image or CircleAvatar fallback)
 ├── Swipe-to-add (Dismissible, start-to-end)
 └── Long-press menu (add to inventory, copy barcode)
 
@@ -62,7 +62,6 @@ StatsScreen
 ScannerScreen
 ├── PopScope (confirmation dialog on back)
 ├── _MobileScannerView (camera + ScannerOverlayPainter)
-├── PLU code entry (numeric keypad for produce items)
 └── _ManualEntryView (text field + submit button)
 
 SettingsScreen

@@ -192,12 +192,6 @@ abstract class AppLocalizations {
   /// **'Categories'**
   String get categoryLabel;
 
-  /// No description provided for @servingSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Serving size'**
-  String get servingSize;
-
   /// No description provided for @energy.
   ///
   /// In en, this message translates to:
@@ -2700,29 +2694,11 @@ abstract class AppLocalizations {
   /// **'No expiry'**
   String get noExpiry;
 
-  /// No description provided for @addProduce.
-  ///
-  /// In en, this message translates to:
-  /// **'Add produce'**
-  String get addProduce;
-
   /// No description provided for @noProduceFinish.
   ///
   /// In en, this message translates to:
   /// **'No, finish trip'**
   String get noProduceFinish;
-
-  /// No description provided for @produceSearchHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Search produce without barcodes'**
-  String get produceSearchHint;
-
-  /// No description provided for @produceNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No produce found. Try a different name.'**
-  String get produceNotFound;
 
   /// No description provided for @addToTrip.
   ///
@@ -2939,36 +2915,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'units'**
   String get unitPlural;
-
-  /// No description provided for @weightModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Weight (g)'**
-  String get weightModeLabel;
-
-  /// No description provided for @unitModeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Unit'**
-  String get unitModeLabel;
-
-  /// No description provided for @servingSmall.
-  ///
-  /// In en, this message translates to:
-  /// **'Small'**
-  String get servingSmall;
-
-  /// No description provided for @servingMedium.
-  ///
-  /// In en, this message translates to:
-  /// **'Medium'**
-  String get servingMedium;
-
-  /// No description provided for @servingLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'Large'**
-  String get servingLarge;
 
   /// No description provided for @unitGrams.
   ///
@@ -3534,24 +3480,6 @@ abstract class AppLocalizations {
   /// **'Starches'**
   String get categoryStarches;
 
-  /// No description provided for @pluEntryTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter PLU code (produce)'**
-  String get pluEntryTooltip;
-
-  /// No description provided for @enterPluCode.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter PLU Code'**
-  String get enterPluCode;
-
-  /// No description provided for @pluCodeNotFound.
-  ///
-  /// In en, this message translates to:
-  /// **'PLU code not recognized'**
-  String get pluCodeNotFound;
-
   /// No description provided for @digitLabel.
   ///
   /// In en, this message translates to:
@@ -3617,54 +3545,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Avg. score'**
   String get averageScore;
-
-  /// No description provided for @produceApple.
-  ///
-  /// In en, this message translates to:
-  /// **'Apple'**
-  String get produceApple;
-
-  /// No description provided for @produceBanana.
-  ///
-  /// In en, this message translates to:
-  /// **'Banana'**
-  String get produceBanana;
-
-  /// No description provided for @produceOrange.
-  ///
-  /// In en, this message translates to:
-  /// **'Orange'**
-  String get produceOrange;
-
-  /// No description provided for @produceTomato.
-  ///
-  /// In en, this message translates to:
-  /// **'Tomato'**
-  String get produceTomato;
-
-  /// No description provided for @producePotato.
-  ///
-  /// In en, this message translates to:
-  /// **'Potato'**
-  String get producePotato;
-
-  /// No description provided for @produceCarrot.
-  ///
-  /// In en, this message translates to:
-  /// **'Carrot'**
-  String get produceCarrot;
-
-  /// No description provided for @produceOnion.
-  ///
-  /// In en, this message translates to:
-  /// **'Onion'**
-  String get produceOnion;
-
-  /// No description provided for @produceLettuce.
-  ///
-  /// In en, this message translates to:
-  /// **'Lettuce'**
-  String get produceLettuce;
 
   /// No description provided for @exactAlarmsDeniedHint.
   ///
@@ -4062,60 +3942,6 @@ abstract class AppLocalizations {
   /// **'Open Search'**
   String get onboardingPage2Cta;
 
-  /// No description provided for @onboardingPage3Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Fresh Produce'**
-  String get onboardingPage3Title;
-
-  /// No description provided for @onboardingPage3Desc.
-  ///
-  /// In en, this message translates to:
-  /// **'Add common fruits and vegetables with a single tap. Perfect for bananas, apples, tomatoes, and more.'**
-  String get onboardingPage3Desc;
-
-  /// No description provided for @onboardingPage3Cta.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Produce'**
-  String get onboardingPage3Cta;
-
-  /// No description provided for @onboardingPage4Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure Your Pantry'**
-  String get onboardingPage4Title;
-
-  /// No description provided for @onboardingPage4Desc.
-  ///
-  /// In en, this message translates to:
-  /// **'Set up price tracking, currency, and data preferences to get the most out of Pantry.'**
-  String get onboardingPage4Desc;
-
-  /// No description provided for @onboardingPage4Cta.
-  ///
-  /// In en, this message translates to:
-  /// **'Set Up'**
-  String get onboardingPage4Cta;
-
-  /// No description provided for @onboardingPage5Title.
-  ///
-  /// In en, this message translates to:
-  /// **'Track Everything'**
-  String get onboardingPage5Title;
-
-  /// No description provided for @onboardingPage5Desc.
-  ///
-  /// In en, this message translates to:
-  /// **'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.'**
-  String get onboardingPage5Desc;
-
-  /// No description provided for @onboardingPage5Cta.
-  ///
-  /// In en, this message translates to:
-  /// **'Get Started'**
-  String get onboardingPage5Cta;
-
   /// No description provided for @onboardingSkip.
   ///
   /// In en, this message translates to:
@@ -4139,12 +3965,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Packaged Products'**
   String get searchSourceOff;
-
-  /// No description provided for @searchSourceUsda.
-  ///
-  /// In en, this message translates to:
-  /// **'Fresh Produce'**
-  String get searchSourceUsda;
 
   /// No description provided for @searchSourceInventory.
   ///
@@ -4343,6 +4163,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not reset the database'**
   String get resetDatabaseFailed;
+
+  /// No description provided for @onboardingPage3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure Your Pantry'**
+  String get onboardingPage3Title;
+
+  /// No description provided for @onboardingPage3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up price tracking, currency, and data preferences to get the most out of Pantry.'**
+  String get onboardingPage3Desc;
+
+  /// No description provided for @onboardingPage3Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up'**
+  String get onboardingPage3Cta;
+
+  /// No description provided for @onboardingPage4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Everything'**
+  String get onboardingPage4Title;
+
+  /// No description provided for @onboardingPage4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitor expiry dates, track prices, create shopping lists, and reduce food waste.'**
+  String get onboardingPage4Desc;
+
+  /// No description provided for @onboardingPage4Cta.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
+  String get onboardingPage4Cta;
+
+  /// No description provided for @servingSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Serving size'**
+  String get servingSize;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

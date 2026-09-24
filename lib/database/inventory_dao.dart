@@ -305,7 +305,6 @@ class InventoryDao {
             AS nutriscore_not_applicable_category,
           products.category AS product_category,
           products.search_text AS product_search_text,
-          products.product_type AS product_type,
           inventories.name AS inventory_name
         FROM inventory
         LEFT JOIN products ON inventory.barcode = products.barcode
@@ -449,7 +448,6 @@ class InventoryDao {
           products.barcode,
           products.name,
           products.image_url,
-          products.product_type,
           MAX(inventory.date_added) AS last_added
         FROM inventory
         INNER JOIN products ON inventory.barcode = products.barcode

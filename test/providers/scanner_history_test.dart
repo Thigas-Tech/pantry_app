@@ -84,31 +84,6 @@ void main() {
       expect(entries.single.imageUrl, 'https://example.com/img.jpg');
     });
 
-    test('resolvePlu records a successful scan', () async {
-      const pluCode = '4011';
-      const produceName = 'Banana';
-      when(
-        () => mockOff.searchProducts(
-          produceName,
-          languageCode: any(named: 'languageCode'),
-        ),
-      ).thenAnswer(
-        (_) async => [const Product(barcode: '000000', name: 'Banana')],
-      );
-
-      await container
-          .read(scannerCameraProvider.notifier)
-          .resolvePlu(
-            pluCode: pluCode,
-            produceName: produceName,
-            languageCode: 'en',
-          );
-
-      final entries = await history();
-      expect(entries, hasLength(1));
-      expect(entries.single.barcode, '000000');
-      expect(entries.single.name, 'Banana');
-    });
 
     test('ProductNotFoundException does not record', () async {
       const barcode = '9999999999999';

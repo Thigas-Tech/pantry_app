@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/search_result.dart';
 
 /// A swipeable, tappable list of [SearchResult]s.
 ///
 /// Each row shows the product avatar, name, brand and barcode, plus badges
-/// for pantry membership, produce type, and API provenance. Rows can be
-/// swiped to trigger [onResultDismissed], tapped to trigger
-/// [onResultTapped], and long-pressed to trigger [onResultLongPressed].
-/// All user-visible strings are passed in so the caller controls
-/// localization.
+/// for pantry membership and API provenance. Rows can be swiped to trigger
+/// [onResultDismissed], tapped to trigger [onResultTapped], and long-pressed
+/// to trigger [onResultLongPressed]. All user-visible strings are passed in
+/// so the caller controls localization.
 class SearchResultsList extends StatelessWidget {
   /// Creates a [SearchResultsList].
   ///
@@ -101,13 +99,7 @@ class SearchResultsList extends StatelessWidget {
                     ),
                   ),
                 if (result.isInPantry) const SizedBox(width: 4),
-                if (product.productType == ProductType.produce)
-                  Icon(
-                    Icons.eco_outlined,
-                    size: 16,
-                    color: Colors.green.shade600,
-                  )
-                else if (result.source == ResultSource.api)
+                if (result.source == ResultSource.api)
                   Icon(
                     Icons.cloud_outlined,
                     size: 16,
@@ -136,20 +128,10 @@ class SearchResultsList extends StatelessWidget {
           fit: BoxFit.cover,
           loadingBuilder: (_, child, loadingProgress) {
             if (loadingProgress == null) return child;
-            return _produceOrBarcodeAvatar(product, theme);
+            return _barcodeAvatar(product.barcode, theme);
           },
-          errorBuilder: (_, _, _) => _produceOrBarcodeAvatar(product, theme),
+          errorBuilder: (_, _, _) => _barcodeAvatar(product.barcode, theme),
         ),
-      );
-    }
-    return _produceOrBarcodeAvatar(product, theme);
-  }
-
-  Widget _produceOrBarcodeAvatar(Product product, ThemeData theme) {
-    if (product.productType == ProductType.produce) {
-      return CircleAvatar(
-        backgroundColor: Colors.green.shade100,
-        child: Icon(Icons.eco_outlined, color: Colors.green.shade600, size: 18),
       );
     }
     return _barcodeAvatar(product.barcode, theme);

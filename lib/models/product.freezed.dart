@@ -148,35 +148,7 @@ mixin _$Product {
 /// - [productSubmissionFailed] — submission failed; retry possible.
 /// - [productSubmissionPartiallyCompleted] — some uploads failed; retry
 ///   possible.
- String get submissionStatus;/// The PLU (Price Look-Up) code for this product, if it is a fresh
-/// produce item (e.g. '4011' for Banana, '4032' for Apple).
-///
-/// Only meaningful when [productType] is [ProductType.produce]. 4-digit
-/// codes are standard PLU codes; 5-digit codes starting with '9'
-/// indicate organic produce. This field is nullable for barcoded and
-/// custom products.
- String? get pluCode;/// The classification of this product.
-///
-/// - [ProductType.barcoded] — scanned from manufacturer barcode (default).
-/// - [ProductType.produce] — identified by PLU code as fresh produce.
-/// - [ProductType.custom] — manually entered by the user.
- ProductType get productType;/// The amount from the first USDA foodPortion (e.g. 1.0 for a single
-/// apple). Populated by [UsdaApiClient.enrichProductWithServingData].
-///
-/// Only meaningful for produce items fetched from USDA. Null for OFF
-/// products, manually entered items, or when USDA has no portion data.
- double? get usdaServingAmount;/// The measureUnit.name from the first USDA foodPortion
-/// (e.g. "fruit", "cup", "medium").
-///
-/// Only meaningful for produce items fetched from USDA. Null for OFF
-/// products, manually entered items, or when USDA has no portion data.
- String? get usdaServingUnit;/// The gramWeight from the first USDA foodPortion (e.g. 182.0 for a
-/// medium apple). This is the primary pre-fill value via
-/// [parseUsdaQuantity].
-///
-/// Only meaningful for produce items fetched from USDA. Null for OFF
-/// products, manually entered items, or when USDA has no portion data.
- double? get usdaGramWeight;
+ String get submissionStatus;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -187,16 +159,16 @@ $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.offNutritionImageUrl, offNutritionImageUrl) || other.offNutritionImageUrl == offNutritionImageUrl)&&(identical(other.offIngredientsImageUrl, offIngredientsImageUrl) || other.offIngredientsImageUrl == offIngredientsImageUrl)&&(identical(other.offProductImageUrl, offProductImageUrl) || other.offProductImageUrl == offProductImageUrl)&&const DeepCollectionEquality().equals(other.categoriesHierarchy, categoriesHierarchy)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.servingQuantity, servingQuantity) || other.servingQuantity == servingQuantity)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.productQuantity, productQuantity) || other.productQuantity == productQuantity)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&const DeepCollectionEquality().equals(other.additionalNutrients, additionalNutrients)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory)&&(identical(other.source, source) || other.source == source)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&(identical(other.nutritionImagePath, nutritionImagePath) || other.nutritionImagePath == nutritionImagePath)&&(identical(other.ingredientsImagePath, ingredientsImagePath) || other.ingredientsImagePath == ingredientsImagePath)&&(identical(other.productImagePath, productImagePath) || other.productImagePath == productImagePath)&&(identical(other.submissionStatus, submissionStatus) || other.submissionStatus == submissionStatus)&&(identical(other.pluCode, pluCode) || other.pluCode == pluCode)&&(identical(other.productType, productType) || other.productType == productType)&&(identical(other.usdaServingAmount, usdaServingAmount) || other.usdaServingAmount == usdaServingAmount)&&(identical(other.usdaServingUnit, usdaServingUnit) || other.usdaServingUnit == usdaServingUnit)&&(identical(other.usdaGramWeight, usdaGramWeight) || other.usdaGramWeight == usdaGramWeight));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.offNutritionImageUrl, offNutritionImageUrl) || other.offNutritionImageUrl == offNutritionImageUrl)&&(identical(other.offIngredientsImageUrl, offIngredientsImageUrl) || other.offIngredientsImageUrl == offIngredientsImageUrl)&&(identical(other.offProductImageUrl, offProductImageUrl) || other.offProductImageUrl == offProductImageUrl)&&const DeepCollectionEquality().equals(other.categoriesHierarchy, categoriesHierarchy)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.servingQuantity, servingQuantity) || other.servingQuantity == servingQuantity)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.productQuantity, productQuantity) || other.productQuantity == productQuantity)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&const DeepCollectionEquality().equals(other.additionalNutrients, additionalNutrients)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory)&&(identical(other.source, source) || other.source == source)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&(identical(other.nutritionImagePath, nutritionImagePath) || other.nutritionImagePath == nutritionImagePath)&&(identical(other.ingredientsImagePath, ingredientsImagePath) || other.ingredientsImagePath == ingredientsImagePath)&&(identical(other.productImagePath, productImagePath) || other.productImagePath == productImagePath)&&(identical(other.submissionStatus, submissionStatus) || other.submissionStatus == submissionStatus));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(categoriesHierarchy),category,ingredients,servingSize,servingQuantity,quantity,productQuantity,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,const DeepCollectionEquality().hash(additionalNutrients),lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,languageCode,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus,pluCode,productType,usdaServingAmount,usdaServingUnit,usdaGramWeight]);
+int get hashCode => Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(categoriesHierarchy),category,ingredients,servingSize,servingQuantity,quantity,productQuantity,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,const DeepCollectionEquality().hash(additionalNutrients),lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,languageCode,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus]);
 
 @override
 String toString() {
-  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, offNutritionImageUrl: $offNutritionImageUrl, offIngredientsImageUrl: $offIngredientsImageUrl, offProductImageUrl: $offProductImageUrl, categoriesHierarchy: $categoriesHierarchy, category: $category, ingredients: $ingredients, servingSize: $servingSize, servingQuantity: $servingQuantity, quantity: $quantity, productQuantity: $productQuantity, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, additionalNutrients: $additionalNutrients, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade, nutriscoreNotApplicableCategory: $nutriscoreNotApplicableCategory, source: $source, languageCode: $languageCode, nutritionImagePath: $nutritionImagePath, ingredientsImagePath: $ingredientsImagePath, productImagePath: $productImagePath, submissionStatus: $submissionStatus, pluCode: $pluCode, productType: $productType, usdaServingAmount: $usdaServingAmount, usdaServingUnit: $usdaServingUnit, usdaGramWeight: $usdaGramWeight)';
+  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, offNutritionImageUrl: $offNutritionImageUrl, offIngredientsImageUrl: $offIngredientsImageUrl, offProductImageUrl: $offProductImageUrl, categoriesHierarchy: $categoriesHierarchy, category: $category, ingredients: $ingredients, servingSize: $servingSize, servingQuantity: $servingQuantity, quantity: $quantity, productQuantity: $productQuantity, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, additionalNutrients: $additionalNutrients, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade, nutriscoreNotApplicableCategory: $nutriscoreNotApplicableCategory, source: $source, languageCode: $languageCode, nutritionImagePath: $nutritionImagePath, ingredientsImagePath: $ingredientsImagePath, productImagePath: $productImagePath, submissionStatus: $submissionStatus)';
 }
 
 
@@ -207,7 +179,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
- String barcode, String name, String? brand, String? imageUrl, String? offNutritionImageUrl, String? offIngredientsImageUrl, String? offProductImageUrl, List<String>? categoriesHierarchy, String? category, String? ingredients, String? servingSize, double? servingQuantity, String? quantity, double? productQuantity, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, List<ProductNutrient> additionalNutrients, int? lastSynced, String? nutriscoreGrade, String? nutriscoreNotApplicableCategory, String source, String languageCode, String? nutritionImagePath, String? ingredientsImagePath, String? productImagePath, String submissionStatus, String? pluCode, ProductType productType, double? usdaServingAmount, String? usdaServingUnit, double? usdaGramWeight
+ String barcode, String name, String? brand, String? imageUrl, String? offNutritionImageUrl, String? offIngredientsImageUrl, String? offProductImageUrl, List<String>? categoriesHierarchy, String? category, String? ingredients, String? servingSize, double? servingQuantity, String? quantity, double? productQuantity, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, List<ProductNutrient> additionalNutrients, int? lastSynced, String? nutriscoreGrade, String? nutriscoreNotApplicableCategory, String source, String languageCode, String? nutritionImagePath, String? ingredientsImagePath, String? productImagePath, String submissionStatus
 });
 
 
@@ -224,7 +196,7 @@ class _$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? offNutritionImageUrl = freezed,Object? offIngredientsImageUrl = freezed,Object? offProductImageUrl = freezed,Object? categoriesHierarchy = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? servingQuantity = freezed,Object? quantity = freezed,Object? productQuantity = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? additionalNutrients = null,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,Object? nutriscoreNotApplicableCategory = freezed,Object? source = null,Object? languageCode = null,Object? nutritionImagePath = freezed,Object? ingredientsImagePath = freezed,Object? productImagePath = freezed,Object? submissionStatus = null,Object? pluCode = freezed,Object? productType = null,Object? usdaServingAmount = freezed,Object? usdaServingUnit = freezed,Object? usdaGramWeight = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? offNutritionImageUrl = freezed,Object? offIngredientsImageUrl = freezed,Object? offProductImageUrl = freezed,Object? categoriesHierarchy = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? servingQuantity = freezed,Object? quantity = freezed,Object? productQuantity = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? additionalNutrients = null,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,Object? nutriscoreNotApplicableCategory = freezed,Object? source = null,Object? languageCode = null,Object? nutritionImagePath = freezed,Object? ingredientsImagePath = freezed,Object? productImagePath = freezed,Object? submissionStatus = null,}) {
   return _then(_self.copyWith(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -256,12 +228,7 @@ as String,nutritionImagePath: freezed == nutritionImagePath ? _self.nutritionIma
 as String?,ingredientsImagePath: freezed == ingredientsImagePath ? _self.ingredientsImagePath : ingredientsImagePath // ignore: cast_nullable_to_non_nullable
 as String?,productImagePath: freezed == productImagePath ? _self.productImagePath : productImagePath // ignore: cast_nullable_to_non_nullable
 as String?,submissionStatus: null == submissionStatus ? _self.submissionStatus : submissionStatus // ignore: cast_nullable_to_non_nullable
-as String,pluCode: freezed == pluCode ? _self.pluCode : pluCode // ignore: cast_nullable_to_non_nullable
-as String?,productType: null == productType ? _self.productType : productType // ignore: cast_nullable_to_non_nullable
-as ProductType,usdaServingAmount: freezed == usdaServingAmount ? _self.usdaServingAmount : usdaServingAmount // ignore: cast_nullable_to_non_nullable
-as double?,usdaServingUnit: freezed == usdaServingUnit ? _self.usdaServingUnit : usdaServingUnit // ignore: cast_nullable_to_non_nullable
-as String?,usdaGramWeight: freezed == usdaGramWeight ? _self.usdaGramWeight : usdaGramWeight // ignore: cast_nullable_to_non_nullable
-as double?,
+as String,
   ));
 }
 
@@ -346,10 +313,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? servingQuantity,  String? quantity,  double? productQuantity,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  List<ProductNutrient> additionalNutrients,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus,  String? pluCode,  ProductType productType,  double? usdaServingAmount,  String? usdaServingUnit,  double? usdaGramWeight)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? servingQuantity,  String? quantity,  double? productQuantity,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  List<ProductNutrient> additionalNutrients,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.servingQuantity,_that.quantity,_that.productQuantity,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.additionalNutrients,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus,_that.pluCode,_that.productType,_that.usdaServingAmount,_that.usdaServingUnit,_that.usdaGramWeight);case _:
+return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.servingQuantity,_that.quantity,_that.productQuantity,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.additionalNutrients,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus);case _:
   return orElse();
 
 }
@@ -367,10 +334,10 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNut
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? servingQuantity,  String? quantity,  double? productQuantity,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  List<ProductNutrient> additionalNutrients,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus,  String? pluCode,  ProductType productType,  double? usdaServingAmount,  String? usdaServingUnit,  double? usdaGramWeight)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? servingQuantity,  String? quantity,  double? productQuantity,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  List<ProductNutrient> additionalNutrients,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
-return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.servingQuantity,_that.quantity,_that.productQuantity,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.additionalNutrients,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus,_that.pluCode,_that.productType,_that.usdaServingAmount,_that.usdaServingUnit,_that.usdaGramWeight);case _:
+return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.servingQuantity,_that.quantity,_that.productQuantity,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.additionalNutrients,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -387,10 +354,10 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNut
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? servingQuantity,  String? quantity,  double? productQuantity,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  List<ProductNutrient> additionalNutrients,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus,  String? pluCode,  ProductType productType,  double? usdaServingAmount,  String? usdaServingUnit,  double? usdaGramWeight)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String barcode,  String name,  String? brand,  String? imageUrl,  String? offNutritionImageUrl,  String? offIngredientsImageUrl,  String? offProductImageUrl,  List<String>? categoriesHierarchy,  String? category,  String? ingredients,  String? servingSize,  double? servingQuantity,  String? quantity,  double? productQuantity,  double? energyKcal,  double? proteinG,  double? carbsG,  double? fatG,  double? fiberG,  double? saltG,  List<ProductNutrient> additionalNutrients,  int? lastSynced,  String? nutriscoreGrade,  String? nutriscoreNotApplicableCategory,  String source,  String languageCode,  String? nutritionImagePath,  String? ingredientsImagePath,  String? productImagePath,  String submissionStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.servingQuantity,_that.quantity,_that.productQuantity,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.additionalNutrients,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus,_that.pluCode,_that.productType,_that.usdaServingAmount,_that.usdaServingUnit,_that.usdaGramWeight);case _:
+return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNutritionImageUrl,_that.offIngredientsImageUrl,_that.offProductImageUrl,_that.categoriesHierarchy,_that.category,_that.ingredients,_that.servingSize,_that.servingQuantity,_that.quantity,_that.productQuantity,_that.energyKcal,_that.proteinG,_that.carbsG,_that.fatG,_that.fiberG,_that.saltG,_that.additionalNutrients,_that.lastSynced,_that.nutriscoreGrade,_that.nutriscoreNotApplicableCategory,_that.source,_that.languageCode,_that.nutritionImagePath,_that.ingredientsImagePath,_that.productImagePath,_that.submissionStatus);case _:
   return null;
 
 }
@@ -402,7 +369,7 @@ return $default(_that.barcode,_that.name,_that.brand,_that.imageUrl,_that.offNut
 
 
 class _Product implements Product {
-  const _Product({required this.barcode, required this.name, this.brand, this.imageUrl, this.offNutritionImageUrl, this.offIngredientsImageUrl, this.offProductImageUrl, final  List<String>? categoriesHierarchy, this.category, this.ingredients, this.servingSize, this.servingQuantity, this.quantity, this.productQuantity, this.energyKcal, this.proteinG, this.carbsG, this.fatG, this.fiberG, this.saltG, final  List<ProductNutrient> additionalNutrients = const <ProductNutrient>[], this.lastSynced, this.nutriscoreGrade, this.nutriscoreNotApplicableCategory, this.source = 'api', this.languageCode = 'en', this.nutritionImagePath, this.ingredientsImagePath, this.productImagePath, this.submissionStatus = productSubmissionNotSubmitted, this.pluCode, this.productType = ProductType.barcoded, this.usdaServingAmount, this.usdaServingUnit, this.usdaGramWeight}): _categoriesHierarchy = categoriesHierarchy,_additionalNutrients = additionalNutrients;
+  const _Product({required this.barcode, required this.name, this.brand, this.imageUrl, this.offNutritionImageUrl, this.offIngredientsImageUrl, this.offProductImageUrl, final  List<String>? categoriesHierarchy, this.category, this.ingredients, this.servingSize, this.servingQuantity, this.quantity, this.productQuantity, this.energyKcal, this.proteinG, this.carbsG, this.fatG, this.fiberG, this.saltG, final  List<ProductNutrient> additionalNutrients = const <ProductNutrient>[], this.lastSynced, this.nutriscoreGrade, this.nutriscoreNotApplicableCategory, this.source = 'api', this.languageCode = 'en', this.nutritionImagePath, this.ingredientsImagePath, this.productImagePath, this.submissionStatus = productSubmissionNotSubmitted}): _categoriesHierarchy = categoriesHierarchy,_additionalNutrients = additionalNutrients;
   
 
 /// The barcode (EAN-13, UPC, etc.) that uniquely identifies the product.
@@ -598,39 +565,6 @@ class _Product implements Product {
 /// - [productSubmissionPartiallyCompleted] — some uploads failed; retry
 ///   possible.
 @override@JsonKey() final  String submissionStatus;
-/// The PLU (Price Look-Up) code for this product, if it is a fresh
-/// produce item (e.g. '4011' for Banana, '4032' for Apple).
-///
-/// Only meaningful when [productType] is [ProductType.produce]. 4-digit
-/// codes are standard PLU codes; 5-digit codes starting with '9'
-/// indicate organic produce. This field is nullable for barcoded and
-/// custom products.
-@override final  String? pluCode;
-/// The classification of this product.
-///
-/// - [ProductType.barcoded] — scanned from manufacturer barcode (default).
-/// - [ProductType.produce] — identified by PLU code as fresh produce.
-/// - [ProductType.custom] — manually entered by the user.
-@override@JsonKey() final  ProductType productType;
-/// The amount from the first USDA foodPortion (e.g. 1.0 for a single
-/// apple). Populated by [UsdaApiClient.enrichProductWithServingData].
-///
-/// Only meaningful for produce items fetched from USDA. Null for OFF
-/// products, manually entered items, or when USDA has no portion data.
-@override final  double? usdaServingAmount;
-/// The measureUnit.name from the first USDA foodPortion
-/// (e.g. "fruit", "cup", "medium").
-///
-/// Only meaningful for produce items fetched from USDA. Null for OFF
-/// products, manually entered items, or when USDA has no portion data.
-@override final  String? usdaServingUnit;
-/// The gramWeight from the first USDA foodPortion (e.g. 182.0 for a
-/// medium apple). This is the primary pre-fill value via
-/// [parseUsdaQuantity].
-///
-/// Only meaningful for produce items fetched from USDA. Null for OFF
-/// products, manually entered items, or when USDA has no portion data.
-@override final  double? usdaGramWeight;
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
@@ -642,16 +576,16 @@ _$ProductCopyWith<_Product> get copyWith => __$ProductCopyWithImpl<_Product>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.offNutritionImageUrl, offNutritionImageUrl) || other.offNutritionImageUrl == offNutritionImageUrl)&&(identical(other.offIngredientsImageUrl, offIngredientsImageUrl) || other.offIngredientsImageUrl == offIngredientsImageUrl)&&(identical(other.offProductImageUrl, offProductImageUrl) || other.offProductImageUrl == offProductImageUrl)&&const DeepCollectionEquality().equals(other._categoriesHierarchy, _categoriesHierarchy)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.servingQuantity, servingQuantity) || other.servingQuantity == servingQuantity)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.productQuantity, productQuantity) || other.productQuantity == productQuantity)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&const DeepCollectionEquality().equals(other._additionalNutrients, _additionalNutrients)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory)&&(identical(other.source, source) || other.source == source)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&(identical(other.nutritionImagePath, nutritionImagePath) || other.nutritionImagePath == nutritionImagePath)&&(identical(other.ingredientsImagePath, ingredientsImagePath) || other.ingredientsImagePath == ingredientsImagePath)&&(identical(other.productImagePath, productImagePath) || other.productImagePath == productImagePath)&&(identical(other.submissionStatus, submissionStatus) || other.submissionStatus == submissionStatus)&&(identical(other.pluCode, pluCode) || other.pluCode == pluCode)&&(identical(other.productType, productType) || other.productType == productType)&&(identical(other.usdaServingAmount, usdaServingAmount) || other.usdaServingAmount == usdaServingAmount)&&(identical(other.usdaServingUnit, usdaServingUnit) || other.usdaServingUnit == usdaServingUnit)&&(identical(other.usdaGramWeight, usdaGramWeight) || other.usdaGramWeight == usdaGramWeight));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.barcode, barcode) || other.barcode == barcode)&&(identical(other.name, name) || other.name == name)&&(identical(other.brand, brand) || other.brand == brand)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.offNutritionImageUrl, offNutritionImageUrl) || other.offNutritionImageUrl == offNutritionImageUrl)&&(identical(other.offIngredientsImageUrl, offIngredientsImageUrl) || other.offIngredientsImageUrl == offIngredientsImageUrl)&&(identical(other.offProductImageUrl, offProductImageUrl) || other.offProductImageUrl == offProductImageUrl)&&const DeepCollectionEquality().equals(other._categoriesHierarchy, _categoriesHierarchy)&&(identical(other.category, category) || other.category == category)&&(identical(other.ingredients, ingredients) || other.ingredients == ingredients)&&(identical(other.servingSize, servingSize) || other.servingSize == servingSize)&&(identical(other.servingQuantity, servingQuantity) || other.servingQuantity == servingQuantity)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.productQuantity, productQuantity) || other.productQuantity == productQuantity)&&(identical(other.energyKcal, energyKcal) || other.energyKcal == energyKcal)&&(identical(other.proteinG, proteinG) || other.proteinG == proteinG)&&(identical(other.carbsG, carbsG) || other.carbsG == carbsG)&&(identical(other.fatG, fatG) || other.fatG == fatG)&&(identical(other.fiberG, fiberG) || other.fiberG == fiberG)&&(identical(other.saltG, saltG) || other.saltG == saltG)&&const DeepCollectionEquality().equals(other._additionalNutrients, _additionalNutrients)&&(identical(other.lastSynced, lastSynced) || other.lastSynced == lastSynced)&&(identical(other.nutriscoreGrade, nutriscoreGrade) || other.nutriscoreGrade == nutriscoreGrade)&&(identical(other.nutriscoreNotApplicableCategory, nutriscoreNotApplicableCategory) || other.nutriscoreNotApplicableCategory == nutriscoreNotApplicableCategory)&&(identical(other.source, source) || other.source == source)&&(identical(other.languageCode, languageCode) || other.languageCode == languageCode)&&(identical(other.nutritionImagePath, nutritionImagePath) || other.nutritionImagePath == nutritionImagePath)&&(identical(other.ingredientsImagePath, ingredientsImagePath) || other.ingredientsImagePath == ingredientsImagePath)&&(identical(other.productImagePath, productImagePath) || other.productImagePath == productImagePath)&&(identical(other.submissionStatus, submissionStatus) || other.submissionStatus == submissionStatus));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(_categoriesHierarchy),category,ingredients,servingSize,servingQuantity,quantity,productQuantity,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,const DeepCollectionEquality().hash(_additionalNutrients),lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,languageCode,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus,pluCode,productType,usdaServingAmount,usdaServingUnit,usdaGramWeight]);
+int get hashCode => Object.hashAll([runtimeType,barcode,name,brand,imageUrl,offNutritionImageUrl,offIngredientsImageUrl,offProductImageUrl,const DeepCollectionEquality().hash(_categoriesHierarchy),category,ingredients,servingSize,servingQuantity,quantity,productQuantity,energyKcal,proteinG,carbsG,fatG,fiberG,saltG,const DeepCollectionEquality().hash(_additionalNutrients),lastSynced,nutriscoreGrade,nutriscoreNotApplicableCategory,source,languageCode,nutritionImagePath,ingredientsImagePath,productImagePath,submissionStatus]);
 
 @override
 String toString() {
-  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, offNutritionImageUrl: $offNutritionImageUrl, offIngredientsImageUrl: $offIngredientsImageUrl, offProductImageUrl: $offProductImageUrl, categoriesHierarchy: $categoriesHierarchy, category: $category, ingredients: $ingredients, servingSize: $servingSize, servingQuantity: $servingQuantity, quantity: $quantity, productQuantity: $productQuantity, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, additionalNutrients: $additionalNutrients, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade, nutriscoreNotApplicableCategory: $nutriscoreNotApplicableCategory, source: $source, languageCode: $languageCode, nutritionImagePath: $nutritionImagePath, ingredientsImagePath: $ingredientsImagePath, productImagePath: $productImagePath, submissionStatus: $submissionStatus, pluCode: $pluCode, productType: $productType, usdaServingAmount: $usdaServingAmount, usdaServingUnit: $usdaServingUnit, usdaGramWeight: $usdaGramWeight)';
+  return 'Product(barcode: $barcode, name: $name, brand: $brand, imageUrl: $imageUrl, offNutritionImageUrl: $offNutritionImageUrl, offIngredientsImageUrl: $offIngredientsImageUrl, offProductImageUrl: $offProductImageUrl, categoriesHierarchy: $categoriesHierarchy, category: $category, ingredients: $ingredients, servingSize: $servingSize, servingQuantity: $servingQuantity, quantity: $quantity, productQuantity: $productQuantity, energyKcal: $energyKcal, proteinG: $proteinG, carbsG: $carbsG, fatG: $fatG, fiberG: $fiberG, saltG: $saltG, additionalNutrients: $additionalNutrients, lastSynced: $lastSynced, nutriscoreGrade: $nutriscoreGrade, nutriscoreNotApplicableCategory: $nutriscoreNotApplicableCategory, source: $source, languageCode: $languageCode, nutritionImagePath: $nutritionImagePath, ingredientsImagePath: $ingredientsImagePath, productImagePath: $productImagePath, submissionStatus: $submissionStatus)';
 }
 
 
@@ -662,7 +596,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
- String barcode, String name, String? brand, String? imageUrl, String? offNutritionImageUrl, String? offIngredientsImageUrl, String? offProductImageUrl, List<String>? categoriesHierarchy, String? category, String? ingredients, String? servingSize, double? servingQuantity, String? quantity, double? productQuantity, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, List<ProductNutrient> additionalNutrients, int? lastSynced, String? nutriscoreGrade, String? nutriscoreNotApplicableCategory, String source, String languageCode, String? nutritionImagePath, String? ingredientsImagePath, String? productImagePath, String submissionStatus, String? pluCode, ProductType productType, double? usdaServingAmount, String? usdaServingUnit, double? usdaGramWeight
+ String barcode, String name, String? brand, String? imageUrl, String? offNutritionImageUrl, String? offIngredientsImageUrl, String? offProductImageUrl, List<String>? categoriesHierarchy, String? category, String? ingredients, String? servingSize, double? servingQuantity, String? quantity, double? productQuantity, double? energyKcal, double? proteinG, double? carbsG, double? fatG, double? fiberG, double? saltG, List<ProductNutrient> additionalNutrients, int? lastSynced, String? nutriscoreGrade, String? nutriscoreNotApplicableCategory, String source, String languageCode, String? nutritionImagePath, String? ingredientsImagePath, String? productImagePath, String submissionStatus
 });
 
 
@@ -679,7 +613,7 @@ class __$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? offNutritionImageUrl = freezed,Object? offIngredientsImageUrl = freezed,Object? offProductImageUrl = freezed,Object? categoriesHierarchy = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? servingQuantity = freezed,Object? quantity = freezed,Object? productQuantity = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? additionalNutrients = null,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,Object? nutriscoreNotApplicableCategory = freezed,Object? source = null,Object? languageCode = null,Object? nutritionImagePath = freezed,Object? ingredientsImagePath = freezed,Object? productImagePath = freezed,Object? submissionStatus = null,Object? pluCode = freezed,Object? productType = null,Object? usdaServingAmount = freezed,Object? usdaServingUnit = freezed,Object? usdaGramWeight = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? barcode = null,Object? name = null,Object? brand = freezed,Object? imageUrl = freezed,Object? offNutritionImageUrl = freezed,Object? offIngredientsImageUrl = freezed,Object? offProductImageUrl = freezed,Object? categoriesHierarchy = freezed,Object? category = freezed,Object? ingredients = freezed,Object? servingSize = freezed,Object? servingQuantity = freezed,Object? quantity = freezed,Object? productQuantity = freezed,Object? energyKcal = freezed,Object? proteinG = freezed,Object? carbsG = freezed,Object? fatG = freezed,Object? fiberG = freezed,Object? saltG = freezed,Object? additionalNutrients = null,Object? lastSynced = freezed,Object? nutriscoreGrade = freezed,Object? nutriscoreNotApplicableCategory = freezed,Object? source = null,Object? languageCode = null,Object? nutritionImagePath = freezed,Object? ingredientsImagePath = freezed,Object? productImagePath = freezed,Object? submissionStatus = null,}) {
   return _then(_Product(
 barcode: null == barcode ? _self.barcode : barcode // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -711,12 +645,7 @@ as String,nutritionImagePath: freezed == nutritionImagePath ? _self.nutritionIma
 as String?,ingredientsImagePath: freezed == ingredientsImagePath ? _self.ingredientsImagePath : ingredientsImagePath // ignore: cast_nullable_to_non_nullable
 as String?,productImagePath: freezed == productImagePath ? _self.productImagePath : productImagePath // ignore: cast_nullable_to_non_nullable
 as String?,submissionStatus: null == submissionStatus ? _self.submissionStatus : submissionStatus // ignore: cast_nullable_to_non_nullable
-as String,pluCode: freezed == pluCode ? _self.pluCode : pluCode // ignore: cast_nullable_to_non_nullable
-as String?,productType: null == productType ? _self.productType : productType // ignore: cast_nullable_to_non_nullable
-as ProductType,usdaServingAmount: freezed == usdaServingAmount ? _self.usdaServingAmount : usdaServingAmount // ignore: cast_nullable_to_non_nullable
-as double?,usdaServingUnit: freezed == usdaServingUnit ? _self.usdaServingUnit : usdaServingUnit // ignore: cast_nullable_to_non_nullable
-as String?,usdaGramWeight: freezed == usdaGramWeight ? _self.usdaGramWeight : usdaGramWeight // ignore: cast_nullable_to_non_nullable
-as double?,
+as String,
   ));
 }
 

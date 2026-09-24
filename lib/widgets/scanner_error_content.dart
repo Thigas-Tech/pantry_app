@@ -10,7 +10,6 @@ class ScannerErrorContent extends StatelessWidget {
     required this.exception,
     required this.onRetry,
     required this.onSwitchToManual,
-    required this.onSwitchToPlu,
     required this.onOpenSettings,
     super.key,
   });
@@ -23,9 +22,6 @@ class ScannerErrorContent extends StatelessWidget {
 
   /// Called when the user switches to manual barcode entry.
   final VoidCallback onSwitchToManual;
-
-  /// Called when the user switches to PLU code entry.
-  final VoidCallback onSwitchToPlu;
 
   /// Called when the user wants to open app settings.
   final VoidCallback onOpenSettings;
@@ -51,14 +47,6 @@ class ScannerErrorContent extends StatelessWidget {
             ),
           ),
           TextButton.icon(
-            onPressed: onSwitchToPlu,
-            icon: const Icon(Icons.dialpad, color: Colors.white70),
-            label: Text(
-              l10n.pluEntryTooltip,
-              style: const TextStyle(color: Colors.white70),
-            ),
-          ),
-          TextButton.icon(
             onPressed: onSwitchToManual,
             icon: const Icon(Icons.edit, color: Colors.white70),
             label: Text(
@@ -70,14 +58,6 @@ class ScannerErrorContent extends StatelessWidget {
       case MobileScannerErrorCode.unsupported:
         message = l10n.cameraNotAvailable;
         actions = [
-          TextButton.icon(
-            onPressed: onSwitchToPlu,
-            icon: const Icon(Icons.dialpad, color: Colors.white),
-            label: Text(
-              l10n.pluEntryTooltip,
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
           TextButton.icon(
             onPressed: onSwitchToManual,
             icon: const Icon(Icons.edit, color: Colors.white),
@@ -101,14 +81,6 @@ class ScannerErrorContent extends StatelessWidget {
             label: Text(
               l10n.retryScan,
               style: const TextStyle(color: Colors.white),
-            ),
-          ),
-          TextButton.icon(
-            onPressed: onSwitchToPlu,
-            icon: const Icon(Icons.dialpad, color: Colors.white70),
-            label: Text(
-              l10n.pluEntryTooltip,
-              style: const TextStyle(color: Colors.white70),
             ),
           ),
           TextButton.icon(

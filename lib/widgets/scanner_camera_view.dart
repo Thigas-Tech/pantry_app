@@ -24,22 +24,18 @@ import 'package:permission_handler/permission_handler.dart';
 /// When [embedded] is true, the widget renders only the camera preview
 /// (plus overlay and error content) without its own [Scaffold] or [AppBar],
 /// so it can be placed inside a parent screen that owns the chrome (such as
-/// the market trip). The AppBar actions (torch, PLU, manual entry) are
-/// omitted in embedded mode; hosts provide their own controls.
+/// the market trip). The AppBar actions (torch, manual entry) are omitted
+/// in embedded mode; hosts provide their own controls.
 class ScannerCameraView extends ConsumerStatefulWidget {
   /// Creates a [ScannerCameraView] widget.
   const ScannerCameraView({
     required this.onSwitchToManual,
-    required this.onSwitchToPlu,
     this.embedded = false,
     super.key,
   });
 
   /// Called when the user switches to manual barcode entry.
   final VoidCallback onSwitchToManual;
-
-  /// Called when the user switches to PLU code entry.
-  final VoidCallback onSwitchToPlu;
 
   /// When true, renders only the camera preview without a surrounding
   /// [Scaffold]/[AppBar] so the host screen owns the chrome.
@@ -170,7 +166,6 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
         exception: cameraState.cameraError!,
         onRetry: _retryOnResume,
         onSwitchToManual: widget.onSwitchToManual,
-        onSwitchToPlu: widget.onSwitchToPlu,
         onOpenSettings: _openSettings,
       );
       if (widget.embedded) return errorContent;
@@ -232,11 +227,6 @@ class _ScannerCameraViewState extends ConsumerState<ScannerCameraView>
                 onPressed: available ? _toggleTorch : null,
               );
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.dialpad),
-            tooltip: l10n.pluEntryTooltip,
-            onPressed: widget.onSwitchToPlu,
           ),
           IconButton(
             icon: const Icon(Icons.edit),

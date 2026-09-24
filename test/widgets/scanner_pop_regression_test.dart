@@ -26,7 +26,6 @@ void main() {
                     MaterialPageRoute<void>(
                       builder: (_) => const ScannerCameraView(
                         onSwitchToManual: _noop,
-                        onSwitchToPlu: _noop,
                       ),
                     ),
                   ),

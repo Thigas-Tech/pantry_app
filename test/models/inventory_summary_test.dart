@@ -42,13 +42,11 @@ void main() {
         'barcode': '123',
         'name': 'Eggs',
         'image_url': 'https://example.com/e.png',
-        'product_type': 'produce',
       });
 
       expect(option.barcode, '123');
       expect(option.name, 'Eggs');
       expect(option.imageUrl, 'https://example.com/e.png');
-      expect(option.productType, 'produce');
     });
 
     test('falls back to empty barcode and null optionals', () {
@@ -57,7 +55,6 @@ void main() {
       expect(option.barcode, isEmpty);
       expect(option.name, isNull);
       expect(option.imageUrl, isNull);
-      expect(option.productType, isNull);
     });
   });
 }

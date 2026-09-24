@@ -5,9 +5,6 @@ enum SearchSource {
   /// Open Food Facts API plus the local cache.
   off,
 
-  /// USDA FoodData Central API.
-  usda,
-
   /// Current active inventory items only.
   inventory,
 }

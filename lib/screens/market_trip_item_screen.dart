@@ -4,16 +4,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
-import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/market_trip_item_provider.dart';
 import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
-import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/product_package_size.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -61,11 +58,6 @@ class _MarketTripItemScreenState extends ConsumerState<MarketTripItemScreen> {
   @override
   void initState() {
     super.initState();
-    // Produce defaults to a 14-day expiry so fresh items are pre-filled with
-    // a sensible shelf-life; the user can still change or clear it.
-    if (_product.productType == ProductType.produce) {
-      _expiryDate = defaultProduceExpiry().toIso8601String().substring(0, 10);
-    }
   }
 
   /// Opens the price sheet (without the purchase-date field) for the item.
@@ -105,11 +97,7 @@ class _MarketTripItemScreenState extends ConsumerState<MarketTripItemScreen> {
   /// Picks an expiry date no earlier than today and stores it in ISO format.
   Future<void> _pickExpiry() async {
     final current = DateTime.tryParse(_expiryDate ?? '');
-    final initial =
-        current ??
-        (_product.productType == ProductType.produce
-            ? defaultProduceExpiry()
-            : DateTime.now().add(const Duration(days: 7)));
+    final initial = current ?? DateTime.now().add(const Duration(days: 7));
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
@@ -184,9 +172,7 @@ class _MarketTripItemScreenState extends ConsumerState<MarketTripItemScreen> {
         ((ref.read(settingsProvider).value?.priceTrackingEnabled ?? false)
             ? tracked
             : null);
-    final title = _product.productType == ProductType.produce
-        ? l10n.localizeProduceName(_product.name)
-        : _product.name;
+    final title = _product.name;
 
     return PopScope(
       // Block the system back button while the add is being persisted so the

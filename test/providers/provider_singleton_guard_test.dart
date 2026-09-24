@@ -1,20 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/services/currency_service.dart';
-import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Guards against duplicate singleton service construction in providers.
 ///
-/// [UsdaApiClient] and [CurrencyService] must be created exactly once each,
-/// inside their owning provider files (usda_provider.dart and
+/// [CurrencyService] must be created exactly once each,
 /// currency_service_provider.dart). Other layers must consume them via
-/// usdaApiClientProvider / currencyServiceProvider so tests can override
+/// currencyServiceProvider so tests can override
 /// a single instance and no client instances are silently duplicated.
 ///
 /// The scan mirrors test/database/sqlite_compatibility_test.dart: it
@@ -31,11 +26,6 @@ void main() {
 
   final bannedConstructors = <RegExp, (String, List<String>)>{
     // The negative lookahead excludes the class's own constructor
-    // declaration, which is written as UsdaApiClient({...}).
-    RegExp(r'UsdaApiClient\((?!\{)'): (
-      'must be provided via usdaApiClientProvider',
-      <String>['usda_provider.dart'],
-    ),
     RegExp(r'CurrencyService\((?!\{)'): (
       'must be provided via currencyServiceProvider',
       <String>['currency_service_provider.dart'],
@@ -85,22 +75,4 @@ void main() {
     );
   }
 
-  test(
-    'usdaApiClientProvider yields one instance shared with all consumers',
-    () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      final provided = container.read(usdaApiClientProvider);
-      expect(
-        identical(provided, container.read(usdaApiClientProvider)),
-        isTrue,
-      );
-
-      final repositoryClient = container
-          .read(productRepositoryProvider)
-          .usdaClient;
-      expect(identical(provided, repositoryClient), isTrue);
-    },
-  );
 }

@@ -84,9 +84,6 @@ Future<void> main() async {
       AddressCheckOption(
         uri: Uri.parse('https://world.openfoodfacts.org'),
       ),
-      AddressCheckOption(
-        uri: Uri.parse('https://fdc.nal.usda.gov'),
-      ),
     ],
     timeout: const Duration(seconds: 10),
     interval: const Duration(seconds: 10),

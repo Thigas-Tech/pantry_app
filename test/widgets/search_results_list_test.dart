@@ -4,7 +4,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/search_result.dart';
 import 'package:pantry_app/widgets/search_results_list.dart';
 
@@ -22,7 +21,6 @@ void main() {
   const produceTomato = Product(
     barcode: '003',
     name: 'Tomato',
-    productType: ProductType.produce,
   );
 
   final results = <SearchResult>[
@@ -94,14 +92,7 @@ void main() {
     testWidgets('shows a cloud icon for API results', (tester) async {
       await pumpList(tester);
       expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
-    });
-
-    testWidgets('shows an eco icon for produce', (tester) async {
-      await pumpList(tester);
-      expect(find.byIcon(Icons.eco_outlined), findsNWidgets(2));
-    });
-
-    testWidgets('tapping a result calls onResultTapped', (tester) async {
+    });    testWidgets('tapping a result calls onResultTapped', (tester) async {
       Product? tapped;
       await tester.pumpWidget(
         MaterialApp(
