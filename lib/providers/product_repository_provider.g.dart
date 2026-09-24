@@ -10,12 +10,11 @@ part of 'product_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 /// Provides the single [ProductRepository] instance used throughout the app.
 ///
-/// The repository combines the local database (from [databaseProvider]),
-/// the Open Food Facts SDK adapter (from [apiServiceProvider]), and the
-/// USDA FoodData Central API client to implement offline-first product
-/// lookup and produce quick-add with nutrition data. The local SQLite
-/// database is the only cache; the cacheStalenessStoreProvider tracks when
-/// the background inventory refresh last ran.
+/// The repository combines the local database (from [databaseProvider])
+/// and the Open Food Facts SDK adapter (from [apiServiceProvider]) to
+/// implement offline-first product lookup. The local SQLite database is
+/// the only cache; the cacheStalenessStoreProvider tracks when the
+/// background inventory refresh last ran.
 ///
 /// ## Dependencies
 ///
@@ -25,8 +24,6 @@ part of 'product_repository_provider.dart';
 ///   fetching product data from the internet.
 /// - [cacheStalenessStoreProvider] — supplies the SharedPreferences-backed
 ///   store that records the last inventory refresh.
-/// - [UsdaApiClient] — created inline for the USDA nutrition lookup
-///   fallback chain.
 ///
 /// ## Lifetime
 ///
@@ -46,12 +43,11 @@ final productRepositoryProvider = ProductRepositoryProvider._();
 
 /// Provides the single [ProductRepository] instance used throughout the app.
 ///
-/// The repository combines the local database (from [databaseProvider]),
-/// the Open Food Facts SDK adapter (from [apiServiceProvider]), and the
-/// USDA FoodData Central API client to implement offline-first product
-/// lookup and produce quick-add with nutrition data. The local SQLite
-/// database is the only cache; the cacheStalenessStoreProvider tracks when
-/// the background inventory refresh last ran.
+/// The repository combines the local database (from [databaseProvider])
+/// and the Open Food Facts SDK adapter (from [apiServiceProvider]) to
+/// implement offline-first product lookup. The local SQLite database is
+/// the only cache; the cacheStalenessStoreProvider tracks when the
+/// background inventory refresh last ran.
 ///
 /// ## Dependencies
 ///
@@ -61,8 +57,6 @@ final productRepositoryProvider = ProductRepositoryProvider._();
 ///   fetching product data from the internet.
 /// - [cacheStalenessStoreProvider] — supplies the SharedPreferences-backed
 ///   store that records the last inventory refresh.
-/// - [UsdaApiClient] — created inline for the USDA nutrition lookup
-///   fallback chain.
 ///
 /// ## Lifetime
 ///
@@ -87,12 +81,11 @@ final class ProductRepositoryProvider
     with $Provider<ProductRepository> {
   /// Provides the single [ProductRepository] instance used throughout the app.
   ///
-  /// The repository combines the local database (from [databaseProvider]),
-  /// the Open Food Facts SDK adapter (from [apiServiceProvider]), and the
-  /// USDA FoodData Central API client to implement offline-first product
-  /// lookup and produce quick-add with nutrition data. The local SQLite
-  /// database is the only cache; the cacheStalenessStoreProvider tracks when
-  /// the background inventory refresh last ran.
+  /// The repository combines the local database (from [databaseProvider])
+  /// and the Open Food Facts SDK adapter (from [apiServiceProvider]) to
+  /// implement offline-first product lookup. The local SQLite database is
+  /// the only cache; the cacheStalenessStoreProvider tracks when the
+  /// background inventory refresh last ran.
   ///
   /// ## Dependencies
   ///
@@ -102,8 +95,6 @@ final class ProductRepositoryProvider
   ///   fetching product data from the internet.
   /// - [cacheStalenessStoreProvider] — supplies the SharedPreferences-backed
   ///   store that records the last inventory refresh.
-  /// - [UsdaApiClient] — created inline for the USDA nutrition lookup
-  ///   fallback chain.
   ///
   /// ## Lifetime
   ///
@@ -151,7 +142,7 @@ final class ProductRepositoryProvider
   }
 }
 
-String _$productRepositoryHash() => r'3fd599e9c90dabd5b12c1fb87c48952af437894c';
+String _$productRepositoryHash() => r'd9923187308202f7399d43f99d2772a26d7a4bd4';
 
 /// Provides the cached [Product] for a barcode, or null.
 ///

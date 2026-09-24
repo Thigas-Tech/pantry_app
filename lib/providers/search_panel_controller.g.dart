@@ -89,7 +89,7 @@ final class SearchPanelControllerProvider
 }
 
 String _$searchPanelControllerHash() =>
-    r'70931c6cdc2371b5dd0c894c84ca9118ee79f6c6';
+    r'bfa787d506eb918fdead1d6d3ca4615ed348838a';
 
 /// Notifier that owns all search state and execution for the search panel.
 ///

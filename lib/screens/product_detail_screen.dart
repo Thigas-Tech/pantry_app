@@ -7,7 +7,6 @@ import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
@@ -26,7 +25,6 @@ import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
 import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
@@ -157,11 +155,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _product.productType == ProductType.produce
-              ? l10n.localizeProduceName(_product.name)
-              : _product.name,
-        ),
+        title: Text(_product.name),
         actions: [
           if (priceTrackingEnabled) const PriceVisibilityToggle(),
           IconButton(
@@ -934,10 +928,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     setState(() => _product = refreshed);
   }
 
-  /// Returns the serving size to display, using preset data for produce items
-  /// that lack a serving size, or "100 g" when no preset is available.
-  /// Converts to the user's preferred unit system. Falls back to the
-  /// localized not-available label when the product has no serving data.
+  /// Returns the serving size to display, converting to the user's
+  /// preferred unit system. Falls back to the localized not-available
+  /// label when the product has no serving data.
   String _displayServingSize(AppLocalizations l10n, Settings settings) {
     // Try structured serving data first
     if (_product.servingQuantity != null &&
@@ -970,30 +963,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     // Fallback to raw servingSize string for display only
     if (_product.servingSize != null) return _product.servingSize!;
 
-    if (_product.productType == ProductType.produce) {
-      final presets = ProduceServingPresets.forName(_product.name);
-      if (presets != null) {
-        final medium = presets['Medium'];
-        if (medium != null) {
-          final system = UnitResolver.systemFor(
-            settings: settings,
-            context: UnitContext.servingSize,
-          );
-          if (system == UnitSystem.imperial) {
-            final converted = UnitConverter.displayUnit(
-              medium,
-              'g',
-              UnitSystem.imperial,
-              weightPref: settings.preferredWeightUnit,
-            );
-            return '1 ${l10n.servingMedium.toLowerCase()}'
-                ' (${converted.quantity} ${converted.unit})';
-          }
-          return '1 ${l10n.servingMedium.toLowerCase()} (${medium.toInt()} g)';
-        }
-      }
-      return '100 g';
-    }
     return l10n.notAvailable;
   }
 
@@ -1054,8 +1023,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           existingItem: existing,
           suggestedExpiry: suggested,
           inventoryId: activeId,
-          productType: _product.productType,
-          produceName: _product.name,
           product: _product,
         ),
       ),

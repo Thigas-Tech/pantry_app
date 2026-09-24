@@ -28,7 +28,6 @@ void main() {
         tester,
         ScannerCameraView(
           onSwitchToManual: () {},
-          onSwitchToPlu: () {},
         ),
         overrides: [
           mobileScannerControllerProvider.overrideWithValue(
@@ -104,7 +103,6 @@ void main() {
       );
 
       expect(find.byIcon(Icons.flash_off), findsOneWidget);
-      expect(find.byIcon(Icons.dialpad), findsOneWidget);
       expect(find.byIcon(Icons.edit), findsOneWidget);
     });
 
@@ -115,7 +113,6 @@ void main() {
         tester,
         ScannerCameraView(
           onSwitchToManual: () {},
-          onSwitchToPlu: () {},
           embedded: true,
         ),
         overrides: [
@@ -134,7 +131,6 @@ void main() {
       expect(find.byType(AppBar), findsNothing);
       expect(find.text('Scan Barcode'), findsNothing);
       expect(find.byIcon(Icons.flash_off), findsNothing);
-      expect(find.byIcon(Icons.dialpad), findsNothing);
       expect(find.byIcon(Icons.edit), findsNothing);
       expect(_overlayPainterFinder, findsOneWidget);
     });

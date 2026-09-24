@@ -123,8 +123,8 @@ User scans barcode
 - `ProductRepository` owns the **single-tier, device-only cache**: the local
   SQLite `products` table is the only place product data is stored. There is
   no server-side or intermediate cache.
-- **Lookup chain**: SQLite → OFF/USDA API → hardcoded fallback. A cache miss
-  fetches from the API and stores the result locally for offline use.
+- **Lookup chain**: SQLite → OFF API. A cache miss fetches from the API
+  and stores the result locally for offline use.
 - **Two-month flush**: `DatabaseHelper.flushExpiredCachedProducts` removes
   API-fetched product rows whose `lastSynced` is older than
   `productCacheMaxAge` (60 days), preserving manual products and surviving
@@ -232,47 +232,7 @@ repository.
 - New store names submitted through the price entry sheet are automatically
   persisted to the `stores` table.
 
-### 3.14 USDA API client
-
-- `UsdaApiClient` -- HTTP client for the
-  [USDA FoodData Central API](https://fdc.nal.usda.gov/).
-  Used as a nutritional fallback when a produce item (PLU code) is not found
-  in Open Food Facts.
-- Fetches product data by PLU code via `GET /fdc/v1/foods/search`.
-- API key is read from `.env` (`USDA_API_KEY`) and sent as a URL query
-  parameter. Returns a distinct `usdaAuthFailed` message on 403.
-
-### 3.15 Produce category mapper
-
-- `ProduceCategoryMapper` -- maps PLU codes and produce names to OFF
-  taxonomy categories with a fallback heuristic based on produce type
-  (fruit, vegetable, herb, mushroom).
-
-### 3.16 Produce nutrition fallback
-
-- `ProduceNutritionFallback` -- hard-coded approximate nutrition values
-  for ~70 common produce items (energy, protein, carbs, fat, fiber).
-  Used when the USDA API is unreachable or the PLU code is not in the
-  USDA database.
-
-### 3.17 Produce serving presets
-
-- `ProduceServingPresets` -- maps ~35 produce names to Small/Medium/Large
-  serving sizes with `servingWeightG` defaults for the weight/unit toggle.
-
-### 3.18 Produce purchase tracker
-
-- `ProducePurchaseTracker` -- tracks how often the user buys each produce
-  item via SharedPreferences. Used by the quick-add carousel to surface
-  frequently-bought items.
-
-### 3.19 PLU service
-
-- `PluService` -- local lookup table of ~70 common PLU codes (e.g. 4011
-  for Banana) mapped to produce names. Used for barcode-less produce
-  entry on the scanner screen.
-
-### 3.20 Changelog loader
+### 3.14 Changelog loader
 
 - `ChangelogLoader` utility at `lib/utils/changelog_loader.dart` provides
   `loadLocalizedChangelog(Locale)` that resolves locale-specific
@@ -280,7 +240,7 @@ repository.
   the "What's New" sheet to display user-facing changelog in the app's
   current language.
 
-### 3.21 Product photo picker
+### 3.15 Product photo picker
 
 - `ProductPhotoPicker` (at `lib/services/product_photo_picker.dart`)
   picks product photos from the camera or the device gallery for the
@@ -305,7 +265,7 @@ repository.
   action (`showCameraPermissionDialog` at
   `lib/utils/camera_permission_dialog.dart`).
 
-### 3.22 Product image service
+### 3.16 Product image service
 
 - `ProductImageService` (at `lib/services/product_image_service.dart`) is
   the testable boundary for product photo persistence in the manual form.
@@ -339,7 +299,7 @@ repository.
 - The slot snapshot is modeled by the immutable `ProductPhotoSlots`
   (`lib/models/product_photo_slots.dart`).
 
-### 3.23 Product photo cropper
+### 3.17 Product photo cropper
 
 - `ProductPhotoCropper` (at `lib/services/product_photo_cropper.dart`)
   produces cropped and rotated copies of local product photos for the

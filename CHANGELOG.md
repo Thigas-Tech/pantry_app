@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.0.19+15] — 2026-09-23
+
+### Removed
+
+- **Produce subsystem**: the entire produce feature was removed — PLU code
+  entry on the scanner, the USDA FoodData Central client and search source,
+  the hardcoded produce nutrition fallback, the produce category mapper,
+  the produce serving-size presets, the produce synthetic barcodes, and
+  the produce quick-add paths. The scanner is now barcode-only, the market
+  trip no longer has an add-produce step, and the search screen has only
+  the OFF and pantry sources. (lib/, test/)
+- **Recipe produce scaling**: name-based per-piece gram estimation via
+  serving presets is gone. Recipe cost and shortage scaling now use only
+  the user-set per-item serving_weight_g from the inventory row.
+
+### Changed
+
+- **Database baseline amended**: the pre-release v1 baseline dropped the
+  `plu_code` and `product_type` columns from the products table. Existing
+  pre-release installs keep the two dormant columns; no migration or data
+  reset is required.
+- **Onboarding** now has four pages (the produce page was removed).
+- **Connectivity probes** check only the Open Food Facts endpoint; the
+  USDA probe was removed.
+- **CI** no longer injects a USDA_API_KEY into the Play Store release
+  builds; the GitHub secret can be deleted after this release.
+- **Docs** updated across the architecture guides and README to reflect
+  the removal.
+
 ## [0.0.18+14] — 2026-09-22
 
 ### Changed

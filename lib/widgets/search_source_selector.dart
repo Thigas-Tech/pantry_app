@@ -3,11 +3,11 @@ import 'package:pantry_app/models/search_filter.dart';
 
 /// A labeled dropdown that lets the user pick the active [SearchSource].
 ///
-/// The three sources (Open Food Facts, USDA, and the user's pantry) are
-/// rendered from the [offLabel], [usdaLabel], and [inventoryLabel] strings so
-/// the caller controls localization. Selection changes are forwarded through
-/// [onChanged]; deduplication (no-op when re-selecting the current source)
-/// is left to the caller.
+/// The two sources (Open Food Facts and the user's pantry) are rendered
+/// from the [offLabel] and [inventoryLabel] strings so the caller controls
+/// localization. Selection changes are forwarded through [onChanged];
+/// deduplication (no-op when re-selecting the current source) is left to
+/// the caller.
 class SearchSourceSelector extends StatelessWidget {
   /// Creates a [SearchSourceSelector].
   ///
@@ -18,7 +18,6 @@ class SearchSourceSelector extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.offLabel,
-    required this.usdaLabel,
     required this.inventoryLabel,
     super.key,
   });
@@ -34,9 +33,6 @@ class SearchSourceSelector extends StatelessWidget {
 
   /// The display name of the Open Food Facts source.
   final String offLabel;
-
-  /// The display name of the USDA source.
-  final String usdaLabel;
 
   /// The display name of the inventory source.
   final String inventoryLabel;
@@ -60,10 +56,6 @@ class SearchSourceSelector extends StatelessWidget {
             DropdownMenuItem(
               value: SearchSource.off,
               child: Text(offLabel),
-            ),
-            DropdownMenuItem(
-              value: SearchSource.usda,
-              child: Text(usdaLabel),
             ),
             DropdownMenuItem(
               value: SearchSource.inventory,

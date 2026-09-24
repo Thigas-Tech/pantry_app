@@ -11,15 +11,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 ///
 /// ## Credential model
 ///
-/// - The USDA FoodData Central key is a public client key (sent in every
-///   request URL), so embedding it is standard practice.
 /// - The Open Food Facts user/password follow the SDK's supported "global
 ///   user for your app" model (see the openfoodfacts-dart account guide):
 ///   one dedicated app account carries submissions. Prefer a dedicated
 ///   account over a personal one.
-/// - Credential-backed features (OFF product submission, Open Prices,
-///   USDA) are disabled when their credential is absent, so a build made
-///   without the flags degrades gracefully instead of failing.
+/// - Credential-backed features (OFF product submission, Open Prices) are
+///   disabled when their credential is absent, so a build made without the
+///   flags degrades gracefully instead of failing.
 ///
 /// This class cannot be instantiated — all members are static.
 class AppConfig {
@@ -73,16 +71,4 @@ class AppConfig {
   /// Leave empty to skip screenshot upload (issue still submits without
   /// images).
   static String get imgurClientId => dotenv.env['IMGUR_CLIENT_ID'] ?? '';
-
-  /// The USDA FoodData Central API key.
-  ///
-  /// Register for free at https://fdc.nal.usda.gov/api-key-signup.html.
-  /// Read from the USDA_API_KEY dart-define at build time, falling back to
-  /// .env for local development. Leave empty to disable USDA produce
-  /// searches and serving-size enrichment.
-  static String get usdaApiKey {
-    const fromEnv = String.fromEnvironment('USDA_API_KEY');
-    if (fromEnv.isNotEmpty) return fromEnv;
-    return dotenv.env['USDA_API_KEY'] ?? '';
-  }
 }

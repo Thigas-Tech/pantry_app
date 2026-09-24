@@ -3,12 +3,14 @@ import 'package:pantry_app/database/migrations/migration.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// The frozen baseline schema.
+/// The baseline schema.
 ///
 /// Creates the complete database from scratch: eleven tables, twenty-nine
 /// indexes, and the default "Home" inventory. This migration is the single
-/// source of truth for the schema; it must never be edited. Any later schema
-/// change is a new numbered migration with its own [up] and [down].
+/// source of truth for the schema. It was amended once while the app was
+/// still pre-release to drop the removed produce feature's plu_code and
+/// product_type columns; from here on every schema change is a new numbered
+/// migration with its own [up] and [down].
 ///
 /// The [down] method drops every table in reverse foreign-key dependency
 /// order so the database can be reset to an empty file.
@@ -93,9 +95,7 @@ class MigrationV1 extends Migration {
         off_product_image_url TEXT,
         categories_hierarchy TEXT,
         language_code TEXT NOT NULL DEFAULT 'en',
-        search_text TEXT,
-        plu_code TEXT,
-        product_type TEXT NOT NULL DEFAULT 'barcoded'
+        search_text TEXT
       )
     ''');
   }

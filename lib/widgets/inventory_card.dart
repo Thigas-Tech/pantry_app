@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
@@ -92,19 +91,13 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
     }
   }
 
-  /// Returns the localized display name for this inventory item.
+  /// Returns the display name for this inventory item.
   ///
-  /// For produce items, calls the localizeProduceName method on
-  /// [AppLocalizations] so the name is shown in the user's locale
-  /// (e.g. "Maca" in Portuguese). Falls back
-  /// to [InventoryWithProduct.barcode] when
+  /// Falls back to [InventoryWithProduct.barcode] when
   /// [InventoryWithProduct.productName] is null.
   String _localizedDisplayName(AppLocalizations l10n) {
     final name = widget.item.productName;
     if (name == null) return widget.item.barcode;
-    if (widget.item.productType == ProductType.produce) {
-      return l10n.localizeProduceName(name);
-    }
     return name;
   }
 

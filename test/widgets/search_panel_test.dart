@@ -11,10 +11,8 @@ import 'package:pantry_app/providers/api_service_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/services/off_adapter.dart';
-import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/widgets/not_found_flow.dart';
 import 'package:pantry_app/widgets/search_panel.dart';
 import '../helpers/pump_app.dart';
@@ -30,12 +28,9 @@ class _MockDatabaseHelper extends Mock implements DatabaseHelper {
 
 class _MockOffAdapter extends Mock implements OffAdapter {}
 
-class _MockUsdaApiClient extends Mock implements UsdaApiClient {}
-
 void main() {
   late _MockDatabaseHelper mockDb;
   late _MockOffAdapter mockApi;
-  late _MockUsdaApiClient mockUsda;
 
   const localProduct = Product(
     barcode: '001',
@@ -53,7 +48,6 @@ void main() {
   setUp(() {
     mockDb = _MockDatabaseHelper();
     mockApi = _MockOffAdapter();
-    mockUsda = _MockUsdaApiClient();
 
     when(() => mockDb.searchProducts(any())).thenAnswer((_) async => []);
     when(
@@ -62,7 +56,6 @@ void main() {
         pageSize: any(named: 'pageSize'),
       ),
     ).thenAnswer((_) async => []);
-    when(() => mockUsda.searchFood(any())).thenAnswer((_) async => []);
   });
 
   Future<void> pumpPanel(
@@ -82,7 +75,6 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         apiServiceProvider.overrideWithValue(mockApi),
-        usdaApiClientProvider.overrideWithValue(mockUsda),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         activeInventoryProvider.overrideWith(
           FakeActiveInventoryNotifier.new,
@@ -188,7 +180,6 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(mockDb),
           apiServiceProvider.overrideWithValue(mockApi),
-          usdaApiClientProvider.overrideWithValue(mockUsda),
           hasConnectionProvider.overrideWith((ref) => Future.value(true)),
           activeInventoryProvider.overrideWith(
             FakeActiveInventoryNotifier.new,
@@ -265,29 +256,6 @@ void main() {
       );
       expect(screen.barcode, '1234567890123');
       expect(screen.submitToOff, isTrue);
-    });
-
-    testWidgets('USDA empty results do NOT show NotFoundFlow', (
-      tester,
-    ) async {
-      await pumpPanel(tester);
-
-      // Switch to USDA source via the dropdown
-      await tester.tap(find.byType(DropdownButton<SearchSource>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Fresh Produce').last);
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(SearchBar), 'unknownproduce');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pump(const Duration(milliseconds: 1100));
-      await tester.pump();
-
-      expect(find.byType(NotFoundFlow), findsNothing);
-      expect(
-        find.text('No products found matching your search'),
-        findsOneWidget,
-      );
     });
   });
 
@@ -500,25 +468,6 @@ void main() {
 
       expect(find.text('Local Milk'), findsOneWidget);
       expect(find.text('Almond Milk'), findsNothing);
-    });
-
-    testWidgets('switching source re-runs the active search', (tester) async {
-      when(() => mockUsda.searchFood('milk')).thenAnswer(
-        (_) async => [localProduct],
-      );
-
-      await pumpPanel(tester);
-
-      await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pump();
-
-      await tester.tap(find.byType(DropdownButton<SearchSource>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Fresh Produce').last);
-      await tester.pumpAndSettle();
-
-      verify(() => mockUsda.searchFood('milk')).called(1);
     });
   });
 }

@@ -5,9 +5,6 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
-import 'package:pantry_app/services/produce_serving_presets.dart';
-import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/off_units.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
@@ -25,8 +22,6 @@ class AddToInventoryScreen extends StatefulWidget {
     super.key,
     this.existingItem,
     this.suggestedExpiry,
-    this.productType,
-    this.produceName,
     this.product,
   });
 
@@ -42,21 +37,11 @@ class AddToInventoryScreen extends StatefulWidget {
   /// A suggested expiry date in ISO 8601 format (YYYY-MM-DD).
   final String? suggestedExpiry;
 
-  /// The product type — controls whether the weight/unit toggle is shown.
-  final ProductType? productType;
-
-  /// The display name of the product, used for serving weight lookups.
-  ///
-  /// When null for produce items, the name is extracted from the barcode
-  /// by stripping the produce- prefix.
-  final String? produceName;
-
   /// The OFF product with quantity data used to pre-fill the amount and
   /// unit fields in create mode (when [existingItem] is null).
   ///
-  /// Only used for non-produce items. The values are parsed by
-  /// [parseQuantity] and applied as defaults — the user can still
-  /// override them.
+  /// The values are parsed by [parseQuantity] and applied as defaults —
+  /// the user can still override them.
   final Product? product;
 
   @override
@@ -70,12 +55,6 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
   late String _location;
   late DateTime? _expiryDate;
   String _notes = '';
-
-  bool _produceIsWeightMode = true;
-  String _selectedSize = 'Medium';
-  String _produceName = 'Apple';
-
-  bool get _isProduce => widget.productType == ProductType.produce;
 
   static final List<String> _presetUnits = OffUnitCatalog.quantityUnits;
   static const _presetLocations = ['pantry', 'fridge', 'freezer'];
@@ -94,76 +73,39 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
         ? DateTime.tryParse(existing!.expiryDate!)
         : (widget.suggestedExpiry != null
               ? DateTime.tryParse(widget.suggestedExpiry!)
-              : (_isProduce ? defaultProduceExpiry() : null));
+              : null);
     _notes = existing?.notes ?? '';
-    // Produce defaults to weight mode (grams) whether or not USDA serving
-    // data is available; the serving-size (unit) mode stays reachable via
-    // the weight/unit toggle.
-    _produceIsWeightMode = true;
-    _produceName =
-        widget.produceName ??
-        (widget.barcode.startsWith('produce-')
-            ? widget.barcode.substring(7)
-            : 'Apple');
     _syncCustomOptions();
   }
 
   /// Pre-fills the quantity from product data.
   ///
-  /// For non-produce items, uses [parseQuantity] with OFF data.
-  /// For produce items, uses [parseUsdaQuantity] with USDA
-  /// foodPortion data. Returns 1 (the default) when no data is available.
+  /// Uses [parseQuantity] with OFF data. Returns 1 (the default) when no
+  /// data is available.
   double _prefillQuantity() {
     if (widget.product == null) return 1;
 
-    if (!_isProduce) {
-      final parsed = parseQuantity(
-        productQuantity: widget.product!.productQuantity,
-        quantity: widget.product!.quantity,
-      );
-      if (parsed != null && parsed.amount > 0) return parsed.amount;
-    }
-
-    if (_isProduce) {
-      final parsed = parseUsdaQuantity(
-        usdaServingAmount: widget.product!.usdaServingAmount,
-        usdaServingUnit: widget.product!.usdaServingUnit,
-        usdaGramWeight: widget.product!.usdaGramWeight,
-      );
-      if (parsed != null && parsed.amount > 0) return parsed.amount;
-    }
+    final parsed = parseQuantity(
+      productQuantity: widget.product!.productQuantity,
+      quantity: widget.product!.quantity,
+    );
+    if (parsed != null && parsed.amount > 0) return parsed.amount;
 
     return 1;
   }
 
   /// Pre-fills the unit from product data.
   ///
-  /// For non-produce items, uses [parseQuantity] with OFF data.
-  /// For produce items, uses [parseUsdaQuantity] with USDA
-  /// foodPortion data. Returns 'pieces' when no data is available.
+  /// Uses [parseQuantity] with OFF data. Returns 'pieces' when no data is
+  /// available.
   String _prefillUnit() {
-    // Produce defaults to grams even without any product data.
-    if (_isProduce && widget.product == null) return 'g';
     if (widget.product == null) return 'pieces';
 
-    if (!_isProduce) {
-      final parsed = parseQuantity(
-        productQuantity: widget.product!.productQuantity,
-        quantity: widget.product!.quantity,
-      );
-      if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
-    }
-
-    if (_isProduce) {
-      final parsed = parseUsdaQuantity(
-        usdaServingAmount: widget.product!.usdaServingAmount,
-        usdaServingUnit: widget.product!.usdaServingUnit,
-        usdaGramWeight: widget.product!.usdaGramWeight,
-      );
-      if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
-      // Produce defaults to grams even without USDA serving data.
-      return 'g';
-    }
+    final parsed = parseQuantity(
+      productQuantity: widget.product!.productQuantity,
+      quantity: widget.product!.quantity,
+    );
+    if (parsed != null && parsed.unit.isNotEmpty) return parsed.unit;
 
     return 'pieces';
   }
@@ -236,18 +178,8 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
     String unit;
     double? servingWeightG;
 
-    if (_isProduce && !_produceIsWeightMode) {
-      unit = _selectedSize;
-      servingWeightG = ProduceServingPresets.forName(
-        _produceName,
-      )?[_selectedSize];
-    } else if (_isProduce) {
-      unit = 'g';
-      servingWeightG = null;
-    } else {
-      unit = _unit;
-      servingWeightG = null;
-    }
+    unit = _unit;
+    servingWeightG = null;
 
     final item = InventoryItem(
       id: widget.existingItem?.id,
@@ -294,26 +226,6 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              if (_isProduce)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: SegmentedButton<bool>(
-                    segments: [
-                      ButtonSegment(
-                        value: true,
-                        label: Text(l10n.weightModeLabel),
-                      ),
-                      ButtonSegment(
-                        value: false,
-                        label: Text(l10n.unitModeLabel),
-                      ),
-                    ],
-                    selected: {_produceIsWeightMode},
-                    onSelectionChanged: (v) {
-                      setState(() => _produceIsWeightMode = v.first);
-                    },
-                  ),
-                ),
               TextFormField(
                 initialValue: _quantity.toString(),
                 decoration: InputDecoration(labelText: l10n.quantityLabel),
@@ -327,43 +239,20 @@ class _AddToInventoryScreenState extends State<AddToInventoryScreen> {
                 },
                 onSaved: (v) => _quantity = double.parse(v!),
               ),
-              if (_isProduce && !_produceIsWeightMode)
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedSize,
-                  items: [
-                    DropdownMenuItem(
-                      value: 'Small',
-                      child: Text(l10n.servingSmall),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Medium',
-                      child: Text(l10n.servingMedium),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Large',
-                      child: Text(l10n.servingLarge),
-                    ),
-                  ],
-                  onChanged: (v) {
-                    setState(() => _selectedSize = v!);
-                  },
-                  decoration: InputDecoration(labelText: l10n.servingSize),
-                ),
-              if (!_isProduce)
-                DropdownButtonFormField<String>(
-                  initialValue: _presetUnits.contains(_unit)
-                      ? _unit
-                      : '__custom__',
-                  items: unitItems,
-                  onChanged: (v) {
-                    if (v == '__custom__') {
-                      unawaited(_pickCustomUnit());
-                    } else {
-                      setState(() => _unit = v!);
-                    }
-                  },
-                  decoration: InputDecoration(labelText: l10n.unitLabel),
-                ),
+              DropdownButtonFormField<String>(
+                initialValue: _presetUnits.contains(_unit)
+                    ? _unit
+                    : '__custom__',
+                items: unitItems,
+                onChanged: (v) {
+                  if (v == '__custom__') {
+                    unawaited(_pickCustomUnit());
+                  } else {
+                    setState(() => _unit = v!);
+                  }
+                },
+                decoration: InputDecoration(labelText: l10n.unitLabel),
+              ),
               DropdownButtonFormField<String>(
                 initialValue: _presetLocations.contains(_location)
                     ? _location

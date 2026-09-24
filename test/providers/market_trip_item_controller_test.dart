@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/market_trip_item_provider.dart';
@@ -140,29 +139,6 @@ void main() {
     );
 
     expect(captured?.name, '2');
-  });
-
-  test('produces a grams unit for produce products', () async {
-    ShoppingItem? captured;
-    when(
-      () => service.addShoppingItem(
-        any(),
-        activeInventoryId: any(named: 'activeInventoryId'),
-      ),
-    ).thenAnswer((inv) async {
-      captured = inv.positionalArguments[0] as ShoppingItem;
-      return 9;
-    });
-
-    await controller().addScannedProduct(
-      const Product(
-        barcode: 'plu-1',
-        name: 'Tomato',
-        productType: ProductType.produce,
-      ),
-    );
-
-    expect(captured?.unit, 'g');
   });
 
   test(

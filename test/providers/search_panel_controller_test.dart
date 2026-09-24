@@ -16,9 +16,7 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/search_panel_controller.dart';
-import 'package:pantry_app/providers/usda_provider.dart';
 import 'package:pantry_app/services/off_adapter.dart';
-import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helpers/pump_app.dart';
 
@@ -35,15 +33,12 @@ class _MockDatabaseHelper extends Mock implements DatabaseHelper {
 
 class _MockOffAdapter extends Mock implements OffAdapter {}
 
-class _MockUsdaApiClient extends Mock implements UsdaApiClient {}
-
 void main() {
   const debounce = Duration(milliseconds: 50);
   final panelProvider = searchPanelControllerProvider(debounce);
 
   late _MockDatabaseHelper mockDb;
   late _MockOffAdapter mockApi;
-  late _MockUsdaApiClient mockUsda;
   late MockProductRepository mockRepo;
 
   const localProduct = Product(
@@ -61,7 +56,6 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     mockDb = _MockDatabaseHelper();
     mockApi = _MockOffAdapter();
-    mockUsda = _MockUsdaApiClient();
     mockRepo = createMockProductRepository();
 
     when(() => mockDb.searchProducts(any())).thenAnswer((_) async => []);
@@ -78,7 +72,6 @@ void main() {
         pageSize: any(named: 'pageSize'),
       ),
     ).thenAnswer((_) async => []);
-    when(() => mockUsda.searchFood(any())).thenAnswer((_) async => []);
     when(
       () => mockDb.getInventoryWithProduct(
         inventoryId: any(named: 'inventoryId'),
@@ -91,7 +84,6 @@ void main() {
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         apiServiceProvider.overrideWithValue(mockApi),
-        usdaApiClientProvider.overrideWithValue(mockUsda),
         productRepositoryProvider.overrideWithValue(mockRepo),
         hasConnectionProvider.overrideWith((ref) => Future.value(connected)),
       ],
@@ -269,33 +261,45 @@ void main() {
         when(
           () => mockDb.searchProducts('milk'),
         ).thenAnswer((_) async => []);
-        when(() => mockUsda.searchFood('milk')).thenAnswer(
-          (_) async => [apiProduct],
+        when(
+          () => mockDb.getInventoryWithProduct(
+            inventoryId: any(named: 'inventoryId'),
+          ),
+        ).thenAnswer(
+          (_) async => [
+            {
+              'id': 1,
+              'barcode': '001',
+              'quantity': 1,
+              'unit': 'pcs',
+              'location': 'pantry',
+              'inventory_id': 1,
+              'product_name': 'Milk',
+            },
+          ],
         );
 
         final notifier = notifierOf(container)
           ..onQuerySubmitted('milk', languageCode: 'en');
         await pumpEventQueue();
 
-        notifier.setActiveSource(SearchSource.usda, languageCode: 'en');
+        notifier.setActiveSource(SearchSource.inventory, languageCode: 'en');
         await pumpEventQueue();
 
-        verify(() => mockUsda.searchFood('milk')).called(1);
         final state = stateOf(container);
-        expect(state.activeSource, SearchSource.usda);
-        expect(state.results.single.product.barcode, '002');
+        expect(state.activeSource, SearchSource.inventory);
+        expect(state.results.single.product.name, 'Milk');
       },
     );
 
     test('setActiveSource with empty query does not search', () async {
       final container = makeContainer();
       notifierOf(container).setActiveSource(
-        SearchSource.usda,
+        SearchSource.inventory,
         languageCode: 'en',
       );
       await pumpEventQueue();
-      verifyNever(() => mockUsda.searchFood(any()));
-      expect(stateOf(container).activeSource, SearchSource.usda);
+      expect(stateOf(container).activeSource, SearchSource.inventory);
     });
 
     test('setActiveSource with same source is a no-op', () {
@@ -429,7 +433,6 @@ void main() {
             'location': 'pantry',
             'inventory_id': 1,
             'product_name': 'Milk',
-            'product_type': null,
           },
         ],
       );
@@ -510,17 +513,6 @@ void main() {
       expect(results, hasLength(1));
       expect(results.single.product.barcode, barcode);
       expect(results.single.source, ResultSource.api);
-    });
-
-    test('USDA returns no results for queries shorter than 2 chars', () async {
-      final container = makeContainer();
-      notifierOf(container)
-        ..setActiveSource(SearchSource.usda, languageCode: 'en')
-        ..onQuerySubmitted('m', languageCode: 'en');
-      await pumpEventQueue();
-
-      verifyNever(() => mockUsda.searchFood(any()));
-      expect(stateOf(container).results, isEmpty);
     });
 
     test(

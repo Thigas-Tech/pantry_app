@@ -17,10 +17,6 @@ void main() {
       expect(AppConfig.offPassword, '');
     });
 
-    test('returns empty string for missing USDA_API_KEY', () {
-      expect(AppConfig.usdaApiKey, '');
-    });
-
     /// Verifies missing CONTACT_EMAIL returns the default email.
     test('returns default email for missing CONTACT_EMAIL', () {
       expect(AppConfig.contactEmail, 'pantry-app@example.com');
@@ -38,7 +34,6 @@ void main() {
           'OFF_PASSWORD': 'secret',
           'CONTACT_EMAIL': 'dev@test.com',
           'USE_OFF_STAGING': 'true',
-          'USDA_API_KEY': 'usda-key',
         },
       );
 
@@ -46,7 +41,6 @@ void main() {
       expect(AppConfig.offPassword, 'secret');
       expect(AppConfig.contactEmail, 'dev@test.com');
       expect(AppConfig.useOffStaging, true);
-      expect(AppConfig.usdaApiKey, 'usda-key');
     });
   });
 }

@@ -7,9 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
-import 'package:pantry_app/utils/date_helpers.dart';
 
 /// Wraps [child] in a MaterialApp with proper localization, matching
 /// the setup used by the app.
@@ -30,191 +28,6 @@ Future<void> _pumpScreen(WidgetTester tester, Widget child) async {
 }
 
 void main() {
-  testWidgets('serving size dropdown shows localized labels', (
-    tester,
-  ) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: 'produce-Apple',
-        inventoryId: 1,
-        productType: ProductType.produce,
-      ),
-    );
-
-    final l10n = AppLocalizations.of(
-      tester.element(find.byType(AddToInventoryScreen)),
-    )!;
-    // Produce defaults to weight (grams) mode; switch to unit mode so the
-    // serving-size dropdown is shown.
-    await tester.tap(find.text(l10n.unitModeLabel));
-    await tester.pumpAndSettle();
-    // Open the serving-size dropdown so all options are built.
-    await tester.tap(find.text(l10n.servingMedium));
-    await tester.pumpAndSettle();
-
-    expect(find.text(l10n.servingSmall), findsOneWidget);
-    expect(find.text(l10n.servingMedium), findsWidgets);
-    expect(find.text(l10n.servingLarge), findsOneWidget);
-  });
-
-  testWidgets('defaults to weight mode (grams) for produce type', (
-    tester,
-  ) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: 'produce-Apple',
-        inventoryId: 1,
-        productType: ProductType.produce,
-      ),
-    );
-
-    final segmentButton = tester.widget<SegmentedButton<bool>>(
-      find.byType(SegmentedButton<bool>),
-    );
-    expect(segmentButton.selected, contains(true));
-  });
-
-  testWidgets('defaults quantity to 1 for produce', (tester) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: 'produce-Apple',
-        inventoryId: 1,
-        productType: ProductType.produce,
-      ),
-    );
-
-    final textFields = find.byType(TextField);
-    // Find the quantity field (first TextField, which is the quantity input)
-    final quantityField = tester.widget<TextField>(textFields.first);
-    expect(quantityField.controller?.text, '1.0');
-  });
-
-  testWidgets('defaults to a grams unit for produce without USDA data', (
-    tester,
-  ) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: 'produce-Apple',
-        inventoryId: 1,
-        productType: ProductType.produce,
-      ),
-    );
-
-    // Weight mode selected = grams unit by default.
-    final segmentButton = tester.widget<SegmentedButton<bool>>(
-      find.byType(SegmentedButton<bool>),
-    );
-    expect(segmentButton.selected, contains(true));
-  });
-
-  testWidgets('pre-fills a 14-day expiry for produce', (tester) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: 'produce-Apple',
-        inventoryId: 1,
-        productType: ProductType.produce,
-      ),
-    );
-
-    final defaultDate = defaultProduceExpiry().toIso8601String().substring(
-      0,
-      10,
-    );
-    expect(find.textContaining(defaultDate), findsOneWidget);
-  });
-
-  testWidgets('keeps the existing expiry when editing a dated produce item', (
-    tester,
-  ) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: 'produce-Apple',
-        inventoryId: 1,
-        productType: ProductType.produce,
-        existingItem: InventoryItem(
-          barcode: 'produce-Apple',
-          expiryDate: '2027-01-01',
-        ),
-      ),
-    );
-
-    expect(find.textContaining('2027-01-01'), findsOneWidget);
-    final defaultDate = defaultProduceExpiry().toIso8601String().substring(
-      0,
-      10,
-    );
-    expect(find.textContaining(defaultDate), findsNothing);
-  });
-
-  testWidgets('respects the suggested expiry over the produce default', (
-    tester,
-  ) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: 'produce-Apple',
-        inventoryId: 1,
-        productType: ProductType.produce,
-        suggestedExpiry: '2027-02-02',
-      ),
-    );
-
-    expect(find.textContaining('2027-02-02'), findsOneWidget);
-    final defaultDate = defaultProduceExpiry().toIso8601String().substring(
-      0,
-      10,
-    );
-    expect(find.textContaining(defaultDate), findsNothing);
-  });
-
-  testWidgets('does not show weight/unit toggle for non-produce', (
-    tester,
-  ) async {
-    await _pumpScreen(
-      tester,
-      const AddToInventoryScreen(
-        barcode: '123456789',
-        inventoryId: 1,
-        productType: ProductType.barcoded,
-      ),
-    );
-
-    expect(find.byType(SegmentedButton<bool>), findsNothing);
-  });
-
-  testWidgets(
-    'derives produce name from barcode when not explicitly provided',
-    (
-      tester,
-    ) async {
-      await _pumpScreen(
-        tester,
-        const AddToInventoryScreen(
-          barcode: 'produce-Banana',
-          inventoryId: 1,
-          productType: ProductType.produce,
-        ),
-      );
-
-      // Weight mode selected — _produceName should be 'Banana' from barcode
-      final segmentButton = tester.widget<SegmentedButton<bool>>(
-        find.byType(SegmentedButton<bool>),
-      );
-      expect(segmentButton.selected, contains(true));
-
-      // Save and verify no errors (serving weight lookup succeeds)
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Add to Pantry'));
-      await tester.pumpAndSettle();
-      // No exception means the serving weight was looked up correctly
-    },
-  );
-
   group('pre-fill from Product', () {
     Product productWithQuantity({
       double? productQuantity,
@@ -240,7 +53,6 @@ void main() {
         AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           product: product,
         ),
       );
@@ -260,7 +72,6 @@ void main() {
         AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           product: product,
         ),
       );
@@ -281,7 +92,6 @@ void main() {
         AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           product: product,
         ),
       );
@@ -304,7 +114,6 @@ void main() {
         AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           product: product,
         ),
       );
@@ -321,7 +130,6 @@ void main() {
         const AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           existingItem: InventoryItem(
             barcode: '123456789',
             quantity: 2,
@@ -340,7 +148,6 @@ void main() {
         AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           product: product,
         ),
       );
@@ -360,7 +167,6 @@ void main() {
         AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           product: product,
         ),
       );
@@ -380,7 +186,6 @@ void main() {
         AddToInventoryScreen(
           barcode: '123456789',
           inventoryId: 1,
-          productType: ProductType.barcoded,
           product: product,
           existingItem: const InventoryItem(
             barcode: '123456789',
@@ -394,210 +199,6 @@ void main() {
       final quantityField = tester.widget<TextField>(textFields.first);
       // Existing item value should be preserved
       expect(quantityField.controller?.text, '7.0');
-    });
-
-    testWidgets('does not pre-fill for produce type without USDA data', (
-      tester,
-    ) async {
-      const product = Product(
-        barcode: 'produce-Apple',
-        name: 'Apple',
-        productQuantity: 200,
-        quantity: '200 g',
-        productType: ProductType.produce,
-      );
-      await _pumpScreen(
-        tester,
-        const AddToInventoryScreen(
-          barcode: 'produce-Apple',
-          inventoryId: 1,
-          productType: ProductType.produce,
-          product: product,
-        ),
-      );
-
-      final textFields = find.byType(TextField);
-      final quantityField = tester.widget<TextField>(textFields.first);
-      // Produce without USDA data should use default quantity (1)
-      expect(quantityField.controller?.text, '1.0');
-    });
-
-    group('USDA pre-fill for produce', () {
-      Product produceWithUsda({
-        double? usdaGramWeight,
-        double? usdaServingAmount,
-        String? usdaServingUnit,
-      }) {
-        return Product(
-          barcode: 'produce-Apple',
-          name: 'Apple',
-          productType: ProductType.produce,
-          usdaGramWeight: usdaGramWeight,
-          usdaServingAmount: usdaServingAmount,
-          usdaServingUnit: usdaServingUnit,
-        );
-      }
-
-      testWidgets('pre-fills quantity from USDA gramWeight for produce', (
-        tester,
-      ) async {
-        final product = produceWithUsda(usdaGramWeight: 182);
-        await _pumpScreen(
-          tester,
-          AddToInventoryScreen(
-            barcode: 'produce-Apple',
-            inventoryId: 1,
-            productType: ProductType.produce,
-            product: product,
-          ),
-        );
-
-        final textFields = find.byType(TextField);
-        final quantityField = tester.widget<TextField>(textFields.first);
-        expect(quantityField.controller?.text, '182.0');
-      });
-
-      testWidgets('switches to weight mode when USDA gramWeight available', (
-        tester,
-      ) async {
-        final product = produceWithUsda(usdaGramWeight: 182);
-        await _pumpScreen(
-          tester,
-          AddToInventoryScreen(
-            barcode: 'produce-Apple',
-            inventoryId: 1,
-            productType: ProductType.produce,
-            product: product,
-          ),
-        );
-
-        final segmentButton = tester.widget<SegmentedButton<bool>>(
-          find.byType(SegmentedButton<bool>),
-        );
-        // weight mode = selected contains true
-        expect(segmentButton.selected, contains(true));
-      });
-
-      testWidgets('leaves default quantity when USDA has no gramWeight', (
-        tester,
-      ) async {
-        final product = produceWithUsda(usdaServingAmount: 1);
-        await _pumpScreen(
-          tester,
-          AddToInventoryScreen(
-            barcode: 'produce-Apple',
-            inventoryId: 1,
-            productType: ProductType.produce,
-            product: product,
-          ),
-        );
-
-        final textFields = find.byType(TextField);
-        final quantityField = tester.widget<TextField>(textFields.first);
-        expect(quantityField.controller?.text, '1.0');
-      });
-
-      testWidgets('defaults to weight mode when USDA has no gramWeight', (
-        tester,
-      ) async {
-        final product = produceWithUsda(usdaServingAmount: 1);
-        await _pumpScreen(
-          tester,
-          AddToInventoryScreen(
-            barcode: 'produce-Apple',
-            inventoryId: 1,
-            productType: ProductType.produce,
-            product: product,
-          ),
-        );
-
-        final segmentButton = tester.widget<SegmentedButton<bool>>(
-          find.byType(SegmentedButton<bool>),
-        );
-        // weight mode = grams unit selected
-        expect(segmentButton.selected, contains(true));
-      });
-
-      testWidgets('does not pre-fill from USDA when editing existing item', (
-        tester,
-      ) async {
-        final product = produceWithUsda(usdaGramWeight: 182);
-        await _pumpScreen(
-          tester,
-          AddToInventoryScreen(
-            barcode: 'produce-Apple',
-            inventoryId: 1,
-            productType: ProductType.produce,
-            product: product,
-            existingItem: const InventoryItem(
-              barcode: 'produce-Apple',
-              quantity: 3,
-              unit: 'g',
-            ),
-          ),
-        );
-
-        final textFields = find.byType(TextField);
-        final quantityField = tester.widget<TextField>(textFields.first);
-        expect(quantityField.controller?.text, '3.0');
-      });
-
-      testWidgets(
-        'pre-fills from OFF for non-produce even with USDA data on product',
-        (
-          tester,
-        ) async {
-          const product = Product(
-            barcode: '123456789',
-            name: 'Test',
-            productQuantity: 500,
-            quantity: '500 ml',
-            usdaGramWeight: 200,
-          );
-          await _pumpScreen(
-            tester,
-            const AddToInventoryScreen(
-              barcode: '123456789',
-              inventoryId: 1,
-              productType: ProductType.barcoded,
-              product: product,
-            ),
-          );
-
-          final textFields = find.byType(TextField);
-          final quantityField = tester.widget<TextField>(textFields.first);
-          expect(quantityField.controller?.text, '500.0');
-        },
-      );
-
-      testWidgets(
-        'pre-fills from USDA for produce even with OFF data on product',
-        (
-          tester,
-        ) async {
-          const product = Product(
-            barcode: 'produce-Apple',
-            name: 'Apple',
-            productType: ProductType.produce,
-            productQuantity: 500,
-            quantity: '500 ml',
-            usdaGramWeight: 182,
-          );
-          await _pumpScreen(
-            tester,
-            const AddToInventoryScreen(
-              barcode: 'produce-Apple',
-              inventoryId: 1,
-              productType: ProductType.produce,
-              product: product,
-            ),
-          );
-
-          final textFields = find.byType(TextField);
-          final quantityField = tester.widget<TextField>(textFields.first);
-          expect(quantityField.controller?.text, '182.0');
-        },
-      );
     });
   });
 }

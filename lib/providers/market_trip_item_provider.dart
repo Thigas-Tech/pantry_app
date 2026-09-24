@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
@@ -67,7 +66,7 @@ class MarketTripItemState {
   }
 }
 
-/// Orchestrates adding a scanned (or produce-searched) product to a market
+/// Orchestrates adding a scanned product to a market
 /// trip as purchased, applying an optional price and expiry in one unit of
 /// work.
 ///
@@ -137,9 +136,6 @@ class MarketTripItemController extends _$MarketTripItemController {
               barcode: product.barcode,
               inventoryId: tripId,
               isPurchased: true,
-              // Produce is weighed in grams by default, matching the
-              // add-to-inventory produce default.
-              unit: product.productType == ProductType.produce ? 'g' : 'pieces',
             ),
             activeInventoryId: tripId,
           );

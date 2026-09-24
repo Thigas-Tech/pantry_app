@@ -2,9 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:openfoodfacts/openfoodfacts.dart' as off;
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/product_nutrient.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/services/off_query.dart';
-import 'package:pantry_app/services/usda_api_client.dart';
 import 'package:pantry_app/utils/nutrient_catalog.dart';
 import 'package:pantry_app/utils/nutrient_conversion.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
@@ -269,44 +267,6 @@ abstract class Product with _$Product {
     /// - [productSubmissionPartiallyCompleted] — some uploads failed; retry
     ///   possible.
     @Default(productSubmissionNotSubmitted) String submissionStatus,
-
-    /// The PLU (Price Look-Up) code for this product, if it is a fresh
-    /// produce item (e.g. '4011' for Banana, '4032' for Apple).
-    ///
-    /// Only meaningful when [productType] is [ProductType.produce]. 4-digit
-    /// codes are standard PLU codes; 5-digit codes starting with '9'
-    /// indicate organic produce. This field is nullable for barcoded and
-    /// custom products.
-    String? pluCode,
-
-    /// The classification of this product.
-    ///
-    /// - [ProductType.barcoded] — scanned from manufacturer barcode (default).
-    /// - [ProductType.produce] — identified by PLU code as fresh produce.
-    /// - [ProductType.custom] — manually entered by the user.
-    @Default(ProductType.barcoded) ProductType productType,
-
-    /// The amount from the first USDA foodPortion (e.g. 1.0 for a single
-    /// apple). Populated by [UsdaApiClient.enrichProductWithServingData].
-    ///
-    /// Only meaningful for produce items fetched from USDA. Null for OFF
-    /// products, manually entered items, or when USDA has no portion data.
-    double? usdaServingAmount,
-
-    /// The measureUnit.name from the first USDA foodPortion
-    /// (e.g. "fruit", "cup", "medium").
-    ///
-    /// Only meaningful for produce items fetched from USDA. Null for OFF
-    /// products, manually entered items, or when USDA has no portion data.
-    String? usdaServingUnit,
-
-    /// The gramWeight from the first USDA foodPortion (e.g. 182.0 for a
-    /// medium apple). This is the primary pre-fill value via
-    /// [parseUsdaQuantity].
-    ///
-    /// Only meaningful for produce items fetched from USDA. Null for OFF
-    /// products, manually entered items, or when USDA has no portion data.
-    double? usdaGramWeight,
   }) = _Product;
 
   /// Creates a [Product] from an SDK [off.Product].
@@ -517,9 +477,6 @@ extension ProductMerge on Product {
           nutriscoreNotApplicableCategory,
       languageCode: api.languageCode,
       lastSynced: api.lastSynced ?? lastSynced,
-      usdaServingAmount: api.usdaServingAmount ?? usdaServingAmount,
-      usdaServingUnit: api.usdaServingUnit ?? usdaServingUnit,
-      usdaGramWeight: api.usdaGramWeight ?? usdaGramWeight,
     );
   }
 

@@ -1,5 +1,14 @@
 # Registro de alteracoes do usuario
 
+## [0.0.19+15]
+
+- Removidos os recursos de hortalicas: o scanner nao aceita mais codigos
+  PLU, a viagem de compras nao tem mais a etapa de adicionar hortalicas e
+  a busca de produtos nao oferece mais uma fonte de hortalicas. Itens
+  escaneados e buscados agora usam apenas codigos de barras.
+- As estimativas de custo e de falta de ingredientes em receitas usam
+  agora apenas o peso por unidade que voce informou ao adicionar o item.
+
 ## [0.0.16+12]
 
 - Esta compilacao de pre-lancamento comeca um banco de dados local novo.

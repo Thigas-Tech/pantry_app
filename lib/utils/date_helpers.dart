@@ -26,14 +26,6 @@ bool isExpiringSoon(String? dateString, int days) {
   return !date.isBefore(todayStart) && date.isBefore(threshold);
 }
 
-/// Today plus the default produce shelf-life (14 days).
-///
-/// Used as the pre-selected expiry date for produce added in a market trip or
-/// to the pantry, so fresh items get a sensible default that can still be
-/// changed or cleared by the user.
-DateTime defaultProduceExpiry([DateTime? now]) =>
-    (now ?? DateTime.now()).add(const Duration(days: 14));
-
 /// Formats [date] as dd/mm/yyyy (e.g. 15/06/2026).
 ///
 /// Shared by the price history chart, the history tiles, and the product

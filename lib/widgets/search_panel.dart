@@ -325,7 +325,6 @@ class _SearchPanelState extends ConsumerState<SearchPanel> {
               languageCode: languageCode,
             ),
             offLabel: l10n.searchSourceOff,
-            usdaLabel: l10n.searchSourceUsda,
             inventoryLabel: l10n.searchSourceInventory,
           ),
         ),

@@ -57,9 +57,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryLabel => 'Categorias';
 
   @override
-  String get servingSize => 'Porção';
-
-  @override
   String get energy => 'Energia';
 
   @override
@@ -1391,16 +1388,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noExpiry => 'Sem validade';
 
   @override
-  String get addProduce => 'Adicionar hortalicas';
-
-  @override
   String get noProduceFinish => 'Nao, terminar ida';
-
-  @override
-  String get produceSearchHint => 'Buscar hortalicas sem codigo de barras';
-
-  @override
-  String get produceNotFound => 'Nenhuma hortalica encontrada. Tente outro nome.';
 
   @override
   String get addToTrip => 'Adicionar a ida';
@@ -1547,21 +1535,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get unitPlural => 'unidades';
-
-  @override
-  String get weightModeLabel => 'Peso (g)';
-
-  @override
-  String get unitModeLabel => 'Unidade';
-
-  @override
-  String get servingSmall => 'Pequeno';
-
-  @override
-  String get servingMedium => 'Médio';
-
-  @override
-  String get servingLarge => 'Grande';
 
   @override
   String get unitGrams => 'g';
@@ -1852,15 +1825,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get categoryStarches => 'Amidos';
 
   @override
-  String get pluEntryTooltip => 'Digitar código PLU (frutas e legumes)';
-
-  @override
-  String get enterPluCode => 'Digitar código PLU';
-
-  @override
-  String get pluCodeNotFound => 'Código PLU não reconhecido';
-
-  @override
   String get digitLabel => 'Dígito';
 
   @override
@@ -1892,30 +1856,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get averageScore => 'Nota media';
-
-  @override
-  String get produceApple => 'Maça';
-
-  @override
-  String get produceBanana => 'Banana';
-
-  @override
-  String get produceOrange => 'Laranja';
-
-  @override
-  String get produceTomato => 'Tomate';
-
-  @override
-  String get producePotato => 'Batata';
-
-  @override
-  String get produceCarrot => 'Cenoura';
-
-  @override
-  String get produceOnion => 'Cebola';
-
-  @override
-  String get produceLettuce => 'Alface';
 
   @override
   String get exactAlarmsDeniedHint => 'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
@@ -2126,33 +2066,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingPage2Cta => 'Abrir Pesquisa';
 
   @override
-  String get onboardingPage3Title => 'Produtos Frescos';
-
-  @override
-  String get onboardingPage3Desc => 'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
-
-  @override
-  String get onboardingPage3Cta => 'Adicionar Produtos Frescos';
-
-  @override
-  String get onboardingPage4Title => 'Configurar Despensa';
-
-  @override
-  String get onboardingPage4Desc => 'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
-
-  @override
-  String get onboardingPage4Cta => 'Configurar';
-
-  @override
-  String get onboardingPage5Title => 'Controle Tudo';
-
-  @override
-  String get onboardingPage5Desc => 'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
-
-  @override
-  String get onboardingPage5Cta => 'Comecar';
-
-  @override
   String get onboardingSkip => 'Pular';
 
   @override
@@ -2163,9 +2076,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get searchSourceOff => 'Produtos Embalados';
-
-  @override
-  String get searchSourceUsda => 'Produtos Frescos';
 
   @override
   String get searchSourceInventory => 'Minha Despensa';
@@ -2267,6 +2177,27 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get resetDatabaseFailed => 'Nao foi possivel redefinir o banco de dados';
+
+  @override
+  String get onboardingPage3Title => 'Configurar Despensa';
+
+  @override
+  String get onboardingPage3Desc => 'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
+
+  @override
+  String get onboardingPage3Cta => 'Configurar';
+
+  @override
+  String get onboardingPage4Title => 'Controle Tudo';
+
+  @override
+  String get onboardingPage4Desc => 'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
+
+  @override
+  String get onboardingPage4Cta => 'Comecar';
+
+  @override
+  String get servingSize => 'Porção';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2320,9 +2251,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get categoryLabel => 'Categorias';
-
-  @override
-  String get servingSize => 'Porção';
 
   @override
   String get energy => 'Energia';
@@ -3656,16 +3584,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get noExpiry => 'Sem validade';
 
   @override
-  String get addProduce => 'Adicionar hortalicas';
-
-  @override
   String get noProduceFinish => 'Nao, terminar ida';
-
-  @override
-  String get produceSearchHint => 'Buscar hortalicas sem codigo de barras';
-
-  @override
-  String get produceNotFound => 'Nenhuma hortalica encontrada. Tente outro nome.';
 
   @override
   String get addToTrip => 'Adicionar a ida';
@@ -3812,21 +3731,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get unitPlural => 'unidades';
-
-  @override
-  String get weightModeLabel => 'Peso (g)';
-
-  @override
-  String get unitModeLabel => 'Unidade';
-
-  @override
-  String get servingSmall => 'Pequeno';
-
-  @override
-  String get servingMedium => 'Médio';
-
-  @override
-  String get servingLarge => 'Grande';
 
   @override
   String get unitGrams => 'g';
@@ -4117,15 +4021,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get categoryStarches => 'Amidos';
 
   @override
-  String get pluEntryTooltip => 'Digitar código PLU (hortifrúti)';
-
-  @override
-  String get enterPluCode => 'Digitar código PLU';
-
-  @override
-  String get pluCodeNotFound => 'Código PLU não reconhecido';
-
-  @override
   String get digitLabel => 'Dígito';
 
   @override
@@ -4157,30 +4052,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get averageScore => 'Nota media';
-
-  @override
-  String get produceApple => 'Maça';
-
-  @override
-  String get produceBanana => 'Banana';
-
-  @override
-  String get produceOrange => 'Laranja';
-
-  @override
-  String get produceTomato => 'Tomate';
-
-  @override
-  String get producePotato => 'Batata';
-
-  @override
-  String get produceCarrot => 'Cenoura';
-
-  @override
-  String get produceOnion => 'Cebola';
-
-  @override
-  String get produceLettuce => 'Alface';
 
   @override
   String get exactAlarmsDeniedHint => 'Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.';
@@ -4391,33 +4262,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get onboardingPage2Cta => 'Abrir Pesquisa';
 
   @override
-  String get onboardingPage3Title => 'Produtos Frescos';
-
-  @override
-  String get onboardingPage3Desc => 'Adicione frutas e vegetais comuns com um unico toque. Perfeito para bananas, macas, tomates e mais.';
-
-  @override
-  String get onboardingPage3Cta => 'Adicionar Produtos Frescos';
-
-  @override
-  String get onboardingPage4Title => 'Configurar Despensa';
-
-  @override
-  String get onboardingPage4Desc => 'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
-
-  @override
-  String get onboardingPage4Cta => 'Configurar';
-
-  @override
-  String get onboardingPage5Title => 'Controle Tudo';
-
-  @override
-  String get onboardingPage5Desc => 'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
-
-  @override
-  String get onboardingPage5Cta => 'Comecar';
-
-  @override
   String get onboardingSkip => 'Pular';
 
   @override
@@ -4428,9 +4272,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get searchSourceOff => 'Produtos Embalados';
-
-  @override
-  String get searchSourceUsda => 'Produtos Frescos';
 
   @override
   String get searchSourceInventory => 'Minha Despensa';
@@ -4532,4 +4373,25 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get resetDatabaseFailed => 'Nao foi possivel redefinir o banco de dados';
+
+  @override
+  String get onboardingPage3Title => 'Configurar Despensa';
+
+  @override
+  String get onboardingPage3Desc => 'Configure monitoramento de precos, moeda e preferencias de dados para aproveitar ao maximo a despensa.';
+
+  @override
+  String get onboardingPage3Cta => 'Configurar';
+
+  @override
+  String get onboardingPage4Title => 'Controle Tudo';
+
+  @override
+  String get onboardingPage4Desc => 'Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.';
+
+  @override
+  String get onboardingPage4Cta => 'Comecar';
+
+  @override
+  String get servingSize => 'Porção';
 }

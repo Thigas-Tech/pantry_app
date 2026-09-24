@@ -9,7 +9,6 @@ class InventoryProductOption {
     required this.barcode,
     this.name,
     this.imageUrl,
-    this.productType,
   });
 
   /// Maps a raw distinct-product row into an [InventoryProductOption].
@@ -21,7 +20,6 @@ class InventoryProductOption {
       barcode: map['barcode'] as String? ?? '',
       name: map['name'] as String?,
       imageUrl: map['image_url'] as String?,
-      productType: map['product_type'] as String?,
     );
   }
 
@@ -33,7 +31,4 @@ class InventoryProductOption {
 
   /// The product image URL, when available.
   final String? imageUrl;
-
-  /// The product type tag (for example 'produce').
-  final String? productType;
 }

@@ -24,7 +24,6 @@ void main() {
           OnboardingFlow(
             onScanBarcode: () {},
             onSearchProduct: () {},
-            onAddProduce: () {},
             onGetStarted: () {},
           ),
         );
@@ -56,7 +55,6 @@ void main() {
           OnboardingFlow(
             onScanBarcode: () {},
             onSearchProduct: () {},
-            onAddProduce: () {},
             onGetStarted: () {},
           ),
         );
@@ -68,19 +66,14 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Search Products'), findsOneWidget);
 
-        // Page 2 -> 3
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-        expect(find.text('Fresh Produce'), findsOneWidget);
-
-        // Page 3 -> 4 (Configure)
+        // Page 2 -> 3 (Configure)
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
         expect(find.text('Configure Your Pantry'), findsOneWidget);
         expect(find.text('Set Up'), findsAtLeast(1));
         expect(find.text('Next'), findsNothing);
 
-        // Page 4 -> 5 (Track Everything)
+        // Page 3 -> 4 (Track Everything)
         await tester.tap(find.text('Set Up').last);
         await tester.pumpAndSettle();
         expect(find.text('Track Everything'), findsOneWidget);
@@ -97,7 +90,6 @@ void main() {
         OnboardingFlow(
           onScanBarcode: () {},
           onSearchProduct: () {},
-          onAddProduce: () {},
           onGetStarted: () {},
         ),
       );
@@ -125,7 +117,6 @@ void main() {
         OnboardingFlow(
           onScanBarcode: () {},
           onSearchProduct: () {},
-          onAddProduce: () {},
           onGetStarted: () => getStartedFired = true,
         ),
       );
@@ -142,20 +133,17 @@ void main() {
         OnboardingFlow(
           onScanBarcode: () {},
           onSearchProduct: () {},
-          onAddProduce: () {},
           onGetStarted: () => getStartedFired = true,
         ),
       );
 
-      // Go to last page (page 5)
-      for (var i = 0; i < 4; i++) {
-        if (i < 3) {
-          await tester.tap(find.text('Next'));
-        } else {
-          await tester.tap(find.text('Set Up').last);
-        }
+      // Go to last page (page 4)
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
       }
+      await tester.tap(find.text('Set Up').last);
+      await tester.pumpAndSettle();
 
       await tester.tap(find.text('Get Started').last);
       expect(getStartedFired, isTrue);
@@ -167,7 +155,6 @@ void main() {
         OnboardingFlow(
           onScanBarcode: () {},
           onSearchProduct: () {},
-          onAddProduce: () {},
           onGetStarted: () {},
         ),
       );
@@ -186,7 +173,6 @@ void main() {
         OnboardingFlow(
           onScanBarcode: () => scanFired = true,
           onSearchProduct: () {},
-          onAddProduce: () {},
           onGetStarted: () {},
         ),
       );
@@ -195,42 +181,18 @@ void main() {
       expect(scanFired, isTrue);
     });
 
-    testWidgets('Page 3 CTA fires onAddProduce', (tester) async {
-      var addProduceFired = false;
-
-      await pumpApp(
-        tester,
-        OnboardingFlow(
-          onScanBarcode: () {},
-          onSearchProduct: () {},
-          onAddProduce: () => addProduceFired = true,
-          onGetStarted: () {},
-        ),
-      );
-
-      // Go to page 3
-      for (var i = 0; i < 2; i++) {
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-      }
-
-      await tester.tap(find.text('Add Produce'));
-      expect(addProduceFired, isTrue);
-    });
-
     testWidgets('Configure page shows price tracking toggle', (tester) async {
       await pumpApp(
         tester,
         OnboardingFlow(
           onScanBarcode: () {},
           onSearchProduct: () {},
-          onAddProduce: () {},
           onGetStarted: () {},
         ),
       );
 
       // Go to page 4
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 2; i++) {
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
       }
@@ -249,13 +211,12 @@ void main() {
           OnboardingFlow(
             onScanBarcode: () {},
             onSearchProduct: () {},
-            onAddProduce: () {},
             onGetStarted: () {},
           ),
         );
 
-        // Go to page 4
-        for (var i = 0; i < 3; i++) {
+        // Go to page 3
+        for (var i = 0; i < 2; i++) {
           await tester.tap(find.text('Next'));
           await tester.pumpAndSettle();
         }

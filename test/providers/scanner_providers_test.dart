@@ -284,63 +284,6 @@ void main() {
       expect(container.read(scannerCameraProvider).scanResolution, isNull);
     });
 
-    test('resolvePlu succeeds and sets ScanResolved', () async {
-      const pluCode = '4011';
-      const produceName = 'Banana';
-      when(
-        () => mockOff.searchProducts(
-          produceName,
-          languageCode: any(named: 'languageCode'),
-        ),
-      ).thenAnswer(
-        (_) async => [const Product(barcode: '000', name: 'Banana')],
-      );
-
-      final notifier = container.read(scannerCameraProvider.notifier);
-      await notifier.resolvePlu(
-        pluCode: pluCode,
-        produceName: produceName,
-        languageCode: 'en',
-      );
-
-      final state = container.read(scannerCameraProvider);
-      expect(state.scanResolution, isA<ScanResolved>());
-      final resolved = state.scanResolution! as ScanResolved;
-      expect(resolved.product.pluCode, pluCode);
-    });
-
-    test('resolvePlu timeout sets ScanFailed with TIMEOUT', () async {
-      const pluCode = '4011';
-      const produceName = 'Banana';
-      final completer = Completer<List<Product>>();
-      when(
-        () => mockOff.searchProducts(
-          produceName,
-          languageCode: any(named: 'languageCode'),
-        ),
-      ).thenAnswer((_) => completer.future);
-
-      final sub = container.listen<ScannerCameraState>(
-        scannerCameraProvider,
-        (_, _) {},
-      );
-      addTearDown(sub.close);
-      final notifier = container.read(scannerCameraProvider.notifier);
-      await notifier.resolvePlu(
-        pluCode: pluCode,
-        produceName: produceName,
-        languageCode: 'en',
-        timeout: const Duration(milliseconds: 100),
-      );
-
-      final state = container.read(scannerCameraProvider);
-      expect(state.scanResolution, isA<ScanFailed>());
-      expect(
-        (state.scanResolution! as ScanFailed).message,
-        'TIMEOUT',
-      );
-    });
-
     test('clearResolution resets scan resolution', () async {
       const barcode = '5012345678900';
       const product = Product(barcode: barcode, name: 'Test');

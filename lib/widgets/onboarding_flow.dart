@@ -17,7 +17,6 @@ class OnboardingFlow extends StatefulWidget {
   const OnboardingFlow({
     required this.onScanBarcode,
     required this.onSearchProduct,
-    required this.onAddProduce,
     required this.onGetStarted,
     super.key,
   });
@@ -27,9 +26,6 @@ class OnboardingFlow extends StatefulWidget {
 
   /// Opens the product search screen.
   final VoidCallback onSearchProduct;
-
-  /// Opens the search screen.
-  final VoidCallback onAddProduce;
 
   /// Completes the onboarding flow.
   final VoidCallback onGetStarted;
@@ -41,7 +37,7 @@ class OnboardingFlow extends StatefulWidget {
 class _OnboardingFlowState extends State<OnboardingFlow> {
   late final PageController _pageController;
   int _currentPage = 0;
-  static const _pageCount = 5;
+  static const _pageCount = 4;
 
   @override
   void initState() {
@@ -115,20 +111,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 onCta: widget.onSearchProduct,
                 colorScheme: colorScheme,
               ),
-              _OnboardingPage(
-                icon: Icons.eco_outlined,
-                title: l10n.onboardingPage3Title,
-                description: l10n.onboardingPage3Desc,
-                ctaLabel: l10n.onboardingPage3Cta,
-                onCta: widget.onAddProduce,
-                colorScheme: colorScheme,
-              ),
               _OnboardingSettingsPage(colorScheme: colorScheme),
               _OnboardingPage(
                 icon: Icons.inventory_2_outlined,
-                title: l10n.onboardingPage5Title,
-                description: l10n.onboardingPage5Desc,
-                ctaLabel: l10n.onboardingPage5Cta,
+                title: l10n.onboardingPage4Title,
+                description: l10n.onboardingPage4Desc,
+                ctaLabel: l10n.onboardingPage4Cta,
                 onCta: widget.onGetStarted,
                 colorScheme: colorScheme,
               ),
@@ -158,9 +146,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                 onPressed: _nextPage,
                 child: Text(
                   _currentPage == _pageCount - 1
-                      ? l10n.onboardingPage5Cta
-                      : _currentPage == _pageCount - 2
                       ? l10n.onboardingPage4Cta
+                      : _currentPage == _pageCount - 2
+                      ? l10n.onboardingPage3Cta
                       : 'Next',
                 ),
               ),
@@ -266,13 +254,13 @@ class _OnboardingSettingsPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                l10n.onboardingPage4Title,
+                l10n.onboardingPage3Title,
                 style: theme.textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                l10n.onboardingPage4Desc,
+                l10n.onboardingPage3Desc,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/product.dart';
-import 'package:pantry_app/models/product_type.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
@@ -126,29 +125,15 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     double metricQty;
     String metricUnit;
 
-    if (product.productType == ProductType.produce) {
-      final parsed = parseUsdaQuantity(
-        usdaServingAmount: product.usdaServingAmount,
-        usdaServingUnit: product.usdaServingUnit,
-        usdaGramWeight: product.usdaGramWeight,
-      );
-      if (parsed != null) {
-        metricQty = parsed.amount;
-        metricUnit = parsed.unit;
-      } else {
-        return (quantity: 1.0, unit: 'pieces');
-      }
+    final parsed = parseServingQuantity(
+      servingQuantity: product.servingQuantity,
+      servingSize: product.servingSize,
+    );
+    if (parsed != null) {
+      metricQty = parsed.amount;
+      metricUnit = parsed.unit;
     } else {
-      final parsed = parseServingQuantity(
-        servingQuantity: product.servingQuantity,
-        servingSize: product.servingSize,
-      );
-      if (parsed != null) {
-        metricQty = parsed.amount;
-        metricUnit = parsed.unit;
-      } else {
-        return (quantity: 1.0, unit: 'pieces');
-      }
+      return (quantity: 1.0, unit: 'pieces');
     }
 
     final system = UnitResolver.systemFor(

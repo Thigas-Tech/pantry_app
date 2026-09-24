@@ -7,13 +7,10 @@ import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/produce_barcode.dart';
-import 'package:pantry_app/services/produce_serving_presets.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/money.dart';
 import 'package:pantry_app/utils/price_calculator.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
-import 'package:pantry_app/utils/serving_weight.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -193,7 +190,7 @@ class RecipeService {
     for (final ingredient in ingredients) {
       final rawBarcode = ingredient.barcode;
       if (rawBarcode == null || rawBarcode.isEmpty) continue;
-      final barcode = normalizeProduceBarcode(rawBarcode);
+      final barcode = rawBarcode;
 
       final rows = await database.rawQuery(
         'SELECT price, currency, package_quantity, package_unit FROM prices'
@@ -272,7 +269,7 @@ class RecipeService {
     if (grouped.isEmpty) return {};
 
     final database = await _db.database;
-    final normalizedKeys = grouped.keys.map(normalizeProduceBarcode).toList();
+    final normalizedKeys = grouped.keys.toList();
     final latest = await _db.priceDao.latestPricesByBarcodes(
       database,
       normalizedKeys,
@@ -282,7 +279,7 @@ class RecipeService {
     final costs = <String, double>{};
     for (final entry in grouped.entries) {
       final rawBarcode = entry.key;
-      final barcode = normalizeProduceBarcode(rawBarcode);
+      final barcode = rawBarcode;
       final priceRow = latest[barcode];
       if (priceRow == null) continue;
 
@@ -334,10 +331,9 @@ class RecipeService {
   /// Scales [ingredient]'s share of [price] against [package].
   ///
   /// First tries a plain same-group scale via [PriceCalculator]. When the
-  /// units are incompatible (pieces vs weight for produce), resolves a
-  /// per-piece serving weight from the inventory row or
-  /// [ProduceServingPresets] and converts before scaling. Returns null when
-  /// no conversion is possible.
+  /// units are incompatible (pieces vs weight), resolves the user-set
+  /// per-piece serving weight from the inventory row and converts before
+  /// scaling. Returns null when no conversion is possible.
   Future<double?> _scaleIngredientCost(
     Database database,
     String barcode,
@@ -359,7 +355,6 @@ class RecipeService {
       database,
       barcode,
       inventoryId,
-      ingredient.name,
     );
     if (servingWeightG == null || servingWeightG <= 0) return null;
 
@@ -395,14 +390,12 @@ class RecipeService {
     );
   }
 
-  /// Resolves the grams-per-piece serving weight for [barcode] in
-  /// [inventoryId], falling back to [ProduceServingPresets] keyed by
-  /// [ingredientName].
+  /// Resolves the user-set grams-per-piece serving weight for [barcode] in
+  /// [inventoryId]. Returns null when the row has no serving weight.
   Future<double?> _servingWeightForIngredient(
     Database database,
     String barcode,
     int inventoryId,
-    String ingredientName,
   ) async {
     final rows = await database.rawQuery(
       'SELECT serving_weight_g FROM inventory'
@@ -410,13 +403,9 @@ class RecipeService {
       ' ORDER BY (expiry_date IS NULL), expiry_date ASC LIMIT 1',
       [barcode, inventoryId],
     );
-    final rowWeight = rows.isEmpty
+    return rows.isEmpty
         ? null
         : (rows.first['serving_weight_g'] as num?)?.toDouble();
-    return ServingWeightResolver.resolve(
-      rowServingWeightG: rowWeight,
-      produceName: ingredientName,
-    );
   }
 
   /// Resolves the package size for [barcode] to scale recipe ingredient
@@ -514,7 +503,7 @@ class RecipeService {
 
     final shortages = <String, double>{};
     for (final entry in grouped.entries) {
-      final barcode = normalizeProduceBarcode(entry.key);
+      final barcode = entry.key;
       final grp = entry.value;
       var rows = await _db.getInventoryRowsByBarcode(
         barcode: barcode,
@@ -554,16 +543,11 @@ class RecipeService {
     return shortages;
   }
 
-  /// Tries to resolve a per-piece serving weight in grams for an inventory
-  /// row.
-  ///
-  /// Delegates to [ServingWeightResolver] so the shortage check, cook
-  /// transaction, and cost scaling share the same sources.
+  /// Tries to resolve the user-set per-piece serving weight in grams for
+  /// an inventory row, so the shortage check, cook transaction, and cost
+  /// scaling share the same source.
   double? _resolveServingWeightG(Map<String, dynamic> row, String name) {
-    return ServingWeightResolver.resolve(
-      rowServingWeightG: (row['serving_weight_g'] as num?)?.toDouble(),
-      produceName: name,
-    );
+    return (row['serving_weight_g'] as num?)?.toDouble();
   }
 
   /// Cooks a recipe: deducts ingredients from the recipe's own inventory
@@ -621,7 +605,7 @@ class RecipeService {
 
     return await database.transaction<CookResult>((txn) async {
       for (final entry in grouped.entries) {
-        final barcode = normalizeProduceBarcode(entry.key);
+        final barcode = entry.key;
         var remaining = entry.value.totalQuantity;
         var rows = await txn.rawQuery(
           'SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?'

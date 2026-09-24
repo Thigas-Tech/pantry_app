@@ -9,7 +9,7 @@
 │  ProductDetail     NutritionTable                                                │
 │  AddToInventory    ScannerOverlay                                                │
 │  Settings / Stats  PriceEntrySheet                                               │
-│  ShoppingList      QuickAddProduce                                               │
+│  ShoppingList                                                                    │
 │  ...                                                                             │
 └───────────┬──────────────────────────────────────────────────────────────────────┘
             │ watches / reads Riverpod providers                                    
