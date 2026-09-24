@@ -284,7 +284,6 @@ void main() {
       expect(container.read(scannerCameraProvider).scanResolution, isNull);
     });
 
-
     test('clearResolution resets scan resolution', () async {
       const barcode = '5012345678900';
       const product = Product(barcode: barcode, name: 'Test');

@@ -84,7 +84,6 @@ void main() {
       expect(entries.single.imageUrl, 'https://example.com/img.jpg');
     });
 
-
     test('ProductNotFoundException does not record', () async {
       const barcode = '9999999999999';
       when(

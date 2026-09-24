@@ -92,7 +92,8 @@ void main() {
     testWidgets('shows a cloud icon for API results', (tester) async {
       await pumpList(tester);
       expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
-    });    testWidgets('tapping a result calls onResultTapped', (tester) async {
+    });
+    testWidgets('tapping a result calls onResultTapped', (tester) async {
       Product? tapped;
       await tester.pumpWidget(
         MaterialApp(

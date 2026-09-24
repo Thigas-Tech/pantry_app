@@ -559,7 +559,7 @@ void main() {
         ),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         apiServiceProvider.overrideWithValue(mockApi),
-              ],
+      ],
     );
 
     await tester.tap(find.byIcon(Icons.search));
@@ -613,7 +613,7 @@ void main() {
           ),
           hasConnectionProvider.overrideWith((ref) => Future.value(true)),
           apiServiceProvider.overrideWithValue(mockApi),
-                  ],
+        ],
       );
 
       await tester.tap(find.byIcon(Icons.search));
@@ -670,7 +670,7 @@ void main() {
         ),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
         apiServiceProvider.overrideWithValue(mockApi),
-              ],
+      ],
     );
 
     await tester.tap(find.byIcon(Icons.search));

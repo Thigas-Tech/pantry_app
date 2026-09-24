@@ -200,8 +200,5 @@ void main() {
       // Existing item value should be preserved
       expect(quantityField.controller?.text, '7.0');
     });
-
-
-
   });
 }

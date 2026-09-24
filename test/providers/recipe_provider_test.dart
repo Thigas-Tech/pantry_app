@@ -45,7 +45,6 @@ class FakeSettingsNotifier extends SettingsNotifier {
   Future<Settings> build() async => const Settings();
 }
 
-
 /// Captures the result of a
 /// [RecipeService.calculateRecipeCost] call inside a widget.
 class _CapturedCost {

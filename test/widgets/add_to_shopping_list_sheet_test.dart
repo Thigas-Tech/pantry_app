@@ -445,7 +445,8 @@ void main() {
         expect(find.text('Milk'), findsOneWidget);
         expect(find.byType(Image), findsAtLeast(1));
       },
-    );    testWidgets(
+    );
+    testWidgets(
       'handles pantry item with empty image_url string',
       (tester) async {
         when(
@@ -721,91 +722,59 @@ void main() {
     });
   });
 
-    testWidgets('shows cloud icon for non-produce API item', (
-      tester,
-    ) async {
-      when(() => mockDb.searchProducts('bread')).thenAnswer(
-        (_) async => <Product>[],
-      );
-      when(
-        () => mockOff.searchProducts(
-          'bread',
-          pageSize: any(named: 'pageSize'),
-        ),
-      ).thenAnswer(
-        (_) async => [
-          const Product(barcode: '002', name: 'API Bread', brand: 'Brand'),
-        ],
-      );
-
-      await pumpApp(
-        tester,
-        Builder(
-          builder: (context) => ElevatedButton(
-            onPressed: () => AddToShoppingListSheet.show(context),
-            child: const Text('Open'),
-          ),
-        ),
-        overrides: [
-          databaseProvider.overrideWithValue(mockDb),
-          apiServiceProvider.overrideWithValue(mockOff),
-          productRepositoryProvider.overrideWithValue(mockRepo),
-          hasConnectionProvider.overrideWith((ref) => Future.value(true)),
-          activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
-        ],
-      );
-
-      await tester.tap(find.text('Open'));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(SearchBar), 'bread');
-      await tester.testTextInput.receiveAction(TextInputAction.search);
-      await tester.pumpAndSettle();
-
-      // Non-produce API items show cloud, no leaf.
-      expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.eco_outlined), findsNothing);
-    });
-
-    testWidgets(
-      'triggers search on Enter key with custom debounce duration',
-      (tester) async {
-        when(() => mockDb.searchProducts('milk')).thenAnswer(
-          (_) async => [
-            const Product(barcode: '001', name: 'Local Milk', brand: 'Brand'),
-          ],
-        );
-
-        await pumpApp(
-          tester,
-          Builder(
-            builder: (context) => ElevatedButton(
-              onPressed: () => AddToShoppingListSheet.show(
-                context,
-                debounceDuration: const Duration(milliseconds: 50),
-              ),
-              child: const Text('Open'),
-            ),
-          ),
-          overrides: sheetOverrides(),
-        );
-
-        await tester.tap(find.text('Open'));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byType(SearchBar), 'milk');
-        await tester.testTextInput.receiveAction(TextInputAction.search);
-        await tester.pumpAndSettle();
-
-        expect(find.text('Local Milk'), findsOneWidget);
-      },
+  testWidgets('shows cloud icon for non-produce API item', (
+    tester,
+  ) async {
+    when(() => mockDb.searchProducts('bread')).thenAnswer(
+      (_) async => <Product>[],
+    );
+    when(
+      () => mockOff.searchProducts(
+        'bread',
+        pageSize: any(named: 'pageSize'),
+      ),
+    ).thenAnswer(
+      (_) async => [
+        const Product(barcode: '002', name: 'API Bread', brand: 'Brand'),
+      ],
     );
 
-    testWidgets('rapid typing triggers a single debounced search', (
+    await pumpApp(
       tester,
-    ) async {
-      when(() => mockDb.searchProducts(any())).thenAnswer(
-        (_) async => <Product>[],
+      Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () => AddToShoppingListSheet.show(context),
+          child: const Text('Open'),
+        ),
+      ),
+      overrides: [
+        databaseProvider.overrideWithValue(mockDb),
+        apiServiceProvider.overrideWithValue(mockOff),
+        productRepositoryProvider.overrideWithValue(mockRepo),
+        hasConnectionProvider.overrideWith((ref) => Future.value(true)),
+        activeInventoryProvider.overrideWith(FakeActiveInventoryNotifier.new),
+      ],
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(SearchBar), 'bread');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+
+    // Non-produce API items show cloud, no leaf.
+    expect(find.byIcon(Icons.cloud_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.eco_outlined), findsNothing);
+  });
+
+  testWidgets(
+    'triggers search on Enter key with custom debounce duration',
+    (tester) async {
+      when(() => mockDb.searchProducts('milk')).thenAnswer(
+        (_) async => [
+          const Product(barcode: '001', name: 'Local Milk', brand: 'Brand'),
+        ],
       );
 
       await pumpApp(
@@ -814,7 +783,7 @@ void main() {
           builder: (context) => ElevatedButton(
             onPressed: () => AddToShoppingListSheet.show(
               context,
-              debounceDuration: const Duration(milliseconds: 100),
+              debounceDuration: const Duration(milliseconds: 50),
             ),
             child: const Text('Open'),
           ),
@@ -825,19 +794,51 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      // Type three characters faster than the debounce window.
-      await tester.enterText(find.byType(SearchBar), 'mil');
-      await tester.pump(const Duration(milliseconds: 20));
       await tester.enterText(find.byType(SearchBar), 'milk');
-      await tester.pump(const Duration(milliseconds: 20));
-
-      // No search yet: the debounce has not elapsed.
-      verifyNever(() => mockDb.searchProducts(any()));
-
-      // Elapse the debounce window: exactly one search fires.
-      await tester.pump(const Duration(milliseconds: 150));
+      await tester.testTextInput.receiveAction(TextInputAction.search);
       await tester.pumpAndSettle();
 
-      verify(() => mockDb.searchProducts('milk')).called(1);
-    });
+      expect(find.text('Local Milk'), findsOneWidget);
+    },
+  );
+
+  testWidgets('rapid typing triggers a single debounced search', (
+    tester,
+  ) async {
+    when(() => mockDb.searchProducts(any())).thenAnswer(
+      (_) async => <Product>[],
+    );
+
+    await pumpApp(
+      tester,
+      Builder(
+        builder: (context) => ElevatedButton(
+          onPressed: () => AddToShoppingListSheet.show(
+            context,
+            debounceDuration: const Duration(milliseconds: 100),
+          ),
+          child: const Text('Open'),
+        ),
+      ),
+      overrides: sheetOverrides(),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    // Type three characters faster than the debounce window.
+    await tester.enterText(find.byType(SearchBar), 'mil');
+    await tester.pump(const Duration(milliseconds: 20));
+    await tester.enterText(find.byType(SearchBar), 'milk');
+    await tester.pump(const Duration(milliseconds: 20));
+
+    // No search yet: the debounce has not elapsed.
+    verifyNever(() => mockDb.searchProducts(any()));
+
+    // Elapse the debounce window: exactly one search fires.
+    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pumpAndSettle();
+
+    verify(() => mockDb.searchProducts('milk')).called(1);
+  });
 }

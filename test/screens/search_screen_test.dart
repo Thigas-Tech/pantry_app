@@ -641,7 +641,6 @@ void main() {
       // The pantry source returns nothing for this query.
       expect(find.text('Local Milk'), findsNothing);
     });
-
   });
 
   group('inPantry filter chip', () {
