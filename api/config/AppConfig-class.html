@@ -63,15 +63,13 @@ version control and <strong>never</strong> shipped as a plaintext Flutter asset;
 injected values are compiled into the binary instead.</p>
 <h2 id="credential-model">Credential model</h2>
 <ul>
-<li>The USDA FoodData Central key is a public client key (sent in every
-request URL), so embedding it is standard practice.</li>
 <li>The Open Food Facts user/password follow the SDK's supported "global
 user for your app" model (see the openfoodfacts-dart account guide):
 one dedicated app account carries submissions. Prefer a dedicated
 account over a personal one.</li>
-<li>Credential-backed features (OFF product submission, Open Prices,
-USDA) are disabled when their credential is absent, so a build made
-without the flags degrades gracefully instead of failing.</li>
+<li>Credential-backed features (OFF product submission, Open Prices) are
+disabled when their credential is absent, so a build made without the
+flags degrades gracefully instead of failing.</li>
 </ul>
 <p>This class cannot be instantiated — all members are static.</p>
 </section>
@@ -232,18 +230,6 @@ Open Food Facts (required by their API terms).
 
 </dd>
 
-        <dt id="usdaApiKey" class="property">
-  <span class="name"><a href="../config/AppConfig/usdaApiKey.html">usdaApiKey</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-  
-
-</dt>
-<dd>
-  The USDA FoodData Central API key.
-  <div class="features"><span class="feature">no setter</span></div>
-
-</dd>
-
         <dt id="useOffStaging" class="property">
   <span class="name"><a href="../config/AppConfig/useOffStaging.html">useOffStaging</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span>
@@ -285,7 +271,7 @@ production server (false).
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

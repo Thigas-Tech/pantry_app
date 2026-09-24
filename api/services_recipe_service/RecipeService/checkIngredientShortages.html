@@ -94,7 +94,7 @@ skipped.</p>
 
   final shortages = &lt;String, double&gt;{};
   for (final entry in grouped.entries) {
-    final barcode = normalizeProduceBarcode(entry.key);
+    final barcode = entry.key;
     final grp = entry.value;
     var rows = await _db.getInventoryRowsByBarcode(
       barcode: barcode,
@@ -160,7 +160,7 @@ skipped.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

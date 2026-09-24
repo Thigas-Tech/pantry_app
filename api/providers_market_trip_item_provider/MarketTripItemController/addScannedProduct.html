@@ -126,9 +126,6 @@ resolved or persisted.</p>
             barcode: product.barcode,
             inventoryId: tripId,
             isPurchased: true,
-            &#47;&#47; Produce is weighed in grams by default, matching the
-            &#47;&#47; add-to-inventory produce default.
-            unit: product.productType == ProductType.produce ? &#39;g&#39; : &#39;pieces&#39;,
           ),
           activeInventoryId: tripId,
         );
@@ -211,7 +208,7 @@ resolved or persisted.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

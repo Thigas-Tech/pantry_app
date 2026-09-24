@@ -62,8 +62,8 @@ and error content when an error occurs.</p>
 <p>When <a href="../widgets_scanner_camera_view/ScannerCameraView/embedded.html">embedded</a> is true, the widget renders only the camera preview
 (plus overlay and error content) without its own <a href="https://api.flutter.dev/flutter/material/Scaffold-class.html">Scaffold</a> or <a href="https://api.flutter.dev/flutter/material/AppBar-class.html">AppBar</a>,
 so it can be placed inside a parent screen that owns the chrome (such as
-the market trip). The AppBar actions (torch, PLU, manual entry) are
-omitted in embedded mode; hosts provide their own controls.</p>
+the market trip). The AppBar actions (torch, manual entry) are omitted
+in embedded mode; hosts provide their own controls.</p>
 </section>
 
 
@@ -98,7 +98,7 @@ omitted in embedded mode; hosts provide their own controls.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ScannerCameraView.new" class="callable">
-          <span class="name"><a href="../widgets_scanner_camera_view/ScannerCameraView/ScannerCameraView.html">ScannerCameraView</a></span><span class="signature">({<span class="parameter" id="param-onSwitchToManual"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToManual</span>, </span><span class="parameter" id="param-onSwitchToPlu"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToPlu</span>, </span><span class="parameter" id="param-embedded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">embedded</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../widgets_scanner_camera_view/ScannerCameraView/ScannerCameraView.html">ScannerCameraView</a></span><span class="signature">({<span class="parameter" id="param-onSwitchToManual"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span> <span class="parameter-name">onSwitchToManual</span>, </span><span class="parameter" id="param-embedded"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">embedded</span> = <span class="default-value">false</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../widgets_scanner_camera_view/ScannerCameraView-class.html">ScannerCameraView</a> widget.
@@ -157,18 +157,6 @@ omitted in embedded mode; hosts provide their own controls.</p>
 </dt>
 <dd>
   Called when the user switches to manual barcode entry.
-  <div class="features"><span class="feature">final</span></div>
-
-</dd>
-
-        <dt id="onSwitchToPlu" class="property">
-  <span class="name"><a href="../widgets_scanner_camera_view/ScannerCameraView/onSwitchToPlu.html">onSwitchToPlu</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-ui/VoidCallback.html">VoidCallback</a></span>
-  
-
-</dt>
-<dd>
-  Called when the user switches to PLU code entry.
   <div class="features"><span class="feature">final</span></div>
 
 </dd>
@@ -376,7 +364,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

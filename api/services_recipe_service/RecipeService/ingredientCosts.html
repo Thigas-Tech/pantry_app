@@ -99,7 +99,7 @@ without a recorded price in <code>inventoryId</code> are absent from the result.
   if (grouped.isEmpty) return {};
 
   final database = await _db.database;
-  final normalizedKeys = grouped.keys.map(normalizeProduceBarcode).toList();
+  final normalizedKeys = grouped.keys.toList();
   final latest = await _db.priceDao.latestPricesByBarcodes(
     database,
     normalizedKeys,
@@ -109,7 +109,7 @@ without a recorded price in <code>inventoryId</code> are absent from the result.
   final costs = &lt;String, double&gt;{};
   for (final entry in grouped.entries) {
     final rawBarcode = entry.key;
-    final barcode = normalizeProduceBarcode(rawBarcode);
+    final barcode = rawBarcode;
     final priceRow = latest[barcode];
     if (priceRow == null) continue;
 
@@ -184,7 +184,7 @@ without a recorded price in <code>inventoryId</code> are absent from the result.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

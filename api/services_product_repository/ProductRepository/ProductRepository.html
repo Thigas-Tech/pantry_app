@@ -58,16 +58,12 @@
 <li><span class="parameter" id="param-_api"><span class="type-annotation"><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a></span> <span class="parameter-name">_api</span>, {</span></li>
 <li><span class="parameter" id="param-stalenessStore"><span>required</span> <span class="type-annotation"><a href="../../services_cache_staleness_store/CacheStalenessStore-class.html">CacheStalenessStore</a></span> <span class="parameter-name">stalenessStore</span>, </span></li>
 <li><span class="parameter" id="param-fallbackApi"><span class="type-annotation"><a href="../../services_off_adapter/OffAdapter-class.html">OffAdapter</a>?</span> <span class="parameter-name">fallbackApi</span>, </span></li>
-<li><span class="parameter" id="param-usdaClient"><span class="type-annotation"><a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a>?</span> <span class="parameter-name">usdaClient</span>, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../services_product_repository/ProductRepository-class.html">ProductRepository</a> with the given <a href="../../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> and
 primary API. An optional fallback API can be provided for future use.</p>
-<p>The optional <a href="../../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> is used by <a href="../../services_product_repository/ProductRepository/addProduceToInventory.html">addProduceToInventory</a> to
-fetch nutrition data for produce items from the USDA FoodData Central
-API when a product is not already cached locally.</p>
 <p>The <a href="../../services_cache_staleness_store/CacheStalenessStore-class.html">CacheStalenessStore</a> is the single source of truth for
 cache-staleness tracking, persisting the last inventory refresh in
 SharedPreferences.</p>
@@ -82,7 +78,6 @@ SharedPreferences.</p>
   this._api, {
   required this._stalenessStore,
   this._fallbackApi,
-  this._usdaClient,
 });</code></pre>
 </section>
 
@@ -111,7 +106,7 @@ SharedPreferences.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

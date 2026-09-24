@@ -54,11 +54,13 @@
 
     
 <section class="desc markdown">
-  <p>The frozen baseline schema.</p>
+  <p>The baseline schema.</p>
 <p>Creates the complete database from scratch: eleven tables, twenty-nine
 indexes, and the default "Home" inventory. This migration is the single
-source of truth for the schema; it must never be edited. Any later schema
-change is a new numbered migration with its own <a href="../database_migrations_v1_baseline_schema/MigrationV1/up.html">up</a> and <a href="../database_migrations_v1_baseline_schema/MigrationV1/down.html">down</a>.</p>
+source of truth for the schema. It was amended once while the app was
+still pre-release to drop the removed produce feature's plu_code and
+product_type columns; from here on every schema change is a new numbered
+migration with its own <a href="../database_migrations_v1_baseline_schema/MigrationV1/up.html">up</a> and <a href="../database_migrations_v1_baseline_schema/MigrationV1/down.html">down</a>.</p>
 <p>The <a href="../database_migrations_v1_baseline_schema/MigrationV1/down.html">down</a> method drops every table in reverse foreign-key dependency
 order so the database can be reset to an empty file.</p>
 </section>
@@ -253,7 +255,7 @@ order so the database can be reset to an empty file.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

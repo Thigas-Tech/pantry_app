@@ -149,9 +149,6 @@ flutter build appbundle --debug
     currency_service.dart      # Exchange rate conversion
     open_prices_api_client.dart  # Open Prices API HTTP client
     open_prices_service.dart     # Open Prices sync coordinator
-    plu_service.dart             # PLU code lookup for produce
-    usda_api_client.dart         # USDA produce nutrition data
-    produce_*.dart               # Produce barcode/nutrition mapping helpers
     product_submission_service.dart  # OFF offline submission queue
     product_image_service.dart, product_image_compressor.dart  # Product photos
     product_photo_picker.dart, product_photo_cropper.dart      # Photo capture
@@ -495,13 +492,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="product_type">
-  <span class="name"><a href="models_product_type/">models/product_type</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="recipe">
   <span class="name"><a href="models_recipe/">models/recipe</a></span> 
 
@@ -831,13 +821,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="usda_provider">
-  <span class="name"><a href="providers_usda_provider/">providers/usda_provider</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="add_product_screen">
   <span class="name"><a href="screens_add_product_screen/">screens/add_product_screen</a></span> 
 
@@ -1097,43 +1080,8 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="plu_service">
-  <span class="name"><a href="services_plu_service/">services/plu_service</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="price_repository">
   <span class="name"><a href="services_price_repository/">services/price_repository</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="produce_barcode">
-  <span class="name"><a href="services_produce_barcode/">services/produce_barcode</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="produce_category_mapper">
-  <span class="name"><a href="services_produce_category_mapper/">services/produce_category_mapper</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="produce_nutrition_fallback">
-  <span class="name"><a href="services_produce_nutrition_fallback/">services/produce_nutrition_fallback</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="produce_serving_presets">
-  <span class="name"><a href="services_produce_serving_presets/">services/produce_serving_presets</a></span> 
 
 </dt>
 <dd>
@@ -1218,13 +1166,6 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="shopping_list_service">
   <span class="name"><a href="services_shopping_list_service/">services/shopping_list_service</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="usda_api_client">
-  <span class="name"><a href="services_usda_api_client/">services/usda_api_client</a></span> 
 
 </dt>
 <dd>
@@ -1391,13 +1332,6 @@ dart pub global run dhttpd --path doc/api
 <dd>
 </dd>
 
-          <dt id="serving_weight">
-  <span class="name"><a href="utils_serving_weight/">utils/serving_weight</a></span> 
-
-</dt>
-<dd>
-</dd>
-
           <dt id="shopping_price">
   <span class="name"><a href="utils_shopping_price/">utils/shopping_price</a></span> 
 
@@ -1547,13 +1481,6 @@ dart pub global run dhttpd --path doc/api
 
           <dt id="price_visibility_toggle">
   <span class="name"><a href="widgets_price_visibility_toggle/">widgets/price_visibility_toggle</a></span> 
-
-</dt>
-<dd>
-</dd>
-
-          <dt id="produce_search_sheet">
-  <span class="name"><a href="widgets_produce_search_sheet/">widgets/produce_search_sheet</a></span> 
 
 </dt>
 <dd>
@@ -1740,7 +1667,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="models_product/">models/product</a></li>
       <li><a href="models_product_nutrient/">models/product_nutrient</a></li>
       <li><a href="models_product_photo_slots/">models/product_photo_slots</a></li>
-      <li><a href="models_product_type/">models/product_type</a></li>
       <li><a href="models_recipe/">models/recipe</a></li>
       <li><a href="models_recipe_history_entry/">models/recipe_history_entry</a></li>
       <li><a href="models_recipe_ingredient/">models/recipe_ingredient</a></li>
@@ -1788,7 +1714,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="providers_stats_provider/">providers/stats_provider</a></li>
       <li><a href="providers_theme_provider/">providers/theme_provider</a></li>
       <li><a href="providers_ui_flags_provider/">providers/ui_flags_provider</a></li>
-      <li><a href="providers_usda_provider/">providers/usda_provider</a></li>
       <li><a href="screens_add_product_screen/">screens/add_product_screen</a></li>
       <li><a href="screens_add_to_inventory_screen/">screens/add_to_inventory_screen</a></li>
       <li><a href="screens_camera_capture_screen/">screens/camera_capture_screen</a></li>
@@ -1826,12 +1751,7 @@ dart pub global run dhttpd --path doc/api
       <li><a href="services_off_query/">services/off_query</a></li>
       <li><a href="services_open_prices_api_client/">services/open_prices_api_client</a></li>
       <li><a href="services_open_prices_service/">services/open_prices_service</a></li>
-      <li><a href="services_plu_service/">services/plu_service</a></li>
       <li><a href="services_price_repository/">services/price_repository</a></li>
-      <li><a href="services_produce_barcode/">services/produce_barcode</a></li>
-      <li><a href="services_produce_category_mapper/">services/produce_category_mapper</a></li>
-      <li><a href="services_produce_nutrition_fallback/">services/produce_nutrition_fallback</a></li>
-      <li><a href="services_produce_serving_presets/">services/produce_serving_presets</a></li>
       <li><a href="services_product_image_compressor/">services/product_image_compressor</a></li>
       <li><a href="services_product_image_service/">services/product_image_service</a></li>
       <li><a href="services_product_photo_cropper/">services/product_photo_cropper</a></li>
@@ -1844,7 +1764,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="services_recipe_service/">services/recipe_service</a></li>
       <li><a href="services_recipe_suggestion_service/">services/recipe_suggestion_service</a></li>
       <li><a href="services_shopping_list_service/">services/shopping_list_service</a></li>
-      <li><a href="services_usda_api_client/">services/usda_api_client</a></li>
       <li><a href="utils_bottom_sheet_helper/">utils/bottom_sheet_helper</a></li>
       <li><a href="utils_camera_permission_dialog/">utils/camera_permission_dialog</a></li>
       <li><a href="utils_changelog_loader/">utils/changelog_loader</a></li>
@@ -1868,7 +1787,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="utils_redaction/">utils/redaction</a></li>
       <li><a href="utils_scan_cooldown/">utils/scan_cooldown</a></li>
       <li><a href="utils_search_utils/">utils/search_utils</a></li>
-      <li><a href="utils_serving_weight/">utils/serving_weight</a></li>
       <li><a href="utils_shopping_price/">utils/shopping_price</a></li>
       <li><a href="utils_snackbar_helper/">utils/snackbar_helper</a></li>
       <li><a href="utils_submission_error_label/">utils/submission_error_label</a></li>
@@ -1891,7 +1809,6 @@ dart pub global run dhttpd --path doc/api
       <li><a href="widgets_price_mask/">widgets/price_mask</a></li>
       <li><a href="widgets_price_section_error/">widgets/price_section_error</a></li>
       <li><a href="widgets_price_visibility_toggle/">widgets/price_visibility_toggle</a></li>
-      <li><a href="widgets_produce_search_sheet/">widgets/produce_search_sheet</a></li>
       <li><a href="widgets_product_photo_management/">widgets/product_photo_management</a></li>
       <li><a href="widgets_product_photo_preview/">widgets/product_photo_preview</a></li>
       <li><a href="widgets_product_photo_tile/">widgets/product_photo_tile</a></li>
@@ -1919,7 +1836,7 @@ dart pub global run dhttpd --path doc/api
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

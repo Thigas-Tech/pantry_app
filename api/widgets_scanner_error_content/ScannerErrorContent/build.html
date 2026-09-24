@@ -128,14 +128,6 @@ Widget build(BuildContext context) {
           ),
         ),
         TextButton.icon(
-          onPressed: onSwitchToPlu,
-          icon: const Icon(Icons.dialpad, color: Colors.white70),
-          label: Text(
-            l10n.pluEntryTooltip,
-            style: const TextStyle(color: Colors.white70),
-          ),
-        ),
-        TextButton.icon(
           onPressed: onSwitchToManual,
           icon: const Icon(Icons.edit, color: Colors.white70),
           label: Text(
@@ -147,14 +139,6 @@ Widget build(BuildContext context) {
     case MobileScannerErrorCode.unsupported:
       message = l10n.cameraNotAvailable;
       actions = [
-        TextButton.icon(
-          onPressed: onSwitchToPlu,
-          icon: const Icon(Icons.dialpad, color: Colors.white),
-          label: Text(
-            l10n.pluEntryTooltip,
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
         TextButton.icon(
           onPressed: onSwitchToManual,
           icon: const Icon(Icons.edit, color: Colors.white),
@@ -178,14 +162,6 @@ Widget build(BuildContext context) {
           label: Text(
             l10n.retryScan,
             style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        TextButton.icon(
-          onPressed: onSwitchToPlu,
-          icon: const Icon(Icons.dialpad, color: Colors.white70),
-          label: Text(
-            l10n.pluEntryTooltip,
-            style: const TextStyle(color: Colors.white70),
           ),
         ),
         TextButton.icon(
@@ -260,7 +236,7 @@ Widget build(BuildContext context) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

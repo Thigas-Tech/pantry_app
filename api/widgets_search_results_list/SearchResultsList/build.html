@@ -159,13 +159,7 @@ Widget build(BuildContext context) {
                   ),
                 ),
               if (result.isInPantry) const SizedBox(width: 4),
-              if (product.productType == ProductType.produce)
-                Icon(
-                  Icons.eco_outlined,
-                  size: 16,
-                  color: Colors.green.shade600,
-                )
-              else if (result.source == ResultSource.api)
+              if (result.source == ResultSource.api)
                 Icon(
                   Icons.cloud_outlined,
                   size: 16,
@@ -207,7 +201,7 @@ Widget build(BuildContext context) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

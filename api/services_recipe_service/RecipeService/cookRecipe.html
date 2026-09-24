@@ -125,7 +125,7 @@ stock. Returns a <a href="../../services_recipe_service/CookResult-class.html">C
 
   return await database.transaction&lt;CookResult&gt;((txn) async {
     for (final entry in grouped.entries) {
-      final barcode = normalizeProduceBarcode(entry.key);
+      final barcode = entry.key;
       var remaining = entry.value.totalQuantity;
       var rows = await txn.rawQuery(
         &#39;SELECT * FROM inventory WHERE barcode = ? AND inventory_id = ?&#39;
@@ -273,7 +273,7 @@ stock. Returns a <a href="../../services_recipe_service/CookResult-class.html">C
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

@@ -54,15 +54,14 @@
 
     
 <section class="desc markdown">
-  <p>A unified input screen for barcodes and produce PLU codes.</p>
-<p>Offers three modes:</p>
+  <p>A unified input screen for barcodes.</p>
+<p>Offers two modes:</p>
 <ul>
 <li>Camera scanner via <a href="../widgets_scanner_camera_view/ScannerCameraView-class.html">ScannerCameraView</a> for barcodes.</li>
 <li>Manual barcode text entry.</li>
-<li>PLU code entry via numeric keypad for produce without barcodes.</li>
 </ul>
-<p>Automatically navigates to <a href="../screens_product_detail_screen/ProductDetailScreen-class.html">ProductDetailScreen</a> when a barcode or PLU
-code is successfully resolved via <a href="../providers_scanner_providers/scannerCameraProvider.html">scannerCameraProvider</a>.</p>
+<p>Automatically navigates to <a href="../screens_product_detail_screen/ProductDetailScreen-class.html">ProductDetailScreen</a> when a barcode is
+successfully resolved via <a href="../providers_scanner_providers/scannerCameraProvider.html">scannerCameraProvider</a>.</p>
 </section>
 
 
@@ -97,7 +96,7 @@ code is successfully resolved via <a href="../providers_scanner_providers/scanne
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="ScannerScreen.new" class="callable">
-          <span class="name"><a href="../screens_scanner_screen/ScannerScreen/ScannerScreen.html">ScannerScreen</a></span><span class="signature">({<span class="parameter" id="param-pluService"><span class="type-annotation"><a href="../services_plu_service/PluService-class.html">PluService</a>?</span> <span class="parameter-name">pluService</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../screens_scanner_screen/ScannerScreen/ScannerScreen.html">ScannerScreen</a></span><span class="signature">({<span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../screens_scanner_screen/ScannerScreen-class.html">ScannerScreen</a> widget.
@@ -107,7 +106,7 @@ code is successfully resolved via <a href="../providers_scanner_providers/scanne
   </section>
     
   <section
-      class="summary offset-anchor"
+      class="summary offset-anchor inherited"
       id="instance-properties">
     <h2>Properties</h2>
     <dl class="properties">
@@ -132,18 +131,6 @@ code is successfully resolved via <a href="../providers_scanner_providers/scanne
 <dd class="inherited">
   Controls how one widget replaces another widget in the tree.
   <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="pluService" class="property">
-  <span class="name"><a href="../screens_scanner_screen/ScannerScreen/pluService.html">pluService</a></span>
-  <span class="signature">&#8594; <a href="../services_plu_service/PluService-class.html">PluService</a>?</span>
-  
-
-</dt>
-<dd>
-  The PLU code-to-name lookup service.
-  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
@@ -350,7 +337,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

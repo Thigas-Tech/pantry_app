@@ -69,12 +69,11 @@
     
 <section class="desc markdown">
   <p>Provides the single <a href="../services_product_repository/ProductRepository-class.html">ProductRepository</a> instance used throughout the app.</p>
-<p>The repository combines the local database (from <a href="../providers_database_provider/databaseProvider.html">databaseProvider</a>),
-the Open Food Facts SDK adapter (from <a href="../providers_api_service_provider/apiServiceProvider.html">apiServiceProvider</a>), and the
-USDA FoodData Central API client to implement offline-first product
-lookup and produce quick-add with nutrition data. The local SQLite
-database is the only cache; the cacheStalenessStoreProvider tracks when
-the background inventory refresh last ran.</p>
+<p>The repository combines the local database (from <a href="../providers_database_provider/databaseProvider.html">databaseProvider</a>)
+and the Open Food Facts SDK adapter (from <a href="../providers_api_service_provider/apiServiceProvider.html">apiServiceProvider</a>) to
+implement offline-first product lookup. The local SQLite database is
+the only cache; the cacheStalenessStoreProvider tracks when the
+background inventory refresh last ran.</p>
 <h2 id="dependencies">Dependencies</h2>
 <ul>
 <li><a href="../providers_database_provider/databaseProvider.html">databaseProvider</a> — supplies the <a href="../database_database_helper/DatabaseHelper-class.html">DatabaseHelper</a> singleton for local
@@ -83,8 +82,6 @@ caching and inventory operations.</li>
 fetching product data from the internet.</li>
 <li><a href="../providers_cache_staleness_store_provider/cacheStalenessStoreProvider.html">cacheStalenessStoreProvider</a> — supplies the SharedPreferences-backed
 store that records the last inventory refresh.</li>
-<li><a href="../services_usda_api_client/UsdaApiClient-class.html">UsdaApiClient</a> — created inline for the USDA nutrition lookup
-fallback chain.</li>
 </ul>
 <h2 id="lifetime">Lifetime</h2>
 <p>Because this is a keep-alive provider (not autoDispose), the repository
@@ -108,7 +105,6 @@ ProductRepository productRepository(Ref ref) {
   return ProductRepository(
     db,
     api,
-    usdaClient: ref.read(usdaApiClientProvider),
     stalenessStore: ref.read(cacheStalenessStoreProvider),
   );
 }</code></pre>
@@ -138,7 +134,7 @@ ProductRepository productRepository(Ref ref) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

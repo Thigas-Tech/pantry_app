@@ -55,11 +55,11 @@
     
 <section class="desc markdown">
   <p>A labeled dropdown that lets the user pick the active <a href="../models_search_filter/SearchSource.html">SearchSource</a>.</p>
-<p>The three sources (Open Food Facts, USDA, and the user's pantry) are
-rendered from the <a href="../widgets_search_source_selector/SearchSourceSelector/offLabel.html">offLabel</a>, <a href="../widgets_search_source_selector/SearchSourceSelector/usdaLabel.html">usdaLabel</a>, and <a href="../widgets_search_source_selector/SearchSourceSelector/inventoryLabel.html">inventoryLabel</a> strings so
-the caller controls localization. Selection changes are forwarded through
-<a href="../widgets_search_source_selector/SearchSourceSelector/onChanged.html">onChanged</a>; deduplication (no-op when re-selecting the current source)
-is left to the caller.</p>
+<p>The two sources (Open Food Facts and the user's pantry) are rendered
+from the <a href="../widgets_search_source_selector/SearchSourceSelector/offLabel.html">offLabel</a> and <a href="../widgets_search_source_selector/SearchSourceSelector/inventoryLabel.html">inventoryLabel</a> strings so the caller controls
+localization. Selection changes are forwarded through <a href="../widgets_search_source_selector/SearchSourceSelector/onChanged.html">onChanged</a>;
+deduplication (no-op when re-selecting the current source) is left to
+the caller.</p>
 </section>
 
 
@@ -93,7 +93,7 @@ is left to the caller.</p>
     <h2>Constructors</h2>
     <dl class="constructor-summary-list">
         <dt id="SearchSourceSelector.new" class="callable">
-          <span class="name"><a href="../widgets_search_source_selector/SearchSourceSelector/SearchSourceSelector.html">SearchSourceSelector</a></span><span class="signature">({<span class="parameter" id="param-label"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">label</span>, </span><span class="parameter" id="param-value"><span>required</span> <span class="type-annotation"><a href="../models_search_filter/SearchSource.html">SearchSource</a></span> <span class="parameter-name">value</span>, </span><span class="parameter" id="param-onChanged"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/ValueChanged.html">ValueChanged</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_search_filter/SearchSource.html">SearchSource</a></span>&gt;</span></span> <span class="parameter-name">onChanged</span>, </span><span class="parameter" id="param-offLabel"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">offLabel</span>, </span><span class="parameter" id="param-usdaLabel"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">usdaLabel</span>, </span><span class="parameter" id="param-inventoryLabel"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">inventoryLabel</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
+          <span class="name"><a href="../widgets_search_source_selector/SearchSourceSelector/SearchSourceSelector.html">SearchSourceSelector</a></span><span class="signature">({<span class="parameter" id="param-label"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">label</span>, </span><span class="parameter" id="param-value"><span>required</span> <span class="type-annotation"><a href="../models_search_filter/SearchSource.html">SearchSource</a></span> <span class="parameter-name">value</span>, </span><span class="parameter" id="param-onChanged"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/ValueChanged.html">ValueChanged</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../models_search_filter/SearchSource.html">SearchSource</a></span>&gt;</span></span> <span class="parameter-name">onChanged</span>, </span><span class="parameter" id="param-offLabel"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">offLabel</span>, </span><span class="parameter" id="param-inventoryLabel"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">inventoryLabel</span>, </span><span class="parameter" id="param-key"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/foundation/Key-class.html">Key</a>?</span> <span class="parameter-name">key</span></span>})</span>
         </dt>
         <dd>
           Creates a <a href="../widgets_search_source_selector/SearchSourceSelector-class.html">SearchSourceSelector</a>.
@@ -188,18 +188,6 @@ is left to the caller.</p>
 <dd class="inherited">
   A representation of the runtime type of the object.
   <div class="features"><span class="feature">no setter</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="usdaLabel" class="property">
-  <span class="name"><a href="../widgets_search_source_selector/SearchSourceSelector/usdaLabel.html">usdaLabel</a></span>
-  <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span>
-  
-
-</dt>
-<dd>
-  The display name of the USDA source.
-  <div class="features"><span class="feature">final</span></div>
 
 </dd>
 
@@ -406,7 +394,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>

@@ -94,13 +94,9 @@ Ingredients whose barcode is null or not present in the map are skipped.
     final product = productsByBarcode[ingredient.barcode];
     if (product == null) continue;
 
-    final perPieceWeightG = ingredient.unit == &#39;pieces&#39;
-        ? _resolvePerPieceWeight(product, ingredient.name)
-        : null;
     final grams = _convertToGrams(
       ingredient.quantity,
       ingredient.unit,
-      perPieceWeightG: perPieceWeightG,
       ingredientName: ingredient.name,
     );
     if (grams &lt;= 0) continue;
@@ -161,7 +157,7 @@ Ingredients whose barcode is null or not present in the map are skipped.
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.18+14
+      0.0.19+15
   </span>
   
 </footer>
