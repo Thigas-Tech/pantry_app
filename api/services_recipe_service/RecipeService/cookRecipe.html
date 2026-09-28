@@ -57,7 +57,6 @@
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../../services_recipe_service/CookResult-class.html">CookResult</a></span>&gt;</span></span>
 <span class="name ">cookRecipe</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="cookRecipe-param-recipeId"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">recipeId</span>, {</span></li>
 <li><span class="parameter" id="cookRecipe-param-activeInventoryId"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">activeInventoryId</span>, </span></li>
-<li><span class="parameter" id="cookRecipe-param-baseCurrency"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">baseCurrency</span>, </span></li>
 </ol>})
 
       
@@ -80,7 +79,6 @@ stock. Returns a <a href="../../services_recipe_service/CookResult-class.html">C
   <pre class="language-dart"><code class="language-dart">Future&lt;CookResult&gt; cookRecipe(
   int recipeId, {
   required int activeInventoryId,
-  required String baseCurrency,
 }) async {
   final recipe = await _db.getRecipe(recipeId);
   final inventoryId = recipe?.inventoryId ?? activeInventoryId;
@@ -97,17 +95,8 @@ stock. Returns a <a href="../../services_recipe_service/CookResult-class.html">C
     throw RecipeCookException(shortages);
   }
 
-  &#47;&#47; Compute current cost
-  final database = await _db.database;
-  final totalCost = await calculateIngredientCost(
-    database,
-    ingredients,
-    inventoryId: inventoryId,
-    baseCurrency: baseCurrency,
-    currencyService: _currencyService,
-  );
-
   &#47;&#47; Transaction: FEFO deduction + history
+  final database = await _db.database;
   final affectedRows = &lt;InventoryRowSnapshot&gt;[];
 
   final grouped = &lt;String, _GroupedIngredient&gt;{};
@@ -236,7 +225,6 @@ stock. Returns a <a href="../../services_recipe_service/CookResult-class.html">C
     final historyId = await txn.insert(&#39;recipe_history&#39;, {
       &#39;recipe_id&#39;: recipeId,
       &#39;made_at&#39;: DateTime.now().millisecondsSinceEpoch,
-      &#39;cost_at_time&#39;: totalCost,
       &#39;ingredient_snapshot&#39;: snapshotJson,
     });
 
@@ -273,7 +261,7 @@ stock. Returns a <a href="../../services_recipe_service/CookResult-class.html">C
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

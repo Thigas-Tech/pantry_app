@@ -68,9 +68,7 @@
 exist in the cache (re-fetched when the two-month cache flush removed
 it), and an inventory item is created (or merged if the same batch —
 same barcode, unit, location, and no expiry — already exists in the
-target inventory). Price data on the shopping item is saved to the
-prices table, scoped to the target inventory, carrying the package
-size when recorded. The shopping item is then deleted.</p>
+target inventory). The shopping item is then deleted.</p>
 <p>Items without a barcode or whose product cannot be found anywhere are
 skipped.</p>
 <p>Returns a <a href="../../services_shopping_list_service/MoveToInventoryResult-class.html">MoveToInventoryResult</a> with counts of moved and skipped
@@ -140,7 +138,7 @@ items. Runs inside a SQLite transaction — all-or-nothing.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

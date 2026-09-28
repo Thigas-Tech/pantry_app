@@ -80,10 +80,7 @@ state, so a single instance is safe.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@Riverpod(keepAlive: true)
 RecipeService recipeService(Ref ref) {
-  return RecipeService(
-    ref.read(databaseProvider),
-    ref.read(currencyServiceProvider),
-  );
+  return RecipeService(ref.read(databaseProvider));
 }</code></pre>
 </section>
 
@@ -111,7 +108,7 @@ RecipeService recipeService(Ref ref) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

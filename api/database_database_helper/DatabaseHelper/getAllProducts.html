@@ -62,14 +62,16 @@
     </section>
     
 <section class="desc markdown">
-  <p>Returns all cached products.</p>
+  <p>Returns the total number of cached product records.
+Returns all cached products.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;List&lt;Product&gt;&gt; getAllProducts() async {
+  <pre class="language-dart"><code class="language-dart">&#47;&#47;&#47; Returns all cached products.
+Future&lt;List&lt;Product&gt;&gt; getAllProducts() async {
   final db = await database;
   return await productDao.all(db);
 }</code></pre>
@@ -100,7 +102,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

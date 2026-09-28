@@ -55,15 +55,10 @@
     
 <section class="desc markdown">
   <p>A lightweight confirmation screen shown for a market trip item.</p>
-<p>Replaces the full product-detail screen in the trip flow so price and
-expiry are asked exactly once per scanned (or produce-searched) product.
-The screen shows the product, an optional price (pre-filled from the
-latest tracked price) and an optional expiry date, then adds the product
-to the trip as purchased through <a href="../providers_market_trip_item_provider/marketTripItemControllerProvider.html">marketTripItemControllerProvider</a>.</p>
-<p>The screen does not touch the price repository or the inventory tables:
-the price is written to the shopping item and recorded into the price
-history by the trip finish flow. It never shows the purchase-date picker
-(the purchase date is always today) and never opens a pantry prompt.</p>
+<p>Replaces the full product-detail screen in the trip flow so expiry is
+asked exactly once per scanned product. The screen shows the product and
+an optional expiry date, then adds the product to the trip as purchased
+through <a href="../providers_market_trip_item_provider/marketTripItemControllerProvider.html">marketTripItemControllerProvider</a>.</p>
 </section>
 
 
@@ -364,7 +359,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

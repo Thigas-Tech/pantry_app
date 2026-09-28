@@ -170,7 +170,6 @@ Widget build(BuildContext context, WidgetRef ref) {
               ),
             ),
             if (!marketTripMode &amp;&amp; !item.isPurchased) ...[
-              const SizedBox(width: 2),
               IconButton(
                 icon: const Icon(Icons.remove_circle_outline, size: 18),
                 visualDensity: VisualDensity.compact,
@@ -214,20 +213,6 @@ Widget build(BuildContext context, WidgetRef ref) {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!marketTripMode &amp;&amp; _showsImage(ref)) _buildCheckbox(ref),
-            if (!marketTripMode &amp;&amp; !item.isPurchased)
-              IconButton(
-                icon: Icon(
-                  item.priceAmount != null
-                      ? Icons.attach_money
-                      : Icons.attach_money_outlined,
-                  size: 20,
-                ),
-                visualDensity: VisualDensity.compact,
-                tooltip: item.priceAmount != null
-                    ? l10n.removePrice
-                    : l10n.addPrice,
-                onPressed: () =&gt; _showPriceEntry(context, ref),
-              ),
             if (!marketTripMode &amp;&amp; item.isPurchased)
               TextButton.icon(
                 icon: const Icon(Icons.add_shopping_cart, size: 18),
@@ -311,7 +296,7 @@ Widget build(BuildContext context, WidgetRef ref) {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

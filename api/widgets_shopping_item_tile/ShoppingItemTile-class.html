@@ -55,11 +55,8 @@
     
 <section class="desc markdown">
   <p>A single row in a shopping list.</p>
-<p>Shows the item name, quantity steppers, price (entered or estimated from
-the latest tracked price), purchased state, and edit/delete actions.</p>
-<p>When the item has no entered price but a tracked price exists for its
-barcode (and price tracking is enabled), an estimate prefixed with
-"Est." is shown instead. An entered price always wins over the estimate.</p>
+<p>Shows the item name, quantity steppers, purchased state, and
+edit/delete actions.</p>
 <p>The tile is shared between the shopping list tab and the market trip
 screen. <a href="../widgets_shopping_item_tile/ShoppingItemTile/reorderIndex.html">reorderIndex</a> enables the drag handle when used inside a
 reorderable pending list.</p>
@@ -156,7 +153,7 @@ reorderable pending list.</p>
 </dt>
 <dd>
   When true, hides every purchase-state control (checkbox, add-again,
-quantity steppers, price button) because everything scanned or added in
+quantity steppers) because everything scanned or added in
 a market trip is already purchased. Deletion (swipe and button) stays.
   <div class="features"><span class="feature">final</span></div>
 
@@ -391,7 +388,7 @@ tools and by <a href="https://api.flutter.dev/flutter/foundation/DiagnosticsNode
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

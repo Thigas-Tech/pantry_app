@@ -56,7 +56,6 @@
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span>&gt;</span></span>
 <span class="name ">addScannedProduct</span>(<wbr><ol class="parameter-list"> <li><span class="parameter" id="addScannedProduct-param-product"><span class="type-annotation"><a href="../../models_product/Product-class.html">Product</a></span> <span class="parameter-name">product</span>, {</span></li>
-<li><span class="parameter" id="addScannedProduct-param-price"><span class="type-annotation"><a href="../../providers_market_trip_item_provider/TripItemPriceInput-class.html">TripItemPriceInput</a>?</span> <span class="parameter-name">price</span>, </span></li>
 <li><span class="parameter" id="addScannedProduct-param-expiryDate"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">expiryDate</span>, </span></li>
 </ol>})
 
@@ -69,8 +68,7 @@
 <p>Marks an existing pending row with the same barcode as purchased, or
 merges into an existing purchased row (same barcode) by incrementing
 its quantity, or inserts a new purchased row when neither exists.
-When <code>price</code> is given it is written to the item, and when <code>expiryDate</code>
-is given (and not before today) it is written too.</p>
+When <code>expiryDate</code> is given (and not before today) it is written too.</p>
 <p>Returns null when the call was ignored because an add for the same
 barcode is already in progress. Throws when the item cannot be
 resolved or persisted.</p>
@@ -82,7 +80,6 @@ resolved or persisted.</p>
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">Future&lt;int?&gt; addScannedProduct(
   Product product, {
-  TripItemPriceInput? price,
   String? expiryDate,
 }) async {
   if (state.processingBarcode == product.barcode) {
@@ -136,18 +133,6 @@ resolved or persisted.</p>
       throw StateError(&#39;No trip item id for barcode ${product.barcode}&#39;);
     }
     if (!ref.mounted) return null;
-
-    if (price != null) {
-      await service.updateShoppingItemPrice(
-        id,
-        priceAmount: price.amount,
-        priceCurrency: price.currency,
-        priceStore: price.store,
-        pricePackageQuantity: price.packageQuantity,
-        pricePackageUnit: price.packageUnit,
-      );
-      if (!ref.mounted) return null;
-    }
 
     final iso = expiryDate;
     if (iso != null) {
@@ -208,7 +193,7 @@ resolved or persisted.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

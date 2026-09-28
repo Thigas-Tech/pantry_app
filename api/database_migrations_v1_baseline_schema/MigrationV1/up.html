@@ -83,9 +83,7 @@ Future&lt;void&gt; up(DatabaseExecutor db) async {
   await _createInventories(db);
   await _createInventory(db);
   await _createProductSubmissionQueue(db);
-  await _createPrices(db);
   await _createShoppingList(db);
-  await _createStores(db);
   await _createRecipes(db);
   await _createRecipeIngredients(db);
   await _createRecipeHistory(db);
@@ -121,7 +119,7 @@ Future&lt;void&gt; up(DatabaseExecutor db) async {
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

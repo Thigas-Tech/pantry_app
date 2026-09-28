@@ -58,14 +58,11 @@
 <li><span class="parameter" id="param-madeAt"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">madeAt</span>, </span></li>
 <li><span class="parameter" id="param-ingredientSnapshot"><span>required</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">ingredientSnapshot</span>, </span></li>
 <li><span class="parameter" id="param-id"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">id</span>, </span></li>
-<li><span class="parameter" id="param-costAtTime"><span>@<a href="https://pub.dev/documentation/freezed_annotation/3.1.0/freezed_annotation/Default/Default.html">Default</a>(0.0)</span> <span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/double-class.html">double</a></span> <span class="parameter-name">costAtTime</span>, </span></li>
 </ol>})
     </section>
     
 <section class="desc markdown">
   <p>Creates a <a href="../../models_recipe_history_entry/RecipeHistoryEntry-class.html">RecipeHistoryEntry</a>.</p>
-<p><code>recipeId</code>, <code>madeAt</code>, and <code>ingredientSnapshot</code> are required. <code>costAtTime</code>
-defaults to 0.0 for recipes with no priced ingredients.</p>
 </section>
 
 
@@ -86,9 +83,6 @@ defaults to 0.0 for recipes with no priced ingredients.</p>
 
   &#47;&#47;&#47; Auto-increment primary key from the recipe_history table.
   int? id,
-
-  &#47;&#47;&#47; Total recipe cost computed at cook time.
-  @Default(0.0) double costAtTime,
 }) = _RecipeHistoryEntry;</code></pre>
 </section>
 
@@ -117,7 +111,7 @@ defaults to 0.0 for recipes with no priced ingredients.</p>
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

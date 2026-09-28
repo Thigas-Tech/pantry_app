@@ -65,12 +65,6 @@
 <li><span class="parameter" id="copyWith-param-weeklyRecipeSuggestionHour"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">weeklyRecipeSuggestionHour</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-weeklyRecipeSuggestionMinute"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">weeklyRecipeSuggestionMinute</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-amoledDarkMode"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">amoledDarkMode</span>, </span></li>
-<li><span class="parameter" id="copyWith-param-priceTrackingEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">priceTrackingEnabled</span>, </span></li>
-<li><span class="parameter" id="copyWith-param-priceRetentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a>?</span> <span class="parameter-name">priceRetentionDays</span>, </span></li>
-<li><span class="parameter" id="copyWith-param-pricesHidden"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">pricesHidden</span>, </span></li>
-<li><span class="parameter" id="copyWith-param-baseCurrency"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">baseCurrency</span>, </span></li>
-<li><span class="parameter" id="copyWith-param-openPricesSyncEnabled"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/bool-class.html">bool</a>?</span> <span class="parameter-name">openPricesSyncEnabled</span>, </span></li>
-<li><span class="parameter" id="copyWith-param-openPricesToken"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a>?</span> <span class="parameter-name">openPricesToken</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-unitSystem"><span class="type-annotation"><a href="../../providers_settings_provider/UnitSystem.html">UnitSystem</a>?</span> <span class="parameter-name">unitSystem</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-unitSystemServingSize"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">unitSystemServingSize</span> = <span class="default-value">_nullSentinel</span>, </span></li>
 <li><span class="parameter" id="copyWith-param-unitSystemRecipeIngredients"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/Object-class.html">Object</a>?</span> <span class="parameter-name">unitSystemRecipeIngredients</span> = <span class="default-value">_nullSentinel</span>, </span></li>
@@ -104,12 +98,6 @@
   int? weeklyRecipeSuggestionHour,
   int? weeklyRecipeSuggestionMinute,
   bool? amoledDarkMode,
-  bool? priceTrackingEnabled,
-  int? priceRetentionDays,
-  bool? pricesHidden,
-  String? baseCurrency,
-  bool? openPricesSyncEnabled,
-  String? openPricesToken,
   UnitSystem? unitSystem,
   Object? unitSystemServingSize = _nullSentinel,
   Object? unitSystemRecipeIngredients = _nullSentinel,
@@ -134,13 +122,6 @@
     weeklyRecipeSuggestionMinute:
         weeklyRecipeSuggestionMinute ?? this.weeklyRecipeSuggestionMinute,
     amoledDarkMode: amoledDarkMode ?? this.amoledDarkMode,
-    priceTrackingEnabled: priceTrackingEnabled ?? this.priceTrackingEnabled,
-    priceRetentionDays: priceRetentionDays ?? this.priceRetentionDays,
-    pricesHidden: pricesHidden ?? this.pricesHidden,
-    baseCurrency: baseCurrency ?? this.baseCurrency,
-    openPricesSyncEnabled:
-        openPricesSyncEnabled ?? this.openPricesSyncEnabled,
-    openPricesToken: openPricesToken ?? this.openPricesToken,
     unitSystem: unitSystem ?? this.unitSystem,
     unitSystemServingSize: identical(unitSystemServingSize, _nullSentinel)
         ? this.unitSystemServingSize
@@ -183,7 +164,7 @@
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>

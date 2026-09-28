@@ -56,7 +56,6 @@
       
 <span class="returntype"><a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter">void</span>&gt;</span></span>
 <span class="name ">cleanupOldEntries</span>(<wbr>{<ol class="parameter-list"> <li><span class="parameter" id="cleanupOldEntries-param-retentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">retentionDays</span> = <span class="default-value">60</span>, </span></li>
-<li><span class="parameter" id="cleanupOldEntries-param-priceRetentionDays"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">priceRetentionDays</span> = <span class="default-value">0</span>, </span></li>
 </ol>})
 
       
@@ -65,22 +64,14 @@
     
 <section class="desc markdown">
   <p>Removes stale inventory items and orphaned products.</p>
-<p><code>retentionDays</code> applies to inventory items only. Price rows use
-<code>priceRetentionDays</code> (default 0 = keep forever).</p>
-<p>Price history is never deleted because a product is absent from the
-pantry: price observations are the user's own records and must survive
-cache maintenance. Prices are only pruned by the explicit
-<code>priceRetentionDays</code> retention policy.</p>
+<p><code>retentionDays</code> applies to inventory items only.</p>
 </section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; cleanupOldEntries({
-  int retentionDays = 60,
-  int priceRetentionDays = 0,
-}) async {
+  <pre class="language-dart"><code class="language-dart">Future&lt;void&gt; cleanupOldEntries({int retentionDays = 60}) async {
   final db = await database;
   final cutoff = DateTime.now()
       .subtract(Duration(days: retentionDays))
@@ -101,33 +92,15 @@ cache maintenance. Prices are only pruned by the explicit
       logInfo(&#39;Removed $deletedItems old inventory items&#39;);
 
       &#47;&#47; Only cached (API-sourced) products that nothing references are
-      &#47;&#47; removed. Manual products and products referenced by a price row
-      &#47;&#47; are always kept.
+      &#47;&#47; removed. Manual products are always kept.
       final deletedProducts = await txn.rawDelete(&#39;&#39;&#39;
         DELETE FROM products
         WHERE source != &#39;manual&#39;
           AND NOT EXISTS (
             SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
           )
-          AND NOT EXISTS (
-            SELECT 1 FROM prices WHERE prices.barcode = products.barcode
-          )
       &#39;&#39;&#39;);
       logInfo(&#39;Removed $deletedProducts orphaned products&#39;);
-
-      if (priceRetentionDays &gt; 0) {
-        final cutoffMillis = DateTime.now()
-            .subtract(Duration(days: priceRetentionDays))
-            .millisecondsSinceEpoch;
-        final deletedPrices = await txn.delete(
-          &#39;prices&#39;,
-          where:
-              &#39;COALESCE(date_purchased, date_added) &lt; ?&#39;
-              &#39; AND sync_status != ?&#39;,
-          whereArgs: [cutoffMillis, priceSyncPending],
-        );
-        logInfo(&#39;Removed $deletedPrices old price rows&#39;);
-      }
     });
 
     &#47;&#47; Self-contained and atomic; runs after the main cleanup so its own
@@ -170,7 +143,7 @@ cache maintenance. Prices are only pruned by the explicit
 <footer>
   <span class="no-break">
     pantry_app
-      0.0.19+15
+      0.0.20+16
   </span>
   
 </footer>
