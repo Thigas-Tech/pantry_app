@@ -10,21 +10,17 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/recipe_service_provider.dart';
-import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/recipe_detail_screen.dart';
 import 'package:pantry_app/screens/recipe_form_screen.dart';
-import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
-import 'package:pantry_app/widgets/price_mask.dart';
-import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 
-/// Displays all saved recipes with cost information.
+/// Displays all saved recipes.
 ///
-/// Shows a list of recipe cards, an average cost banner, and an empty state.
+/// Shows a list of recipe cards and an empty state.
 /// Tapping a recipe opens its detail screen. Swiping left deletes with undo.
 class RecipeListScreen extends ConsumerStatefulWidget {
   /// Creates a [RecipeListScreen].
@@ -78,16 +74,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
                   }
                 },
               );
-            },
-          ),
-          Consumer(
-            builder: (context, ref, child) {
-              final settings =
-                  ref.watch(settingsProvider).value ?? const Settings();
-              if (!settings.priceTrackingEnabled) {
-                return const SizedBox.shrink();
-              }
-              return const PriceVisibilityToggle();
             },
           ),
         ],
@@ -166,7 +152,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
       },
       child: ListView(
         children: [
-          _AverageCostBanner(ref: ref),
           ...recipes.map(
             (recipe) => _RecipeCard(
               key: ValueKey(recipe.id),
@@ -174,52 +159,6 @@ class _RecipeListScreenState extends ConsumerState<RecipeListScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// A banner card showing the average cost across all recipes.
-class _AverageCostBanner extends ConsumerWidget {
-  const _AverageCostBanner({required this.ref});
-
-  final WidgetRef ref;
-
-  @override
-  Widget build(BuildContext context, WidgetRef widgetRef) {
-    final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider).value ?? const Settings();
-    final currencyCode = settings.baseCurrency;
-    final symbol = currencySymbolFor(currencyCode);
-    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-    final averageCost =
-        ref.watch(averageRecipeCostProvider((activeId, currencyCode))).value ??
-        0.0;
-
-    return Card(
-      margin: const EdgeInsets.all(16).copyWith(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            const Icon(Icons.account_balance_wallet),
-            const SizedBox(width: 12),
-            Text(
-              l10n.recipeAverageCost,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const Spacer(),
-            PriceMask(
-              formattedPrice: '$symbol${averageCost.toStringAsFixed(2)}',
-              child: Text(
-                '$symbol${averageCost.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -237,10 +176,6 @@ class _RecipeCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider).value ?? const Settings();
-    final currencyCode = settings.baseCurrency;
-    final symbol = currencySymbolFor(currencyCode);
-
     return Dismissible(
       key: ValueKey('recipe_${recipe.id}'),
       direction: DismissDirection.endToStart,
@@ -302,11 +237,6 @@ class _RecipeCard extends ConsumerWidget {
               _IngredientCountLabel(recipeId: recipe.id!),
               const SizedBox(width: 12),
               _RecipeNutriScoreBadge(recipeId: recipe.id!),
-              const SizedBox(width: 8),
-              _RecipeCostLabel(
-                recipeId: recipe.id!,
-                currencySymbol: symbol,
-              ),
             ],
           ),
           trailing: const Icon(Icons.chevron_right),
@@ -360,47 +290,5 @@ class _IngredientCountLabel extends ConsumerWidget {
     final count =
         ref.watch(allRecipeIngredientsProvider(recipeId)).value?.length ?? 0;
     return Text(l10n.ingredientCount(count));
-  }
-}
-
-/// A label showing the calculated cost of a single recipe.
-class _RecipeCostLabel extends ConsumerWidget {
-  const _RecipeCostLabel({
-    required this.recipeId,
-    required this.currencySymbol,
-  });
-
-  final int recipeId;
-  final String currencySymbol;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-    final baseCurrency =
-        (ref.watch(settingsProvider).value ?? const Settings()).baseCurrency;
-    final cost = ref
-        .watch(recipeCostProvider((recipeId, activeId, baseCurrency)))
-        .value;
-
-    if (cost == null) return const SizedBox.shrink();
-    if (cost <= 0) {
-      return Text(
-        l10n.recipeCostUnknown,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      );
-    }
-    final formattedPrice = '$currencySymbol${cost.toStringAsFixed(2)}';
-    return PriceMask(
-      formattedPrice: formattedPrice,
-      child: Text(
-        formattedPrice,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
   }
 }

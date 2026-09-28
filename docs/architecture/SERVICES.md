@@ -50,9 +50,7 @@ User scans barcode
   screen re-fetches a cached product in the current locale via
   `ProductRepository.refreshProductLanguage`, which merges via
   `mergeFromApi` (API products) or `mergeLanguageOnly` (manual products,
-  so user-entered fields are never overwritten). Stats categories resolve
-  OFF hierarchy tags in the current locale (from
-  `currentLocaleProvider`) with an `en:` fallback.
+  so user-entered fields are never overwritten).
 
 ### 3.3 Notification service
 
@@ -129,10 +127,7 @@ User scans barcode
   API-fetched product rows whose `lastSynced` is older than
   `productCacheMaxAge` (60 days), preserving manual products and surviving
   inventory rows. It runs on startup inside `cleanupOldEntries`; flushed
-  products are re-fetched on the next access or background refresh. Price
-  history is unaffected: the `prices` table has no foreign key to
-  `products`, and the move-to-inventory flow re-fetches flushed products
-  before writing their prices.
+  products are re-fetched on the next access or background refresh.
 - **Background refresh**: `CacheRefreshCoordinator` refreshes inventory
   products when the cache is overdue (5 days), gated by connectivity and
   tracked via `CacheStalenessStore` in SharedPreferences.
@@ -145,94 +140,7 @@ In-app GitHub feedback was **removed**. There is no feedback submission, no
 PAT, and no feedback queue. Reach the maintainer through the project's GitHub
 repository.
 
-### 3.8 Price repository
-
-- `PriceRepository` -- wraps `DatabaseHelper` (PriceDao), `CurrencyService`,
-  and `OpenPricesService`. Exposed to screens via `priceRepositoryProvider`.
-- All price CRUD delegates to `PriceDao`. Formatting calls
-  `CurrencyService` to convert prices to the user's base currency for
-  display; writes always keep the original currency.
-- `unitPriceLabel(price, ...)` builds a localized per-unit label ("R$ 0,83/
-  unit", "/100 g", "/kg", "/L", "/100 ml") from a `Price`'s package fields,
-  via `PriceCalculator.unitPrice`. Returns null when no usable package size
-  exists.
-- Aggregations (`totalInventoryValue`, `averageItemPrice`,
-  `pricedItemCount`) are scoped to an inventory and weight by the held
-  quantity in SQL (see `PriceDao`).
-- **Resilience**: the `prices` table carries no foreign keys by design, so
-  history survives product cache flushes and pantry deletion.
-  `cleanupOldEntries` never deletes orphaned prices; only the explicit
-  price-retention setting prunes old rows. Every latest-price lookup orders
-  by `COALESCE(date_purchased, date_added) DESC, id DESC`.
-- Sync helpers: `getPendingSyncPrices()` and `syncToOpenPrices()`, which
-  delegates to `OpenPricesService.syncPendingPrices` (currently a local-only
-  placeholder -- no HTTP).
-
-### 3.9 Currency service
-
-- `CurrencyService` -- fetches exchange rates from
-  [ExchangeRate-API](https://open.er-api.com/) (free, no key required).
-- Caches rates locally in `SharedPreferences` with a 24h TTL.
-- `convert(amount, from, to)` converts a monetary amount between ISO 4217
-  currencies using the cached rate.
-
-### 3.10 Open Prices API client
-
-- `OpenPricesApiClient` -- HTTP client for
-  [Open Prices API](https://prices.openfoodfacts.org/api/docs).
-  Base URL: `https://prices.openfoodfacts.org/api/v1` (prod) or
-  `https://prices.openfoodfacts.net/api/v1` (pre-prod). Bearer token read
-  from `AppConfig.openPricesToken` or overridden via the `token` constructor
-  parameter.
-- `fetchPricesByBarcode(barcode)` returns a paginated `FetchPricesResult`
-  of `RemotePrice` (id, product_code, price, currency, product name, store,
-  date). `price_per` and product quantity fields are not parsed yet.
-- `validateToken()` probes a lightweight authenticated endpoint and returns
-  whether the configured token is valid.
-- `submitPrice(...)` posts a price to `POST /api/v1/prices`. It requires a
-  `proofId` (mandatory on the API) and is currently a placeholder -- the app
-  never creates proofs, and `price_per` / `receipt_quantity` are not sent.
-  No exceptions are thrown; failures return `SubmitPriceResult(success: false)`.
-
-### 3.11 Open Prices service
-
-- `OpenPricesService` -- coordinates syncing local prices to Open Prices.
-  When no token is configured, all operations short-circuit to empty results
-  (local-only mode).
-- `fetchPricesByBarcode(barcode)` gates the API read behind `hasToken` and
-  delegates to `OpenPricesApiClient`.
-- `syncPendingPrices()` reads `pending` prices and marks them `synced`
-  directly in the database without any HTTP request. Proof upload and price
-  creation are blocked by the missing receipt-capture feature.
-
-### 3.12 Shopping list
-
-- `ShoppingListDao` -- all shopping list CRUD scoped to the active inventory.
-  Items can have optional barcode links to products, quantities, units, and
-  price fields. Pending items are ordered by a `sort_order` column (frozen
-  v1 baseline) so manual drag-to-reorder persists; `reorder` assigns
-  sequential order values inside a transaction.
-- `ShoppingListService` -- owns shopping list business logic:
-  `addShoppingItem`, `toggleShoppingItem`, `deleteShoppingItem`,
-  `clearPurchasedShoppingItems`, `updateShoppingItemPrice`,
-  `updateShoppingItem`, `reorderShoppingItems`, and the
-  `movePurchasedToInventory` transaction.
-- `addShoppingItem` and other mutation functions in
-  `providers/shopping_list_provider.dart` manage state invalidation and DB
-  writes. `pendingShoppingCountProvider` feeds the nav-bar badge on the
-  shopping list destination.
-
-### 3.13 Store persistence
-
-- `StoreDao` -- stores saved store names in the `stores` table (version 19
-  migration). `insert` is case-insensitive and deduplicates. `getAll` returns
-  stores ordered alphabetically.
-- The price entry sheet uses `storesProvider` (FutureProvider) to power an
-  `Autocomplete<String>` dropdown with a "+" add-new button.
-- New store names submitted through the price entry sheet are automatically
-  persisted to the `stores` table.
-
-### 3.14 Changelog loader
+### 3.8 Changelog loader
 
 - `ChangelogLoader` utility at `lib/utils/changelog_loader.dart` provides
   `loadLocalizedChangelog(Locale)` that resolves locale-specific
@@ -240,7 +148,7 @@ repository.
   the "What's New" sheet to display user-facing changelog in the app's
   current language.
 
-### 3.15 Product photo picker
+### 3.9 Product photo picker
 
 - `ProductPhotoPicker` (at `lib/services/product_photo_picker.dart`)
   picks product photos from the camera or the device gallery for the
@@ -265,7 +173,7 @@ repository.
   action (`showCameraPermissionDialog` at
   `lib/utils/camera_permission_dialog.dart`).
 
-### 3.16 Product image service
+### 3.10 Product image service
 
 - `ProductImageService` (at `lib/services/product_image_service.dart`) is
   the testable boundary for product photo persistence in the manual form.
@@ -299,7 +207,7 @@ repository.
 - The slot snapshot is modeled by the immutable `ProductPhotoSlots`
   (`lib/models/product_photo_slots.dart`).
 
-### 3.17 Product photo cropper
+### 3.11 Product photo cropper
 
 - `ProductPhotoCropper` (at `lib/services/product_photo_cropper.dart`)
   produces cropped and rotated copies of local product photos for the

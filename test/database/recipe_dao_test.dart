@@ -135,16 +135,6 @@ void main() {
       expect(recipe, isNull);
     });
 
-    test('count returns correct total', () async {
-      expect(await dao.count(db), 0);
-
-      await dao.insert(db, const Recipe(name: 'A'));
-      expect(await dao.count(db), 1);
-
-      await dao.insert(db, const Recipe(name: 'B'));
-      expect(await dao.count(db), 2);
-    });
-
     test('delete returns 0 for non-existent id', () async {
       final affected = await dao.delete(db, 999);
       expect(affected, 0);

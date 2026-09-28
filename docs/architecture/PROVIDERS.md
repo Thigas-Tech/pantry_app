@@ -44,7 +44,6 @@ to enforce the convention mechanically.
 | `productRepositoryProvider` | `Provider` | Repository (DB + API) |
 | `imageCacheProvider` | `Provider` | Image download/cache (WebP) |
 | `notificationServiceProvider` | `Provider` | Expiry reminder scheduling |
-| `statsProvider` | `FutureProvider` | Aggregated pantry statistics |
 | `activeInventoryProvider` | `AsyncNotifierProvider` | Current pantry ID, persisted + DB-validated in build |
 | `inventoryWithProductProvider` | `FutureProvider` | Joined inventory list for home |
 | `inventoryListProvider` | `FutureProvider` | All pantries (id, name) |
@@ -56,24 +55,14 @@ to enforce the convention mechanically.
 | `settingsProvider` | `AsyncNotifierProvider` | Notifications, retention, threshold (loaded from prefs in build) |
 | `themeModeProvider` | `AsyncNotifierProvider` | Light / dark / system theme (loaded from prefs in build) |
 | `productSubmissionServiceProvider` | `Provider` | OFF product submission |
-| `priceRepositoryProvider` | `Provider` | Price CRUD + Open Prices sync |
-| `priceHistoryProvider` | `FutureProvider.family` | Price history for (barcode, inventoryId) |
-| `latestPriceProvider` | `FutureProvider.family` | Latest price for (barcode, inventoryId) |
-| `pricesHiddenProvider` | `Provider<bool>` | Price visibility toggle (privacy mask) |
-| `inventoryValueProvider` | `FutureProvider` | Total inventory value |
-| `averagePriceProvider` | `FutureProvider` | Average item price |
-| `pricedItemCountProvider` | `FutureProvider` | Count of priced items |
-| `pendingSyncCountProvider` | `FutureProvider` | Open Prices pending sync count |
-| `currencyServiceProvider` | `Provider` | Exchange rate conversion |
 | `shoppingListProvider` | `FutureProvider` | Shopping list for active inventory |
 | `pendingShoppingListProvider` | `FutureProvider` | Pending (not purchased) items |
 | `purchasedShoppingListProvider` | `FutureProvider` | Purchased items |
 | `pendingShoppingCountProvider` | `FutureProvider` | Pending item count |
-| `storesProvider` | `FutureProvider` | Saved store names for autocomplete |
 | `cacheStalenessStoreProvider` | `Provider` | SharedPreferences-backed last-refresh timestamp store |
 | `inventoryProductsProvider` | `FutureProvider` | Distinct products from active inventory |
 | `searchPanelControllerProvider` | `NotifierProvider.family` | Async search state for SearchPanel (debounced query, source, in-pantry filter) |
-| `marketTripItemControllerProvider` | `NotifierProvider.family` | Adds a scanned item to a market trip as purchased, applying optional price + expiry (autoDispose, keyed by trip inventory id) |
+| `marketTripItemControllerProvider` | `NotifierProvider.family` | Adds a scanned item to a market trip as purchased, applying an optional expiry (autoDispose, keyed by trip inventory id) |
 | `mobileScannerControllerProvider` | `Provider` | Auto-disposed `MobileScannerController` for the scanner camera |
 | `scannerCameraProvider` | `NotifierProvider` | Scanner camera lifecycle + scan resolution |
 
@@ -82,7 +71,7 @@ to enforce the convention mechanically.
 `marketTripItemControllerProvider(tripId)` owns the single unit of work that
 adds a scanned product to a trip: it marks a pending
 row purchased, or merges into an existing purchased row by quantity, or
-inserts a new purchased row, then writes an optional price and expiry and
+inserts a new purchased row, then writes an optional expiry and
 invalidates the shopping list providers. The confirm screen keeps the
 autoDispose notifier alive for the screen's lifetime by watching its
 `.notifier` in `build`; when the screen pops the notifier is disposed.

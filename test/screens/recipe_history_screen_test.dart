@@ -55,13 +55,11 @@ void main() {
           RecipeHistoryEntry(
             recipeId: 1,
             madeAt: DateTime(2026, 7, 20).millisecondsSinceEpoch,
-            costAtTime: 12.50,
             ingredientSnapshot: '[{"name":"Eggs","quantity":2}]',
           ),
           RecipeHistoryEntry(
             recipeId: 1,
             madeAt: DateTime(2026, 7, 18).millisecondsSinceEpoch,
-            costAtTime: 15,
             ingredientSnapshot:
                 '[{"name":"Eggs","quantity":2},{"name":"Cheese","quantity":1}]',
           ),

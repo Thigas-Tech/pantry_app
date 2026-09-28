@@ -59,7 +59,7 @@ The main inventory list is a lazy `ListView.builder` over a flattened
 section index (`InventoryGrouping.entries` in
 `lib/utils/inventory_grouping.dart`): items are grouped once per change
 of the underlying list, the expiring-soon window, or the calendar day,
-so offscreen cards (and their image/price futures) are never built.
+so offscreen cards (and their image futures) are never built.
 Section headers are rendered by the shared `SectionHeader` widget.
 
 ### 11.6 Thread strategy

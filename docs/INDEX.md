@@ -15,7 +15,6 @@ Dart source is published from `///` doc comments at
 - [Localization](architecture/LOCALIZATION.md)
 - [Testing Strategy](architecture/TESTING.md)
 - [Performance & Footprint](architecture/PERFORMANCE.md)
-- [Price Tracking](architecture/PRICE_TRACKING.md)
 
 ## Guides
 
@@ -30,6 +29,5 @@ Dart source is published from `///` doc comments at
 ## Reference
 
 - [OFF Submission Contract](reference/off_submission_contract.md)
-- [Open Prices Reference](reference/open_prices_reference.md)
 - [Platform References](reference/platform_refs.md)
 - [OFF Test Products](reference/off_test_products.md)

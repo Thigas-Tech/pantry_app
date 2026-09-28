@@ -4,16 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
-import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
-import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
-import 'package:pantry_app/utils/shopping_price.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
@@ -21,7 +17,7 @@ import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
 import 'package:pantry_app/widgets/shopping_item_tile.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// The main shopping list screen with price tracking and move-to-inventory.
+/// The main shopping list screen with move-to-inventory.
 class ShoppingListScreen extends ConsumerStatefulWidget {
   /// Creates a [ShoppingListScreen] widget.
   const ShoppingListScreen({super.key});
@@ -340,7 +336,6 @@ class _ShoppingListBody extends ConsumerWidget {
                 _SectionHeader(
                   title: l10n.pendingItems,
                   itemCount: pending.length,
-                  totalText: _buildTotalText(context, ref, pending),
                 ),
             ],
           ),
@@ -376,7 +371,6 @@ class _ShoppingListBody extends ConsumerWidget {
                 _SectionHeader(
                   title: l10n.purchasedItems,
                   itemCount: purchased.length,
-                  totalText: _buildTotalText(context, ref, purchased),
                 ),
                 ...purchased.map((item) => ShoppingItemTile(item: item)),
               ],
@@ -385,79 +379,20 @@ class _ShoppingListBody extends ConsumerWidget {
       ],
     );
   }
-
-  String? _buildTotalText(
-    BuildContext context,
-    WidgetRef ref,
-    List<ShoppingItem> items,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
-    final priceTrackingEnabled =
-        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
-    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-
-    final prices = <ShoppingPrice>[];
-    for (final item in items) {
-      if (item.priceAmount != null && item.priceAmount! > 0) {
-        prices.add(
-          ShoppingPrice(
-            amount: item.priceAmount!,
-            currency: item.priceCurrency ?? 'USD',
-            isEstimate: false,
-            store: item.priceStore,
-          ),
-        );
-        continue;
-      }
-      if (!priceTrackingEnabled || item.barcode == null) continue;
-      final tracked = ref
-          .watch(latestPriceProvider((item.barcode!, activeId)))
-          .asData
-          ?.value;
-      if (tracked == null) continue;
-      prices.add(
-        ShoppingPrice(
-          amount: tracked.price,
-          currency: tracked.currency,
-          isEstimate: true,
-        ),
-      );
-    }
-
-    if (prices.isEmpty) return null;
-
-    final total = groupShoppingPrices(prices);
-    final parts = total.byCurrency.entries.map((e) {
-      final symbol = currencySymbolFor(e.key);
-      return '$symbol${e.value.toStringAsFixed(2)}';
-    });
-    final totalText = parts.join(' + ');
-    if (total.estimatedAmount > 0) {
-      final estimateSymbol = currencySymbolFor(total.byCurrency.keys.first);
-      final estimated =
-          '$estimateSymbol${total.estimatedAmount.toStringAsFixed(2)}';
-      return l10n.totalWithEstimated(totalText, estimated);
-    }
-    return l10n.shoppingTotal(totalText);
-  }
 }
 
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({
     required this.title,
     required this.itemCount,
-    this.totalText,
   });
 
   final String title;
   final int itemCount;
-  final String? totalText;
 
   @override
   Widget build(BuildContext context) {
-    final label = totalText != null
-        ? '$title ($itemCount) — $totalText'
-        : '$title ($itemCount)';
+    final label = '$title ($itemCount)';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),

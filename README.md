@@ -25,10 +25,8 @@ never waste food again.
 - **Pull-to-refresh** — updates cached product data from Open Food Facts when online
 - **Nutri-Score** — A–E badges on the home screen and product detail, with average per pantry and grey dash for non-applicable products
 - **Manual product entry** — full form with nutrition table and camera capture when a barcode is unknown or you're offline
-- **Price tracking** — record purchase prices with store, date, currency, and package size; view price history, per-unit prices, and total inventory value
 - **Shopping list** — add items from cached products or free-text, mark as purchased, batch-move to pantry
 - **Weekly recipe suggestions** — optional weekly notification suggesting a recipe that matches your current inventory (via TheMealDB)
-- **Store autocomplete** — saved store names persist across uses, suggested in the price entry sheet
 - **Barcode history** — the last 50 scanned barcodes are kept locally on your device
 
 ## Screenshots
@@ -107,7 +105,6 @@ lib/
     product_dao.dart       # Product table CRUD
     inventory_dao.dart     # Inventory items CRUD + joins
     inventories_dao.dart   # Named pantries CRUD
-    price_dao.dart         # Price observations CRUD + aggregation
     shopping_list_dao.dart # Shopping list CRUD (per-inventory)
     store_dao.dart         # Saved store names CRUD
     product_submission_queue_dao.dart  # OFF submission queue
@@ -125,10 +122,6 @@ lib/
     notification_coordinator.dart  # Notification scheduling orchestrator
     notification_service.dart  # Expiry reminder scheduling
     image_cache_service.dart   # WebP image download & cache
-    price_repository.dart      # Price CRUD + Open Prices sync
-    currency_service.dart      # Exchange rate conversion
-    open_prices_api_client.dart  # Open Prices API HTTP client
-    open_prices_service.dart     # Open Prices sync coordinator
     product_submission_service.dart  # OFF offline submission queue
     product_image_service.dart, product_image_compressor.dart  # Product photos
     product_photo_picker.dart, product_photo_cropper.dart      # Photo capture
@@ -138,7 +131,6 @@ lib/
     camera_service.dart, camera_image_processor.dart  # Camera capture
     app_startup_service.dart, app_update_handler.dart  # App lifecycle
   utils/               # Logger, snackbar helpers
-    price_calculator.dart   # Unit-aware price math (per-unit price, scaled cost)
     unit_conversion.dart    # Unit normalization & conversion
     off_language.dart       # App locale -> OFF language code mapping
   widgets/             # Reusable components

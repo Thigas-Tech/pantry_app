@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/database/database_helper.dart';
-import 'package:pantry_app/models/store.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'database_provider.g.dart';
@@ -21,11 +20,4 @@ part 'database_provider.g.dart';
 @Riverpod(keepAlive: true)
 DatabaseHelper database(Ref ref) {
   return DatabaseHelper();
-}
-
-/// Lists all saved stores alphabetically for autocomplete suggestions.
-@riverpod
-Future<List<Store>> stores(Ref ref) {
-  final db = ref.watch(databaseProvider);
-  return db.getAllStores();
 }

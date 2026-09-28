@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/providers/database_provider.dart';
-import 'package:pantry_app/providers/settings_provider.dart';
-import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 
 /// Displays the cooking history for a specific recipe.
 ///
-/// Shows a chronological list of "made" events with date, cost at time,
-/// and number of ingredients used.
+/// Shows a chronological list of "made" events with date and the
+/// number of ingredients used.
 class RecipeHistoryScreen extends ConsumerStatefulWidget {
   /// Creates a [RecipeHistoryScreen] for the given [recipeId] and [recipeName].
   const RecipeHistoryScreen({
@@ -51,7 +49,6 @@ class _RecipeHistoryScreenState extends ConsumerState<RecipeHistoryScreen> {
             (e) => <String, dynamic>{
               'id': e.id,
               'made_at': e.madeAt,
-              'cost_at_time': e.costAtTime,
               'ingredient_snapshot': e.ingredientSnapshot,
             },
           )
@@ -63,8 +60,6 @@ class _RecipeHistoryScreenState extends ConsumerState<RecipeHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider).value ?? const Settings();
-    final symbol = currencySymbolFor(settings.baseCurrency);
 
     return Scaffold(
       appBar: AppBar(
@@ -85,8 +80,6 @@ class _RecipeHistoryScreenState extends ConsumerState<RecipeHistoryScreen> {
                   final madeAt = DateTime.fromMillisecondsSinceEpoch(
                     entry['made_at'] as int,
                   );
-                  final cost =
-                      (entry['cost_at_time'] as num?)?.toDouble() ?? 0.0;
                   final snapshot =
                       entry['ingredient_snapshot'] as String? ?? '[]';
                   final dateStr =
@@ -94,9 +87,6 @@ class _RecipeHistoryScreenState extends ConsumerState<RecipeHistoryScreen> {
 
                   return ListTile(
                     title: Text(dateStr),
-                    subtitle: Text(
-                      '${l10n.recipeCost}: $symbol${cost.toStringAsFixed(2)}',
-                    ),
                     trailing: Text(
                       '${snapshot.split(',').length}'
                       ' ${l10n.ingredients.toLowerCase()}',

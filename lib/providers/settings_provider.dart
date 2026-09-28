@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
-import 'package:pantry_app/config.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,12 +62,6 @@ class Settings {
     this.weeklyRecipeSuggestionHour = 18,
     this.weeklyRecipeSuggestionMinute = 0,
     this.amoledDarkMode = false,
-    this.priceTrackingEnabled = false,
-    this.priceRetentionDays = 0,
-    this.pricesHidden = false,
-    this.baseCurrency = 'USD',
-    this.openPricesSyncEnabled = false,
-    this.openPricesToken = '',
     this.unitSystem = UnitSystem.metric,
     this.unitSystemServingSize,
     this.unitSystemRecipeIngredients,
@@ -125,29 +117,6 @@ class Settings {
   /// surface colours, which reduces power consumption on AMOLED displays.
   final bool amoledDarkMode;
 
-  /// Whether price tracking is enabled.
-  ///
-  /// When disabled, all price UI surfaces are hidden.
-  final bool priceTrackingEnabled;
-
-  /// Number of days to retain price history (0 = keep forever).
-  final int priceRetentionDays;
-
-  /// Whether all prices should be masked for privacy.
-  final bool pricesHidden;
-
-  /// ISO 4217 currency code for displaying prices.
-  ///
-  /// Auto-detected from the device locale on first launch.
-  /// Common values: 'USD', 'BRL', 'EUR', 'GBP', 'JPY'.
-  final String baseCurrency;
-
-  /// Whether syncing to the Open Prices community database is enabled.
-  final bool openPricesSyncEnabled;
-
-  /// Bearer token for the Open Prices API.
-  final String openPricesToken;
-
   /// Global unit system preference (Metric or Imperial).
   final UnitSystem unitSystem;
 
@@ -181,12 +150,6 @@ class Settings {
     int? weeklyRecipeSuggestionHour,
     int? weeklyRecipeSuggestionMinute,
     bool? amoledDarkMode,
-    bool? priceTrackingEnabled,
-    int? priceRetentionDays,
-    bool? pricesHidden,
-    String? baseCurrency,
-    bool? openPricesSyncEnabled,
-    String? openPricesToken,
     UnitSystem? unitSystem,
     Object? unitSystemServingSize = _nullSentinel,
     Object? unitSystemRecipeIngredients = _nullSentinel,
@@ -211,13 +174,6 @@ class Settings {
       weeklyRecipeSuggestionMinute:
           weeklyRecipeSuggestionMinute ?? this.weeklyRecipeSuggestionMinute,
       amoledDarkMode: amoledDarkMode ?? this.amoledDarkMode,
-      priceTrackingEnabled: priceTrackingEnabled ?? this.priceTrackingEnabled,
-      priceRetentionDays: priceRetentionDays ?? this.priceRetentionDays,
-      pricesHidden: pricesHidden ?? this.pricesHidden,
-      baseCurrency: baseCurrency ?? this.baseCurrency,
-      openPricesSyncEnabled:
-          openPricesSyncEnabled ?? this.openPricesSyncEnabled,
-      openPricesToken: openPricesToken ?? this.openPricesToken,
       unitSystem: unitSystem ?? this.unitSystem,
       unitSystemServingSize: identical(unitSystemServingSize, _nullSentinel)
           ? this.unitSystemServingSize
@@ -261,14 +217,6 @@ class SettingsNotifier extends _$SettingsNotifier {
         weeklyRecipeSuggestionMinute:
             prefs.getInt('weeklyRecipeSuggestionMinute') ?? 0,
         amoledDarkMode: prefs.getBool('amoledDarkMode') ?? false,
-        priceTrackingEnabled: prefs.getBool('priceTrackingEnabled') ?? false,
-        priceRetentionDays: prefs.getInt('priceRetentionDays') ?? 0,
-        pricesHidden: prefs.getBool('pricesHidden') ?? false,
-        baseCurrency:
-            prefs.getString('baseCurrency') ?? _detectLocaleCurrency(),
-        openPricesSyncEnabled: prefs.getBool('openPricesSyncEnabled') ?? false,
-        openPricesToken:
-            prefs.getString('openPricesToken') ?? AppConfig.openPricesToken,
         unitSystem: UnitSystem.values.firstWhere(
           (e) => e.name == prefs.getString('unitSystem'),
           orElse: () => UnitSystem.metric,
@@ -308,9 +256,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       );
     } on Exception catch (e) {
       logWarning('Failed to load settings from SharedPreferences: $e');
-      return Settings(
-        baseCurrency: _detectLocaleCurrency(),
-      );
+      return const Settings();
     }
   }
 
@@ -416,60 +362,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     unawaited(_persist(updated));
   }
 
-  /// Sets whether price tracking is enabled.
-  void setPriceTrackingEnabled({required bool value}) {
-    final updated = (state.value ?? const Settings()).copyWith(
-      priceTrackingEnabled: value,
-    );
-    state = AsyncValue.data(updated);
-    unawaited(_persist(updated));
-  }
-
-  /// Sets the price retention period in days.
-  void setPriceRetentionDays(int value) {
-    final updated = (state.value ?? const Settings()).copyWith(
-      priceRetentionDays: value,
-    );
-    state = AsyncValue.data(updated);
-    unawaited(_persist(updated));
-  }
-
-  /// Sets whether prices are hidden.
-  void setPricesHidden({required bool value}) {
-    final updated = (state.value ?? const Settings()).copyWith(
-      pricesHidden: value,
-    );
-    state = AsyncValue.data(updated);
-    unawaited(_persist(updated));
-  }
-
-  /// Sets the base currency code (ISO 4217).
-  void setBaseCurrency(String value) {
-    final updated = (state.value ?? const Settings()).copyWith(
-      baseCurrency: value,
-    );
-    state = AsyncValue.data(updated);
-    unawaited(_persist(updated));
-  }
-
-  /// Sets whether Open Prices sync is enabled.
-  void setOpenPricesSyncEnabled({required bool value}) {
-    final updated = (state.value ?? const Settings()).copyWith(
-      openPricesSyncEnabled: value,
-    );
-    state = AsyncValue.data(updated);
-    unawaited(_persist(updated));
-  }
-
-  /// Sets the Open Prices API bearer token.
-  void setOpenPricesToken(String value) {
-    final updated = (state.value ?? const Settings()).copyWith(
-      openPricesToken: value,
-    );
-    state = AsyncValue.data(updated);
-    unawaited(_persist(updated));
-  }
-
   /// Sets the global unit system.
   void setUnitSystem(UnitSystem value) {
     final updated = (state.value ?? const Settings()).copyWith(
@@ -558,21 +450,6 @@ class SettingsNotifier extends _$SettingsNotifier {
         settings.weeklyRecipeSuggestionMinute,
       );
       await prefs.setBool('amoledDarkMode', settings.amoledDarkMode);
-      await prefs.setBool(
-        'priceTrackingEnabled',
-        settings.priceTrackingEnabled,
-      );
-      await prefs.setInt(
-        'priceRetentionDays',
-        settings.priceRetentionDays,
-      );
-      await prefs.setBool('pricesHidden', settings.pricesHidden);
-      await prefs.setString('baseCurrency', settings.baseCurrency);
-      await prefs.setBool(
-        'openPricesSyncEnabled',
-        settings.openPricesSyncEnabled,
-      );
-      await prefs.setString('openPricesToken', settings.openPricesToken);
       await prefs.setString(
         'unitSystem',
         settings.unitSystem.name,
@@ -612,75 +489,5 @@ class SettingsNotifier extends _$SettingsNotifier {
     } on Exception catch (e) {
       logWarning('Failed to persist settings to SharedPreferences: $e');
     }
-  }
-}
-
-/// Maps the device locale to an ISO 4217 currency code.
-///
-/// Uses [Platform.localeName] (e.g. pt_BR, en_US) to infer the most
-/// likely currency. Falls back to 'USD' for unknown locales.
-String _detectLocaleCurrency() {
-  try {
-    final locale = Platform.localeName;
-    final code = locale.contains('_') ? locale.split('_').last : '';
-    return switch (code.toUpperCase()) {
-      'BR' => 'BRL',
-      'US' => 'USD',
-      'GB' => 'GBP',
-      'EU' ||
-      'DE' ||
-      'FR' ||
-      'ES' ||
-      'IT' ||
-      'PT' ||
-      'NL' ||
-      'BE' ||
-      'AT' ||
-      'IE' ||
-      'FI' ||
-      'GR' ||
-      'LU' ||
-      'SK' ||
-      'SI' ||
-      'EE' ||
-      'LV' ||
-      'LT' ||
-      'MT' ||
-      'CY' ||
-      'HR' => 'EUR',
-      'JP' => 'JPY',
-      'CA' => 'CAD',
-      'AU' => 'AUD',
-      'MX' => 'MXN',
-      'CN' => 'CNY',
-      'IN' => 'INR',
-      'RU' => 'RUB',
-      'KR' => 'KRW',
-      'CH' => 'CHF',
-      'SE' => 'SEK',
-      'NO' => 'NOK',
-      'DK' => 'DKK',
-      'PL' => 'PLN',
-      'CZ' => 'CZK',
-      'AR' => 'ARS',
-      'CL' => 'CLP',
-      'CO' => 'COP',
-      'ZA' => 'ZAR',
-      'NG' => 'NGN',
-      'TR' => 'TRY',
-      'IL' => 'ILS',
-      'SG' => 'SGD',
-      'HK' => 'HKD',
-      'TW' => 'TWD',
-      'TH' => 'THB',
-      'MY' => 'MYR',
-      'PH' => 'PHP',
-      'ID' => 'IDR',
-      'VN' => 'VND',
-      _ => 'USD',
-    };
-  } on Object catch (e) {
-    logWarning('Locale currency detection failed, falling back to USD: $e');
-    return 'USD';
   }
 }

@@ -65,28 +65,6 @@ const Map<String, List<String>> _expectedColumns = {
     'next_retry_at',
     'created_at',
   ],
-  'prices': [
-    'id',
-    'barcode',
-    'price',
-    'currency',
-    'store',
-    'is_discounted',
-    'regular_price',
-    'date_purchased',
-    'sync_status',
-    'open_prices_id',
-    'location_osm_id',
-    'location_osm_type',
-    'receipt_series',
-    'receipt_number',
-    'receipt_item_index',
-    'notes',
-    'package_quantity',
-    'package_unit',
-    'date_added',
-    'inventory_id',
-  ],
   'shopping_list': [
     'id',
     'barcode',
@@ -97,16 +75,9 @@ const Map<String, List<String>> _expectedColumns = {
     'inventory_id',
     'date_added',
     'date_purchased',
-    'price_amount',
-    'price_currency',
-    'price_store',
-    'price_package_quantity',
-    'price_package_unit',
-    'price_photo_path',
     'expiry_date',
     'sort_order',
   ],
-  'stores': ['id', 'name'],
   'recipes': [
     'id',
     'name',
@@ -130,7 +101,6 @@ const Map<String, List<String>> _expectedColumns = {
     'id',
     'recipe_id',
     'made_at',
-    'cost_at_time',
     'ingredient_snapshot',
   ],
   'scan_history': ['id', 'barcode', 'name', 'scanned_at', 'image_url'],
@@ -145,11 +115,6 @@ const List<String> _expectedIndexes = [
   'idx_inventory_barcode_inventory_id',
   'idx_inventory_inventory_expiry',
   'idx_inventory_inventory_barcode',
-  'idx_prices_barcode',
-  'idx_prices_date',
-  'idx_prices_sync_status',
-  'idx_prices_inventory_id',
-  'idx_prices_barcode_inventory_date',
   'idx_submission_queue_retry',
   'idx_shopping_barcode',
   'idx_shopping_purchased',
@@ -241,10 +206,6 @@ void main() {
       });
       expect(await _foreignKeyTargets(db, 'recipes'), {'inventories'});
       expect(await _foreignKeyTargets(db, 'recipe_ingredients'), {'recipes'});
-    });
-
-    test('prices has no foreign keys by design', () async {
-      expect(await _foreignKeyTargets(db, 'prices'), isEmpty);
     });
 
     test('seeds the default Home inventory', () async {

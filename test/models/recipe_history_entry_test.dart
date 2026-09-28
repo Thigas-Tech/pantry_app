@@ -11,7 +11,6 @@ void main() {
       );
       expect(entry.recipeId, 1);
       expect(entry.madeAt, 1000);
-      expect(entry.costAtTime, 0);
       expect(entry.ingredientSnapshot, '[]');
       expect(entry.id, isNull);
     });
@@ -21,13 +20,11 @@ void main() {
         id: 1,
         recipeId: 2,
         madeAt: 2000,
-        costAtTime: 15.50,
         ingredientSnapshot: '[{"name":"eggs"}]',
       );
       expect(entry.id, 1);
       expect(entry.recipeId, 2);
       expect(entry.madeAt, 2000);
-      expect(entry.costAtTime, 15.50);
       expect(entry.ingredientSnapshot, '[{"name":"eggs"}]');
     });
 
@@ -38,10 +35,9 @@ void main() {
         madeAt: 1000,
         ingredientSnapshot: '[]',
       );
-      final copied = entry.copyWith(costAtTime: 10);
+      final copied = entry.copyWith(ingredientSnapshot: '[x]');
       expect(copied.id, 1);
-      expect(copied.costAtTime, 10.0);
-      expect(copied.ingredientSnapshot, '[]');
+      expect(copied.ingredientSnapshot, '[x]');
     });
 
     test('equality works', () {

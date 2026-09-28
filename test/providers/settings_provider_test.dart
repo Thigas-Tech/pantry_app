@@ -115,7 +115,6 @@ void main() {
               notificationsEnabled: false,
               retentionDays: 90,
               amoledDarkMode: true,
-              baseCurrency: 'EUR',
             ),
           );
 
@@ -125,7 +124,6 @@ void main() {
       expect(prefs.getBool('notificationsEnabled'), false);
       expect(prefs.getInt('retentionDays'), 90);
       expect(prefs.getBool('amoledDarkMode'), true);
-      expect(prefs.getString('baseCurrency'), 'EUR');
 
       container.dispose();
     });
@@ -147,12 +145,6 @@ void main() {
               weeklyRecipeSuggestionHour: 9,
               weeklyRecipeSuggestionMinute: 30,
               amoledDarkMode: true,
-              priceTrackingEnabled: true,
-              priceRetentionDays: 365,
-              pricesHidden: true,
-              baseCurrency: 'BRL',
-              openPricesSyncEnabled: true,
-              openPricesToken: 'tok_abc',
             ),
           );
 
@@ -169,12 +161,6 @@ void main() {
       expect(prefs.getInt('weeklyRecipeSuggestionHour'), 9);
       expect(prefs.getInt('weeklyRecipeSuggestionMinute'), 30);
       expect(prefs.getBool('amoledDarkMode'), true);
-      expect(prefs.getBool('priceTrackingEnabled'), true);
-      expect(prefs.getInt('priceRetentionDays'), 365);
-      expect(prefs.getBool('pricesHidden'), true);
-      expect(prefs.getString('baseCurrency'), 'BRL');
-      expect(prefs.getBool('openPricesSyncEnabled'), true);
-      expect(prefs.getString('openPricesToken'), 'tok_abc');
 
       container.dispose();
     });
@@ -186,7 +172,6 @@ void main() {
       expect(settings, isA<Settings>());
       expect(settings.notificationsEnabled, isA<bool>());
       expect(settings.retentionDays, isA<int>());
-      expect(settings.baseCurrency, isNotEmpty);
       container.dispose();
     });
 

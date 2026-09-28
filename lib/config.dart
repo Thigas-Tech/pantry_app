@@ -59,12 +59,6 @@ class AppConfig {
     return const String.fromEnvironment('USE_OFF_STAGING') == 'true';
   }
 
-  /// The Bearer token for the Open Prices API.
-  ///
-  /// Generate at https://prices.openfoodfacts.org/settings/tokens
-  /// Leave empty to disable all Open Prices API features (local-only mode).
-  static String get openPricesToken => dotenv.env['OPEN_PRICES_TOKEN'] ?? '';
-
   /// The Imgur Client-ID used for anonymous image uploads.
   ///
   /// Register at https://api.imgur.com/oauth2/addclient to obtain one.

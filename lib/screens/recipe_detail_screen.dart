@@ -11,24 +11,19 @@ import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/recipe_service_provider.dart';
-import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/recipe_form_screen.dart';
 import 'package:pantry_app/screens/recipe_history_screen.dart';
-import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/money.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
-import 'package:pantry_app/widgets/price_mask.dart';
-import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/recipe_nutrition_table.dart';
 
-/// Displays a single recipe in read-only mode with ingredients, instructions,
-/// cost, and a prominent "I made this" action that deducts ingredients from
-/// inventory and logs the event to recipe_history.
+/// Displays a single recipe in read-only mode with ingredients,
+/// instructions, and a prominent "I made this" action that deducts
+/// ingredients from inventory and logs the event to recipe_history.
 class RecipeDetailScreen extends ConsumerStatefulWidget {
   /// Creates a [RecipeDetailScreen] for the given [recipeId].
   const RecipeDetailScreen({required this.recipeId, super.key});
@@ -76,9 +71,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
           .cookRecipe(
             widget.recipeId,
             activeInventoryId: await ref.read(activeInventoryProvider.future),
-            baseCurrency: (await ref.read(
-              settingsProvider.future,
-            )).baseCurrency,
           );
       logInfo('Recipe ${widget.recipeId} cooked successfully');
       if (!mounted) return;
@@ -142,27 +134,11 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final settings = ref.watch(settingsProvider).value ?? const Settings();
-    final priceTrackingEnabled = settings.priceTrackingEnabled;
-    final currencyCode = settings.baseCurrency;
-    final symbol = currencySymbolFor(currencyCode);
-    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-    final cost =
-        ref
-            .watch(
-              recipeCostProvider((widget.recipeId, activeId, currencyCode)),
-            )
-            .value ??
-        0.0;
-    final costPerServing = _recipe != null && _recipe!.servings > 0
-        ? Money.roundToCents(cost / _recipe!.servings)
-        : 0.0;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(_recipe?.name ?? ''),
         actions: [
-          if (priceTrackingEnabled) const PriceVisibilityToggle(),
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
@@ -208,17 +184,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                     final asyncData = ref.watch(
                       recipeIngredientsWithProductsProvider(widget.recipeId),
                     );
-                    final ingredientCosts =
-                        ref
-                            .watch(
-                              recipeIngredientCostsProvider((
-                                widget.recipeId,
-                                activeId,
-                                currencyCode,
-                              )),
-                            )
-                            .value ??
-                        const <String, double>{};
                     return asyncData.when(
                       data: (data) {
                         final grouped = <String, _DisplayIngredient>{};
@@ -252,9 +217,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                             const SizedBox(height: 8),
                             ...grouped.values.map(
                               (g) {
-                                final cost = g.barcode != null
-                                    ? ingredientCosts[g.barcode]
-                                    : null;
                                 return ListTile(
                                   dense: true,
                                   leading: _buildIngredientImage(
@@ -267,20 +229,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                                       g.unit,
                                     )} x ${g.name}',
                                   ),
-                                  subtitle: cost != null
-                                      ? PriceMask(
-                                          formattedPrice:
-                                              '$symbol'
-                                              '${cost.toStringAsFixed(2)}',
-                                          child: Text(
-                                            '$symbol'
-                                            '${cost.toStringAsFixed(2)}',
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall,
-                                          ),
-                                        )
-                                      : null,
                                   trailing: _recipe!.servings > 0
                                       ? Text(
                                           '${l10n.recipePerServing}: '
@@ -332,7 +280,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                   Text(_recipe!.instructions),
                   const SizedBox(height: 16),
                 ],
-                _buildCostSection(l10n, symbol, cost, costPerServing),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -352,61 +299,6 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
                 ),
               ],
             ),
-    );
-  }
-
-  /// Builds the recipe cost row and the per-serving breakdown, if the
-  /// recipe has servings.
-  Widget _buildCostSection(
-    AppLocalizations l10n,
-    String symbol,
-    double cost,
-    double costPerServing,
-  ) {
-    final formatted = '$symbol${cost.toStringAsFixed(2)}';
-    final perServingFormatted = costPerServing > 0
-        ? '$symbol${costPerServing.toStringAsFixed(2)}'
-        : null;
-    return Column(
-      children: [
-        Row(
-          children: [
-            Text(
-              l10n.recipeCost,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const Spacer(),
-            PriceMask(
-              formattedPrice: formatted,
-              child: Text(
-                formatted,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        if (perServingFormatted != null) ...[
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
-                l10n.costPerServing,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const Spacer(),
-              PriceMask(
-                formattedPrice: perServingFormatted,
-                child: Text(
-                  perServingFormatted,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ],
     );
   }
 

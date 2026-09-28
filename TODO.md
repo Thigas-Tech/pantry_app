@@ -47,7 +47,7 @@ monetization and paid-infrastructure work.
 - [ ] **Empty-pantry onboarding** — when inventory is empty, show a guided
   "scan your first item" flow instead of just the empty state widget.
 - [ ] **Widget test → golden coverage** — product detail and settings screens
-  (home and stats already have golden tests).
+  (home already has golden tests).
 - [ ] **Remove functional debt** — audit for features that have been
   superseded, unused code paths (dead code after refactors), and outdated API
   endpoints. Older app versions with unused features cost server-side (API
@@ -149,7 +149,7 @@ monetization and paid-infrastructure work.
 
 - [ ] **AdMob integration** — add `google_mobile_ads`, create an `AdService`
   (init, load banners/native ads, dispose), an `AdBanner` widget, and a
-  `SearchNativeAd` widget. Banner on Home, Product Detail, Settings, Stats.
+  `SearchNativeAd` widget. Banner on Home, Product Detail, Settings.
   Native ad in Search results (every 5th).
 - [ ] **GDPR/LGPD consent flow** — UMP SDK consent on first launch,
   "Ad Preferences" toggle in Settings, privacy policy link.

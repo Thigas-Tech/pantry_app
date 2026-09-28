@@ -11,7 +11,7 @@ HomeScreen
     ├── RefreshIndicator (pull-to-refresh)
     └── ListView.builder (lazy, flattened InventoryGrouping entries, RepaintBoundary on each card)
         ├── SectionHeader (expired / expiring soon / good)
-        └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot, flat + per-unit price)
+        └── InventoryCard (tappable, image, NutriScoreBadge, expiry dot)
 
 ProductDetailScreen
 ├── AppBar (name, OFF link)
@@ -21,7 +21,6 @@ ProductDetailScreen
 ├── NutritionTable (energy, protein, carbs, fat, fiber, salt)
 ├── Ingredients (ExpansionTile)
 ├── InventoryTiles (location icon, qty, expiry, edit/delete)
-├── PriceHistorySection (latest price, store, date, per-unit label; tap for history)
 ├── ProductSubmissionStatus (manual products only; status chip + retry)
 │   └── Live progress panel while a submission for this barcode is in flight
 ├── ProductPhotoManagement (manual products only)
@@ -50,14 +49,8 @@ SearchScreen
 ├── Swipe-to-add (Dismissible, start-to-end)
 └── Long-press menu (add to inventory, copy barcode)
 
-StatsScreen
-├── Summary cards (total products, items, added this week/month)
-├── NutriScoreBar (fl_chart BarChart by grade A-E)
-├── CategoryChart (fl_chart BarChart by category)
-├── LocationChart (fl_chart BarChart by storage location)
-├── Photo completeness (local vs OFF photos)
-├── PriceStatistics (total value, average price, priced item count)
-└── RefreshIndicator (pull-to-refresh)
+StatsScreen (coming soon)
+└── ComingSoonScreen (icon, localized title and description)
 
 ScannerScreen
 ├── PopScope (confirmation dialog on back)
@@ -76,9 +69,9 @@ SettingsScreen
 ShoppingListScreen
 ├── AppBar (move-to-pantry button, clear-purchased, share)
 ├── PendingSection (items not yet purchased)
-│   ├── ShoppingItemTile (name, qty stepper, price, store; swipe actions,
+│   ├── ShoppingItemTile (name, qty stepper; swipe actions,
 │   │   edit sheet via pencil/long-press, drag handle)
-│   └── SectionHeader with per-currency running totals
+│   └── SectionHeader with item counts
 ├── PurchasedSection (items marked purchased)
 ├── FAB -> AddToShoppingListSheet (search cached products or manual entry)
 └── ShoppingItemEditSheet (rename item, change quantity/unit)
@@ -87,17 +80,4 @@ PantryShell
 └── NavigationBar with Badge on the List destination showing the pending
     shopping item count
 
-PriceEntrySheet (bottom sheet, reused from multiple screens)
-├── Amount field (TextFormField with locale-aware decimal formatter)
-├── Store field (Autocomplete from saved stores, "+ Add new store" button)
-├── Date picker
-├── Discounted toggle
-├── Notes field
-└── Submit button
-
-PriceHistoryScreen (per product barcode)
-├── AppBar (product name)
-├── PriceVisibilityToggle (privacy mask)
-├── Price rows (date, flat price, store, sync status, per-unit UnitPriceLabel)
-└── Empty state (no prices) with "Add price" button
 ```

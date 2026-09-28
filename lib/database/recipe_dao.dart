@@ -178,12 +178,4 @@ class RecipeDao {
       rethrow;
     }
   }
-
-  /// Returns the total number of recipes.
-  Future<int> count(Database db) async {
-    return Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM recipes'),
-        ) ??
-        0;
-  }
 }

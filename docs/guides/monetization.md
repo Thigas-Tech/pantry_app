@@ -30,7 +30,7 @@ Summary:
 - Package: `google_mobile_ads`
 - Provider: planned `AdService` Riverpod provider
 - Widgets: `AdBanner` (banner), `SearchNativeAd` (native in Search)
-- Screens: Home, Product Detail, Settings, Stats (banner); Search (native, every 5th item)
+- Screens: Home, Product Detail, Settings (banner); Search (native, every 5th item)
 - Ad unit IDs: from `.env`, test IDs in debug, production IDs in release
 
 ### Implementation checklist
@@ -41,7 +41,7 @@ Summary:
 - [ ] Create `lib/services/ad_service.dart` (init, load banner, dispose)
 - [ ] Create `lib/widgets/ad_banner.dart` (wraps `BannerAd`)
 - [ ] Create `lib/widgets/search_native_ad.dart` (native ad)
-- [ ] Insert `<AdBanner>` on Home, Product Detail, Settings, Stats
+- [ ] Insert `<AdBanner>` on Home, Product Detail, Settings
 - [ ] Insert `<SearchNativeAd>` in Search results list
 - [ ] Add test ad unit IDs to `.env.example`
 - [ ] New ARB strings: `adLoading`, `adFailedToLoad`

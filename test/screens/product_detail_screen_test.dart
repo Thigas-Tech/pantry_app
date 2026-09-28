@@ -41,8 +41,6 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/models/image_field.dart';
 import 'package:pantry_app/models/inventory_item.dart';
 import 'package:pantry_app/models/photo_pick_result.dart';
-import 'package:pantry_app/models/price.dart';
-import 'package:pantry_app/models/price_history_point.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_photo_slots.dart';
 import 'package:pantry_app/models/submission_progress.dart';
@@ -51,26 +49,20 @@ import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
-import 'package:pantry_app/providers/price_provider.dart';
-import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_photo_picker_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
-import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
-import 'package:pantry_app/services/price_repository.dart';
 import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/services/product_photo_picker.dart';
 import 'package:pantry_app/services/product_repository.dart';
 import 'package:pantry_app/services/product_submission_service.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/photo_source_chooser.dart';
-import 'package:pantry_app/widgets/price_entry_sheet.dart';
-import 'package:pantry_app/widgets/price_history_chart.dart';
 import 'package:pantry_app/widgets/product_photo_management.dart';
 import 'package:pantry_app/widgets/product_photo_preview.dart';
 import 'package:pantry_app/widgets/product_photo_tile.dart';
@@ -290,8 +282,6 @@ class FakeSettingsNotifierImperial extends SettingsNotifier {
 
 class MockProductRepository extends Mock implements ProductRepository {}
 
-class MockPriceRepository extends Mock implements PriceRepository {}
-
 class MockProductSubmissionService extends Mock
     implements ProductSubmissionService {}
 
@@ -330,7 +320,6 @@ void _registerFallbacks() {
   );
   registerFallbackValue(AndroidScheduleMode.inexactAllowWhileIdle);
   registerFallbackValue(const Product(barcode: 'fallback', name: 'Fallback'));
-  registerFallbackValue(const Price(barcode: 'fallback', price: 1));
   registerFallbackValue(PhotoSource.camera);
   registerFallbackValue(File('/fallback.jpg'));
   registerFallbackValue(ImageField.nutrition);
@@ -345,7 +334,6 @@ List<Override> screenOverrides({
   required MockNotificationService mockNotif,
   MockProductSubmissionService? mockSubmissionService,
   MockDatabaseHelper? mockDb,
-  MockPriceRepository? mockPriceRepo,
   ProductImageService? imageService,
   MockProductPhotoPicker? mockPicker,
   bool online = true,
@@ -366,8 +354,6 @@ List<Override> screenOverrides({
     if (mockSubmissionService != null)
       productSubmissionServiceProvider.overrideWithValue(mockSubmissionService),
     if (mockDb != null) databaseProvider.overrideWithValue(mockDb),
-    if (mockPriceRepo != null)
-      priceRepositoryProvider.overrideWithValue(mockPriceRepo),
     productImageServiceProvider.overrideWithValue(effectiveImageService),
     if (mockPicker != null)
       productPhotoPickerProvider.overrideWithValue(mockPicker),
@@ -1675,267 +1661,6 @@ void main() {
   // --------------------------------------------------------------------------
   // Price section (trend + recent prices + view all + scoped save)
   // --------------------------------------------------------------------------
-
-  group('price section', () {
-    const barcode = '5901234123457';
-
-    final trendPrices = [
-      const Price(
-        barcode: barcode,
-        price: 6.5,
-        store: 'Store C',
-        datePurchased: 1719792000000,
-      ),
-      const Price(
-        barcode: barcode,
-        price: 5,
-        store: 'Store A',
-        datePurchased: 1719705600000,
-      ),
-      const Price(
-        barcode: barcode,
-        price: 4,
-        store: 'Store B',
-        datePurchased: 1719619200000,
-      ),
-    ];
-
-    final trendPoints = [
-      PriceHistoryPoint(
-        date: DateTime.fromMillisecondsSinceEpoch(1719619200000),
-        amount: 4,
-      ),
-      PriceHistoryPoint(
-        date: DateTime.fromMillisecondsSinceEpoch(1719705600000),
-        amount: 5,
-      ),
-      PriceHistoryPoint(
-        date: DateTime.fromMillisecondsSinceEpoch(1719792000000),
-        amount: 6.5,
-      ),
-    ];
-
-    testWidgets('shows latest price, trend and recent list', (tester) async {
-      setLargeScreen(tester);
-      await pumpApp(
-        tester,
-        const ProductDetailScreen(product: testProduct),
-        overrides: [
-          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
-          latestPriceProvider((barcode, 1)).overrideWith(
-            (ref) => trendPrices.first,
-          ),
-          priceHistoryProvider((barcode, 1)).overrideWith(
-            (ref) => trendPrices,
-          ),
-          priceChartPointsProvider((barcode, 1, 'USD')).overrideWith(
-            (ref) => trendPoints,
-          ),
-        ],
-      );
-
-      expect(find.text(r'$6.50'), findsNWidgets(2));
-      expect(find.text('Recent prices'), findsOneWidget);
-      expect(find.text('Prices are rising'), findsOneWidget);
-      expect(find.text('Store A'), findsOneWidget);
-      expect(find.text('Store B'), findsOneWidget);
-      expect(find.text('View all'), findsOneWidget);
-      expect(find.text('Add price'), findsOneWidget);
-      expect(find.byType(PriceHistoryChart), findsOneWidget);
-    });
-
-    testWidgets('single price shows a hint instead of the chart', (
-      tester,
-    ) async {
-      setLargeScreen(tester);
-      await pumpApp(
-        tester,
-        const ProductDetailScreen(product: testProduct),
-        overrides: [
-          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
-          latestPriceProvider((barcode, 1)).overrideWith(
-            (ref) => trendPrices.first,
-          ),
-          priceHistoryProvider((barcode, 1)).overrideWith(
-            (ref) => [trendPrices.first],
-          ),
-          priceChartPointsProvider((barcode, 1, 'USD')).overrideWith(
-            (ref) => [trendPoints.first],
-          ),
-        ],
-      );
-
-      expect(find.text(r'$6.50'), findsOneWidget);
-      expect(find.text('Recent prices'), findsNothing);
-      expect(find.text('Prices are rising'), findsNothing);
-      expect(find.text('Add another price to see the trend'), findsOneWidget);
-      expect(find.byType(PriceHistoryChart), findsNothing);
-    });
-
-    testWidgets('shows empty state when no prices exist', (tester) async {
-      setLargeScreen(tester);
-      await pumpApp(
-        tester,
-        const ProductDetailScreen(product: testProduct),
-        overrides: [
-          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
-          latestPriceProvider((barcode, 1)).overrideWith(
-            (ref) => null,
-          ),
-        ],
-      );
-
-      expect(find.text('No prices recorded.'), findsOneWidget);
-      expect(find.text('Add price'), findsOneWidget);
-    });
-
-    testWidgets('view all link opens the price history screen', (
-      tester,
-    ) async {
-      setLargeScreen(tester);
-      await pumpApp(
-        tester,
-        const ProductDetailScreen(product: testProduct),
-        overrides: [
-          ...screenOverrides(mockRepo: mockRepo, mockNotif: mockNotif),
-          latestPriceProvider((barcode, 1)).overrideWith(
-            (ref) => trendPrices.first,
-          ),
-          priceHistoryProvider((barcode, 1)).overrideWith(
-            (ref) => trendPrices,
-          ),
-        ],
-      );
-
-      await tester.tap(find.text('View all'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(PriceHistoryScreen), findsOneWidget);
-    });
-
-    testWidgets('saved price is stamped with the active inventory', (
-      tester,
-    ) async {
-      setLargeScreen(tester);
-      final mockPriceRepo = MockPriceRepository();
-      when(
-        () => mockPriceRepo.addPrice(any()),
-      ).thenAnswer((_) async => 1);
-      when(
-        () => mockRepo.cacheProduct(any()),
-      ).thenAnswer((_) async {});
-      when(
-        () => mockPriceRepo.getLatestPrice(
-          any(),
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async => null);
-      when(
-        () => mockPriceRepo.getPriceHistory(
-          any(),
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async => <Price>[]);
-
-      await pumpApp(
-        tester,
-        const ProductDetailScreen(product: testProduct),
-        overrides: [
-          ...screenOverrides(
-            mockRepo: mockRepo,
-            mockNotif: mockNotif,
-            mockPriceRepo: mockPriceRepo,
-          ),
-          latestPriceProvider((barcode, 1)).overrideWith((ref) => null),
-        ],
-      );
-
-      await tester.tap(find.text('Add price'));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField).first, '12.50');
-      await tester.tap(
-        find
-            .descendant(
-              of: find.byType(PriceEntrySheet),
-              matching: find.text('Add price'),
-            )
-            .last,
-      );
-      await tester.pumpAndSettle();
-
-      verify(
-        () => mockPriceRepo.addPrice(
-          any(that: isA<Price>().having((p) => p.inventoryId, 'inv', 1)),
-        ),
-      ).called(1);
-    });
-
-    testWidgets('add price re-reads the chart provider', (tester) async {
-      setLargeScreen(tester);
-      final mockPriceRepo = MockPriceRepository();
-      when(
-        () => mockPriceRepo.addPrice(any()),
-      ).thenAnswer((_) async => 1);
-      when(
-        () => mockPriceRepo.formatPrice(any(), any()),
-      ).thenAnswer(
-        (invocation) =>
-            r'$'
-            '${(invocation.positionalArguments[0] as num).toStringAsFixed(2)}',
-      );
-      when(
-        () => mockRepo.cacheProduct(any()),
-      ).thenAnswer((_) async {});
-      when(
-        () => mockPriceRepo.getLatestPrice(
-          any(),
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async => trendPrices.first);
-      when(
-        () => mockPriceRepo.getPriceHistory(
-          any(),
-          inventoryId: any(named: 'inventoryId'),
-        ),
-      ).thenAnswer((_) async => trendPrices);
-
-      var chartReads = 0;
-      await pumpApp(
-        tester,
-        const ProductDetailScreen(product: testProduct),
-        overrides: [
-          ...screenOverrides(
-            mockRepo: mockRepo,
-            mockNotif: mockNotif,
-            mockPriceRepo: mockPriceRepo,
-          ),
-          priceChartPointsProvider((barcode, 1, 'USD')).overrideWith((ref) {
-            chartReads++;
-            return trendPoints;
-          }),
-        ],
-      );
-      expect(chartReads, 1);
-
-      await tester.tap(find.text('Add price'));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField).first, '12.50');
-      await tester.tap(
-        find
-            .descendant(
-              of: find.byType(PriceEntrySheet),
-              matching: find.text('Add price'),
-            )
-            .last,
-      );
-      await tester.pumpAndSettle();
-
-      expect(chartReads, 2);
-      verify(() => mockPriceRepo.addPrice(any())).called(1);
-    });
-  });
 
   testWidgets(
     'inventory list does not refetch or flash loading when the screen '

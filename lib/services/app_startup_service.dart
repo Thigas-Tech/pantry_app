@@ -262,12 +262,8 @@ class AppStartupService {
       logInfo('Starting database cleanup');
       final prefs = await SharedPreferences.getInstance();
       final retentionDays = prefs.getInt('retentionDays') ?? 60;
-      final priceRetentionDays = prefs.getInt('priceRetentionDays') ?? 0;
       final dbHelper = container.read(databaseProvider);
-      await dbHelper.cleanupOldEntries(
-        retentionDays: retentionDays,
-        priceRetentionDays: priceRetentionDays,
-      );
+      await dbHelper.cleanupOldEntries(retentionDays: retentionDays);
       logInfo('Database cleanup completed');
     } on Exception catch (e) {
       logError('Database cleanup failed: $e');

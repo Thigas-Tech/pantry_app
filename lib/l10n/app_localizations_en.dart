@@ -816,22 +816,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAbout => 'About';
 
   @override
-  String get priceTracking => 'Price Tracking';
-
-  @override
-  String get priceTrackingDescription => 'Record purchase prices and track how much you spend.';
-
-  @override
   String get photoCompletenessTitle => 'Photo Completeness';
 
   @override
   String get noCategories => 'No categories yet';
-
-  @override
-  String get statsEmptyTitle => 'No items to analyze';
-
-  @override
-  String get statsEmptySubtitle => 'Add products to your pantry to see statistics here.';
 
   @override
   String get addedThisWeekLabel => 'This week';
@@ -1049,99 +1037,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amoledNudgeDismiss => 'Not now';
 
   @override
-  String get price => 'Price';
-
-  @override
-  String get prices => 'Prices';
-
-  @override
-  String get addPrice => 'Add price';
-
-  @override
-  String get editPrice => 'Edit price';
-
-  @override
   String get deletePrice => 'Delete price';
-
-  @override
-  String get priceAdded => 'Price added.';
-
-  @override
-  String get priceUpdated => 'Price updated.';
-
-  @override
-  String get priceDeleted => 'Price deleted.';
-
-  @override
-  String get priceHistory => 'Price history';
-
-  @override
-  String get noPrices => 'No prices recorded.';
-
-  @override
-  String get recentPrices => 'Recent prices';
-
-  @override
-  String get viewAllPrices => 'View all';
 
   @override
   String get noPriceTrend => 'Add at least two prices to see the trend.';
 
   @override
-  String get totalValue => 'Total value';
-
-  @override
-  String get averagePrice => 'Average item price';
-
-  @override
   String get showPrices => 'Show prices';
-
-  @override
-  String get hidePrices => 'Hide prices for privacy';
-
-  @override
-  String get hidePricesDescription => 'Replace price values with masked text everywhere, including the stats screen.';
-
-  @override
-  String get pricesHidden => 'Prices hidden.';
-
-  @override
-  String get pricesVisible => 'Prices visible.';
-
-  @override
-  String get priceTrackingEnabled => 'Enable price tracking';
-
-  @override
-  String get priceRetentionDays => 'Price retention';
-
-  @override
-  String priceRetentionDaysValue(int days) {
-    return 'Keep prices for $days days (0 = keep forever)';
-  }
-
-  @override
-  String get currency => 'Currency';
-
-  @override
-  String get baseCurrency => 'Base currency';
 
   @override
   String get baseCurrencyDescription => 'All prices are shown in this currency.';
 
   @override
-  String get store => 'Store';
-
-  @override
   String get addNewStore => 'Add new store';
-
-  @override
-  String get storeAdded => 'Store added';
-
-  @override
-  String get storeAlreadyExists => 'A store with this name already exists';
-
-  @override
-  String get storeName => 'Store name';
 
   @override
   String get discounted => 'Discounted';
@@ -1153,62 +1061,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDeletePrice => 'Delete this price entry?';
 
   @override
-  String get syncToOpenPrices => 'Share with Open Prices';
-
-  @override
-  String get syncToOpenPricesDescription => 'Contribute your price data to the community food-price database.';
-
-  @override
-  String get openPricesToken => 'Open Prices API Token';
-
-  @override
-  String get openPricesTokenDescription => 'Token generated from your Open Food Facts account.';
-
-  @override
-  String get openPricesTokenSaved => 'Token saved.';
-
-  @override
-  String get openPricesSyncStarted => 'Syncing prices...';
-
-  @override
-  String openPricesSyncComplete(int count) {
-    return '$count prices synced.';
-  }
-
-  @override
-  String get priceSyncStatus => 'Synced';
-
-  @override
-  String get priceSyncPending => 'Pending sync';
-
-  @override
-  String get priceSyncFailed => 'Sync failed';
-
-  @override
-  String get priceTrendUp => 'Prices are rising';
-
-  @override
-  String get priceTrendDown => 'Prices are falling';
-
-  @override
-  String get priceTrendStable => 'Prices are stable';
-
-  @override
   String get datePurchased => 'Purchase date';
-
-  @override
-  String itemWithPriceCount(int count, int total) {
-    return '$count of $total items have prices';
-  }
-
-  @override
-  String get openPricesProofExplanation => 'To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.';
-
-  @override
-  String get openPricesConsentTitle => 'Contribute to Open Prices';
-
-  @override
-  String get openPricesConsentBody => 'Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.';
 
   @override
   String get iUnderstand => 'I understand';
@@ -1327,24 +1180,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backToSearch => 'Back to search';
 
   @override
-  String get removePrice => 'Price removed';
-
-  @override
-  String shoppingTotal(String total) {
-    return 'Total: $total';
-  }
-
-  @override
-  String totalWithEstimated(String total, String estimated) {
-    return 'Total: $total (incl. $estimated estimated)';
-  }
-
-  @override
-  String estimatedPrice(String price) {
-    return 'Est. $price';
-  }
-
-  @override
   String get marketTripTitle => 'Market trip';
 
   @override
@@ -1374,12 +1209,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get useEstimate => 'Use estimate';
-
-  @override
-  String get enterPrice => 'Enter price';
-
-  @override
-  String get priceNotSet => 'No price';
 
   @override
   String get addExpiryDate => 'Add expiry date';
@@ -1451,9 +1280,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choosePantry => 'Choose a pantry';
 
   @override
-  String get addToPantrySkipped => 'Price saved. Add from product page to track inventory.';
-
-  @override
   String get invalidPriceAmount => 'Enter a valid price amount';
 
   @override
@@ -1461,17 +1287,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dismiss => 'Dismiss';
-
-  @override
-  String get priceHidden => 'Price hidden';
-
-  @override
-  String get priceTrendHint => 'Add another price to see the trend';
-
-  @override
-  String priceChartTooltip(String date, String price) {
-    return '$date - $price';
-  }
 
   @override
   String get scanFailed => 'Barcode scan failed.';
@@ -1547,21 +1362,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unitLiter => 'L';
-
-  @override
-  String get pricePerPiece => '/unit';
-
-  @override
-  String get pricePerHundredGrams => '/100 g';
-
-  @override
-  String get pricePerKilogram => '/kg';
-
-  @override
-  String get pricePerLiter => '/L';
-
-  @override
-  String get pricePerHundredMilliliters => '/100 ml';
 
   @override
   String get packageQuantity => 'Package quantity';
@@ -1849,9 +1649,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noStoreData => 'No purchase data yet';
 
   @override
-  String get noSpendingData => 'Add prices to see spending trends';
-
-  @override
   String get monthLabel => 'Month';
 
   @override
@@ -1960,9 +1757,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePhoto => 'Change photo';
 
   @override
-  String get costPerServing => 'Cost per serving';
-
-  @override
   String get recipeNutritionPerServing => 'Per serving';
 
   @override
@@ -1998,16 +1792,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discardChangesConfirm => 'You have unsaved changes. Discard them?';
 
   @override
-  String get recipeCost => 'Recipe cost';
-
-  @override
-  String get recipeCostUnknown => 'Unknown';
-
-  @override
   String get recipePerServing => 'per serving';
-
-  @override
-  String get recipeAverageCost => 'Average recipe cost';
 
   @override
   String ingredientCount(num count) {
@@ -2198,4 +1983,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get servingSize => 'Serving size';
+
+  @override
+  String get statsComingSoonTitle => 'Statistics coming soon';
+
+  @override
+  String get statsComingSoonDescription => 'Pantry insights and charts will arrive in a future update.';
 }

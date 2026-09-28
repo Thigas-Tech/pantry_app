@@ -7,29 +7,22 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_summary.dart';
 import 'package:pantry_app/models/inventory_with_product.dart';
-import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
-import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
-import 'package:pantry_app/providers/price_provider.dart';
-import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
-import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/market_trip_item_screen.dart';
 import 'package:pantry_app/screens/market_trip_screen.dart';
 import 'package:pantry_app/screens/product_detail_screen.dart';
-import 'package:pantry_app/services/price_repository.dart';
 import 'package:pantry_app/services/shopping_list_service.dart';
-import 'package:pantry_app/widgets/quantity_and_pantry_sheet.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
 
 import '../helpers/pump_app.dart';
@@ -38,21 +31,9 @@ class _MockDatabaseHelper extends Mock implements DatabaseHelper {}
 
 class _MockShoppingListService extends Mock implements ShoppingListService {}
 
-class _MockPriceRepository extends Mock implements PriceRepository {}
-
 class _FakeActiveInventoryNotifier extends ActiveInventoryNotifier {
   @override
   Future<int> build() async => 1;
-}
-
-class _FakeSettingsNotifier extends SettingsNotifier {
-  @override
-  Future<Settings> build() async => const Settings(priceTrackingEnabled: true);
-}
-
-class _FakeSettingsTrackingOff extends SettingsNotifier {
-  @override
-  Future<Settings> build() async => const Settings();
 }
 
 /// A shared counter of [Pantry.build] invocations.
@@ -119,23 +100,9 @@ void main() {
     List<InventorySummary> inventories = const [],
     List<ShoppingItem> items = const [],
     _MockShoppingListService? service,
-    Price? trackedPrice,
-    bool priceTracking = true,
     _BuildCounter? pantryCounter,
   }) async {
     final effectiveService = service ?? _MockShoppingListService();
-    final repo = _MockPriceRepository();
-    when(() => repo.formatPrice(any(), any())).thenAnswer(
-      (inv) =>
-          r'$'
-          '${inv.positionalArguments[0]}',
-    );
-    when(
-      () => repo.getLatestPrice(
-        any(),
-        inventoryId: any(named: 'inventoryId'),
-      ),
-    ).thenAnswer((_) async => null);
     final productRepo = createMockProductRepository();
     final db = _MockDatabaseHelper();
     when(db.getInventories).thenAnswer((_) async => []);
@@ -152,23 +119,15 @@ void main() {
         activeInventoryProvider.overrideWith(
           _FakeActiveInventoryNotifier.new,
         ),
-        settingsProvider.overrideWith(
-          priceTracking
-              ? _FakeSettingsNotifier.new
-              : _FakeSettingsTrackingOff.new,
-        ),
         databaseProvider.overrideWithValue(db),
         shoppingListServiceProvider.overrideWithValue(effectiveService),
         shoppingListByInventoryProvider(1).overrideWith((ref) => items),
         shoppingListProvider.overrideWith((ref) => items),
         scannerCameraProvider.overrideWith(() => scanner),
-        priceRepositoryProvider.overrideWithValue(repo),
         productRepositoryProvider.overrideWithValue(productRepo),
-        latestPriceProvider(('1', 1)).overrideWith((ref) => trackedPrice),
         if (pantryCounter != null)
           pantryProvider.overrideWith(() => _FakePantry(pantryCounter)),
         hasConnectionProvider.overrideWith((ref) => Future.value(true)),
-        storesProvider.overrideWith((ref) => const <Store>[]),
       ],
     );
     await tester.pump();
@@ -406,91 +365,12 @@ void main() {
     expect(setup.scanner.state.scanResolution, isNull);
   });
 
-  testWidgets('confirming with a tracked price applies it to the item', (
-    tester,
-  ) async {
-    final setup = await pumpTrip(
-      tester,
-      inventories: [inventory1],
-      trackedPrice: const Price(barcode: '1', price: 4.99),
-    );
-    stubInsertPath(setup.db, setup.service);
-    when(
-      () => setup.service.updateShoppingItemPrice(
-        any(),
-        priceAmount: any(named: 'priceAmount'),
-        priceCurrency: any(named: 'priceCurrency'),
-        priceStore: any(named: 'priceStore'),
-      ),
-    ).thenAnswer((_) async {});
-
-    await openConfirmation(tester, setup.scanner);
-    await tester.tap(find.text('Add to trip'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    verify(
-      () => setup.service.updateShoppingItemPrice(
-        1,
-        priceAmount: 4.99,
-        priceCurrency: any(named: 'priceCurrency'),
-        priceStore: any(named: 'priceStore'),
-      ),
-    ).called(1);
-  });
-
-  testWidgets(
-    'confirming with price tracking disabled does not apply a tracked price',
-    (tester) async {
-      final setup = await pumpTrip(
-        tester,
-        inventories: [inventory1],
-        trackedPrice: const Price(barcode: '1', price: 4.99),
-        priceTracking: false,
-      );
-      stubInsertPath(setup.db, setup.service);
-      when(
-        () => setup.service.updateShoppingItemPrice(
-          any(),
-          priceAmount: any(named: 'priceAmount'),
-          priceCurrency: any(named: 'priceCurrency'),
-          priceStore: any(named: 'priceStore'),
-        ),
-      ).thenAnswer((_) async {});
-
-      await openConfirmation(tester, setup.scanner);
-      await tester.tap(find.text('Add to trip'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-
-      verifyNever(
-        () => setup.service.updateShoppingItemPrice(
-          any(),
-          priceAmount: any(named: 'priceAmount'),
-          priceCurrency: any(named: 'priceCurrency'),
-          priceStore: any(named: 'priceStore'),
-        ),
-      );
-    },
-  );
-
   testWidgets('confirming never opens the pantry prompt', (tester) async {
     final setup = await pumpTrip(
       tester,
       inventories: [inventory1],
-      trackedPrice: const Price(barcode: '1', price: 4.99),
     );
     stubInsertPath(setup.db, setup.service);
-    when(
-      () => setup.service.updateShoppingItemPrice(
-        any(),
-        priceAmount: any(named: 'priceAmount'),
-        priceCurrency: any(named: 'priceCurrency'),
-        priceStore: any(named: 'priceStore'),
-      ),
-    ).thenAnswer((_) async {});
 
     await openConfirmation(tester, setup.scanner);
     await tester.tap(find.text('Add to trip'));
@@ -499,7 +379,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Add to your pantry'), findsNothing);
-    expect(find.byType(QuantityAndPantrySheet), findsNothing);
   });
 
   testWidgets('setting an expiry date in the confirmation saves it once', (
@@ -614,62 +493,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(MarketTripItemScreen), findsNothing);
   });
-
-  testWidgets(
-    'the trip price sheet is pre-filled with the OFF package size',
-    (tester) async {
-      final setup = await pumpTrip(tester, inventories: [inventory1]);
-      await openConfirmation(
-        tester,
-        setup.scanner,
-        product: const Product(
-          barcode: '9',
-          name: 'Yogurt',
-          productQuantity: 0.45,
-          quantity: '3 x 150 g',
-        ),
-      );
-
-      await tester.tap(find.text('Enter price'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      final packageField = tester
-          .widgetList<TextField>(find.byType(TextField))
-          .firstWhere(
-            (w) => w.decoration?.labelText == 'Package size',
-          );
-      expect(packageField.controller?.text, '450');
-    },
-  );
-
-  testWidgets(
-    'the trip price sheet falls back to the serving size for the package',
-    (tester) async {
-      final setup = await pumpTrip(tester, inventories: [inventory1]);
-      await openConfirmation(
-        tester,
-        setup.scanner,
-        product: const Product(
-          barcode: '8',
-          name: 'Snack',
-          servingQuantity: 25,
-          servingSize: '25.0g',
-        ),
-      );
-
-      await tester.tap(find.text('Enter price'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-
-      final packageField = tester
-          .widgetList<TextField>(find.byType(TextField))
-          .firstWhere(
-            (w) => w.decoration?.labelText == 'Package size',
-          );
-      expect(packageField.controller?.text, '25');
-    },
-  );
 
   testWidgets('an unknown barcode opens the add-product screen', (
     tester,

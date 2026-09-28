@@ -11,12 +11,6 @@ part 'shopping_item.freezed.dart';
 /// they mark it as [isPurchased] and may optionally move it to a pantry
 /// ([inventoryId]).
 ///
-/// ## Price tracking
-///
-/// [priceAmount], [priceCurrency], and [priceStore] store price data
-/// entered while shopping. When the item is moved to inventory, the price
-/// is saved to the canonical price table.
-///
 /// ## Ordering
 ///
 /// Pending items are manually ordered via [sortOrder], driven by the
@@ -26,7 +20,6 @@ part 'shopping_item.freezed.dart';
 /// See also:
 /// - ShoppingListDao — data-access layer for this model.
 /// - Product — the static product catalogue this item may reference.
-/// - Price model — the canonical price-history model.
 @freezed
 abstract class ShoppingItem with _$ShoppingItem {
   /// Creates a [ShoppingItem].
@@ -62,23 +55,6 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// Epoch timestamp (milliseconds since Unix epoch) of when the item
     /// was marked as purchased.
     int? datePurchased,
-
-    /// Price entered while shopping, or null if no price was set.
-    double? priceAmount,
-
-    /// ISO 4217 currency code for [priceAmount] (e.g. 'USD', 'BRL').
-    String? priceCurrency,
-
-    /// Store where the item was or will be purchased.
-    String? priceStore,
-
-    /// Package size the recorded price applies to (e.g. 12 for a dozen
-    /// eggs). Carried into the prices table when the item is moved to the
-    /// pantry so unit prices and recipe scaling keep working.
-    double? pricePackageQuantity,
-
-    /// Unit for [pricePackageQuantity] (e.g. 'pieces', 'g', 'L').
-    String? pricePackageUnit,
 
     /// Optional expiry date in ISO 8601 format (YYYY-MM-DD), mirroring
     /// [InventoryItem.expiryDate]. Captured for market trip items so it can

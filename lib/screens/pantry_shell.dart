@@ -12,10 +12,10 @@ import 'package:pantry_app/screens/home_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/screens/settings_screen.dart';
 import 'package:pantry_app/screens/shopping_list_screen.dart';
-import 'package:pantry_app/screens/stats_screen.dart';
 import 'package:pantry_app/utils/changelog_loader.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
+import 'package:pantry_app/widgets/coming_soon_screen.dart';
 import 'package:pantry_app/widgets/whats_new_sheet.dart';
 
 /// The root shell that holds the [NavigationBar] and switches between
@@ -23,8 +23,8 @@ import 'package:pantry_app/widgets/whats_new_sheet.dart';
 ///
 /// Tabs:
 /// - **Home** — inventory dashboard with grouping by expiry status.
-/// - **Recipes** — saved recipes with cost tracking.
-/// - **Stats** — inventory statistics.
+/// - **Recipes** — saved recipes.
+/// - **Stats** — statistics (coming soon).
 /// - **List** — shopping list of items to buy.
 /// - **Settings** — application preferences.
 ///
@@ -194,7 +194,7 @@ class _PantryShellState extends ConsumerState<PantryShell> {
             children: const [
               HomeScreen(),
               RecipeListScreen(),
-              StatsScreen(),
+              StatsComingSoonScreen(),
               ShoppingListScreen(),
               SettingsScreen(),
             ], // children

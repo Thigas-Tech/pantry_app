@@ -62,7 +62,6 @@ removed because the padding value is now computed at runtime.
 
 | File | Status |
 |------|--------|
-| `lib/widgets/price_entry_sheet.dart` | Fixed — `EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPad)` |
 | `lib/widgets/quantity_and_pantry_sheet.dart` | Fixed — same pattern |
 | `lib/widgets/add_to_shopping_list_sheet.dart` | Fixed — custom form and main form button |
 | `lib/widgets/whats_new_sheet.dart` | Already handled — `maxHeight` calc subtracts `bottomPadding` |

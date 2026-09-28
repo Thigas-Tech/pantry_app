@@ -39,7 +39,7 @@ class FinishShoppingTripResult {
 }
 
 /// Owns all shopping list business logic: adding, toggling, deleting,
-/// price updates and the move-purchased-to-inventory transaction.
+/// and the move-purchased-to-inventory transaction.
 ///
 /// Kept free of Riverpod so every method is testable with plain
 /// dependencies. The active inventory id is passed in by the caller (which
@@ -150,31 +150,7 @@ class ShoppingListService {
     return deleted;
   }
 
-  /// Updates only the price fields for the shopping item with the given
-  /// [id].
-  ///
-  /// [pricePackageQuantity] and [pricePackageUnit] describe the package the
-  /// recorded price applies to; they are carried into the prices table when
-  /// the item is later moved into the pantry.
-  Future<void> updateShoppingItemPrice(
-    int id, {
-    double? priceAmount,
-    String? priceCurrency,
-    String? priceStore,
-    double? pricePackageQuantity,
-    String? pricePackageUnit,
-  }) async {
-    await _db.updateShoppingItemPriceFields(
-      id,
-      priceAmount: priceAmount,
-      priceCurrency: priceCurrency,
-      priceStore: priceStore,
-      pricePackageQuantity: pricePackageQuantity,
-      pricePackageUnit: pricePackageUnit,
-    );
-  }
-
-  /// Updates an existing shopping item (name, quantity, unit, or price).
+  /// Updates an existing shopping item (name, quantity, or unit).
   ///
   /// Persists the whole [ShoppingItem] via the DAO's update path. The
   /// caller is responsible for re-reading the item first if only some
@@ -223,9 +199,7 @@ class ShoppingListService {
   /// exist in the cache (re-fetched when the two-month cache flush removed
   /// it), and an inventory item is created (or merged if the same batch —
   /// same barcode, unit, location, and no expiry — already exists in the
-  /// target inventory). Price data on the shopping item is saved to the
-  /// prices table, scoped to the target inventory, carrying the package
-  /// size when recorded. The shopping item is then deleted.
+  /// target inventory). The shopping item is then deleted.
   ///
   /// Items without a barcode or whose product cannot be found anywhere are
   /// skipped.
@@ -431,22 +405,6 @@ class ShoppingListService {
           'Created inventory item — barcode=${item.barcode} '
           'qty=${item.quantity}',
         );
-      }
-
-      if (item.priceAmount != null) {
-        await txn.insert('prices', {
-          'barcode': item.barcode,
-          'price': item.priceAmount,
-          'currency': item.priceCurrency ?? 'USD',
-          'store': item.priceStore,
-          'date_purchased': DateTime.now().millisecondsSinceEpoch,
-          'date_added': DateTime.now().millisecondsSinceEpoch,
-          'sync_status': 'local_only',
-          'is_discounted': 0,
-          'inventory_id': inventoryId,
-          'package_quantity': item.pricePackageQuantity,
-          'package_unit': item.pricePackageUnit,
-        });
       }
 
       await txn.delete(

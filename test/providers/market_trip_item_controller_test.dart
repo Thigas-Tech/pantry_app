@@ -44,14 +44,6 @@ void main() {
       ),
     ).thenAnswer((_) async => 7);
     when(() => service.updateShoppingItem(any())).thenAnswer((_) async {});
-    when(
-      () => service.updateShoppingItemPrice(
-        any(),
-        priceAmount: any(named: 'priceAmount'),
-        priceCurrency: any(named: 'priceCurrency'),
-        priceStore: any(named: 'priceStore'),
-      ),
-    ).thenAnswer((_) async {});
     when(() => service.updateShoppingItemExpiry(any(), any())).thenAnswer(
       (_) async {},
     );
@@ -173,43 +165,6 @@ void main() {
       );
     },
   );
-
-  test('writes an explicit price to the item', () async {
-    when(() => db.markShoppingItemsByBarcode('1', inventoryId: 1)).thenAnswer(
-      (_) async => 1,
-    );
-    when(
-      () => db.getShoppingList(inventoryId: 1),
-    ).thenAnswer(
-      (_) async => const [
-        ShoppingItem(
-          name: 'Milk',
-          barcode: '1',
-          isPurchased: true,
-          id: 5,
-          inventoryId: 1,
-        ),
-      ],
-    );
-
-    await controller().addScannedProduct(
-      product,
-      price: const TripItemPriceInput(
-        amount: 4.99,
-        currency: 'USD',
-        store: 'Corner Store',
-      ),
-    );
-
-    verify(
-      () => service.updateShoppingItemPrice(
-        5,
-        priceAmount: 4.99,
-        priceCurrency: 'USD',
-        priceStore: 'Corner Store',
-      ),
-    ).called(1);
-  });
 
   test('writes an expiry date to the item', () async {
     when(() => db.markShoppingItemsByBarcode('1', inventoryId: 1)).thenAnswer(

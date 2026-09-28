@@ -816,22 +816,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsAbout => 'Sobre';
 
   @override
-  String get priceTracking => 'Controle de Preços';
-
-  @override
-  String get priceTrackingDescription => 'Acompanhe seus gastos.';
-
-  @override
   String get photoCompletenessTitle => 'Fotos dos Produtos';
 
   @override
   String get noCategories => 'Nenhuma categoria';
-
-  @override
-  String get statsEmptyTitle => 'Nenhum item para analisar';
-
-  @override
-  String get statsEmptySubtitle => 'Adicione produtos à sua despensa para ver estatísticas aqui.';
 
   @override
   String get addedThisWeekLabel => 'Esta semana';
@@ -1049,99 +1037,19 @@ class AppLocalizationsPt extends AppLocalizations {
   String get amoledNudgeDismiss => 'Agora nao';
 
   @override
-  String get price => 'Preco';
-
-  @override
-  String get prices => 'Precos';
-
-  @override
-  String get addPrice => 'Adicionar preco';
-
-  @override
-  String get editPrice => 'Editar preco';
-
-  @override
   String get deletePrice => 'Excluir preco';
-
-  @override
-  String get priceAdded => 'Preco adicionado.';
-
-  @override
-  String get priceUpdated => 'Preco atualizado.';
-
-  @override
-  String get priceDeleted => 'Preco excluido.';
-
-  @override
-  String get priceHistory => 'Historico de precos';
-
-  @override
-  String get noPrices => 'Nenhum preco registrado.';
-
-  @override
-  String get recentPrices => 'Precos recentes';
-
-  @override
-  String get viewAllPrices => 'Ver todos';
 
   @override
   String get noPriceTrend => 'Adicione pelo menos dois precos para ver a tendencia.';
 
   @override
-  String get totalValue => 'Valor total';
-
-  @override
-  String get averagePrice => 'Preco medio';
-
-  @override
   String get showPrices => 'Mostrar precos';
-
-  @override
-  String get hidePrices => 'Ocultar precos por privacidade';
-
-  @override
-  String get hidePricesDescription => 'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
-
-  @override
-  String get pricesHidden => 'Precos ocultos.';
-
-  @override
-  String get pricesVisible => 'Precos visiveis.';
-
-  @override
-  String get priceTrackingEnabled => 'Ativar controle de precos';
-
-  @override
-  String get priceRetentionDays => 'Retencao de precos';
-
-  @override
-  String priceRetentionDaysValue(int days) {
-    return 'Manter precos por $days dias (0 = manter para sempre)';
-  }
-
-  @override
-  String get currency => 'Moeda';
-
-  @override
-  String get baseCurrency => 'Moeda base';
 
   @override
   String get baseCurrencyDescription => 'Todos os precos sao exibidos nesta moeda.';
 
   @override
-  String get store => 'Loja';
-
-  @override
   String get addNewStore => 'Adicionar nova loja';
-
-  @override
-  String get storeAdded => 'Loja adicionada';
-
-  @override
-  String get storeAlreadyExists => 'Já existe uma loja com este nome';
-
-  @override
-  String get storeName => 'Nome da loja';
 
   @override
   String get discounted => 'Com desconto';
@@ -1153,62 +1061,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get confirmDeletePrice => 'Excluir esta entrada de preco?';
 
   @override
-  String get syncToOpenPrices => 'Compartilhar com Open Prices';
-
-  @override
-  String get syncToOpenPricesDescription => 'Contribua com seus dados de preco para o banco de dados comunitario.';
-
-  @override
-  String get openPricesToken => 'Token da API Open Prices';
-
-  @override
-  String get openPricesTokenDescription => 'Token gerado da sua conta do Open Food Facts.';
-
-  @override
-  String get openPricesTokenSaved => 'Token salvo.';
-
-  @override
-  String get openPricesSyncStarted => 'Sincronizando precos...';
-
-  @override
-  String openPricesSyncComplete(int count) {
-    return '$count precos sincronizados.';
-  }
-
-  @override
-  String get priceSyncStatus => 'Sincronizado';
-
-  @override
-  String get priceSyncPending => 'Sincronizacao pendente';
-
-  @override
-  String get priceSyncFailed => 'Falha na sincronizacao';
-
-  @override
-  String get priceTrendUp => 'Precos estao subindo';
-
-  @override
-  String get priceTrendDown => 'Precos estao caindo';
-
-  @override
-  String get priceTrendStable => 'Precos estaveis';
-
-  @override
   String get datePurchased => 'Data da compra';
-
-  @override
-  String itemWithPriceCount(int count, int total) {
-    return '$count de $total itens tem precos';
-  }
-
-  @override
-  String get openPricesProofExplanation => 'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
-
-  @override
-  String get openPricesConsentTitle => 'Contribuir com Open Prices';
-
-  @override
-  String get openPricesConsentBody => 'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
 
   @override
   String get iUnderstand => 'Entendi';
@@ -1327,24 +1180,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get backToSearch => 'Voltar a busca';
 
   @override
-  String get removePrice => 'Preco removido';
-
-  @override
-  String shoppingTotal(String total) {
-    return 'Total: $total';
-  }
-
-  @override
-  String totalWithEstimated(String total, String estimated) {
-    return 'Total: $total (incl. $estimated estimado)';
-  }
-
-  @override
-  String estimatedPrice(String price) {
-    return 'Est. $price';
-  }
-
-  @override
   String get marketTripTitle => 'Ida ao mercado';
 
   @override
@@ -1374,12 +1209,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get useEstimate => 'Usar estimativa';
-
-  @override
-  String get enterPrice => 'Informar preco';
-
-  @override
-  String get priceNotSet => 'Sem preco';
 
   @override
   String get addExpiryDate => 'Adicionar data de validade';
@@ -1451,9 +1280,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get choosePantry => 'Escolher despensa';
 
   @override
-  String get addToPantrySkipped => 'Preco salvo. Adicione pela pagina do produto para acompanhar.';
-
-  @override
   String get invalidPriceAmount => 'Digite um valor de preço válido';
 
   @override
@@ -1461,17 +1287,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get dismiss => 'Dispensar';
-
-  @override
-  String get priceHidden => 'Preco oculto';
-
-  @override
-  String get priceTrendHint => 'Adicione outro preco para ver a tendencia';
-
-  @override
-  String priceChartTooltip(String date, String price) {
-    return '$date - $price';
-  }
 
   @override
   String get scanFailed => 'Falha ao escanear codigo de barras.';
@@ -1547,21 +1362,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get unitLiter => 'L';
-
-  @override
-  String get pricePerPiece => '/unidade';
-
-  @override
-  String get pricePerHundredGrams => '/100 g';
-
-  @override
-  String get pricePerKilogram => '/kg';
-
-  @override
-  String get pricePerLiter => '/L';
-
-  @override
-  String get pricePerHundredMilliliters => '/100 ml';
 
   @override
   String get packageQuantity => 'Quantidade da embalagem';
@@ -1849,9 +1649,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noStoreData => 'Sem dados de compra';
 
   @override
-  String get noSpendingData => 'Adicione precos para ver tendencias';
-
-  @override
   String get monthLabel => 'Mes';
 
   @override
@@ -1960,9 +1757,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get changePhoto => 'Alterar foto';
 
   @override
-  String get costPerServing => 'Custo por porcao';
-
-  @override
   String get recipeNutritionPerServing => 'Por porcao';
 
   @override
@@ -1998,16 +1792,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get discardChangesConfirm => 'Você tem alterações não salvas. Descartá-las?';
 
   @override
-  String get recipeCost => 'Custo da receita';
-
-  @override
-  String get recipeCostUnknown => 'Desconhecido';
-
-  @override
   String get recipePerServing => 'por porção';
-
-  @override
-  String get recipeAverageCost => 'Custo médio das receitas';
 
   @override
   String ingredientCount(num count) {
@@ -2198,6 +1983,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get servingSize => 'Porção';
+
+  @override
+  String get statsComingSoonTitle => 'Estatisticas em breve';
+
+  @override
+  String get statsComingSoonDescription => 'As estatisticas e graficos da despensa chegarao em uma atualizacao futura.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -3012,22 +2803,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get settingsAbout => 'Sobre';
 
   @override
-  String get priceTracking => 'Controle de Preços';
-
-  @override
-  String get priceTrackingDescription => 'Acompanhe seus gastos.';
-
-  @override
   String get photoCompletenessTitle => 'Fotos dos Produtos';
 
   @override
   String get noCategories => 'Nenhuma categoria';
-
-  @override
-  String get statsEmptyTitle => 'Nenhum item para analisar';
-
-  @override
-  String get statsEmptySubtitle => 'Adicione produtos à sua despensa para ver estatísticas aqui.';
 
   @override
   String get addedThisWeekLabel => 'Esta semana';
@@ -3245,99 +3024,19 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get amoledNudgeDismiss => 'Agora nao';
 
   @override
-  String get price => 'Preco';
-
-  @override
-  String get prices => 'Precos';
-
-  @override
-  String get addPrice => 'Adicionar preco';
-
-  @override
-  String get editPrice => 'Editar preco';
-
-  @override
   String get deletePrice => 'Excluir preco';
-
-  @override
-  String get priceAdded => 'Preco adicionado.';
-
-  @override
-  String get priceUpdated => 'Preco atualizado.';
-
-  @override
-  String get priceDeleted => 'Preco excluido.';
-
-  @override
-  String get priceHistory => 'Historico de precos';
-
-  @override
-  String get noPrices => 'Nenhum preco registrado.';
-
-  @override
-  String get recentPrices => 'Precos recentes';
-
-  @override
-  String get viewAllPrices => 'Ver todos';
 
   @override
   String get noPriceTrend => 'Adicione pelo menos dois precos para ver a tendencia.';
 
   @override
-  String get totalValue => 'Valor total';
-
-  @override
-  String get averagePrice => 'Preco medio';
-
-  @override
   String get showPrices => 'Mostrar precos';
-
-  @override
-  String get hidePrices => 'Ocultar precos por privacidade';
-
-  @override
-  String get hidePricesDescription => 'Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.';
-
-  @override
-  String get pricesHidden => 'Precos ocultos.';
-
-  @override
-  String get pricesVisible => 'Precos visiveis.';
-
-  @override
-  String get priceTrackingEnabled => 'Ativar controle de precos';
-
-  @override
-  String get priceRetentionDays => 'Retencao de precos';
-
-  @override
-  String priceRetentionDaysValue(int days) {
-    return 'Manter precos por $days dias (0 = manter para sempre)';
-  }
-
-  @override
-  String get currency => 'Moeda';
-
-  @override
-  String get baseCurrency => 'Moeda base';
 
   @override
   String get baseCurrencyDescription => 'Todos os precos sao exibidos nesta moeda.';
 
   @override
-  String get store => 'Loja';
-
-  @override
   String get addNewStore => 'Adicionar nova loja';
-
-  @override
-  String get storeAdded => 'Loja adicionada';
-
-  @override
-  String get storeAlreadyExists => 'Já existe uma loja com este nome';
-
-  @override
-  String get storeName => 'Nome da loja';
 
   @override
   String get discounted => 'Com desconto';
@@ -3349,62 +3048,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get confirmDeletePrice => 'Excluir esta entrada de preco?';
 
   @override
-  String get syncToOpenPrices => 'Compartilhar com Open Prices';
-
-  @override
-  String get syncToOpenPricesDescription => 'Contribua com seus dados de preco para o banco de dados comunitario.';
-
-  @override
-  String get openPricesToken => 'Token da API Open Prices';
-
-  @override
-  String get openPricesTokenDescription => 'Token gerado da sua conta do Open Food Facts.';
-
-  @override
-  String get openPricesTokenSaved => 'Token salvo.';
-
-  @override
-  String get openPricesSyncStarted => 'Sincronizando precos...';
-
-  @override
-  String openPricesSyncComplete(int count) {
-    return '$count precos sincronizados.';
-  }
-
-  @override
-  String get priceSyncStatus => 'Sincronizado';
-
-  @override
-  String get priceSyncPending => 'Sincronizacao pendente';
-
-  @override
-  String get priceSyncFailed => 'Falha na sincronizacao';
-
-  @override
-  String get priceTrendUp => 'Precos estao subindo';
-
-  @override
-  String get priceTrendDown => 'Precos estao caindo';
-
-  @override
-  String get priceTrendStable => 'Precos estaveis';
-
-  @override
   String get datePurchased => 'Data da compra';
-
-  @override
-  String itemWithPriceCount(int count, int total) {
-    return '$count de $total itens tem precos';
-  }
-
-  @override
-  String get openPricesProofExplanation => 'Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.';
-
-  @override
-  String get openPricesConsentTitle => 'Contribuir com Open Prices';
-
-  @override
-  String get openPricesConsentBody => 'Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.';
 
   @override
   String get iUnderstand => 'Entendi';
@@ -3523,24 +3167,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get backToSearch => 'Voltar a busca';
 
   @override
-  String get removePrice => 'Preco removido';
-
-  @override
-  String shoppingTotal(String total) {
-    return 'Total: $total';
-  }
-
-  @override
-  String totalWithEstimated(String total, String estimated) {
-    return 'Total: $total (incl. $estimated estimado)';
-  }
-
-  @override
-  String estimatedPrice(String price) {
-    return 'Est. $price';
-  }
-
-  @override
   String get marketTripTitle => 'Ida ao mercado';
 
   @override
@@ -3570,12 +3196,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get useEstimate => 'Usar estimativa';
-
-  @override
-  String get enterPrice => 'Informar preco';
-
-  @override
-  String get priceNotSet => 'Sem preco';
 
   @override
   String get addExpiryDate => 'Adicionar data de validade';
@@ -3647,9 +3267,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get choosePantry => 'Escolher despensa';
 
   @override
-  String get addToPantrySkipped => 'Preco salvo. Adicione pela pagina do produto para acompanhar.';
-
-  @override
   String get invalidPriceAmount => 'Digite um valor de preço válido';
 
   @override
@@ -3657,17 +3274,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get dismiss => 'Dispensar';
-
-  @override
-  String get priceHidden => 'Preco oculto';
-
-  @override
-  String get priceTrendHint => 'Adicione outro preco para ver a tendencia';
-
-  @override
-  String priceChartTooltip(String date, String price) {
-    return '$date - $price';
-  }
 
   @override
   String get scanFailed => 'Falha ao escanear codigo de barras.';
@@ -3743,21 +3349,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get unitLiter => 'L';
-
-  @override
-  String get pricePerPiece => '/unidade';
-
-  @override
-  String get pricePerHundredGrams => '/100 g';
-
-  @override
-  String get pricePerKilogram => '/kg';
-
-  @override
-  String get pricePerLiter => '/L';
-
-  @override
-  String get pricePerHundredMilliliters => '/100 ml';
 
   @override
   String get packageQuantity => 'Quantidade da embalagem';
@@ -4045,9 +3636,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get noStoreData => 'Sem dados de compra';
 
   @override
-  String get noSpendingData => 'Adicione precos para ver tendencias';
-
-  @override
   String get monthLabel => 'Mes';
 
   @override
@@ -4156,9 +3744,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get changePhoto => 'Alterar foto';
 
   @override
-  String get costPerServing => 'Custo por porcao';
-
-  @override
   String get recipeNutritionPerServing => 'Por porcao';
 
   @override
@@ -4194,16 +3779,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get discardChangesConfirm => 'Você tem alterações não salvas. Descartá-las?';
 
   @override
-  String get recipeCost => 'Custo da receita';
-
-  @override
-  String get recipeCostUnknown => 'Desconhecido';
-
-  @override
   String get recipePerServing => 'por porção';
-
-  @override
-  String get recipeAverageCost => 'Custo médio das receitas';
 
   @override
   String ingredientCount(num count) {
@@ -4394,4 +3970,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get servingSize => 'Porção';
+
+  @override
+  String get statsComingSoonTitle => 'Estatisticas em breve';
+
+  @override
+  String get statsComingSoonDescription => 'As estatisticas e graficos da despensa chegarao em uma atualizacao futura.';
 }

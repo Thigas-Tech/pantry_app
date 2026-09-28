@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.0.20+16] — 2026-09-28
+
+### Removed
+
+- **Price tracking**: the entire price feature was removed — the prices and
+  stores tables, PriceDao, PriceRepository, CurrencyService, the Open Prices
+  client/service, all price widgets (entry sheet, history chart, privacy
+  mask, visibility toggle, per-unit label), the price history screen, and
+  the price settings (tracking toggle, base currency, retention, hide
+  prices, Open Prices opt-in). Price entry was also removed from the market
+  trip, the shopping list, the product detail screen, and the inventory
+  cards.
+- **Recipe costs**: recipe cost banners, per-ingredient cost rows, and the
+  cook-history cost-at-time were removed. FEFO cooking and quantity-based
+  shortage checks are unchanged.
+- **Stats screen**: replaced by a coming-soon placeholder; the stats
+  provider, PantryStats model, and the DAO aggregation queries were
+  removed.
+
+### Changed
+
+- **Database baseline amended**: the pre-release v1 baseline dropped the
+  prices and stores tables, the shopping_list price columns, and
+  recipe_history.cost_at_time. The schema now has nine tables. Existing
+  pre-release installs keep the dormant columns harmlessly.
+- **Onboarding** settings page no longer shows the price-tracking switch
+  or the currency picker.
+- **Docs** updated across the architecture guides and README; the price
+  tracking and Open Prices reference docs were deleted.
+
 ## [0.0.19+15] — 2026-09-23
 
 ### Removed

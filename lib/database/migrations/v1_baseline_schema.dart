@@ -5,12 +5,13 @@ import 'package:sqflite/sqflite.dart';
 
 /// The baseline schema.
 ///
-/// Creates the complete database from scratch: eleven tables, twenty-nine
-/// indexes, and the default "Home" inventory. This migration is the single
-/// source of truth for the schema. It was amended once while the app was
-/// still pre-release to drop the removed produce feature's plu_code and
-/// product_type columns; from here on every schema change is a new numbered
-/// migration with its own [up] and [down].
+/// Creates the complete database from scratch: nine tables and the default
+/// "Home" inventory. This migration is the single source of truth for the
+/// schema. It was amended while the app was still pre-release to drop the
+/// removed produce feature's plu_code and product_type columns and the
+/// removed price-tracking feature's prices and stores tables; from here on
+/// every schema change is a new numbered migration with its own [up] and
+/// [down].
 ///
 /// The [down] method drops every table in reverse foreign-key dependency
 /// order so the database can be reset to an empty file.
@@ -27,9 +28,7 @@ class MigrationV1 extends Migration {
     await _createInventories(db);
     await _createInventory(db);
     await _createProductSubmissionQueue(db);
-    await _createPrices(db);
     await _createShoppingList(db);
-    await _createStores(db);
     await _createRecipes(db);
     await _createRecipeIngredients(db);
     await _createRecipeHistory(db);
@@ -54,10 +53,8 @@ class MigrationV1 extends Migration {
     'shopping_list',
     'inventory',
     'recipe_history',
-    'prices',
     'product_submission_queue',
     'scan_history',
-    'stores',
     'products',
     'inventories',
   ];
@@ -142,35 +139,6 @@ class MigrationV1 extends Migration {
     ''');
   }
 
-  Future<void> _createPrices(DatabaseExecutor db) async {
-    // No foreign keys by design: a price is the user's own record and must
-    // survive product cache flushes and pantry deletion.
-    await db.execute('''
-      CREATE TABLE prices (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        barcode TEXT NOT NULL,
-        price REAL NOT NULL,
-        currency TEXT NOT NULL,
-        store TEXT,
-        is_discounted INTEGER NOT NULL DEFAULT 0,
-        regular_price REAL,
-        date_purchased INTEGER,
-        sync_status TEXT NOT NULL DEFAULT 'local_only',
-        open_prices_id INTEGER,
-        location_osm_id TEXT,
-        location_osm_type TEXT,
-        receipt_series TEXT,
-        receipt_number TEXT,
-        receipt_item_index INTEGER,
-        notes TEXT,
-        package_quantity REAL,
-        package_unit TEXT,
-        date_added INTEGER NOT NULL,
-        inventory_id INTEGER NOT NULL DEFAULT 1
-      )
-    ''');
-  }
-
   Future<void> _createShoppingList(DatabaseExecutor db) async {
     await db.execute('''
       CREATE TABLE shopping_list (
@@ -183,27 +151,12 @@ class MigrationV1 extends Migration {
         inventory_id INTEGER,
         date_added INTEGER NOT NULL,
         date_purchased INTEGER,
-        price_amount REAL,
-        price_currency TEXT,
-        price_store TEXT,
-        price_package_quantity REAL,
-        price_package_unit TEXT,
-        price_photo_path TEXT,
         expiry_date TEXT,
         sort_order REAL NOT NULL DEFAULT 0,
         FOREIGN KEY (barcode) REFERENCES products(barcode)
           ON DELETE SET NULL,
         FOREIGN KEY (inventory_id) REFERENCES inventories(id)
           ON DELETE SET NULL
-      )
-    ''');
-  }
-
-  Future<void> _createStores(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE stores (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE
       )
     ''');
   }
@@ -246,7 +199,6 @@ class MigrationV1 extends Migration {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         recipe_id INTEGER NOT NULL,
         made_at INTEGER NOT NULL,
-        cost_at_time REAL DEFAULT 0,
         ingredient_snapshot TEXT
       )
     ''');
@@ -277,12 +229,6 @@ class MigrationV1 extends Migration {
           ' ON inventory(inventory_id, expiry_date)',
       'CREATE INDEX idx_inventory_inventory_barcode'
           ' ON inventory(inventory_id, barcode)',
-      'CREATE INDEX idx_prices_barcode ON prices(barcode)',
-      'CREATE INDEX idx_prices_date ON prices(date_purchased)',
-      'CREATE INDEX idx_prices_sync_status ON prices(sync_status)',
-      'CREATE INDEX idx_prices_inventory_id ON prices(inventory_id)',
-      'CREATE INDEX idx_prices_barcode_inventory_date'
-          ' ON prices(barcode, inventory_id, date_purchased, id)',
       'CREATE INDEX idx_submission_queue_retry'
           ' ON product_submission_queue(next_retry_at)',
       'CREATE INDEX idx_shopping_barcode ON shopping_list(barcode)',

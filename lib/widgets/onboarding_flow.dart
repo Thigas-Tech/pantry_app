@@ -272,24 +272,6 @@ class _OnboardingSettingsPage extends StatelessWidget {
                 child: Column(
                   children: [
                     _SettingsTile(
-                      title: l10n.priceTrackingEnabled,
-                      trailing: Switch.adaptive(
-                        value: settings.priceTrackingEnabled,
-                        onChanged: (v) => ref
-                            .read(settingsProvider.notifier)
-                            .setPriceTrackingEnabled(value: v),
-                      ),
-                    ),
-                    _SettingsTile(
-                      title: l10n.currency,
-                      subtitle: settings.baseCurrency,
-                      onTap: () => _showCurrencyPicker(
-                        context,
-                        ref,
-                        settings.baseCurrency,
-                      ),
-                    ),
-                    _SettingsTile(
                       title: l10n.dataRetention,
                       subtitle: l10n.retentionDaysValue(settings.retentionDays),
                       onTap: () => _showIntDialog(
@@ -328,85 +310,6 @@ class _OnboardingSettingsPage extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
-  }
-
-  void _showCurrencyPicker(
-    BuildContext context,
-    WidgetRef ref,
-    String current,
-  ) {
-    const currencies = [
-      'USD',
-      'BRL',
-      'EUR',
-      'GBP',
-      'JPY',
-      'CAD',
-      'AUD',
-      'CHF',
-      'ARS',
-      'MXN',
-      'CNY',
-      'INR',
-      'KRW',
-      'SEK',
-      'NOK',
-      'DKK',
-      'PLN',
-      'CZK',
-      'CLP',
-      'COP',
-      'ZAR',
-      'NGN',
-      'TRY',
-      'ILS',
-      'SGD',
-      'HKD',
-      'TWD',
-      'THB',
-      'MYR',
-      'PHP',
-      'IDR',
-      'VND',
-      'RUB',
-    ];
-    unawaited(
-      showModalBottomSheet<String>(
-        context: context,
-        builder: (ctx) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  AppLocalizations.of(context)!.baseCurrency,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              SizedBox(
-                height: 300,
-                child: ListView(
-                  children: currencies.map((code) {
-                    final isSelected = code == current;
-                    return ListTile(
-                      title: Text(code),
-                      trailing: isSelected ? const Icon(Icons.check) : null,
-                      onTap: () {
-                        ref
-                            .read(settingsProvider.notifier)
-                            .setBaseCurrency(code);
-                        Navigator.pop(ctx);
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -461,13 +364,11 @@ class _SettingsTile extends StatelessWidget {
   const _SettingsTile({
     required this.title,
     this.subtitle,
-    this.trailing,
     this.onTap,
   });
 
   final String title;
   final String? subtitle;
-  final Widget? trailing;
   final VoidCallback? onTap;
 
   @override
@@ -475,7 +376,6 @@ class _SettingsTile extends StatelessWidget {
     return ListTile(
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: trailing,
       onTap: onTap,
     );
   }

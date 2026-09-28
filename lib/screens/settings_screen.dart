@@ -7,7 +7,6 @@ import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/connectivity_provider.dart';
-import 'package:pantry_app/providers/currency_service_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_for_barcode_provider.dart';
@@ -15,13 +14,11 @@ import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
-import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/recipe_provider.dart';
 import 'package:pantry_app/providers/scan_history_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
-import 'package:pantry_app/providers/stats_provider.dart';
 import 'package:pantry_app/providers/theme_provider.dart';
 import 'package:pantry_app/providers/ui_flags_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
@@ -452,116 +449,12 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           ExpansionTile(
-            leading: const Icon(Icons.attach_money),
-            title: Text(l10n.priceTracking),
-            children: [
-              SwitchListTile(
-                title: Text(l10n.priceTrackingEnabled),
-                value: settings.priceTrackingEnabled,
-                onChanged: (value) {
-                  logInfo('Price tracking toggled: $value');
-                  ref
-                      .read(settingsProvider.notifier)
-                      .setPriceTrackingEnabled(value: value);
-
-                  if (context.mounted) {
-                    SnackbarHelper.showInfo(
-                      context,
-                      value ? l10n.pricesVisible : l10n.pricesHidden,
-                    );
-                  }
-                },
-              ),
-              ListTile(
-                title: Text(l10n.baseCurrency),
-                subtitle: Text(settings.baseCurrency),
-                onTap: () => _showCurrencyPicker(context, ref),
-              ),
-              ListTile(
-                title: Text(l10n.priceRetentionDays),
-                subtitle: Text(
-                  l10n.priceRetentionDaysValue(settings.priceRetentionDays),
-                ),
-                onTap: () => _showPriceRetentionDialog(context, ref),
-              ),
-              SwitchListTile(
-                title: Text(l10n.hidePrices),
-                subtitle: Text(l10n.hidePricesDescription),
-                value: settings.pricesHidden,
-                onChanged: (value) {
-                  logInfo('Prices hidden toggled: $value');
-                  ref
-                      .read(settingsProvider.notifier)
-                      .setPricesHidden(value: value);
-
-                  if (context.mounted) {
-                    SnackbarHelper.showInfo(
-                      context,
-                      value ? l10n.pricesHidden : l10n.pricesVisible,
-                    );
-                  }
-                },
-              ),
-              const Divider(),
-              SwitchListTile(
-                title: Text(l10n.syncToOpenPrices),
-                subtitle: Text(l10n.syncToOpenPricesDescription),
-                value: settings.openPricesSyncEnabled,
-                onChanged: (value) async {
-                  if (value) {
-                    final consent = await _showOpenPricesConsentDialog(
-                      context,
-                      l10n,
-                    );
-                    if (consent != true) return;
-                  }
-                  logInfo('Open Prices sync toggled: $value');
-                  ref
-                      .read(settingsProvider.notifier)
-                      .setOpenPricesSyncEnabled(value: value);
-                },
-              ),
-              if (settings.openPricesSyncEnabled) ...[
-                ListTile(
-                  title: Text(l10n.openPricesToken),
-                  subtitle: Text(l10n.openPricesTokenDescription),
-                  onTap: () => _showOpenPricesTokenDialog(context, ref),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Text(
-                    l10n.openPricesProofExplanation,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          ExpansionTile(
             leading: const Icon(Icons.cleaning_services),
             title: Text(l10n.settingsMaintenance),
             children: [
               ListTile(
                 title: Text(l10n.flushCache),
                 subtitle: Text(l10n.flushCacheSub),
-                trailing: Consumer(
-                  builder: (context, ref, child) {
-                    final size = ref.watch(currencyCacheSizeProvider).value;
-                    if (size == null || size == 0) {
-                      return const SizedBox.shrink();
-                    }
-                    return Text(
-                      _formatBytes(size, l10n),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant,
-                      ),
-                    );
-                  },
-                ),
                 onTap: () => _flushCache(context, ref),
               ),
             ],
@@ -631,12 +524,6 @@ class SettingsScreen extends ConsumerWidget {
         ..invalidate(inventoryCountProvider)
         ..invalidate(totalInventoryCountProvider)
         ..invalidate(averageNutriscoreProvider)
-        ..invalidate(statsProvider)
-        ..invalidate(priceHistoryProvider)
-        ..invalidate(priceChartPointsProvider)
-        ..invalidate(latestPriceProvider)
-        ..invalidate(inventoryValueProvider)
-        ..invalidate(averagePriceProvider)
         ..invalidate(allRecipesProvider)
         ..invalidate(allRecipeIngredientsProvider)
         ..invalidate(recipeIngredientsWithProductsProvider)
@@ -647,7 +534,6 @@ class SettingsScreen extends ConsumerWidget {
         ..invalidate(pendingShoppingCountProvider)
         ..invalidate(inventoryProductsProvider)
         ..invalidate(scanHistoryProvider)
-        ..invalidate(storesProvider)
         ..invalidate(productRepositoryProvider)
         ..invalidate(productByBarcodeProvider)
         ..invalidate(inventoryForBarcodeProvider);
@@ -967,170 +853,6 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _showCurrencyPicker(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context)!;
-    final current = await ref.read(settingsProvider.future);
-    if (!context.mounted) return;
-    final currencies = [
-      'USD',
-      'BRL',
-      'EUR',
-      'GBP',
-      'JPY',
-      'CAD',
-      'AUD',
-      'CHF',
-      'CNY',
-      'INR',
-      'MXN',
-      'ARS',
-      'CLP',
-      'COP',
-      'ZAR',
-      'NGN',
-      'TRY',
-      'ILS',
-      'SGD',
-      'HKD',
-      'TWD',
-      'KRW',
-      'SEK',
-      'NOK',
-      'DKK',
-      'PLN',
-      'CZK',
-      'RUB',
-      'THB',
-      'MYR',
-      'PHP',
-      'IDR',
-      'VND',
-    ];
-    final selected = await showDialog<String>(
-      context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text(l10n.baseCurrency),
-        children: [
-          SizedBox(
-            height: 320,
-            width: 240,
-            child: RadioGroup<String>(
-              groupValue: current.baseCurrency,
-              onChanged: (value) => Navigator.pop(ctx, value),
-              child: ListView.builder(
-                itemCount: currencies.length,
-                itemBuilder: (ctx, i) => RadioListTile<String>(
-                  value: currencies[i],
-                  title: Text(currencies[i]),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (selected != null && selected != current.baseCurrency) {
-      logInfo('Base currency changed to $selected');
-      ref.read(settingsProvider.notifier).setBaseCurrency(selected);
-
-      if (context.mounted) {
-        SnackbarHelper.showInfo(
-          context,
-          '${l10n.currency}: $selected',
-        );
-      }
-    }
-  }
-
-  Future<void> _showPriceRetentionDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final current = await ref.read(settingsProvider.future);
-    if (!context.mounted) return;
-    final days = await _showDaysDialog(
-      context,
-      title: l10n.priceRetentionDays,
-      initialValue: current.priceRetentionDays,
-    );
-    if (days != null) {
-      logInfo('Price retention changed to $days days');
-      ref.read(settingsProvider.notifier).setPriceRetentionDays(days);
-
-      if (context.mounted) {
-        SnackbarHelper.showInfo(
-          context,
-          l10n.priceRetentionDaysValue(days),
-        );
-      }
-    }
-  }
-
-  Future<bool?> _showOpenPricesConsentDialog(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.openPricesConsentTitle),
-        content: Text(l10n.openPricesConsentBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.iUnderstand),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _showOpenPricesTokenDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final current = await ref.read(settingsProvider.future);
-    if (!context.mounted) return;
-    final controller = TextEditingController(text: current.openPricesToken);
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.openPricesToken),
-        content: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: l10n.bearerTokenLabel,
-          ),
-          obscureText: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
-    );
-    if (result != null) {
-      logInfo('Open Prices API token updated');
-      ref.read(settingsProvider.notifier).setOpenPricesToken(result);
-
-      if (context.mounted) {
-        SnackbarHelper.showInfo(context, l10n.openPricesTokenSaved);
-      }
-    }
-  }
-
   Future<int?> _showDaysDialog(
     BuildContext context, {
     required String title,
@@ -1429,12 +1151,4 @@ class SettingsScreen extends ConsumerWidget {
       await openAppSettings();
     }
   }
-}
-
-String _formatBytes(int bytes, AppLocalizations l10n) {
-  if (bytes < 1024) return l10n.bytesUnit(bytes);
-  if (bytes < 1024 * 1024) {
-    return l10n.kbUnit((bytes / 1024).toStringAsFixed(1));
-  }
-  return l10n.mbUnit((bytes / (1024 * 1024)).toStringAsFixed(1));
 }

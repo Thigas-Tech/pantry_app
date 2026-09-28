@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pantry_app/database/database_helper.dart';
 import 'package:pantry_app/models/inventory_item.dart';
-import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/product_nutrient.dart';
 import 'package:pantry_app/models/recipe.dart';
@@ -124,76 +123,6 @@ void main() {
 
       final tempItems = await db.getInventoryItems(inventoryId: id);
       expect(tempItems, isEmpty);
-    });
-  });
-
-  group('Prices per inventory', () {
-    test('getLatestPrice and getPricesByBarcode are scoped', () async {
-      await db.insertProduct(const Product(barcode: '123', name: 'Coffee'));
-      final workId = await db.createInventory('Work');
-
-      await db.insertPrice(
-        const Price(barcode: '123', price: 10, datePurchased: 100),
-      );
-      await db.insertPrice(
-        Price(
-          barcode: '123',
-          price: 20,
-          inventoryId: workId,
-          datePurchased: 200,
-        ),
-      );
-
-      final homeLatest = await db.getLatestPrice(
-        '123',
-        inventoryId: 1,
-      );
-      final workLatest = await db.getLatestPrice(
-        '123',
-        inventoryId: workId,
-      );
-      expect(homeLatest!.price, 10);
-      expect(workLatest!.price, 20);
-
-      final homeHistory = await db.getPricesByBarcode(
-        '123',
-        inventoryId: 1,
-      );
-      expect(homeHistory, hasLength(1));
-      expect(homeHistory.first.price, 10);
-    });
-
-    test('deleteInventory preserves price rows', () async {
-      await db.insertProduct(const Product(barcode: '123', name: 'Coffee'));
-      final workId = await db.createInventory('Work');
-
-      await db.insertPrice(
-        const Price(barcode: '123', price: 10, datePurchased: 100),
-      );
-      await db.insertPrice(
-        Price(
-          barcode: '123',
-          price: 20,
-          inventoryId: workId,
-          datePurchased: 200,
-        ),
-      );
-
-      await db.deleteInventory(workId);
-
-      // The inventory is gone...
-      final list = await db.getInventories();
-      expect(list.any((e) => e['id'] == workId), isFalse);
-
-      // ...but both price rows survive (barcode observations are not deleted).
-      expect(
-        (await db.getLatestPrice('123', inventoryId: 1))!.price,
-        10,
-      );
-      expect(
-        (await db.getLatestPrice('123', inventoryId: workId))!.price,
-        20,
-      );
     });
   });
 
@@ -534,15 +463,6 @@ void main() {
       expect(product, isNull);
     });
 
-    test('preserves price history for products not in the pantry', () async {
-      await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
-      await db.insertPrice(const Price(barcode: 'p1', price: 9.99));
-
-      await db.cleanupOldEntries();
-
-      expect(await db.getPriceCountByBarcode('p1'), 1);
-    });
-
     test('preserves manual products even when not in the pantry', () async {
       await db.insertProduct(
         const Product(barcode: 'manual1', name: 'Manual', source: 'manual'),
@@ -551,54 +471,6 @@ void main() {
       await db.cleanupOldEntries();
 
       expect(await db.getProduct('manual1'), isNotNull);
-    });
-
-    test('preserves cached products referenced by prices', () async {
-      final freshSync = DateTime.now().millisecondsSinceEpoch;
-      await db.insertProduct(
-        const Product(barcode: 'p1', name: 'P1').copyWith(
-          lastSynced: freshSync,
-        ),
-      );
-      await db.insertPrice(const Price(barcode: 'p1', price: 9.99));
-
-      await db.cleanupOldEntries();
-
-      expect(await db.getProduct('p1'), isNotNull);
-    });
-
-    test('prunes prices older than the configured retention', () async {
-      await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
-      await db.insertPrice(
-        Price(
-          barcode: 'p1',
-          price: 9.99,
-          datePurchased: DateTime.now()
-              .subtract(const Duration(days: 100))
-              .millisecondsSinceEpoch,
-        ),
-      );
-
-      await db.cleanupOldEntries(priceRetentionDays: 60);
-
-      expect(await db.getPriceCountByBarcode('p1'), 0);
-    });
-
-    test('keeps recent prices when retention is configured', () async {
-      await db.insertProduct(const Product(barcode: 'p1', name: 'P1'));
-      await db.insertPrice(
-        Price(
-          barcode: 'p1',
-          price: 9.99,
-          datePurchased: DateTime.now()
-              .subtract(const Duration(days: 10))
-              .millisecondsSinceEpoch,
-        ),
-      );
-
-      await db.cleanupOldEntries(priceRetentionDays: 60);
-
-      expect(await db.getPriceCountByBarcode('p1'), 1);
     });
   });
 
@@ -684,13 +556,13 @@ void main() {
   });
 
   group('counts', () {
-    test('getProductCount and getInventoryCount', () async {
+    test('inventory count methods', () async {
       await db.insertProduct(const Product(barcode: 'a', name: 'A'));
       await db.insertProduct(const Product(barcode: 'b', name: 'B'));
       await db.insertInventoryItem(
         const InventoryItem(barcode: 'a'),
       );
-      expect(await db.getProductCount(), 2);
+      expect((await db.getAllProducts()).length, 2);
       expect(await db.getInventoryCount(), 1);
       expect(await db.getInventoryCount(inventoryId: 1), 1);
     });
@@ -708,7 +580,7 @@ void main() {
         const Product(barcode: 'manual2', name: 'Manual2', source: 'manual'),
       );
 
-      expect(await db.getProductCount(), 3);
+      expect((await db.getAllProducts()).length, 3);
 
       await db.clearCachedProducts();
 
@@ -717,16 +589,16 @@ void main() {
       // Manual products preserved.
       expect((await db.getProduct('manual1'))!.name, 'Manual1');
       expect((await db.getProduct('manual2'))!.name, 'Manual2');
-      expect(await db.getProductCount(), 2);
+      expect((await db.getAllProducts()).length, 2);
     });
 
     test('no-op when there are no api products', () async {
       await db.insertProduct(
         const Product(barcode: 'm1', name: 'M1', source: 'manual'),
       );
-      expect(await db.getProductCount(), 1);
+      expect((await db.getAllProducts()).length, 1);
       await db.clearCachedProducts();
-      expect(await db.getProductCount(), 1);
+      expect((await db.getAllProducts()).length, 1);
     });
 
     test('getCachedProducts excludes manual products', () async {
@@ -750,9 +622,9 @@ void main() {
       await db.insertProduct(
         const Product(barcode: 'm1', name: 'M1', source: 'manual'),
       );
-      expect(await db.getProductCount(), 2);
+      expect((await db.getAllProducts()).length, 2);
       await db.clearAllProducts();
-      expect(await db.getProductCount(), 0);
+      expect((await db.getAllProducts()).length, 0);
     });
   });
 

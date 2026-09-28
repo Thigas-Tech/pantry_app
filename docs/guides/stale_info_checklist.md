@@ -24,7 +24,6 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 | `docs/architecture/PROVIDERS.md` — provider table | Provider added, removed, or renamed |
 | `docs/architecture/UI_STRUCTURE.md` — screen/widget tree | Screen widget tree changes |
 | `docs/architecture/PERFORMANCE.md` — CI/CD pipeline table (section 11.9) | Workflow added, renamed, or trigger changed |
-| `docs/architecture/PRICE_TRACKING.md` — local data model / sync / proof sections | Schema version bumped, Open Prices sync stops being a local placeholder, proof upload implemented, price entry gains package-size fields |
 | `docs/guides/monetization.md` | Any monetization features implemented or deferred |
 
 ## 3. `TODO.md`
@@ -77,7 +76,6 @@ hot spots in order. Each entry lists the trigger that makes it stale.
 These patterns reappear frequently. Search for them when auditing:
 
 - **Removed feature mentioned as current**: CSV import/export, Dio, `exportData()`
-- **Price tracking described as fully synced**: Open Prices sync currently marks prices `synced` locally without HTTP, there is no `proof_image_path` column, and `submitPrice` does not send `price_per` yet (see `docs/architecture/PRICE_TRACKING.md`)
 - **Non-existent provider listed**: `adServiceProvider`, `donationServiceProvider`, `firebaseServiceProvider`, `cloudBackupServiceProvider`, `backupStatusProvider`, `isProProvider`, `isAdFreeProvider`, `firebaseCacheProvider`, `authServiceProvider`, `authStateProvider` (all Firebase and auth providers were removed with Firebase)
 - **Implemented feature marked `[ ]`**: Check `TODO.md` against actual source files
 - **Contradictory `[Unreleased]` entries**: Earlier changelog sections may describe the true current state

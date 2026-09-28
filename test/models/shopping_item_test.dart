@@ -58,37 +58,6 @@ void main() {
       expect(item.isPurchased, false);
     });
 
-    test('price fields default to null', () {
-      const item = ShoppingItem(name: 'Milk');
-      expect(item.priceAmount, isNull);
-      expect(item.priceCurrency, isNull);
-      expect(item.priceStore, isNull);
-    });
-
-    test('creates with price fields', () {
-      const item = ShoppingItem(
-        name: 'Cheese',
-        priceAmount: 3.99,
-        priceCurrency: 'USD',
-        priceStore: 'Whole Foods',
-      );
-      expect(item.priceAmount, 3.99);
-      expect(item.priceCurrency, 'USD');
-      expect(item.priceStore, 'Whole Foods');
-    });
-
-    test('copyWith preserves price fields', () {
-      const item = ShoppingItem(
-        name: 'Milk',
-        priceAmount: 2.50,
-        priceCurrency: 'USD',
-      );
-      final copied = item.copyWith(quantity: 3);
-      expect(copied.priceAmount, 2.50);
-      expect(copied.priceCurrency, 'USD');
-      expect(copied.quantity, 3.0);
-    });
-
     test('expiry date defaults to null and is set via copyWith', () {
       const item = ShoppingItem(name: 'Milk');
       expect(item.expiryDate, isNull);

@@ -2,17 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:pantry_app/database/database_helper.dart';
-import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
-import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/money.dart';
-import 'package:pantry_app/utils/price_calculator.dart';
-import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
-import 'package:sqflite/sqflite.dart';
 
 /// Groups ingredients by barcode with a summed quantity.
 class _GroupedIngredient {
@@ -65,7 +59,7 @@ class InventoryRowSnapshot {
   final Map<String, dynamic> originalRow;
 }
 
-/// Owns all recipe business logic: saving, deleting, cost calculation,
+/// Owns all recipe business logic: saving, deleting,
 /// shortage checking and the cook transaction.
 ///
 /// Kept free of Riverpod so every method is testable with plain
@@ -73,13 +67,9 @@ class InventoryRowSnapshot {
 /// the caller (which reads them from the providers).
 class RecipeService {
   /// Creates a [RecipeService].
-  RecipeService(
-    this._db,
-    this._currencyService,
-  );
+  RecipeService(this._db);
 
   final DatabaseHelper _db;
-  final CurrencyService _currencyService;
 
   /// Saves a recipe — creates a new one or updates an existing one.
   ///
@@ -138,344 +128,6 @@ class RecipeService {
   Future<void> deleteRecipe(int id) async {
     await _db.deleteRecipe(id);
     logInfo('Recipe $id deleted');
-  }
-
-  /// Calculates the total cost of [recipeId] from its ingredients' latest
-  /// prices, scoped to the recipe's own inventory (falling back to
-  /// [activeInventoryId]) and converted to [baseCurrency].
-  Future<double> calculateRecipeCost(
-    int recipeId, {
-    required int activeInventoryId,
-    required String baseCurrency,
-  }) async {
-    final ingredients = await _db.getRecipeIngredients(recipeId);
-    if (ingredients.isEmpty) return 0.0;
-
-    final recipe = await _db.getRecipe(recipeId);
-    final inventoryId = recipe?.inventoryId ?? activeInventoryId;
-    final database = await _db.database;
-
-    return await calculateIngredientCost(
-      database,
-      ingredients,
-      inventoryId: inventoryId,
-      baseCurrency: baseCurrency,
-      currencyService: _currencyService,
-    );
-  }
-
-  /// Sums the latest price of each [ingredients] row found in the prices
-  /// table for the given [inventoryId], converted to [baseCurrency].
-  ///
-  /// Each ingredient's cost is scaled by the fraction of the package
-  /// actually used when a package size can be resolved. The package size is
-  /// looked up in this order: the price row itself, then the product's
-  /// packaging quantity. When the ingredient and package units are
-  /// incompatible (e.g. pieces vs grams for produce), a per-piece serving
-  /// weight is used to convert before scaling. When no package size or
-  /// conversion can be resolved, the full price is charged (legacy
-  /// behavior).
-  ///
-  /// Ingredients without a barcode, or with no price recorded in
-  /// [inventoryId], contribute zero. Each ingredient cost and the final
-  /// total are rounded to cents. Returns 0.0 when nothing can be priced.
-  Future<double> calculateIngredientCost(
-    Database database,
-    List<RecipeIngredient> ingredients, {
-    required int inventoryId,
-    required String baseCurrency,
-    required CurrencyService currencyService,
-  }) async {
-    var total = 0.0;
-    for (final ingredient in ingredients) {
-      final rawBarcode = ingredient.barcode;
-      if (rawBarcode == null || rawBarcode.isEmpty) continue;
-      final barcode = rawBarcode;
-
-      final rows = await database.rawQuery(
-        'SELECT price, currency, package_quantity, package_unit FROM prices'
-        ' WHERE barcode = ? AND inventory_id = ?'
-        ' ORDER BY COALESCE(date_purchased, date_added) DESC, id DESC LIMIT 1',
-        [barcode, inventoryId],
-      );
-      if (rows.isEmpty) continue;
-
-      final price = (rows.first['price'] as num?)?.toDouble() ?? 0.0;
-      final currency = rows.first['currency'] as String? ?? baseCurrency;
-
-      var cost = price;
-      final packageSize = await _resolvePackageSize(
-        database,
-        barcode,
-        priceRow: rows.first,
-      );
-      if (packageSize != null) {
-        final scaled = await _scaleIngredientCost(
-          database,
-          barcode,
-          inventoryId,
-          price: price,
-          ingredient: ingredient,
-          package: packageSize,
-        );
-        if (scaled == null) {
-          logWarning(
-            'Full package price charged for ingredient $barcode '
-            '(${ingredient.quantity} ${ingredient.unit}): '
-            'package size or conversion could not be resolved',
-          );
-        } else {
-          cost = scaled;
-        }
-      }
-
-      final converted = await currencyService.convert(
-        cost,
-        currency,
-        baseCurrency,
-      );
-      total += Money.roundToCents(converted);
-    }
-
-    return Money.roundToCents(total);
-  }
-
-  /// Returns the scaled cost per grouped ingredient for [ingredients],
-  /// keyed by the ingredient's barcode.
-  ///
-  /// Ingredients sharing a barcode are grouped with summed quantities,
-  /// matching the recipe detail display, and each group's cost is scaled by
-  /// the fraction of the package used with the same resolution and
-  /// conversion rules as [calculateIngredientCost]. Costs are converted to
-  /// [baseCurrency] and rounded to cents. Ingredients without a barcode or
-  /// without a recorded price in [inventoryId] are absent from the result.
-  Future<Map<String, double>> ingredientCosts(
-    List<RecipeIngredient> ingredients, {
-    required int inventoryId,
-    required String baseCurrency,
-  }) async {
-    final grouped = <String, _GroupedIngredient>{};
-    for (final ing in ingredients) {
-      final barcode = ing.barcode;
-      if (barcode == null || barcode.isEmpty) continue;
-      grouped
-              .putIfAbsent(
-                barcode,
-                () => _GroupedIngredient(name: ing.name, unit: ing.unit),
-              )
-              .totalQuantity +=
-          ing.quantity;
-    }
-    if (grouped.isEmpty) return {};
-
-    final database = await _db.database;
-    final normalizedKeys = grouped.keys.toList();
-    final latest = await _db.priceDao.latestPricesByBarcodes(
-      database,
-      normalizedKeys,
-      inventoryId: inventoryId,
-    );
-
-    final costs = <String, double>{};
-    for (final entry in grouped.entries) {
-      final rawBarcode = entry.key;
-      final barcode = rawBarcode;
-      final priceRow = latest[barcode];
-      if (priceRow == null) continue;
-
-      var cost = priceRow.price;
-      final packageSize = await _resolvePackageSize(
-        database,
-        barcode,
-        priceRow: {
-          'package_quantity': priceRow.packageQuantity,
-          'package_unit': priceRow.packageUnit,
-        },
-      );
-      if (packageSize != null) {
-        final scaled = await _scaleIngredientCost(
-          database,
-          barcode,
-          inventoryId,
-          price: priceRow.price,
-          ingredient: RecipeIngredient(
-            recipeId: 0,
-            name: entry.value.name,
-            barcode: rawBarcode,
-            quantity: entry.value.totalQuantity,
-            unit: entry.value.unit,
-          ),
-          package: packageSize,
-        );
-        if (scaled == null) {
-          logWarning(
-            'Full package price charged for ingredient $rawBarcode '
-            '(${entry.value.totalQuantity} ${entry.value.unit}): '
-            'package size or conversion could not be resolved',
-          );
-        } else {
-          cost = scaled;
-        }
-      }
-
-      final converted = await _currencyService.convert(
-        cost,
-        priceRow.currency,
-        baseCurrency,
-      );
-      costs[rawBarcode] = Money.roundToCents(converted);
-    }
-    return costs;
-  }
-
-  /// Scales [ingredient]'s share of [price] against [package].
-  ///
-  /// First tries a plain same-group scale via [PriceCalculator]. When the
-  /// units are incompatible (pieces vs weight), resolves the user-set
-  /// per-piece serving weight from the inventory row and converts before
-  /// scaling. Returns null when no conversion is possible.
-  Future<double?> _scaleIngredientCost(
-    Database database,
-    String barcode,
-    int inventoryId, {
-    required double price,
-    required RecipeIngredient ingredient,
-    required ({double packageQuantity, String packageUnit}) package,
-  }) async {
-    final scaled = PriceCalculator.scaledIngredientCost(
-      price: price,
-      ingredientQuantity: ingredient.quantity,
-      ingredientUnit: ingredient.unit,
-      packageQuantity: package.packageQuantity,
-      packageUnit: package.packageUnit,
-    );
-    if (scaled != null) return scaled;
-
-    final servingWeightG = await _servingWeightForIngredient(
-      database,
-      barcode,
-      inventoryId,
-    );
-    if (servingWeightG == null || servingWeightG <= 0) return null;
-
-    final ingredientIsWeight = UnitConverter.areUnitsCompatible(
-      ingredient.unit,
-      'g',
-    );
-    final packageIsWeight = UnitConverter.areUnitsCompatible(
-      package.packageUnit,
-      'g',
-    );
-
-    final double? convertedQuantity;
-    final String convertedUnit;
-    if (ingredientIsWeight && !packageIsWeight) {
-      // Grams needed -> pieces to take from a pieces package.
-      convertedQuantity = ingredient.quantity / servingWeightG;
-      convertedUnit = 'pieces';
-    } else if (!ingredientIsWeight && packageIsWeight) {
-      // Pieces needed -> grams to take from a weight package.
-      convertedQuantity = ingredient.quantity * servingWeightG;
-      convertedUnit = 'g';
-    } else {
-      return null;
-    }
-
-    return PriceCalculator.scaledIngredientCost(
-      price: price,
-      ingredientQuantity: convertedQuantity,
-      ingredientUnit: convertedUnit,
-      packageQuantity: package.packageQuantity,
-      packageUnit: package.packageUnit,
-    );
-  }
-
-  /// Resolves the user-set grams-per-piece serving weight for [barcode] in
-  /// [inventoryId]. Returns null when the row has no serving weight.
-  Future<double?> _servingWeightForIngredient(
-    Database database,
-    String barcode,
-    int inventoryId,
-  ) async {
-    final rows = await database.rawQuery(
-      'SELECT serving_weight_g FROM inventory'
-      ' WHERE barcode = ? AND inventory_id = ?'
-      ' ORDER BY (expiry_date IS NULL), expiry_date ASC LIMIT 1',
-      [barcode, inventoryId],
-    );
-    return rows.isEmpty
-        ? null
-        : (rows.first['serving_weight_g'] as num?)?.toDouble();
-  }
-
-  /// Resolves the package size for [barcode] to scale recipe ingredient
-  /// costs.
-  ///
-  /// Checks, in order:
-  ///   1. The [priceRow]'s own package_quantity / package_unit columns.
-  ///   2. The product's packaging quantity ([Product.quantity] /
-  ///      [Product.productQuantity]), resolving multi-pack strings like
-  ///      "3 x 150 g" to their TOTAL package size (450 g), matching the
-  ///      package a recorded price applies to.
-  ///
-  /// The inventory row is deliberately not consulted: its stored quantity
-  /// is the current stock, not the size of the package the price applies
-  /// to, so using it as a package size would distort the scaled cost.
-  ///
-  /// Returns null when no usable package size is found.
-  Future<({double packageQuantity, String packageUnit})?> _resolvePackageSize(
-    Database database,
-    String barcode, {
-    required Map<String, dynamic> priceRow,
-  }) async {
-    final priceQty = (priceRow['package_quantity'] as num?)?.toDouble();
-    final priceUnit = priceRow['package_unit'] as String?;
-    if (priceQty != null && priceUnit != null && priceQty > 0) {
-      return (packageQuantity: priceQty, packageUnit: priceUnit);
-    }
-
-    final productRows = await database.query(
-      'products',
-      columns: ['quantity', 'product_quantity'],
-      where: 'barcode = ?',
-      whereArgs: [barcode],
-      limit: 1,
-    );
-    if (productRows.isNotEmpty) {
-      final parsed = parsePackageQuantity(
-        productQuantity: (productRows.first['product_quantity'] as num?)
-            ?.toDouble(),
-        quantity: productRows.first['quantity'] as String?,
-      );
-      if (parsed != null) {
-        return (packageQuantity: parsed.amount, packageUnit: parsed.unit);
-      }
-    }
-
-    return null;
-  }
-
-  /// Calculates the average cost across all recipes in the active inventory.
-  ///
-  /// Returns 0.0 if no recipes exist (guards division by zero).
-  Future<double> calculateAverageRecipeCost({
-    required int activeInventoryId,
-    required String baseCurrency,
-  }) async {
-    final recipes = await _db.getAllRecipes(activeInventoryId);
-    if (recipes.isEmpty) return 0.0;
-
-    var totalCost = 0.0;
-    for (final recipe in recipes) {
-      final cost = await calculateRecipeCost(
-        recipe.id!,
-        activeInventoryId: activeInventoryId,
-        baseCurrency: baseCurrency,
-      );
-      totalCost += cost;
-    }
-
-    return totalCost / recipes.length;
   }
 
   /// Groups [ingredients] by barcode, sums quantities, normalizes units, and
@@ -560,7 +212,6 @@ class RecipeService {
   Future<CookResult> cookRecipe(
     int recipeId, {
     required int activeInventoryId,
-    required String baseCurrency,
   }) async {
     final recipe = await _db.getRecipe(recipeId);
     final inventoryId = recipe?.inventoryId ?? activeInventoryId;
@@ -577,17 +228,8 @@ class RecipeService {
       throw RecipeCookException(shortages);
     }
 
-    // Compute current cost
-    final database = await _db.database;
-    final totalCost = await calculateIngredientCost(
-      database,
-      ingredients,
-      inventoryId: inventoryId,
-      baseCurrency: baseCurrency,
-      currencyService: _currencyService,
-    );
-
     // Transaction: FEFO deduction + history
+    final database = await _db.database;
     final affectedRows = <InventoryRowSnapshot>[];
 
     final grouped = <String, _GroupedIngredient>{};
@@ -716,7 +358,6 @@ class RecipeService {
       final historyId = await txn.insert('recipe_history', {
         'recipe_id': recipeId,
         'made_at': DateTime.now().millisecondsSinceEpoch,
-        'cost_at_time': totalCost,
         'ingredient_snapshot': snapshotJson,
       });
 

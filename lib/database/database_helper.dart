@@ -3,7 +3,6 @@ import 'package:pantry_app/database/inventories_dao.dart';
 import 'package:pantry_app/database/inventory_dao.dart';
 import 'package:pantry_app/database/migrations/all_migrations.dart';
 import 'package:pantry_app/database/migrations/migration_runner.dart';
-import 'package:pantry_app/database/price_dao.dart';
 import 'package:pantry_app/database/product_dao.dart';
 import 'package:pantry_app/database/product_submission_queue_dao.dart';
 import 'package:pantry_app/database/recipe_dao.dart';
@@ -11,16 +10,13 @@ import 'package:pantry_app/database/recipe_history_dao.dart';
 import 'package:pantry_app/database/recipe_ingredient_dao.dart';
 import 'package:pantry_app/database/scan_history_dao.dart';
 import 'package:pantry_app/database/shopping_list_dao.dart';
-import 'package:pantry_app/database/store_dao.dart';
 import 'package:pantry_app/models/inventory_item.dart';
-import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/recipe.dart';
 import 'package:pantry_app/models/recipe_history_entry.dart';
 import 'package:pantry_app/models/recipe_ingredient.dart';
 import 'package:pantry_app/models/scan_history_entry.dart';
 import 'package:pantry_app/models/shopping_item.dart';
-import 'package:pantry_app/models/store.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,9 +39,7 @@ import 'package:sqflite/sqflite.dart';
 /// - inventories – named pantries (e.g. "Home", "Work").
 /// - inventory – instances of products the user has added to a pantry.
 /// - product_submission_queue – offline queue for OFF product submissions.
-/// - prices – purchase price observations per barcode.
 /// - shopping_list – items the user intends to buy.
-/// - stores – saved store names for autocomplete.
 /// - recipes – user-created recipes.
 /// - recipe_ingredients – ingredients linked to a recipe.
 /// - recipe_history – history of cooked recipes.
@@ -54,8 +48,8 @@ import 'package:sqflite/sqflite.dart';
 /// ## Delegation
 ///
 /// CRUD operations are delegated to dedicated DAO classes:
-/// [ProductDao], [InventoryDao], [InventoriesDao], [PriceDao],
-/// [ShoppingListDao], [StoreDao], [ProductSubmissionQueueDao],
+/// [ProductDao], [InventoryDao], [InventoriesDao],
+/// [ShoppingListDao], [ProductSubmissionQueueDao],
 /// [RecipeDao], [RecipeIngredientDao], [ScanHistoryDao].
 ///
 /// See also:
@@ -89,14 +83,8 @@ class DatabaseHelper {
   final ProductSubmissionQueueDao productSubmissionQueueDao =
       ProductSubmissionQueueDao();
 
-  /// DAO for the prices table.
-  final PriceDao priceDao = const PriceDao();
-
   /// DAO for the shopping_list table.
   final ShoppingListDao shoppingListDao = const ShoppingListDao();
-
-  /// DAO for the stores table.
-  final StoreDao storeDao = const StoreDao();
 
   /// DAO for the recipes table.
   final RecipeDao recipeDao = const RecipeDao();
@@ -200,7 +188,7 @@ class DatabaseHelper {
   /// [databaseVersion]. The transaction guarantees that a failure leaves the
   /// database in its previous state instead of a half-rebuilt one.
   ///
-  /// All data is deleted, including pantries, inventory, prices, recipes,
+  /// All data is deleted, including pantries, inventory, recipes,
   /// and history. Callers must surface this as a destructive action.
   Future<void> resetDatabase() async {
     final db = await database;
@@ -267,10 +255,6 @@ class DatabaseHelper {
   }
 
   /// Returns the total number of cached product records.
-  Future<int> getProductCount() async {
-    final db = await database;
-    return await productDao.count(db);
-  }
 
   /// Returns all cached products.
   Future<List<Product>> getAllProducts() async {
@@ -301,7 +285,7 @@ class DatabaseHelper {
   /// update and manual cache flush so that user-entered data is never lost.
   ///
   /// Foreign key enforcement is temporarily disabled because inventory rows
-  /// and prices legitimately survive cache flushes (they are LEFT JOINed).
+  /// legitimately survive cache flushes (they are LEFT JOINed).
   /// Shopping list items have ON DELETE SET NULL which also requires FK
   /// enforcement to be active — after deletion, shopping list barcode
   /// references are explicitly cleaned up. PRAGMA foreign_keys is a no-op
@@ -400,17 +384,8 @@ class DatabaseHelper {
 
   /// Removes stale inventory items and orphaned products.
   ///
-  /// [retentionDays] applies to inventory items only. Price rows use
-  /// [priceRetentionDays] (default 0 = keep forever).
-  ///
-  /// Price history is never deleted because a product is absent from the
-  /// pantry: price observations are the user's own records and must survive
-  /// cache maintenance. Prices are only pruned by the explicit
-  /// [priceRetentionDays] retention policy.
-  Future<void> cleanupOldEntries({
-    int retentionDays = 60,
-    int priceRetentionDays = 0,
-  }) async {
+  /// [retentionDays] applies to inventory items only.
+  Future<void> cleanupOldEntries({int retentionDays = 60}) async {
     final db = await database;
     final cutoff = DateTime.now()
         .subtract(Duration(days: retentionDays))
@@ -431,33 +406,15 @@ class DatabaseHelper {
         logInfo('Removed $deletedItems old inventory items');
 
         // Only cached (API-sourced) products that nothing references are
-        // removed. Manual products and products referenced by a price row
-        // are always kept.
+        // removed. Manual products are always kept.
         final deletedProducts = await txn.rawDelete('''
           DELETE FROM products
           WHERE source != 'manual'
             AND NOT EXISTS (
               SELECT 1 FROM inventory WHERE inventory.barcode = products.barcode
             )
-            AND NOT EXISTS (
-              SELECT 1 FROM prices WHERE prices.barcode = products.barcode
-            )
         ''');
         logInfo('Removed $deletedProducts orphaned products');
-
-        if (priceRetentionDays > 0) {
-          final cutoffMillis = DateTime.now()
-              .subtract(Duration(days: priceRetentionDays))
-              .millisecondsSinceEpoch;
-          final deletedPrices = await txn.delete(
-            'prices',
-            where:
-                'COALESCE(date_purchased, date_added) < ?'
-                ' AND sync_status != ?',
-            whereArgs: [cutoffMillis, priceSyncPending],
-          );
-          logInfo('Removed $deletedPrices old price rows');
-        }
       });
 
       // Self-contained and atomic; runs after the main cleanup so its own
@@ -635,105 +592,6 @@ class DatabaseHelper {
     return await inventoryDao.count(db, inventoryId: inventoryId);
   }
 
-  // ---- Prices (delegating to PriceDao) ------------------------
-
-  /// Inserts a price observation. Returns the new row ID.
-  Future<int> insertPrice(Price price) async {
-    final db = await database;
-    return await priceDao.insert(db, price);
-  }
-
-  /// Returns the price with the given [id], or null if not found.
-  Future<Price?> getPriceById(int id) async {
-    final db = await database;
-    return await priceDao.getById(db, id);
-  }
-
-  /// Returns all price entries for the given [barcode] and [inventoryId],
-  /// ordered by date descending.
-  Future<List<Price>> getPricesByBarcode(
-    String barcode, {
-    required int inventoryId,
-    int? limit,
-    int? offset,
-  }) async {
-    final db = await database;
-    return await priceDao.listByBarcode(
-      db,
-      barcode,
-      inventoryId: inventoryId,
-      limit: limit,
-      offset: offset,
-    );
-  }
-
-  /// Returns the most recent price for the given [barcode] and
-  /// [inventoryId], or null.
-  Future<Price?> getLatestPrice(
-    String barcode, {
-    required int inventoryId,
-  }) async {
-    final db = await database;
-    return await priceDao.getLatest(db, barcode, inventoryId: inventoryId);
-  }
-
-  /// Updates an existing price row.
-  Future<int> updatePrice(Price price) async {
-    final db = await database;
-    return await priceDao.update(db, price);
-  }
-
-  /// Deletes the price with the given [id].
-  Future<int> deletePrice(int id) async {
-    final db = await database;
-    return await priceDao.delete(db, id);
-  }
-
-  /// Returns the total number of prices for the given [barcode].
-  Future<int> getPriceCountByBarcode(String barcode) async {
-    final db = await database;
-    return await priceDao.countByBarcode(db, barcode);
-  }
-
-  /// Returns the total number of prices on record.
-  Future<int> getPriceCount() async {
-    final db = await database;
-    return await priceDao.count(db);
-  }
-
-  /// Returns the sum of the most recent price per distinct product in the
-  /// given inventory.
-  Future<double?> getTotalInventoryValue(int inventoryId) async {
-    final db = await database;
-    return await priceDao.totalInventoryValue(db, inventoryId);
-  }
-
-  /// Returns the average of the most recent price per distinct product in
-  /// the given inventory.
-  Future<double?> getAverageItemPrice(int inventoryId) async {
-    final db = await database;
-    return await priceDao.averageItemPrice(db, inventoryId);
-  }
-
-  /// Returns the count of distinct inventory items that have at least one
-  /// price.
-  Future<int> getPricedItemCount(int inventoryId) async {
-    final db = await database;
-    return await priceDao.pricedItemCount(db, inventoryId);
-  }
-
-  /// Returns prices with the given [syncStatus] for Open Prices sync.
-  Future<List<Price>> getPricesBySyncStatus(String syncStatus) async {
-    final db = await database;
-    return await priceDao.getBySyncStatus(db, syncStatus);
-  }
-
-  /// Counts prices with the given [syncStatus] without loading the rows.
-  Future<int> countPricesBySyncStatus(String syncStatus) async {
-    final db = await database;
-    return await priceDao.countBySyncStatus(db, syncStatus);
-  }
-
   // ---- Shopping list (delegating to ShoppingListDao) ------------
 
   /// Inserts a shopping list item. Returns the new row ID.
@@ -772,28 +630,6 @@ class DatabaseHelper {
   Future<void> reorderShoppingItems(List<int> itemIds) async {
     final db = await database;
     return await shoppingListDao.reorder(db, itemIds);
-  }
-
-  /// Updates only the price-related columns for the shopping item
-  /// with the given [id].
-  Future<int> updateShoppingItemPriceFields(
-    int id, {
-    double? priceAmount,
-    String? priceCurrency,
-    String? priceStore,
-    double? pricePackageQuantity,
-    String? pricePackageUnit,
-  }) async {
-    final db = await database;
-    return await shoppingListDao.updatePriceFields(
-      db,
-      id,
-      priceAmount: priceAmount,
-      priceCurrency: priceCurrency,
-      priceStore: priceStore,
-      pricePackageQuantity: pricePackageQuantity,
-      pricePackageUnit: pricePackageUnit,
-    );
   }
 
   /// Updates only the expiry date for the shopping item with the given [id].
@@ -851,12 +687,6 @@ class DatabaseHelper {
     return await shoppingListDao.pendingCount(db, inventoryId: inventoryId);
   }
 
-  /// Returns all saved stores, ordered alphabetically.
-  Future<List<Store>> getAllStores() async {
-    final db = await database;
-    return await storeDao.getAll(db);
-  }
-
   // ---- Recipe (delegating to RecipeDao + RecipeIngredientDao) -------
 
   /// Inserts a new recipe and returns its row ID.
@@ -888,12 +718,6 @@ class DatabaseHelper {
   Future<int> deleteRecipe(int id) async {
     final db = await database;
     return await recipeDao.delete(db, id);
-  }
-
-  /// Returns the total number of recipes.
-  Future<int> getRecipeCount() async {
-    final db = await database;
-    return await recipeDao.count(db);
   }
 
   /// Inserts a recipe ingredient and returns its row ID.
@@ -1000,14 +824,6 @@ class DatabaseHelper {
   Future<List<RecipeHistoryEntry>> getRecipeHistory(int recipeId) async {
     final db = await database;
     return await recipeHistoryDao.getByRecipeId(db, recipeId);
-  }
-
-  /// Returns all history entries made at or after [sinceMillis].
-  Future<List<RecipeHistoryEntry>> getRecentRecipeHistory(
-    int sinceMillis,
-  ) async {
-    final db = await database;
-    return await recipeHistoryDao.getRecent(db, sinceMillis);
   }
 
   /// Deletes the history entry with the given [historyId].

@@ -11,8 +11,6 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
-import 'package:pantry_app/providers/price_provider.dart';
-import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
@@ -26,8 +24,6 @@ import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
-import 'package:pantry_app/widgets/price_mask.dart';
-import 'package:pantry_app/widgets/unit_price_label.dart';
 
 /// A tappable card representing one inventory item on the home screen.
 ///
@@ -148,7 +144,6 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildSubtitle(l10n),
-              _buildPriceLine(l10n),
             ],
           ),
           trailing: Semantics(
@@ -279,50 +274,6 @@ class _InventoryCardState extends ConsumerState<InventoryCard> {
       sb.write(' · ${l10n.expiryPrefix}: ${widget.item.expiryDate}');
     }
     return Text(sb.toString());
-  }
-
-  Widget _buildPriceLine(AppLocalizations l10n) {
-    final priceTrackingEnabled = ref.watch(
-      settingsProvider.select((s) => s.value?.priceTrackingEnabled ?? false),
-    );
-    if (!priceTrackingEnabled) return const SizedBox.shrink();
-
-    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-    final priceAsync = ref.watch(
-      latestPriceProvider((widget.item.barcode, activeId)),
-    );
-    return priceAsync.whenOrNull(
-          data: (price) {
-            if (price == null) return const SizedBox.shrink();
-            final repo = ref.read(priceRepositoryProvider);
-            final formatted = repo.formatPrice(price.price, price.currency);
-            return Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PriceMask(
-                    formattedPrice: formatted,
-                    child: Text(
-                      formatted,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  UnitPriceLabel(
-                    price: price,
-                    style: const TextStyle(fontSize: 11),
-                  ),
-                ],
-              ),
-            );
-          },
-        ) ??
-        const SizedBox.shrink();
   }
 
   Widget _buildLeadingImage() {

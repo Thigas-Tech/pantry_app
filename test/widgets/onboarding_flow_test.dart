@@ -180,51 +180,5 @@ void main() {
       await tester.tap(find.text('Open Scanner'));
       expect(scanFired, isTrue);
     });
-
-    testWidgets('Configure page shows price tracking toggle', (tester) async {
-      await pumpApp(
-        tester,
-        OnboardingFlow(
-          onScanBarcode: () {},
-          onSearchProduct: () {},
-          onGetStarted: () {},
-        ),
-      );
-
-      // Go to page 4
-      for (var i = 0; i < 2; i++) {
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-      }
-
-      expect(find.text('Enable price tracking'), findsOneWidget);
-      expect(find.byType(Switch), findsOneWidget);
-    });
-
-    testWidgets(
-      'Configure page shows currency, data retention, and expiry warning',
-      (
-        tester,
-      ) async {
-        await pumpApp(
-          tester,
-          OnboardingFlow(
-            onScanBarcode: () {},
-            onSearchProduct: () {},
-            onGetStarted: () {},
-          ),
-        );
-
-        // Go to page 3
-        for (var i = 0; i < 2; i++) {
-          await tester.tap(find.text('Next'));
-          await tester.pumpAndSettle();
-        }
-
-        expect(find.text('Data retention'), findsOneWidget);
-        expect(find.text('Expiring soon threshold'), findsOneWidget);
-        expect(find.text('USD'), findsOneWidget);
-      },
-    );
   });
 }

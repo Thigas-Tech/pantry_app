@@ -79,7 +79,6 @@ void main() {
       final db = await dbHelper.database;
       await dao.insert(db, product);
       await dao.insert(db, product.copyWith(barcode: '456', name: 'Prod 2'));
-      expect(await dao.count(db), 2);
       expect((await dao.all(db)).length, 2);
     });
 
@@ -87,7 +86,7 @@ void main() {
       final db = await dbHelper.database;
       await dao.insert(db, product);
       await dao.clear(db);
-      expect(await dao.count(db), 0);
+      expect((await dao.all(db)).length, 0);
     });
 
     test('insert and get round-trips packaging quantity fields', () async {
@@ -169,7 +168,7 @@ void main() {
     test('deleteBySource removes only target source', () async {
       final db = await dbHelper.database;
       await dao.deleteBySource(db, 'api');
-      expect(await dao.count(db), 1);
+      expect((await dao.all(db)).length, 1);
       expect(await dao.get(db, 'api1'), isNull);
       expect(await dao.get(db, 'man1'), isNotNull);
     });
