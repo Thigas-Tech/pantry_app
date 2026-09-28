@@ -17,9 +17,6 @@ part 'recipe_history_entry.freezed.dart';
 @freezed
 abstract class RecipeHistoryEntry with _$RecipeHistoryEntry {
   /// Creates a [RecipeHistoryEntry].
-  ///
-  /// [recipeId], [madeAt], and [ingredientSnapshot] are required. [costAtTime]
-  /// defaults to 0.0 for recipes with no priced ingredients.
   const factory RecipeHistoryEntry({
     /// Foreign key referencing the cooked recipe.
     required int recipeId,
@@ -34,8 +31,5 @@ abstract class RecipeHistoryEntry with _$RecipeHistoryEntry {
 
     /// Auto-increment primary key from the recipe_history table.
     int? id,
-
-    /// Total recipe cost computed at cook time.
-    @Default(0.0) double costAtTime,
   }) = _RecipeHistoryEntry;
 }

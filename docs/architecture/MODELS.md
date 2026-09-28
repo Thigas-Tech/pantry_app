@@ -9,8 +9,5 @@ for JSON deserialization from the Open Food Facts API, except where noted.
 | `ProductNutrient` | freezed | Additional nutrient (OFF tag, value, canonical unit) |
 | `InventoryItem` | freezed | An instance of a product in a pantry (qty, expiry, location) |
 | `InventoryWithProduct` | plain Dart | Join result from `getInventoryWithProduct` query |
-| `Price` | freezed | Purchase price observation (amount, currency, store, sync status, package size/unit) |
-| `UnitPrice` | plain Dart | Per-base-unit price (piece / gram / milliliter) from `PriceCalculator.unitPrice` |
-| `ShoppingItem` | freezed | Shopping list entry with price fields and photo support |
-| `PantryStats` | freezed | Aggregated statistics for the stats screen |
+| `ShoppingItem` | freezed | Shopping list entry |
 | `Store` | freezed | Saved store name for autocomplete |

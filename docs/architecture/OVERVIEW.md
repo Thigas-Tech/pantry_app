@@ -8,7 +8,7 @@
 │  ScannerScreen     EmptyPantry       snackbar_helper                             │
 │  ProductDetail     NutritionTable                                                │
 │  AddToInventory    ScannerOverlay                                                │
-│  Settings / Stats  PriceEntrySheet                                               │
+│  Settings                                                                       │
 │  ShoppingList                                                                    │
 │  ...                                                                             │
 └───────────┬──────────────────────────────────────────────────────────────────────┘
@@ -18,14 +18,12 @@
 │  providers/                                                                      │
 │  activeInventoryProvider   inventoryWithProductProvider                          │
 │  settingsProvider          themeModeProvider                                     │
-│  productRepositoryProvider statsProvider                                         │
+│  productRepositoryProvider                                                      │
 │  imageCacheProvider        notificationServiceProvider                           │
 │  connectivityProvider      githubIssueServiceProvider                            │
 │  apiServiceProvider        inventoryCountProvider                                │
-│  priceRepositoryProvider   priceHistoryProvider                                  │
-│  shoppingListProvider      storesProvider                                        │
-│  currencyServiceProvider   inventoryProductsProvider                             │
-│  cacheStalenessStoreProvider                                                     │
+│  shoppingListProvider                                                           │
+│  cacheStalenessStoreProvider  inventoryProductsProvider                         │
 └───────────┬──────────────────────────────────────────────────────────────────────┘
             │ calls                                                                 
 ┌───────────▼──────────────────────────────────────────────────────────────────────┐
@@ -33,22 +31,20 @@
 │  services/                                                                       │
 │  ProductRepository    OffAdapter    NotificationService                          │
 │  ImageCacheService    GithubIssueService                                         │
-│  PriceRepository      CurrencyService  OpenPricesService                         │
-│  StoreDao             ShoppingListDao  ShoppingListService                       │
-│  CacheStalenessStore                                                             │
+│  ShoppingListDao     ShoppingListService                                        │
 └─────────────┬───────────────────────────┬────────────────────────────────────────┘
               │                           │                                          
 ┌─────────▼─────────────────┐  ┌──▼───────────────┐                               
 │ Local DB                  │  │ Remote API       │                               
 │ database/                 │  │ services/        │                               
-│ SQLite - 11 tables:       │  │ Open Food Facts  │                               
+│ SQLite - 9 tables:        │  │ Open Food Facts  │                               
 │ products                  │  │ v3 REST (SDK)    │                               
-│ inventories               │  │ Open Prices API  │                               
-│ inventory                 │  │ ExchangeRate-API │                               
+│ inventories               │  │                    │                               
+│ inventory                 │  │                  │                               
 │ product_submission_queue  │  └──────────────────┘                               
-│ prices                    │                                                      
+
 │ shopping_list             │                                                      
-│ stores                    │                                                      
+
 │ recipes                   │                                                      
 │ recipe_ingredients        │                                                      
 │ recipe_history            │                                                      

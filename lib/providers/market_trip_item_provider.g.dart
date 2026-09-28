@@ -9,7 +9,7 @@ part of 'market_trip_item_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Orchestrates adding a scanned product to a market
-/// trip as purchased, applying an optional price and expiry in one unit of
+/// trip as purchased, applying an optional expiry in one unit of
 /// work.
 ///
 /// Kept free of UI concerns: navigation, snackbars, and the scan-resolution
@@ -21,7 +21,7 @@ part of 'market_trip_item_provider.dart';
 final marketTripItemControllerProvider = MarketTripItemControllerFamily._();
 
 /// Orchestrates adding a scanned product to a market
-/// trip as purchased, applying an optional price and expiry in one unit of
+/// trip as purchased, applying an optional expiry in one unit of
 /// work.
 ///
 /// Kept free of UI concerns: navigation, snackbars, and the scan-resolution
@@ -31,7 +31,7 @@ final marketTripItemControllerProvider = MarketTripItemControllerFamily._();
 final class MarketTripItemControllerProvider
     extends $NotifierProvider<MarketTripItemController, MarketTripItemState> {
   /// Orchestrates adding a scanned product to a market
-  /// trip as purchased, applying an optional price and expiry in one unit of
+  /// trip as purchased, applying an optional expiry in one unit of
   /// work.
   ///
   /// Kept free of UI concerns: navigation, snackbars, and the scan-resolution
@@ -84,10 +84,10 @@ final class MarketTripItemControllerProvider
 }
 
 String _$marketTripItemControllerHash() =>
-    r'1e9458515b8a6f095c7a3d9d7ae3f2c7bba85e84';
+    r'b176c77e6392dd5470002d321d629588dc6c1cfa';
 
 /// Orchestrates adding a scanned product to a market
-/// trip as purchased, applying an optional price and expiry in one unit of
+/// trip as purchased, applying an optional expiry in one unit of
 /// work.
 ///
 /// Kept free of UI concerns: navigation, snackbars, and the scan-resolution
@@ -114,7 +114,7 @@ final class MarketTripItemControllerFamily extends $Family
       );
 
   /// Orchestrates adding a scanned product to a market
-  /// trip as purchased, applying an optional price and expiry in one unit of
+  /// trip as purchased, applying an optional expiry in one unit of
   /// work.
   ///
   /// Kept free of UI concerns: navigation, snackbars, and the scan-resolution
@@ -130,7 +130,7 @@ final class MarketTripItemControllerFamily extends $Family
 }
 
 /// Orchestrates adding a scanned product to a market
-/// trip as purchased, applying an optional price and expiry in one unit of
+/// trip as purchased, applying an optional expiry in one unit of
 /// work.
 ///
 /// Kept free of UI concerns: navigation, snackbars, and the scan-resolution

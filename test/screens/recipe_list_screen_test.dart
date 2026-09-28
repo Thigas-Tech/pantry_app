@@ -11,7 +11,6 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/screens/manage_inventories_screen.dart';
 import 'package:pantry_app/screens/recipe_list_screen.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
-import 'package:pantry_app/widgets/price_mask.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import '../helpers/pump_app.dart';
@@ -52,7 +51,6 @@ void main() {
   Future<void> pumpList(
     WidgetTester tester,
     Settings settings, {
-    bool hasPriceData = true,
     List<Recipe> homeRecipes = const [Recipe(id: 1, name: 'Omelette')],
     List<Override> extraOverrides = const [],
   }) async {
@@ -77,26 +75,6 @@ void main() {
       ],
     );
     when(() => mockDb.database).thenAnswer((_) async => mockSqfliteDb);
-
-    if (hasPriceData) {
-      when(
-        () => mockSqfliteDb.rawQuery(
-          any(),
-          any(),
-        ),
-      ).thenAnswer(
-        (_) async => [
-          {'price': 3.50, 'currency': 'USD'},
-        ],
-      );
-    } else {
-      when(
-        () => mockSqfliteDb.rawQuery(
-          any(),
-          any(),
-        ),
-      ).thenAnswer((_) async => []);
-    }
 
     when(
       () => mockSqfliteDb.query(
@@ -129,42 +107,6 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
   }
-
-  group('PriceMask in recipe list', () {
-    testWidgets('wraps cost labels when prices visible', (tester) async {
-      await pumpList(
-        tester,
-        const Settings(priceTrackingEnabled: true),
-      );
-
-      expect(find.byType(PriceMask), findsAtLeast(1));
-      expect(find.textContaining('3.50'), findsAtLeast(1));
-    });
-
-    testWidgets('masks cost labels when prices hidden', (tester) async {
-      await pumpList(
-        tester,
-        const Settings(
-          priceTrackingEnabled: true,
-          pricesHidden: true,
-        ),
-      );
-
-      expect(find.byType(PriceMask), findsAtLeast(1));
-      expect(find.textContaining('3.50'), findsNothing);
-    });
-
-    testWidgets('shows unknown cost when cost is zero', (tester) async {
-      await pumpList(
-        tester,
-        const Settings(),
-        hasPriceData: false,
-      );
-
-      expect(find.byType(PriceMask), findsAtLeast(1));
-      expect(find.text('Unknown'), findsOneWidget);
-    });
-  });
 
   group('inventory switcher', () {
     testWidgets('shows the active inventory name', (tester) async {

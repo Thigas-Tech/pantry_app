@@ -76,44 +76,6 @@ void main() {
     });
   });
 
-  group('getRecent', () {
-    test('returns entries after the given timestamp', () async {
-      await dao.insert(
-        db,
-        const RecipeHistoryEntry(
-          recipeId: 1,
-          madeAt: 100,
-          ingredientSnapshot: '[]',
-        ),
-      );
-      await dao.insert(
-        db,
-        const RecipeHistoryEntry(
-          recipeId: 1,
-          madeAt: 200,
-          ingredientSnapshot: '[]',
-        ),
-      );
-
-      final entries = await dao.getRecent(db, 150);
-      expect(entries.length, 1);
-      expect(entries[0].madeAt, 200);
-    });
-
-    test('returns empty when no entries after timestamp', () async {
-      await dao.insert(
-        db,
-        const RecipeHistoryEntry(
-          recipeId: 1,
-          madeAt: 100,
-          ingredientSnapshot: '[]',
-        ),
-      );
-      final entries = await dao.getRecent(db, 999);
-      expect(entries, isEmpty);
-    });
-  });
-
   group('deleteById', () {
     test('removes the entry', () async {
       final id = await dao.insert(

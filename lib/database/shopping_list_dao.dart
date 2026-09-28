@@ -21,11 +21,6 @@ class ShoppingListDao {
     'inventory_id': item.inventoryId,
     'date_added': item.dateAdded ?? DateTime.now().millisecondsSinceEpoch,
     'date_purchased': item.datePurchased,
-    'price_amount': item.priceAmount,
-    'price_currency': item.priceCurrency,
-    'price_store': item.priceStore,
-    'price_package_quantity': item.pricePackageQuantity,
-    'price_package_unit': item.pricePackageUnit,
     'expiry_date': item.expiryDate,
     'sort_order': item.sortOrder,
   };
@@ -41,11 +36,6 @@ class ShoppingListDao {
     inventoryId: map['inventory_id'] as int?,
     dateAdded: map['date_added'] as int?,
     datePurchased: map['date_purchased'] as int?,
-    priceAmount: (map['price_amount'] as num?)?.toDouble(),
-    priceCurrency: map['price_currency'] as String?,
-    priceStore: map['price_store'] as String?,
-    pricePackageQuantity: (map['price_package_quantity'] as num?)?.toDouble(),
-    pricePackageUnit: map['price_package_unit'] as String?,
     expiryDate: map['expiry_date'] as String?,
     sortOrder: (map['sort_order'] as num?)?.toDouble() ?? 0,
   );
@@ -228,39 +218,6 @@ class ShoppingListDao {
       return affected;
     } on Exception catch (e) {
       logError('Failed to update shopping item ${item.id}: $e');
-      rethrow;
-    }
-  }
-
-  /// Updates only the price-related columns for the shopping item
-  /// with the given [id]. Leaves all other columns unchanged.
-  Future<int> updatePriceFields(
-    Database db,
-    int id, {
-    double? priceAmount,
-    String? priceCurrency,
-    String? priceStore,
-    double? pricePackageQuantity,
-    String? pricePackageUnit,
-  }) async {
-    logInfo('Updating price fields for shopping item $id');
-    try {
-      final affected = await db.update(
-        'shopping_list',
-        {
-          'price_amount': priceAmount,
-          'price_currency': priceCurrency,
-          'price_store': priceStore,
-          'price_package_quantity': pricePackageQuantity,
-          'price_package_unit': pricePackageUnit,
-        },
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-      logInfo('Price fields updated for shopping item $id');
-      return affected;
-    } on Exception catch (e) {
-      logError('Failed to update price fields for item $id: $e');
       rethrow;
     }
   }

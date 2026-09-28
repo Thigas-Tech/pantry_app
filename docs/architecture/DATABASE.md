@@ -2,7 +2,7 @@
 
 ### 2.1 Schema (version 1)
 
-Eleven tables:
+Nine tables:
 
 | Table | Purpose |
 |---|---|
@@ -10,9 +10,7 @@ Eleven tables:
 | `inventories` | Named pantries (e.g. "Home", "Work"). PK = id |
 | `inventory` | Instances of products in a pantry. FK -> products, inventories |
 | `product_submission_queue` | Offline queue for OFF product submissions |
-| `prices` | Purchase price observations per barcode, scoped to their owning inventory via `inventory_id`, with optional package size for per-unit pricing |
 | `shopping_list` | Items the user intends to buy |
-| `stores` | Saved store names for autocomplete on price entry |
 | `recipes` | User-created recipes, scoped to their owning inventory via `inventory_id` |
 | `recipe_ingredients` | Ingredients linked to a recipe |
 | `recipe_history` | Audit log of recipes marked as made |
@@ -28,9 +26,7 @@ Each table has a dedicated Data Access Object:
 | `InventoryDao` | CRUD items, joined queries |
 | `InventoriesDao` | CRUD named pantries |
 | `ProductSubmissionQueueDao` | CRUD offline submission queue |
-| `PriceDao` | CRUD prices, quantity-scaled aggregation queries (total value, average, monthly/store spending) |
 | `ShoppingListDao` | CRUD shopping list items, per-inventory scoped |
-| `StoreDao` | CRUD saved store names, case-insensitive lookup |
 | `RecipeDao` | CRUD recipes |
 | `RecipeIngredientDao` | CRUD recipe ingredients |
 | `RecipeHistoryDao` | CRUD recipe history entries |
@@ -89,7 +85,7 @@ restart report a higher
 `user_version`, so sqflite invokes `onDatabaseDowngradeDelete`, which
 deletes the database file (including the WAL and shared-memory sidecars)
 and recreates it from the baseline. This is intentional for the
-pre-release app: previously saved pantries, prices, recipes, and history
+pre-release app: previously saved pantries, recipes, and history
 are discarded once.
 
 **Reset**: `DatabaseHelper.resetDatabase()` runs `down` to version 0 and
@@ -125,7 +121,7 @@ like `ROW_NUMBER() OVER` (3.25+), no `ALTER TABLE DROP COLUMN` /
 `test/database/sqlite_compatibility_test.dart` scans `lib/` and fails if any
 of these constructs are reintroduced. FEFO ordering
 uses the portable `ORDER BY (expiry_date IS NULL), expiry_date ASC`, and
-"latest price per barcode" uses a correlated subquery
+FEFO ordering
 (`ORDER BY date_purchased DESC, id DESC LIMIT 1`).
 
 **Name-based FEFO fallback** (`getInventoryRowsByProductName` and the

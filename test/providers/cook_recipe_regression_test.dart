@@ -147,9 +147,6 @@ class _CookTestWidget extends ConsumerWidget {
                 activeInventoryId: await ref.read(
                   activeInventoryProvider.future,
                 ),
-                baseCurrency: (await ref.read(
-                  settingsProvider.future,
-                )).baseCurrency,
               );
         } on Exception {
           // Silently ignore -- we only care that the invalidation

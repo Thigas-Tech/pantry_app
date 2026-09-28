@@ -39,7 +39,7 @@ void main() {
       await db.insertProduct(
         const Product(barcode: 'manual1', name: 'Manual One', source: 'manual'),
       );
-      expect(await db.getProductCount(), 3);
+      expect((await db.getAllProducts()).length, 3);
 
       // Insert inventory items referencing all three.
       await db.insertInventoryItem(
@@ -62,7 +62,7 @@ void main() {
       // 2. Flush clears only API products.
       await db.clearCachedProducts();
       expect(
-        await db.getProductCount(),
+        (await db.getAllProducts()).length,
         1,
         reason: 'only manual product survives',
       );
@@ -95,7 +95,7 @@ void main() {
       await db.clearCachedProducts();
       expect(await db.getProduct('a'), isNull);
       expect((await db.getProduct('m'))!.name, 'M');
-      expect(await db.getProductCount(), 1);
+      expect((await db.getAllProducts()).length, 1);
     });
   });
 

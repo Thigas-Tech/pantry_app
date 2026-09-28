@@ -1,5 +1,12 @@
 # Registro de alteracoes do usuario
 
+## [0.0.20+16]
+
+- Removido o controle de precos: valores de compra, historico de precos,
+  precos por unidade e nomes de lojas nao fazem mais parte do app.
+- Os custos das receitas nao sao mais exibidos.
+- A aba de estatisticas agora mostra um aviso de "em breve".
+
 ## [0.0.19+15]
 
 - Removidos os recursos de hortifruti: o scanner nao aceita mais codigos

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pantry_app/l10n/app_localizations.dart';
 import 'package:pantry_app/l10n/l10n_extensions.dart';
 import 'package:pantry_app/models/inventory_item.dart';
-import 'package:pantry_app/models/price.dart';
 import 'package:pantry_app/models/product.dart';
 import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
@@ -14,8 +13,6 @@ import 'package:pantry_app/providers/image_cache_provider.dart';
 import 'package:pantry_app/providers/inventory_for_barcode_provider.dart';
 import 'package:pantry_app/providers/notification_coordinator_provider.dart';
 import 'package:pantry_app/providers/notification_service_provider.dart';
-import 'package:pantry_app/providers/price_provider.dart';
-import 'package:pantry_app/providers/price_repository_provider.dart';
 import 'package:pantry_app/providers/product_image_service_provider.dart';
 import 'package:pantry_app/providers/product_repository_provider.dart';
 import 'package:pantry_app/providers/product_submission_provider.dart';
@@ -23,12 +20,10 @@ import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/add_to_inventory_screen.dart';
-import 'package:pantry_app/screens/price_history_screen.dart';
 import 'package:pantry_app/services/exceptions.dart';
 import 'package:pantry_app/services/product_image_service.dart';
 import 'package:pantry_app/utils/date_helpers.dart';
 import 'package:pantry_app/utils/logger.dart';
-import 'package:pantry_app/utils/product_package_size.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
 import 'package:pantry_app/utils/quantity_parser.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
@@ -36,14 +31,8 @@ import 'package:pantry_app/utils/unit_conversion.dart';
 import 'package:pantry_app/utils/unit_resolver.dart';
 import 'package:pantry_app/widgets/nutriscore_badge.dart';
 import 'package:pantry_app/widgets/nutrition_table.dart';
-import 'package:pantry_app/widgets/price_entry_sheet.dart';
-import 'package:pantry_app/widgets/price_history_chart.dart';
-import 'package:pantry_app/widgets/price_mask.dart';
-import 'package:pantry_app/widgets/price_section_error.dart';
-import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/product_photo_management.dart';
 import 'package:pantry_app/widgets/product_submission_status.dart';
-import 'package:pantry_app/widgets/quantity_and_pantry_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Displays full product details and the associated inventory entries
@@ -104,8 +93,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// use from [dispose] (where [ref] is unavailable).
   late final ProductImageService _imageService;
 
-  /// Guards the price sheet so a double-tap cannot stack two sheets.
-  bool _priceSheetOpen = false;
 
   @override
   void initState() {
@@ -141,8 +128,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       inventoryForBarcodeProvider((_product.barcode, activeId)).future,
     );
 
-    final priceTrackingEnabled =
-        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
 
     // When a submission for this product reaches a terminal state (e.g. one
     // started from the add-product screen), refresh the displayed product so
@@ -157,7 +142,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       appBar: AppBar(
         title: Text(_product.name),
         actions: [
-          if (priceTrackingEnabled) const PriceVisibilityToggle(),
           IconButton(
             icon: const Icon(Icons.open_in_browser),
             tooltip: l10n.viewOnOpenFoodFacts,
@@ -334,8 +318,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ),
             const SizedBox(height: 24),
 
-            // Price section
-            _buildPriceSection(context, l10n),
             const SizedBox(height: 16),
 
             // Inventory section header
@@ -471,398 +453,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     );
   }
 
-  /// Builds the price section with latest price, add/edit, and history.
-  Widget _buildPriceSection(BuildContext context, AppLocalizations l10n) {
-    final barcode = _product.barcode;
-    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-    final priceAsync = ref.watch(latestPriceProvider((barcode, activeId)));
-    final historyAsync = ref.watch(priceHistoryProvider((barcode, activeId)));
-
-    return priceAsync.when(
-      data: (price) {
-        if (price == null) return _buildNoPriceData(context, l10n);
-        return historyAsync.when(
-          data: (history) => _buildPriceData(context, l10n, price, history),
-          loading: () => const SizedBox(height: 48),
-          error: (_, _) => _buildPriceData(context, l10n, price, const []),
-        );
-      },
-      loading: () => const SizedBox(height: 48),
-      error: (_, _) => _buildPriceSectionError(context, l10n),
-    );
-  }
-
-  /// Builds the fallback shown when price data cannot be loaded: a localized
-  /// error row with a retry action instead of silently hiding the section.
-  Widget _buildPriceSectionError(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
-    return PriceSectionError(
-      onRetry: () {
-        final barcode = _product.barcode;
-        final activeId = ref.read(activeInventoryProvider).value ?? 1;
-        final baseCurrency =
-            ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
-        ref
-          ..invalidate(latestPriceProvider((barcode, activeId)))
-          ..invalidate(priceHistoryProvider((barcode, activeId)))
-          ..invalidate(
-            priceChartPointsProvider((barcode, activeId, baseCurrency)),
-          );
-      },
-    );
-  }
-
-  Widget _buildPriceData(
-    BuildContext context,
-    AppLocalizations l10n,
-    Price price,
-    List<Price> history,
-  ) {
-    final repo = ref.read(priceRepositoryProvider);
-    final theme = Theme.of(context);
-    final formattedPrice = repo.formatPrice(price.price, price.currency);
-    final recent = history.length > 5 ? history.sublist(0, 5) : history;
-    final trend = _trendFor(recent);
-    final trendLabel = switch (trend) {
-      'up' => l10n.priceTrendUp,
-      'down' => l10n.priceTrendDown,
-      'stable' => l10n.priceTrendStable,
-      _ => null,
-    };
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(l10n.prices, style: theme.textTheme.titleMedium),
-        const SizedBox(height: 8),
-        PriceMask(
-          formattedPrice: formattedPrice,
-          child: Text(
-            formattedPrice,
-            style: theme.textTheme.headlineSmall,
-          ),
-        ),
-        if (price.store != null)
-          Text(price.store!, style: theme.textTheme.bodySmall),
-        if (trendLabel != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            trendLabel,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ],
-        ..._buildPriceHistoryChart(),
-        if (recent.length >= 2) ...[
-          const SizedBox(height: 12),
-          Text(l10n.recentPrices, style: theme.textTheme.titleSmall),
-          const SizedBox(height: 4),
-          ...recent.map((p) => _buildRecentPriceRow(context, l10n, p)),
-        ],
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 4,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () => _addPrice(context),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(l10n.addPrice),
-            ),
-            OutlinedButton.icon(
-              onPressed: () => _editPrice(context, price),
-              icon: const Icon(Icons.edit, size: 18),
-              label: Text(l10n.editPrice),
-            ),
-            TextButton(
-              onPressed: () => _openPriceHistory(context),
-              child: Text(l10n.viewAllPrices),
-            ),
-          ],
-        ),
-        const Divider(height: 24),
-      ],
-    );
-  }
-
-  /// Builds the full price history chart from chart-ready points.
-  ///
-  /// Renders the chart when at least two points exist, a hint prompting for
-  /// a second observation when exactly one point exists, and nothing when
-  /// there are no points or the chart data cannot be loaded (the
-  /// recent-price rows below remain available).
-  List<Widget> _buildPriceHistoryChart() {
-    final activeId = ref.watch(activeInventoryProvider).value ?? 1;
-    final baseCurrency =
-        ref.watch(settingsProvider).value?.baseCurrency ?? 'USD';
-    final chartAsync = ref.watch(
-      priceChartPointsProvider((_product.barcode, activeId, baseCurrency)),
-    );
-    final repo = ref.read(priceRepositoryProvider);
-    return chartAsync.when(
-      data: (points) {
-        if (points.length >= 2) {
-          return [
-            const SizedBox(height: 12),
-            PriceHistoryChart(
-              points: points,
-              formatAmount: (value) => repo.formatPrice(value, baseCurrency),
-            ),
-          ];
-        }
-        if (points.length == 1) {
-          final l10n = AppLocalizations.of(context)!;
-          return [
-            const SizedBox(height: 12),
-            Text(
-              l10n.priceTrendHint,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ];
-        }
-        return const [];
-      },
-      loading: () => const [SizedBox(height: 12), SizedBox(height: 48)],
-      error: (_, _) => const [],
-    );
-  }
-
-  /// Builds one compact recent-price row (date, masked price, store).
-  Widget _buildRecentPriceRow(
-    BuildContext context,
-    AppLocalizations l10n,
-    Price price,
-  ) {
-    final theme = Theme.of(context);
-    final repo = ref.read(priceRepositoryProvider);
-    final formattedPrice = repo.formatPrice(price.price, price.currency);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 84,
-            child: Text(
-              _formatShortDate(price),
-              style: theme.textTheme.bodySmall,
-            ),
-          ),
-          Expanded(
-            child: PriceMask(
-              formattedPrice: formattedPrice,
-              child: Text(
-                formattedPrice,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-          if (price.store != null)
-            Expanded(
-              child: Text(
-                price.store!,
-                textAlign: TextAlign.end,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// Returns 'up', 'down', or 'stable' comparing the newest price against
-  /// the oldest in [history], or null when there are fewer than two prices.
-  static String? _trendFor(List<Price> history) {
-    if (history.length < 2) return null;
-    final latest = history.first.price;
-    final oldest = history.last.price;
-    const epsilon = 0.001;
-    if (latest > oldest + epsilon) return 'up';
-    if (latest < oldest - epsilon) return 'down';
-    return 'stable';
-  }
-
   /// Formats the purchase date as dd/mm/yyyy.
-  String _formatShortDate(Price price) {
-    if (price.datePurchased == null) return '\u2014';
-    return formatShortDate(
-      DateTime.fromMillisecondsSinceEpoch(price.datePurchased!),
-    );
-  }
-
-  Widget _buildNoPriceData(BuildContext context, AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(l10n.prices, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Text(
-          l10n.noPrices,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 8),
-        FilledButton.icon(
-          onPressed: () => _addPrice(context),
-          icon: const Icon(Icons.add, size: 18),
-          label: Text(l10n.addPrice),
-        ),
-        const Divider(height: 24),
-      ],
-    );
-  }
-
-  Future<void> _addPrice(BuildContext context) async {
-    if (_priceSheetOpen) return;
-    _priceSheetOpen = true;
-    try {
-      final l10n = AppLocalizations.of(context)!;
-      final package = productPackageSize(_product);
-      final price = await PriceEntrySheet.show(
-        context,
-        barcode: _product.barcode,
-        existingPackageQuantity: package?.quantity,
-        existingPackageUnit: package?.unit,
-      );
-      if (price != null) {
-        try {
-          await ref.read(productRepositoryProvider).cacheProduct(_product);
-          final activeId = await ref.read(activeInventoryProvider.future);
-          final scoped = price.copyWith(inventoryId: activeId);
-          await ref.read(priceRepositoryProvider).addPrice(scoped);
-          if (!context.mounted) return;
-          final baseCurrency =
-              ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
-          ref
-            ..invalidate(latestPriceProvider((_product.barcode, activeId)))
-            ..invalidate(
-              priceHistoryProvider((_product.barcode, activeId)),
-            )
-            ..invalidate(
-              priceChartPointsProvider((
-                _product.barcode,
-                activeId,
-                baseCurrency,
-              )),
-            );
-
-          if (price.datePurchased != null &&
-              price.store != null &&
-              price.store!.isNotEmpty) {
-            final repo = ref.read(productRepositoryProvider);
-            final activeId = await ref.read(activeInventoryProvider.future);
-            final existingItems = await repo.getInventoryForBarcode(
-              _product.barcode,
-              inventoryId: activeId,
-            );
-            if (context.mounted && existingItems.isEmpty) {
-              final result = await QuantityAndPantrySheet.show(context);
-              if (result != null && context.mounted) {
-                final item = InventoryItem(
-                  barcode: _product.barcode,
-                  inventoryId: result.inventoryId,
-                  quantity: result.quantity,
-                );
-                await repo.cacheProduct(_product);
-                final newId = await repo.addInventoryItem(item);
-                final savedItem = item.copyWith(id: newId);
-                final notificationService = ref.read(
-                  notificationServiceProvider,
-                );
-                await notificationService.scheduleExpiryReminders(
-                  savedItem,
-                  productName: _product.name,
-                  expiringSoonTitle: l10n.expiringSoon,
-                  buildExpiringSoonBody: l10n.expiresTomorrow,
-                  expiringTodayTitle: l10n.expiringToday,
-                  buildExpiringTodayBody: l10n.expiresToday,
-                  channelName: l10n.expiryChannelName,
-                  channelDescription: l10n.expiryChannelDescription,
-                );
-                await _rescheduleInactivityReminder();
-                if (context.mounted) {
-                  SnackbarHelper.showInfo(context, l10n.itemAdded);
-                }
-              } else if (context.mounted) {
-                SnackbarHelper.showInfo(context, l10n.addToPantrySkipped);
-              }
-            } else if (context.mounted) {
-              SnackbarHelper.showInfo(context, l10n.priceAdded);
-            }
-          } else if (context.mounted) {
-            SnackbarHelper.showInfo(context, l10n.priceAdded);
-          }
-        } on Exception catch (e) {
-          logError('Failed to add price: $e');
-          if (context.mounted) {
-            SnackbarHelper.showError(context, l10n.errorGeneric);
-          }
-        }
-      }
-    } finally {
-      _priceSheetOpen = false;
-    }
-  }
-
-  Future<void> _editPrice(BuildContext context, Price price) async {
-    final l10n = AppLocalizations.of(context)!;
-    final updated = await PriceEntrySheet.show(
-      context,
-      barcode: _product.barcode,
-      existingPrice: price,
-    );
-    if (updated != null) {
-      try {
-        await ref.read(priceRepositoryProvider).updatePrice(updated);
-        if (context.mounted) {
-          SnackbarHelper.showInfo(context, l10n.priceUpdated);
-          final activeId = await ref.read(activeInventoryProvider.future);
-          final baseCurrency =
-              ref.read(settingsProvider).value?.baseCurrency ?? 'USD';
-          ref
-            ..invalidate(
-              latestPriceProvider((_product.barcode, activeId)),
-            )
-            ..invalidate(
-              priceHistoryProvider((_product.barcode, activeId)),
-            )
-            ..invalidate(
-              priceChartPointsProvider((
-                _product.barcode,
-                activeId,
-                baseCurrency,
-              )),
-            );
-        }
-      } on Exception catch (e) {
-        logError('Failed to update price: $e');
-        if (context.mounted) {
-          SnackbarHelper.showError(context, l10n.errorGeneric);
-        }
-      }
-    }
-  }
-
-  Future<void> _openPriceHistory(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => PriceHistoryScreen(
-          barcode: _product.barcode,
-          productName: _product.name,
-          product: _product,
-        ),
-      ),
-    );
-  }
 
   /// Builds an [_InventoryTile] for the given [item].
   Widget _buildInventoryTile(InventoryItem item) {

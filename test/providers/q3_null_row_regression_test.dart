@@ -12,7 +12,6 @@ import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/database_provider.dart';
 import 'package:pantry_app/providers/recipe_service_provider.dart';
 import 'package:pantry_app/providers/settings_provider.dart';
-import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/services/recipe_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -76,7 +75,7 @@ void main() {
         ),
       ];
 
-      final service = RecipeService(mockDb, CurrencyService());
+      final service = RecipeService(mockDb);
       final shortages = await service.checkIngredientShortages(ingredients, 1);
 
       expect(shortages, {'Eggs': 2.0});
@@ -185,15 +184,11 @@ void main() {
                     final activeId = await ref.read(
                       activeInventoryProvider.future,
                     );
-                    final baseCurrency = (await ref.read(
-                      settingsProvider.future,
-                    )).baseCurrency;
                     await ref
                         .read(recipeServiceProvider)
                         .cookRecipe(
                           1,
                           activeInventoryId: activeId,
-                          baseCurrency: baseCurrency,
                         );
                     cookCompleted = true;
                   }(),

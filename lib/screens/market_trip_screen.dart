@@ -10,19 +10,15 @@ import 'package:pantry_app/models/shopping_item.dart';
 import 'package:pantry_app/providers/active_inventory_provider.dart';
 import 'package:pantry_app/providers/inventory_provider.dart';
 import 'package:pantry_app/providers/pantry_provider.dart';
-import 'package:pantry_app/providers/price_provider.dart';
 import 'package:pantry_app/providers/scanner_providers.dart';
-import 'package:pantry_app/providers/settings_provider.dart';
 import 'package:pantry_app/providers/shopping_list_provider.dart';
 import 'package:pantry_app/providers/shopping_list_service_provider.dart';
 import 'package:pantry_app/screens/add_product_screen.dart';
 import 'package:pantry_app/screens/market_trip_item_screen.dart';
-import 'package:pantry_app/services/currency_service.dart';
 import 'package:pantry_app/utils/bottom_sheet_helper.dart';
 import 'package:pantry_app/utils/deferred_refresh.dart';
 import 'package:pantry_app/utils/logger.dart';
 import 'package:pantry_app/utils/progress_indicator_helper.dart';
-import 'package:pantry_app/utils/shopping_price.dart';
 import 'package:pantry_app/utils/snackbar_helper.dart';
 import 'package:pantry_app/widgets/add_to_shopping_list_sheet.dart';
 import 'package:pantry_app/widgets/scanner_camera_view.dart';
@@ -297,68 +293,6 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
     }
   }
 
-  Widget _buildTotal(BuildContext context, List<ShoppingItem> items) {
-    final l10n = AppLocalizations.of(context)!;
-    final tripId = _tripInventoryId;
-    if (tripId == null) return const SizedBox.shrink();
-
-    final priceTrackingEnabled =
-        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
-
-    final prices = <ShoppingPrice>[];
-    for (final item in items) {
-      if (item.priceAmount != null && item.priceAmount! > 0) {
-        prices.add(
-          ShoppingPrice(
-            amount: item.priceAmount!,
-            currency: item.priceCurrency ?? 'USD',
-            isEstimate: false,
-          ),
-        );
-        continue;
-      }
-      if (!priceTrackingEnabled || item.barcode == null) continue;
-      final tracked = ref
-          .watch(latestPriceProvider((item.barcode!, tripId)))
-          .asData
-          ?.value;
-      if (tracked == null) continue;
-      prices.add(
-        ShoppingPrice(
-          amount: tracked.price,
-          currency: tracked.currency,
-          isEstimate: true,
-        ),
-      );
-    }
-
-    if (prices.isEmpty) return const SizedBox.shrink();
-
-    final total = groupShoppingPrices(prices);
-    final parts = total.byCurrency.entries.map((e) {
-      final symbol = currencySymbolFor(e.key);
-      return '$symbol${e.value.toStringAsFixed(2)}';
-    });
-    final totalText = parts.join(' + ');
-    final label = total.estimatedAmount > 0
-        ? l10n.totalWithEstimated(
-            totalText,
-            '${currencySymbolFor(total.byCurrency.keys.first)}'
-            '${total.estimatedAmount.toStringAsFixed(2)}',
-          )
-        : l10n.shoppingTotal(totalText);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -381,7 +315,6 @@ class _MarketTripScreenState extends ConsumerState<MarketTripScreen> {
               inventoryId: tripId,
               onScanStateChanged: _onScanStateChanged,
               onManualAdd: () => unawaited(_openManualAdd(tripId)),
-              buildTotal: _buildTotal,
             ),
     );
   }
@@ -393,14 +326,12 @@ class _TripBody extends ConsumerWidget {
     required this.inventoryId,
     required this.onScanStateChanged,
     required this.onManualAdd,
-    required this.buildTotal,
   });
 
   final int inventoryId;
   final void Function(ScannerCameraState?, ScannerCameraState)
   onScanStateChanged;
   final VoidCallback onManualAdd;
-  final Widget Function(BuildContext, List<ShoppingItem>) buildTotal;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -462,7 +393,6 @@ class _TripBody extends ConsumerWidget {
                   },
                 ),
         ),
-        buildTotal(context, items),
       ],
     );
   }

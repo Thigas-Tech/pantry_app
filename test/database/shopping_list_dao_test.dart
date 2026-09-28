@@ -235,103 +235,6 @@ void main() {
     });
   });
 
-  group('price fields', () {
-    test('persists price fields on insert', () async {
-      final id = await dao.insert(
-        db,
-        const ShoppingItem(
-          name: 'Milk',
-          priceAmount: 2.99,
-          priceCurrency: 'USD',
-          priceStore: 'Kroger',
-        ),
-      );
-
-      final item = await dao.getById(db, id);
-      expect(item!.priceAmount, 2.99);
-      expect(item.priceCurrency, 'USD');
-      expect(item.priceStore, 'Kroger');
-    });
-
-    test('price fields survive toggle purchased', () async {
-      final id = await dao.insert(
-        db,
-        const ShoppingItem(
-          name: 'Bread',
-          priceAmount: 1.50,
-          priceCurrency: 'BRL',
-          priceStore: 'Pao de Acucar',
-        ),
-      );
-
-      await dao.togglePurchased(db, id);
-
-      final item = await dao.getById(db, id);
-      expect(item!.isPurchased, true);
-      expect(item.priceAmount, 1.50);
-      expect(item.priceCurrency, 'BRL');
-      expect(item.priceStore, 'Pao de Acucar');
-    });
-
-    test('updatePriceFields changes only price columns', () async {
-      final id = await dao.insert(
-        db,
-        const ShoppingItem(name: 'Eggs', quantity: 6),
-      );
-
-      await dao.updatePriceFields(
-        db,
-        id,
-        priceAmount: 3,
-        priceCurrency: 'EUR',
-        priceStore: 'Aldi',
-      );
-
-      final item = await dao.getById(db, id);
-      expect(item!.name, 'Eggs');
-      expect(item.quantity, 6.0);
-      expect(item.isPurchased, false);
-      expect(item.priceAmount, 3.00);
-      expect(item.priceCurrency, 'EUR');
-      expect(item.priceStore, 'Aldi');
-    });
-
-    test('updatePriceFields clears price fields when null', () async {
-      final id = await dao.insert(
-        db,
-        const ShoppingItem(
-          name: 'Juice',
-          priceAmount: 4.50,
-          priceCurrency: 'USD',
-          priceStore: 'Walmart',
-        ),
-      );
-
-      await dao.updatePriceFields(db, id);
-
-      final item = await dao.getById(db, id);
-      expect(item!.priceAmount, isNull);
-      expect(item.priceCurrency, isNull);
-      expect(item.priceStore, isNull);
-    });
-
-    test('listPending includes price fields from DB', () async {
-      await dao.insert(
-        db,
-        const ShoppingItem(
-          name: 'Butter',
-          priceAmount: 2,
-          priceCurrency: 'USD',
-        ),
-      );
-
-      final items = await dao.listPending(db);
-      expect(items.length, 1);
-      expect(items[0].priceAmount, 2.00);
-      expect(items[0].priceCurrency, 'USD');
-    });
-  });
-
   group('insertOrMergeByBarcode inventory scoping', () {
     test('merges within same inventory', () async {
       await dao.insertOrMergeByBarcode(
@@ -631,27 +534,6 @@ void main() {
 
       await dao.updateExpiryFields(db, id, expiryDate: null);
       expect((await dao.getById(db, id))!.expiryDate, isNull);
-    });
-
-    test('updateExpiryFields leaves other columns unchanged', () async {
-      final id = await dao.insert(
-        db,
-        const ShoppingItem(
-          name: 'Milk',
-          priceAmount: 4.99,
-          priceCurrency: 'USD',
-          priceStore: 'Shop',
-        ),
-      );
-
-      await dao.updateExpiryFields(db, id, expiryDate: '2026-12-31');
-
-      final item = (await dao.getById(db, id))!;
-      expect(item.expiryDate, '2026-12-31');
-      expect(item.priceAmount, 4.99);
-      expect(item.priceCurrency, 'USD');
-      expect(item.priceStore, 'Shop');
-      expect(item.name, 'Milk');
     });
   });
 }

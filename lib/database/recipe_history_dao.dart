@@ -16,7 +16,6 @@ class RecipeHistoryDao {
     if (entry.id != null) 'id': entry.id,
     'recipe_id': entry.recipeId,
     'made_at': entry.madeAt,
-    'cost_at_time': entry.costAtTime,
     'ingredient_snapshot': entry.ingredientSnapshot,
   };
 
@@ -25,7 +24,6 @@ class RecipeHistoryDao {
     id: map['id'] as int?,
     recipeId: map['recipe_id'] as int,
     madeAt: map['made_at'] as int,
-    costAtTime: (map['cost_at_time'] as num?)?.toDouble() ?? 0.0,
     ingredientSnapshot: map['ingredient_snapshot'] as String? ?? '[]',
   );
 
@@ -57,25 +55,6 @@ class RecipeHistoryDao {
       return rows.map(fromMap).toList();
     } on Exception catch (e) {
       logError('Error listing history for recipe $recipeId: $e');
-      rethrow;
-    }
-  }
-
-  /// Returns all history entries made at or after [sinceMillis].
-  Future<List<RecipeHistoryEntry>> getRecent(
-    Database db,
-    int sinceMillis,
-  ) async {
-    try {
-      final rows = await db.query(
-        'recipe_history',
-        where: 'made_at >= ?',
-        whereArgs: [sinceMillis],
-        orderBy: 'made_at DESC',
-      );
-      return rows.map(fromMap).toList();
-    } on Exception catch (e) {
-      logError('Error listing recent history: $e');
       rethrow;
     }
   }

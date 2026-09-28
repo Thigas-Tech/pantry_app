@@ -370,8 +370,6 @@
   },
   "whatsNewDismiss": "Entendi",
   "settingsAbout": "Sobre",
-  "priceTracking": "Controle de Preços",
-  "priceTrackingDescription": "Acompanhe seus gastos.",
   "photoCompletenessTitle": "Fotos dos Produtos",
   "noCategories": "Nenhuma categoria",
   "addedThisWeekLabel": "Esta semana",
@@ -399,23 +397,8 @@
   "navList": "Lista",
   "apiSearchWarning": "Nao foi possivel buscar todos os resultados online. Alguns produtos podem estar faltando.",
   "dismiss": "Dispensar",
-  "priceHidden": "Preco oculto",
-  "priceTrendHint": "Adicione outro preco para ver a tendencia",
-  "priceChartTooltip": "{date} - {price}",
-  "@priceChartTooltip": {
-    "description": "Tooltip no grafico do historico de precos mostrando a data da compra e o preco",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "price": {
-        "type": "String"
-      }
-    }
-  },
   "add": "Adicionar",
   "addAgain": "Adicionar de novo",
-  "addPrice": "Adicionar preco",
   "addShoppingItem": "Adicionar item",
   "addItem": "Adicionar item",
   "productAddedToShoppingList": "{product} adicionado a lista de compras",
@@ -432,34 +415,6 @@
   "addCustomItem": "Adicionar item personalizado",
   "noProductsFound": "Nenhum produto encontrado. Tente um item personalizado.",
   "backToSearch": "Voltar a busca",
-  "removePrice": "Preco removido",
-  "shoppingTotal": "Total: {total}",
-  "@shoppingTotal": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "totalWithEstimated": "Total: {total} (incl. {estimated} estimado)",
-  "@totalWithEstimated": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      },
-      "estimated": {
-        "type": "String"
-      }
-    }
-  },
-  "estimatedPrice": "Est. {price}",
-  "@estimatedPrice": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      }
-    }
-  },
   "marketTripTitle": "Ida ao mercado",
   "scanNextItem": "Escanee itens para adiciona-los a esta ida",
   "finishTrip": "Terminar ida",
@@ -489,8 +444,6 @@
     }
   },
   "useEstimate": "Usar estimativa",
-  "enterPrice": "Informar preco",
-  "priceNotSet": "Sem preco",
   "addExpiryDate": "Adicionar data de validade",
   "noExpiry": "Sem validade",
   "noProduceFinish": "Nao, terminar ida",
@@ -541,8 +494,6 @@
   "amoledNudgeEnable": "Ativar modo escuro",
   "amoledNudgeTitle": "Trocar para o modo escuro?",
   "attachScreenshot": "Anexar captura de tela",
-  "averagePrice": "Preco medio",
-  "baseCurrency": "Moeda base",
   "baseCurrencyDescription": "Todos os precos sao exibidos nesta moeda.",
   "cameraNotAvailable": "Camera nao disponivel neste dispositivo.",
   "cameraPermissionDenied": "Permissao da camera negada. Conceda acesso nas Configuracoes.",
@@ -553,17 +504,13 @@
   "clearPurchased": "Limpar comprados",
   "clearPurchasedConfirm": "Remover todos os itens comprados?",
   "confirmDeletePrice": "Excluir esta entrada de preco?",
-  "currency": "Moeda",
   "datePurchased": "Data da compra",
   "deleteItem": "Excluir item",
   "deletePrice": "Excluir preco",
   "discounted": "Com desconto",
-  "editPrice": "Editar preco",
   "emptyShoppingList": "Sua lista de compras esta vazia",
   "emptyShoppingListSub": "Adicione itens de um produto ou toque em + para adicionar manualmente",
   "showPrices": "Mostrar precos",
-  "hidePrices": "Ocultar precos por privacidade",
-  "hidePricesDescription": "Substituir valores de preco por texto mascarado em todos os lugares, incluindo a tela de estatisticas.",
   "iUnderstand": "Entendi",
   "inactivityReminderBody": "Voce nao adicionou nenhum produto em {days} dias.",
   "@inactivityReminderBody": {
@@ -616,22 +563,8 @@
   "unit": "Unidade",
   "editItem": "Editar item",
   "editQuantity": "Editar quantidade",
-  "itemWithPriceCount": "{count} de {total} itens tem precos",
-  "@itemWithPriceCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "total": {
-        "type": "int",
-        "example": "20"
-      }
-    }
-  },
   "markPurchased": "Marcar como comprado",
   "moveToInventory": "Mover para despensa",
-  "noPrices": "Nenhum preco registrado.",
   "notes": "Observações",
   "packageSize": "Tamanho da embalagem",
   "packageSizeHint": "Quantidade em uma embalagem, ex. 12",
@@ -640,52 +573,9 @@
   "notificationDeniedWarning": "Notificacoes desativadas. Lembretes de validade e inatividade so aparecerao ao abrir o app. Ative nas Configuracoes a qualquer momento.",
   "notificationPermissionBody": "Para receber lembretes de validade, conceda permissao de notificacao nas configuracoes do dispositivo.",
   "notificationPermissionTitle": "Permissao de Notificacao Necessaria",
-  "openPricesConsentBody": "Open Prices e um banco de dados comunitario de precos de alimentos. Para contribuir, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante.\n\nAo adicionar ou editar um preco, voce tera a opcao de tirar uma foto de comprovante. Precos sem foto permanecem na sua despensa local e nao sao compartilhados.",
-  "openPricesConsentTitle": "Contribuir com Open Prices",
-  "openPricesProofExplanation": "Para compartilhar com o Open Prices, uma foto do recibo ou da etiqueta de prateleira e necessaria como comprovante. Precos sem foto permanecem apenas na sua despensa local.",
-  "openPricesSyncComplete": "{count} precos sincronizados.",
-  "@openPricesSyncComplete": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
-  "openPricesSyncStarted": "Sincronizando precos...",
-  "openPricesToken": "Token da API Open Prices",
-  "openPricesTokenDescription": "Token gerado da sua conta do Open Food Facts.",
-  "openPricesTokenSaved": "Token salvo.",
   "openSettings": "Abrir Configuracoes",
   "pendingItems": "Para comprar",
-  "price": "Preco",
-  "priceAdded": "Preco adicionado.",
-  "priceDeleted": "Preco excluido.",
-  "priceHistory": "Historico de precos",
-  "recentPrices": "Precos recentes",
-  "viewAllPrices": "Ver todos",
   "noPriceTrend": "Adicione pelo menos dois precos para ver a tendencia.",
-  "priceRetentionDays": "Retencao de precos",
-  "priceRetentionDaysValue": "Manter precos por {days} dias (0 = manter para sempre)",
-  "@priceRetentionDaysValue": {
-    "placeholders": {
-      "days": {
-        "type": "int",
-        "example": "365"
-      }
-    }
-  },
-  "priceSyncFailed": "Falha na sincronizacao",
-  "priceSyncPending": "Sincronizacao pendente",
-  "priceSyncStatus": "Sincronizado",
-  "priceTrackingEnabled": "Ativar controle de precos",
-  "priceTrendDown": "Precos estao caindo",
-  "priceTrendStable": "Precos estaveis",
-  "priceTrendUp": "Precos estao subindo",
-  "priceUpdated": "Preco atualizado.",
-  "prices": "Precos",
-  "pricesHidden": "Precos ocultos.",
-  "pricesVisible": "Precos visiveis.",
   "productUpdated": "Produto atualizado.",
   "notAvailable": "N/D",
   "purchasedItems": "Comprados",
@@ -752,17 +642,8 @@
       }
     }
   },
-  "statsEmptySubtitle": "Adicione produtos à sua despensa para ver estatísticas aqui.",
-  "statsEmptyTitle": "Nenhum item para analisar",
-  "store": "Loja",
   "addNewStore": "Adicionar nova loja",
-  "storeAdded": "Loja adicionada",
-  "storeAlreadyExists": "Já existe uma loja com este nome",
-  "storeName": "Nome da loja",
   "switchToManualEntry": "Digitar codigo manualmente",
-  "syncToOpenPrices": "Compartilhar com Open Prices",
-  "syncToOpenPricesDescription": "Contribua com seus dados de preco para o banco de dados comunitario.",
-  "totalValue": "Valor total",
   "undoClearPurchased": "Itens comprados limpos",
   "undoDeleteShoppingItem": "Item excluido",
   "unmarkPurchased": "Desmarcar comprado",
@@ -770,7 +651,6 @@
   "addToPantryAfterPriceDesc": "Registre a quantidade comprada para acompanhar no seu estoque.",
   "howManyBought": "Quantas unidades voce comprou?",
   "choosePantry": "Escolher despensa",
-  "addToPantrySkipped": "Preco salvo. Adicione pela pagina do produto para acompanhar.",
   "scanFailed": "Falha ao escanear codigo de barras.",
   "selectedCount": "{count, plural, =0{Nenhum item selecionado} =1{1 item selecionado} other{{count} itens selecionados}}",
   "@selectedCount": {
@@ -798,11 +678,6 @@
   "unitKg": "kg",
   "unitMl": "ml",
   "unitLiter": "L",
-  "pricePerPiece": "/unidade",
-  "pricePerHundredGrams": "/100 g",
-  "pricePerKilogram": "/kg",
-  "pricePerLiter": "/L",
-  "pricePerHundredMilliliters": "/100 ml",
   "packageQuantity": "Quantidade da embalagem",
   "generalNotificationChannelName": "Notificações Gerais",
   "generalNotificationChannelDescription": "Notificações padrão do app",
@@ -896,7 +771,6 @@
   "storeSpendingTitle": "Gastos por loja",
   "nutriscoreByStoreTitle": "Nutri-Score por loja",
   "noStoreData": "Sem dados de compra",
-  "noSpendingData": "Adicione precos para ver tendencias",
   "monthLabel": "Mes",
   "averageScore": "Nota media",
   "exactAlarmsDeniedHint": "Notificações agendadas podem sofrer atrasos porque alarmes exatos não foram concedidos. Conceda em Configurações > Notificações > Agendar alarmes exatos.",
@@ -935,10 +809,7 @@
   "noRecipesSubtitle": "Registre receitas para controlar custos e planejar refeições",
   "discardChanges": "Descartar alterações?",
   "discardChangesConfirm": "Você tem alterações não salvas. Descartá-las?",
-  "recipeCost": "Custo da receita",
-  "recipeCostUnknown": "Desconhecido",
   "recipePerServing": "por porção",
-  "recipeAverageCost": "Custo médio das receitas",
   "ingredientCount": "{count, plural, one{{count} ingrediente} other{{count} ingredientes}}",
   "deleteRecipeConfirm": "Excluir esta receita?",
   "madeRecipe": "Fiz esta receita",
@@ -952,7 +823,6 @@
   "setServingsHint": "Defina o numero de porcoes no editor da receita para ver a nutricao por porcao",
   "addPhoto": "Adicionar foto",
   "changePhoto": "Alterar foto",
-  "costPerServing": "Custo por porcao",
   "recipeNutritionPerServing": "Por porcao",
   "recipeNutriScore": "Nutri-Score",
   "recipeNoIngredients": "A receita nao tem ingredientes",
@@ -1035,5 +905,7 @@
   "onboardingPage4Title": "Controle Tudo",
   "onboardingPage4Desc": "Monitore datas de validade, acompanhe precos, crie listas de compras e reduza o desperdicio de alimentos.",
   "onboardingPage4Cta": "Comecar",
-  "servingSize": "Porção"
+  "servingSize": "Porção",
+  "statsComingSoonTitle": "Estatisticas em breve",
+  "statsComingSoonDescription": "As estatisticas e graficos da despensa chegarao em uma atualizacao futura."
 }

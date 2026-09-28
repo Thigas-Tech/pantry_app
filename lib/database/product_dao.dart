@@ -201,14 +201,6 @@ class ProductDao {
     return result.map(fromMap).toList();
   }
 
-  /// Returns the total number of cached product records.
-  Future<int> count(Database db) async {
-    return Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM products'),
-        ) ??
-        0;
-  }
-
   /// Returns all cached products.
   Future<List<Product>> all(Database db) async {
     final result = await db.query('products');

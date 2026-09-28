@@ -1614,18 +1614,6 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsAbout;
 
-  /// No description provided for @priceTracking.
-  ///
-  /// In en, this message translates to:
-  /// **'Price Tracking'**
-  String get priceTracking;
-
-  /// No description provided for @priceTrackingDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Record purchase prices and track how much you spend.'**
-  String get priceTrackingDescription;
-
   /// No description provided for @photoCompletenessTitle.
   ///
   /// In en, this message translates to:
@@ -1637,18 +1625,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No categories yet'**
   String get noCategories;
-
-  /// No description provided for @statsEmptyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No items to analyze'**
-  String get statsEmptyTitle;
-
-  /// No description provided for @statsEmptySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add products to your pantry to see statistics here.'**
-  String get statsEmptySubtitle;
 
   /// No description provided for @addedThisWeekLabel.
   ///
@@ -2052,77 +2028,11 @@ abstract class AppLocalizations {
   /// **'Not now'**
   String get amoledNudgeDismiss;
 
-  /// No description provided for @price.
-  ///
-  /// In en, this message translates to:
-  /// **'Price'**
-  String get price;
-
-  /// No description provided for @prices.
-  ///
-  /// In en, this message translates to:
-  /// **'Prices'**
-  String get prices;
-
-  /// No description provided for @addPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Add price'**
-  String get addPrice;
-
-  /// No description provided for @editPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit price'**
-  String get editPrice;
-
   /// No description provided for @deletePrice.
   ///
   /// In en, this message translates to:
   /// **'Delete price'**
   String get deletePrice;
-
-  /// No description provided for @priceAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Price added.'**
-  String get priceAdded;
-
-  /// No description provided for @priceUpdated.
-  ///
-  /// In en, this message translates to:
-  /// **'Price updated.'**
-  String get priceUpdated;
-
-  /// No description provided for @priceDeleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Price deleted.'**
-  String get priceDeleted;
-
-  /// No description provided for @priceHistory.
-  ///
-  /// In en, this message translates to:
-  /// **'Price history'**
-  String get priceHistory;
-
-  /// No description provided for @noPrices.
-  ///
-  /// In en, this message translates to:
-  /// **'No prices recorded.'**
-  String get noPrices;
-
-  /// No description provided for @recentPrices.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent prices'**
-  String get recentPrices;
-
-  /// No description provided for @viewAllPrices.
-  ///
-  /// In en, this message translates to:
-  /// **'View all'**
-  String get viewAllPrices;
 
   /// No description provided for @noPriceTrend.
   ///
@@ -2130,77 +2040,11 @@ abstract class AppLocalizations {
   /// **'Add at least two prices to see the trend.'**
   String get noPriceTrend;
 
-  /// No description provided for @totalValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Total value'**
-  String get totalValue;
-
-  /// No description provided for @averagePrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Average item price'**
-  String get averagePrice;
-
   /// No description provided for @showPrices.
   ///
   /// In en, this message translates to:
   /// **'Show prices'**
   String get showPrices;
-
-  /// No description provided for @hidePrices.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide prices for privacy'**
-  String get hidePrices;
-
-  /// No description provided for @hidePricesDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace price values with masked text everywhere, including the stats screen.'**
-  String get hidePricesDescription;
-
-  /// No description provided for @pricesHidden.
-  ///
-  /// In en, this message translates to:
-  /// **'Prices hidden.'**
-  String get pricesHidden;
-
-  /// No description provided for @pricesVisible.
-  ///
-  /// In en, this message translates to:
-  /// **'Prices visible.'**
-  String get pricesVisible;
-
-  /// No description provided for @priceTrackingEnabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable price tracking'**
-  String get priceTrackingEnabled;
-
-  /// No description provided for @priceRetentionDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Price retention'**
-  String get priceRetentionDays;
-
-  /// No description provided for @priceRetentionDaysValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep prices for {days} days (0 = keep forever)'**
-  String priceRetentionDaysValue(int days);
-
-  /// No description provided for @currency.
-  ///
-  /// In en, this message translates to:
-  /// **'Currency'**
-  String get currency;
-
-  /// No description provided for @baseCurrency.
-  ///
-  /// In en, this message translates to:
-  /// **'Base currency'**
-  String get baseCurrency;
 
   /// No description provided for @baseCurrencyDescription.
   ///
@@ -2208,35 +2052,11 @@ abstract class AppLocalizations {
   /// **'All prices are shown in this currency.'**
   String get baseCurrencyDescription;
 
-  /// No description provided for @store.
-  ///
-  /// In en, this message translates to:
-  /// **'Store'**
-  String get store;
-
   /// No description provided for @addNewStore.
   ///
   /// In en, this message translates to:
   /// **'Add new store'**
   String get addNewStore;
-
-  /// No description provided for @storeAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'Store added'**
-  String get storeAdded;
-
-  /// No description provided for @storeAlreadyExists.
-  ///
-  /// In en, this message translates to:
-  /// **'A store with this name already exists'**
-  String get storeAlreadyExists;
-
-  /// No description provided for @storeName.
-  ///
-  /// In en, this message translates to:
-  /// **'Store name'**
-  String get storeName;
 
   /// No description provided for @discounted.
   ///
@@ -2256,113 +2076,11 @@ abstract class AppLocalizations {
   /// **'Delete this price entry?'**
   String get confirmDeletePrice;
 
-  /// No description provided for @syncToOpenPrices.
-  ///
-  /// In en, this message translates to:
-  /// **'Share with Open Prices'**
-  String get syncToOpenPrices;
-
-  /// No description provided for @syncToOpenPricesDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Contribute your price data to the community food-price database.'**
-  String get syncToOpenPricesDescription;
-
-  /// No description provided for @openPricesToken.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Prices API Token'**
-  String get openPricesToken;
-
-  /// No description provided for @openPricesTokenDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Token generated from your Open Food Facts account.'**
-  String get openPricesTokenDescription;
-
-  /// No description provided for @openPricesTokenSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Token saved.'**
-  String get openPricesTokenSaved;
-
-  /// No description provided for @openPricesSyncStarted.
-  ///
-  /// In en, this message translates to:
-  /// **'Syncing prices...'**
-  String get openPricesSyncStarted;
-
-  /// No description provided for @openPricesSyncComplete.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} prices synced.'**
-  String openPricesSyncComplete(int count);
-
-  /// No description provided for @priceSyncStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Synced'**
-  String get priceSyncStatus;
-
-  /// No description provided for @priceSyncPending.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending sync'**
-  String get priceSyncPending;
-
-  /// No description provided for @priceSyncFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Sync failed'**
-  String get priceSyncFailed;
-
-  /// No description provided for @priceTrendUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Prices are rising'**
-  String get priceTrendUp;
-
-  /// No description provided for @priceTrendDown.
-  ///
-  /// In en, this message translates to:
-  /// **'Prices are falling'**
-  String get priceTrendDown;
-
-  /// No description provided for @priceTrendStable.
-  ///
-  /// In en, this message translates to:
-  /// **'Prices are stable'**
-  String get priceTrendStable;
-
   /// No description provided for @datePurchased.
   ///
   /// In en, this message translates to:
   /// **'Purchase date'**
   String get datePurchased;
-
-  /// No description provided for @itemWithPriceCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} of {total} items have prices'**
-  String itemWithPriceCount(int count, int total);
-
-  /// No description provided for @openPricesProofExplanation.
-  ///
-  /// In en, this message translates to:
-  /// **'To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.'**
-  String get openPricesProofExplanation;
-
-  /// No description provided for @openPricesConsentTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Contribute to Open Prices'**
-  String get openPricesConsentTitle;
-
-  /// No description provided for @openPricesConsentBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.'**
-  String get openPricesConsentBody;
 
   /// No description provided for @iUnderstand.
   ///
@@ -2592,30 +2310,6 @@ abstract class AppLocalizations {
   /// **'Back to search'**
   String get backToSearch;
 
-  /// No description provided for @removePrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Price removed'**
-  String get removePrice;
-
-  /// No description provided for @shoppingTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Total: {total}'**
-  String shoppingTotal(String total);
-
-  /// No description provided for @totalWithEstimated.
-  ///
-  /// In en, this message translates to:
-  /// **'Total: {total} (incl. {estimated} estimated)'**
-  String totalWithEstimated(String total, String estimated);
-
-  /// No description provided for @estimatedPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Est. {price}'**
-  String estimatedPrice(String price);
-
   /// No description provided for @marketTripTitle.
   ///
   /// In en, this message translates to:
@@ -2669,18 +2363,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use estimate'**
   String get useEstimate;
-
-  /// No description provided for @enterPrice.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter price'**
-  String get enterPrice;
-
-  /// No description provided for @priceNotSet.
-  ///
-  /// In en, this message translates to:
-  /// **'No price'**
-  String get priceNotSet;
 
   /// No description provided for @addExpiryDate.
   ///
@@ -2766,12 +2448,6 @@ abstract class AppLocalizations {
   /// **'Choose a pantry'**
   String get choosePantry;
 
-  /// No description provided for @addToPantrySkipped.
-  ///
-  /// In en, this message translates to:
-  /// **'Price saved. Add from product page to track inventory.'**
-  String get addToPantrySkipped;
-
   /// No description provided for @invalidPriceAmount.
   ///
   /// In en, this message translates to:
@@ -2789,24 +2465,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dismiss'**
   String get dismiss;
-
-  /// No description provided for @priceHidden.
-  ///
-  /// In en, this message translates to:
-  /// **'Price hidden'**
-  String get priceHidden;
-
-  /// No description provided for @priceTrendHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Add another price to see the trend'**
-  String get priceTrendHint;
-
-  /// Tooltip on the price history chart showing the purchase date and the price
-  ///
-  /// In en, this message translates to:
-  /// **'{date} - {price}'**
-  String priceChartTooltip(String date, String price);
 
   /// No description provided for @scanFailed.
   ///
@@ -2939,36 +2597,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'L'**
   String get unitLiter;
-
-  /// No description provided for @pricePerPiece.
-  ///
-  /// In en, this message translates to:
-  /// **'/unit'**
-  String get pricePerPiece;
-
-  /// No description provided for @pricePerHundredGrams.
-  ///
-  /// In en, this message translates to:
-  /// **'/100 g'**
-  String get pricePerHundredGrams;
-
-  /// No description provided for @pricePerKilogram.
-  ///
-  /// In en, this message translates to:
-  /// **'/kg'**
-  String get pricePerKilogram;
-
-  /// No description provided for @pricePerLiter.
-  ///
-  /// In en, this message translates to:
-  /// **'/L'**
-  String get pricePerLiter;
-
-  /// No description provided for @pricePerHundredMilliliters.
-  ///
-  /// In en, this message translates to:
-  /// **'/100 ml'**
-  String get pricePerHundredMilliliters;
 
   /// No description provided for @packageQuantity.
   ///
@@ -3528,12 +3156,6 @@ abstract class AppLocalizations {
   /// **'No purchase data yet'**
   String get noStoreData;
 
-  /// No description provided for @noSpendingData.
-  ///
-  /// In en, this message translates to:
-  /// **'Add prices to see spending trends'**
-  String get noSpendingData;
-
   /// No description provided for @monthLabel.
   ///
   /// In en, this message translates to:
@@ -3750,12 +3372,6 @@ abstract class AppLocalizations {
   /// **'Change photo'**
   String get changePhoto;
 
-  /// No description provided for @costPerServing.
-  ///
-  /// In en, this message translates to:
-  /// **'Cost per serving'**
-  String get costPerServing;
-
   /// No description provided for @recipeNutritionPerServing.
   ///
   /// In en, this message translates to:
@@ -3822,29 +3438,11 @@ abstract class AppLocalizations {
   /// **'You have unsaved changes. Discard them?'**
   String get discardChangesConfirm;
 
-  /// No description provided for @recipeCost.
-  ///
-  /// In en, this message translates to:
-  /// **'Recipe cost'**
-  String get recipeCost;
-
-  /// No description provided for @recipeCostUnknown.
-  ///
-  /// In en, this message translates to:
-  /// **'Unknown'**
-  String get recipeCostUnknown;
-
   /// No description provided for @recipePerServing.
   ///
   /// In en, this message translates to:
   /// **'per serving'**
   String get recipePerServing;
-
-  /// No description provided for @recipeAverageCost.
-  ///
-  /// In en, this message translates to:
-  /// **'Average recipe cost'**
-  String get recipeAverageCost;
 
   /// No description provided for @ingredientCount.
   ///
@@ -4205,6 +3803,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Serving size'**
   String get servingSize;
+
+  /// No description provided for @statsComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics coming soon'**
+  String get statsComingSoonTitle;
+
+  /// No description provided for @statsComingSoonDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry insights and charts will arrive in a future update.'**
+  String get statsComingSoonDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

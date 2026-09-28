@@ -403,12 +403,8 @@
   },
   "whatsNewDismiss": "Got it",
   "settingsAbout": "About",
-  "priceTracking": "Price Tracking",
-  "priceTrackingDescription": "Record purchase prices and track how much you spend.",
   "photoCompletenessTitle": "Photo Completeness",
   "noCategories": "No categories yet",
-  "statsEmptyTitle": "No items to analyze",
-  "statsEmptySubtitle": "Add products to your pantry to see statistics here.",
   "addedThisWeekLabel": "This week",
   "addedThisMonthLabel": "This month",
   "productDataUnavailable": "Product data unavailable — pull to refresh when online",
@@ -531,86 +527,15 @@
   "amoledNudgeBody": "Dark mode can save battery life on your device, especially if it has an AMOLED screen. You can also enable pure-black surfaces in Settings for maximum power savings.",
   "amoledNudgeEnable": "Enable dark mode",
   "amoledNudgeDismiss": "Not now",
-  "price": "Price",
-  "prices": "Prices",
-  "addPrice": "Add price",
-  "editPrice": "Edit price",
   "deletePrice": "Delete price",
-  "priceAdded": "Price added.",
-  "priceUpdated": "Price updated.",
-  "priceDeleted": "Price deleted.",
-  "priceHistory": "Price history",
-  "noPrices": "No prices recorded.",
-  "recentPrices": "Recent prices",
-  "viewAllPrices": "View all",
   "noPriceTrend": "Add at least two prices to see the trend.",
-  "totalValue": "Total value",
-  "averagePrice": "Average item price",
   "showPrices": "Show prices",
-  "hidePrices": "Hide prices for privacy",
-  "hidePricesDescription": "Replace price values with masked text everywhere, including the stats screen.",
-  "pricesHidden": "Prices hidden.",
-  "pricesVisible": "Prices visible.",
-  "priceTrackingEnabled": "Enable price tracking",
-  "priceRetentionDays": "Price retention",
-  "priceRetentionDaysValue": "Keep prices for {days} days (0 = keep forever)",
-  "@priceRetentionDaysValue": {
-    "placeholders": {
-      "days": {
-        "type": "int",
-        "example": "365"
-      }
-    }
-  },
-  "currency": "Currency",
-  "baseCurrency": "Base currency",
   "baseCurrencyDescription": "All prices are shown in this currency.",
-  "store": "Store",
   "addNewStore": "Add new store",
-  "storeAdded": "Store added",
-  "storeAlreadyExists": "A store with this name already exists",
-  "storeName": "Store name",
   "discounted": "Discounted",
   "regularPrice": "Regular price",
   "confirmDeletePrice": "Delete this price entry?",
-  "syncToOpenPrices": "Share with Open Prices",
-  "syncToOpenPricesDescription": "Contribute your price data to the community food-price database.",
-  "openPricesToken": "Open Prices API Token",
-  "openPricesTokenDescription": "Token generated from your Open Food Facts account.",
-  "openPricesTokenSaved": "Token saved.",
-  "openPricesSyncStarted": "Syncing prices...",
-  "openPricesSyncComplete": "{count} prices synced.",
-  "@openPricesSyncComplete": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    }
-  },
-  "priceSyncStatus": "Synced",
-  "priceSyncPending": "Pending sync",
-  "priceSyncFailed": "Sync failed",
-  "priceTrendUp": "Prices are rising",
-  "priceTrendDown": "Prices are falling",
-  "priceTrendStable": "Prices are stable",
   "datePurchased": "Purchase date",
-  "itemWithPriceCount": "{count} of {total} items have prices",
-  "@itemWithPriceCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      },
-      "total": {
-        "type": "int",
-        "example": "20"
-      }
-    }
-  },
-  "openPricesProofExplanation": "To share with Open Prices, a photo of the receipt or shelf label is required as proof. Prices without a photo stay in your local pantry only.",
-  "openPricesConsentTitle": "Contribute to Open Prices",
-  "openPricesConsentBody": "Open Prices is a community database of food prices. To contribute, a photo of the receipt or shelf label is required as proof.\n\nWhen you add or edit a price, you will have the option to take a proof photo. Prices without a photo stay in your local pantry and are not shared.",
   "iUnderstand": "I understand",
   "notes": "Notes",
   "packageSize": "Package size",
@@ -656,34 +581,6 @@
   "addCustomItem": "Add custom item",
   "noProductsFound": "No products found. Try a custom item.",
   "backToSearch": "Back to search",
-  "removePrice": "Price removed",
-  "shoppingTotal": "Total: {total}",
-  "@shoppingTotal": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "totalWithEstimated": "Total: {total} (incl. {estimated} estimated)",
-  "@totalWithEstimated": {
-    "placeholders": {
-      "total": {
-        "type": "String"
-      },
-      "estimated": {
-        "type": "String"
-      }
-    }
-  },
-  "estimatedPrice": "Est. {price}",
-  "@estimatedPrice": {
-    "placeholders": {
-      "price": {
-        "type": "String"
-      }
-    }
-  },
   "marketTripTitle": "Market trip",
   "scanNextItem": "Scan items to add them to this trip",
   "finishTrip": "Finish trip",
@@ -713,8 +610,6 @@
     }
   },
   "useEstimate": "Use estimate",
-  "enterPrice": "Enter price",
-  "priceNotSet": "No price",
   "addExpiryDate": "Add expiry date",
   "noExpiry": "No expiry",
   "noProduceFinish": "No, finish trip",
@@ -760,24 +655,9 @@
   "addToPantryAfterPriceDesc": "Record the amount you bought to track it in your inventory.",
   "howManyBought": "How many did you buy?",
   "choosePantry": "Choose a pantry",
-  "addToPantrySkipped": "Price saved. Add from product page to track inventory.",
   "invalidPriceAmount": "Enter a valid price amount",
   "apiSearchWarning": "Could not fetch all online results. Some products may be missing.",
   "dismiss": "Dismiss",
-  "priceHidden": "Price hidden",
-  "priceTrendHint": "Add another price to see the trend",
-  "priceChartTooltip": "{date} - {price}",
-  "@priceChartTooltip": {
-    "description": "Tooltip on the price history chart showing the purchase date and the price",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "price": {
-        "type": "String"
-      }
-    }
-  },
   "scanFailed": "Barcode scan failed.",
   "testNotification": "Send test notification",
   "testScheduledNotification": "Send scheduled test notification (2 min)",
@@ -805,11 +685,6 @@
   "unitKg": "kg",
   "unitMl": "ml",
   "unitLiter": "L",
-  "pricePerPiece": "/unit",
-  "pricePerHundredGrams": "/100 g",
-  "pricePerKilogram": "/kg",
-  "pricePerLiter": "/L",
-  "pricePerHundredMilliliters": "/100 ml",
   "packageQuantity": "Package quantity",
   "generalNotificationChannelName": "General Notifications",
   "generalNotificationChannelDescription": "Standard app notifications",
@@ -903,7 +778,6 @@
   "storeSpendingTitle": "Spending by store",
   "nutriscoreByStoreTitle": "Nutri-Score by store",
   "noStoreData": "No purchase data yet",
-  "noSpendingData": "Add prices to see spending trends",
   "monthLabel": "Month",
   "averageScore": "Avg. score",
   "exactAlarmsDeniedHint": "Scheduled test notifications may be delayed because exact alarms are not granted. Grant it in Settings > Notifications > Schedule exact alarms.",
@@ -940,7 +814,6 @@
   "setServingsHint": "Set the number of servings in the recipe editor to see per-portion nutrition",
   "addPhoto": "Add photo",
   "changePhoto": "Change photo",
-  "costPerServing": "Cost per serving",
   "recipeNutritionPerServing": "Per serving",
   "recipeNutriScore": "Nutri-Score",
   "recipeNoIngredients": "Recipe has no ingredients",
@@ -964,10 +837,7 @@
   "noRecipesSubtitle": "Register recipes to track costs and plan meals",
   "discardChanges": "Discard changes?",
   "discardChangesConfirm": "You have unsaved changes. Discard them?",
-  "recipeCost": "Recipe cost",
-  "recipeCostUnknown": "Unknown",
   "recipePerServing": "per serving",
-  "recipeAverageCost": "Average recipe cost",
   "ingredientCount": "{count, plural, one{{count} ingredient} other{{count} ingredients}}",
   "deleteRecipeConfirm": "Delete this recipe?",
   "madeRecipe": "I made this",
@@ -1035,5 +905,7 @@
   "onboardingPage4Title": "Track Everything",
   "onboardingPage4Desc": "Monitor expiry dates, track prices, create shopping lists, and reduce food waste.",
   "onboardingPage4Cta": "Get Started",
-  "servingSize": "Serving size"
+  "servingSize": "Serving size",
+  "statsComingSoonTitle": "Statistics coming soon",
+  "statsComingSoonDescription": "Pantry insights and charts will arrive in a future update."
 }

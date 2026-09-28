@@ -1,5 +1,12 @@
 # User Changelog
 
+## [0.0.20+16]
+
+- Removed price tracking: purchase prices, price history, per-unit prices,
+  and store names are gone from the app.
+- Recipe costs are no longer shown.
+- The Stats tab now shows a coming-soon notice.
+
 ## [0.0.19+15]
 
 - Removed the produce features: the scanner no longer accepts PLU codes,

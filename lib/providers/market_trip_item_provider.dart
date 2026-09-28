@@ -10,34 +10,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'market_trip_item_provider.g.dart';
 
-/// The optional price to record on a market trip item.
-class TripItemPriceInput {
-  /// Creates a [TripItemPriceInput].
-  const TripItemPriceInput({
-    required this.amount,
-    required this.currency,
-    this.store,
-    this.packageQuantity,
-    this.packageUnit,
-  });
-
-  /// The price amount.
-  final double amount;
-
-  /// ISO 4217 currency code for [amount].
-  final String currency;
-
-  /// The store where the item was purchased, if known.
-  final String? store;
-
-  /// Package size the recorded price applies to (e.g. 12 for a dozen
-  /// eggs), carried into the prices table when the trip finishes.
-  final double? packageQuantity;
-
-  /// Unit for [packageQuantity] (e.g. 'pieces', 'g', 'L').
-  final String? packageUnit;
-}
-
 /// State of one trip-item add flow, scoped to a single trip inventory.
 class MarketTripItemState {
   /// Creates a [MarketTripItemState].
@@ -67,7 +39,7 @@ class MarketTripItemState {
 }
 
 /// Orchestrates adding a scanned product to a market
-/// trip as purchased, applying an optional price and expiry in one unit of
+/// trip as purchased, applying an optional expiry in one unit of
 /// work.
 ///
 /// Kept free of UI concerns: navigation, snackbars, and the scan-resolution
@@ -84,15 +56,13 @@ class MarketTripItemController extends _$MarketTripItemController {
   /// Marks an existing pending row with the same barcode as purchased, or
   /// merges into an existing purchased row (same barcode) by incrementing
   /// its quantity, or inserts a new purchased row when neither exists.
-  /// When [price] is given it is written to the item, and when [expiryDate]
-  /// is given (and not before today) it is written too.
+  /// When [expiryDate] is given (and not before today) it is written too.
   ///
   /// Returns null when the call was ignored because an add for the same
   /// barcode is already in progress. Throws when the item cannot be
   /// resolved or persisted.
   Future<int?> addScannedProduct(
     Product product, {
-    TripItemPriceInput? price,
     String? expiryDate,
   }) async {
     if (state.processingBarcode == product.barcode) {
@@ -146,18 +116,6 @@ class MarketTripItemController extends _$MarketTripItemController {
         throw StateError('No trip item id for barcode ${product.barcode}');
       }
       if (!ref.mounted) return null;
-
-      if (price != null) {
-        await service.updateShoppingItemPrice(
-          id,
-          priceAmount: price.amount,
-          priceCurrency: price.currency,
-          priceStore: price.store,
-          pricePackageQuantity: price.packageQuantity,
-          pricePackageUnit: price.packageUnit,
-        );
-        if (!ref.mounted) return null;
-      }
 
       final iso = expiryDate;
       if (iso != null) {

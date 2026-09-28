@@ -28,7 +28,6 @@ import 'package:pantry_app/widgets/error_view.dart';
 import 'package:pantry_app/widgets/inventory_card.dart';
 import 'package:pantry_app/widgets/inventory_switcher_card.dart';
 import 'package:pantry_app/widgets/onboarding_flow.dart';
-import 'package:pantry_app/widgets/price_visibility_toggle.dart';
 import 'package:pantry_app/widgets/search_panel.dart';
 import 'package:pantry_app/widgets/section_header.dart';
 
@@ -189,8 +188,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final l10n = AppLocalizations.of(context)!;
     final pantryAsync = ref.watch(pantryProvider);
     final controller = ref.watch(homeScreenControllerProvider);
-    final priceTrackingEnabled =
-        ref.watch(settingsProvider).value?.priceTrackingEnabled ?? false;
     final expiringSoonDays =
         ref.watch(settingsProvider).value?.expiringSoonDays ?? 3;
 
@@ -249,7 +246,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
               ],
             ] else ...[
-              if (priceTrackingEnabled) const PriceVisibilityToggle(),
               if (inventories.asData?.value != null) ...[
                 InventorySwitcherCard(
                   name: l10n.displayInventoryName(

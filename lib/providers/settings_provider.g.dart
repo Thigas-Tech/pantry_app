@@ -39,7 +39,7 @@ final class SettingsNotifierProvider
   SettingsNotifier create() => SettingsNotifier();
 }
 
-String _$settingsNotifierHash() => r'fecfe98ddd802ed8337092985fb474be85ed25a5';
+String _$settingsNotifierHash() => r'0cbe91b7ea834cf364941d2bd031e33bd50dd5eb';
 
 /// A notifier that holds the current [Settings] and persists every field
 /// to [SharedPreferences].
