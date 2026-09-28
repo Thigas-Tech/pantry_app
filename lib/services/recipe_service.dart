@@ -129,6 +129,7 @@ class RecipeService {
     await _db.deleteRecipe(id);
     logInfo('Recipe $id deleted');
   }
+
   /// Groups [ingredients] by barcode, sums quantities, normalizes units, and
   /// checks availability against inventory.
   ///

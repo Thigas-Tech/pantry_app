@@ -56,7 +56,6 @@ abstract class ShoppingItem with _$ShoppingItem {
     /// was marked as purchased.
     int? datePurchased,
 
-
     /// Optional expiry date in ISO 8601 format (YYYY-MM-DD), mirroring
     /// [InventoryItem.expiryDate]. Captured for market trip items so it can
     /// be carried into the pantry when the trip is finished.

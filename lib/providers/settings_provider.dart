@@ -117,7 +117,6 @@ class Settings {
   /// surface colours, which reduces power consumption on AMOLED displays.
   final bool amoledDarkMode;
 
-
   /// Global unit system preference (Metric or Imperial).
   final UnitSystem unitSystem;
 

@@ -93,7 +93,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   /// use from [dispose] (where [ref] is unavailable).
   late final ProductImageService _imageService;
 
-
   @override
   void initState() {
     super.initState();
@@ -127,7 +126,6 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
     final inventoryFuture = ref.watch(
       inventoryForBarcodeProvider((_product.barcode, activeId)).future,
     );
-
 
     // When a submission for this product reaches a terminal state (e.g. one
     // started from the add-product screen), refresh the displayed product so

@@ -150,7 +150,7 @@ class ShoppingListService {
     return deleted;
   }
 
-/// Updates an existing shopping item (name, quantity, or unit).
+  /// Updates an existing shopping item (name, quantity, or unit).
   ///
   /// Persists the whole [ShoppingItem] via the DAO's update path. The
   /// caller is responsible for re-reading the item first if only some
@@ -406,7 +406,6 @@ class ShoppingListService {
           'qty=${item.quantity}',
         );
       }
-
 
       await txn.delete(
         'shopping_list',
